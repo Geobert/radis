@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<string name="app_name">Radis</string>
+	<string name="no_account">Pas de compte créé. Appuyez sur la touche « Menu »
+		pour en créer un.</string>
+	<string name="create_account">Créer un compte</string>
+	<string name="name">Nom</string>
+	<string name="account_creation">Création de compte</string>
+	<string name="description">Description</string>
+	<string name="start_sum">Somme de départ</string>
+	<string name="create">Créer</string>
+	<string name="cancel">Annuler</string>
+	<string name="accounts_list">Liste des comptes</string>
+	<string name="currency">Devise</string>
+	<string name="delete">Supprimer</string>
+	<string name="account_prompt">Sélectionnez une devise</string>
+	<string-array name="all_currencies">
+		<item>AUD</item>
+		<item>BRL</item>
+<!--		<item>BWP</item>-->
+<!--		<item>BZD</item>-->
+		<item>CAD</item>
+		<item>CHF</item>
+		<item>CNY</item>
+<!--		<item>CZK</item>-->
+<!--		<item>DKK</item>-->
+		<item>EUR</item>
+		<item>GBP</item>
+		<item>HKD</item>
+<!--		<item>INR</item>-->
+<!--		<item>JMD</item>-->
+		<item>JPY</item>
+<!--		<item>KRW</item>-->
+<!--		<item>NOK</item>-->
+<!--		<item>NZD</item>-->
+<!--		<item>PHP</item>-->
+<!--		<item>PKR</item>-->
+<!--		<item>PLN</item>-->
+<!--		<item>RUB</item>-->
+		<item>SEK</item>
+		<item>SGD</item>
+<!--		<item>TRY</item>-->
+<!--		<item>TTD</item>-->
+		<item>TWD</item>
+		<item>USD</item>
+<!--		<item>ZAR</item>-->
+<!--		<item>ZWD</item>-->
+	</string-array>
+<string name="edit">Modifier</string>
+<string name="ok">Ok</string>
+</resources>
