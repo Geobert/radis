@@ -6,12 +6,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.sax.StartElementListener;
 
-public class OperationsDbAdapter extends CommonDbAdapter {
-	private static final String TAG = "OperationsDbAdapter";
-	private String mAccountName;
+public class OperationsDbAdapter extends AccountsDbAdapter {
+	private long mAccountId;
 	private String mDatabaseTable;
 
 	private Map<String, Long> mModesMap;
@@ -25,10 +22,10 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	 * @param ctx
 	 *            the Context within which to work
 	 */
-	public OperationsDbAdapter(Context ctx, String accountName) {
+	public OperationsDbAdapter(Context ctx, long accountRowId) {
 		super(ctx);
-		this.mAccountName = accountName;
-		mDatabaseTable = mAccountName + "_ops";
+		mAccountId = accountRowId;
+		mDatabaseTable = String.format(OPS_ACCOUNT_TABLE, mAccountId);
 	}
 
 	private void fillCache(String table, String[] cols, Map<String, Long> map) {

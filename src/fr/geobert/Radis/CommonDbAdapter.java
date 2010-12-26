@@ -63,8 +63,9 @@ public class CommonDbAdapter {
 	public static final String KEY_OP_SUM = "op_sum";
 	public static final String KEY_OP_SCHEDULED_ID = "op_scheduled_id";
 	public static final String KEY_OP_ROWID = "_id";
-
-	private static final String DATABASE_OP_CREATE = "create table %s_ops("
+	
+	public static final String OPS_ACCOUNT_TABLE = "ops_of_account_%d";
+	protected static final String DATABASE_OP_CREATE = "create table " + OPS_ACCOUNT_TABLE + "("
 			+ KEY_OP_ROWID + " integer primary key autoincrement, "
 			+ KEY_OP_THIRD_PARTY + " integer not null, " + KEY_OP_TAG
 			+ " integer not null, " + KEY_OP_SUM + " real not null, "
@@ -77,6 +78,8 @@ public class CommonDbAdapter {
 			+ KEY_OP_MODE + ") REFERENCES " + DATABASE_MODES_TABLE + "("
 			+ KEY_MODE_ROWID + "));";
 
+	protected static final String DATABASE_OP_DROP = "drop table if exists " + OPS_ACCOUNT_TABLE + ";";
+	
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected final Context mCtx;
@@ -94,7 +97,7 @@ public class CommonDbAdapter {
 		@Override
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL(DATABASE_ACCOUNT_CREATE);
-			db.execSQL(DATABASE_OP_CREATE);
+			//db.execSQL(DATABASE_OP_CREATE);
 			db.execSQL(DATABASE_THIRD_PARTIES_CREATE);
 			db.execSQL(DATABASE_MODES_CREATE);
 			db.execSQL(DATABASE_TAGS_CREATE);

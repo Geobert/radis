@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.SQLException;
 
 public class AccountsDbAdapter extends CommonDbAdapter {
-	private static final String TAG = "AccountsDbAdapter";
-
 	/**
 	 * Constructor - takes the context to allow the database to be
 	 * opened/created
@@ -54,7 +52,14 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 		initialValues.put(KEY_ACCOUNT_OP_SUM, 0);
 		initialValues.put(KEY_ACCOUNT_CUR_SUM, start_sum);
 		initialValues.put(KEY_ACCOUNT_CURRENCY, currency);
-		return mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
+		long rowId = mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
+		try {
+			mDb.execSQL(String.format(DATABASE_OP_CREATE, rowId));
+		} catch (Exception e) {
+			int i = 0;
+			i = i + 1;
+		}
+		return rowId;
 	}
 
 	/**
@@ -65,6 +70,7 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 	 * @return true if deleted, false otherwise
 	 */
 	public boolean deleteAccount(long rowId) {
+		mDb.execSQL(String.format(DATABASE_OP_DROP, rowId));
 		return mDb
 				.delete(DATABASE_ACCOUNT_TABLE, KEY_ACCOUNT_ROWID + "=" + rowId, null) > 0;
 	}

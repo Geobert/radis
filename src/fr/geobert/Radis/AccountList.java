@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -75,7 +76,7 @@ public class AccountList extends ListActivity {
 			fillData();
 			return true;
 		case EDIT_ACCOUNT_ID:
-			Intent i = new Intent(this, AccountCreation.class);
+			Intent i = new Intent(this, AccountEditor.class);
 			i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_ROWID, info.id);
 			startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
 			return true;
@@ -126,7 +127,15 @@ public class AccountList extends ListActivity {
 	}
 
 	private void createAccount() {
-		Intent i = new Intent(this, AccountCreation.class);
+		Intent i = new Intent(this, AccountEditor.class);
 		startActivityForResult(i, ACTIVITY_ACCOUNT_CREATE);
 	}
+	
+	@Override
+    protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		Intent i = new Intent(this, OperationList.class);
+		i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_ROWID, id);
+		startActivity(i);
+    }
 }

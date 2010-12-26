@@ -7,7 +7,6 @@ import java.util.Currency;
 import java.util.Locale;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -17,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-public class AccountCreation extends Activity {
+public class AccountEditor extends Activity {
 	private AccountsDbAdapter mDbHelper;
 	private EditText mAccountNameText;
 	private EditText mAccountStartSumText;
@@ -28,7 +27,7 @@ public class AccountCreation extends Activity {
 	private DecimalFormat mFormatSum;
 
 	// to let inner class access to the context
-	private AccountCreation context = this; 
+	private AccountEditor context = this; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

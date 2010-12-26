@@ -49,4 +49,16 @@
 	</string-array>
 <string name="edit">Modifier</string>
 <string name="ok">Ok</string>
+<string name="third_party">Tiers</string>
+<string name="sum">Somme</string>
+<string name="tag">Catégorie</string>
+<string name="date">Date</string>
+<string name="mode">Mode de paiement</string>
+<string name="allowed_sum_digits">0123456789-.,</string>
+<string name="credit">Crédit</string>
+<string name="debit">Débit</string>
+<string name="current_sum">Solde</string>
+<string name="sum_at">Solde au %1$s = %2$s</string>
+
+<string name="no_operation">Aucune opération</string>
 </resources>

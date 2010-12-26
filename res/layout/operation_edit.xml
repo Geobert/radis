@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content"
+	android:orientation="vertical">
+	<TextView android:layout_width="wrap_content" android:padding="5px"
+		android:layout_height="wrap_content" android:text="@string/date" />
+	<Button android:id="@+id/edit_op_date" android:text="24/12/2010"
+		android:layout_width="fill_parent" android:layout_height="wrap_content"
+		android:gravity="center" />
+	<TextView android:layout_width="wrap_content" android:padding="5px"
+		android:layout_height="wrap_content" android:text="@string/third_party" />
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:gravity="left|center_vertical">
+		<EditText android:id="@+id/edit_op_third_party"
+			android:layout_width="fill_parent" android:padding="5px"
+			android:layout_height="wrap_content" android:layout_weight="1" />
+		<Button android:layout_weight="0" android:text="!"
+			android:id="@+id/edit_op_third_parties_list" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center" />
+	</LinearLayout>
+	<TextView android:layout_width="wrap_content" android:padding="5px"
+		android:layout_height="wrap_content" android:text="@string/sum" />
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" android:gravity="left|center_vertical">
+		<EditText android:id="@+id/edit_op_sum" android:layout_width="fill_parent"
+			android:gravity="right" android:padding="5px" android:layout_height="wrap_content"
+			android:layout_weight="1" android:digits="@string/allowed_sum_digits"
+			android:inputType="number|numberSigned|numberDecimal" />
+		<Button android:layout_weight="0" android:text="-/+"
+			android:id="@+id/edit_op_sign" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center" />
+	</LinearLayout>
+	<TextView android:layout_width="wrap_content" android:padding="5px"
+		android:layout_height="wrap_content" android:text="@string/tag" />
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:gravity="left|center_vertical">
+		<EditText android:id="@+id/edit_op_tag" android:layout_width="fill_parent"
+			android:padding="5px" android:layout_height="wrap_content"
+			android:layout_weight="1" />
+		<Button android:layout_weight="0" android:text="#"
+			android:id="@+id/edit_op_tags_list" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center" />
+	</LinearLayout>
+	<TextView android:layout_width="wrap_content" android:padding="5px"
+		android:layout_height="wrap_content" android:text="@string/mode" />
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent" 
+		android:layout_height="wrap_content" android:gravity="left|center_vertical">
+		<EditText android:id="@+id/edit_op_mode"
+			android:layout_width="fill_parent" android:padding="5px"
+			android:layout_height="wrap_content" android:layout_weight="1" />
+		<Button android:layout_weight="0" android:text="M"
+			android:id="@+id/edit_op_modes_list" android:layout_width="wrap_content"
+			android:layout_height="wrap_content" android:gravity="center" />
+	</LinearLayout>
+	<LinearLayout android:orientation="horizontal"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:paddingTop="5px"
+		android:gravity="center_horizontal">
+		<Button android:id="@+id/confirm_op" android:text="@string/ok"
+			android:layout_weight="1" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		<Button android:id="@+id/cancel_op" android:text="@string/cancel"
+			android:layout_weight="1" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+	</LinearLayout>
+</LinearLayout>
