@@ -6,6 +6,8 @@ import android.database.Cursor;
 import android.database.SQLException;
 
 public class AccountsDbAdapter extends CommonDbAdapter {
+	protected Cursor mCurAccount;
+
 	/**
 	 * Constructor - takes the context to allow the database to be
 	 * opened/created
@@ -53,12 +55,7 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 		initialValues.put(KEY_ACCOUNT_CUR_SUM, start_sum);
 		initialValues.put(KEY_ACCOUNT_CURRENCY, currency);
 		long rowId = mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
-		try {
-			mDb.execSQL(String.format(DATABASE_OP_CREATE, rowId));
-		} catch (Exception e) {
-			int i = 0;
-			i = i + 1;
-		}
+		mDb.execSQL(String.format(DATABASE_OP_CREATE, rowId));
 		return rowId;
 	}
 
@@ -71,8 +68,8 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 	 */
 	public boolean deleteAccount(long rowId) {
 		mDb.execSQL(String.format(DATABASE_OP_DROP, rowId));
-		return mDb
-				.delete(DATABASE_ACCOUNT_TABLE, KEY_ACCOUNT_ROWID + "=" + rowId, null) > 0;
+		return mDb.delete(DATABASE_ACCOUNT_TABLE, KEY_ACCOUNT_ROWID + "="
+				+ rowId, null) > 0;
 	}
 
 	/**
@@ -81,9 +78,9 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 	 * @return Cursor over all notes
 	 */
 	public Cursor fetchAllAccounts() {
-		return mDb.query(DATABASE_ACCOUNT_TABLE, new String[] { KEY_ACCOUNT_ROWID,
-				KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY },
-				null, null, null, null, null);
+		return mDb.query(DATABASE_ACCOUNT_TABLE, new String[] {
+				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
+				KEY_ACCOUNT_CURRENCY }, null, null, null, null, null);
 	}
 
 	/**
@@ -96,15 +93,16 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 	 *             if note could not be found/retrieved
 	 */
 	public Cursor fetchAccount(long rowId) throws SQLException {
-		Cursor mCursor = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] {
+		mCurAccount = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_DESC,
 				KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_OP_SUM,
 				KEY_ACCOUNT_CURRENCY }, KEY_ACCOUNT_ROWID + "=" + rowId, null,
 				null, null, null, null);
-		if (mCursor != null) {
-			mCursor.moveToFirst();
+		Cursor c = mCurAccount;
+		if (c != null) {
+			c.moveToFirst();
 		}
-		return mCursor;
+		return c;
 
 	}
 
@@ -128,25 +126,44 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 		args.put(KEY_ACCOUNT_DESC, desc);
 		args.put(KEY_ACCOUNT_START_SUM, start_sum);
 		args.put(KEY_ACCOUNT_CURRENCY, currency);
-		return mDb.update(DATABASE_ACCOUNT_TABLE, args,
-				KEY_ACCOUNT_ROWID + "=" + rowId, null) > 0;
+		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
+				+ rowId, null) > 0;
 	}
 
-	public boolean updateCurrentSum(long rowId) {
-		Cursor account = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] {
-				KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_OP_SUM }, KEY_ACCOUNT_ROWID + "=" + rowId, null,
-				null, null, null, null);
-		if (account != null) {
-			account.moveToFirst();
-		}
+	public boolean updateOpSum(long rowId, double newSum) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_ACCOUNT_OP_SUM, newSum);
+		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
+				+ rowId, null) > 0;
+	}
+
+	public double updateCurrentSum(long rowId) {
+		Cursor account = getCurAccountIfDiff(rowId);
 		double start = account
 				.getDouble(account
 						.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_START_SUM));
 		double opSum = account.getDouble(account
 				.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_OP_SUM));
 		ContentValues args = new ContentValues();
-		args.put(KEY_ACCOUNT_CUR_SUM, start + opSum);
-		return mDb.update(DATABASE_ACCOUNT_TABLE, args,
-				KEY_ACCOUNT_ROWID + "=" + rowId, null) > 0;
+		double curSum = start + opSum;
+		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
+		mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
+				+ rowId, null);
+		return curSum;
+	}
+
+	private Cursor getCurAccountIfDiff(long rowId) {
+		Cursor account = mCurAccount;
+		if (null == account
+				|| !account.isFirst()
+				|| account
+						.getLong(account
+								.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_ROWID)) != rowId) {
+			account = fetchAccount(rowId);
+		} else {
+			account.requery();
+			account.moveToFirst();
+		}
+		return account;
 	}
 }

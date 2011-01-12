@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:orientation="horizontal"
-	android:layout_height="wrap_content"
-	android:background="#D6D6FF">
-	<TextView android:layout_width="fill_parent" android:id="@+id/op_date"
-		android:textColor="#000000" android:layout_height="wrap_content"
-		android:padding="3dip" android:layout_column="0" android:text="24/12/10" />
+	style="@style/OpLine" android:background="@drawable/odd_op_line">
+	<TextView android:layout_width="wrap_content" android:id="@+id/op_date" android:minWidth="40sp"
+		android:textColor="#000000" android:layout_height="wrap_content" 
+		android:padding="3dip" android:text="24/12" />
 	<TextView android:layout_width="fill_parent" android:id="@+id/op_third_party"
 		android:layout_height="wrap_content" android:padding="3dip"
-		android:textColor="#000000" android:layout_column="1" android:text="toto" />
-	<TextView android:layout_width="wrap_content" android:id="@+id/op_debit"
+		android:textColor="#000000" android:text="toto" android:layout_weight="1"/>
+	<TextView android:layout_width="wrap_content" android:id="@+id/op_debit" android:minWidth="60sp"
 		android:gravity="right" android:padding="3dip" android:textColor="#000000"
-		android:layout_height="wrap_content" android:text="200 €"
-		android:layout_column="2" />
-	<TextView android:layout_width="wrap_content" android:id="@+id/op_credit"
+		android:layout_height="wrap_content" android:text="200€"
+		android:layout_weight="0" />
+	<TextView android:layout_width="wrap_content" android:id="@+id/op_credit" android:minWidth="60sp"
 		android:textColor="#000000" android:gravity="right" android:padding="3dip"
-		android:layout_column="3" android:layout_height="wrap_content"
-		android:text="200 €" />
+		android:layout_height="wrap_content" android:layout_weight="0"
+		android:text="200€" />
 </LinearLayout>

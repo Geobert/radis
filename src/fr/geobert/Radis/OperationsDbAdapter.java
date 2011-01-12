@@ -1,5 +1,6 @@
 package fr.geobert.Radis;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import android.content.ContentValues;
@@ -11,9 +12,9 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	private long mAccountId;
 	private String mDatabaseTable;
 
-	private Map<String, Long> mModesMap;
-	private Map<String, Long> mTagsMap;
-	private Map<String, Long> mThirdPartiesMap;
+	private LinkedHashMap<String, Long> mModesMap;
+	private LinkedHashMap<String, Long> mTagsMap;
+	private LinkedHashMap<String, Long> mThirdPartiesMap;
 
 	/**
 	 * Constructor - takes the context to allow the database to be
@@ -41,6 +42,10 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	}
 
 	private void fillCaches() {
+		mModesMap = new LinkedHashMap<String, Long>();
+		mTagsMap = new LinkedHashMap<String, Long>();
+		mThirdPartiesMap = new LinkedHashMap<String, Long>();
+
 		fillCache(DATABASE_MODES_TABLE, new String[] { KEY_MODE_ROWID,
 				KEY_MODE_NAME }, mModesMap);
 		fillCache(DATABASE_TAGS_TABLE, new String[] { KEY_TAG_ROWID,
@@ -77,6 +82,10 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	 */
 	private long getKeyIdOrCreate(String key, Map<String, Long> map,
 			String table, String col) throws SQLException {
+		key = key.trim();
+		if (key.length() == 0) {
+			return -1;
+		}
 		Long i = map.get(key);
 		if (null != i) {
 			return i.longValue();
@@ -94,33 +103,31 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		}
 	}
 
-	/**
-	 * Create a new note using the title and body provided. If the note is
-	 * successfully created return the new rowId for that note, otherwise return
-	 * a -1 to indicate failure.
-	 * 
-	 * @param title
-	 *            the title of the note
-	 * @param body
-	 *            the body of the note
-	 * @return rowId or -1 if failed
-	 */
+	private void putKeyId(String key, String keyTableName, String keyTableCol,
+			String opTableCol, Map<String, Long> keyMap,
+			ContentValues initialValues) {
+		long id = getKeyIdOrCreate(key, keyMap, keyTableName, keyTableCol);
+		if (id != -1) {
+			initialValues.put(opTableCol, id);
+		} else {
+			initialValues.putNull(opTableCol);
+		}
+	}
+
 	public long createOp(Operation op) {
 		ContentValues initialValues = new ContentValues();
 
 		String key = op.getThirdParty();
-		long id = getKeyIdOrCreate(key, mThirdPartiesMap,
-				DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME);
-		initialValues.put(KEY_OP_THIRD_PARTY, id);
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
 
 		key = op.getTag();
-		id = getKeyIdOrCreate(key, mTagsMap, DATABASE_TAGS_TABLE, KEY_TAG_NAME);
-		initialValues.put(KEY_OP_TAG, id);
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				initialValues);
 
 		key = op.getMode();
-		id = getKeyIdOrCreate(key, mModesMap, DATABASE_MODES_TABLE,
-				KEY_MODE_NAME);
-		initialValues.put(KEY_OP_MODE, id);
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
+				mModesMap, initialValues);
 
 		initialValues.put(KEY_OP_SUM, op.getSum());
 		initialValues.put(KEY_OP_DATE, op.getDate());
@@ -138,47 +145,65 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		return mDb.delete(mDatabaseTable, KEY_OP_ROWID + "=" + rowId, null) > 0;
 	}
 
-	/**
-	 * Return a Cursor over the list of all notes in the database
-	 * 
-	 * @return Cursor over all notes
-	 */
+	private final String DATABASE_TABLE_JOINTURE = "%s ops LEFT OUTER JOIN "
+			+ DATABASE_THIRD_PARTIES_TABLE + " tp ON ops." + KEY_OP_THIRD_PARTY
+			+ " = tp." + KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
+			+ DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode."
+			+ KEY_MODE_ROWID + " LEFT OUTER JOIN " + DATABASE_TAGS_TABLE
+			+ " tag ON ops." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
+
+	private final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
+			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
+			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE };
+
 	public Cursor fetchOps(long startRowId, int nbRows) {
-		return mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
-				KEY_OP_THIRD_PARTY, KEY_OP_TAG, KEY_OP_SUM, KEY_OP_DATE },
-				KEY_OP_ROWID + ">=" + startRowId + " AND " + KEY_OP_ROWID + "<"
-						+ (startRowId + nbRows), null, null, null, null);
+		return mDb.query(String.format(DATABASE_TABLE_JOINTURE, mDatabaseTable,
+				mDatabaseTable), OP_COLS_QUERY, KEY_OP_ROWID + ">="
+				+ startRowId + " AND " + KEY_OP_ROWID + "<"
+				+ (startRowId + nbRows), null, null, null, null);
+	}
+
+	public Cursor fetchNLastOps(int nbOps) {
+		return mDb.query(
+				String.format(DATABASE_TABLE_JOINTURE, mDatabaseTable),
+				OP_COLS_QUERY, null, null, null, null, "ops." + KEY_OP_DATE
+						+ " desc, ops." + KEY_OP_ROWID + " desc", Integer.toString(nbOps));
 	}
 
 	public Cursor fetchOneOp(long rowId) {
-		return mDb.query(true, mDatabaseTable, new String[] { KEY_OP_ROWID,
-				KEY_OP_THIRD_PARTY, KEY_OP_TAG, KEY_OP_SUM, KEY_OP_DATE },
-				KEY_OP_ROWID + "=" + rowId, null, null, null, null, null);
+		Cursor c = mDb.query(String.format(DATABASE_TABLE_JOINTURE,
+				mDatabaseTable), OP_COLS_QUERY, "ops." + KEY_OP_ROWID + " = "
+				+ rowId, null, null, null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
 	}
 
-	public Cursor fechOpsByDate(long startDate, long endDate) {
-		return mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
-				KEY_OP_THIRD_PARTY, KEY_OP_TAG, KEY_OP_SUM, KEY_OP_DATE },
-				KEY_OP_DATE + ">=" + startDate + " AND " + KEY_OP_DATE + "<="
-						+ endDate, null, null, null, null);
+	public Cursor fetchOpsSumsLaterThan(long date) {
+		Cursor c =  mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
+				KEY_OP_SUM }, KEY_OP_DATE + " > " + date, null, null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
 	}
 
 	public boolean updateOp(long rowId, Operation op) {
 		ContentValues args = new ContentValues();
+
 		String key = op.getThirdParty();
-		long id = getKeyIdOrCreate(key, mThirdPartiesMap,
-				DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME);
-		args.put(KEY_OP_THIRD_PARTY, id);
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, args);
 
 		key = op.getTag();
-		id = getKeyIdOrCreate(key, mTagsMap, DATABASE_TAGS_TABLE, KEY_TAG_NAME);
-		args.put(KEY_OP_TAG, id);
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				args);
 
 		key = op.getMode();
-		id = getKeyIdOrCreate(key, mModesMap, DATABASE_MODES_TABLE,
-				KEY_MODE_NAME);
-		args.put(KEY_OP_MODE, id);
-		
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
+				mModesMap, args);
+
 		args.put(KEY_OP_SUM, op.getSum());
 		args.put(KEY_OP_DATE, op.getDate());
 

@@ -61,4 +61,10 @@
 <string name="sum_at">Solde au %1$s = %2$s</string>
 
 <string name="no_operation">Aucune opération</string>
+<string name="new_op">Nouvelle opération</string>
+<string name="tp_account_name">Compte %s</string>
+<string name="account_edit">Modification du compte</string>
+<string name="op_edition">Saisie d\'opération</string>
+<string name="future_sum_at">Projection au %1$s = %2$s</string>
+<string name="sum_at_selection">Solde à la selection = %1$s</string>
 </resources>

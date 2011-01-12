@@ -7,6 +7,7 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -36,6 +37,7 @@ public class AccountList extends ListActivity {
 		mDbHelper = new AccountsDbAdapter(this);
 		mDbHelper.open();
 		fillData();
+		setTitle(getString(R.string.app_name) + " - " + getString(R.string.accounts_list));
 		registerForContextMenu(getListView());
 	}
 
@@ -77,7 +79,7 @@ public class AccountList extends ListActivity {
 			return true;
 		case EDIT_ACCOUNT_ID:
 			Intent i = new Intent(this, AccountEditor.class);
-			i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_ROWID, info.id);
+			i.putExtra(Tools.EXTRAS_ACCOUNT_ID, info.id);
 			startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
 			return true;
 		}
@@ -103,7 +105,6 @@ public class AccountList extends ListActivity {
 				super.setViewText(v, text);
 			}
 		}
-
 	}
 
 	private void fillData() {
@@ -130,12 +131,15 @@ public class AccountList extends ListActivity {
 		Intent i = new Intent(this, AccountEditor.class);
 		startActivityForResult(i, ACTIVITY_ACCOUNT_CREATE);
 	}
-	
+
 	@Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
+	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
+		SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
+		String accountName = data.getString(data.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME));
 		Intent i = new Intent(this, OperationList.class);
-		i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_ROWID, id);
+		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
+		i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_NAME, accountName);
 		startActivity(i);
-    }
+	}
 }

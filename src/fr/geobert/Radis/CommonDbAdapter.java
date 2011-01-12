@@ -67,9 +67,9 @@ public class CommonDbAdapter {
 	public static final String OPS_ACCOUNT_TABLE = "ops_of_account_%d";
 	protected static final String DATABASE_OP_CREATE = "create table " + OPS_ACCOUNT_TABLE + "("
 			+ KEY_OP_ROWID + " integer primary key autoincrement, "
-			+ KEY_OP_THIRD_PARTY + " integer not null, " + KEY_OP_TAG
-			+ " integer not null, " + KEY_OP_SUM + " real not null, "
-			+ KEY_OP_MODE + " integer not null, " + KEY_OP_DATE
+			+ KEY_OP_THIRD_PARTY + " integer, " + KEY_OP_TAG
+			+ " integer, " + KEY_OP_SUM + " real not null, "
+			+ KEY_OP_MODE + " integer, " + KEY_OP_DATE
 			+ " integer not null, " + KEY_OP_SCHEDULED_ID
 			+ " integer, FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES "
 			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID

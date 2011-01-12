@@ -2,19 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:padding="5px" android:layout_width="fill_parent"
 	android:layout_height="wrap_content" android:orientation="vertical">
-	<TextView android:layout_width="wrap_content" android:padding="5px"
-		android:layout_height="wrap_content" android:text="@string/name" />
-	<EditText android:id="@+id/edit_account_name"
-		android:layout_width="fill_parent" android:padding="5px"
-		android:layout_height="wrap_content" />
-	<TextView android:layout_width="wrap_content" android:padding="5px"
-		android:layout_height="wrap_content" android:text="@string/start_sum" />
-	<EditText android:id="@+id/edit_account_start_sum"
-	android:digits="@string/allowed_sum_digits" android:inputType="number|numberSigned|numberDecimal"
-	android:layout_width="fill_parent" android:padding="5px"
-	android:layout_height="wrap_content" />
-	<TextView android:layout_width="wrap_content" android:padding="5px"
-		android:layout_height="wrap_content" android:text="@string/currency" />
+	<TextView android:text="@string/name" style="@style/EditorTextView" />
+	<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText" />
+	<TextView style="@style/EditorTextView" android:text="@string/start_sum" />
+	<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum" />
+	<TextView style="@style/EditorTextView" android:text="@string/currency" />
 	<Spinner android:id="@+id/currency_spinner"
 		android:layout_height="wrap_content" android:layout_width="fill_parent"
 		android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
@@ -24,20 +16,12 @@
 		android:layout_width="fill_parent"
 	-->
 	<!--		android:padding="5px" android:layout_height="wrap_content" />-->
-	<TextView android:layout_width="wrap_content" android:padding="5px"
-		android:layout_height="wrap_content" android:text="@string/description" />
-	<EditText android:id="@+id/edit_account_desc"
-		android:layout_width="fill_parent" android:gravity="top|left"
-		android:lines="3" android:padding="5px" android:layout_height="wrap_content" />
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content" android:paddingTop="5px"
-		android:gravity="center_horizontal">
+	<TextView style="@style/EditorTextView" android:text="@string/description" />
+	<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText" />
+	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
 		<Button android:id="@+id/confirm_creation" android:text="@string/ok"
-			android:layout_weight="1" android:layout_width="fill_parent" 
-			android:layout_height="wrap_content" />
+			style="@style/FormButton" />
 		<Button android:id="@+id/cancel_creation" android:text="@string/cancel"
-			android:layout_weight="1" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
+			style="@style/FormButton" />
 	</LinearLayout>
 </LinearLayout>

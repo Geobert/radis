@@ -11,8 +11,9 @@
             </intent-filter>
         </activity>
 
-    <activity android:name="AccountCreation" android:label="@string/account_creation"></activity>
+    <activity android:name="AccountEditor"></activity>
 <activity android:name="OperationList" android:label="test op list label"></activity>
+<activity android:name="OperationEditor" android:label="@string/op_edition"></activity>
 </application>
     <uses-sdk android:minSdkVersion="7" />
 

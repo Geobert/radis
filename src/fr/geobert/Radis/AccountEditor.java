@@ -46,11 +46,11 @@ public class AccountEditor extends Activity {
 
 		mRowId = (savedInstanceState == null) ? null
 				: (Long) savedInstanceState
-						.getSerializable(AccountsDbAdapter.KEY_ACCOUNT_ROWID);
+						.getSerializable(Tools.EXTRAS_ACCOUNT_ID);
 		if (mRowId == null) {
 			Bundle extras = getIntent().getExtras();
 			mRowId = extras != null ? extras
-					.getLong(AccountsDbAdapter.KEY_ACCOUNT_ROWID) : null;
+					.getLong(Tools.EXTRAS_ACCOUNT_ID) : null;
 		}
 
 		populateFields();

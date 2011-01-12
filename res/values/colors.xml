@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<color name="odd_op">#FFD6D6FF</color>
+<color name="even_op">#FFFFFFFF</color>
+<color name="highlight">#FFFF9100</color>
+<color name="op_selected">#FFFA9898</color>
+</resources>
