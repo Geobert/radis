@@ -310,7 +310,7 @@ public class OperationList extends ListActivity {
 	private Cursor findLastOpBeforeDate(GregorianCalendar date) {
 		Cursor ops = mLast25Ops;
 		ops.requery();
-		if (ops.moveToLast()) {
+		if (ops.moveToFirst()) {
 			long dateLong = date.getTimeInMillis();
 			do {
 				long opDate = ops.getLong(ops
@@ -318,7 +318,7 @@ public class OperationList extends ListActivity {
 				if (opDate <= dateLong) {
 					break;
 				}
-			} while (ops.moveToPrevious());
+			} while (ops.moveToNext());
 		}
 		return ops;
 	}
