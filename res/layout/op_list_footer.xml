@@ -3,12 +3,8 @@
 	android:orientation="horizontal" android:layout_weight="0"
 	android:layout_width="fill_parent" android:layout_height="wrap_content"
 	android:paddingTop="5px" android:gravity="right">
-	<TextView android:id="@+id/date_sum"
-		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:text="Solde au 24/21/2010 = 2040 €" android:textSize="15px"
-		android:layout_weight="1" android:padding="3dip" />
-	<TextView android:id="@+id/future_sum" android:layout_height="wrap_content"
-		android:layout_weight="1" android:padding="3dip" android:textSize="15px"
-		android:gravity="right" android:layout_width="fill_parent"
-		android:text="Solde au 25/12/2010 = 2000 €" />
+	<TextView android:id="@+id/date_sum" android:text="Solde à la selection = 2040.00"
+		style="@style/SumsTextView" />
+	<TextView android:id="@+id/future_sum" style="@style/SumsTextView"
+		android:gravity="right" android:text="Solde au 25/12/2010 = 2000.00" />
 </LinearLayout>

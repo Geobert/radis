@@ -66,6 +66,15 @@ public class OperationList extends ListActivity {
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
 		fillData();
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		if (mCurAccount.isClosed()) {
+			mCurAccount.requery();
+			mCurAccount.moveToFirst();
+		}
 		double curSum = mCurAccount.getDouble(mCurAccount
 				.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM));
 		updateFutureSumDisplay(curSum);
@@ -127,20 +136,15 @@ public class OperationList extends ListActivity {
 	}
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
-		private int[] colors = new int[] { R.drawable.odd_op_line,
-				R.drawable.even_op_line };
-
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
-			int pos = cursor.getPosition() % colors.length;
 
 			if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
 				double sum = cursor.getDouble(columnIndex);
 				TextView textView;
 				TextView toClean;
 				LinearLayout parent = (LinearLayout) view.getParent();
-				parent.setBackgroundResource(colors[pos]);
 				if (sum >= 0.0) {
 					textView = (TextView) parent.findViewById(R.id.op_credit);
 					toClean = (TextView) parent.findViewById(R.id.op_debit);
@@ -162,36 +166,35 @@ public class OperationList extends ListActivity {
 			return false;
 		}
 	}
-	
-//	private class SelectedCursorAdapter extends SimpleCursorAdapter {
-//		private int mSelectedPos = -1;
-//		
-//		SelectedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
-//			super(context, layout, c, from, to);
-//		}
-//		
-//		public void setSelectedPosition(int pos){
-//			mSelectedPos = pos;
-//			// inform the view of this change
-//			notifyDataSetChanged();
-//		}
-//		
-//		public int getSelectedPosition(){
-//			return mSelectedPos;
-//		}
-//		
-//		@Override
-//		public View getView(int position, View convertView, ViewGroup parent) {
-//		    View v = convertView;
-//
-//		   	        // change the row color based on selected state
-//	        if(mSelectedPos == position){
-//	        	parent.setBackgroundResource(R.color.op_selected);
-//	        }
-//	        return(v);
-//		}
-//	}
-	
+
+	private class SelectedCursorAdapter extends SimpleCursorAdapter {
+		private int selectedPos = -1;
+		private int[] colors = new int[] { R.drawable.odd_op_line,
+				R.drawable.even_op_line };
+
+		SelectedCursorAdapter(Context context, int layout, Cursor c,
+				String[] from, int[] to) {
+			super(context, layout, c, from, to);
+		}
+
+		public void setSelectedPosition(int pos){
+			selectedPos = pos;
+			// inform the view of this change
+			notifyDataSetChanged();
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View v = super.getView(position, convertView, parent);
+			if (selectedPos == position) {
+				v.setBackgroundResource(R.color.op_selected);
+			} else {
+				v.setBackgroundResource(colors[position % colors.length]);
+			}
+			return v;
+		}
+	}
+
 	private void fillData() {
 		if (mLast25Ops == null) {
 			mLast25Ops = mDbHelper.fetchNLastOps(25);
@@ -211,7 +214,7 @@ public class OperationList extends ListActivity {
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_debit };
 
 		// Now create a simple cursor adapter and set it to display
-		SimpleCursorAdapter operations = new SimpleCursorAdapter(this,
+		SelectedCursorAdapter operations = new SelectedCursorAdapter(this,
 				R.layout.operation_row, opsCursor, from, to);
 		operations.setViewBinder(new InnerViewBinder());
 		setListAdapter(operations);
@@ -232,12 +235,20 @@ public class OperationList extends ListActivity {
 		}
 	}
 
-	private double getCurrentAccountOpSum() {
+	private double getAccountOpSum() {
 		Cursor c = mCurAccount;
 		c.requery();
 		c.moveToFirst();
 		return c.getDouble(c
 				.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_OP_SUM));
+	}
+
+	private double getAccountCurSum() {
+		Cursor c = mCurAccount;
+		c.requery();
+		c.moveToFirst();
+		return c.getDouble(c
+				.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM));
 	}
 
 	private void updateSums(Intent data) {
@@ -246,7 +257,7 @@ public class OperationList extends ListActivity {
 	}
 
 	private void updateSums(double oldSum, double sum) {
-		double opSum = getCurrentAccountOpSum();
+		double opSum = getAccountOpSum();
 		opSum = opSum - oldSum + sum;
 		if (mDbHelper.updateOpSum(mAccountId, opSum)) {
 			double curSum = mDbHelper.updateCurrentSum(mAccountId);
@@ -282,19 +293,7 @@ public class OperationList extends ListActivity {
 		return sum;
 	}
 
-	private double computeSumLaterThan(GregorianCalendar date) {
-		date.set(date.get(GregorianCalendar.YEAR), date
-				.get(GregorianCalendar.MONTH), date
-				.get(GregorianCalendar.DAY_OF_MONTH), 0, 0, 0);
-		long dateInMillis = date.getTimeInMillis();
-		Cursor c = mDbHelper.fetchOpsSumsLaterThan(dateInMillis);
-		startManagingCursor(c);
-		double sum = computeSumFromCursor(c);
-		return sum;
-	}
-
-	private void updateSumAtDateDisplay(GregorianCalendar date,
-			double curSum) {
+	private void updateSumAtDateDisplay(GregorianCalendar date, double curSum) {
 		if (null == date) {
 			date = mLastSelectedDate;
 			if (null == date) {
@@ -302,13 +301,26 @@ public class OperationList extends ListActivity {
 			}
 		}
 		mLastSelectedDate = date;
-		double sum = computeSumLaterThan(date);
-		TextView t = (TextView) getListView().findViewById(R.id.date_sum);
-		Operation f = new Operation(); // to use formatters
-		f.setSum(curSum - sum);
-		f.setDate(date.getTimeInMillis());
-		t.setText(String.format(getString(R.string.sum_at), f.getDateStr(), f
-				.getSumStr()));
+		Cursor c = findLastOpBeforeDate(date);
+		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+		adapter.setSelectedPosition(c.getPosition());
+		updateSumAtSelectedOpDisplay(c, getAccountCurSum());
+	}
+
+	private Cursor findLastOpBeforeDate(GregorianCalendar date) {
+		Cursor ops = mLast25Ops;
+		ops.requery();
+		if (ops.moveToLast()) {
+			long dateLong = date.getTimeInMillis();
+			do {
+				long opDate = ops.getLong(ops
+						.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE));
+				if (opDate <= dateLong) {
+					break;
+				}
+			} while (ops.moveToPrevious());
+		}
+		return ops;
 	}
 
 	private void updateSumAtSelectedOpDisplay(Cursor selectedOp, double curSum) {
@@ -326,16 +338,11 @@ public class OperationList extends ListActivity {
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
-		//l.setSelection(position);
-		v.setSelected(true);
-		Cursor c = mCurAccount;
-		c.requery();
-		c.moveToFirst();
-		double curSum = c.getDouble(c
-				.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM));
-		updateSumAtSelectedOpDisplay(data, curSum);
+		if (id != -1) {
+			SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
+			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+			adapter.setSelectedPosition(position);
+			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
+		}
 	}
-	
-	
 }
