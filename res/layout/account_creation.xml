@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:padding="5px" android:layout_width="fill_parent"
-	android:layout_height="wrap_content" android:orientation="vertical">
-	<TextView android:text="@string/name" style="@style/EditorTextView" />
-	<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText" />
-	<TextView style="@style/EditorTextView" android:text="@string/start_sum" />
-	<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum" />
-	<TextView style="@style/EditorTextView" android:text="@string/currency" />
-	<Spinner android:id="@+id/currency_spinner"
-		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
-	</Spinner>
-	<!--
-		<EditText android:id="@+id/edit_currency_code"
-		android:layout_width="fill_parent"
-	-->
-	<!--		android:padding="5px" android:layout_height="wrap_content" />-->
-	<TextView style="@style/EditorTextView" android:text="@string/description" />
-	<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText" />
-	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
-		<Button android:id="@+id/confirm_creation" android:text="@string/ok"
-			style="@style/FormButton" />
-		<Button android:id="@+id/cancel_creation" android:text="@string/cancel"
-			style="@style/FormButton" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="wrap_content">
+	<LinearLayout android:padding="5px" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:orientation="vertical">
+		<TextView android:text="@string/name" style="@style/EditorTextView" />
+		<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText" />
+		<TextView style="@style/EditorTextView" android:text="@string/start_sum" />
+		<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum" />
+		<TextView style="@style/EditorTextView" android:text="@string/currency" />
+		<Spinner android:id="@+id/currency_spinner"
+			android:layout_height="wrap_content" android:layout_width="fill_parent"
+			android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
+		</Spinner>
+		<!--
+			<EditText android:id="@+id/edit_currency_code"
+			android:layout_width="fill_parent"
+		-->
+		<!--		android:padding="5px" android:layout_height="wrap_content" />-->
+		<TextView style="@style/EditorTextView" android:text="@string/description" />
+		<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText" />
+		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
+			<Button android:id="@+id/confirm_creation" android:text="@string/ok"
+				style="@style/FormButton" />
+			<Button android:id="@+id/cancel_creation" android:text="@string/cancel"
+				style="@style/FormButton" />
+		</LinearLayout>
 	</LinearLayout>
-</LinearLayout>
+</ScrollView>
