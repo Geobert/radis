@@ -66,20 +66,18 @@ public class OperationList extends ListActivity {
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
 		fillData();
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		if (mCurAccount.isClosed()) {
-			mCurAccount.requery();
-			mCurAccount.moveToFirst();
-		}
 		double curSum = mCurAccount.getDouble(mCurAccount
 				.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM));
 		updateFutureSumDisplay(curSum);
 		updateSumAtDateDisplay(new GregorianCalendar(), curSum);
 	}
+
+//	@Override
+//	protected void onStart() {
+//		super.onStart();
+//	
+//	
+//	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
