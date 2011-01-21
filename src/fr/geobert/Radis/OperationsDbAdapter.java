@@ -35,7 +35,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 			do {
 				String key = c.getString(1);
 				Long value = c.getLong(0);
-				mModesMap.put(key, value);
+				map.put(key, value);
 			} while (c.moveToNext());
 		}
 		c.close();
