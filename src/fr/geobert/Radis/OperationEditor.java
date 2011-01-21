@@ -15,6 +15,10 @@ import android.widget.EditText;
 
 public class OperationEditor extends Activity {
 	static final int DATE_DIALOG_ID = 0;
+	static final int THIRD_PARTIES_DIALOG_ID = 1;
+	static final int TAGS_DIALOG_ID = 2;
+	static final int MODES_DIALOG_ID = 3;
+
 	private OperationsDbAdapter mDbHelper;
 	private EditText mOpThirdPartyText;
 	private EditText mOpSumText;
@@ -73,10 +77,13 @@ public class OperationEditor extends Activity {
 		mOpDateBut = (Button) findViewById(R.id.edit_op_date);
 		Button confirmButton = (Button) findViewById(R.id.confirm_op);
 		Button cancelButton = (Button) findViewById(R.id.cancel_op);
+		Button thirdPartyEdit = (Button) findViewById(R.id.edit_op_third_parties_list);
 
 		populateFields();
 
+		// listeners
 		confirmButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View view) {
 				try {
 					StringBuilder errMsg = new StringBuilder();
@@ -98,6 +105,7 @@ public class OperationEditor extends Activity {
 		});
 
 		cancelButton.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View view) {
 				setResult(RESULT_CANCELED);
 				finish();
@@ -105,8 +113,16 @@ public class OperationEditor extends Activity {
 		});
 
 		mOpDateBut.setOnClickListener(new View.OnClickListener() {
+			@Override
 			public void onClick(View view) {
 				showDialog(DATE_DIALOG_ID);
+			}
+		});
+
+		thirdPartyEdit.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(THIRD_PARTIES_DIALOG_ID);
 			}
 		});
 	}
@@ -131,6 +147,12 @@ public class OperationEditor extends Activity {
 		case DATE_DIALOG_ID:
 			return new DatePickerDialog(this, mDateSetListener, op.getYear(),
 					op.getMonth(), op.getDay());
+		case THIRD_PARTIES_DIALOG_ID:
+			Cursor c = mDbHelper.fetchAllThirdParties();
+			Dialog d = new InfoEditor(this, mDbHelper,
+					getString(R.string.third_parties_list), c,
+					OperationsDbAdapter.KEY_THIRD_PARTY_NAME).getDialog();
+			return d;
 		}
 		return null;
 	}
@@ -140,7 +162,7 @@ public class OperationEditor extends Activity {
 			Cursor opCursor = mDbHelper.fetchOneOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentOp = new Operation(opCursor);
-			
+
 			mOpSumText.setText(mCurrentOp.getSumStr());
 		} else {
 			mCurrentOp = new Operation();

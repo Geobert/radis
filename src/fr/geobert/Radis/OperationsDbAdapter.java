@@ -167,7 +167,8 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		return mDb.query(
 				String.format(DATABASE_TABLE_JOINTURE, mDatabaseTable),
 				OP_COLS_QUERY, null, null, null, null, "ops." + KEY_OP_DATE
-						+ " desc, ops." + KEY_OP_ROWID + " desc", Integer.toString(nbOps));
+						+ " desc, ops." + KEY_OP_ROWID + " desc", Integer
+						.toString(nbOps));
 	}
 
 	public Cursor fetchOneOp(long rowId) {
@@ -181,8 +182,9 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	}
 
 	public Cursor fetchOpsSumsLaterThan(long date) {
-		Cursor c =  mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
-				KEY_OP_SUM }, KEY_OP_DATE + " > " + date, null, null, null, null);
+		Cursor c = mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
+				KEY_OP_SUM }, KEY_OP_DATE + " > " + date, null, null, null,
+				null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -209,5 +211,20 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 
 		return mDb.update(mDatabaseTable, args, KEY_OP_ROWID + "=" + rowId,
 				null) > 0;
+	}
+
+	public Cursor fetchAllThirdParties() {
+		Cursor c = mDb.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
+				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null, null,
+				null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public boolean deleteThirdParty(long rowId) {
+		return mDb.delete(DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_ROWID
+				+ "=" + rowId, null) > 0;
 	}
 }

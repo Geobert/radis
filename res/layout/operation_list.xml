@@ -2,7 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<ListView android:id="@+id/android:list" style="@style/OpListView"/>
+	<LinearLayout style="@style/SumsLayout">
+		<TextView android:id="@+id/date_sum" android:text="Solde à la selection = 2040.00"
+			style="@style/SumsTextView" />
+		<TextView android:id="@+id/future_sum" style="@style/SumsTextView" 
+			android:gravity="right" android:text="Solde au 25/12/2010 = 2000.00" />
+	</LinearLayout>
+	<ListView android:id="@+id/android:list" style="@style/OpListView" />
 	<TextView android:id="@+id/android:empty"
 		android:layout_width="fill_parent" android:layout_height="fill_parent"
 		android:text="@string/no_operation" android:textSize="25px"

@@ -58,7 +58,7 @@
 <string name="credit">Crédit</string>
 <string name="debit">Débit</string>
 <string name="current_sum">Solde</string>
-<string name="sum_at">Solde au %1$s = %2$s</string>
+<string name="sum_at">Au %1$s = %2$s</string>
 
 <string name="no_operation">Aucune opération</string>
 <string name="new_op">Nouvelle opération</string>
@@ -67,4 +67,6 @@
 <string name="op_edition">Saisie d\'opération</string>
 <string name="future_sum_at">Projection au %1$s = %2$s</string>
 <string name="sum_at_selection">Solde à la selection = %1$s</string>
+<string name="third_parties_list">Liste des tiers</string>
+
 </resources>
