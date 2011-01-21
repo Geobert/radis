@@ -16,6 +16,8 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	private LinkedHashMap<String, Long> mTagsMap;
 	private LinkedHashMap<String, Long> mThirdPartiesMap;
 
+	private Cursor mThirdPartiesCursor = null;
+
 	/**
 	 * Constructor - takes the context to allow the database to be
 	 * opened/created
@@ -214,9 +216,16 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	}
 
 	public Cursor fetchAllThirdParties() {
-		Cursor c = mDb.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
-				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null, null,
-				null, null, null);
+		Cursor c = mThirdPartiesCursor;
+		if (null == c) {
+			c = mDb.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
+					KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null, null,
+					null, null, null);
+			mThirdPartiesCursor = c;
+		} else {
+			c.requery();
+		}
+
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -224,7 +233,28 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	}
 
 	public boolean deleteThirdParty(long rowId) {
-		return mDb.delete(DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_ROWID
-				+ "=" + rowId, null) > 0;
+		boolean res = mDb.delete(DATABASE_THIRD_PARTIES_TABLE,
+				KEY_THIRD_PARTY_ROWID + "=" + rowId, null) > 0;
+		mThirdPartiesCursor.requery();
+		return res;
+	}
+
+	public Cursor fetchMatchingInfo(String table, String colName,
+			String constraint) {
+		String where;
+		String[] params;
+		if (null != constraint) {
+			where = colName + " LIKE ?";
+			params = new String[] { "%" + constraint.trim() + "%" };
+		} else {
+			where = null;
+			params = null;
+		}
+		Cursor c = mDb.query(table, new String[] { "_id", colName }, where, params, null,
+				null, null);
+		if (null != c) {
+			c.moveToFirst();
+		}
+		return c;
 	}
 }

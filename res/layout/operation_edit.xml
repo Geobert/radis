@@ -9,7 +9,7 @@
 			style="@style/EditorBaseButton.DateButton" />
 		<TextView style="@style/EditorTextView" android:text="@string/third_party" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<EditText android:id="@+id/edit_op_third_party" style="@style/EditorEditText" />
+			<AutoCompleteTextView android:id="@+id/edit_op_third_party" style="@style/EditorEditText" android:completionThreshold="1"/>
 			<Button android:id="@+id/edit_op_third_parties_list" style="@style/EditorBaseButton.ListButton" />
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/sum" />

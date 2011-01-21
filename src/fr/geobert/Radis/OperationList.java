@@ -313,12 +313,14 @@ public class OperationList extends ListActivity {
 		Cursor c = mLast25Ops;
 		c.requery();
 		c.moveToFirst();
+		TextView t = (TextView) findViewById(R.id.future_sum);
 		if (c.isFirst()) {
 			Operation latestOp = new Operation(c);
 			latestOp.setSum(curSum); // to use existing formatter
-			TextView t = (TextView) findViewById(R.id.future_sum);
 			t.setText(String.format(getString(R.string.sum_at), latestOp
 					.getDateStr(), latestOp.getSumStr()));
+		} else {
+			t.setText("");
 		}
 	}
 

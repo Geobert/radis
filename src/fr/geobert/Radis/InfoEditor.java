@@ -77,9 +77,7 @@ public class InfoEditor {
 
 	private void onDeleteClicked() {
 		mCursor.moveToPosition(mSelectedInfo);
-		if (mDbHelper.deleteThirdParty(mCursor.getLong(mCursor
-				.getColumnIndex(OperationsDbAdapter.KEY_THIRD_PARTY_ROWID)))) {
-			mCursor.requery();
-		}
+		mDbHelper.deleteThirdParty(mCursor.getLong(mCursor
+				.getColumnIndex(OperationsDbAdapter.KEY_THIRD_PARTY_ROWID)));
 	}
 }
