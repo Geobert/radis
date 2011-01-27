@@ -14,18 +14,18 @@
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/sum" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<EditText android:id="@+id/edit_op_sum" style="@style/EditorEditText.Sum" />
+			<AutoCompleteTextView android:id="@+id/edit_op_sum" style="@style/EditorEditText.Sum" />
 			<Button android:text="-/+" android:id="@+id/edit_op_sign"
 				style="@style/EditorBaseButton" />
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/tag" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<EditText android:id="@+id/edit_op_tag" style="@style/EditorEditText" />
+			<AutoCompleteTextView android:id="@+id/edit_op_tag" style="@style/EditorEditText" />
 			<Button android:id="@+id/edit_op_tags_list" style="@style/EditorBaseButton.ListButton" />
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/mode" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<EditText android:id="@+id/edit_op_mode" style="@style/EditorEditText" />
+			<AutoCompleteTextView android:id="@+id/edit_op_mode" style="@style/EditorEditText" />
 			<Button android:id="@+id/edit_op_modes_list" style="@style/EditorBaseButton.ListButton" />
 		</LinearLayout>
 		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">

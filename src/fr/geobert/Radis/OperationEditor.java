@@ -25,6 +25,7 @@ public class OperationEditor extends Activity {
 	static final int THIRD_PARTIES_DIALOG_ID = 1;
 	static final int TAGS_DIALOG_ID = 2;
 	static final int MODES_DIALOG_ID = 3;
+	static final int EDIT_INFO_DIALOG_ID = 4;
 
 	private OperationsDbAdapter mDbHelper;
 	private AutoCompleteTextView mOpThirdPartyText;
@@ -40,6 +41,7 @@ public class OperationEditor extends Activity {
 	private OperationEditor context = this;
 	private Operation mCurrentOp;
 	private double mPreviousSum = 0.0;
+	private InfoManager mInfoManager;
 
 	// the callback received when the user "sets" the date in the dialog
 	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
@@ -60,6 +62,7 @@ public class OperationEditor extends Activity {
 		private String mCurrentConstraint;
 
 		private String boldFormat = "<u><b>$1</b></u>";
+
 		public InfoAdapter(String tableName, String colName) {
 			super(OperationEditor.this, null);
 			mColName = colName;
@@ -73,11 +76,13 @@ public class OperationEditor extends Activity {
 
 		@Override
 		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-			mCurrentConstraint = constraint != null ? constraint.toString() : null;
+			mCurrentConstraint = constraint != null ? constraint.toString()
+					: null;
 			if (getFilterQueryProvider() != null) {
-                return getFilterQueryProvider().runQuery(constraint);
-            }
-			Cursor c = mDbHelper.fetchMatchingInfo(mTableName, mColName, mCurrentConstraint);
+				return getFilterQueryProvider().runQuery(constraint);
+			}
+			Cursor c = mDbHelper.fetchMatchingInfo(mTableName, mColName,
+					mCurrentConstraint);
 			OperationEditor.this.startManagingCursor(c);
 			return c;
 		}
@@ -86,7 +91,8 @@ public class OperationEditor extends Activity {
 		public void bindView(View view, Context context, Cursor cursor) {
 			String text = convertToString(cursor).toString();
 			if (mCurrentConstraint != null) {
-				text = text.replaceAll("(?i)(" + mCurrentConstraint + ")", boldFormat);
+				text = text.replaceAll("(?i)(" + mCurrentConstraint + ")",
+						boldFormat);
 			}
 			((TextView) view).setText(Html.fromHtml(text));
 		}
@@ -94,8 +100,8 @@ public class OperationEditor extends Activity {
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			final LayoutInflater inflater = LayoutInflater.from(context);
-			final View view = inflater
-					.inflate(android.R.layout.simple_dropdown_item_1line, parent, false);
+			final View view = inflater.inflate(
+					android.R.layout.simple_dropdown_item_1line, parent, false);
 
 			return view;
 		}
@@ -135,7 +141,7 @@ public class OperationEditor extends Activity {
 		Button confirmButton = (Button) findViewById(R.id.confirm_op);
 		Button cancelButton = (Button) findViewById(R.id.cancel_op);
 		Button thirdPartyEdit = (Button) findViewById(R.id.edit_op_third_parties_list);
-
+		Button opSignBut = (Button) findViewById(R.id.edit_op_sign);
 		populateFields();
 
 		// listeners
@@ -182,6 +188,21 @@ public class OperationEditor extends Activity {
 				showDialog(THIRD_PARTIES_DIALOG_ID);
 			}
 		});
+
+		opSignBut.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				invertSign();
+			}
+		});
+	}
+
+	private void invertSign() {
+		Long sum = Long.parseLong(mOpSumText.getText().toString());
+		if (sum != null) {
+			sum = -sum;
+		}
+		mOpSumText.setText(sum.toString());
 	}
 
 	private boolean isFormValid(StringBuilder errMsg) {
@@ -197,6 +218,12 @@ public class OperationEditor extends Activity {
 		return res;
 	}
 
+	private Dialog createInfoListDialog(String table, String colName,
+			String title) {
+		mInfoManager = new InfoManager(this, mDbHelper, title, table, colName);
+		return mInfoManager.getListDialog();
+	}
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		Operation op = mCurrentOp;
@@ -205,13 +232,34 @@ public class OperationEditor extends Activity {
 			return new DatePickerDialog(this, mDateSetListener, op.getYear(),
 					op.getMonth(), op.getDay());
 		case THIRD_PARTIES_DIALOG_ID:
-			Cursor c = mDbHelper.fetchAllThirdParties();
-			Dialog d = new InfoEditor(this, mDbHelper,
-					getString(R.string.third_parties_list), c,
-					OperationsDbAdapter.KEY_THIRD_PARTY_NAME).getDialog();
+			return createInfoListDialog(
+					OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+					OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
+					getString(R.string.third_parties));
+		case TAGS_DIALOG_ID:
+			return createInfoListDialog(
+					OperationsDbAdapter.DATABASE_TAGS_TABLE,
+					OperationsDbAdapter.KEY_TAG_NAME, getString(R.string.tags));
+		case MODES_DIALOG_ID:
+			return createInfoListDialog(
+					OperationsDbAdapter.DATABASE_MODES_TABLE,
+					OperationsDbAdapter.KEY_MODE_NAME,
+					getString(R.string.modes));
+		case EDIT_INFO_DIALOG_ID:
+			Dialog d = mInfoManager.getEditDialog();
+			mInfoManager.initEditDialog(d);
 			return d;
 		}
 		return null;
+	}
+
+	@Override
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		Operation op = mCurrentOp;
+		switch (id) {
+		case EDIT_INFO_DIALOG_ID:
+			mInfoManager.initEditDialog(dialog);
+		}
 	}
 
 	private void populateFields() {

@@ -1,5 +1,6 @@
 package fr.geobert.Radis;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 
+@SuppressWarnings("serial")
 public class OperationsDbAdapter extends AccountsDbAdapter {
 	private long mAccountId;
 	private String mDatabaseTable;
@@ -16,7 +18,14 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	private LinkedHashMap<String, Long> mTagsMap;
 	private LinkedHashMap<String, Long> mThirdPartiesMap;
 
-	private Cursor mThirdPartiesCursor = null;
+	private HashMap<String, Cursor> mInfoCursorMap;
+	private static final HashMap<String, String> mInfoColMap = new HashMap<String, String>() {
+		{
+			put(DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME);
+			put(DATABASE_TAGS_TABLE, KEY_TAG_NAME);
+			put(DATABASE_MODES_TABLE, KEY_MODE_NAME);
+		}
+	};;
 
 	/**
 	 * Constructor - takes the context to allow the database to be
@@ -29,6 +38,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		super(ctx);
 		mAccountId = accountRowId;
 		mDatabaseTable = String.format(OPS_ACCOUNT_TABLE, mAccountId);
+		mInfoCursorMap = new HashMap<String, Cursor>();
 	}
 
 	private void fillCache(String table, String[] cols, Map<String, Long> map) {
@@ -215,27 +225,21 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 				null) > 0;
 	}
 
-	public Cursor fetchAllThirdParties() {
-		Cursor c = mThirdPartiesCursor;
-		if (null == c) {
-			c = mDb.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
-					KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null, null,
-					null, null, null);
-			mThirdPartiesCursor = c;
-		} else {
-			c.requery();
-		}
-
-		if (c != null) {
-			c.moveToFirst();
-		}
-		return c;
+	public boolean updateInfo(String table, long rowId, String value) {
+		ContentValues args = new ContentValues();
+		args.put(mInfoColMap.get(table), value);
+		return mDb.update(table, args, "_id =" + rowId, null) > 0;
 	}
-
-	public boolean deleteThirdParty(long rowId) {
-		boolean res = mDb.delete(DATABASE_THIRD_PARTIES_TABLE,
-				KEY_THIRD_PARTY_ROWID + "=" + rowId, null) > 0;
-		mThirdPartiesCursor.requery();
+	
+	public long createInfo(String table, String value) {
+		ContentValues args = new ContentValues();
+		args.put(mInfoColMap.get(table), value);
+		return mDb.insert(table, null, args);
+	}
+	
+	public boolean deleteInfo(String table, long rowId) {
+		boolean res = mDb.delete(table, "_id =" + rowId, null) > 0;
+		mInfoCursorMap.get(table).requery();
 		return res;
 	}
 
@@ -250,8 +254,8 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 			where = null;
 			params = null;
 		}
-		Cursor c = mDb.query(table, new String[] { "_id", colName }, where, params, null,
-				null, null);
+		Cursor c = mDb.query(table, new String[] { "_id", colName }, where,
+				params, null, null, colName + " asc");
 		if (null != c) {
 			c.moveToFirst();
 		}

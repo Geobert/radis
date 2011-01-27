@@ -67,6 +67,9 @@
 <string name="op_edition">Saisie d\'opération</string>
 <string name="future_sum_at">Projection au %1$s = %2$s</string>
 <string name="sum_at_selection">Solde à la selection = %1$s</string>
-<string name="third_parties_list">Liste des tiers</string>
+<string name="list_of">Liste des %s</string>
 
+<string name="tags">Catégories</string>
+<string name="modes">Modes</string>
+<string name="third_parties">Tiers</string>
 </resources>

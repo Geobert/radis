@@ -6,6 +6,7 @@ import java.util.GregorianCalendar;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
@@ -14,9 +15,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -35,29 +36,28 @@ public class OperationList extends ListActivity {
 	private String mAccountName;
 	private Cursor mCurAccount;
 	private DecimalFormat mDecimalFormat;
-	private Cursor mLast25Ops = null;
+	private final int NB_LAST_OPS = 20;
+	private final int OFFSET = 60;
+	private Cursor mLastOps = null;
 	private GregorianCalendar mLastSelectedDate;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
+		private Resources res = getResources();
+
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
 
 			if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
+				TextView textView = ((TextView) view);
 				double sum = cursor.getDouble(columnIndex);
-				TextView textView;
-				TextView toClean;
-				LinearLayout parent = (LinearLayout) view.getParent();
 				if (sum >= 0.0) {
-					textView = (TextView) parent.findViewById(R.id.op_credit);
-					toClean = (TextView) parent.findViewById(R.id.op_debit);
+					textView.setTextColor(res.getColor(R.color.positiveSum));
 				} else {
-					textView = (TextView) parent.findViewById(R.id.op_debit);
-					toClean = (TextView) parent.findViewById(R.id.op_credit);
+					textView.setTextColor(res.getColor(R.color.blackSum));
 				}
 				String txt = mDecimalFormat.format(Double.valueOf(sum));
 				textView.setText(txt);
-				toClean.setText("");
 				return true;
 			} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
 				Operation op = new Operation();
@@ -102,6 +102,7 @@ public class OperationList extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		mDecimalFormat = new DecimalFormat();
 		mDecimalFormat.setMaximumFractionDigits(2);
 		mDecimalFormat.setMinimumFractionDigits(2);
@@ -131,8 +132,11 @@ public class OperationList extends ListActivity {
 				new AdapterView.OnItemSelectedListener() {
 					public void onItemSelected(AdapterView parentView,
 							View childView, int position, long id) {
-						((SelectedCursorAdapter) getListAdapter())
-								.setSelectedPosition(position);
+						mLastOps.moveToPosition(position);
+						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+						adapter.setSelectedPosition(position);
+						updateSumAtSelectedOpDisplay(mLastOps,
+								getAccountCurSum());
 					}
 
 					public void onNothingSelected(AdapterView parentView) {
@@ -202,20 +206,21 @@ public class OperationList extends ListActivity {
 			SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
 			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 			adapter.setSelectedPosition(position);
-			setSelection(position);
+			getListView().setSelectionFromTop(position, position * OFFSET);
+			//setSelection(position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		}
 	}
 
 	private void fillData() {
-		if (mLast25Ops == null) {
-			mLast25Ops = mDbHelper.fetchNLastOps(25);
-			startManagingCursor(mLast25Ops);
+		if (mLastOps == null) {
+			mLastOps = mDbHelper.fetchNLastOps(NB_LAST_OPS);
+			startManagingCursor(mLastOps);
 		} else {
-			mLast25Ops.requery();
-			mLast25Ops.moveToFirst();
+			mLastOps.requery();
+			mLastOps.moveToFirst();
 		}
-		Cursor opsCursor = mLast25Ops;
+		Cursor opsCursor = mLastOps;
 		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
@@ -223,7 +228,7 @@ public class OperationList extends ListActivity {
 
 		// and an array of the fields we want to bind those fields to (in this
 		// case just text1)
-		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_debit };
+		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum };
 
 		// Now create a simple cursor adapter and set it to display
 		SelectedCursorAdapter operations = new SelectedCursorAdapter(this,
@@ -279,7 +284,7 @@ public class OperationList extends ListActivity {
 	}
 
 	private Cursor findLastOpBeforeDate(GregorianCalendar date) {
-		Cursor ops = mLast25Ops;
+		Cursor ops = mLastOps;
 		ops.requery();
 		if (ops.moveToFirst()) {
 			long dateLong = date.getTimeInMillis();
@@ -310,7 +315,7 @@ public class OperationList extends ListActivity {
 	}
 
 	private void updateFutureSumDisplay(double curSum) {
-		Cursor c = mLast25Ops;
+		Cursor c = mLastOps;
 		c.requery();
 		c.moveToFirst();
 		TextView t = (TextView) findViewById(R.id.future_sum);
@@ -334,8 +339,9 @@ public class OperationList extends ListActivity {
 		mLastSelectedDate = date;
 		Cursor c = findLastOpBeforeDate(date);
 		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-		adapter.setSelectedPosition(c.getPosition());
-		setSelection(c.getPosition());
+		int position = c.getPosition();
+		adapter.setSelectedPosition(position);
+		getListView().setSelectionFromTop(position, position * OFFSET);
 		updateSumAtSelectedOpDisplay(c, getAccountCurSum());
 	}
 
@@ -350,4 +356,5 @@ public class OperationList extends ListActivity {
 		t.setText(String.format(getString(R.string.sum_at_selection), f
 				.getSumStr()));
 	}
+
 }

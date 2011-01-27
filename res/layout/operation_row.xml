@@ -6,8 +6,6 @@
 	<TextView android:id="@+id/op_third_party" style="@style/OpRowTextView"
 		android:layout_width="fill_parent" android:text="toto"
 		android:layout_weight="1"  />
-	<TextView android:id="@+id/op_debit" style="@style/OpRowTextView.Sums"
-		android:text="200€" />
-	<TextView android:id="@+id/op_credit" style="@style/OpRowTextView.Sums"
-		android:text="200€" />
+	<TextView android:id="@+id/op_sum" style="@style/OpRowTextView.Sums"
+		android:text="200,00" />
 </LinearLayout>

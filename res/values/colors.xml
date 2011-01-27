@@ -4,4 +4,6 @@
 <color name="even_op">#FFFFFFFF</color>
 <color name="highlight">#FFFF9100</color>
 <color name="op_selected">#FFFA9898</color>
+<color name="positiveSum">#24B347</color>
+<color name="blackSum">#000000</color>
 </resources>
