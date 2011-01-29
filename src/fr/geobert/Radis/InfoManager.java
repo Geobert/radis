@@ -106,7 +106,7 @@ public class InfoManager {
 		return mListDialog;
 	}
 
-	private void refreshToolbarStatus() {
+	public void refreshToolbarStatus() {
 		boolean oneSelected = mSelectedInfo != -1;
 		mDelBut.setEnabled(oneSelected);
 		mEditBut.setEnabled(oneSelected);
@@ -134,7 +134,7 @@ public class InfoManager {
 		info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
 		mContext.showDialog(OperationEditor.EDIT_INFO_DIALOG_ID);
 	}
-
+	
 	public void initEditDialog(Dialog dialog) {
 		EditText t = mEditorText;
 		Bundle info = mInfo;

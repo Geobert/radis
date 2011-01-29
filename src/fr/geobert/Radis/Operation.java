@@ -12,7 +12,11 @@ public class Operation {
 	private GregorianCalendar mDate;
 	private SimpleDateFormat mDateFormat;
 	private SimpleDateFormat mShortDateFormat;
-	private DecimalFormat mSumFormat;
+	public static DecimalFormat SUM_FORMAT = new DecimalFormat();
+	static {
+		SUM_FORMAT.setMaximumFractionDigits(2);
+		SUM_FORMAT.setMinimumFractionDigits(2);
+	}
 
 	private String mThirdParty;
 	private String mTag;
@@ -47,9 +51,6 @@ public class Operation {
 	private void initFormaters() {
 		mDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		mShortDateFormat = new SimpleDateFormat("dd/MM");
-		mSumFormat = new DecimalFormat();
-		mSumFormat.setMaximumFractionDigits(2);
-		mSumFormat.setMinimumFractionDigits(2);
 	}
 
 	public int getMonth() {
@@ -125,11 +126,11 @@ public class Operation {
 	}
 
 	public String getSumStr() {
-		return mSumFormat.format(mSum);
+		return SUM_FORMAT.format(mSum);
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
-		mSum = mSumFormat.parse(sumStr).doubleValue();
+		mSum = SUM_FORMAT.parse(sumStr).doubleValue();
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {

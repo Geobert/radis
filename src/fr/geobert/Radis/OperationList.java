@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -109,10 +110,10 @@ public class OperationList extends ListActivity {
 		setContentView(R.layout.operation_list);
 		registerForContextMenu(getListView());
 
-		// LayoutInflater inf = getLayoutInflater();
-		// View footer = inf
-		// .inflate(R.layout.op_list_footer, getListView(), false);
-		// getListView().addFooterView(footer);
+		LayoutInflater inf = getLayoutInflater();
+		View footer = inf
+				.inflate(R.layout.op_list_footer, getListView(), false);
+		getListView().addFooterView(footer);
 		Bundle extras = getIntent().getExtras();
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
 				: null;
@@ -209,6 +210,8 @@ public class OperationList extends ListActivity {
 			getListView().setSelectionFromTop(position, position * OFFSET);
 			//setSelection(position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
+		} else { // get more ops is clicked
+			
 		}
 	}
 

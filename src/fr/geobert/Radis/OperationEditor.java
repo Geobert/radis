@@ -141,6 +141,8 @@ public class OperationEditor extends Activity {
 		Button confirmButton = (Button) findViewById(R.id.confirm_op);
 		Button cancelButton = (Button) findViewById(R.id.cancel_op);
 		Button thirdPartyEdit = (Button) findViewById(R.id.edit_op_third_parties_list);
+		Button tagsEdit = (Button) findViewById(R.id.edit_op_tags_list);
+		Button modesEdit = (Button) findViewById(R.id.edit_op_modes_list);
 		Button opSignBut = (Button) findViewById(R.id.edit_op_sign);
 		populateFields();
 
@@ -188,21 +190,40 @@ public class OperationEditor extends Activity {
 				showDialog(THIRD_PARTIES_DIALOG_ID);
 			}
 		});
+		
+		tagsEdit.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(TAGS_DIALOG_ID);
+			}
+		});
+		
+		modesEdit.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showDialog(MODES_DIALOG_ID);
+			}
+		});
 
 		opSignBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				invertSign();
+				try {
+					invertSign();
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 	}
 
-	private void invertSign() {
-		Long sum = Long.parseLong(mOpSumText.getText().toString());
+	private void invertSign() throws ParseException {
+		Double sum = Operation.SUM_FORMAT.parse(mOpSumText.getText().toString()).doubleValue();
 		if (sum != null) {
 			sum = -sum;
 		}
-		mOpSumText.setText(sum.toString());
+		mOpSumText.setText(Operation.SUM_FORMAT.format(sum));
 	}
 
 	private boolean isFormValid(StringBuilder errMsg) {

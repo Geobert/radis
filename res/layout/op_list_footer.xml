@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="horizontal" android:layout_weight="0"
-	android:layout_width="fill_parent" android:layout_height="wrap_content"
-	android:paddingTop="5px" android:gravity="right">
-	<TextView android:id="@+id/date_sum" android:text="Solde à la selection = 2040.00"
-		style="@style/SumsTextView" />
-	<TextView android:id="@+id/future_sum" style="@style/SumsTextView"
-		android:gravity="right" android:text="Solde au 25/12/2010 = 2000.00" />
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:paddingTop="5px">
+	<TextView android:id="@+id/date_sum" android:text="@string/get_more_op"
+		android:textSize="24sp" android:layout_height="wrap_content"
+		android:layout_width="fill_parent" android:gravity="center" />
 </LinearLayout>
