@@ -205,7 +205,7 @@ public class OperationList extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if (id != -1) {
-			SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
+			MatrixCursor data = (MatrixCursor) l.getItemAtPosition(position);
 			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 			adapter.setSelectedPosition(position);
 			getListView().setSelectionFromTop(position, position * OFFSET);
@@ -227,6 +227,7 @@ public class OperationList extends ListActivity {
 					OperationsDbAdapter.KEY_OP_DATE });
 			startManagingCursor(mLastOps);
 			Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
+			startManagingCursor(c);
 			if (c.moveToFirst()) {
 				do {
 					Object[] values = { new Long(c.getLong(0)), c.getString(1),
