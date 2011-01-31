@@ -164,7 +164,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 			+ KEY_MODE_ROWID + " LEFT OUTER JOIN " + DATABASE_TAGS_TABLE
 			+ " tag ON ops." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
 
-	private final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
+	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
 			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
 			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE };
 

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -39,7 +40,7 @@ public class OperationList extends ListActivity {
 	private DecimalFormat mDecimalFormat;
 	private final int NB_LAST_OPS = 20;
 	private final int OFFSET = 60;
-	private Cursor mLastOps = null;
+	private MatrixCursor mLastOps = null;
 	private GregorianCalendar mLastSelectedDate;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -208,22 +209,38 @@ public class OperationList extends ListActivity {
 			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 			adapter.setSelectedPosition(position);
 			getListView().setSelectionFromTop(position, position * OFFSET);
-			//setSelection(position);
+			// setSelection(position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
-			
+
 		}
 	}
 
 	private void fillData() {
 		if (mLastOps == null) {
-			mLastOps = mDbHelper.fetchNLastOps(NB_LAST_OPS);
+			mLastOps = new MatrixCursor(new String[] {
+					OperationsDbAdapter.KEY_OP_ROWID,
+					OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
+					OperationsDbAdapter.KEY_TAG_NAME,
+					OperationsDbAdapter.KEY_MODE_NAME,
+					OperationsDbAdapter.KEY_OP_SUM,
+					OperationsDbAdapter.KEY_OP_DATE });
+			startManagingCursor(mLastOps);
+			Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
+			if (c.moveToFirst()) {
+				do {
+					Object[] values = { new Long(c.getLong(0)), c.getString(1),
+							c.getString(2), c.getString(3),
+							new Double(c.getDouble(4)), new Long(c.getLong(5)) };
+					mLastOps.addRow(values);
+				} while (c.moveToNext());
+			}
 			startManagingCursor(mLastOps);
 		} else {
 			mLastOps.requery();
 			mLastOps.moveToFirst();
 		}
-		Cursor opsCursor = mLastOps;
+		MatrixCursor opsCursor = mLastOps;
 		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
