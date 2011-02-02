@@ -27,6 +27,9 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		}
 	};;
 
+	private static final String OP_ORDERING = "ops." + KEY_OP_DATE
+			+ " desc, ops." + KEY_OP_ROWID + " desc";
+
 	/**
 	 * Constructor - takes the context to allow the database to be
 	 * opened/created
@@ -178,8 +181,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	public Cursor fetchNLastOps(int nbOps) {
 		return mDb.query(
 				String.format(DATABASE_TABLE_JOINTURE, mDatabaseTable),
-				OP_COLS_QUERY, null, null, null, null, "ops." + KEY_OP_DATE
-						+ " desc, ops." + KEY_OP_ROWID + " desc", Integer
+				OP_COLS_QUERY, null, null, null, null, OP_ORDERING, Integer
 						.toString(nbOps));
 	}
 
@@ -193,15 +195,33 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		return c;
 	}
 
-	public Cursor fetchOpsSumsLaterThan(long date) {
-		Cursor c = mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
-				KEY_OP_SUM }, KEY_OP_DATE + " > " + date, null, null, null,
-				null);
+	public Cursor fetchOpEarlierThan(long date, int nbOps) {
+		Cursor c = null;
+
+		try {
+			c = mDb.query(String
+					.format(DATABASE_TABLE_JOINTURE, mDatabaseTable),
+					OP_COLS_QUERY, "ops." + KEY_OP_DATE + " < " + date, null,
+					null, null, OP_ORDERING, Integer.toString(nbOps));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		if (c != null) {
 			c.moveToFirst();
 		}
 		return c;
 	}
+
+	// public Cursor fetchOpsSumsLaterThan(long date) {
+	// Cursor c = mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
+	// KEY_OP_SUM }, KEY_OP_DATE + " > " + date, null, null, null,
+	// null);
+	// if (c != null) {
+	// c.moveToFirst();
+	// }
+	// return c;
+	// }
 
 	public boolean updateOp(long rowId, Operation op) {
 		ContentValues args = new ContentValues();
@@ -225,18 +245,19 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 				null) > 0;
 	}
 
+	// INFOS
 	public boolean updateInfo(String table, long rowId, String value) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
 		return mDb.update(table, args, "_id =" + rowId, null) > 0;
 	}
-	
+
 	public long createInfo(String table, String value) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
 		return mDb.insert(table, null, args);
 	}
-	
+
 	public boolean deleteInfo(String table, long rowId) {
 		boolean res = mDb.delete(table, "_id =" + rowId, null) > 0;
 		mInfoCursorMap.get(table).requery();

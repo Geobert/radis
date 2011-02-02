@@ -9,7 +9,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
-import android.database.sqlite.SQLiteCursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -19,7 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -42,6 +44,7 @@ public class OperationList extends ListActivity {
 	private final int OFFSET = 60;
 	private MatrixCursor mLastOps = null;
 	private GregorianCalendar mLastSelectedDate;
+	private ImageView mLoadingIcon;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
@@ -100,6 +103,41 @@ public class OperationList extends ListActivity {
 		}
 	}
 
+	private class GetMoreOps extends AsyncTask<Long, Void, Void> {
+
+		@Override
+		protected void onPostExecute(Void result) {
+			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
+			mLoadingIcon.clearAnimation();
+			mLoadingIcon.setVisibility(View.INVISIBLE);
+		}
+
+		@Override
+		protected void onPreExecute() {
+			mLoadingIcon.setVisibility(View.VISIBLE);
+			mLoadingIcon.startAnimation(AnimationUtils.loadAnimation(
+					OperationList.this, R.anim.rotation));
+		}
+
+		@Override
+		protected Void doInBackground(Long... params) {
+			Cursor result = mDbHelper
+					.fetchOpEarlierThan(params[0], NB_LAST_OPS);
+			startManagingCursor(result);
+			fillLastOps(result);
+			return null;
+		}
+
+	}
+
+	private void getMoreOps() {
+		MatrixCursor c = mLastOps;
+		c.moveToLast();
+		Long earliestOpDate = c.getLong(c
+				.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE));
+		new GetMoreOps().execute(earliestOpDate);
+	}
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -114,6 +152,7 @@ public class OperationList extends ListActivity {
 		LayoutInflater inf = getLayoutInflater();
 		View footer = inf
 				.inflate(R.layout.op_list_footer, getListView(), false);
+		mLoadingIcon = (ImageView) footer.findViewById(R.id.loading_icon);
 		getListView().addFooterView(footer);
 		Bundle extras = getIntent().getExtras();
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
@@ -134,11 +173,11 @@ public class OperationList extends ListActivity {
 				new AdapterView.OnItemSelectedListener() {
 					public void onItemSelected(AdapterView parentView,
 							View childView, int position, long id) {
-						mLastOps.moveToPosition(position);
-						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-						adapter.setSelectedPosition(position);
-						updateSumAtSelectedOpDisplay(mLastOps,
-								getAccountCurSum());
+//						mLastOps.moveToPosition(position);
+//						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+//						adapter.setSelectedPosition(position);
+						new UpdateSumAtSelected(position).execute();
+						
 					}
 
 					public void onNothingSelected(AdapterView parentView) {
@@ -201,18 +240,15 @@ public class OperationList extends ListActivity {
 		}
 	}
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		if (id != -1) {
-			MatrixCursor data = (MatrixCursor) l.getItemAtPosition(position);
-			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-			adapter.setSelectedPosition(position);
-			getListView().setSelectionFromTop(position, position * OFFSET);
-			// setSelection(position);
-			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
-		} else { // get more ops is clicked
-
+	private void fillLastOps(Cursor c) {
+		MatrixCursor lo = mLastOps;
+		if (c.moveToFirst()) {
+			do {
+				Object[] values = { new Long(c.getLong(0)), c.getString(1),
+						c.getString(2), c.getString(3),
+						new Double(c.getDouble(4)), new Long(c.getLong(5)) };
+				lo.addRow(values);
+			} while (c.moveToNext());
 		}
 	}
 
@@ -228,15 +264,7 @@ public class OperationList extends ListActivity {
 			startManagingCursor(mLastOps);
 			Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
 			startManagingCursor(c);
-			if (c.moveToFirst()) {
-				do {
-					Object[] values = { new Long(c.getLong(0)), c.getString(1),
-							c.getString(2), c.getString(3),
-							new Double(c.getDouble(4)), new Long(c.getLong(5)) };
-					mLastOps.addRow(values);
-				} while (c.moveToNext());
-			}
-			startManagingCursor(mLastOps);
+			fillLastOps(c);
 		} else {
 			mLastOps.requery();
 			mLastOps.moveToFirst();
@@ -343,8 +371,8 @@ public class OperationList extends ListActivity {
 		if (c.isFirst()) {
 			Operation latestOp = new Operation(c);
 			latestOp.setSum(curSum); // to use existing formatter
-			t.setText(String.format(getString(R.string.sum_at), latestOp
-					.getDateStr(), latestOp.getSumStr()));
+			t.setText(String.format(getString(R.string.sum_at),
+					latestOp.getDateStr(), latestOp.getSumStr()));
 		} else {
 			t.setText("");
 		}
@@ -359,23 +387,52 @@ public class OperationList extends ListActivity {
 		}
 		mLastSelectedDate = date;
 		Cursor c = findLastOpBeforeDate(date);
-		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 		int position = c.getPosition();
-		adapter.setSelectedPosition(position);
-		getListView().setSelectionFromTop(position, position * OFFSET);
-		updateSumAtSelectedOpDisplay(c, getAccountCurSum());
+		new UpdateSumAtSelected(position).execute();
 	}
 
-	private void updateSumAtSelectedOpDisplay(Cursor selectedOp, double curSum) {
-		double sum = 0.0;
-		if (selectedOp.moveToPrevious()) {
-			sum = computeSumFromCursor(selectedOp);
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		if (id != -1) {
+			new UpdateSumAtSelected(position).execute();
+		} else { // get more ops is clicked
+			getMoreOps();
 		}
-		Operation f = new Operation(); // to use formatters
-		f.setSum(curSum - sum);
-		TextView t = (TextView) findViewById(R.id.date_sum);
-		t.setText(String.format(getString(R.string.sum_at_selection), f
-				.getSumStr()));
+	}
+
+	private class UpdateSumAtSelected extends AsyncTask<Void, Void, Double> {
+		int mPos;
+
+		public UpdateSumAtSelected(int position) {
+			super();
+			mPos = position;
+		}
+
+		@Override
+		protected void onPostExecute(Double result) {
+			int position = mPos;
+			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+			adapter.setSelectedPosition(position);
+			getListView().setSelectionFromTop(position, position * OFFSET);
+			TextView t = (TextView) findViewById(R.id.date_sum);
+			t.setText(String.format(getString(R.string.sum_at_selection),
+					Operation.SUM_FORMAT.format(result)));
+		}
+
+		@Override
+		protected Double doInBackground(Void... params) {
+			MatrixCursor selectedOp = (MatrixCursor) getListView()
+					.getItemAtPosition(mPos);
+			double curSum = getAccountCurSum();
+			double sum = 0.0;
+			if (selectedOp.moveToPrevious()) {
+				sum = computeSumFromCursor(selectedOp);
+			}
+
+			return curSum - sum;
+		}
+
 	}
 
 }

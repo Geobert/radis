@@ -10,8 +10,8 @@ import android.database.Cursor;
 
 public class Operation {
 	private GregorianCalendar mDate;
-	private SimpleDateFormat mDateFormat;
-	private SimpleDateFormat mShortDateFormat;
+	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
+	public static SimpleDateFormat SHORT_DATE_FORMAT = new SimpleDateFormat("dd/MM");
 	public static DecimalFormat SUM_FORMAT = new DecimalFormat();
 	static {
 		SUM_FORMAT.setMaximumFractionDigits(2);
@@ -24,7 +24,6 @@ public class Operation {
 	private double mSum;
 
 	public Operation(Cursor op) {
-		initFormaters();
 		mThirdParty = op
 				.getString(op
 						.getColumnIndexOrThrow(OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
@@ -40,17 +39,11 @@ public class Operation {
 	}
 
 	public Operation() {
-		initFormaters();
 		mDate = new GregorianCalendar();
 		mSum = 0.0d;
 		mThirdParty = "";
 		mMode = "";
 		mTag = "";
-	}
-
-	private void initFormaters() {
-		mDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-		mShortDateFormat = new SimpleDateFormat("dd/MM");
 	}
 
 	public int getMonth() {
@@ -78,11 +71,11 @@ public class Operation {
 	}
 
 	public String getDateStr() {
-		return mDateFormat.format(mDate.getTime());
+		return DATE_FORMAT.format(mDate.getTime());
 	}
 
 	public String getShortDateStr() {
-		return mShortDateFormat.format(mDate.getTime());
+		return SHORT_DATE_FORMAT.format(mDate.getTime());
 	}
 
 	public long getDate() {
@@ -134,7 +127,7 @@ public class Operation {
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {
-		mDate.setTime(mDateFormat.parse(dateStr));
+		mDate.setTime(DATE_FORMAT.parse(dateStr));
 
 	}
 }
