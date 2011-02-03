@@ -270,7 +270,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		String[] params;
 		if (null != constraint) {
 			where = colName + " LIKE ?";
-			params = new String[] { "%" + constraint.trim() + "%" };
+			params = new String[] { constraint.trim() + "%" };
 		} else {
 			where = null;
 			params = null;
