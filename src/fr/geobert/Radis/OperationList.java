@@ -1,6 +1,6 @@
 package fr.geobert.Radis;
 
-import java.text.DecimalFormat;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import android.app.ListActivity;
@@ -12,20 +12,20 @@ import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class OperationList extends ListActivity {
 	private static final int CREATE_OP_ID = Menu.FIRST;
@@ -39,37 +39,42 @@ public class OperationList extends ListActivity {
 	private Long mAccountId;
 	private String mAccountName;
 	private Cursor mCurAccount;
-	private DecimalFormat mDecimalFormat;
 	private final int NB_LAST_OPS = 20;
-	private final int OFFSET = 60;
 	private MatrixCursor mLastOps = null;
 	private GregorianCalendar mLastSelectedDate;
 	private ImageView mLoadingIcon;
+	private AsyncTask<Void, Void, Double> mUpdateSumTask;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-			String colName = cursor.getColumnName(columnIndex);
 
-			if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
-				TextView textView = ((TextView) view);
-				double sum = cursor.getDouble(columnIndex);
-				if (sum >= 0.0) {
-					textView.setTextColor(res.getColor(R.color.positiveSum));
-				} else {
-					textView.setTextColor(res.getColor(R.color.blackSum));
+			try {
+				String colName = cursor.getColumnName(columnIndex);
+
+				if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
+					TextView textView = ((TextView) view);
+					double sum = cursor.getDouble(columnIndex);
+					if (sum >= 0.0) {
+						textView.setTextColor(res.getColor(R.color.positiveSum));
+					} else {
+						textView.setTextColor(res.getColor(R.color.blackSum));
+					}
+					String txt = Operation.SUM_FORMAT.format(Double
+							.valueOf(sum));
+					textView.setText(txt);
+					return true;
+				} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
+					Date date = new Date(cursor.getLong(columnIndex));
+					((TextView) view).setText(Operation.SHORT_DATE_FORMAT
+							.format(date));
+					return true;
 				}
-				String txt = mDecimalFormat.format(Double.valueOf(sum));
-				textView.setText(txt);
-				return true;
-			} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
-				Operation op = new Operation();
-				long date = cursor.getLong(columnIndex);
-				op.setDate(date);
-				((TextView) view).setText(op.getShortDateStr());
-				return true;
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			return false;
 		}
@@ -143,9 +148,6 @@ public class OperationList extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		mDecimalFormat = new DecimalFormat();
-		mDecimalFormat.setMaximumFractionDigits(2);
-		mDecimalFormat.setMinimumFractionDigits(2);
 		setContentView(R.layout.operation_list);
 		registerForContextMenu(getListView());
 
@@ -165,19 +167,18 @@ public class OperationList extends ListActivity {
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
 		fillData();
-		double curSum = mCurAccount.getDouble(mCurAccount
-				.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM));
+		double curSum = getAccountCurSum();
 		updateFutureSumDisplay(curSum);
 		updateSumAtDateDisplay(new GregorianCalendar(), curSum);
 		getListView().setOnItemSelectedListener(
 				new AdapterView.OnItemSelectedListener() {
 					public void onItemSelected(AdapterView parentView,
 							View childView, int position, long id) {
-//						mLastOps.moveToPosition(position);
-//						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-//						adapter.setSelectedPosition(position);
-						new UpdateSumAtSelected(position).execute();
-						
+						mLastOps.moveToPosition(position);
+						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+						adapter.setSelectedPosition(position);
+						updateSumAtSelectedOpDisplay(mLastOps,
+								getAccountCurSum());
 					}
 
 					public void onNothingSelected(AdapterView parentView) {
@@ -321,7 +322,7 @@ public class OperationList extends ListActivity {
 	private double computeSumFromCursor(Cursor c) {
 		double sum = 0.0;
 		if (null != c && !c.isBeforeFirst() && !c.isAfterLast()) {
-			boolean hasNext = true;
+			boolean hasNext = c.moveToPrevious();
 			while (hasNext) {
 				double s = c.getDouble(c
 						.getColumnIndex(OperationsDbAdapter.KEY_OP_SUM));
@@ -387,52 +388,63 @@ public class OperationList extends ListActivity {
 		}
 		mLastSelectedDate = date;
 		Cursor c = findLastOpBeforeDate(date);
-		int position = c.getPosition();
-		new UpdateSumAtSelected(position).execute();
+		selectOpAndAdjustOffset(getListView(), c.getPosition());
+		updateSumAtSelectedOpDisplay(c, curSum);
 	}
 
+	private void selectOpAndAdjustOffset(ListView l, int position) {
+		// Get the top position from the first visible element
+		int firstIdx = l.getFirstVisiblePosition();
+		int offset = 58;
+		int firstOffset = offset;
+
+		View firstView = l.getChildAt(firstIdx);
+		if (null != firstView) {
+			offset = firstView.getHeight();
+			firstOffset = firstView.getBottom() - (firstIdx * offset)
+					- firstIdx; // getBottom = px according to virtual
+								// ListView (not only what we see on
+								// screen), - (firstIdx * offset) =
+								// remove
+								// all the previous items height, -
+								// firstIdx
+								// = remove the separator height
+		}
+
+		int relativePos = position - firstIdx;
+		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+		adapter.setSelectedPosition(position);
+		l.setSelectionFromTop(position, ((relativePos - 1) * offset)
+				+ firstOffset + relativePos);
+	}
+	
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if (id != -1) {
-			new UpdateSumAtSelected(position).execute();
+			selectOpAndAdjustOffset(l, position);
+			MatrixCursor data = (MatrixCursor) l.getItemAtPosition(position);
+			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
 			getMoreOps();
 		}
 	}
 
-	private class UpdateSumAtSelected extends AsyncTask<Void, Void, Double> {
-		int mPos;
+	private void updateSumAtSelectedOpDisplay(Cursor data,
+			double accountCurSum) {
+		TextView t = (TextView) findViewById(R.id.date_sum);
+		t.setText(String.format(
+				getString(R.string.sum_at_selection),
+				Operation.SUM_FORMAT.format(accountCurSum
+						- computeSumFromCursor(data))));
+	}
 
-		public UpdateSumAtSelected(int position) {
-			super();
-			mPos = position;
+	@Override
+	protected void onPause() {
+		if (null != mUpdateSumTask) {
+			mUpdateSumTask.cancel(true);
 		}
-
-		@Override
-		protected void onPostExecute(Double result) {
-			int position = mPos;
-			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-			adapter.setSelectedPosition(position);
-			getListView().setSelectionFromTop(position, position * OFFSET);
-			TextView t = (TextView) findViewById(R.id.date_sum);
-			t.setText(String.format(getString(R.string.sum_at_selection),
-					Operation.SUM_FORMAT.format(result)));
-		}
-
-		@Override
-		protected Double doInBackground(Void... params) {
-			MatrixCursor selectedOp = (MatrixCursor) getListView()
-					.getItemAtPosition(mPos);
-			double curSum = getAccountCurSum();
-			double sum = 0.0;
-			if (selectedOp.moveToPrevious()) {
-				sum = computeSumFromCursor(selectedOp);
-			}
-
-			return curSum - sum;
-		}
-
+		super.onPause();
 	}
 
 }
