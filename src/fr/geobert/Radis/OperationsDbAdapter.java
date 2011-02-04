@@ -280,6 +280,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		if (null != c) {
 			c.moveToFirst();
 		}
+		mInfoCursorMap.put(table, c);
 		return c;
 	}
 }
