@@ -44,6 +44,7 @@ public class OperationList extends ListActivity {
 	private GregorianCalendar mLastSelectedDate;
 	private ImageView mLoadingIcon;
 	private AsyncTask<Void, Void, Double> mUpdateSumTask;
+	private Integer mLastSelectedPosition = null;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
@@ -167,10 +168,23 @@ public class OperationList extends ListActivity {
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
+
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
 		fillData();
 		double curSum = getAccountCurSum();
 		updateFutureSumDisplay(curSum);
-		updateSumAtDateDisplay(new GregorianCalendar(), curSum);
+		if (mLastSelectedPosition == null) {
+			updateSumAtDateDisplay(new GregorianCalendar(), curSum);
+		} else {
+			int position = mLastSelectedPosition.intValue();
+			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
+					position);
+			updateSumAtSelectedOpDisplay(data, curSum);
+		}
 		getListView().setOnItemSelectedListener(
 				new AdapterView.OnItemSelectedListener() {
 					public void onItemSelected(AdapterView parentView,
@@ -378,6 +392,8 @@ public class OperationList extends ListActivity {
 	}
 
 	private void updateSumAtDateDisplay(GregorianCalendar date, double curSum) {
+		// TODO maybe no need date param as we use this function only with
+		// current time
 		if (null == date) {
 			date = mLastSelectedDate;
 			if (null == date) {
@@ -385,9 +401,7 @@ public class OperationList extends ListActivity {
 			}
 		}
 		mLastSelectedDate = date;
-		Cursor c = findLastOpBeforeDate(date);
-		selectOpAndAdjustOffset(getListView(), c.getPosition());
-		updateSumAtSelectedOpDisplay(c, curSum);
+		updateSumAtSelectedOpDisplay(findLastOpBeforeDate(date), curSum);
 	}
 
 	private void selectOpAndAdjustOffset(ListView l, int position) {
@@ -422,7 +436,6 @@ public class OperationList extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if (id != -1) {
-			selectOpAndAdjustOffset(l, position);
 			MatrixCursor data = (MatrixCursor) l.getItemAtPosition(position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
@@ -431,6 +444,9 @@ public class OperationList extends ListActivity {
 	}
 
 	private void updateSumAtSelectedOpDisplay(Cursor data, double accountCurSum) {
+		int position = data.getPosition();
+		mLastSelectedPosition = position;
+		selectOpAndAdjustOffset(getListView(), position);
 		TextView t = (TextView) findViewById(R.id.date_sum);
 		t.setText(String.format(
 				getString(R.string.sum_at_selection),
@@ -446,4 +462,13 @@ public class OperationList extends ListActivity {
 		super.onPause();
 	}
 
+	@Override
+	protected void onRestoreInstanceState(Bundle state) {
+		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
+	}
+
+	@Override
+	public Object onRetainNonConfigurationInstance() {
+		return mLastSelectedPosition;
+	}
 }
