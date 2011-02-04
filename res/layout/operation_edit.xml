@@ -20,12 +20,12 @@
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/tag" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<AutoCompleteTextView android:id="@+id/edit_op_tag" style="@style/EditorEditText" />
+			<AutoCompleteTextView android:id="@+id/edit_op_tag" style="@style/EditorEditText" android:completionThreshold="1"/>
 			<Button android:id="@+id/edit_op_tags_list" style="@style/EditorBaseButton.ListButton" />
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/mode" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<AutoCompleteTextView android:id="@+id/edit_op_mode" style="@style/EditorEditText" />
+			<AutoCompleteTextView android:id="@+id/edit_op_mode" style="@style/EditorEditText" android:completionThreshold="1"/>
 			<Button android:id="@+id/edit_op_modes_list" style="@style/EditorBaseButton.ListButton" />
 		</LinearLayout>
 		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">

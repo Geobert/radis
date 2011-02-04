@@ -25,7 +25,7 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 			put(DATABASE_TAGS_TABLE, KEY_TAG_NAME);
 			put(DATABASE_MODES_TABLE, KEY_MODE_NAME);
 		}
-	};;
+	};
 
 	private static final String OP_ORDERING = "ops." + KEY_OP_DATE
 			+ " desc, ops." + KEY_OP_ROWID + " desc";

@@ -156,6 +156,7 @@ public class OperationList extends ListActivity {
 				.inflate(R.layout.op_list_footer, getListView(), false);
 		mLoadingIcon = (ImageView) footer.findViewById(R.id.loading_icon);
 		getListView().addFooterView(footer);
+
 		Bundle extras = getIntent().getExtras();
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
 				: null;
@@ -237,6 +238,7 @@ public class OperationList extends ListActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
+			fillData();
 			updateSums(data);
 		}
 	}
@@ -254,22 +256,18 @@ public class OperationList extends ListActivity {
 	}
 
 	private void fillData() {
-		if (mLastOps == null) {
-			mLastOps = new MatrixCursor(new String[] {
-					OperationsDbAdapter.KEY_OP_ROWID,
-					OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-					OperationsDbAdapter.KEY_TAG_NAME,
-					OperationsDbAdapter.KEY_MODE_NAME,
-					OperationsDbAdapter.KEY_OP_SUM,
-					OperationsDbAdapter.KEY_OP_DATE });
-			startManagingCursor(mLastOps);
-			Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
-			startManagingCursor(c);
-			fillLastOps(c);
-		} else {
-			mLastOps.requery();
-			mLastOps.moveToFirst();
-		}
+		mLastOps = new MatrixCursor(
+				new String[] { OperationsDbAdapter.KEY_OP_ROWID,
+						OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
+						OperationsDbAdapter.KEY_TAG_NAME,
+						OperationsDbAdapter.KEY_MODE_NAME,
+						OperationsDbAdapter.KEY_OP_SUM,
+						OperationsDbAdapter.KEY_OP_DATE });
+		startManagingCursor(mLastOps);
+		Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
+		startManagingCursor(c);
+		fillLastOps(c);
+
 		MatrixCursor opsCursor = mLastOps;
 		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
@@ -397,18 +395,20 @@ public class OperationList extends ListActivity {
 		int firstIdx = l.getFirstVisiblePosition();
 		int offset = 58;
 		int firstOffset = offset;
-
-		View firstView = l.getChildAt(firstIdx);
+		int count = l.getChildCount();
+		count = count == 0 ? 1 : count;
+		int relativeFirstIdx = firstIdx % count;
+		View firstView = l.getChildAt(relativeFirstIdx);
 		if (null != firstView) {
 			offset = firstView.getHeight();
-			firstOffset = firstView.getBottom() - (firstIdx * offset)
-					- firstIdx; // getBottom = px according to virtual
-								// ListView (not only what we see on
-								// screen), - (firstIdx * offset) =
-								// remove
-								// all the previous items height, -
-								// firstIdx
-								// = remove the separator height
+			firstOffset = firstView.getBottom() - (relativeFirstIdx * offset)
+					- relativeFirstIdx; // getBottom = px according to virtual
+			// ListView (not only what we see on
+			// screen), - (firstIdx * offset) =
+			// remove
+			// all the previous items height, -
+			// firstIdx
+			// = remove the separator height
 		}
 
 		int relativePos = position - firstIdx;
@@ -417,7 +417,7 @@ public class OperationList extends ListActivity {
 		l.setSelectionFromTop(position, ((relativePos - 1) * offset)
 				+ firstOffset + relativePos);
 	}
-	
+
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
@@ -430,8 +430,7 @@ public class OperationList extends ListActivity {
 		}
 	}
 
-	private void updateSumAtSelectedOpDisplay(Cursor data,
-			double accountCurSum) {
+	private void updateSumAtSelectedOpDisplay(Cursor data, double accountCurSum) {
 		TextView t = (TextView) findViewById(R.id.date_sum);
 		t.setText(String.format(
 				getString(R.string.sum_at_selection),

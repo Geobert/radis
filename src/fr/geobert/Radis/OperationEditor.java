@@ -3,13 +3,13 @@ package fr.geobert.Radis;
 import java.text.ParseException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,8 +30,8 @@ public class OperationEditor extends Activity {
 	private OperationsDbAdapter mDbHelper;
 	private AutoCompleteTextView mOpThirdPartyText;
 	private EditText mOpSumText;
-	private EditText mOpModeText;
-	private EditText mOpTagText;
+	private AutoCompleteTextView mOpModeText;
+	private AutoCompleteTextView mOpTagText;
 	private Button mOpDateBut;
 
 	private Long mRowId;
@@ -55,57 +55,6 @@ public class OperationEditor extends Activity {
 		}
 
 	};
-
-	private class InfoAdapter extends CursorAdapter {
-		private String mColName = null;
-		private String mTableName = null;
-		private String mCurrentConstraint;
-
-		private String boldFormat = "<u><b>$1</b></u>";
-
-		public InfoAdapter(String tableName, String colName) {
-			super(OperationEditor.this, null);
-			mColName = colName;
-			mTableName = tableName;
-		}
-
-		@Override
-		public CharSequence convertToString(Cursor cursor) {
-			return cursor.getString(cursor.getColumnIndex(mColName));
-		}
-
-		@Override
-		public Cursor runQueryOnBackgroundThread(CharSequence constraint) {
-			mCurrentConstraint = constraint != null ? constraint.toString()
-					: null;
-			if (getFilterQueryProvider() != null) {
-				return getFilterQueryProvider().runQuery(constraint);
-			}
-			Cursor c = mDbHelper.fetchMatchingInfo(mTableName, mColName,
-					mCurrentConstraint);
-			OperationEditor.this.startManagingCursor(c);
-			return c;
-		}
-
-		@Override
-		public void bindView(View view, Context context, Cursor cursor) {
-			String text = convertToString(cursor).toString();
-			if (mCurrentConstraint != null) {
-				text = text.replaceAll("(?i)(" + mCurrentConstraint + ")",
-						boldFormat);
-			}
-			((TextView) view).setText(Html.fromHtml(text));
-		}
-
-		@Override
-		public View newView(Context context, Cursor cursor, ViewGroup parent) {
-			final LayoutInflater inflater = LayoutInflater.from(context);
-			final View view = inflater.inflate(
-					android.R.layout.simple_dropdown_item_1line, parent, false);
-
-			return view;
-		}
-	}
 
 	private void updateDateButton() {
 		mOpDateBut.setText(mCurrentOp.getDateStr());
@@ -131,12 +80,18 @@ public class OperationEditor extends Activity {
 		setContentView(R.layout.operation_edit);
 
 		mOpThirdPartyText = (AutoCompleteTextView) findViewById(R.id.edit_op_third_party);
-		mOpThirdPartyText.setAdapter(new InfoAdapter(
+		mOpThirdPartyText.setAdapter(new InfoAdapter(this, mDbHelper,
 				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
-		mOpModeText = (EditText) findViewById(R.id.edit_op_mode);
+		mOpModeText = (AutoCompleteTextView) findViewById(R.id.edit_op_mode);
+		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
+				OperationsDbAdapter.DATABASE_MODES_TABLE,
+				OperationsDbAdapter.KEY_MODE_NAME));
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
-		mOpTagText = (EditText) findViewById(R.id.edit_op_tag);
+		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
+		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
+				OperationsDbAdapter.DATABASE_TAGS_TABLE,
+				OperationsDbAdapter.KEY_TAG_NAME));
 		mOpDateBut = (Button) findViewById(R.id.edit_op_date);
 		Button confirmButton = (Button) findViewById(R.id.confirm_op);
 		Button cancelButton = (Button) findViewById(R.id.cancel_op);
@@ -190,14 +145,14 @@ public class OperationEditor extends Activity {
 				showDialog(THIRD_PARTIES_DIALOG_ID);
 			}
 		});
-		
+
 		tagsEdit.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				showDialog(TAGS_DIALOG_ID);
 			}
 		});
-		
+
 		modesEdit.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -219,7 +174,8 @@ public class OperationEditor extends Activity {
 	}
 
 	private void invertSign() throws ParseException {
-		Double sum = Operation.SUM_FORMAT.parse(mOpSumText.getText().toString()).doubleValue();
+		Double sum = Operation.SUM_FORMAT
+				.parse(mOpSumText.getText().toString()).doubleValue();
 		if (sum != null) {
 			sum = -sum;
 		}
@@ -276,10 +232,15 @@ public class OperationEditor extends Activity {
 
 	@Override
 	protected void onPrepareDialog(int id, Dialog dialog) {
-		Operation op = mCurrentOp;
 		switch (id) {
 		case EDIT_INFO_DIALOG_ID:
 			mInfoManager.initEditDialog(dialog);
+			break;
+		case THIRD_PARTIES_DIALOG_ID:
+		case TAGS_DIALOG_ID:
+		case MODES_DIALOG_ID:
+			mInfoManager.onPrepareDialog((AlertDialog) dialog);
+			break;
 		}
 	}
 
