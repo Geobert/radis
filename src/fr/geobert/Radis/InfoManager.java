@@ -31,6 +31,7 @@ public class InfoManager {
 	private Button mOkBut;
 	private AutoCompleteTextView mInfoText;
 
+	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
 		{
 			put(OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,

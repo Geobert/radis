@@ -12,7 +12,6 @@ import android.database.SQLException;
 @SuppressWarnings("serial")
 public class OperationsDbAdapter extends AccountsDbAdapter {
 	private long mAccountId;
-	private String mDatabaseTable;
 
 	private LinkedHashMap<String, Long> mModesMap;
 	private LinkedHashMap<String, Long> mTagsMap;
@@ -40,7 +39,6 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	public OperationsDbAdapter(Context ctx, long accountRowId) {
 		super(ctx);
 		mAccountId = accountRowId;
-		mDatabaseTable = String.format(OPS_ACCOUNT_TABLE, mAccountId);
 		mInfoCursorMap = new HashMap<String, Cursor>();
 	}
 
@@ -146,7 +144,8 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 
 		initialValues.put(KEY_OP_SUM, op.getSum());
 		initialValues.put(KEY_OP_DATE, op.getDate());
-		return mDb.insert(mDatabaseTable, null, initialValues);
+		initialValues.put(KEY_OP_ACCOUNT_ID, mAccountId);
+		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 	}
 
 	/**
@@ -157,38 +156,37 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 	 * @return true if deleted, false otherwise
 	 */
 	public boolean deleteOp(long rowId) {
-		return mDb.delete(mDatabaseTable, KEY_OP_ROWID + "=" + rowId, null) > 0;
+		return mDb.delete(DATABASE_OPERATIONS_TABLE,
+				KEY_OP_ROWID + "=" + rowId, null) > 0;
 	}
 
-	private final String DATABASE_TABLE_JOINTURE = "%s ops LEFT OUTER JOIN "
-			+ DATABASE_THIRD_PARTIES_TABLE + " tp ON ops." + KEY_OP_THIRD_PARTY
-			+ " = tp." + KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
+	private final String DATABASE_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
+			+ " ops LEFT OUTER JOIN " + DATABASE_THIRD_PARTIES_TABLE
+			+ " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp."
+			+ KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
 			+ DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode."
 			+ KEY_MODE_ROWID + " LEFT OUTER JOIN " + DATABASE_TAGS_TABLE
 			+ " tag ON ops." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
 
 	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
 			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
-			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE };
+			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
+			"ops." + KEY_OP_ACCOUNT_ID };
 
-	public Cursor fetchOps(long startRowId, int nbRows) {
-		return mDb.query(String.format(DATABASE_TABLE_JOINTURE, mDatabaseTable,
-				mDatabaseTable), OP_COLS_QUERY, KEY_OP_ROWID + ">="
-				+ startRowId + " AND " + KEY_OP_ROWID + "<"
-				+ (startRowId + nbRows), null, null, null, null);
-	}
+	private static final String RESTRICT_TO_ACCOUNT = "ops."
+			+ KEY_OP_ACCOUNT_ID + " = %d";
 
 	public Cursor fetchNLastOps(int nbOps) {
-		return mDb.query(
-				String.format(DATABASE_TABLE_JOINTURE, mDatabaseTable),
-				OP_COLS_QUERY, null, null, null, null, OP_ORDERING, Integer
-						.toString(nbOps));
+		return mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, mAccountId), null, null,
+				null, OP_ORDERING, Integer.toString(nbOps));
 	}
 
 	public Cursor fetchOneOp(long rowId) {
-		Cursor c = mDb.query(String.format(DATABASE_TABLE_JOINTURE,
-				mDatabaseTable), OP_COLS_QUERY, "ops." + KEY_OP_ROWID + " = "
-				+ rowId, null, null, null, null, null);
+		Cursor c = mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
+						+ KEY_OP_ROWID + " = " + rowId, null, null, null, null,
+				null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -199,9 +197,9 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		Cursor c = null;
 
 		try {
-			c = mDb.query(String
-					.format(DATABASE_TABLE_JOINTURE, mDatabaseTable),
-					OP_COLS_QUERY, "ops." + KEY_OP_DATE + " < " + date, null,
+			c = mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+					String.format(RESTRICT_TO_ACCOUNT, mAccountId)
+							+ " AND ops." + KEY_OP_DATE + " < " + date, null,
 					null, null, OP_ORDERING, Integer.toString(nbOps));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -241,8 +239,8 @@ public class OperationsDbAdapter extends AccountsDbAdapter {
 		args.put(KEY_OP_SUM, op.getSum());
 		args.put(KEY_OP_DATE, op.getDate());
 
-		return mDb.update(mDatabaseTable, args, KEY_OP_ROWID + "=" + rowId,
-				null) > 0;
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
+				+ rowId, null) > 0;
 	}
 
 	// INFOS
