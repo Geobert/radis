@@ -86,6 +86,17 @@ public class CommonDbAdapter {
 
 	protected static final String INDEX_ON_ACCOUNT_ID_CREATE = "CREATE INDEX IF NOT EXISTS account_id_idx ON "
 			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ACCOUNT_ID + ")";
+
+	protected static final String TRIGGER_ON_DELETE_THIRD_PARTY_CREATE = "CREATE TRIGGER on_delete_third_party AFTER DELETE ON "
+			+ DATABASE_THIRD_PARTIES_TABLE
+			+ " BEGIN UPDATE "
+			+ DATABASE_OPERATIONS_TABLE
+			+ " SET "
+			+ KEY_OP_THIRD_PARTY
+			+ " = null WHERE "
+			+ KEY_OP_THIRD_PARTY
+			+ " = old."
+			+ KEY_THIRD_PARTY_ROWID + "; END";
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected final Context mCtx;
@@ -108,6 +119,7 @@ public class CommonDbAdapter {
 			db.execSQL(DATABASE_MODES_CREATE);
 			db.execSQL(DATABASE_TAGS_CREATE);
 			db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
+			db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 		}
 
 		@Override
@@ -145,6 +157,7 @@ public class CommonDbAdapter {
 									+ oldTableName + " old;");
 							db.execSQL("DROP TABLE " + oldTableName + ";");
 							db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
+							db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 						} while (allAccounts.moveToNext());
 					}
 					allAccounts.close();
