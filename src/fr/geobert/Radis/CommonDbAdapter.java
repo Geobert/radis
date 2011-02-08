@@ -10,7 +10,7 @@ import android.util.Log;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 2;
+	protected static final int DATABASE_VERSION = 3;
 
 	protected static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	protected static final String DATABASE_MODES_TABLE = "modes";
@@ -97,6 +97,29 @@ public class CommonDbAdapter {
 			+ KEY_OP_THIRD_PARTY
 			+ " = old."
 			+ KEY_THIRD_PARTY_ROWID + "; END";
+	protected static final String TRIGGER_ON_DELETE_MODE_CREATE = "CREATE TRIGGER on_delete_mode AFTER DELETE ON "
+			+ DATABASE_MODES_TABLE
+			+ " BEGIN UPDATE "
+			+ DATABASE_OPERATIONS_TABLE
+			+ " SET "
+			+ KEY_OP_MODE
+			+ " = null WHERE "
+			+ KEY_OP_MODE
+			+ " = old."
+			+ KEY_MODE_ROWID
+			+ "; END";
+	protected static final String TRIGGER_ON_DELETE_TAG_CREATE = "CREATE TRIGGER on_delete_tag AFTER DELETE ON "
+			+ DATABASE_TAGS_TABLE
+			+ " BEGIN UPDATE "
+			+ DATABASE_OPERATIONS_TABLE
+			+ " SET "
+			+ KEY_OP_TAG
+			+ " = null WHERE "
+			+ KEY_OP_TAG
+			+ " = old."
+			+ KEY_TAG_ROWID
+			+ "; END";
+
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected final Context mCtx;
@@ -120,6 +143,8 @@ public class CommonDbAdapter {
 			db.execSQL(DATABASE_TAGS_CREATE);
 			db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
 			db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
+			db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
+			db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 		}
 
 		@Override
@@ -156,12 +181,16 @@ public class CommonDbAdapter {
 									+ ", old.op_third_party, old.op_tag, old.op_sum, old.op_mode, old.op_date, old.op_scheduled_id FROM "
 									+ oldTableName + " old;");
 							db.execSQL("DROP TABLE " + oldTableName + ";");
-							db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
-							db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 						} while (allAccounts.moveToNext());
 					}
 					allAccounts.close();
 				}
+			case 2:
+				db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+
 			default:
 				break;
 			}
