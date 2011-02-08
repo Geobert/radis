@@ -26,8 +26,8 @@ public class AccountEditor extends Activity {
 	private ArrayAdapter<CharSequence> mCurrAdapter;
 
 	// to let inner class access to the context
-	private AccountEditor context = this; 
-	
+	private AccountEditor context = this;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -38,6 +38,9 @@ public class AccountEditor extends Activity {
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
 		mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
+		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
+				Operation.SUM_FORMAT.getDecimalFormatSymbols()
+						.getDecimalSeparator()));
 		mAccountCurrency = (Spinner) findViewById(R.id.currency_spinner);
 		Button confirmButton = (Button) findViewById(R.id.confirm_creation);
 		Button cancelButton = (Button) findViewById(R.id.cancel_creation);
@@ -47,8 +50,8 @@ public class AccountEditor extends Activity {
 						.getSerializable(Tools.EXTRAS_ACCOUNT_ID);
 		if (mRowId == null) {
 			Bundle extras = getIntent().getExtras();
-			mRowId = extras != null ? extras
-					.getLong(Tools.EXTRAS_ACCOUNT_ID) : null;
+			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
+					: null;
 		}
 
 		populateFields();
@@ -106,18 +109,14 @@ public class AccountEditor extends Activity {
 			Cursor account = mDbHelper.fetchAccount(mRowId);
 			startManagingCursor(account);
 			mAccountNameText
-					.setText(account
-							.getString(account
-									.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME)));
+					.setText(account.getString(account
+							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME)));
 			mAccountDescText
-					.setText(account
-							.getString(account
-									.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_DESC)));
+					.setText(account.getString(account
+							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_DESC)));
 			mAccountStartSumText
-					.setText(Operation.SUM_FORMAT
-							.format(account
-									.getDouble(account
-											.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_START_SUM))));
+					.setText(Operation.SUM_FORMAT.format(account.getDouble(account
+							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_START_SUM))));
 			String currencyStr = account
 					.getString(account
 							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_CURRENCY));
@@ -129,8 +128,10 @@ public class AccountEditor extends Activity {
 			mAccountCurrency.setSelection(pos);
 		} else {
 			mAccountStartSumText.setText(Operation.SUM_FORMAT.format(0.00));
-			int pos = Arrays.binarySearch(allCurrencies, Currency.getInstance(
-					Locale.getDefault()).getCurrencyCode());
+			int pos = Arrays
+					.binarySearch(allCurrencies,
+							Currency.getInstance(Locale.getDefault())
+									.getCurrencyCode());
 			mAccountCurrency.setSelection(pos);
 		}
 	}
@@ -138,12 +139,6 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-//		StringBuilder errMsg = new StringBuilder();
-//		if (isFormValid(errMsg)) {
-//			saveState();
-//			outState.putSerializable(AccountsDbAdapter.KEY_ACCOUNT_ROWID,
-//					mRowId);
-//		}
 	}
 
 	@Override
@@ -162,8 +157,8 @@ public class AccountEditor extends Activity {
 		String desc = mAccountDescText.getText().toString();
 		double startSum = 0;
 		try {
-			startSum = Operation.SUM_FORMAT.parse(mAccountStartSumText.getText()
-					.toString()).doubleValue();
+			startSum = Operation.SUM_FORMAT.parse(
+					mAccountStartSumText.getText().toString()).doubleValue();
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}
