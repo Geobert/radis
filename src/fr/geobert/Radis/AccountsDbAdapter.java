@@ -26,9 +26,7 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 		initialValues.put(KEY_ACCOUNT_OP_SUM, 0);
 		initialValues.put(KEY_ACCOUNT_CUR_SUM, start_sum);
 		initialValues.put(KEY_ACCOUNT_CURRENCY, currency);
-		long rowId = mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
-		mDb.execSQL(String.format(DATABASE_OP_CREATE, rowId));
-		return rowId;
+		return mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
 	}
 
 	public boolean deleteAccount(long rowId) {

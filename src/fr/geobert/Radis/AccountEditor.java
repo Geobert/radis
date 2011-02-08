@@ -24,7 +24,6 @@ public class AccountEditor extends Activity {
 	private Spinner mAccountCurrency;
 	private Long mRowId;
 	private ArrayAdapter<CharSequence> mCurrAdapter;
-	private DecimalFormat mFormatSum;
 
 	// to let inner class access to the context
 	private AccountEditor context = this; 
@@ -32,7 +31,6 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mFormatSum = new DecimalFormat("0.00");
 		mDbHelper = new AccountsDbAdapter(this);
 		mDbHelper.open();
 		setContentView(R.layout.account_creation);
@@ -116,7 +114,7 @@ public class AccountEditor extends Activity {
 							.getString(account
 									.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_DESC)));
 			mAccountStartSumText
-					.setText(mFormatSum
+					.setText(Operation.SUM_FORMAT
 							.format(account
 									.getDouble(account
 											.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_START_SUM))));
@@ -130,7 +128,7 @@ public class AccountEditor extends Activity {
 			int pos = Arrays.binarySearch(allCurrencies, currencyStr);
 			mAccountCurrency.setSelection(pos);
 		} else {
-			mAccountStartSumText.setText(mFormatSum.format(0.00));
+			mAccountStartSumText.setText(Operation.SUM_FORMAT.format(0.00));
 			int pos = Arrays.binarySearch(allCurrencies, Currency.getInstance(
 					Locale.getDefault()).getCurrencyCode());
 			mAccountCurrency.setSelection(pos);
@@ -164,7 +162,7 @@ public class AccountEditor extends Activity {
 		String desc = mAccountDescText.getText().toString();
 		double startSum = 0;
 		try {
-			startSum = mFormatSum.parse(mAccountStartSumText.getText()
+			startSum = Operation.SUM_FORMAT.parse(mAccountStartSumText.getText()
 					.toString()).doubleValue();
 		} catch (ParseException e) {
 			e.printStackTrace();
