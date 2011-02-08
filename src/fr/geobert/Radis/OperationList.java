@@ -45,6 +45,7 @@ public class OperationList extends ListActivity {
 	private ImageView mLoadingIcon;
 	private AsyncTask<Void, Void, Double> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
+	private boolean mOnRestore = false;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
@@ -428,8 +429,9 @@ public class OperationList extends ListActivity {
 		int relativePos = position - firstIdx;
 		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 		adapter.setSelectedPosition(position);
-		l.setSelectionFromTop(position, ((relativePos - 1) * offset)
-				+ firstOffset + relativePos);
+		l.setSelectionFromTop(position, mOnRestore ? 0
+				: ((relativePos - 1) * offset) + firstOffset + relativePos);
+		mOnRestore = false;
 	}
 
 	@Override
@@ -465,6 +467,7 @@ public class OperationList extends ListActivity {
 	@Override
 	protected void onRestoreInstanceState(Bundle state) {
 		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
+		mOnRestore = true;
 	}
 
 	@Override
