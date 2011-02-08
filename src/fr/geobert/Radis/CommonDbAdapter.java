@@ -184,10 +184,10 @@ public class CommonDbAdapter {
 						} while (allAccounts.moveToNext());
 					}
 					allAccounts.close();
+					db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
+					db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				}
 			case 2:
-				db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
-				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 
