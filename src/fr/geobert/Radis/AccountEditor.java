@@ -37,9 +37,8 @@ public class AccountEditor extends Activity {
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
 		mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
-		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
-				Operation.SUM_FORMAT.getDecimalFormatSymbols()
-						.getDecimalSeparator()));
+		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(Operation.SUM_FORMAT
+				.getDecimalFormatSymbols().getDecimalSeparator()));
 		mAccountStartSumText
 				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 					@Override

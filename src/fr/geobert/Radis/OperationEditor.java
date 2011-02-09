@@ -51,6 +51,7 @@ public class OperationEditor extends Activity {
 		}
 
 	};
+	private CorrectCommaWatcher mSumTextWatcher;
 
 	private void updateDateButton() {
 		mOpDateBut.setText(mCurrentOp.getDateStr());
@@ -84,7 +85,10 @@ public class OperationEditor extends Activity {
 		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
 				OperationsDbAdapter.DATABASE_MODES_TABLE,
 				OperationsDbAdapter.KEY_MODE_NAME));
+		mSumTextWatcher = new CorrectCommaWatcher(Operation.SUM_FORMAT
+				.getDecimalFormatSymbols().getDecimalSeparator());
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
+		mOpSumText.addTextChangedListener(mSumTextWatcher);
 		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
 		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
 				OperationsDbAdapter.DATABASE_TAGS_TABLE,
@@ -172,6 +176,7 @@ public class OperationEditor extends Activity {
 	}
 
 	private void invertSign() throws ParseException {
+		mSumTextWatcher.setAutoNegate(false);
 		Double sum = Operation.SUM_FORMAT
 				.parse(mOpSumText.getText().toString()).doubleValue();
 		if (sum != null) {
@@ -258,6 +263,7 @@ public class OperationEditor extends Activity {
 			} else {
 				mOpSumText.setText(mCurrentOp.getSumStr());
 			}
+			mSumTextWatcher.setAutoNegate(true);
 		}
 		Operation op = mCurrentOp;
 		mPreviousSum = op.getSum();
