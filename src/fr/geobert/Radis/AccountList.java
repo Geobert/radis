@@ -26,7 +26,7 @@ public class AccountList extends ListActivity {
 	private static final int CREATE_ACCOUNT_ID = Menu.FIRST;
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
-	
+
 	private static final int ACTIVITY_ACCOUNT_CREATE = 0;
 	private static final int ACTIVITY_ACCOUNT_EDIT = 1;
 
@@ -63,7 +63,7 @@ public class AccountList extends ListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, EDIT_ACCOUNT_ID, 0, R.string.edit);
 		menu.add(0, DELETE_ACCOUNT_ID, 0, R.string.delete);
-		
+
 	}
 
 	@Override
@@ -97,19 +97,27 @@ public class AccountList extends ListActivity {
 	}
 
 	private class InnerSimpleCursorAdapter extends SimpleCursorAdapter {
+
+		private String mCurrency = "";
+
 		InnerSimpleCursorAdapter(Context context, int layout, Cursor c,
 				String[] from, int[] to) {
 			super(context, layout, c, from, to);
+			if (c.getCount() > 0) {
+				mCurrency = Currency
+						.getInstance(
+								c.getString(c
+										.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CURRENCY)))
+						.getSymbol();
+			}
 		}
 
 		@Override
 		public void setViewText(TextView v, String text) {
-			if (v.getId() == R.id.account_currency) {
-				Currency c = Currency.getInstance(text);
-				super.setViewText(v, c.getSymbol());
-			} else if (v.getId() == R.id.account_sum) {
-				String d = new DecimalFormat("0.00").format(Double
-						.parseDouble(text));
+			if (v.getId() == R.id.account_sum) {
+				String d = Operation.SUM_FORMAT
+						.format(Double.parseDouble(text));
+				d = d + " " + mCurrency;
 				super.setViewText(v, d);
 			} else {
 				super.setViewText(v, text);
@@ -128,8 +136,7 @@ public class AccountList extends ListActivity {
 
 		// and an array of the fields we want to bind those fields to (in this
 		// case just text1)
-		int[] to = new int[] { R.id.account_name, R.id.account_sum,
-				R.id.account_currency };
+		int[] to = new int[] { R.id.account_name, R.id.account_sum };
 
 		// Now create a simple cursor adapter and set it to display
 		InnerSimpleCursorAdapter accounts = new InnerSimpleCursorAdapter(this,
@@ -153,15 +160,15 @@ public class AccountList extends ListActivity {
 		i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_NAME, accountName);
 		startActivity(i);
 	}
-	
+
 	@Override
 	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
 		if (Tools.onKeyLongPress(keyCode, event, this)) {
 			return true;
 		}
-	    return super.onKeyLongPress(keyCode, event);
+		return super.onKeyLongPress(keyCode, event);
 	}
-	
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {

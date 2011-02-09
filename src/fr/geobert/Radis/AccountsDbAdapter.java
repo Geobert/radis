@@ -36,9 +36,13 @@ public class AccountsDbAdapter extends CommonDbAdapter {
 	}
 
 	public Cursor fetchAllAccounts() {
-		return mDb.query(DATABASE_ACCOUNT_TABLE, new String[] {
+		Cursor c = mDb.query(DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
 				KEY_ACCOUNT_CURRENCY }, null, null, null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
 	}
 
 	public Cursor fetchAccount(long rowId) throws SQLException {
