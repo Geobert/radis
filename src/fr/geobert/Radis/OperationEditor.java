@@ -9,6 +9,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -221,6 +222,8 @@ public class OperationEditor extends Activity {
 			Dialog d = mInfoManager.getEditDialog();
 			mInfoManager.initEditDialog(d);
 			return d;
+		case Tools.DEBUG_DIALOG:
+			return Tools.getDebugDialog(this, mDbHelper);
 		}
 		return null;
 	}
@@ -300,5 +303,13 @@ public class OperationEditor extends Activity {
 		} else {
 			mDbHelper.updateOp(mRowId, op);
 		}
+	}
+	
+	@Override
+	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+		if (Tools.onKeyLongPress(keyCode, event, this)) {
+			return true;
+		}
+	    return super.onKeyLongPress(keyCode, event);
 	}
 }

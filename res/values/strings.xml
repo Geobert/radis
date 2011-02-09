@@ -60,7 +60,8 @@
 <string name="current_sum">Solde</string>
 <string name="sum_at">Au %1$s = %2$s</string>
 
-<string name="no_operation">Aucune opération</string>
+<string name="no_operation">Aucune opération. Appuyez sur la touche « Menu »
+		pour en créer.</string>
 <string name="new_op">Nouvelle opération</string>
 <string name="tp_account_name">Compte %s</string>
 <string name="account_edit">Modification du compte</string>

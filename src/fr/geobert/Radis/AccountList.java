@@ -3,31 +3,37 @@ package fr.geobert.Radis;
 import java.text.DecimalFormat;
 import java.util.Currency;
 
+import android.app.Dialog;
 import android.app.ListActivity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class AccountList extends ListActivity {
 	private static final int CREATE_ACCOUNT_ID = Menu.FIRST;
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
-
+	private static final int TRASH_BASE_ID = Menu.FIRST + 3;
+	
 	private static final int ACTIVITY_ACCOUNT_CREATE = 0;
 	private static final int ACTIVITY_ACCOUNT_EDIT = 1;
 
 	private AccountsDbAdapter mDbHelper;
+	public static AccountList ACTIVITY;
+	public static PendingIntent RESTART_INTENT;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -37,8 +43,12 @@ public class AccountList extends ListActivity {
 		mDbHelper = new AccountsDbAdapter(this);
 		mDbHelper.open();
 		fillData();
-		setTitle(getString(R.string.app_name) + " - " + getString(R.string.accounts_list));
+		setTitle(getString(R.string.app_name) + " - "
+				+ getString(R.string.accounts_list));
 		registerForContextMenu(getListView());
+		ACTIVITY = this;
+		RESTART_INTENT = PendingIntent.getActivity(this.getBaseContext(), 0,
+				new Intent(getIntent()), getIntent().getFlags());
 	}
 
 	@Override
@@ -54,6 +64,7 @@ public class AccountList extends ListActivity {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, EDIT_ACCOUNT_ID, 0, R.string.edit);
 		menu.add(0, DELETE_ACCOUNT_ID, 0, R.string.delete);
+		
 	}
 
 	@Override
@@ -136,10 +147,28 @@ public class AccountList extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
-		String accountName = data.getString(data.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME));
+		String accountName = data.getString(data
+				.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME));
 		Intent i = new Intent(this, OperationList.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
 		i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_NAME, accountName);
 		startActivity(i);
+	}
+	
+	@Override
+	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+		if (Tools.onKeyLongPress(keyCode, event, this)) {
+			return true;
+		}
+	    return super.onKeyLongPress(keyCode, event);
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case Tools.DEBUG_DIALOG:
+			return Tools.getDebugDialog(this, mDbHelper);
+		}
+		return null;
 	}
 }

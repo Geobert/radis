@@ -1,10 +1,13 @@
 package fr.geobert.Radis;
 
+import java.io.File;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
 import android.util.Log;
 
 public class CommonDbAdapter {
@@ -216,5 +219,18 @@ public class CommonDbAdapter {
 
 	public void close() {
 		mDbHelper.close();
+	}
+
+	public void trashDatabase() {
+		close();
+		mDb.close();
+		mCtx.deleteDatabase(DATABASE_NAME);
+		Tools.restartApp();
+	}
+	
+	public void backupDatabase(String name) {
+		// TODO
+		File sd = Environment.getExternalStorageDirectory();
+
 	}
 }

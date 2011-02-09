@@ -3,6 +3,7 @@ package fr.geobert.Radis;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -218,7 +220,7 @@ public class OperationList extends ListActivity {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
 			menu.add(0, DELETE_OP_ID, 0, R.string.delete);
-		}
+		} 
 	}
 
 	@Override
@@ -475,5 +477,22 @@ public class OperationList extends ListActivity {
 	@Override
 	public Object onRetainNonConfigurationInstance() {
 		return mLastSelectedPosition;
+	}
+	
+	@Override
+	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+		if (Tools.onKeyLongPress(keyCode, event, this)) {
+			return true;
+		}
+	    return super.onKeyLongPress(keyCode, event);
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case Tools.DEBUG_DIALOG:
+			return Tools.getDebugDialog(this, mDbHelper);
+		}
+		return null;
 	}
 }
