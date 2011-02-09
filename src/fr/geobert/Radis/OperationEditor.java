@@ -256,9 +256,9 @@ public class OperationEditor extends Activity {
 		}
 		Operation op = mCurrentOp;
 		mPreviousSum = op.getSum();
-		mOpThirdPartyText.setText(op.getThirdParty());
-		mOpModeText.setText(op.getMode());
-		mOpTagText.setText(op.getTag());
+		Tools.setTextWithoutComplete(mOpThirdPartyText, op.getThirdParty());
+		Tools.setTextWithoutComplete(mOpModeText, op.getMode());
+		Tools.setTextWithoutComplete(mOpTagText, op.getTag());
 		updateDateButton();
 	}
 

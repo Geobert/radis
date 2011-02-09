@@ -3,6 +3,7 @@ package fr.geobert.Radis;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.widget.AutoCompleteTextView;
 
 public class Tools {
 	private static Tools instance = null;
@@ -32,5 +33,12 @@ public class Tools {
 		}
 		instance.mCtx = ctx;
 		return instance;
+	}
+	
+	public static void setTextWithoutComplete(AutoCompleteTextView v, String text) {
+		InfoAdapter adapter = (InfoAdapter)v.getAdapter();
+		v.setAdapter((InfoAdapter)null);
+		v.setText(text);
+		v.setAdapter(adapter);
 	}
 }

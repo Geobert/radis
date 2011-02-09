@@ -111,11 +111,8 @@ public class InfoManager {
 	protected void infoSelected() {
 		ListView lv = mListDialog.getListView();
 		mCursor.moveToPosition(lv.getCheckedItemPosition());
-		InfoAdapter adapter = (InfoAdapter)mInfoText.getAdapter();
-		mInfoText.setAdapter((InfoAdapter)null);
-		mInfoText.setText(mCursor.getString(mCursor.getColumnIndex(mInfo
-				.getString("colName"))));
-		mInfoText.setAdapter(adapter);
+		Tools.setTextWithoutComplete(mInfoText, mCursor.getString(mCursor
+				.getColumnIndex(mInfo.getString("colName"))));
 	}
 
 	public void fillData(Cursor c, String colName) {
@@ -137,7 +134,7 @@ public class InfoManager {
 		mOkBut = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
 		refreshToolbarStatus();
 	}
-	
+
 	public void refreshToolbarStatus() {
 		boolean oneSelected = mSelectedInfo != -1;
 		mDelBut.setEnabled(oneSelected);
