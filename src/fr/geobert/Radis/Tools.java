@@ -72,7 +72,7 @@ public class Tools {
 
 	private static CommonDbAdapter mDb;
 	public static Dialog getDebugDialog(Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = {"Trash database"};
+		final CharSequence[] items = {"Trash database", "Restart"};
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -85,6 +85,9 @@ public class Tools {
 		    	switch (item) {
 		    	case 0:
 		    		mDb.trashDatabase();
+		    		break;
+		    	case 1:
+		    		Tools.restartApp();
 		    		break;
 		    	}
 		    }
