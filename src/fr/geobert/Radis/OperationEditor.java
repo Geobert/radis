@@ -29,7 +29,7 @@ public class OperationEditor extends Activity {
 	private AutoCompleteTextView mOpModeText;
 	private AutoCompleteTextView mOpTagText;
 	private Button mOpDateBut;
-
+	//private DatePicker mDatePicker;
 	private Long mRowId;
 	private Long mAccountId;
 
@@ -54,6 +54,7 @@ public class OperationEditor extends Activity {
 
 	private void updateDateButton() {
 		mOpDateBut.setText(mCurrentOp.getDateStr());
+		//mDatePicker.updateDate(mCurrentOp.getYear(), mCurrentOp.getMonth(), mCurrentOp.getDay());
 	}
 
 	@Override
@@ -89,6 +90,7 @@ public class OperationEditor extends Activity {
 				OperationsDbAdapter.DATABASE_TAGS_TABLE,
 				OperationsDbAdapter.KEY_TAG_NAME));
 		mOpDateBut = (Button) findViewById(R.id.edit_op_date);
+		//mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		Button confirmButton = (Button) findViewById(R.id.confirm_op);
 		Button cancelButton = (Button) findViewById(R.id.cancel_op);
 		Button thirdPartyEdit = (Button) findViewById(R.id.edit_op_third_parties_list);

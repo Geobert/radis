@@ -57,6 +57,10 @@ public class Tools {
 		System.exit(2);
 	}
 
+	// ------------------------------------------------------
+	// DEBUG TOOLS
+	// ------------------------------------------------------
+	
 	public static boolean onKeyLongPress(int keyCode, KeyEvent event,
 			Activity curActivity) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && DEBUG_MODE) {
@@ -66,10 +70,9 @@ public class Tools {
 		return false;
 	}
 
-	
-	private static final CharSequence[] items = {"Trash database"};
 	private static CommonDbAdapter mDb;
 	public static Dialog getDebugDialog(Context context, CommonDbAdapter dB) {
+		final CharSequence[] items = {"Trash database"};
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -90,5 +93,10 @@ public class Tools {
 		builder.setTitle("Debug menu");
 		
 		return builder.create();
+	}
+	
+	private static void fillDatabase(CommonDbAdapter db) {
+		mDb = db;
+		
 	}
 }

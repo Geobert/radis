@@ -220,7 +220,7 @@ public class OperationList extends ListActivity {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
 			menu.add(0, DELETE_OP_ID, 0, R.string.delete);
-		} 
+		}
 	}
 
 	@Override
@@ -257,7 +257,6 @@ public class OperationList extends ListActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
-			fillData();
 			updateSums(data);
 		}
 	}
@@ -450,14 +449,16 @@ public class OperationList extends ListActivity {
 	}
 
 	private void updateSumAtSelectedOpDisplay(Cursor data, double accountCurSum) {
-		int position = data.getPosition();
-		mLastSelectedPosition = position;
-		selectOpAndAdjustOffset(getListView(), position);
-		TextView t = (TextView) findViewById(R.id.date_sum);
-		t.setText(String.format(
-				getString(R.string.sum_at_selection),
-				Operation.SUM_FORMAT.format(accountCurSum
-						- computeSumFromCursor(data))));
+		if (null != data) {
+			int position = data.getPosition();
+			mLastSelectedPosition = position;
+			selectOpAndAdjustOffset(getListView(), position);
+			TextView t = (TextView) findViewById(R.id.date_sum);
+			t.setText(String.format(
+					getString(R.string.sum_at_selection),
+					Operation.SUM_FORMAT.format(accountCurSum
+							- computeSumFromCursor(data))));
+		}
 	}
 
 	@Override
@@ -478,15 +479,15 @@ public class OperationList extends ListActivity {
 	public Object onRetainNonConfigurationInstance() {
 		return mLastSelectedPosition;
 	}
-	
+
 	@Override
 	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
 		if (Tools.onKeyLongPress(keyCode, event, this)) {
 			return true;
 		}
-	    return super.onKeyLongPress(keyCode, event);
+		return super.onKeyLongPress(keyCode, event);
 	}
-	
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {

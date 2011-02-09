@@ -4,6 +4,7 @@
 	<LinearLayout android:layout_width="fill_parent"
 		android:id="@+id/edit_op_root" android:layout_height="wrap_content"
 		android:orientation="vertical">
+<!--		<DatePicker android:id="@+id/edit_op_date" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingTop="5px"/>-->
 		<TextView style="@style/EditorTextView" android:text="@string/date" />
 		<Button android:id="@+id/edit_op_date" android:text="24/12/2010"
 			style="@style/EditorBaseButton.DateButton" />

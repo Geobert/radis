@@ -26,7 +26,6 @@ public class AccountList extends ListActivity {
 	private static final int CREATE_ACCOUNT_ID = Menu.FIRST;
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
-	private static final int TRASH_BASE_ID = Menu.FIRST + 3;
 	
 	private static final int ACTIVITY_ACCOUNT_CREATE = 0;
 	private static final int ACTIVITY_ACCOUNT_EDIT = 1;
