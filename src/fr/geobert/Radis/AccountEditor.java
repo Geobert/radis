@@ -1,6 +1,5 @@
 package fr.geobert.Radis;
 
-import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Currency;
@@ -41,6 +40,15 @@ public class AccountEditor extends Activity {
 		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
 				Operation.SUM_FORMAT.getDecimalFormatSymbols()
 						.getDecimalSeparator()));
+		mAccountStartSumText
+				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (hasFocus) {
+							((EditText) v).selectAll();
+						}
+					}
+				});
 		mAccountCurrency = (Spinner) findViewById(R.id.currency_spinner);
 		Button confirmButton = (Button) findViewById(R.id.confirm_creation);
 		Button cancelButton = (Button) findViewById(R.id.cancel_creation);
