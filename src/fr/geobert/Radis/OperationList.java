@@ -214,9 +214,11 @@ public class OperationList extends ListActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		super.onCreateContextMenu(menu, v, menuInfo);
-		menu.add(0, EDIT_OP_ID, 0, R.string.edit);
-		menu.add(0, DELETE_OP_ID, 0, R.string.delete);
+		if (((AdapterContextMenuInfo) menuInfo).id != -1) {
+			super.onCreateContextMenu(menu, v, menuInfo);
+			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
+			menu.add(0, DELETE_OP_ID, 0, R.string.delete);
+		}
 	}
 
 	@Override
