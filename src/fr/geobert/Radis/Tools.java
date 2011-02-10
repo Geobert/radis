@@ -49,6 +49,21 @@ public class Tools {
 		v.setAdapter(adapter);
 	}
 
+	public static Dialog createDeleteConfirmationDialog(Context ctx,
+			DialogInterface.OnClickListener onClick) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+		builder.setMessage(R.string.delete_confirmation)
+				.setCancelable(false)
+				.setPositiveButton(R.string.yes, onClick)
+				.setNegativeButton(R.string.cancel,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+		return builder.create();
+	}
+
 	public static void restartApp() {
 		AlarmManager mgr = (AlarmManager) AccountList.ACTIVITY
 				.getSystemService(Context.ALARM_SERVICE);
@@ -60,7 +75,7 @@ public class Tools {
 	// ------------------------------------------------------
 	// DEBUG TOOLS
 	// ------------------------------------------------------
-	
+
 	public static boolean onKeyLongPress(int keyCode, KeyEvent event,
 			Activity curActivity) {
 		if (keyCode == KeyEvent.KEYCODE_BACK && DEBUG_MODE) {
@@ -71,35 +86,37 @@ public class Tools {
 	}
 
 	private static CommonDbAdapter mDb;
+
 	public static Dialog getDebugDialog(Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = {"Trash database", "Restart"};
+		final CharSequence[] items = { "Trash database", "Restart" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+		builder.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
 				});
 		builder.setItems(items, new DialogInterface.OnClickListener() {
-		    public void onClick(DialogInterface dialog, int item) {
-		    	switch (item) {
-		    	case 0:
-		    		mDb.trashDatabase();
-		    		break;
-		    	case 1:
-		    		Tools.restartApp();
-		    		break;
-		    	}
-		    }
+			public void onClick(DialogInterface dialog, int item) {
+				switch (item) {
+				case 0:
+					mDb.trashDatabase();
+					break;
+				case 1:
+					Tools.restartApp();
+					break;
+				}
+			}
 		});
 
 		builder.setTitle("Debug menu");
-		
+
 		return builder.create();
 	}
-	
+
 	private static void fillDatabase(CommonDbAdapter db) {
 		mDb = db;
-		
+
 	}
 }

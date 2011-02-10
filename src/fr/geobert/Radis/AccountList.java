@@ -2,10 +2,12 @@ package fr.geobert.Radis;
 
 import java.util.Currency;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
@@ -29,7 +31,10 @@ public class AccountList extends ListActivity {
 	private static final int ACTIVITY_ACCOUNT_CREATE = 0;
 	private static final int ACTIVITY_ACCOUNT_EDIT = 1;
 
+	private static final int DIALOG_DELETE = 0;
+
 	private AccountsDbAdapter mDbHelper;
+	private long mAccountToDelete = 0;
 	public static AccountList ACTIVITY;
 	public static PendingIntent RESTART_INTENT;
 
@@ -82,9 +87,8 @@ public class AccountList extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_ACCOUNT_ID:
-
-			mDbHelper.deleteAccount(info.id);
-			fillData();
+			mAccountToDelete = info.id;
+			showDialog(DIALOG_DELETE);
 			return true;
 		case EDIT_ACCOUNT_ID:
 			Intent i = new Intent(this, AccountEditor.class);
@@ -93,6 +97,11 @@ public class AccountList extends ListActivity {
 			return true;
 		}
 		return super.onContextItemSelected(item);
+	}
+
+	private void deleteAccount(long id) {
+		mDbHelper.deleteAccount(id);
+		fillData();
 	}
 
 	private class InnerSimpleCursorAdapter extends SimpleCursorAdapter {
@@ -173,6 +182,14 @@ public class AccountList extends ListActivity {
 		switch (id) {
 		case Tools.DEBUG_DIALOG:
 			return Tools.getDebugDialog(this, mDbHelper);
+		case DIALOG_DELETE:
+			return Tools.createDeleteConfirmationDialog(this,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							deleteAccount(mAccountToDelete);
+							mAccountToDelete = 0;
+						}
+					});
 		}
 		return null;
 	}

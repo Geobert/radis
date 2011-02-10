@@ -141,8 +141,12 @@ public class InfoManager {
 		mEditBut.setEnabled(oneSelected);
 		mOkBut.setEnabled(oneSelected);
 	}
-
+	
 	private void onDeleteClicked() {
+		mContext.showDialog(OperationEditor.INFO_DELETE_DIALOG_ID);
+	}
+	
+	public void deleteInfo() {
 		mCursor.moveToPosition(mSelectedInfo);
 		mDbHelper.deleteInfo(mInfo.getString("table"),
 				mCursor.getLong(mCursor.getColumnIndex("_id")));

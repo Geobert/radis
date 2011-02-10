@@ -3,9 +3,11 @@ package fr.geobert.Radis;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -36,6 +38,7 @@ public class OperationList extends ListActivity {
 
 	private static final int ACTIVITY_OP_CREATE = 0;
 	private static final int ACTIVITY_OP_EDIT = 1;
+	private static final int DIALOG_DELETE = 0;
 
 	private OperationsDbAdapter mDbHelper;
 	private Long mAccountId;
@@ -48,6 +51,7 @@ public class OperationList extends ListActivity {
 	private AsyncTask<Void, Void, Double> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
+	private AdapterContextMenuInfo mOpToDelete = null;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
@@ -240,8 +244,8 @@ public class OperationList extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_OP_ID:
-			deleteOp(info);
-			fillData();
+			showDialog(DIALOG_DELETE);
+			mOpToDelete = info;
 			return true;
 		case EDIT_OP_ID:
 			Intent i = new Intent(this, OperationEditor.class);
@@ -493,6 +497,15 @@ public class OperationList extends ListActivity {
 		switch (id) {
 		case Tools.DEBUG_DIALOG:
 			return Tools.getDebugDialog(this, mDbHelper);
+		case DIALOG_DELETE:
+			return Tools.createDeleteConfirmationDialog(this,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							deleteOp(mOpToDelete);
+							fillData();
+							mOpToDelete = null;
+						}
+					});
 		}
 		return null;
 	}

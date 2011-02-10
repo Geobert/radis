@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ public class OperationEditor extends Activity {
 	static final int TAGS_DIALOG_ID = 2;
 	static final int MODES_DIALOG_ID = 3;
 	static final int EDIT_INFO_DIALOG_ID = 4;
+	public static final int INFO_DELETE_DIALOG_ID = 5;
 
 	private OperationsDbAdapter mDbHelper;
 	private AutoCompleteTextView mOpThirdPartyText;
@@ -155,6 +157,13 @@ public class OperationEditor extends Activity {
 			return d;
 		case Tools.DEBUG_DIALOG:
 			return Tools.getDebugDialog(this, mDbHelper);
+		case INFO_DELETE_DIALOG_ID:
+			return Tools.createDeleteConfirmationDialog(this,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							mInfoManager.deleteInfo();
+						}
+					});
 		}
 		return null;
 	}
