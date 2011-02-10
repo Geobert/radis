@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -28,12 +29,9 @@ public class Tools {
 		// See if we're a debug or a release build
 		try {
 			PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
-					ctx.getPackageName(), PackageManager.GET_SIGNATURES);
-			if (packageInfo.signatures.length > 0) {
-				String signature = new String(
-						packageInfo.signatures[0].toByteArray());
-				DEBUG_MODE = signature.contains("Android Debug");
-			}
+					ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS);
+			int flags = packageInfo.applicationInfo.flags; 
+			DEBUG_MODE = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 		} catch (NameNotFoundException e1) {
 			e1.printStackTrace();
 		}
