@@ -103,7 +103,7 @@ public class AccountList extends ListActivity {
 		InnerSimpleCursorAdapter(Context context, int layout, Cursor c,
 				String[] from, int[] to) {
 			super(context, layout, c, from, to);
-			if (c.getCount() > 0) {
+			if (c.getCount() > 0 && c.moveToFirst()) {
 				mCurrency = Currency
 						.getInstance(
 								c.getString(c
