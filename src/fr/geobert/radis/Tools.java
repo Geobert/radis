@@ -1,4 +1,4 @@
-package fr.geobert.Radis;
+package fr.geobert.radis;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -6,6 +6,9 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.view.KeyEvent;
 import android.widget.AutoCompleteTextView;
 
@@ -20,6 +23,22 @@ public class Tools {
 	public static String EXTRAS_ACCOUNT_ID = "account_id";
 	public static boolean DEBUG_MODE = true;
 	public static final int DEBUG_DIALOG = 9876;
+
+	public static void checkDebugMode(Context ctx) {
+		// See if we're a debug or a release build
+		try {
+			PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
+					ctx.getPackageName(), PackageManager.GET_SIGNATURES);
+			if (packageInfo.signatures.length > 0) {
+				String signature = new String(
+						packageInfo.signatures[0].toByteArray());
+				DEBUG_MODE = signature.contains("Android Debug");
+			}
+		} catch (NameNotFoundException e1) {
+			e1.printStackTrace();
+		}
+
+	}
 
 	public void popError(String msg) {
 		AlertDialog alertDialog = new AlertDialog.Builder(mCtx).create();

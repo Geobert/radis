@@ -1,4 +1,4 @@
-package fr.geobert.Radis;
+package fr.geobert.radis;
 
 import java.util.Currency;
 
@@ -41,6 +41,7 @@ public class AccountList extends ListActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
 		mDbHelper = new AccountsDbAdapter(this);

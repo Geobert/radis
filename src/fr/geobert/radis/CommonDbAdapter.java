@@ -1,4 +1,4 @@
-package fr.geobert.Radis;
+package fr.geobert.radis;
 
 import java.io.File;
 
