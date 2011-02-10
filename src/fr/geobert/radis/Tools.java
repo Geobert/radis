@@ -134,8 +134,15 @@ public class Tools {
 		return builder.create();
 	}
 
-	private static void fillDatabase(CommonDbAdapter db) {
-		mDb = db;
-
+	public static void backupDatabase() {
+		
 	}
+	
+	public static void restoreDatabase() {
+		
+	}
+//	private static void fillDatabase(CommonDbAdapter db) {
+//		mDb = db;
+//
+//	}
 }

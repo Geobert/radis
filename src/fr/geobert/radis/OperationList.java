@@ -3,7 +3,6 @@ package fr.geobert.radis;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;

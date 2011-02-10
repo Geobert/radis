@@ -1,12 +1,7 @@
 package fr.geobert.radis;
 
-import java.text.ParseException;
-
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.View;
 
 public class CorrectCommaWatcher implements TextWatcher {
 	private char mLocaleComma;

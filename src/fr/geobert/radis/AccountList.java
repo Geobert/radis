@@ -2,7 +2,6 @@ package fr.geobert.radis;
 
 import java.util.Currency;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.PendingIntent;
