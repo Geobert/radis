@@ -26,6 +26,7 @@ public class AccountEditor extends Activity {
 
 	// to let inner class access to the context
 	private AccountEditor context = this;
+	private boolean mOnRestore = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +38,9 @@ public class AccountEditor extends Activity {
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
 		mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
-		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(Operation.SUM_FORMAT
-				.getDecimalFormatSymbols().getDecimalSeparator()));
+		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
+				Operation.SUM_FORMAT.getDecimalFormatSymbols()
+						.getDecimalSeparator()));
 		mAccountStartSumText
 				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 					@Override
@@ -60,8 +62,6 @@ public class AccountEditor extends Activity {
 			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
 					: null;
 		}
-
-		populateFields();
 
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View view) {
@@ -146,6 +146,21 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
+		outState.putString("name", mAccountNameText.getText().toString());
+		outState.putString("startSum", mAccountStartSumText.getText()
+				.toString());
+		outState.putInt("currency", mAccountCurrency.getSelectedItemPosition());
+		outState.putString("desc", mAccountDescText.getText().toString());
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle state) {
+		super.onRestoreInstanceState(state);
+		mAccountNameText.setText(state.getString("name"));
+		mAccountStartSumText.setText(state.getString("startSum"));
+		mAccountCurrency.setSelection(state.getInt("currency"));
+		mAccountDescText.setText(state.getString("desc"));
+		mOnRestore = true;
 	}
 
 	@Override
@@ -156,7 +171,11 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		populateFields();
+		if (!mOnRestore) {
+			populateFields();
+		} else {
+			mOnRestore = false;
+		}
 	}
 
 	private void saveState() {

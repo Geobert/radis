@@ -1,6 +1,5 @@
 package fr.geobert.Radis;
 
-import java.text.DecimalFormat;
 import java.util.Currency;
 
 import android.app.Dialog;
