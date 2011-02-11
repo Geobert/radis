@@ -151,6 +151,7 @@ public class AccountEditor extends Activity {
 				.toString());
 		outState.putInt("currency", mAccountCurrency.getSelectedItemPosition());
 		outState.putString("desc", mAccountDescText.getText().toString());
+		mOnRestore = true;
 	}
 
 	@Override

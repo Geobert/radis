@@ -105,7 +105,7 @@ public class Tools {
 	private static CommonDbAdapter mDb;
 
 	public static Dialog getDebugDialog(Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = { "Trash database", "Restart" };
+		final CharSequence[] items = { "Trash database", "Backup database", "Restart" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -121,6 +121,9 @@ public class Tools {
 					mDb.trashDatabase();
 					break;
 				case 1:
+					mDb.backupDatabase();
+					break;
+				case 2:
 					Tools.restartApp();
 					break;
 				}
@@ -128,17 +131,9 @@ public class Tools {
 		});
 
 		builder.setTitle("Debug menu");
-
 		return builder.create();
 	}
 
-	public static void backupDatabase() {
-		
-	}
-	
-	public static void restoreDatabase() {
-		
-	}
 //	private static void fillDatabase(CommonDbAdapter db) {
 //		mDb = db;
 //

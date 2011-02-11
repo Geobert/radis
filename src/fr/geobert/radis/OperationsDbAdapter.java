@@ -10,7 +10,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 
 @SuppressWarnings("serial")
-public class OperationsDbAdapter extends AccountsDbAdapter {
+public class OperationsDbAdapter extends CommonDbAdapter {
 	private long mAccountId;
 
 	private LinkedHashMap<String, Long> mModesMap;

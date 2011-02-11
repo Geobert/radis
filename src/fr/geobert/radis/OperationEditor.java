@@ -332,6 +332,7 @@ public class OperationEditor extends Activity {
 		outState.putString("mode", mOpModeText.getText().toString());
 		outState.putString("sum", mOpSumText.getText().toString());
 		outState.putString("date", mOpDateBut.getText().toString());
+		mOnRestore = true;
 	}
 
 	@Override
