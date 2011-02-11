@@ -105,7 +105,7 @@ public class Tools {
 	private static CommonDbAdapter mDb;
 
 	public static Dialog getDebugDialog(Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = { "Trash database", "Backup database", "Restart" };
+		final CharSequence[] items = { "Trash DB", "Backup DB", "Restore last saved DB", "Restart" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -124,6 +124,9 @@ public class Tools {
 					mDb.backupDatabase();
 					break;
 				case 2:
+					mDb.restoreDatabase();
+					break;
+				case 3:
 					Tools.restartApp();
 					break;
 				}

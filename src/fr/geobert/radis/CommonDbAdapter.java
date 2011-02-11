@@ -131,7 +131,7 @@ public class CommonDbAdapter {
 	protected SQLiteDatabase mDb;
 	protected final Context mCtx;
 	protected Cursor mCurAccount;
-	
+
 	public CommonDbAdapter(Context ctx) {
 		this.mCtx = ctx;
 	}
@@ -315,7 +315,7 @@ public class CommonDbAdapter {
 		}
 		return account;
 	}
-	
+
 	public void trashDatabase() {
 		close();
 		mDb.close();
@@ -324,6 +324,8 @@ public class CommonDbAdapter {
 	}
 
 	public void backupDatabase() {
+		close();
+		mDb.close();
 		try {
 			File sd = Environment.getExternalStorageDirectory();
 			File data = Environment.getDataDirectory();
@@ -337,20 +339,43 @@ public class CommonDbAdapter {
 				File backupDB = new File(sd, backupDBPath);
 
 				if (currentDB.exists()) {
-					FileChannel src = new FileInputStream(currentDB).getChannel();
-					FileChannel dst = new FileOutputStream(backupDB).getChannel();
+					FileChannel src = new FileInputStream(currentDB)
+							.getChannel();
+					FileChannel dst = new FileOutputStream(backupDB)
+							.getChannel();
 
 					dst.transferFrom(src, 0, src.size());
 					src.close();
 					dst.close();
 				}
 			}
+			Tools.restartApp();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void restoreDatabase() {
-		
+		close();
+		mDb.close();
+		try {
+			File sd = Environment.getExternalStorageDirectory();
+
+			String backupDBPath = "/radis/radisDb";
+			File currentDB = mCtx.getDatabasePath(DATABASE_NAME);
+			File backupDB = new File(sd, backupDBPath);
+
+			if (backupDB.exists()) {
+				FileChannel dst = new FileOutputStream(currentDB).getChannel();
+				FileChannel src = new FileInputStream(backupDB).getChannel();
+				
+				dst.transferFrom(src, 0, src.size());
+				src.close();
+				dst.close();
+			}
+			Tools.restartApp();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
