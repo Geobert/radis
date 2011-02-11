@@ -16,7 +16,7 @@
 		<TextView style="@style/EditorTextView" android:text="@string/sum" />
 		<LinearLayout style="@style/EditorHorizontalLinearLayout">
 			<AutoCompleteTextView android:id="@+id/edit_op_sum" style="@style/EditorEditText.Sum" />
-			<Button android:text="-/+" android:id="@+id/edit_op_sign"
+			<Button android:id="@+id/edit_op_sign" android:drawableLeft="@drawable/plus_moins"
 				style="@style/EditorBaseButton" />
 		</LinearLayout>
 		<TextView style="@style/EditorTextView" android:text="@string/tag" />
