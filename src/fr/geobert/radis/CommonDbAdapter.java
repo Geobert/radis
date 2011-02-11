@@ -290,9 +290,9 @@ public class CommonDbAdapter {
 		Cursor account = getCurAccountIfDiff(rowId);
 		double start = account
 				.getDouble(account
-						.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_START_SUM));
+						.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
 		double opSum = account.getDouble(account
-				.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_OP_SUM));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		ContentValues args = new ContentValues();
 		double curSum = start + opSum;
 		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
@@ -307,7 +307,7 @@ public class CommonDbAdapter {
 				|| !account.isFirst()
 				|| account
 						.getLong(account
-								.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_ROWID)) != rowId) {
+								.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_ROWID)) != rowId) {
 			account = fetchAccount(rowId);
 		} else {
 			account.requery();

@@ -16,7 +16,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 
 public class AccountEditor extends Activity {
-	private AccountsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 	private EditText mAccountNameText;
 	private EditText mAccountStartSumText;
 	private EditText mAccountDescText;
@@ -31,7 +31,7 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		mDbHelper = new AccountsDbAdapter(this);
+		mDbHelper = new CommonDbAdapter(this);
 		mDbHelper.open();
 		setContentView(R.layout.account_creation);
 
@@ -117,16 +117,16 @@ public class AccountEditor extends Activity {
 			startManagingCursor(account);
 			mAccountNameText
 					.setText(account.getString(account
-							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME)));
+							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME)));
 			mAccountDescText
 					.setText(account.getString(account
-							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_DESC)));
+							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_DESC)));
 			mAccountStartSumText
 					.setText(Operation.SUM_FORMAT.format(account.getDouble(account
-							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_START_SUM))));
+							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM))));
 			String currencyStr = account
 					.getString(account
-							.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_CURRENCY));
+							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_CURRENCY));
 			if (currencyStr.length() == 0) {
 				currencyStr = Currency.getInstance(Locale.getDefault())
 						.getCurrencyCode();

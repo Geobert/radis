@@ -1,6 +1,7 @@
 package fr.geobert.radis;
 
 import java.util.Currency;
+import java.util.Date;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -8,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
@@ -32,7 +34,7 @@ public class AccountList extends ListActivity {
 
 	private static final int DIALOG_DELETE = 0;
 
-	private AccountsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 	private long mAccountToDelete = 0;
 	public static AccountList ACTIVITY;
 	public static PendingIntent RESTART_INTENT;
@@ -43,7 +45,7 @@ public class AccountList extends ListActivity {
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
-		mDbHelper = new AccountsDbAdapter(this);
+		mDbHelper = new CommonDbAdapter(this);
 		mDbHelper.open();
 		fillData();
 		setTitle(getString(R.string.app_name) + " - "
@@ -104,52 +106,72 @@ public class AccountList extends ListActivity {
 		fillData();
 	}
 
-	private class InnerSimpleCursorAdapter extends SimpleCursorAdapter {
-
-		private String mCurrency = "";
-
-		InnerSimpleCursorAdapter(Context context, int layout, Cursor c,
-				String[] from, int[] to) {
-			super(context, layout, c, from, to);
-			if (c.getCount() > 0 && c.moveToFirst()) {
-				mCurrency = Currency
-						.getInstance(
-								c.getString(c
-										.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CURRENCY)))
-						.getSymbol();
-			}
-		}
+	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
+		private Resources res = getResources();
 
 		@Override
-		public void setViewText(TextView v, String text) {
-			if (v.getId() == R.id.account_sum) {
-				String d = Operation.SUM_FORMAT
-						.format(Double.parseDouble(text));
-				d = d + " " + mCurrency;
-				super.setViewText(v, d);
-			} else {
-				super.setViewText(v, text);
+		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+			String colName = cursor.getColumnName(columnIndex);
+
+			if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) {
+				TextView textView = ((TextView) view);
+				double sum = cursor.getDouble(columnIndex);
+				if (sum < 0.0) {
+					textView.setTextColor(res.getColor(R.color.op_alert));
+				}
+				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
+				textView.setText(txt
+						+ " "
+						+ Currency
+								.getInstance(
+										cursor.getString(cursor
+												.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)))
+								.getSymbol());
+
+				return true;
 			}
+			return false;
 		}
 	}
+
+	// private class InnerSimpleCursorAdapter extends SimpleCursorAdapter {
+	// InnerSimpleCursorAdapter(Context context, int layout, Cursor c,
+	// String[] from, int[] to) {
+	// super(context, layout, c, from, to);
+	// }
+	//
+	// @Override
+	// public void setViewText(TextView v, String text) {
+	// if (v.getId() == R.id.account_sum) {
+	// String d = Operation.SUM_FORMAT
+	// .format(Double.parseDouble(text));
+	// d = d + " " + mCurrency;
+	// super.setViewText(v, d);
+	// } else {
+	// super.setViewText(v, text);
+	// }
+	// }
+	// }
 
 	private void fillData() {
 		Cursor accountsCursor = mDbHelper.fetchAllAccounts();
 		startManagingCursor(accountsCursor);
 
 		// Create an array to specify the fields we want to display in the list
-		String[] from = new String[] { AccountsDbAdapter.KEY_ACCOUNT_NAME,
-				AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM,
-				AccountsDbAdapter.KEY_ACCOUNT_CURRENCY };
+		String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
+				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM,
+				CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
 
 		// and an array of the fields we want to bind those fields to (in this
 		// case just text1)
 		int[] to = new int[] { R.id.account_name, R.id.account_sum };
 
 		// Now create a simple cursor adapter and set it to display
-		InnerSimpleCursorAdapter accounts = new InnerSimpleCursorAdapter(this,
+		SimpleCursorAdapter accounts = new SimpleCursorAdapter(this,
 				R.layout.account_row, accountsCursor, from, to);
+		accounts.setViewBinder(new InnerViewBinder());
 		setListAdapter(accounts);
+
 	}
 
 	private void createAccount() {
@@ -162,10 +184,10 @@ public class AccountList extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 		SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
 		String accountName = data.getString(data
-				.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_NAME));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME));
 		Intent i = new Intent(this, OperationList.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
-		i.putExtra(AccountsDbAdapter.KEY_ACCOUNT_NAME, accountName);
+		i.putExtra(CommonDbAdapter.KEY_ACCOUNT_NAME, accountName);
 		startActivity(i);
 	}
 

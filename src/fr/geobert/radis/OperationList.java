@@ -57,31 +57,24 @@ public class OperationList extends ListActivity {
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+			String colName = cursor.getColumnName(columnIndex);
 
-			try {
-				String colName = cursor.getColumnName(columnIndex);
-
-				if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
-					TextView textView = ((TextView) view);
-					double sum = cursor.getDouble(columnIndex);
-					if (sum >= 0.0) {
-						textView.setTextColor(res.getColor(R.color.positiveSum));
-					} else {
-						textView.setTextColor(res.getColor(R.color.blackSum));
-					}
-					String txt = Operation.SUM_FORMAT.format(Double
-							.valueOf(sum));
-					textView.setText(txt);
-					return true;
-				} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
-					Date date = new Date(cursor.getLong(columnIndex));
-					((TextView) view).setText(Operation.SHORT_DATE_FORMAT
-							.format(date));
-					return true;
+			if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
+				TextView textView = ((TextView) view);
+				double sum = cursor.getDouble(columnIndex);
+				if (sum >= 0.0) {
+					textView.setTextColor(res.getColor(R.color.positiveSum));
+				} else {
+					textView.setTextColor(res.getColor(R.color.blackSum));
 				}
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
+				textView.setText(txt);
+				return true;
+			} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
+				Date date = new Date(cursor.getLong(columnIndex));
+				((TextView) view).setText(Operation.SHORT_DATE_FORMAT
+						.format(date));
+				return true;
 			}
 			return false;
 		}
@@ -168,7 +161,7 @@ public class OperationList extends ListActivity {
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
 				: null;
 		mAccountName = extras != null ? extras
-				.getString(AccountsDbAdapter.KEY_ACCOUNT_NAME) : null;
+				.getString(CommonDbAdapter.KEY_ACCOUNT_NAME) : null;
 		setTitle(getString(R.string.app_name) + " - " + mAccountName);
 		mDbHelper = new OperationsDbAdapter(this, mAccountId);
 		mDbHelper.open();
@@ -327,7 +320,7 @@ public class OperationList extends ListActivity {
 		c.requery();
 		c.moveToFirst();
 		return c.getDouble(c
-				.getColumnIndexOrThrow(AccountsDbAdapter.KEY_ACCOUNT_OP_SUM));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 	}
 
 	private double getAccountCurSum() {
@@ -335,7 +328,7 @@ public class OperationList extends ListActivity {
 		c.requery();
 		c.moveToFirst();
 		return c.getDouble(c
-				.getColumnIndex(AccountsDbAdapter.KEY_ACCOUNT_CUR_SUM));
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM));
 	}
 
 	private double computeSumFromCursor(Cursor c) {
