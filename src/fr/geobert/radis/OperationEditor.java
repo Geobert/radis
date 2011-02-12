@@ -155,8 +155,6 @@ public class OperationEditor extends Activity {
 			Dialog d = mInfoManager.getEditDialog();
 			mInfoManager.initEditDialog(d);
 			return d;
-		case Tools.DEBUG_DIALOG:
-			return Tools.getDebugDialog(this, mDbHelper);
 		case INFO_DELETE_DIALOG_ID:
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
@@ -164,8 +162,9 @@ public class OperationEditor extends Activity {
 							mInfoManager.deleteInfo();
 						}
 					});
+		default:
+			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
-		return null;
 	}
 
 	@Override

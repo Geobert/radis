@@ -323,7 +323,7 @@ public class CommonDbAdapter {
 		Tools.restartApp();
 	}
 
-	public void backupDatabase() {
+	public boolean backupDatabase() {
 		close();
 		mDb.close();
 		try {
@@ -348,14 +348,15 @@ public class CommonDbAdapter {
 					src.close();
 					dst.close();
 				}
+				return true;
 			}
-			Tools.restartApp();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 
-	public void restoreDatabase() {
+	public boolean restoreDatabase() {
 		close();
 		mDb.close();
 		try {
@@ -372,10 +373,11 @@ public class CommonDbAdapter {
 				dst.transferFrom(src, 0, src.size());
 				src.close();
 				dst.close();
+				return true;
 			}
-			Tools.restartApp();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return false;
 	}
 }

@@ -18,6 +18,7 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +32,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class OperationList extends ListActivity {
-	private static final int CREATE_OP_ID = Menu.FIRST;
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 
@@ -205,7 +205,9 @@ public class OperationList extends ListActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		menu.add(0, CREATE_OP_ID, 0, R.string.new_op);
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.operations_list_menu, menu);
+		inflater.inflate(R.menu.advanced_actions, menu);
 		return true;
 	}
 
@@ -222,11 +224,14 @@ public class OperationList extends ListActivity {
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
-		case CREATE_OP_ID:
+		case R.id.create_operation:
 			createOp();
 			return true;
+		default:
+			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
+				return true;
+			}
 		}
-
 		return super.onMenuItemSelected(featureId, item);
 	}
 
@@ -487,8 +492,6 @@ public class OperationList extends ListActivity {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
-		case Tools.DEBUG_DIALOG:
-			return Tools.getDebugDialog(this, mDbHelper);
 		case DIALOG_DELETE:
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
@@ -498,7 +501,8 @@ public class OperationList extends ListActivity {
 							mOpToDelete = null;
 						}
 					});
+		default:
+			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
-		return null;
 	}
 }

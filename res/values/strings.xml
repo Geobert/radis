@@ -76,4 +76,16 @@
 <string name="get_more_op">Opérations précédentes…</string>
 <string name="delete_confirmation">Confirmer la suppression ?</string>
 <string name="yes">Oui</string>
+<string name="advanced">Actions avancées</string>
+<string name="backup_db">Sauver les comptes</string>
+<string name="restore_db">Restaurer les comptes</string>
+<string name="restore_confirm">La restauration va écraser vos données actuelles ! Cette opération est irréversible.</string>
+<string name="backup_confirm">La sauvegarde va écraser la sauvegarde précédente si elle existe !</string>
+<string name="to_continue">Continuer</string>
+<string name="backup_success">Sauvegarde réussie !</string>
+<string name="backup_failed">Sauvegarde échouée.</string>
+<string name="restore_success">Restauration réussie !</string>
+<string name="restore_failed">Restauration échouée.</string>
+<string name="restarting">Redémarrage en cours…</string>
+<string name="will_restart">L\'application va redémarrer.</string>
 </resources>
