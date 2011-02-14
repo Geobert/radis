@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import java.text.DecimalFormat;
 import java.util.Currency;
 
 import android.app.Dialog;
@@ -40,6 +41,9 @@ public class AccountList extends ListActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Operation.SUM_FORMAT = new DecimalFormat();
+		Operation.SUM_FORMAT.setMaximumFractionDigits(2);
+		Operation.SUM_FORMAT.setMinimumFractionDigits(2);
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);

@@ -12,11 +12,7 @@ public class Operation {
 	private GregorianCalendar mDate;
 	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 	public static SimpleDateFormat SHORT_DATE_FORMAT = new SimpleDateFormat("dd/MM");
-	public static DecimalFormat SUM_FORMAT = new DecimalFormat();
-	static {
-		SUM_FORMAT.setMaximumFractionDigits(2);
-		SUM_FORMAT.setMinimumFractionDigits(2);
-	}
+	public static DecimalFormat SUM_FORMAT;
 
 	private String mThirdParty;
 	private String mTag;
