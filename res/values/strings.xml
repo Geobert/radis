@@ -2,19 +2,18 @@
 <resources>
 
 	<string name="app_name">Radis</string>
-	<string name="no_account">Pas de compte créé. Appuyez sur la touche « Menu »
-		pour en créer un.</string>
-	<string name="create_account">Créer un compte</string>
-	<string name="name">Nom</string>
-	<string name="account_creation">Création de compte</string>
+	<string name="no_account">No account. Press "menu" to create one.</string>
+	<string name="create_account">Create account</string>
+	<string name="name">Name</string>
+	<string name="account_creation">Account creation</string>
 	<string name="description">Description</string>
-	<string name="start_sum">Somme de départ</string>
-	<string name="create">Créer</string>
-	<string name="cancel">Annuler</string>
-	<string name="accounts_list">Liste des comptes</string>
-	<string name="currency">Devise</string>
-	<string name="delete">Supprimer</string>
-	<string name="account_prompt">Sélectionnez une devise</string>
+	<string name="start_sum">Start sum</string>
+	<string name="create">Create</string>
+	<string name="cancel">Cancel</string>
+	<string name="accounts_list">Account list</string>
+	<string name="currency">Currency</string>
+	<string name="delete">Delete</string>
+	<string name="account_prompt">Select a currency</string>
 	<string-array name="all_currencies">
 		<item>AUD</item>
 		<item>BRL</item>
@@ -47,46 +46,45 @@
 <!--		<item>ZAR</item>-->
 <!--		<item>ZWD</item>-->
 	</string-array>
-<string name="edit">Modifier</string>
+<string name="edit">Edit</string>
 <string name="ok">Ok</string>
-<string name="third_party">Tiers</string>
-<string name="sum">Somme</string>
-<string name="tag">Catégorie</string>
+<string name="third_party">Third party</string>
+<string name="sum">Sum</string>
+<string name="tag">Category</string>
 <string name="date">Date</string>
-<string name="mode">Mode de paiement</string>
+<string name="mode">Payment method</string>
 <string name="allowed_sum_digits">0123456789-.,</string>
-<string name="credit">Crédit</string>
-<string name="debit">Débit</string>
-<string name="current_sum">Solde</string>
-<string name="sum_at">Au %1$s = %2$s</string>
+<string name="credit">Credit</string>
+<string name="debit">Debit</string>
+<string name="current_sum">Balance</string>
+<string name="sum_at">At %1$s = %2$s</string>
 
-<string name="no_operation">Aucune opération. Appuyez sur la touche « Menu »
-		pour en créer.</string>
-<string name="new_op">Nouvelle opération</string>
-<string name="tp_account_name">Compte %s</string>
-<string name="account_edit">Modification du compte</string>
-<string name="op_edition">Saisie d\'opération</string>
-<string name="future_sum_at">Projection au %1$s = %2$s</string>
-<string name="sum_at_selection">Solde à la selection = %1$s</string>
-<string name="list_of">Liste des %s</string>
+<string name="no_operation">No transaction. Press "menu" to create one.</string>
+<string name="new_op">New transaction</string>
+<string name="tp_account_name">Account %s</string>
+<string name="account_edit">Edit account</string>
+<string name="op_edition">Transaction edition</string>
+<string name="future_sum_at">Future balance at %1$s = %2$s</string>
+<string name="sum_at_selection">Balance at selection = %1$s</string>
+<string name="list_of">List of %s</string>
 
-<string name="tags">Catégories</string>
-<string name="modes">Modes</string>
-<string name="third_parties">Tiers</string>
-<string name="get_more_op">Opérations précédentes…</string>
-<string name="delete_confirmation">Confirmer la suppression ?</string>
-<string name="yes">Oui</string>
-<string name="advanced">Actions avancées</string>
-<string name="backup_db">Sauver les comptes</string>
-<string name="restore_db">Restaurer les comptes</string>
-<string name="restore_confirm">La restauration va écraser vos données actuelles ! Cette opération est irréversible.</string>
-<string name="backup_confirm">La sauvegarde va écraser la sauvegarde précédente si elle existe !</string>
-<string name="to_continue">Continuer</string>
-<string name="backup_success">Sauvegarde réussie !</string>
-<string name="backup_failed">Sauvegarde échouée.</string>
-<string name="restore_success">Restauration réussie !</string>
-<string name="restore_failed">Restauration échouée.</string>
-<string name="restarting">Redémarrage en cours…</string>
-<string name="will_restart">L\'application va redémarrer.</string>
-<string name="no_more_ops">Fin de la liste d\'opérations</string>
+<string name="tags">Tags</string>
+<string name="modes">Payment method</string>
+<string name="third_parties">Third party</string>
+<string name="get_more_op">Previous transaction…</string>
+<string name="delete_confirmation">Really delete?</string>
+<string name="yes">Yes</string>
+<string name="advanced">Advanced actions</string>
+<string name="backup_db">Backup database</string>
+<string name="restore_db">Restore database</string>
+<string name="restore_confirm">Restore will override current data! This can\'t be undone.</string>
+<string name="backup_confirm">Backup will override last backup if it exists!</string>
+<string name="to_continue">Continue</string>
+<string name="backup_success">Backup successed!</string>
+<string name="backup_failed">Backup failed.</string>
+<string name="restore_success">Restoration successed!</string>
+<string name="restore_failed">Restoration failed.</string>
+<string name="restarting">Restarting…</string>
+<string name="will_restart">Application will be restart.</string>
+<string name="no_more_ops">No more transaction</string>
 </resources>
