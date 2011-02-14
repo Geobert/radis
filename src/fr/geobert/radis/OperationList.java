@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class OperationList extends ListActivity {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
@@ -109,12 +110,17 @@ public class OperationList extends ListActivity {
 	}
 
 	private class GetMoreOps extends AsyncTask<Long, Void, Void> {
+		private boolean mHasResult = false;
 
 		@Override
 		protected void onPostExecute(Void result) {
 			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
+			if (!mHasResult) {
+				Toast.makeText(OperationList.this, R.string.no_more_ops, Toast.LENGTH_LONG)
+						.show();
+			}
 		}
 
 		@Override
@@ -129,7 +135,7 @@ public class OperationList extends ListActivity {
 			Cursor result = mDbHelper
 					.fetchOpEarlierThan(params[0], NB_LAST_OPS);
 			startManagingCursor(result);
-			fillLastOps(result);
+			mHasResult = fillLastOps(result);
 			return null;
 		}
 
@@ -262,7 +268,7 @@ public class OperationList extends ListActivity {
 		}
 	}
 
-	private void fillLastOps(Cursor c) {
+	private boolean fillLastOps(Cursor c) {
 		MatrixCursor lo = mLastOps;
 		if (c.moveToFirst()) {
 			do {
@@ -271,6 +277,9 @@ public class OperationList extends ListActivity {
 						new Double(c.getDouble(4)), new Long(c.getLong(5)) };
 				lo.addRow(values);
 			} while (c.moveToNext());
+			return true;
+		} else {
+			return false;
 		}
 	}
 

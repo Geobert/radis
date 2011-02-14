@@ -88,4 +88,5 @@
 <string name="restore_failed">Restauration échouée.</string>
 <string name="restarting">Redémarrage en cours…</string>
 <string name="will_restart">L\'application va redémarrer.</string>
+<string name="no_more_ops">Fin de la liste d\'opérations</string>
 </resources>
