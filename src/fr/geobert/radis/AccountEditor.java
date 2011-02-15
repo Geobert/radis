@@ -34,7 +34,7 @@ public class AccountEditor extends Activity {
 		mDbHelper = new CommonDbAdapter(this);
 		mDbHelper.open();
 		setContentView(R.layout.account_creation);
-
+		setTitle(R.string.account_edit);
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
 		mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);

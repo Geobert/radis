@@ -62,7 +62,7 @@
 <string name="no_operation">No transaction. Press "menu" to create one.</string>
 <string name="new_op">New transaction</string>
 <string name="tp_account_name">Account %s</string>
-<string name="account_edit">Edit account</string>
+<string name="account_edit">Account edition</string>
 <string name="op_edition">Transaction edition</string>
 <string name="future_sum_at">Future balance at %1$s = %2$s</string>
 <string name="sum_at_selection">Balance at selection = %1$s</string>
