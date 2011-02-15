@@ -8,7 +8,7 @@
 	<string name="name">Nom</string>
 	<string name="account_creation">Création de compte</string>
 	<string name="description">Description</string>
-	<string name="start_sum">Somme de départ</string>
+	<string name="start_sum">Montant de départ</string>
 	<string name="create">Créer</string>
 	<string name="cancel">Annuler</string>
 	<string name="accounts_list">Liste des comptes</string>
@@ -50,7 +50,7 @@
 <string name="edit">Modifier</string>
 <string name="ok">Ok</string>
 <string name="third_party">Tiers</string>
-<string name="sum">Somme</string>
+<string name="sum">Montant</string>
 <string name="tag">Catégorie</string>
 <string name="date">Date</string>
 <string name="mode">Mode de paiement</string>

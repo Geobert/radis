@@ -7,7 +7,7 @@
 	<string name="name">Name</string>
 	<string name="account_creation">Account creation</string>
 	<string name="description">Description</string>
-	<string name="start_sum">Start sum</string>
+	<string name="start_sum">Start amount</string>
 	<string name="create">Create</string>
 	<string name="cancel">Cancel</string>
 	<string name="accounts_list">Account list</string>
@@ -49,7 +49,7 @@
 <string name="edit">Edit</string>
 <string name="ok">Ok</string>
 <string name="third_party">Third party</string>
-<string name="sum">Sum</string>
+<string name="sum">Amount</string>
 <string name="tag">Category</string>
 <string name="date">Date</string>
 <string name="mode">Payment method</string>
