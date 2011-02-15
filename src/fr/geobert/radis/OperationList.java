@@ -26,6 +26,9 @@ import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -52,6 +55,10 @@ public class OperationList extends ListActivity {
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
 	private AdapterContextMenuInfo mOpToDelete = null;
+	private AutoCompleteTextView mQuickAddThirdParty;
+	private EditText mQuickAddAmount;
+	private Button mQuickAddButton;
+	private QuickAddTextWatcher mQuickAddTextWatcher;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
@@ -118,8 +125,8 @@ public class OperationList extends ListActivity {
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (!mHasResult) {
-				Toast.makeText(OperationList.this, R.string.no_more_ops, Toast.LENGTH_LONG)
-						.show();
+				Toast.makeText(OperationList.this, R.string.no_more_ops,
+						Toast.LENGTH_LONG).show();
 			}
 		}
 
@@ -173,13 +180,43 @@ public class OperationList extends ListActivity {
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
+		mQuickAddThirdParty = (AutoCompleteTextView) findViewById(R.id.quickadd_third_party);
+		mQuickAddThirdParty.setAdapter(new InfoAdapter(this, mDbHelper,
+				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+				OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
+		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
 
+		mQuickAddAmount.addTextChangedListener(new CorrectCommaWatcher(
+				Operation.SUM_FORMAT.getDecimalFormatSymbols()
+						.getDecimalSeparator(), mQuickAddAmount)
+				.setAutoNegate(true));
+		mQuickAddButton = (Button) findViewById(R.id.quickadd_validate);
+		mQuickAddButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View view) {
+				Operation op = new Operation();
+				op.setThirdParty(mQuickAddThirdParty.getText().toString());
+				try {
+					op.setSumStr(mQuickAddAmount.getText().toString());
+					mDbHelper.createOp(op);
+					updateSums(0, op.getSum());
+					mQuickAddAmount.setText("");
+					mQuickAddThirdParty.setText("");
+					fillData();
+					updateSumsAndSelection();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		mQuickAddButton.setEnabled(false);
+		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
+				mQuickAddAmount, mQuickAddButton);
+		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
+		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
 	}
 
-	@Override
-	protected void onResume() {
-		super.onResume();
-		fillData();
+	private void updateSumsAndSelection() {
 		double curSum = getAccountCurSum();
 		updateFutureSumDisplay(curSum);
 		if (mLastSelectedPosition == null) {
@@ -190,6 +227,13 @@ public class OperationList extends ListActivity {
 					position);
 			updateSumAtSelectedOpDisplay(data, curSum);
 		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		fillData();
+		updateSumsAndSelection();
 		getListView().setOnItemSelectedListener(
 				new AdapterView.OnItemSelectedListener() {
 					public void onItemSelected(AdapterView parentView,

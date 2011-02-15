@@ -40,7 +40,7 @@ public class AccountEditor extends Activity {
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
 		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
 				Operation.SUM_FORMAT.getDecimalFormatSymbols()
-						.getDecimalSeparator()));
+						.getDecimalSeparator(), mAccountStartSumText));
 		mAccountStartSumText
 				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 					@Override
@@ -103,7 +103,7 @@ public class AccountEditor extends Activity {
 		if (startSumStr.length() == 0) {
 			if (errMsg.length() > 0)
 				errMsg.append("\n");
-			errMsg.append("Somme de départ vide");
+			errMsg.append(getString(R.string.no_start_amount));
 			res = false;
 		}
 		return res;
@@ -134,7 +134,6 @@ public class AccountEditor extends Activity {
 			int pos = Arrays.binarySearch(allCurrencies, currencyStr);
 			mAccountCurrency.setSelection(pos);
 		} else {
-			mAccountStartSumText.setText(Operation.SUM_FORMAT.format(0.00));
 			int pos = Arrays
 					.binarySearch(allCurrencies,
 							Currency.getInstance(Locale.getDefault())

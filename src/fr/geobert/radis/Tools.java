@@ -11,9 +11,11 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Handler;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 public class Tools {
@@ -253,6 +255,16 @@ public class Tools {
 
 		builder.setTitle("Debug menu");
 		return builder.create();
+	}
+
+	public static void setSumTextGravity(EditText sumText) {
+		int gravity;
+		if (sumText.length() > 0) {
+			gravity = Gravity.CENTER_VERTICAL|Gravity.RIGHT;
+		} else {
+			gravity = Gravity.CENTER_VERTICAL|Gravity.LEFT;
+		}
+		sumText.setGravity(gravity);
 	}
 
 	// private static void fillDatabase(CommonDbAdapter db) {

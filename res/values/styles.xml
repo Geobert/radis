@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<style name="EditorTextView" parent="@android:style/Widget.TextView">
-		<item name="android:padding">5px</item>
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">wrap_content</item>
 	</style>
@@ -11,21 +10,36 @@
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:gravity">center</item>
 	</style>
+	<style name="QuickAddBaseButton" parent="@android:style/Widget.Button">
+		<item name="android:layout_weight">0</item>
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">fill_parent</item>
+		<item name="android:gravity">center</item>
+		<item name="android:drawableLeft">@drawable/btn_check_buttonless_on</item>
+	</style>
 	<style name="EditorBaseButton.ListButton">
 		<item name="android:drawableLeft">@drawable/more36</item>
 	</style>
 	<style name="EditorEditText" parent="@android:style/Widget.EditText">
 		<item name="android:layout_width">fill_parent</item>
-		<item name="android:padding">5px</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:layout_weight">1</item>
 		<item name="android:gravity">center_vertical</item>
+	</style>
+	<style name="QuickAddEditText" parent="@android:style/Widget.EditText">
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_weight">1</item>
+		<item name="android:gravity">center_vertical</item>
+	</style>
+	<style name="QuickAddEditText.Sum">
+		<item name="android:digits">@string/allowed_sum_digits</item>
+		<item name="android:inputType">number|numberSigned|numberDecimal</item>
 	</style>
 	<style name="EditorBaseButton.DateButton">
 		<item name="android:layout_width">fill_parent</item>
 	</style>
 	<style name="EditorEditText.Sum">
-		<item name="android:gravity">right|center_vertical</item>
 		<item name="android:digits">@string/allowed_sum_digits</item>
 		<item name="android:inputType">number|numberSigned|numberDecimal</item>
 	</style>
@@ -77,6 +91,13 @@
 		<item name="android:gravity">right</item>
 		<item name="android:clickable">true</item>
 		<item name="android:drawable">@drawable/fake_listview_line</item>
+	</style>
+	<style name="QuickAddLayout">
+		<item name="android:orientation">horizontal</item>
+		<item name="android:layout_weight">0</item>
+		<item name="android:layout_width">fill_parent</item>
+		<item name="android:layout_height">fill_parent</item>
+		<item name="android:gravity">bottom</item>
 	</style>
 	<style name="OpRowTextView" parent="@android:style/Widget.TextView">
 		<item name="android:layout_width">wrap_content</item>

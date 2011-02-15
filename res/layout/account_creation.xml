@@ -3,12 +3,12 @@
 	android:layout_width="fill_parent" android:layout_height="wrap_content">
 	<LinearLayout android:padding="5px" android:layout_width="fill_parent"
 		android:layout_height="wrap_content" android:orientation="vertical">
-		<TextView android:text="@string/name" style="@style/EditorTextView" />
-		<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText" />
-		<TextView style="@style/EditorTextView" android:text="@string/start_sum" />
-		<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum" />
+<!--		<TextView android:text="@string/name" style="@style/EditorTextView" />-->
+		<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText" android:hint="@string/name"/>
+<!--		<TextView style="@style/EditorTextView" android:text="@string/start_sum" />-->
+		<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum" android:hint="@string/start_sum"/>
 		<TextView style="@style/EditorTextView" android:text="@string/currency" />
-		<Spinner android:id="@+id/currency_spinner"
+		<Spinner android:id="@+id/currency_spinner" 
 			android:layout_height="wrap_content" android:layout_width="fill_parent"
 			android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
 		</Spinner>

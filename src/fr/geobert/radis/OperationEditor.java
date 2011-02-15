@@ -4,12 +4,12 @@ import java.text.ParseException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
@@ -30,8 +30,8 @@ public class OperationEditor extends Activity {
 	private EditText mOpSumText;
 	private AutoCompleteTextView mOpModeText;
 	private AutoCompleteTextView mOpTagText;
-	private Button mOpDateBut;
-	// private DatePicker mDatePicker;
+	// private Button mOpDateBut;
+	private DatePicker mDatePicker;
 	private Long mRowId;
 	private Long mAccountId;
 
@@ -44,23 +44,23 @@ public class OperationEditor extends Activity {
 	private boolean mOnRestore = false;
 
 	// the callback received when the user "sets" the date in the dialog
-	private DatePickerDialog.OnDateSetListener mDateSetListener = new DatePickerDialog.OnDateSetListener() {
-		public void onDateSet(DatePicker view, int year, int monthOfYear,
+	private DatePicker.OnDateChangedListener mDateSetListener = new DatePicker.OnDateChangedListener() {
+		@Override
+		public void onDateChanged(DatePicker view, int year, int monthOfYear,
 				int dayOfMonth) {
 			Operation op = mCurrentOp;
 			op.setYear(year);
 			op.setMonth(monthOfYear);
 			op.setDay(dayOfMonth);
-			updateDateButton();
 		}
 
 	};
 
-	private void updateDateButton() {
-		mOpDateBut.setText(mCurrentOp.getDateStr());
-		// mDatePicker.updateDate(mCurrentOp.getYear(), mCurrentOp.getMonth(),
-		// mCurrentOp.getDay());
-	}
+	// private void updateDateButton() {
+	// // mOpDateBut.setText(mCurrentOp.getDateStr());
+	// mDatePicker.updateDate(mCurrentOp.getYear(), mCurrentOp.getMonth(),
+	// mCurrentOp.getDay());
+	// }
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -89,16 +89,15 @@ public class OperationEditor extends Activity {
 		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
 				OperationsDbAdapter.DATABASE_MODES_TABLE,
 				OperationsDbAdapter.KEY_MODE_NAME));
-		mSumTextWatcher = new CorrectCommaWatcher(Operation.SUM_FORMAT
-				.getDecimalFormatSymbols().getDecimalSeparator());
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
-
+		mSumTextWatcher = new CorrectCommaWatcher(Operation.SUM_FORMAT
+				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
 		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
 		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
 				OperationsDbAdapter.DATABASE_TAGS_TABLE,
 				OperationsDbAdapter.KEY_TAG_NAME));
-		mOpDateBut = (Button) findViewById(R.id.edit_op_date);
-		// mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
+		// mOpDateBut = (Button) findViewById(R.id.edit_op_date);
+		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 	}
 
 	private void invertSign() throws ParseException {
@@ -133,10 +132,10 @@ public class OperationEditor extends Activity {
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
-		case DATE_DIALOG_ID:
-			Operation op = mCurrentOp;
-			return new DatePickerDialog(this, mDateSetListener, op.getYear(),
-					op.getMonth(), op.getDay());
+		// case DATE_DIALOG_ID:
+		// Operation op = mCurrentOp;
+		// return new DatePickerDialog(this, mDateSetListener, op.getYear(),
+		// op.getMonth(), op.getDay());
 		case THIRD_PARTIES_DIALOG_ID:
 			return createInfoListDialog(
 					OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
@@ -197,12 +196,15 @@ public class OperationEditor extends Activity {
 			}
 			mSumTextWatcher.setAutoNegate(true);
 		}
+		Tools.setSumTextGravity(mOpSumText);
 		Operation op = mCurrentOp;
 		mPreviousSum = op.getSum();
 		Tools.setTextWithoutComplete(mOpThirdPartyText, op.getThirdParty());
 		Tools.setTextWithoutComplete(mOpModeText, op.getMode());
 		Tools.setTextWithoutComplete(mOpTagText, op.getTag());
-		updateDateButton();
+		mDatePicker.init(op.getYear(), op.getMonth(), op.getDay(),
+				mDateSetListener);
+		// updateDateButton();
 	}
 
 	@Override
@@ -255,12 +257,12 @@ public class OperationEditor extends Activity {
 			}
 		});
 
-		mOpDateBut.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				showDialog(DATE_DIALOG_ID);
-			}
-		});
+		// mOpDateBut.setOnClickListener(new View.OnClickListener() {
+		// @Override
+		// public void onClick(View view) {
+		// showDialog(DATE_DIALOG_ID);
+		// }
+		// });
 
 		thirdPartyEdit.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -302,7 +304,7 @@ public class OperationEditor extends Activity {
 		op.setMode(mOpModeText.getText().toString());
 		op.setTag(mOpTagText.getText().toString());
 		op.setSumStr(mOpSumText.getText().toString());
-		op.setDateStr(mOpDateBut.getText().toString());
+		// op.setDateStr(mOpDateBut.getText().toString());
 
 		if (mRowId == null) {
 			long id = mDbHelper.createOp(op);
@@ -332,7 +334,8 @@ public class OperationEditor extends Activity {
 		outState.putString("sum", mOpSumText.getText().toString());
 		outState.putLong("rowId", mRowId.longValue());
 		outState.putDouble("previousSum", mPreviousSum);
-		outState.putString("date", mOpDateBut.getText().toString());
+		// outState.putString("date", mOpDateBut.getText().toString());
+
 		mOnRestore = true;
 	}
 
@@ -343,11 +346,15 @@ public class OperationEditor extends Activity {
 		Tools.setTextWithoutComplete(mOpTagText, state.getString("tag"));
 		Tools.setTextWithoutComplete(mOpModeText, state.getString("mode"));
 		mOpSumText.setText(state.getString("sum"));
-		mOpDateBut.setText(state.getString("date"));
+		Tools.setSumTextGravity(mOpSumText);
+		// mOpDateBut.setText(state.getString("date"));
 		mOnRestore = true;
 		mRowId = Long.valueOf(state.getLong("rowId"));
 		mPreviousSum = state.getDouble("previousSum");
-		mCurrentOp = (Operation) getLastNonConfigurationInstance();
+		Operation op = (Operation) getLastNonConfigurationInstance();
+		mCurrentOp = op;
+		mDatePicker.init(op.getYear(), op.getMonth(), op.getDay(),
+				mDateSetListener);
 	}
 
 	@Override

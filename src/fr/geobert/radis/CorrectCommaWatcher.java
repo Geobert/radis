@@ -2,13 +2,17 @@ package fr.geobert.radis;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Gravity;
+import android.widget.EditText;
 
 public class CorrectCommaWatcher implements TextWatcher {
 	private char mLocaleComma;
 	private boolean mAutoNegate = false;
+	private EditText mEditText;
 
-	public CorrectCommaWatcher(char localeComma) {
+	public CorrectCommaWatcher(char localeComma, EditText w) {
 		mLocaleComma = localeComma;
+		mEditText = w;
 	}
 
 	@Override
@@ -40,6 +44,11 @@ public class CorrectCommaWatcher implements TextWatcher {
 				}
 			}
 		}
+		if (s.length() == 0) {
+			mEditText.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
+		} else {
+			mEditText.setGravity(Gravity.CENTER_VERTICAL|Gravity.RIGHT);
+		}
 	}
 
 	@Override
@@ -51,8 +60,9 @@ public class CorrectCommaWatcher implements TextWatcher {
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 	}
 
-	public void setAutoNegate(boolean b) {
+	public CorrectCommaWatcher setAutoNegate(boolean b) {
 		mAutoNegate = b;
+		return this;
 	}
 
 }

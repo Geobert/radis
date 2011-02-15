@@ -11,11 +11,20 @@
 
 	<ListView android:id="@+id/android:list" style="@style/OpListView" />
 
-	<!--	<com.markupartist.android.widget.PullToRefreshListView-->
-	<!--		android:id="@+id/android:list" style="@style/OpListView" />-->
+	<!-- <com.markupartist.android.widget.PullToRefreshListView -->
+	<!-- android:id="@+id/android:list" style="@style/OpListView" /> -->
 
-	<TextView android:id="@+id/android:empty"
-		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:text="@string/no_operation" android:textSize="25px"
-		android:gravity="center" />
+	 <TextView android:id="@+id/android:empty" 
+	 android:layout_width="fill_parent" android:layout_height="fill_parent" 
+	 android:text="@string/no_operation" android:textSize="25px" 
+	 android:gravity="center" /> 
+
+	<LinearLayout style="@style/QuickAddLayout">
+		<LinearLayout style="@style/EditorHorizontalLinearLayout" android:padding="0dp">
+			<AutoCompleteTextView android:id="@+id/quickadd_third_party" android:hint="@string/third_party"
+				style="@style/QuickAddEditText" android:completionThreshold="1" />
+			<EditText android:id="@+id/quickadd_amount" style="@style/QuickAddEditText.Sum" android:hint="@string/sum"/>
+			<Button android:id="@+id/quickadd_validate" style="@style/QuickAddBaseButton" />
+		</LinearLayout>
+	</LinearLayout>
 </LinearLayout>
