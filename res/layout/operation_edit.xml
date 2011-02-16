@@ -1,41 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="wrap_content">
-	<LinearLayout android:layout_width="fill_parent"
-		android:id="@+id/edit_op_root" android:layout_height="wrap_content"
-		android:orientation="vertical">
-		<DatePicker android:id="@+id/edit_op_date" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingTop="5px" android:paddingBottom="5px"/>
-<!--		<TextView style="@style/EditorTextView" android:text="@string/date" />-->
-<!--		<Button android:id="@+id/edit_op_date" android:text="24/12/2010"-->
-<!--			style="@style/EditorBaseButton.DateButton" />-->
-<!--		<TextView style="@style/EditorTextView" android:text="@string/third_party" />-->
-		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<AutoCompleteTextView android:id="@+id/edit_op_third_party" style="@style/EditorEditText" android:completionThreshold="1" android:hint="@string/third_party"/>
-			<Button android:id="@+id/edit_op_third_parties_list" style="@style/EditorBaseButton.ListButton" />
+<LinearLayout android:padding="5px" android:layout_width="fill_parent"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_height="wrap_content" android:orientation="vertical">
+	<ScrollView android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:layout_weight="1"
+		android:fillViewport="true">
+		<LinearLayout android:layout_width="fill_parent"
+			android:id="@+id/edit_op_root" android:layout_height="wrap_content"
+			android:orientation="vertical">
+			<DatePicker android:id="@+id/edit_op_date"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:paddingTop="5px" android:paddingBottom="5px" />
+			<LinearLayout style="@style/EditorHorizontalLinearLayout">
+				<AutoCompleteTextView android:id="@+id/edit_op_third_party"
+					style="@style/EditorEditText" android:completionThreshold="1"
+					android:hint="@string/third_party" />
+				<Button android:id="@+id/edit_op_third_parties_list" style="@style/EditorBaseButton.ListButton" />
+			</LinearLayout>
+			<LinearLayout style="@style/EditorHorizontalLinearLayout">
+				<EditText android:id="@+id/edit_op_sum" style="@style/EditorEditText.Sum"
+					android:hint="@string/sum" />
+				<Button android:id="@+id/edit_op_sign" android:drawableLeft="@drawable/plus_moins"
+					style="@style/EditorBaseButton" />
+			</LinearLayout>
+			<LinearLayout style="@style/EditorHorizontalLinearLayout">
+				<AutoCompleteTextView android:id="@+id/edit_op_tag"
+					style="@style/EditorEditText" android:completionThreshold="1"
+					android:hint="@string/tag" />
+				<Button android:id="@+id/edit_op_tags_list" style="@style/EditorBaseButton.ListButton" />
+			</LinearLayout>
+			<LinearLayout style="@style/EditorHorizontalLinearLayout">
+				<AutoCompleteTextView android:id="@+id/edit_op_mode"
+					style="@style/EditorEditText" android:completionThreshold="1"
+					android:hint="@string/mode" />
+				<Button android:id="@+id/edit_op_modes_list" style="@style/EditorBaseButton.ListButton" />
+			</LinearLayout>
+
 		</LinearLayout>
-<!--		<TextView style="@style/EditorTextView" android:text="@string/sum" />-->
-		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<EditText android:id="@+id/edit_op_sum" style="@style/EditorEditText.Sum" android:hint="@string/sum"/>
-			<Button android:id="@+id/edit_op_sign" android:drawableLeft="@drawable/plus_moins"
-				style="@style/EditorBaseButton" />
-		</LinearLayout>
-<!--		<TextView style="@style/EditorTextView" android:text="@string/tag" />-->
-		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<AutoCompleteTextView android:id="@+id/edit_op_tag" style="@style/EditorEditText" android:completionThreshold="1" android:hint="@string/tag"/>
-			<Button android:id="@+id/edit_op_tags_list" style="@style/EditorBaseButton.ListButton" />
-		</LinearLayout>
-<!--		<TextView style="@style/EditorTextView" android:text="@string/mode" />-->
-		<LinearLayout style="@style/EditorHorizontalLinearLayout">
-			<AutoCompleteTextView android:id="@+id/edit_op_mode" style="@style/EditorEditText" android:completionThreshold="1" android:hint="@string/mode"/>
-			<Button android:id="@+id/edit_op_modes_list" style="@style/EditorBaseButton.ListButton" />
-		</LinearLayout>
-		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
-			<Button android:id="@+id/confirm_op" android:text="@string/ok"
-				android:layout_weight="1" android:layout_width="fill_parent"
-				android:layout_height="wrap_content" />
-			<Button android:id="@+id/cancel_op" android:text="@string/cancel"
-				android:layout_weight="1" android:layout_width="fill_parent"
-				android:layout_height="wrap_content" />
-		</LinearLayout>
+	</ScrollView>
+	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
+		<Button android:id="@+id/confirm_op" android:text="@string/ok"
+			android:layout_weight="1" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		<Button android:id="@+id/cancel_op" android:text="@string/cancel"
+			android:layout_weight="1" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
 	</LinearLayout>
-</ScrollView>
+</LinearLayout>
