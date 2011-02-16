@@ -40,19 +40,6 @@ public class OperationEditor extends Activity {
 	private CorrectCommaWatcher mSumTextWatcher;
 	private boolean mOnRestore = false;
 
-	// the callback received when the user "sets" the date in the dialog
-	private DatePicker.OnDateChangedListener mDateSetListener = new DatePicker.OnDateChangedListener() {
-		@Override
-		public void onDateChanged(DatePicker view, int year, int monthOfYear,
-				int dayOfMonth) {
-			Operation op = mCurrentOp;
-			op.setYear(year);
-			op.setMonth(monthOfYear);
-			op.setDay(dayOfMonth);
-		}
-
-	};
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -189,8 +176,7 @@ public class OperationEditor extends Activity {
 		Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
 		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
 		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
-		mDatePicker.init(op.getYear(), op.getMonth(), op.getDay(),
-				mDateSetListener);
+		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
 		mNotesText.setText(op.mNotes);
 	}
 
@@ -286,6 +272,13 @@ public class OperationEditor extends Activity {
 		op.mTag = mOpTagText.getText().toString();
 		op.setSumStr(mOpSumText.getText().toString());
 		op.mNotes = mNotesText.getText().toString();
+		
+		DatePicker dp = mDatePicker;
+		dp.clearChildFocus(getCurrentFocus());
+		op.setDay(dp.getDayOfMonth());
+		op.setMonth(dp.getMonth());
+		op.setYear(dp.getYear());
+		
 		if (mRowId == null) {
 			long id = mDbHelper.createOp(op);
 			if (id > 0) {
@@ -332,13 +325,18 @@ public class OperationEditor extends Activity {
 		mPreviousSum = state.getDouble("previousSum");
 		Operation op = (Operation) getLastNonConfigurationInstance();
 		mCurrentOp = op;
-		mDatePicker.init(op.getYear(), op.getMonth(), op.getDay(),
-				mDateSetListener);
+		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
 		mNotesText.setText(state.getString("notes"));
 	}
 
 	@Override
 	public Object onRetainNonConfigurationInstance() {
-		return mCurrentOp;
+		DatePicker dp = mDatePicker;
+		dp.clearChildFocus(getCurrentFocus());
+		Operation op = mCurrentOp;
+		op.setDay(dp.getDayOfMonth());
+		op.setMonth(dp.getMonth());
+		op.setYear(dp.getYear());
+		return op;
 	}
 }
