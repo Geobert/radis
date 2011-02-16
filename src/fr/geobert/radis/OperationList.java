@@ -235,11 +235,11 @@ public class OperationList extends ListActivity {
 
 	private void quickAddOp() {
 		Operation op = new Operation();
-		op.setThirdParty(mQuickAddThirdParty.getText().toString());
+		op.mThirdParty = mQuickAddThirdParty.getText().toString();
 		try {
 			op.setSumStr(mQuickAddAmount.getText().toString());
 			mDbHelper.createOp(op);
-			updateSums(0, op.getSum());
+			updateSums(0, op.mSum);
 			mQuickAddAmount.setText("");
 			mQuickAddThirdParty.setText("");
 			fillData();
@@ -367,7 +367,7 @@ public class OperationList extends ListActivity {
 			do {
 				Object[] values = { new Long(c.getLong(0)), c.getString(1),
 						c.getString(2), c.getString(3),
-						new Double(c.getDouble(4)), new Long(c.getLong(5)) };
+						new Double(c.getDouble(4)), new Long(c.getLong(5)), c.getString(6) };
 				lo.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -383,7 +383,8 @@ public class OperationList extends ListActivity {
 						OperationsDbAdapter.KEY_TAG_NAME,
 						OperationsDbAdapter.KEY_MODE_NAME,
 						OperationsDbAdapter.KEY_OP_SUM,
-						OperationsDbAdapter.KEY_OP_DATE });
+						OperationsDbAdapter.KEY_OP_DATE,
+						OperationsDbAdapter.KEY_OP_NOTES });
 		startManagingCursor(mLastOps);
 		Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
 		startManagingCursor(c);
@@ -498,7 +499,7 @@ public class OperationList extends ListActivity {
 		TextView t = (TextView) findViewById(R.id.future_sum);
 		if (c.isFirst()) {
 			Operation latestOp = new Operation(c);
-			latestOp.setSum(curSum); // to use existing formatter
+			latestOp.mSum = curSum; // to use existing formatter
 			t.setText(String.format(getString(R.string.sum_at),
 					latestOp.getDateStr(), latestOp.getSumStr()));
 		} else {

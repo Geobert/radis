@@ -91,4 +91,5 @@
 <string name="no_more_ops">Fin de la liste d\'opérations</string>
 <string name="no_start_amount">Le montant de départ est vide</string>
 <string name="misc">Divers</string>
+<string name="notes">Remarques</string>
 </resources>

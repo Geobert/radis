@@ -35,7 +35,7 @@
 					android:hint="@string/mode" />
 				<Button android:id="@+id/edit_op_modes_list" style="@style/EditorBaseButton.ListButton" />
 			</LinearLayout>
-
+			<EditText android:id="@+id/edit_op_notes" style="@style/DescEditText" android:hint="@string/notes"/>
 		</LinearLayout>
 	</ScrollView>
 	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">

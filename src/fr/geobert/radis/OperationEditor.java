@@ -30,6 +30,7 @@ public class OperationEditor extends Activity {
 	private AutoCompleteTextView mOpTagText;
 	// private Button mOpDateBut;
 	private DatePicker mDatePicker;
+	private EditText mNotesText;
 	private Long mRowId;
 	private Long mAccountId;
 
@@ -87,6 +88,7 @@ public class OperationEditor extends Activity {
 				OperationsDbAdapter.DATABASE_TAGS_TABLE,
 				OperationsDbAdapter.KEY_TAG_NAME));
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
+		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 	}
 
 	private void invertSign() throws ParseException {
@@ -174,7 +176,7 @@ public class OperationEditor extends Activity {
 			mOpSumText.setText(mCurrentOp.getSumStr());
 		} else {
 			mCurrentOp = new Operation();
-			if (mCurrentOp.getSum() == 0.0) {
+			if (mCurrentOp.mSum == 0.0) {
 				mOpSumText.setText("");
 			} else {
 				mOpSumText.setText(mCurrentOp.getSumStr());
@@ -183,12 +185,13 @@ public class OperationEditor extends Activity {
 		}
 		Tools.setSumTextGravity(mOpSumText);
 		Operation op = mCurrentOp;
-		mPreviousSum = op.getSum();
-		Tools.setTextWithoutComplete(mOpThirdPartyText, op.getThirdParty());
-		Tools.setTextWithoutComplete(mOpModeText, op.getMode());
-		Tools.setTextWithoutComplete(mOpTagText, op.getTag());
+		mPreviousSum = op.mSum;
+		Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
+		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
+		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
 		mDatePicker.init(op.getYear(), op.getMonth(), op.getDay(),
 				mDateSetListener);
+		mNotesText.setText(op.mNotes);
 	}
 
 	@Override
@@ -220,12 +223,13 @@ public class OperationEditor extends Activity {
 					if (isFormValid(errMsg)) {
 						saveState();
 						Intent res = new Intent();
-						res.putExtra("sum", mCurrentOp.getSum());
+						res.putExtra("sum", mCurrentOp.mSum);
 						res.putExtra("oldSum", mPreviousSum);
 						setResult(RESULT_OK, res);
 						finish();
 					} else {
-						Tools.popError(OperationEditor.this, errMsg.toString(), null);
+						Tools.popError(OperationEditor.this, errMsg.toString(),
+								null);
 					}
 				} catch (ParseException e) {
 					Tools.popError(OperationEditor.this, e.getMessage(), null);
@@ -277,11 +281,11 @@ public class OperationEditor extends Activity {
 
 	private void saveState() throws ParseException {
 		Operation op = mCurrentOp;
-		op.setThirdParty(mOpThirdPartyText.getText().toString());
-		op.setMode(mOpModeText.getText().toString());
-		op.setTag(mOpTagText.getText().toString());
+		op.mThirdParty = mOpThirdPartyText.getText().toString();
+		op.mMode = mOpModeText.getText().toString();
+		op.mTag = mOpTagText.getText().toString();
 		op.setSumStr(mOpSumText.getText().toString());
-
+		op.mNotes = mNotesText.getText().toString();
 		if (mRowId == null) {
 			long id = mDbHelper.createOp(op);
 			if (id > 0) {
@@ -309,6 +313,7 @@ public class OperationEditor extends Activity {
 		outState.putString("mode", mOpModeText.getText().toString());
 		outState.putString("sum", mOpSumText.getText().toString());
 		outState.putLong("rowId", mRowId.longValue());
+		outState.putString("notes", mNotesText.getText().toString());
 		outState.putDouble("previousSum", mPreviousSum);
 
 		mOnRestore = true;
@@ -329,6 +334,7 @@ public class OperationEditor extends Activity {
 		mCurrentOp = op;
 		mDatePicker.init(op.getYear(), op.getMonth(), op.getDay(),
 				mDateSetListener);
+		mNotesText.setText(state.getString("notes"));
 	}
 
 	@Override

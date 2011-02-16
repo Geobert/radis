@@ -10,14 +10,17 @@ import android.database.Cursor;
 
 public class Operation {
 	private GregorianCalendar mDate;
-	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
-	public static SimpleDateFormat SHORT_DATE_FORMAT = new SimpleDateFormat("dd/MM");
+	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
+			"dd/MM/yyyy");
+	public static SimpleDateFormat SHORT_DATE_FORMAT = new SimpleDateFormat(
+			"dd/MM");
 	public static DecimalFormat SUM_FORMAT;
 
-	private String mThirdParty;
-	private String mTag;
-	private String mMode;
-	private double mSum;
+	public String mThirdParty;
+	public String mTag;
+	public String mMode;
+	public String mNotes;
+	public double mSum;
 
 	public Operation(Cursor op) {
 		mThirdParty = op
@@ -32,6 +35,8 @@ public class Operation {
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getLong(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_DATE)));
+		mNotes = op.getString(op
+				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_NOTES));
 	}
 
 	public Operation() {
@@ -40,6 +45,7 @@ public class Operation {
 		mThirdParty = "";
 		mMode = "";
 		mTag = "";
+		mNotes = "";
 	}
 
 	public int getMonth() {
@@ -80,38 +86,6 @@ public class Operation {
 
 	public void setDate(long date) {
 		mDate.setTimeInMillis(date);
-	}
-
-	public String getThirdParty() {
-		return mThirdParty;
-	}
-
-	public void setThirdParty(String thirdParty) {
-		this.mThirdParty = thirdParty;
-	}
-
-	public String getTag() {
-		return mTag;
-	}
-
-	public void setTag(String tag) {
-		this.mTag = tag;
-	}
-
-	public String getMode() {
-		return mMode;
-	}
-
-	public void setMode(String mode) {
-		this.mMode = mode;
-	}
-
-	public double getSum() {
-		return mSum;
-	}
-
-	public void setSum(double sum) {
-		this.mSum = sum;
 	}
 
 	public String getSumStr() {

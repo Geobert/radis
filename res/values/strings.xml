@@ -89,4 +89,5 @@
 <string name="no_more_ops">No more transaction</string>
 <string name="no_start_amount">Start amount is empty</string>
 <string name="misc">Misc</string>
+<string name="notes">Notes</string>
 </resources>

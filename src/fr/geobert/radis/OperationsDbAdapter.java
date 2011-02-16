@@ -130,21 +130,22 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	public long createOp(Operation op) {
 		ContentValues initialValues = new ContentValues();
 
-		String key = op.getThirdParty();
+		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
 				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
 
-		key = op.getTag();
+		key = op.mTag;
 		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
 				initialValues);
 
-		key = op.getMode();
+		key = op.mMode;
 		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
 				mModesMap, initialValues);
 
-		initialValues.put(KEY_OP_SUM, op.getSum());
+		initialValues.put(KEY_OP_SUM, op.mSum);
 		initialValues.put(KEY_OP_DATE, op.getDate());
 		initialValues.put(KEY_OP_ACCOUNT_ID, mAccountId);
+		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 	}
 
@@ -171,7 +172,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
 			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
 			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
-			"ops." + KEY_OP_ACCOUNT_ID };
+			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES };
 
 	private static final String RESTRICT_TO_ACCOUNT = "ops."
 			+ KEY_OP_ACCOUNT_ID + " = %d";
@@ -224,21 +225,21 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	public boolean updateOp(long rowId, Operation op) {
 		ContentValues args = new ContentValues();
 
-		String key = op.getThirdParty();
+		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
 				KEY_OP_THIRD_PARTY, mThirdPartiesMap, args);
 
-		key = op.getTag();
+		key = op.mTag;
 		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
 				args);
 
-		key = op.getMode();
+		key = op.mMode;
 		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
 				mModesMap, args);
 
-		args.put(KEY_OP_SUM, op.getSum());
+		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_DATE, op.getDate());
-
+		args.put(KEY_OP_NOTES, op.mNotes);
 		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
 	}

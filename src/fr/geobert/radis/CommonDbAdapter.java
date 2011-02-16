@@ -17,7 +17,7 @@ import android.util.Log;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 3;
+	protected static final int DATABASE_VERSION = 4;
 
 	protected static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	protected static final String DATABASE_MODES_TABLE = "modes";
@@ -73,13 +73,18 @@ public class CommonDbAdapter {
 	public static final String KEY_OP_SCHEDULED_ID = "op_scheduled_id";
 	public static final String KEY_OP_ACCOUNT_ID = "op_account_id";
 	public static final String KEY_OP_ROWID = "_id";
+	public static final String KEY_OP_NOTES = "op_notes";
 
 	protected static final String DATABASE_OP_CREATE = "create table "
-			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID
-			+ " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY
-			+ " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
-			+ " real not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
-			+ KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, "
+			+ DATABASE_OPERATIONS_TABLE + "(" 
+			+ KEY_OP_ROWID + " integer primary key autoincrement, " 
+			+ KEY_OP_THIRD_PARTY + " integer, " 
+			+ KEY_OP_TAG + " integer, " 
+			+ KEY_OP_SUM + " real not null, " 
+			+ KEY_OP_ACCOUNT_ID + " integer not null, "
+			+ KEY_OP_MODE + " integer, " 
+			+ KEY_OP_DATE + " integer not null, "
+			+ KEY_OP_NOTES + " string, "
 			+ KEY_OP_SCHEDULED_ID + " integer, FOREIGN KEY ("
 			+ KEY_OP_THIRD_PARTY + ") REFERENCES "
 			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
@@ -126,7 +131,8 @@ public class CommonDbAdapter {
 			+ " = old."
 			+ KEY_TAG_ROWID
 			+ "; END";
-
+	protected static final String ADD_NOTES_COLUNM = "ALTER TABLE " + DATABASE_OPERATIONS_TABLE + " ADD COLUMN " + KEY_OP_NOTES + " string"; 
+	
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected final Context mCtx;
@@ -198,7 +204,8 @@ public class CommonDbAdapter {
 			case 2:
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
-
+			case 3:
+				db.execSQL(ADD_NOTES_COLUNM);
 			default:
 				break;
 			}
