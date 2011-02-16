@@ -83,6 +83,24 @@ public class OperationList extends ListActivity {
 				((TextView) view).setText(Operation.SHORT_DATE_FORMAT
 						.format(date));
 				return true;
+			} else if (colName.equals(OperationsDbAdapter.KEY_TAG_NAME)) {
+				TextView textView = ((TextView) view);
+				StringBuilder b = new StringBuilder();
+				String s = cursor.getString(columnIndex);
+				if (null != s) {
+					b.append(s);
+				} else {
+					b.append('−');
+				}
+				b.append(" / ");
+				s = cursor.getString(columnIndex + 1);
+				if (null != s) {
+					b.append(s);
+				} else {
+					b.append('−');
+				}
+				textView.setText(b.toString());
+				return true;
 			}
 			return false;
 		}
@@ -194,29 +212,44 @@ public class OperationList extends ListActivity {
 		mQuickAddButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				Operation op = new Operation();
-				op.setThirdParty(mQuickAddThirdParty.getText().toString());
-				try {
-					op.setSumStr(mQuickAddAmount.getText().toString());
-					mDbHelper.createOp(op);
-					updateSums(0, op.getSum());
-					mQuickAddAmount.setText("");
-					mQuickAddThirdParty.setText("");
-					fillData();
-					updateSumsAndSelection();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				quickAddOp();
 			}
 		});
-		mQuickAddButton.setEnabled(false);
+		OperationList.setQuickAddButEnabled(mQuickAddButton, false);
 		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
 				mQuickAddAmount, mQuickAddButton);
 		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
 		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
 	}
 
-	private void updateSumsAndSelection() {
+	public static void setQuickAddButEnabled(Button but, boolean b) {
+		but.setEnabled(b);
+		int drawable;
+		if (b) {
+			drawable = R.drawable.btn_check_buttonless_on;
+		} else {
+			drawable = R.drawable.btn_check_buttonless_off;
+		}
+		but.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
+	}
+
+	private void quickAddOp() {
+		Operation op = new Operation();
+		op.setThirdParty(mQuickAddThirdParty.getText().toString());
+		try {
+			op.setSumStr(mQuickAddAmount.getText().toString());
+			mDbHelper.createOp(op);
+			updateSums(0, op.getSum());
+			mQuickAddAmount.setText("");
+			mQuickAddThirdParty.setText("");
+			fillData();
+			updateSumsAndSelection();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void updateSumsAndSelection() throws Exception {
 		double curSum = getAccountCurSum();
 		updateFutureSumDisplay(curSum);
 		if (mLastSelectedPosition == null) {
@@ -228,28 +261,39 @@ public class OperationList extends ListActivity {
 			updateSumAtSelectedOpDisplay(data, curSum);
 		}
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
 		fillData();
-		updateSumsAndSelection();
-		getListView().setOnItemSelectedListener(
-				new AdapterView.OnItemSelectedListener() {
-					public void onItemSelected(AdapterView parentView,
-							View childView, int position, long id) {
-						mLastOps.moveToPosition(position);
-						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-						adapter.setSelectedPosition(position);
-						updateSumAtSelectedOpDisplay(mLastOps,
-								getAccountCurSum());
-					}
+		try {
+			updateSumsAndSelection();
+			getListView().setOnItemSelectedListener(
+					new AdapterView.OnItemSelectedListener() {
+						public void onItemSelected(AdapterView parentView,
+								View childView, int position, long id) {
+							mLastOps.moveToPosition(position);
+							SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+							adapter.setSelectedPosition(position);
+							try {
+								updateSumAtSelectedOpDisplay(mLastOps,
+										getAccountCurSum());
+							} catch (Exception e) {
+								Tools.popError(OperationList.this,
+										e.getMessage(),
+										Tools.createRestartClickListener());
+							}
+						}
 
-					public void onNothingSelected(AdapterView parentView) {
-						((SelectedCursorAdapter) getListAdapter())
-								.setSelectedPosition(-1);
-					}
-				});
+						public void onNothingSelected(AdapterView parentView) {
+							((SelectedCursorAdapter) getListAdapter())
+									.setSelectedPosition(-1);
+						}
+					});
+		} catch (Exception e) {
+			Tools.popError(OperationList.this, e.getMessage(),
+					Tools.createRestartClickListener());
+		}
 	}
 
 	@Override
@@ -308,7 +352,12 @@ public class OperationList extends ListActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
-			updateSums(data);
+			try {
+				updateSums(data);
+			} catch (Exception e) {
+				Tools.popError(OperationList.this, e.getMessage(),
+						Tools.createRestartClickListener());
+			}
 		}
 	}
 
@@ -341,14 +390,13 @@ public class OperationList extends ListActivity {
 		fillLastOps(c);
 
 		MatrixCursor opsCursor = mLastOps;
-		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-				OperationsDbAdapter.KEY_OP_SUM };
+				OperationsDbAdapter.KEY_OP_SUM, OperationsDbAdapter.KEY_TAG_NAME,
+				OperationsDbAdapter.KEY_MODE_NAME };
 
-		// and an array of the fields we want to bind those fields to (in this
-		// case just text1)
-		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum };
+		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
+				R.id.op_infos };
 
 		// Now create a simple cursor adapter and set it to display
 		SelectedCursorAdapter operations = new SelectedCursorAdapter(this,
@@ -364,7 +412,7 @@ public class OperationList extends ListActivity {
 		startActivityForResult(i, ACTIVITY_OP_CREATE);
 	}
 
-	private void deleteOp(AdapterContextMenuInfo info) {
+	private void deleteOp(AdapterContextMenuInfo info) throws Exception {
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
 		double sum = c.getDouble(c
@@ -373,20 +421,29 @@ public class OperationList extends ListActivity {
 		mDbHelper.deleteOp(info.id);
 	}
 
-	private double getAccountOpSum() {
+	// generic function for getAccountOpSum and getAccountCurSum
+	private double getAccountSum(String col) throws Exception {
 		Cursor c = mCurAccount;
-		c.requery();
-		c.moveToFirst();
-		return c.getDouble(c
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+		if (c.isClosed()) {
+			mCurAccount = mDbHelper.fetchAccount(mAccountId);
+			startManagingCursor(mCurAccount);
+			c = mCurAccount;
+			return c.getDouble(c.getColumnIndex(col));
+		} else {
+			if (c.requery() && c.moveToFirst()) {
+				return c.getDouble(c.getColumnIndexOrThrow(col));
+			} else {
+				throw new Exception("Error while requery");
+			}
+		}
 	}
 
-	private double getAccountCurSum() {
-		Cursor c = mCurAccount;
-		c.requery();
-		c.moveToFirst();
-		return c.getDouble(c
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM));
+	private double getAccountOpSum() throws Exception {
+		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_OP_SUM);
+	}
+
+	private double getAccountCurSum() throws Exception {
+		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM);
 	}
 
 	private double computeSumFromCursor(Cursor c) {
@@ -419,12 +476,12 @@ public class OperationList extends ListActivity {
 		return ops;
 	}
 
-	private void updateSums(Intent data) {
+	private void updateSums(Intent data) throws Exception {
 		Bundle extras = data.getExtras();
 		updateSums(extras.getDouble("oldSum"), extras.getDouble("sum"));
 	}
 
-	private void updateSums(double oldSum, double sum) {
+	private void updateSums(double oldSum, double sum) throws Exception {
 		double opSum = getAccountOpSum();
 		opSum = opSum - oldSum + sum;
 		if (mDbHelper.updateOpSum(mAccountId, opSum)) {
@@ -496,7 +553,12 @@ public class OperationList extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 		if (id != -1) {
 			MatrixCursor data = (MatrixCursor) l.getItemAtPosition(position);
-			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
+			try {
+				updateSumAtSelectedOpDisplay(data, getAccountCurSum());
+			} catch (Exception e) {
+				Tools.popError(OperationList.this, e.getMessage(),
+						Tools.createRestartClickListener());
+			}
 		} else { // get more ops is clicked
 			getMoreOps();
 		}
@@ -524,8 +586,17 @@ public class OperationList extends ListActivity {
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putCharSequence("third_party", mQuickAddThirdParty.getText());
+		outState.putCharSequence("amount", mQuickAddAmount.getText());
+	}
+
+	@Override
 	protected void onRestoreInstanceState(Bundle state) {
 		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
+		mQuickAddThirdParty.setText(state.getCharSequence("third_party"));
+		mQuickAddAmount.setText(state.getCharSequence("amount"));
 		mOnRestore = true;
 	}
 
@@ -549,9 +620,16 @@ public class OperationList extends ListActivity {
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							deleteOp(mOpToDelete);
-							fillData();
-							mOpToDelete = null;
+							try {
+								deleteOp(mOpToDelete);
+								fillData();
+								mOpToDelete = null;
+							} catch (Exception e) {
+								Tools.popError(OperationList.this,
+										e.getMessage(),
+										Tools.createRestartClickListener());
+							}
+
 						}
 					});
 		default:

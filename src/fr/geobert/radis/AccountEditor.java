@@ -24,8 +24,6 @@ public class AccountEditor extends Activity {
 	private Long mRowId;
 	private ArrayAdapter<CharSequence> mCurrAdapter;
 
-	// to let inner class access to the context
-	private AccountEditor context = this;
 	private boolean mOnRestore = false;
 
 	@Override
@@ -71,7 +69,7 @@ public class AccountEditor extends Activity {
 					saveState();
 					finish();
 				} else {
-					Tools.getInstance(context).popError(errMsg.toString());
+					Tools.popError(AccountEditor.this, errMsg.toString(), null);
 				}
 			}
 		});

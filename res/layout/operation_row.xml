@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	style="@style/OpLine" android:background="@drawable/odd_op_line">
-	<TextView android:id="@+id/op_date" android:minWidth="40sp"
-		android:text="24/12" style="@style/OpRowTextView" />
-	<TextView android:id="@+id/op_third_party" style="@style/OpRowTextView"
-		android:layout_width="fill_parent" android:text="toto"
-		android:layout_weight="1"  />
-	<TextView android:id="@+id/op_sum" style="@style/OpRowTextView.Sums"
-		android:text="200,00" />
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:background="@drawable/odd_op_line" android:padding="0px">
+	<LinearLayout style="@style/OpLine">
+		<TextView android:id="@+id/op_date" android:minWidth="40sp"
+			android:text="24/12" style="@style/OpRowTextView" />
+		<TextView android:id="@+id/op_third_party" style="@style/OpRowTextView"
+			android:layout_width="fill_parent" android:text="toto"
+			android:layout_weight="1" />
+		<TextView android:id="@+id/op_sum" style="@style/OpRowTextView.Sums"
+			android:text="200,00" />
+	</LinearLayout>
+	<LinearLayout style="@style/OpLine" android:gravity="right">
+		<TextView android:id="@+id/op_infos"
+			android:text="Courses / Carte Bleu" style="@style/OpRowTextView.Infos" />
+	</LinearLayout>
 </LinearLayout>

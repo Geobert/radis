@@ -11,15 +11,21 @@ public class QuickAddTextWatcher implements TextWatcher {
 	private EditText mAmount;
 	private Button mQuickAdd;
 
-	public QuickAddTextWatcher(AutoCompleteTextView thirdParty, EditText amount, Button quickAdd) {
+	public QuickAddTextWatcher(AutoCompleteTextView thirdParty,
+			EditText amount, Button quickAdd) {
 		mThirdParty = thirdParty;
 		mAmount = amount;
 		mQuickAdd = quickAdd;
 	}
-	
+
 	@Override
 	public void afterTextChanged(Editable s) {
-		mQuickAdd.setEnabled((mThirdParty.length() != 0) && (mAmount.length() != 0));		
+		EditText amount = mAmount;
+		OperationList
+				.setQuickAddButEnabled(
+						mQuickAdd,
+						((mThirdParty.length() != 0) && (amount.length() != 0) && !(amount
+								.length() == 1 && amount.getText().charAt(0) == '-')));
 	}
 
 	@Override

@@ -19,9 +19,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class Tools {
-	private static Tools instance = null;
-	private Context mCtx;
-
 	// these are here because database force to use "_id" to be able to use
 	// SimpleCursorAdaptater, so KEY_ACCOUNT_ROWID == KEY_OP_ROWID and make bug
 	// when used in extras
@@ -43,24 +40,20 @@ public class Tools {
 
 	}
 
-	public void popError(String msg) {
-		AlertDialog alertDialog = new AlertDialog.Builder(mCtx).create();
+	public static DialogInterface.OnClickListener createRestartClickListener() {
+		return new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				Tools.restartApp();
+			}
+		};
+	}
+	
+	public static void popError(Activity ctx, String msg, DialogInterface.OnClickListener onClick) {
+		AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
 		alertDialog.setTitle("Erreur");
 		alertDialog.setMessage(msg);
-		alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int which) {
-				return;
-			}
-		});
+		alertDialog.setButton("OK", onClick);
 		alertDialog.show();
-	}
-
-	public static Tools getInstance(Context ctx) {
-		if (null == instance) {
-			instance = new Tools();
-		}
-		instance.mCtx = ctx;
-		return instance;
 	}
 
 	public static void setTextWithoutComplete(AutoCompleteTextView v,
