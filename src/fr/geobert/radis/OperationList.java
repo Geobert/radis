@@ -260,7 +260,10 @@ public class OperationList extends ListActivity {
 
 	private void updateSumsAndSelection() throws Exception {
 		double curSum = getAccountCurSum();
-		updateFutureSumDisplay(curSum);
+		Cursor c = mLastOps;
+		c.requery();
+		c.moveToFirst();
+		updateFutureSumDisplay(curSum, c);
 		if (mLastSelectedPosition == null) {
 			updateSumAtDateDisplay(new GregorianCalendar(), curSum);
 		} else {
@@ -505,16 +508,16 @@ public class OperationList extends ListActivity {
 		double opSum = getAccountOpSum();
 		opSum = opSum - oldSum + sum;
 		if (mDbHelper.updateOpSum(mAccountId, opSum)) {
-			double curSum = mDbHelper.updateCurrentSum(mAccountId);
-			updateFutureSumDisplay(curSum);
+			Cursor c = mLastOps;
+			c.requery();
+			c.moveToFirst();
+			double curSum = mDbHelper.updateCurrentSum(mAccountId, c);
+			updateFutureSumDisplay(curSum, c);
 			updateSumAtDateDisplay(null, curSum);
 		}
 	}
 
-	private void updateFutureSumDisplay(double curSum) {
-		Cursor c = mLastOps;
-		c.requery();
-		c.moveToFirst();
+	private void updateFutureSumDisplay(double curSum, Cursor c) {
 		TextView t = (TextView) findViewById(R.id.future_sum);
 		if (c.isFirst()) {
 			Operation latestOp = new Operation(c);

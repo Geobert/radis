@@ -17,7 +17,7 @@ import android.util.Log;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 4;
+	protected static final int DATABASE_VERSION = 5;
 
 	protected static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	protected static final String DATABASE_MODES_TABLE = "modes";
@@ -32,6 +32,7 @@ public class CommonDbAdapter {
 	public static final String KEY_ACCOUNT_OP_SUM = "account_operations_sum";
 	public static final String KEY_ACCOUNT_CURRENCY = "account_currency";
 	public static final String KEY_ACCOUNT_ROWID = "_id";
+	public static final String KEY_ACCOUNT_CUR_SUM_DATE = "account_current_sum_date";
 
 	private static final String DATABASE_ACCOUNT_CREATE = "create table "
 			+ DATABASE_ACCOUNT_TABLE + "(" + KEY_ACCOUNT_ROWID
@@ -39,6 +40,7 @@ public class CommonDbAdapter {
 			+ " text not null, " + KEY_ACCOUNT_DESC + " text not null, "
 			+ KEY_ACCOUNT_START_SUM + " real not null, " + KEY_ACCOUNT_OP_SUM
 			+ " real not null, " + KEY_ACCOUNT_CUR_SUM + " real not null, "
+			+ KEY_ACCOUNT_CUR_SUM_DATE + " integer not null, "
 			+ KEY_ACCOUNT_CURRENCY + " text not null);";
 
 	public static final String KEY_THIRD_PARTY_ROWID = "_id";
@@ -76,17 +78,13 @@ public class CommonDbAdapter {
 	public static final String KEY_OP_NOTES = "op_notes";
 
 	protected static final String DATABASE_OP_CREATE = "create table "
-			+ DATABASE_OPERATIONS_TABLE + "(" 
-			+ KEY_OP_ROWID + " integer primary key autoincrement, " 
-			+ KEY_OP_THIRD_PARTY + " integer, " 
-			+ KEY_OP_TAG + " integer, " 
-			+ KEY_OP_SUM + " real not null, " 
-			+ KEY_OP_ACCOUNT_ID + " integer not null, "
-			+ KEY_OP_MODE + " integer, " 
-			+ KEY_OP_DATE + " integer not null, "
-			+ KEY_OP_NOTES + " string, "
-			+ KEY_OP_SCHEDULED_ID + " integer, FOREIGN KEY ("
-			+ KEY_OP_THIRD_PARTY + ") REFERENCES "
+			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID
+			+ " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY
+			+ " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
+			+ " real not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
+			+ KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, "
+			+ KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID
+			+ " integer, FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES "
 			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
 			+ "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES "
 			+ DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID + "), FOREIGN KEY ("
@@ -131,8 +129,12 @@ public class CommonDbAdapter {
 			+ " = old."
 			+ KEY_TAG_ROWID
 			+ "; END";
-	protected static final String ADD_NOTES_COLUNM = "ALTER TABLE " + DATABASE_OPERATIONS_TABLE + " ADD COLUMN " + KEY_OP_NOTES + " string"; 
-	
+	protected static final String ADD_NOTES_COLUNM = "ALTER TABLE "
+			+ DATABASE_OPERATIONS_TABLE + " ADD COLUMN " + KEY_OP_NOTES
+			+ " text";
+	protected static final String ADD_CUR_DATE_COLUNM = "ALTER TABLE "
+			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
+			+ KEY_ACCOUNT_CUR_SUM_DATE + " integer not null DEFAULT 0";
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected final Context mCtx;
@@ -206,6 +208,8 @@ public class CommonDbAdapter {
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 			case 3:
 				db.execSQL(ADD_NOTES_COLUNM);
+			case 4:
+				db.execSQL(ADD_CUR_DATE_COLUNM);
 			default:
 				break;
 			}
@@ -254,7 +258,8 @@ public class CommonDbAdapter {
 	public Cursor fetchAllAccounts() {
 		Cursor c = mDb.query(DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
-				KEY_ACCOUNT_CURRENCY }, null, null, null, null, null);
+				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE }, null, null,
+				null, null, null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -293,16 +298,19 @@ public class CommonDbAdapter {
 				+ rowId, null) > 0;
 	}
 
-	public double updateCurrentSum(long rowId) {
+	public double updateCurrentSum(long rowId, Cursor op) {
 		Cursor account = getCurAccountIfDiff(rowId);
-		double start = account
-				.getDouble(account
-						.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
+		double start = account.getDouble(account
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
 		double opSum = account.getDouble(account
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		ContentValues args = new ContentValues();
 		double curSum = start + opSum;
 		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
+		if (null != op) {
+			args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op
+					.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE)));
+		}
 		mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
 				+ rowId, null);
 		return curSum;
@@ -376,7 +384,7 @@ public class CommonDbAdapter {
 			if (backupDB.exists()) {
 				FileChannel dst = new FileOutputStream(currentDB).getChannel();
 				FileChannel src = new FileInputStream(backupDB).getChannel();
-				
+
 				dst.transferFrom(src, 0, src.size());
 				src.close();
 				dst.close();

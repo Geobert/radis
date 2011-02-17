@@ -92,4 +92,5 @@
 <string name="no_start_amount">Le montant de départ est vide</string>
 <string name="misc">Divers</string>
 <string name="notes">Remarques</string>
+<string name="balance_at">Solde au %s</string>
 </resources>

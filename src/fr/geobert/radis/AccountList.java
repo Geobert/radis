@@ -2,6 +2,7 @@ package fr.geobert.radis;
 
 import java.text.DecimalFormat;
 import java.util.Currency;
+import java.util.Date;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -62,8 +63,8 @@ public class AccountList extends ListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.account_list_menu, menu);
-	    inflater.inflate(R.menu.advanced_actions, menu);
+		inflater.inflate(R.menu.account_list_menu, menu);
+		inflater.inflate(R.menu.advanced_actions, menu);
 		return true;
 	}
 
@@ -125,6 +126,8 @@ public class AccountList extends ListActivity {
 				double sum = cursor.getDouble(columnIndex);
 				if (sum < 0.0) {
 					textView.setTextColor(res.getColor(R.color.op_alert));
+				} else {
+					textView.setTextColor(res.getColor(R.color.positiveSum));
 				}
 				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
 				textView.setText(txt
@@ -135,6 +138,17 @@ public class AccountList extends ListActivity {
 												.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)))
 								.getSymbol());
 
+				return true;
+			} else if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE)) {
+				TextView textView = ((TextView) view);
+				long dateLong = cursor.getLong(cursor.getColumnIndex(colName));
+				if (dateLong > 0) {
+					textView.setText(String.format(
+							getString(R.string.balance_at),
+							Operation.DATE_FORMAT.format(new Date(dateLong))));
+				} else {
+					textView.setText("");
+				}
 				return true;
 			}
 			return false;
@@ -148,11 +162,13 @@ public class AccountList extends ListActivity {
 		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
 				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM,
+				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE,
 				CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
 
 		// and an array of the fields we want to bind those fields to (in this
 		// case just text1)
-		int[] to = new int[] { R.id.account_name, R.id.account_sum };
+		int[] to = new int[] { R.id.account_name, R.id.account_sum,
+				R.id.account_balance_at };
 
 		// Now create a simple cursor adapter and set it to display
 		SimpleCursorAdapter accounts = new SimpleCursorAdapter(this,
@@ -198,8 +214,8 @@ public class AccountList extends ListActivity {
 							mAccountToDelete = 0;
 						}
 					});
-			default:
-				return Tools.onDefaultCreateDialog(this, id, mDbHelper);
+		default:
+			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
 	}
 }
