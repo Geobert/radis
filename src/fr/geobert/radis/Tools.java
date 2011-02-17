@@ -150,7 +150,7 @@ public class Tools {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							Activity ctx = mActivity;
-							if (mDb.backupDatabase()) {
+							if (mDb.restoreDatabase()) {
 								StringBuilder msg = new StringBuilder();
 								msg.append(
 										ctx.getString(R.string.restore_success))
