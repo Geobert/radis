@@ -2,8 +2,14 @@
 <resources>
 <color name="highlight">#FFFF9100</color>
 <color name="op_alert">#FFFA9898</color>
-<color name="op_selected">#FF2f5839</color>
 <color name="positiveSum">#7ee897</color>
-<color name="line_color">#FF5F5F5F</color>
+<!--<color name="line_color">#FF000000</color>-->
+<!--<color name="line_end_gradient_color">#FF202020</color>-->
+<!--<color name="op_selected">#FF2f5839</color>-->
+<!--<color name="op_selected_end_gradient">#ff284b30</color>-->
+<color name="op_selected">#FF0f4c6b</color>
+<color name="op_selected_end_gradient">#ff0e435e</color>
+<color name="line_color">#FF353535</color>
+<color name="line_end_gradient_color">#ff2A2A2A</color>
 <color name="text_color">#efefef</color>
 </resources>
