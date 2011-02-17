@@ -13,7 +13,14 @@
 			android:text="200,00" />
 	</LinearLayout>
 	<LinearLayout style="@style/OpLine" android:gravity="right">
+		<LinearLayout android:layout_width="fill_parent" android:layout_weight="1"
+			android:layout_height="fill_parent" android:orientation="horizontal"
+			android:gravity="center_vertical|left" android:paddingLeft="5px">
+			<ImageView android:src="@drawable/arrow_down16"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:id="@+id/op_icon" />
+		</LinearLayout>
 		<TextView android:id="@+id/op_infos" android:text="Courses / Carte Bleu"
-			style="@style/OpRowTextView.Infos" />
+			style="@style/OpRowTextView.Infos" android:layout_weight="0"/>
 	</LinearLayout>
 </LinearLayout>

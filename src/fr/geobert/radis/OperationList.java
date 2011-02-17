@@ -31,6 +31,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -71,11 +72,15 @@ public class OperationList extends ListActivity {
 
 			if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
 				TextView textView = ((TextView) view);
+				ImageView i = (ImageView) ((LinearLayout) view.getParent()
+						.getParent()).findViewById(R.id.op_icon);
 				double sum = cursor.getDouble(columnIndex);
 				if (sum >= 0.0) {
 					textView.setTextColor(res.getColor(R.color.positiveSum));
+					i.setImageResource(R.drawable.arrow_up16);
 				} else {
 					textView.setTextColor(res.getColor(R.color.text_color));
+					i.setImageResource(R.drawable.arrow_down16);
 				}
 				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
 				textView.setText(txt);
@@ -110,6 +115,7 @@ public class OperationList extends ListActivity {
 
 	private class SelectedCursorAdapter extends SimpleCursorAdapter {
 		private int selectedPos = -1;
+
 		SelectedCursorAdapter(Context context, int layout, Cursor c,
 				String[] from, int[] to) {
 			super(context, layout, c, from, to);
