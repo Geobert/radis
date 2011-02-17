@@ -45,9 +45,9 @@ public class CorrectCommaWatcher implements TextWatcher {
 			}
 		}
 		if (s.length() == 0) {
-			mEditText.setGravity(Gravity.CENTER_VERTICAL|Gravity.LEFT);
+			mEditText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
 		} else {
-			mEditText.setGravity(Gravity.CENTER_VERTICAL|Gravity.RIGHT);
+			mEditText.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
 		}
 	}
 
@@ -64,5 +64,4 @@ public class CorrectCommaWatcher implements TextWatcher {
 		mAutoNegate = b;
 		return this;
 	}
-
 }

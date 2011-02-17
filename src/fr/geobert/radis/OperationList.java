@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AutoCompleteTextView;
@@ -59,6 +60,7 @@ public class OperationList extends ListActivity {
 	private EditText mQuickAddAmount;
 	private Button mQuickAddButton;
 	private QuickAddTextWatcher mQuickAddTextWatcher;
+	private CorrectCommaWatcher mCorrectCommaWatcher;
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
 		private Resources res = getResources();
@@ -203,11 +205,10 @@ public class OperationList extends ListActivity {
 				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
 		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
-
-		mQuickAddAmount.addTextChangedListener(new CorrectCommaWatcher(
-				Operation.SUM_FORMAT.getDecimalFormatSymbols()
-						.getDecimalSeparator(), mQuickAddAmount)
-				.setAutoNegate(true));
+		mCorrectCommaWatcher = new CorrectCommaWatcher(Operation.SUM_FORMAT
+				.getDecimalFormatSymbols().getDecimalSeparator(),
+				mQuickAddAmount).setAutoNegate(true);
+		mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher);
 		mQuickAddButton = (Button) findViewById(R.id.quickadd_validate);
 		mQuickAddButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -242,6 +243,11 @@ public class OperationList extends ListActivity {
 			updateSums(0, op.mSum);
 			mQuickAddAmount.setText("");
 			mQuickAddThirdParty.setText("");
+			InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+			mgr.hideSoftInputFromWindow(mQuickAddAmount.getWindowToken(), 0);
+			mCorrectCommaWatcher.setAutoNegate(true);
+			mQuickAddAmount.clearFocus();
+			mQuickAddThirdParty.clearFocus();
 			fillData();
 			updateSumsAndSelection();
 		} catch (Exception e) {
@@ -263,9 +269,17 @@ public class OperationList extends ListActivity {
 	}
 
 	@Override
+	protected void onStart() {
+		super.onStart();
+		mQuickAddThirdParty.clearFocus();
+
+	}
+
+	@Override
 	protected void onResume() {
 		super.onResume();
 		fillData();
+		mCorrectCommaWatcher.setAutoNegate(true);
 		try {
 			updateSumsAndSelection();
 			getListView().setOnItemSelectedListener(
@@ -367,7 +381,8 @@ public class OperationList extends ListActivity {
 			do {
 				Object[] values = { new Long(c.getLong(0)), c.getString(1),
 						c.getString(2), c.getString(3),
-						new Double(c.getDouble(4)), new Long(c.getLong(5)), c.getString(6) };
+						new Double(c.getDouble(4)), new Long(c.getLong(5)),
+						c.getString(6) };
 				lo.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -377,14 +392,14 @@ public class OperationList extends ListActivity {
 	}
 
 	private void fillData() {
-		mLastOps = new MatrixCursor(
-				new String[] { OperationsDbAdapter.KEY_OP_ROWID,
-						OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-						OperationsDbAdapter.KEY_TAG_NAME,
-						OperationsDbAdapter.KEY_MODE_NAME,
-						OperationsDbAdapter.KEY_OP_SUM,
-						OperationsDbAdapter.KEY_OP_DATE,
-						OperationsDbAdapter.KEY_OP_NOTES });
+		mLastOps = new MatrixCursor(new String[] {
+				OperationsDbAdapter.KEY_OP_ROWID,
+				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
+				OperationsDbAdapter.KEY_TAG_NAME,
+				OperationsDbAdapter.KEY_MODE_NAME,
+				OperationsDbAdapter.KEY_OP_SUM,
+				OperationsDbAdapter.KEY_OP_DATE,
+				OperationsDbAdapter.KEY_OP_NOTES });
 		startManagingCursor(mLastOps);
 		Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
 		startManagingCursor(c);
@@ -393,7 +408,8 @@ public class OperationList extends ListActivity {
 		MatrixCursor opsCursor = mLastOps;
 		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-				OperationsDbAdapter.KEY_OP_SUM, OperationsDbAdapter.KEY_TAG_NAME,
+				OperationsDbAdapter.KEY_OP_SUM,
+				OperationsDbAdapter.KEY_TAG_NAME,
 				OperationsDbAdapter.KEY_MODE_NAME };
 
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
