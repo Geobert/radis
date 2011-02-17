@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<color name="odd_op">#FFD6D6FF</color>
-<color name="even_op">#FFFFFFFF</color>
 <color name="highlight">#FFFF9100</color>
 <color name="op_alert">#FFFA9898</color>
-<color name="op_selected">#FFF2EB80</color>
-<color name="positiveSum">#24B347</color>
-<color name="blackSum">#000000</color>
+<color name="op_selected">#FF2f5839</color>
+<color name="positiveSum">#7ee897</color>
+<color name="line_color">#FF5F5F5F</color>
+<color name="text_color">#efefef</color>
 </resources>

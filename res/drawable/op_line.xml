@@ -7,5 +7,6 @@
 	<item android:state_selected="true" android:state_focused="true" android:drawable="@color/op_selected" />
 	<item android:state_checked="true" android:drawable="@color/op_selected" />
 	<item android:state_pressed="true" android:drawable="@color/highlight" />
-	<item android:drawable="@color/even_op" />
+<!--	<item android:drawable="@color/line_color" />-->
+	<item android:drawable="@drawable/line_gradient" />
 </selector>

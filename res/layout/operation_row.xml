@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="wrap_content" android:background="@drawable/odd_op_line" android:padding="0px">
+	android:layout_height="wrap_content" android:background="@drawable/op_line"
+	android:padding="0px">
 	<LinearLayout style="@style/OpLine">
 		<TextView android:id="@+id/op_date" android:minWidth="40sp"
 			android:text="24/12" style="@style/OpRowTextView" />
@@ -12,7 +13,7 @@
 			android:text="200,00" />
 	</LinearLayout>
 	<LinearLayout style="@style/OpLine" android:gravity="right">
-		<TextView android:id="@+id/op_infos"
-			android:text="Courses / Carte Bleu" style="@style/OpRowTextView.Infos" />
+		<TextView android:id="@+id/op_infos" android:text="Courses / Carte Bleu"
+			style="@style/OpRowTextView.Infos" />
 	</LinearLayout>
 </LinearLayout>

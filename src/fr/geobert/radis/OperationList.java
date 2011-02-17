@@ -75,7 +75,7 @@ public class OperationList extends ListActivity {
 				if (sum >= 0.0) {
 					textView.setTextColor(res.getColor(R.color.positiveSum));
 				} else {
-					textView.setTextColor(res.getColor(R.color.blackSum));
+					textView.setTextColor(res.getColor(R.color.text_color));
 				}
 				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
 				textView.setText(txt);
@@ -110,9 +110,6 @@ public class OperationList extends ListActivity {
 
 	private class SelectedCursorAdapter extends SimpleCursorAdapter {
 		private int selectedPos = -1;
-		private int[] colors = new int[] { R.drawable.odd_op_line,
-				R.drawable.even_op_line };
-
 		SelectedCursorAdapter(Context context, int layout, Cursor c,
 				String[] from, int[] to) {
 			super(context, layout, c, from, to);
@@ -128,9 +125,9 @@ public class OperationList extends ListActivity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View v = super.getView(position, convertView, parent);
 			if (selectedPos == position) {
-				v.setBackgroundResource(R.color.op_selected);
+				v.setBackgroundResource(R.drawable.line_selected_gradient);
 			} else {
-				v.setBackgroundResource(colors[position % colors.length]);
+				v.setBackgroundResource(R.drawable.op_line);
 			}
 			return v;
 		}
@@ -539,7 +536,7 @@ public class OperationList extends ListActivity {
 	private void selectOpAndAdjustOffset(ListView l, int position) {
 		// Get the top position from the first visible element
 		int firstIdx = l.getFirstVisiblePosition();
-		int offset = 58;
+		int offset = 77;
 		int firstOffset = offset;
 		int count = l.getChildCount();
 		count = count == 0 ? 1 : count;
