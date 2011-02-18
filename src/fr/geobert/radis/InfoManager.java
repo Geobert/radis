@@ -19,7 +19,6 @@ public class InfoManager {
 	private OperationEditor mContext = null;
 	private AlertDialog.Builder mBuilder = null;
 	private AlertDialog mListDialog = null;
-	private AlertDialog mEditDialog = null;
 	private Button mAddBut;
 	private Button mDelBut;
 	private Button mEditBut;
@@ -30,6 +29,8 @@ public class InfoManager {
 	private EditText mEditorText;
 	private Button mOkBut;
 	private AutoCompleteTextView mInfoText;
+	private int mEditId;
+	private int mDeleteId;
 
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
@@ -42,15 +43,17 @@ public class InfoManager {
 	};
 
 	InfoManager(OperationEditor context, OperationsDbAdapter dbHelper,
-			String title, String table, String colName) {
+			String title, String table, String colName, int editId, int deleteId) {
 		mDbHelper = dbHelper;
 		mContext = context;
-		AlertDialog.Builder builder = new AlertDialog.Builder(context);
-		builder.setTitle(title);
 		mInfo = new Bundle();
 		mInfo.putString("title", title);
 		mInfo.putString("table", table);
 		mInfo.putString("colName", colName);
+		mEditId = editId;
+		mDeleteId = deleteId;
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setTitle(title);
 		LayoutInflater inflater = (LayoutInflater) context.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.info_list, null);
 		builder.setPositiveButton(context.getString(R.string.ok),
@@ -70,15 +73,6 @@ public class InfoManager {
 		mEditBut = (Button) layout.findViewById(R.id.edit_info);
 		mInfoText = (AutoCompleteTextView) context
 				.findViewById(EDITTEXT_OF_INFO.get(table));
-		// String[] from = { colName };
-		// int[] to = { R.id.info_text };
-		// ListView lv = (ListView)layout.findViewById(R.id.infos_list);
-		// SimpleCursorAdapter adapter = new SimpleCursorAdapter(mContext,
-		// R.layout.info_row, c, from, to);
-		// lv.setAdapter(adapter);
-		//
-		// builder.setView(layout);
-		// mDialog = builder.create();
 
 		builder.setView(layout);
 		mBuilder = builder;
@@ -141,11 +135,12 @@ public class InfoManager {
 		mEditBut.setEnabled(oneSelected);
 		mOkBut.setEnabled(oneSelected);
 	}
-	
+
 	private void onDeleteClicked() {
-		mContext.showDialog(OperationEditor.INFO_DELETE_DIALOG_ID);
+		mContext.mCurrentInfoTable = mInfo.getString("table");
+		mContext.showDialog(mDeleteId);
 	}
-	
+
 	public void deleteInfo() {
 		mCursor.moveToPosition(mSelectedInfo);
 		mDbHelper.deleteInfo(mInfo.getString("table"),
@@ -156,7 +151,8 @@ public class InfoManager {
 		Bundle info = mInfo;
 		info.remove("value");
 		info.remove("rowId");
-		mContext.showDialog(OperationEditor.EDIT_INFO_DIALOG_ID);
+		mContext.mCurrentInfoTable = info.getString("table");
+		mContext.showDialog(mEditId);
 	}
 
 	private void onEditClicked() {
@@ -166,13 +162,16 @@ public class InfoManager {
 		info.putString("value", mCursor.getString(mCursor.getColumnIndex(mInfo
 				.getString("colName"))));
 		info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
-		mContext.showDialog(OperationEditor.EDIT_INFO_DIALOG_ID);
+		mContext.showDialog(mEditId);
 	}
+
+	private AlertDialog d;
 
 	public void initEditDialog(Dialog dialog) {
 		EditText t = mEditorText;
 		Bundle info = mInfo;
 		if (null != info) {
+			//dialog.setTitle(info.getString("title"));
 			String tmp = info.getString("value");
 			t.setText(tmp);
 		}
@@ -197,23 +196,24 @@ public class InfoManager {
 				});
 		Bundle info = mInfo;
 		mEditorText = (EditText) layout.findViewById(R.id.info_edit_text);
-		// EditText t = (EditText) layout.findViewById(R.id.info_edit_text);
 		if (null != info) {
 			builder.setTitle(info.getString("title"));
-			// String tmp = info.getString("value");
-			// t.setText(tmp);
 		}
 		builder.setView(layout);
-		mEditDialog = builder.create();
-		return mEditDialog;
+		return builder.create();
 	}
 
 	private void saveText() {
 		EditText t = mEditorText;
 		String value = t.getText().toString();
 		long rowId = mInfo.getLong("rowId");
-		if (rowId != 0) { // update
-			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value);
+		long id = mDbHelper.getKeyIdOrCreate(value, mInfo.getString("table"));
+		if (rowId != 0 || id != 0) { // update
+			if (id != 0) {
+				mDbHelper.updateInfo(mInfo.getString("table"), id, value);
+			} else {
+				mDbHelper.updateInfo(mInfo.getString("table"), rowId, value);
+			}
 		} else { // create
 			mDbHelper.createInfo(mInfo.getString("table"), value);
 		}

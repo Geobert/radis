@@ -93,6 +93,18 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	 * @return
 	 * @throws SQLException
 	 */
+	
+	public long getKeyIdOrCreate(String key, String table) throws SQLException {
+		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+			return getKeyIdOrCreate(key, mThirdPartiesMap, table, KEY_THIRD_PARTY_NAME);
+		} else if (table.equals(DATABASE_TAGS_TABLE)) {
+			return getKeyIdOrCreate(key, mTagsMap, table, KEY_TAG_NAME);
+		} else if (table.equals(DATABASE_MODES_TABLE)) {
+			return getKeyIdOrCreate(key, mModesMap, table, KEY_MODE_NAME);
+		}
+		return 0;
+	}
+	
 	private long getKeyIdOrCreate(String key, Map<String, Long> map,
 			String table, String col) throws SQLException {
 		key = key.trim();

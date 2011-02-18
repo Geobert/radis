@@ -1,6 +1,7 @@
 package fr.geobert.radis;
 
 import java.text.ParseException;
+import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,11 +18,15 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 
 public class OperationEditor extends Activity {
-	static final int THIRD_PARTIES_DIALOG_ID = 1;
-	static final int TAGS_DIALOG_ID = 2;
-	static final int MODES_DIALOG_ID = 3;
-	static final int EDIT_INFO_DIALOG_ID = 4;
-	public static final int INFO_DELETE_DIALOG_ID = 5;
+	private static final int THIRD_PARTIES_DIALOG_ID = 1;
+	private static final int TAGS_DIALOG_ID = 2;
+	private static final int MODES_DIALOG_ID = 3;
+	private static final int EDIT_THIRD_PARTY_DIALOG_ID = 4;
+	private static final int EDIT_TAG_DIALOG_ID = 5;
+	private static final int EDIT_MODE_DIALOG_ID = 6;
+	private static final int DELETE_THIRD_PARTY_DIALOG_ID = 7;
+	private static final int DELETE_TAG_DIALOG_ID = 8;
+	private static final int DELETE_MODE_DIALOG_ID = 9;
 
 	private OperationsDbAdapter mDbHelper;
 	private AutoCompleteTextView mOpThirdPartyText;
@@ -36,9 +41,10 @@ public class OperationEditor extends Activity {
 
 	private Operation mCurrentOp;
 	private double mPreviousSum = 0.0;
-	private InfoManager mInfoManager;
+	private HashMap<String, InfoManager> mInfoManagersMap;
 	private CorrectCommaWatcher mSumTextWatcher;
 	private boolean mOnRestore = false;
+	public String mCurrentInfoTable;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +82,7 @@ public class OperationEditor extends Activity {
 				OperationsDbAdapter.KEY_TAG_NAME));
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
+		mInfoManagersMap = new HashMap<String, InfoManager>();
 	}
 
 	private void invertSign() throws ParseException {
@@ -102,9 +109,11 @@ public class OperationEditor extends Activity {
 	}
 
 	private Dialog createInfoListDialog(String table, String colName,
-			String title) {
-		mInfoManager = new InfoManager(this, mDbHelper, title, table, colName);
-		return mInfoManager.getListDialog();
+			String title, int editId, int deletiId) {
+		InfoManager i = new InfoManager(this, mDbHelper, title, table, colName,
+				editId, deletiId);
+		mInfoManagersMap.put(table, i);
+		return i.getListDialog();
 	}
 
 	@Override
@@ -114,25 +123,34 @@ public class OperationEditor extends Activity {
 			return createInfoListDialog(
 					OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 					OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-					getString(R.string.third_parties));
+					getString(R.string.third_parties),
+					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
 		case TAGS_DIALOG_ID:
 			return createInfoListDialog(
 					OperationsDbAdapter.DATABASE_TAGS_TABLE,
-					OperationsDbAdapter.KEY_TAG_NAME, getString(R.string.tags));
+					OperationsDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
+					EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID);
 		case MODES_DIALOG_ID:
 			return createInfoListDialog(
 					OperationsDbAdapter.DATABASE_MODES_TABLE,
 					OperationsDbAdapter.KEY_MODE_NAME,
-					getString(R.string.modes));
-		case EDIT_INFO_DIALOG_ID:
-			Dialog d = mInfoManager.getEditDialog();
-			mInfoManager.initEditDialog(d);
+					getString(R.string.modes), EDIT_MODE_DIALOG_ID,
+					DELETE_MODE_DIALOG_ID);
+		case EDIT_THIRD_PARTY_DIALOG_ID:
+		case EDIT_TAG_DIALOG_ID:
+		case EDIT_MODE_DIALOG_ID:
+			InfoManager i = mInfoManagersMap.get(mCurrentInfoTable);
+			Dialog d = i.getEditDialog();
+			i.initEditDialog(d);
 			return d;
-		case INFO_DELETE_DIALOG_ID:
+		case DELETE_THIRD_PARTY_DIALOG_ID:
+		case DELETE_TAG_DIALOG_ID:
+		case DELETE_MODE_DIALOG_ID:
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							mInfoManager.deleteInfo();
+							mInfoManagersMap.get(mCurrentInfoTable)
+									.deleteInfo();
 						}
 					});
 		default:
@@ -143,13 +161,20 @@ public class OperationEditor extends Activity {
 	@Override
 	protected void onPrepareDialog(int id, Dialog dialog) {
 		switch (id) {
-		case EDIT_INFO_DIALOG_ID:
-			mInfoManager.initEditDialog(dialog);
+		case EDIT_THIRD_PARTY_DIALOG_ID:
+			mInfoManagersMap.get(mCurrentInfoTable).initEditDialog(dialog);
 			break;
 		case THIRD_PARTIES_DIALOG_ID:
+			mInfoManagersMap.get(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE)
+					.onPrepareDialog((AlertDialog) dialog);
+			break;
 		case TAGS_DIALOG_ID:
+			mInfoManagersMap.get(CommonDbAdapter.DATABASE_TAGS_TABLE)
+					.onPrepareDialog((AlertDialog) dialog);
+			break;
 		case MODES_DIALOG_ID:
-			mInfoManager.onPrepareDialog((AlertDialog) dialog);
+			mInfoManagersMap.get(CommonDbAdapter.DATABASE_MODES_TABLE)
+					.onPrepareDialog((AlertDialog) dialog);
 			break;
 		}
 	}
@@ -272,13 +297,13 @@ public class OperationEditor extends Activity {
 		op.mTag = mOpTagText.getText().toString();
 		op.setSumStr(mOpSumText.getText().toString());
 		op.mNotes = mNotesText.getText().toString();
-		
+
 		DatePicker dp = mDatePicker;
 		dp.clearChildFocus(getCurrentFocus());
 		op.setDay(dp.getDayOfMonth());
 		op.setMonth(dp.getMonth());
 		op.setYear(dp.getYear());
-		
+
 		if (mRowId == null) {
 			long id = mDbHelper.createOp(op);
 			if (id > 0) {

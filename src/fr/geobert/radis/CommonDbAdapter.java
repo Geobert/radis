@@ -246,6 +246,7 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_ACCOUNT_OP_SUM, 0);
 		initialValues.put(KEY_ACCOUNT_CUR_SUM, start_sum);
 		initialValues.put(KEY_ACCOUNT_CURRENCY, currency);
+		initialValues.put(KEY_ACCOUNT_CUR_SUM_DATE, 0);
 		return mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
 	}
 
