@@ -60,11 +60,18 @@ public class AccountList extends ListActivity {
 		RESTART_INTENT = PendingIntent.getActivity(this.getBaseContext(), 0,
 				new Intent(getIntent()), getIntent().getFlags());
 		final GestureDetector gestureDetector = new GestureDetector(
-				new SwipeDetector(getListView(), null, new ListSwipeAction() {
+				new SwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
 					public void run() {
 						if (mRowId > 0) {
 							startAccountEdit(mRowId);
+						}
+					}
+				}, new ListSwipeAction() {
+					@Override
+					public void run() {
+						if (mRowId > 0) {
+							openOperationsList(mPosition, mRowId);
 						}
 					}
 				}));
@@ -113,10 +120,10 @@ public class AccountList extends ListActivity {
 
 	private void startAccountEdit(long id) {
 		Intent i = new Intent(this, AccountEditor.class);
-			i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
-			startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
+		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
+		startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
 	}
-	
+
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
