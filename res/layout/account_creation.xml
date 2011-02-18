@@ -20,10 +20,8 @@
 				android:layout_height="wrap_content" android:layout_width="fill_parent"
 				android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
 			</Spinner>
-			<!-- <EditText android:id="@+id/edit_currency_code" android:layout_width="fill_parent" -->
-			<!-- android:padding="5px" android:layout_height="wrap_content" /> -->
-			<TextView style="@style/EditorTextView" android:text="@string/description" />
-			<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText" />
+<!--			<TextView style="@style/EditorTextView" android:text="@string/description" />-->
+			<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText" android:hint="@string/description" />
 
 		</LinearLayout>
 	</ScrollView>

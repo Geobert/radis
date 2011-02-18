@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+import org.acra.ErrorReporter;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -378,8 +380,10 @@ public class OperationList extends ListActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
 			try {
+				fillData();
 				updateSums(data);
 			} catch (Exception e) {
+				ErrorReporter.getInstance().handleException(e);
 				Tools.popError(OperationList.this, e.getMessage(),
 						Tools.createRestartClickListener());
 			}
