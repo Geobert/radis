@@ -242,7 +242,9 @@ public class OperationList extends ListActivity {
 				}, new ListSwipeAction() {
 					@Override
 					public void run() {
-						startOperationEdit(mRowId);
+						if (mRowId > 0) {
+							startOperationEdit(mRowId);
+						}
 					}
 				}));
 		View.OnTouchListener gestureListener = new View.OnTouchListener() {
