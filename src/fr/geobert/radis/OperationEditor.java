@@ -330,7 +330,9 @@ public class OperationEditor extends Activity {
 		outState.putString("tag", mOpTagText.getText().toString());
 		outState.putString("mode", mOpModeText.getText().toString());
 		outState.putString("sum", mOpSumText.getText().toString());
-		outState.putLong("rowId", mRowId.longValue());
+		if (mRowId != null) {
+			outState.putLong("rowId", mRowId.longValue());
+		}
 		outState.putString("notes", mNotesText.getText().toString());
 		outState.putDouble("previousSum", mPreviousSum);
 
@@ -346,7 +348,8 @@ public class OperationEditor extends Activity {
 		mOpSumText.setText(state.getString("sum"));
 		Tools.setSumTextGravity(mOpSumText);
 		mOnRestore = true;
-		mRowId = Long.valueOf(state.getLong("rowId"));
+		long rowId = state.getLong("rowId");
+		mRowId = rowId != 0 ? Long.valueOf(rowId) : null;
 		mPreviousSum = state.getDouble("previousSum");
 		Operation op = (Operation) getLastNonConfigurationInstance();
 		mCurrentOp = op;
