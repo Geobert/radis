@@ -15,10 +15,12 @@ import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
@@ -57,6 +59,22 @@ public class AccountList extends ListActivity {
 		ACTIVITY = this;
 		RESTART_INTENT = PendingIntent.getActivity(this.getBaseContext(), 0,
 				new Intent(getIntent()), getIntent().getFlags());
+		final GestureDetector gestureDetector = new GestureDetector(
+				new SwipeDetector(getListView(), null, new ListSwipeAction() {
+					@Override
+					public void run() {
+						startAccountEdit(mRowId);
+					}
+				}));
+		View.OnTouchListener gestureListener = new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (gestureDetector.onTouchEvent(event)) {
+					return true;
+				}
+				return false;
+			}
+		};
+		getListView().setOnTouchListener(gestureListener);
 	}
 
 	@Override
@@ -91,6 +109,12 @@ public class AccountList extends ListActivity {
 		return super.onMenuItemSelected(featureId, item);
 	}
 
+	private void startAccountEdit(long id) {
+		Intent i = new Intent(this, AccountEditor.class);
+			i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
+			startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
+	}
+	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
@@ -101,9 +125,7 @@ public class AccountList extends ListActivity {
 			showDialog(DIALOG_DELETE);
 			return true;
 		case EDIT_ACCOUNT_ID:
-			Intent i = new Intent(this, AccountEditor.class);
-			i.putExtra(Tools.EXTRAS_ACCOUNT_ID, info.id);
-			startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
+			startAccountEdit(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -183,16 +205,21 @@ public class AccountList extends ListActivity {
 		startActivityForResult(i, ACTIVITY_ACCOUNT_CREATE);
 	}
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		SQLiteCursor data = (SQLiteCursor) l.getItemAtPosition(position);
+	private void openOperationsList(int position, long accountId) {
+		SQLiteCursor data = (SQLiteCursor) getListView().getItemAtPosition(
+				position);
 		String accountName = data.getString(data
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME));
 		Intent i = new Intent(this, OperationList.class);
-		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
+		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, accountId);
 		i.putExtra(CommonDbAdapter.KEY_ACCOUNT_NAME, accountName);
 		startActivity(i);
+	}
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		openOperationsList(position, id);
 	}
 
 	@Override

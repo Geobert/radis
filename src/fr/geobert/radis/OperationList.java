@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -18,11 +17,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -232,6 +233,27 @@ public class OperationList extends ListActivity {
 				mQuickAddAmount, mQuickAddButton);
 		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
 		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
+		final GestureDetector gestureDetector = new GestureDetector(
+				new SwipeDetector(getListView(), new ListSwipeAction() {
+					@Override
+					public void run() {
+						OperationList.this.finish();
+					}
+				}, new ListSwipeAction() {
+					@Override
+					public void run() {
+						startOperationEdit(mRowId);
+					}
+				}));
+		View.OnTouchListener gestureListener = new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (gestureDetector.onTouchEvent(event)) {
+					return true;
+				}
+				return false;
+			}
+		};
+		getListView().setOnTouchListener(gestureListener);
 	}
 
 	public static void setQuickAddButEnabled(Button but, boolean b) {
@@ -251,7 +273,7 @@ public class OperationList extends ListActivity {
 		op.setSumStr(mQuickAddAmount.getText().toString());
 		mDbHelper.createOp(op);
 		fillData();
-		
+
 		// TODO both calls have overlapped operations, clean it
 		updateSums(0, op.mSum);
 		updateSumsAndSelection();
@@ -366,10 +388,7 @@ public class OperationList extends ListActivity {
 			mOpToDelete = info;
 			return true;
 		case EDIT_OP_ID:
-			Intent i = new Intent(this, OperationEditor.class);
-			i.putExtra(Tools.EXTRAS_OP_ID, info.id);
-			i.putExtra(Tools.EXTRAS_ACCOUNT_ID, mAccountId);
-			startActivityForResult(i, ACTIVITY_OP_EDIT);
+			startOperationEdit(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -580,11 +599,19 @@ public class OperationList extends ListActivity {
 		mOnRestore = false;
 	}
 
+	private void startOperationEdit(long id) {
+		Intent i = new Intent(this, OperationEditor.class);
+		i.putExtra(Tools.EXTRAS_OP_ID, id);
+		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, mAccountId);
+		startActivityForResult(i, ACTIVITY_OP_EDIT);
+	}
+
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		if (id != -1) {
-			MatrixCursor data = (MatrixCursor) l.getItemAtPosition(position);
+			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
+					position);
 			try {
 				updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 			} catch (Exception e) {
