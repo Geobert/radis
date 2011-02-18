@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -216,7 +217,12 @@ public class OperationList extends ListActivity {
 		mQuickAddButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				quickAddOp();
+				try {
+					quickAddOp();
+				} catch (Exception e) {
+					Tools.popError(OperationList.this, e.getMessage(), null);
+					e.printStackTrace();
+				}
 			}
 		});
 		OperationList.setQuickAddButEnabled(mQuickAddButton, false);
@@ -237,25 +243,24 @@ public class OperationList extends ListActivity {
 		but.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
 	}
 
-	private void quickAddOp() {
+	private void quickAddOp() throws Exception {
 		Operation op = new Operation();
 		op.mThirdParty = mQuickAddThirdParty.getText().toString();
-		try {
-			op.setSumStr(mQuickAddAmount.getText().toString());
-			mDbHelper.createOp(op);
-			updateSums(0, op.mSum);
-			mQuickAddAmount.setText("");
-			mQuickAddThirdParty.setText("");
-			InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-			mgr.hideSoftInputFromWindow(mQuickAddAmount.getWindowToken(), 0);
-			mCorrectCommaWatcher.setAutoNegate(true);
-			mQuickAddAmount.clearFocus();
-			mQuickAddThirdParty.clearFocus();
-			fillData();
-			updateSumsAndSelection();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		op.setSumStr(mQuickAddAmount.getText().toString());
+		mDbHelper.createOp(op);
+		fillData();
+		
+		// TODO both calls have overlapped operations, clean it
+		updateSums(0, op.mSum);
+		updateSumsAndSelection();
+
+		mQuickAddAmount.setText("");
+		mQuickAddThirdParty.setText("");
+		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.hideSoftInputFromWindow(mQuickAddAmount.getWindowToken(), 0);
+		mCorrectCommaWatcher.setAutoNegate(true);
+		mQuickAddAmount.clearFocus();
+		mQuickAddThirdParty.clearFocus();
 	}
 
 	private void updateSumsAndSelection() throws Exception {
