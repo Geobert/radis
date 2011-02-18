@@ -63,7 +63,9 @@ public class AccountList extends ListActivity {
 				new SwipeDetector(getListView(), null, new ListSwipeAction() {
 					@Override
 					public void run() {
-						startAccountEdit(mRowId);
+						if (mRowId > 0) {
+							startAccountEdit(mRowId);
+						}
 					}
 				}));
 		View.OnTouchListener gestureListener = new View.OnTouchListener() {
