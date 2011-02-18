@@ -72,6 +72,7 @@ public class AccountList extends ListActivity {
 					public void run() {
 						if (mRowId > 0) {
 							openOperationsList(mPosition, mRowId);
+							
 						}
 					}
 				}));
@@ -122,6 +123,7 @@ public class AccountList extends ListActivity {
 		Intent i = new Intent(this, AccountEditor.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
 		startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
+		AccountList.this.overridePendingTransition(R.anim.left_to_right, 0);
 	}
 
 	@Override

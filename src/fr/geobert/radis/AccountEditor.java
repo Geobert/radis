@@ -68,6 +68,7 @@ public class AccountEditor extends Activity {
 					setResult(RESULT_OK);
 					saveState();
 					finish();
+					AccountEditor.this.overridePendingTransition(R.anim.right_to_left, 0);
 				} else {
 					Tools.popError(AccountEditor.this, errMsg.toString(), null);
 				}
@@ -78,6 +79,7 @@ public class AccountEditor extends Activity {
 			public void onClick(View view) {
 				setResult(RESULT_CANCELED);
 				finish();
+				AccountEditor.this.overridePendingTransition(R.anim.right_to_left, 0);
 			}
 		});
 
