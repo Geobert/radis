@@ -49,6 +49,7 @@ public class AccountList extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
 		mDbHelper = new CommonDbAdapter(this);
+		mDbHelper = null;
 		mDbHelper.open();
 		fillData();
 		setTitle(getString(R.string.app_name) + " - "
