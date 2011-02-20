@@ -5,11 +5,14 @@ import java.util.HashMap;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -166,13 +169,11 @@ public class InfoManager {
 		mContext.showDialog(mEditId);
 	}
 
-	private AlertDialog d;
-
-	public void initEditDialog(Dialog dialog) {
+	public void initEditDialog(final Dialog dialog) {
 		EditText t = mEditorText;
 		Bundle info = mInfo;
 		if (null != info) {
-			//dialog.setTitle(info.getString("title"));
+			// dialog.setTitle(info.getString("title"));
 			String tmp = info.getString("value");
 			t.setText(tmp);
 		}
@@ -208,15 +209,15 @@ public class InfoManager {
 		EditText t = mEditorText;
 		String value = t.getText().toString();
 		long rowId = mInfo.getLong("rowId");
-		long id = mDbHelper.getKeyIdOrCreate(value, mInfo.getString("table"));
-		if (rowId != 0 || id != 0) { // update
-			if (id != 0) {
-				mDbHelper.updateInfo(mInfo.getString("table"), id, value);
-			} else {
-				mDbHelper.updateInfo(mInfo.getString("table"), rowId, value);
-			}
+		if (rowId != 0) { // update
+			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value);
 		} else { // create
-			mDbHelper.createInfo(mInfo.getString("table"), value);
+			long id = mDbHelper.getKeyIdIfExists(value, mInfo.getString("table"));
+			if (id > 0) { // already existing value, update
+				Tools.popError(mContext, mContext.getString(R.string.item_exists), null);
+			} else {
+				mDbHelper.createInfo(mInfo.getString("table"), value);
+			}
 		}
 		mCursor.requery();
 	}
