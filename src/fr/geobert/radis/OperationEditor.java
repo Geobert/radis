@@ -104,7 +104,7 @@ public class OperationEditor extends Activity {
 			if (errMsg.length() > 0) {
 				errMsg.append("\n");
 			}
-			errMsg.append("Somme de départ vide");
+			errMsg.append(getString(R.string.empty_amount));
 			res = false;
 		}
 		return res;
