@@ -187,6 +187,9 @@ public class OperationList extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (null == Operation.SUM_FORMAT) {
+			Tools.initSumFormater();
+		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.operation_list);
 		registerForContextMenu(getListView());

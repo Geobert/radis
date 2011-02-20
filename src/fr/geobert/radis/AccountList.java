@@ -44,9 +44,9 @@ public class AccountList extends ListActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		Operation.SUM_FORMAT = new DecimalFormat();
-		Operation.SUM_FORMAT.setMaximumFractionDigits(2);
-		Operation.SUM_FORMAT.setMinimumFractionDigits(2);
+		if (null == Operation.SUM_FORMAT) {
+			Tools.initSumFormater();
+		}
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
@@ -72,7 +72,7 @@ public class AccountList extends ListActivity {
 					public void run() {
 						if (mRowId > 0) {
 							openOperationsList(mPosition, mRowId);
-							
+
 						}
 					}
 				}));

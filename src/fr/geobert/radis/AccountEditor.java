@@ -29,6 +29,9 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (null == Operation.SUM_FORMAT) {
+			Tools.initSumFormater();
+		}
 		mDbHelper = new CommonDbAdapter(this);
 		mDbHelper.open();
 		setContentView(R.layout.account_creation);

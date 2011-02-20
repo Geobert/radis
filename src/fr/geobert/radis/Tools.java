@@ -1,5 +1,7 @@
 package fr.geobert.radis;
 
+import java.text.DecimalFormat;
+
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -258,6 +260,12 @@ public class Tools {
 			gravity = Gravity.CENTER_VERTICAL|Gravity.LEFT;
 		}
 		sumText.setGravity(gravity);
+	}
+
+	public static void initSumFormater() {
+		Operation.SUM_FORMAT = new DecimalFormat();
+		Operation.SUM_FORMAT.setMaximumFractionDigits(2);
+		Operation.SUM_FORMAT.setMinimumFractionDigits(2);
 	}
 
 	// private static void fillDatabase(CommonDbAdapter db) {
