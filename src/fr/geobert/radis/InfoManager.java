@@ -162,6 +162,7 @@ public class InfoManager {
 		info.putString("value", mCursor.getString(mCursor.getColumnIndex(mInfo
 				.getString("colName"))));
 		info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
+		mContext.mCurrentInfoTable = info.getString("table");
 		mContext.showDialog(mEditId);
 	}
 
