@@ -102,4 +102,5 @@
 <string name="crash_dialog_comment_prompt">Ou peut-être désirez vous ajouter des détails sur le probème avant ?</string>
 <string name="crash_dialog_ok_toast">Merci beaucoup ! Je m\'en vais pourfendre cet abominable bug !</string>
 <string name="empty_amount">Le montant est vide</string>
+<string name="item_exists">L\'élément existe déjà</string>
 </resources>

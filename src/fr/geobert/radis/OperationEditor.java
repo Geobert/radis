@@ -164,6 +164,8 @@ public class OperationEditor extends Activity {
 	protected void onPrepareDialog(int id, Dialog dialog) {
 		switch (id) {
 		case EDIT_THIRD_PARTY_DIALOG_ID:
+		case EDIT_TAG_DIALOG_ID:
+		case EDIT_MODE_DIALOG_ID:
 			mInfoManagersMap.get(mCurrentInfoTable).initEditDialog(dialog);
 			break;
 		case THIRD_PARTIES_DIALOG_ID:

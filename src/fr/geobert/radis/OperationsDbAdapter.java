@@ -105,7 +105,22 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return 0;
 	}
 	
-	private long getKeyIdOrCreate(String key, Map<String, Long> map,
+	public long getKeyIdIfExists(String key, String table) {
+		Long res = null;
+		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+			res = mThirdPartiesMap.get(key);
+		} else if (table.equals(DATABASE_TAGS_TABLE)) {
+			res = mTagsMap.get(key);
+		} else if (table.equals(DATABASE_MODES_TABLE)) {
+			res = mModesMap.get(key);
+		}
+		if (null != res) {
+			return res.longValue();
+		}
+		return -1;
+	}
+	
+	private long getKeyIdOrCreate(String key, LinkedHashMap<String, Long> map,
 			String table, String col) throws SQLException {
 		key = key.trim();
 		if (key.length() == 0) {
@@ -129,7 +144,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	}
 
 	private void putKeyId(String key, String keyTableName, String keyTableCol,
-			String opTableCol, Map<String, Long> keyMap,
+			String opTableCol, LinkedHashMap<String, Long> keyMap,
 			ContentValues initialValues) {
 		long id = getKeyIdOrCreate(key, keyMap, keyTableName, keyTableCol);
 		if (id != -1) {
