@@ -86,12 +86,12 @@ public class OperationList extends ListActivity {
 					textView.setTextColor(res.getColor(R.color.text_color));
 					i.setImageResource(R.drawable.arrow_down16);
 				}
-				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
+				String txt = Formater.SUM_FORMAT.format(Double.valueOf(sum));
 				textView.setText(txt);
 				return true;
 			} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
 				Date date = new Date(cursor.getLong(columnIndex));
-				((TextView) view).setText(Operation.SHORT_DATE_FORMAT
+				((TextView) view).setText(Formater.SHORT_DATE_FORMAT
 						.format(date));
 				return true;
 			} else if (colName.equals(OperationsDbAdapter.KEY_TAG_NAME)) {
@@ -187,8 +187,8 @@ public class OperationList extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (null == Operation.SUM_FORMAT) {
-			Tools.initSumFormater();
+		if (null == Formater.SUM_FORMAT) {
+			Formater.init();
 		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.operation_list);
@@ -215,7 +215,7 @@ public class OperationList extends ListActivity {
 				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
 		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
-		mCorrectCommaWatcher = new CorrectCommaWatcher(Operation.SUM_FORMAT
+		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(),
 				mQuickAddAmount).setAutoNegate(true);
 		mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher);
@@ -324,7 +324,7 @@ public class OperationList extends ListActivity {
 			updateSumsAndSelection();
 			getListView().setOnItemSelectedListener(
 					new AdapterView.OnItemSelectedListener() {
-						public void onItemSelected(AdapterView parentView,
+						public void onItemSelected(AdapterView<?> parentView,
 								View childView, int position, long id) {
 							mLastOps.moveToPosition(position);
 							SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
@@ -339,7 +339,7 @@ public class OperationList extends ListActivity {
 							}
 						}
 
-						public void onNothingSelected(AdapterView parentView) {
+						public void onNothingSelected(AdapterView<?> parentView) {
 							((SelectedCursorAdapter) getListAdapter())
 									.setSelectedPosition(-1);
 						}
@@ -636,7 +636,7 @@ public class OperationList extends ListActivity {
 			TextView t = (TextView) findViewById(R.id.date_sum);
 			t.setText(String.format(
 					getString(R.string.sum_at_selection),
-					Operation.SUM_FORMAT.format(accountCurSum
+					Formater.SUM_FORMAT.format(accountCurSum
 							- computeSumFromCursor(data))));
 		}
 	}

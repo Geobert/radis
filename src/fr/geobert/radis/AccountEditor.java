@@ -29,8 +29,8 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (null == Operation.SUM_FORMAT) {
-			Tools.initSumFormater();
+		if (null == Formater.SUM_FORMAT) {
+			Formater.init();
 		}
 		mDbHelper = new CommonDbAdapter(this);
 		mDbHelper.open();
@@ -40,7 +40,7 @@ public class AccountEditor extends Activity {
 		mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
 		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
-				Operation.SUM_FORMAT.getDecimalFormatSymbols()
+				Formater.SUM_FORMAT.getDecimalFormatSymbols()
 						.getDecimalSeparator(), mAccountStartSumText));
 		mAccountStartSumText
 				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -125,7 +125,7 @@ public class AccountEditor extends Activity {
 					.setText(account.getString(account
 							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_DESC)));
 			mAccountStartSumText
-					.setText(Operation.SUM_FORMAT.format(account.getDouble(account
+					.setText(Formater.SUM_FORMAT.format(account.getDouble(account
 							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM))));
 			String currencyStr = account
 					.getString(account
@@ -181,7 +181,7 @@ public class AccountEditor extends Activity {
 		String desc = mAccountDescText.getText().toString();
 		double startSum = 0;
 		try {
-			startSum = Operation.SUM_FORMAT.parse(
+			startSum = Formater.SUM_FORMAT.parse(
 					mAccountStartSumText.getText().toString()).doubleValue();
 		} catch (ParseException e) {
 			e.printStackTrace();

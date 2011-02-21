@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import java.text.DecimalFormat;
 import java.util.Currency;
 import java.util.Date;
 
@@ -44,8 +43,8 @@ public class AccountList extends ListActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (null == Operation.SUM_FORMAT) {
-			Tools.initSumFormater();
+		if (null == Formater.SUM_FORMAT) {
+			Formater.init();
 		}
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
@@ -162,7 +161,7 @@ public class AccountList extends ListActivity {
 				} else {
 					textView.setTextColor(res.getColor(R.color.positiveSum));
 				}
-				String txt = Operation.SUM_FORMAT.format(Double.valueOf(sum));
+				String txt = Formater.SUM_FORMAT.format(Double.valueOf(sum));
 				textView.setText(txt
 						+ " "
 						+ Currency
@@ -178,7 +177,7 @@ public class AccountList extends ListActivity {
 				if (dateLong > 0) {
 					textView.setText(String.format(
 							getString(R.string.balance_at),
-							Operation.DATE_FORMAT.format(new Date(dateLong))));
+							Formater.DATE_FORMAT.format(new Date(dateLong))));
 				} else {
 					textView.setText("");
 				}

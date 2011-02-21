@@ -1,21 +1,15 @@
 package fr.geobert.radis;
 
-import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Operation {
+public class Operation implements Parcelable {
 	private GregorianCalendar mDate;
-	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-			"dd/MM/yyyy");
-	public static SimpleDateFormat SHORT_DATE_FORMAT = new SimpleDateFormat(
-			"dd/MM");
-	public static DecimalFormat SUM_FORMAT;
-
 	public String mThirdParty;
 	public String mTag;
 	public String mMode;
@@ -47,6 +41,11 @@ public class Operation {
 		mTag = "";
 		mNotes = "";
 	}
+	
+	public Operation(Parcel parcel) {
+		mDate = new GregorianCalendar();
+		readFromParcel(parcel);
+	}
 
 	public int getMonth() {
 		return mDate.get(Calendar.MONTH);
@@ -73,11 +72,11 @@ public class Operation {
 	}
 
 	public String getDateStr() {
-		return DATE_FORMAT.format(mDate.getTime());
+		return Formater.DATE_FORMAT.format(mDate.getTime());
 	}
 
 	public String getShortDateStr() {
-		return SHORT_DATE_FORMAT.format(mDate.getTime());
+		return Formater.SHORT_DATE_FORMAT.format(mDate.getTime());
 	}
 
 	public long getDate() {
@@ -89,15 +88,55 @@ public class Operation {
 	}
 
 	public String getSumStr() {
-		return SUM_FORMAT.format(mSum);
+		return Formater.SUM_FORMAT.format(mSum);
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
-		mSum = SUM_FORMAT.parse(sumStr).doubleValue();
+		mSum = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {
-		mDate.setTime(DATE_FORMAT.parse(dateStr));
+		mDate.setTime(Formater.DATE_FORMAT.parse(dateStr));
 
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(getDay());
+		dest.writeInt(getMonth());
+		dest.writeInt(getYear());
+		dest.writeString(mThirdParty);
+		dest.writeString(mTag);
+		dest.writeString(mMode);
+		dest.writeString(mNotes);
+		dest.writeDouble(mSum);
+		
+	}
+	
+	private void readFromParcel(Parcel in) {
+        setDay(in.readInt());
+        setMonth(in.readInt());
+        setYear(in.readInt());
+        mThirdParty = in.readString();
+        mTag = in.readString();
+        mMode = in.readString();
+        mNotes = in.readString();
+        mSum = in.readDouble();
+    }
+	
+	public static final Parcelable.Creator<Operation> CREATOR =
+    	new Parcelable.Creator<Operation>() {
+            public Operation createFromParcel(Parcel in) {
+                return new Operation(in);
+            }
+ 
+            public Operation[] newArray(int size) {
+                return new Operation[size];
+            }
+        };
 }

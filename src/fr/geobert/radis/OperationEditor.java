@@ -51,8 +51,8 @@ public class OperationEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (null == Operation.SUM_FORMAT) {
-			Tools.initSumFormater();
+		if (null == Formater.SUM_FORMAT) {
+			Formater.init();
 		}
 		Bundle extras = getIntent().getExtras();
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
@@ -78,7 +78,7 @@ public class OperationEditor extends Activity {
 				OperationsDbAdapter.DATABASE_MODES_TABLE,
 				OperationsDbAdapter.KEY_MODE_NAME));
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
-		mSumTextWatcher = new CorrectCommaWatcher(Operation.SUM_FORMAT
+		mSumTextWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
 		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
 		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
@@ -91,12 +91,12 @@ public class OperationEditor extends Activity {
 
 	private void invertSign() throws ParseException {
 		mSumTextWatcher.setAutoNegate(false);
-		Double sum = Operation.SUM_FORMAT
+		Double sum = Formater.SUM_FORMAT
 				.parse(mOpSumText.getText().toString()).doubleValue();
 		if (sum != null) {
 			sum = -sum;
 		}
-		mOpSumText.setText(Operation.SUM_FORMAT.format(sum));
+		mOpSumText.setText(Formater.SUM_FORMAT.format(sum));
 	}
 
 	private boolean isFormValid(StringBuilder errMsg) {
@@ -341,7 +341,13 @@ public class OperationEditor extends Activity {
 		}
 		outState.putString("notes", mNotesText.getText().toString());
 		outState.putDouble("previousSum", mPreviousSum);
-
+		DatePicker dp = mDatePicker;
+		dp.clearChildFocus(getCurrentFocus());
+		Operation op = mCurrentOp;
+		op.setDay(dp.getDayOfMonth());
+		op.setMonth(dp.getMonth());
+		op.setYear(dp.getYear());
+		outState.putParcelable("currentOp", op);
 		mOnRestore = true;
 	}
 
@@ -357,7 +363,8 @@ public class OperationEditor extends Activity {
 		long rowId = state.getLong("rowId");
 		mRowId = rowId != 0 ? Long.valueOf(rowId) : null;
 		mPreviousSum = state.getDouble("previousSum");
-		Operation op = (Operation) getLastNonConfigurationInstance();
+		
+		Operation op = state.getParcelable("currentOp");
 		mCurrentOp = op;
 		if (op != null) {
 			mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
@@ -368,14 +375,4 @@ public class OperationEditor extends Activity {
 		mNotesText.setText(state.getString("notes"));
 	}
 
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-		DatePicker dp = mDatePicker;
-		dp.clearChildFocus(getCurrentFocus());
-		Operation op = mCurrentOp;
-		op.setDay(dp.getDayOfMonth());
-		op.setMonth(dp.getMonth());
-		op.setYear(dp.getYear());
-		return op;
-	}
 }
