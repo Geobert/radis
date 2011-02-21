@@ -3,6 +3,8 @@ package fr.geobert.radis;
 import java.text.ParseException;
 import java.util.HashMap;
 
+import org.acra.ErrorReporter;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -339,7 +341,13 @@ public class OperationEditor extends Activity {
 		}
 		outState.putString("notes", mNotesText.getText().toString());
 		outState.putDouble("previousSum", mPreviousSum);
-
+		DatePicker dp = mDatePicker;
+		dp.clearChildFocus(getCurrentFocus());
+		Operation op = mCurrentOp;
+		op.setDay(dp.getDayOfMonth());
+		op.setMonth(dp.getMonth());
+		op.setYear(dp.getYear());
+		outState.putParcelable("currentOp", op);
 		mOnRestore = true;
 	}
 
@@ -355,9 +363,14 @@ public class OperationEditor extends Activity {
 		long rowId = state.getLong("rowId");
 		mRowId = rowId != 0 ? Long.valueOf(rowId) : null;
 		mPreviousSum = state.getDouble("previousSum");
-		Operation op = (Operation) getLastNonConfigurationInstance();
+		Operation op = state.getParcelable("currentOp");
 		mCurrentOp = op;
-		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
+		if (op != null) {
+			mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
+		} else {
+			ErrorReporter.getInstance().handleException(
+					new NullPointerException("op was not correctly restored"));
+		}
 		mNotesText.setText(state.getString("notes"));
 	}
 

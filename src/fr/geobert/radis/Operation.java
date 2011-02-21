@@ -7,8 +7,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Operation {
+public class Operation implements Parcelable {
 	private GregorianCalendar mDate;
 	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
 			"dd/MM/yyyy");
@@ -46,6 +48,10 @@ public class Operation {
 		mMode = "";
 		mTag = "";
 		mNotes = "";
+	}
+
+	public Operation(Parcel in) {
+		readFromParcel(in);
 	}
 
 	public int getMonth() {
@@ -100,4 +106,43 @@ public class Operation {
 		mDate.setTime(DATE_FORMAT.parse(dateStr));
 
 	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeInt(getDay());
+		dest.writeInt(getMonth());
+		dest.writeInt(getYear());
+		dest.writeString(mThirdParty);
+		dest.writeString(mTag);
+		dest.writeString(mMode);
+		dest.writeString(mNotes);
+		dest.writeDouble(mSum);
+
+	}
+
+	private void readFromParcel(Parcel in) {
+		setDay(in.readInt());
+		setMonth(in.readInt());
+		setYear(in.readInt());
+		mThirdParty = in.readString();
+		mTag = in.readString();
+		mMode = in.readString();
+		mNotes = in.readString();
+		mSum = in.readDouble();
+	}
+
+	public static final Parcelable.Creator<Operation> CREATOR = new Parcelable.Creator<Operation>() {
+		public Operation createFromParcel(Parcel in) {
+			return new Operation(in);
+		}
+
+		public Operation[] newArray(int size) {
+			return new Operation[size];
+		}
+	};
 }
