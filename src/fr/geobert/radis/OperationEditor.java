@@ -3,6 +3,8 @@ package fr.geobert.radis;
 import java.text.ParseException;
 import java.util.HashMap;
 
+import org.acra.ErrorReporter;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -357,7 +359,12 @@ public class OperationEditor extends Activity {
 		mPreviousSum = state.getDouble("previousSum");
 		Operation op = (Operation) getLastNonConfigurationInstance();
 		mCurrentOp = op;
-		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
+		if (op != null) {
+			mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
+		} else {
+			ErrorReporter.getInstance().handleException(
+					new NullPointerException("op was not correctly restored"));
+		}
 		mNotesText.setText(state.getString("notes"));
 	}
 
