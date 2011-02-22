@@ -5,38 +5,7 @@
 	<ScrollView android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:layout_weight="1"
 		android:fillViewport="true">
-		<LinearLayout android:layout_width="fill_parent"
-			android:id="@+id/edit_op_root" android:layout_height="wrap_content"
-			android:orientation="vertical">
-			<DatePicker android:id="@+id/edit_op_date"
-				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:paddingTop="5px" android:paddingBottom="5px" />
-			<LinearLayout style="@style/EditorHorizontalLinearLayout">
-				<AutoCompleteTextView android:id="@+id/edit_op_third_party"
-					style="@style/EditorEditText" android:completionThreshold="1"
-					android:hint="@string/third_party" />
-				<Button android:id="@+id/edit_op_third_parties_list" style="@style/EditorBaseButton.ListButton" />
-			</LinearLayout>
-			<LinearLayout style="@style/EditorHorizontalLinearLayout">
-				<EditText android:id="@+id/edit_op_sum" style="@style/EditorEditText.Sum"
-					android:hint="@string/sum" />
-				<Button android:id="@+id/edit_op_sign" android:drawableLeft="@drawable/plus_moins"
-					style="@style/EditorBaseButton" />
-			</LinearLayout>
-			<LinearLayout style="@style/EditorHorizontalLinearLayout">
-				<AutoCompleteTextView android:id="@+id/edit_op_tag"
-					style="@style/EditorEditText" android:completionThreshold="1"
-					android:hint="@string/tag" />
-				<Button android:id="@+id/edit_op_tags_list" style="@style/EditorBaseButton.ListButton" />
-			</LinearLayout>
-			<LinearLayout style="@style/EditorHorizontalLinearLayout">
-				<AutoCompleteTextView android:id="@+id/edit_op_mode"
-					style="@style/EditorEditText" android:completionThreshold="1"
-					android:hint="@string/mode" />
-				<Button android:id="@+id/edit_op_modes_list" style="@style/EditorBaseButton.ListButton" />
-			</LinearLayout>
-			<EditText android:id="@+id/edit_op_notes" style="@style/DescEditText" android:hint="@string/notes"/>
-		</LinearLayout>
+		<include layout="@layout/main_op_edit"/>
 	</ScrollView>
 	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
 		<Button android:id="@+id/confirm_op" android:text="@string/ok"
