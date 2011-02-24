@@ -21,9 +21,11 @@ import android.widget.Toast;
 public class Tools {
 	// these are here because database force to use "_id" to be able to use
 	// SimpleCursorAdaptater, so KEY_ACCOUNT_ROWID == KEY_OP_ROWID and make bug
-	// when used in extras
+	// when used in Bundle's extras
 	public static String EXTRAS_OP_ID = "op_id";
 	public static String EXTRAS_ACCOUNT_ID = "account_id";
+
+	// debug mode stuff
 	public static boolean DEBUG_MODE = true;
 	public static final int DEBUG_DIALOG = 9876;
 
@@ -47,8 +49,9 @@ public class Tools {
 			}
 		};
 	}
-	
-	public static void popError(Activity ctx, String msg, DialogInterface.OnClickListener onClick) {
+
+	public static void popError(Activity ctx, String msg,
+			DialogInterface.OnClickListener onClick) {
 		AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
 		alertDialog.setTitle("Erreur");
 		alertDialog.setMessage(msg);
@@ -130,14 +133,41 @@ public class Tools {
 				.setCancelable(false)
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog,
-									int id) {
+							public void onClick(DialogInterface dialog, int id) {
 								Tools.restartApp();
 							}
 						});
 		return builder.create();
 	}
-	
+
+	private interface BooleanResultNoParamFct {
+		boolean run();
+	}
+
+	private static DialogInterface.OnClickListener createRestoreOrBackupClickListener(
+			final BooleanResultNoParamFct action, final int successTextId,
+			final int failureTextId) {
+		return new DialogInterface.OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				Activity ctx = mActivity;
+				if (action.run()) {
+					StringBuilder msg = new StringBuilder();
+					msg.append(ctx.getString(successTextId)).append('\n')
+							.append(ctx.getString(R.string.restarting));
+					Toast t = Toast.makeText(ctx, msg, Toast.LENGTH_LONG);
+					t.show();
+					new Handler().postDelayed(new Runnable() {
+						public void run() {
+							Tools.restartApp();
+						}
+					}, 2000);
+				} else {
+					ctx.showDialog(failureTextId);
+				}
+			}
+		};
+	}
+
 	public static Dialog onDefaultCreateDialog(Activity ctx, int id,
 			CommonDbAdapter db) {
 		mDb = db;
@@ -146,57 +176,31 @@ public class Tools {
 		case Tools.DEBUG_DIALOG:
 			return Tools.getDebugDialog(ctx, db);
 		case R.id.restore:
-			return Tools.getAdvancedDialog(ctx, id,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Activity ctx = mActivity;
-							if (mDb.restoreDatabase()) {
-								StringBuilder msg = new StringBuilder();
-								msg.append(
-										ctx.getString(R.string.restore_success))
-										.append('\n')
-										.append(ctx
-												.getString(R.string.restarting));
-								Toast t = Toast.makeText(ctx, msg,
-										Toast.LENGTH_LONG);
-								t.show();
-								new Handler().postDelayed(new Runnable() {
-									public void run() {
-										Tools.restartApp();
-									}
-								}, 2000);
-							} else {
-								ctx.showDialog(R.string.restore_failed);
-							}
-						}
-					});
+			return Tools.getAdvancedDialog(
+					ctx,
+					id,
+					createRestoreOrBackupClickListener(
+							new BooleanResultNoParamFct() {
+								@Override
+								public boolean run() {
+									return mDb.restoreDatabase();
+								}
+							}, R.string.restore_success,
+							R.string.restore_failed));
 		case R.id.backup:
-			return Tools.getAdvancedDialog(ctx, id,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							Activity ctx = mActivity;
-							if (mDb.backupDatabase()) {
-								StringBuilder msg = new StringBuilder();
-								msg.append(
-										ctx.getString(R.string.backup_success))
-										.append('\n')
-										.append(ctx
-												.getString(R.string.restarting));
-								Toast t = Toast.makeText(ctx, msg,
-										Toast.LENGTH_LONG);
-								t.show();
-								new Handler().postDelayed(new Runnable() {
-									public void run() {
-										Tools.restartApp();
-									}
-								}, 2000);
-							} else {
-								ctx.showDialog(R.string.backup_failed);
-							}
-						}
-					});
+			return Tools
+					.getAdvancedDialog(
+							ctx,
+							id,
+							createRestoreOrBackupClickListener(
+									new BooleanResultNoParamFct() {
+										@Override
+										public boolean run() {
+											return mDb.backupDatabase();
+										}
+									}, R.string.backup_success,
+									R.string.backup_failed));
 		case R.string.backup_failed:
-			return createFailAndRestartDialog(ctx, id);
 		case R.string.restore_failed:
 			return createFailAndRestartDialog(ctx, id);
 		}
@@ -253,14 +257,12 @@ public class Tools {
 	public static void setSumTextGravity(EditText sumText) {
 		int gravity;
 		if (sumText.length() > 0) {
-			gravity = Gravity.CENTER_VERTICAL|Gravity.RIGHT;
+			gravity = Gravity.CENTER_VERTICAL | Gravity.RIGHT;
 		} else {
-			gravity = Gravity.CENTER_VERTICAL|Gravity.LEFT;
+			gravity = Gravity.CENTER_VERTICAL | Gravity.LEFT;
 		}
 		sumText.setGravity(gravity);
 	}
-
-	
 
 	// private static void fillDatabase(CommonDbAdapter db) {
 	// mDb = db;

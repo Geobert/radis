@@ -29,13 +29,22 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	private static final String OP_ORDERING = "ops." + KEY_OP_DATE
 			+ " desc, ops." + KEY_OP_ROWID + " desc";
 
-	/**
-	 * Constructor - takes the context to allow the database to be
-	 * opened/created
-	 * 
-	 * @param ctx
-	 *            the Context within which to work
-	 */
+	private final String DATABASE_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
+			+ " ops LEFT OUTER JOIN " + DATABASE_THIRD_PARTIES_TABLE
+			+ " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp."
+			+ KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
+			+ DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode."
+			+ KEY_MODE_ROWID + " LEFT OUTER JOIN " + DATABASE_TAGS_TABLE
+			+ " tag ON ops." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
+
+	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
+			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
+			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
+			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES };
+
+	private static final String RESTRICT_TO_ACCOUNT = "ops."
+			+ KEY_OP_ACCOUNT_ID + " = %d";
+
 	public OperationsDbAdapter(Context ctx, long accountRowId) {
 		super(ctx);
 		mAccountId = accountRowId;
@@ -67,36 +76,16 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, mThirdPartiesMap);
 	}
 
-	/**
-	 * Open the notes database. If it cannot be opened, try to create a new
-	 * instance of the database. If it cannot be created, throw an exception to
-	 * signal the failure
-	 * 
-	 * @return this (self reference, allowing this to be chained in an
-	 *         initialization call)
-	 * @throws SQLException
-	 *             if the database could be neither opened or created
-	 */
 	public OperationsDbAdapter open() throws SQLException {
 		super.open();
 		fillCaches();
 		return this;
 	}
 
-	/**
-	 * get the rowId from cache if exists or fill the table with new value
-	 * 
-	 * @param key
-	 * @param map
-	 * @param table
-	 * @param col
-	 * @return
-	 * @throws SQLException
-	 */
-	
 	public long getKeyIdOrCreate(String key, String table) throws SQLException {
 		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
-			return getKeyIdOrCreate(key, mThirdPartiesMap, table, KEY_THIRD_PARTY_NAME);
+			return getKeyIdOrCreate(key, mThirdPartiesMap, table,
+					KEY_THIRD_PARTY_NAME);
 		} else if (table.equals(DATABASE_TAGS_TABLE)) {
 			return getKeyIdOrCreate(key, mTagsMap, table, KEY_TAG_NAME);
 		} else if (table.equals(DATABASE_MODES_TABLE)) {
@@ -104,7 +93,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		}
 		return 0;
 	}
-	
+
 	public long getKeyIdIfExists(String key, String table) {
 		Long res = null;
 		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
@@ -119,7 +108,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		}
 		return -1;
 	}
-	
+
 	private long getKeyIdOrCreate(String key, LinkedHashMap<String, Long> map,
 			String table, String col) throws SQLException {
 		key = key.trim();
@@ -176,33 +165,10 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 	}
 
-	/**
-	 * Delete the note with the given rowId
-	 * 
-	 * @param rowId
-	 *            id of note to delete
-	 * @return true if deleted, false otherwise
-	 */
 	public boolean deleteOp(long rowId) {
 		return mDb.delete(DATABASE_OPERATIONS_TABLE,
 				KEY_OP_ROWID + "=" + rowId, null) > 0;
 	}
-
-	private final String DATABASE_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
-			+ " ops LEFT OUTER JOIN " + DATABASE_THIRD_PARTIES_TABLE
-			+ " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp."
-			+ KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
-			+ DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode."
-			+ KEY_MODE_ROWID + " LEFT OUTER JOIN " + DATABASE_TAGS_TABLE
-			+ " tag ON ops." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
-
-	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
-			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
-			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
-			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES };
-
-	private static final String RESTRICT_TO_ACCOUNT = "ops."
-			+ KEY_OP_ACCOUNT_ID + " = %d";
 
 	public Cursor fetchNLastOps(int nbOps) {
 		return mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
@@ -238,16 +204,6 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		}
 		return c;
 	}
-
-	// public Cursor fetchOpsSumsLaterThan(long date) {
-	// Cursor c = mDb.query(mDatabaseTable, new String[] { KEY_OP_ROWID,
-	// KEY_OP_SUM }, KEY_OP_DATE + " > " + date, null, null, null,
-	// null);
-	// if (c != null) {
-	// c.moveToFirst();
-	// }
-	// return c;
-	// }
 
 	public boolean updateOp(long rowId, Operation op) {
 		ContentValues args = new ContentValues();
