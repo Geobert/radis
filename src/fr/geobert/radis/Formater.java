@@ -15,4 +15,8 @@ public class Formater {
 		Formater.SUM_FORMAT.setMaximumFractionDigits(2);
 		Formater.SUM_FORMAT.setMinimumFractionDigits(2);
 	}
+	
+	public static boolean isInit() {
+		return SUM_FORMAT == null;
+	}
 }

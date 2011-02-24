@@ -43,7 +43,7 @@ public class AccountList extends ListActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (null == Formater.SUM_FORMAT) {
+		if (!Formater.isInit()) {
 			Formater.init();
 		}
 		Tools.checkDebugMode(this);

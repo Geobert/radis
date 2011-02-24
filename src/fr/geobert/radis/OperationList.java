@@ -187,7 +187,7 @@ public class OperationList extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (null == Formater.SUM_FORMAT) {
+		if (!Formater.isInit()) {
 			Formater.init();
 		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);

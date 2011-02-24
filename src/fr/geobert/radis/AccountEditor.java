@@ -29,7 +29,7 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (null == Formater.SUM_FORMAT) {
+		if (!Formater.isInit()) {
 			Formater.init();
 		}
 		mDbHelper = new CommonDbAdapter(this);

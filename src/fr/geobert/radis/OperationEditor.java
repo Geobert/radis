@@ -51,7 +51,7 @@ public class OperationEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (null == Formater.SUM_FORMAT) {
+		if (!Formater.isInit()) {
 			Formater.init();
 		}
 		Bundle extras = getIntent().getExtras();
