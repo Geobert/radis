@@ -9,7 +9,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class Operation implements Parcelable {
-	private GregorianCalendar mDate;
+	protected GregorianCalendar mDate;
 	public String mThirdParty;
 	public String mTag;
 	public String mMode;
@@ -118,7 +118,7 @@ public class Operation implements Parcelable {
 		
 	}
 	
-	private void readFromParcel(Parcel in) {
+	protected void readFromParcel(Parcel in) {
         setDay(in.readInt());
         setMonth(in.readInt());
         setYear(in.readInt());

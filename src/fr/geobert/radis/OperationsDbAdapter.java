@@ -189,16 +189,10 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 	public Cursor fetchOpEarlierThan(long date, int nbOps) {
 		Cursor c = null;
-
-		try {
-			c = mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
-					String.format(RESTRICT_TO_ACCOUNT, mAccountId)
-							+ " AND ops." + KEY_OP_DATE + " < " + date, null,
-					null, null, OP_ORDERING, Integer.toString(nbOps));
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		c = mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
+						+ KEY_OP_DATE + " < " + date, null, null, null,
+				OP_ORDERING, Integer.toString(nbOps));
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -226,8 +220,14 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
 	}
-
-	// INFOS
+	
+	// ----------------------
+	// SCHEDULED TRANSACTIONS
+	// ----------------------
+	
+	// ------------------------------
+	// INFOS (third party, tag, mode)
+	// ------------------------------
 	public boolean updateInfo(String table, long rowId, String value) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);

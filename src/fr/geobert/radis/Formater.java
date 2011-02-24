@@ -17,6 +17,6 @@ public class Formater {
 	}
 	
 	public static boolean isInit() {
-		return SUM_FORMAT == null;
+		return SUM_FORMAT != null;
 	}
 }
