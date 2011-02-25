@@ -8,6 +8,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.os.Bundle;
 
 @SuppressWarnings("serial")
 public class OperationsDbAdapter extends CommonDbAdapter {
@@ -29,7 +30,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	private static final String OP_ORDERING = "ops." + KEY_OP_DATE
 			+ " desc, ops." + KEY_OP_ROWID + " desc";
 
-	private final String DATABASE_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
+	private final String DATABASE_OP_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
 			+ " ops LEFT OUTER JOIN " + DATABASE_THIRD_PARTIES_TABLE
 			+ " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp."
 			+ KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
@@ -44,6 +45,36 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 	private static final String RESTRICT_TO_ACCOUNT = "ops."
 			+ KEY_OP_ACCOUNT_ID + " = %d";
+
+	private static final String SCHEDULED_OP_ORDERING = "sch."
+			+ KEY_SCHEDULED_DATE + " desc, sch." + KEY_SCHEDULED_ROWID
+			+ " desc";
+
+	private final String DATABASE_SCHEDULED_TABLE_JOINTURE = DATABASE_SCHEDULED_TABLE
+			+ " sch LEFT OUTER JOIN "
+			+ DATABASE_THIRD_PARTIES_TABLE
+			+ " tp ON sch."
+			+ KEY_OP_THIRD_PARTY
+			+ " = tp."
+			+ KEY_THIRD_PARTY_ROWID
+			+ " LEFT OUTER JOIN "
+			+ DATABASE_MODES_TABLE
+			+ " mode ON sch."
+			+ KEY_OP_MODE
+			+ " = mode."
+			+ KEY_MODE_ROWID
+			+ " LEFT OUTER JOIN "
+			+ DATABASE_TAGS_TABLE
+			+ " tag ON sch." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
+
+	public static final String[] SCHEDULED_OP_COLS_QUERY = {
+			"sch." + KEY_SCHEDULED_ROWID, "tp." + KEY_THIRD_PARTY_NAME,
+			"tag." + KEY_TAG_NAME, "mode." + KEY_MODE_NAME,
+			"sch." + KEY_SCHEDULED_SUM, "sch." + KEY_SCHEDULED_DATE,
+			"sch." + KEY_SCHEDULED_ACCOUNT_ID, "sch." + KEY_SCHEDULED_NOTES,
+			"sch." + KEY_SCHEDULED_END_DATE,
+			"sch." + KEY_SCHEDULED_PERIODICITY,
+			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT };
 
 	public OperationsDbAdapter(Context ctx, long accountRowId) {
 		super(ctx);
@@ -145,7 +176,6 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 	public long createOp(Operation op) {
 		ContentValues initialValues = new ContentValues();
-
 		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
 				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
@@ -171,13 +201,13 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	}
 
 	public Cursor fetchNLastOps(int nbOps) {
-		return mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, mAccountId), null, null,
 				null, OP_ORDERING, Integer.toString(nbOps));
 	}
 
 	public Cursor fetchOneOp(long rowId) {
-		Cursor c = mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
 						+ KEY_OP_ROWID + " = " + rowId, null, null, null, null,
 				null);
@@ -189,7 +219,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 	public Cursor fetchOpEarlierThan(long date, int nbOps) {
 		Cursor c = null;
-		c = mDb.query(DATABASE_TABLE_JOINTURE, OP_COLS_QUERY,
+		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
 						+ KEY_OP_DATE + " < " + date, null, null, null,
 				OP_ORDERING, Integer.toString(nbOps));
@@ -220,11 +250,84 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
 	}
-	
+
 	// ----------------------
 	// SCHEDULED TRANSACTIONS
 	// ----------------------
-	
+	public Cursor fetchAllScheduledOps() {
+		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
+				SCHEDULED_OP_COLS_QUERY, null, null, null, null,
+				SCHEDULED_OP_ORDERING);
+		if (null != c) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public Cursor fetchOneScheduledOp(long rowId) {
+		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
+				SCHEDULED_OP_COLS_QUERY, "ops." + KEY_OP_ROWID + " = " + rowId,
+				null, null, null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public long createScheduledOp(ScheduledOperation op) {
+		ContentValues initialValues = new ContentValues();
+		String key = op.mThirdParty;
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_SCHEDULED_THIRD_PARTY, mThirdPartiesMap, initialValues);
+
+		key = op.mTag;
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_SCHEDULED_TAG,
+				mTagsMap, initialValues);
+
+		key = op.mMode;
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_SCHEDULED_MODE,
+				mModesMap, initialValues);
+
+		initialValues.put(KEY_SCHEDULED_SUM, op.mSum);
+		initialValues.put(KEY_SCHEDULED_DATE, op.getDate());
+		initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, mAccountId);
+		initialValues.put(KEY_SCHEDULED_NOTES, op.mNotes);
+		initialValues.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
+		initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
+		initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+		return mDb.insert(DATABASE_SCHEDULED_TABLE, null, initialValues);
+	}
+
+	public boolean updateScheduledOp(long rowId, ScheduledOperation op) {
+		ContentValues args = new ContentValues();
+
+		String key = op.mThirdParty;
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_SCHEDULED_THIRD_PARTY, mThirdPartiesMap, args);
+
+		key = op.mTag;
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_SCHEDULED_TAG,
+				mTagsMap, args);
+
+		key = op.mMode;
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_SCHEDULED_MODE,
+				mModesMap, args);
+
+		args.put(KEY_SCHEDULED_SUM, op.mSum);
+		args.put(KEY_SCHEDULED_DATE, op.getDate());
+		args.put(KEY_SCHEDULED_NOTES, op.mNotes);
+		args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
+		args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
+		args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+		return mDb.update(DATABASE_SCHEDULED_TABLE, args, KEY_OP_ROWID + "="
+				+ rowId, null) > 0;
+	}
+
+	public boolean deleteScheduledOp(long rowId) {
+		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ROWID + "="
+				+ rowId, null) > 0;
+	}
+
 	// ------------------------------
 	// INFOS (third party, tag, mode)
 	// ------------------------------
