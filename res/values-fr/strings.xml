@@ -103,4 +103,18 @@
 <string name="crash_dialog_ok_toast">Merci beaucoup ! Je m\'en vais pourfendre cet abominable bug !</string>
 <string name="empty_amount">Le montant est vide</string>
 <string name="item_exists">L\'élément existe déjà</string>
+<string-array name="periodicity_units">
+    <item>Une fois</item>
+    <item>Journalière</item>
+    <item>Mensuelle</item>
+    <item>Annuelle</item>
+    <item>Tous les %d jours</item>
+    <item>Tous les %d mois</item>
+    <item>Toutes les %d années</item>
+</string-array>
+<string name="no_end_date">Pas de fin</string>
+<string name="scheduling">Plannification</string>
+<string name="basics">Informations principales</string>
+<string name="end_date">Date de fin</string>
+<string name="scheduled_ops">Échéancier</string>
 </resources>

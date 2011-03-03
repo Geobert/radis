@@ -1,42 +1,39 @@
 package fr.geobert.radis;
 
-import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.MotionEvent;
+import java.util.ArrayList;
 
-public class ViewSwipeDetector extends SimpleOnGestureListener {
-	private static final int SWIPE_MIN_DISTANCE = 120;
-	private static final int SWIPE_MAX_OFF_PATH = 250;
-	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+import android.gesture.Gesture;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
+import android.gesture.Prediction;
+
+public class ViewSwipeDetector implements
+		GestureOverlayView.OnGesturePerformedListener {
 	private Runnable mLToR;
 	private Runnable mRToL;
+	private GestureLibrary mGesturelib;
 
-	public ViewSwipeDetector(Runnable lToR, Runnable rToL) {
+	public ViewSwipeDetector(GestureLibrary gesturelib, Runnable lToR,
+			Runnable rToL) {
 		mLToR = lToR;
 		mRToL = rToL;
+		mGesturelib = gesturelib;
 	}
 
 	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-			float velocityY) {
-		try {
-			if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
-				return false;
-
-			if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
-					&& Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) { // <--
-				if (null != mRToL) {
-					mRToL.run();
-				}
-			} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
-					&& Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) { // -->
+	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
+		ArrayList<Prediction> predictions = mGesturelib.recognize(gesture);
+		if (predictions.size() > 0 && predictions.get(0).score > 18.0) {
+			Prediction prediction = predictions.get(0);
+			if (prediction.name.equals("LeftToRight")) {
 				if (null != mLToR) {
 					mLToR.run();
 				}
+			} else if (prediction.name.equals("RightToLeft")) {
+				if (null != mRToL) {
+					mRToL.run();
+				}
 			}
-		} catch (Exception e) {
-			// nothing
 		}
-		return false;
-
 	}
 }

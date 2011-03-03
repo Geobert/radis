@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.gesture.GestureOverlayView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent" android:id="@+id/gesture_view"
+	android:gestureStrokeType="single" android:eventsInterceptionEnabled="true"
+	android:layout_weight="1.0">
+	<LinearLayout android:padding="5px" android:layout_width="fill_parent"
+		android:id="@+id/scheduled_op_editor"
+		android:layout_height="wrap_content" android:orientation="vertical">
+		<ViewFlipper android:id="@+id/header_flipper"
+			android:layout_width="fill_parent" android:layout_height="wrap_content">
+			<TextView android:gravity="center_vertical|right"
+				android:id="@+id/basics_header" android:text="@string/scheduling"
+				android:drawableRight="@drawable/ic_menu_arrow_l2r_mdpi"
+				android:layout_width="fill_parent" android:layout_height="wrap_content" />
+			<TextView android:gravity="center_vertical|left"
+				android:text="@string/basics" android:id="@+id/scheduling_header"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:drawableLeft="@drawable/ic_menu_arrow_r2l_mdpi" />
+		</ViewFlipper>
+		<ScrollView android:layout_width="fill_parent"
+			android:layout_height="fill_parent" android:layout_weight="1"
+			android:fillViewport="true">
+			<ViewFlipper android:id="@+id/flipper"
+				android:layout_width="fill_parent" android:layout_height="wrap_content">
+				<include layout="@layout/main_op_edit" />
+				<include layout="@layout/scheduling_edit" />
+			</ViewFlipper>
+		</ScrollView>
+		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
+			<Button android:id="@+id/confirm_op" android:text="@string/ok"
+				android:layout_weight="1" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" />
+			<Button android:id="@+id/cancel_op" android:text="@string/cancel"
+				android:layout_weight="1" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" />
+		</LinearLayout>
+	</LinearLayout>
+</android.gesture.GestureOverlayView>

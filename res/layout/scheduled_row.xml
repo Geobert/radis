@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="wrap_content" android:background="@drawable/op_line"
+	android:padding="0px">
+	<LinearLayout style="@style/OpLine">
+		<TextView android:id="@+id/scheduled_date" android:minWidth="40sp"
+			android:text="24/12" style="@style/OpRowTextView" />
+		<TextView android:id="@+id/scheduled_third_party" style="@style/OpRowTextView"
+			android:layout_width="fill_parent" android:text="toto"
+			android:layout_weight="1" />
+		<TextView android:id="@+id/scheduled_sum" style="@style/OpRowTextView.Sums"
+			android:text="200,00" />
+	</LinearLayout>
+	<LinearLayout style="@style/OpLine" android:gravity="right">
+		<LinearLayout android:layout_width="fill_parent"
+			android:layout_weight="1" android:layout_height="fill_parent"
+			android:orientation="horizontal" android:gravity="center_vertical|left"
+			android:paddingLeft="5px">
+			<ImageView android:src="@drawable/arrow_down16"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:id="@+id/scheduled_icon" />
+			<TextView android:id="@+id/scheduled_account" android:text="Courant"
+				style="@style/OpRowTextView.Infos" android:layout_weight="0" />
+		</LinearLayout>
+		<TextView android:id="@+id/scheduled_infos" android:text="Period / Limit"
+			style="@style/OpRowTextView.Infos" android:layout_weight="0" />
+	</LinearLayout>
+</LinearLayout>

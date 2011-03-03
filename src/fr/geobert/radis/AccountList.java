@@ -59,7 +59,7 @@ public class AccountList extends ListActivity {
 		RESTART_INTENT = PendingIntent.getActivity(this.getBaseContext(), 0,
 				new Intent(getIntent()), getIntent().getFlags());
 		final GestureDetector gestureDetector = new GestureDetector(
-				new SwipeDetector(getListView(), new ListSwipeAction() {
+				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
 					public void run() {
 						if (mRowId > 0) {
@@ -91,7 +91,7 @@ public class AccountList extends ListActivity {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.account_list_menu, menu);
-		inflater.inflate(R.menu.advanced_actions, menu);
+		inflater.inflate(R.menu.common_menu, menu);
 		return true;
 	}
 
@@ -110,6 +110,9 @@ public class AccountList extends ListActivity {
 		case R.id.create_account:
 			createAccount();
 			return true;
+		case R.id.go_to_sch_op:
+			startScheduledOpsList();
+			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
 				return true;
@@ -118,11 +121,16 @@ public class AccountList extends ListActivity {
 		return super.onMenuItemSelected(featureId, item);
 	}
 
+	private void startScheduledOpsList() {
+		Intent i = new Intent(this, ScheduledOpList.class);
+		startActivity(i);
+	}
+
 	private void startAccountEdit(long id) {
 		Intent i = new Intent(this, AccountEditor.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, id);
 		startActivityForResult(i, ACTIVITY_ACCOUNT_EDIT);
-		AccountList.this.overridePendingTransition(R.anim.left_to_right, 0);
+		AccountList.this.overridePendingTransition(R.anim.enter_from_left, 0);
 	}
 
 	@Override

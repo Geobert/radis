@@ -4,7 +4,7 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
 import android.widget.ListView;
 
-public class SwipeDetector extends SimpleOnGestureListener {
+public class ListViewSwipeDetector extends SimpleOnGestureListener {
 	private static final int SWIPE_MIN_DISTANCE = 120;
 	private static final int SWIPE_MAX_OFF_PATH = 250;
 	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
@@ -12,7 +12,7 @@ public class SwipeDetector extends SimpleOnGestureListener {
 	private ListSwipeAction mRToL;
 	private ListView mListView;
 
-	public SwipeDetector(ListView l, ListSwipeAction lToR, ListSwipeAction rToL) {
+	public ListViewSwipeDetector(ListView l, ListSwipeAction lToR, ListSwipeAction rToL) {
 		mLToR = lToR;
 		mRToL = rToL;
 		mListView = l;

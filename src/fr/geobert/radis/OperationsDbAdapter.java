@@ -8,7 +8,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.os.Bundle;
 
 @SuppressWarnings("serial")
 public class OperationsDbAdapter extends CommonDbAdapter {
@@ -54,30 +53,46 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 			+ " sch LEFT OUTER JOIN "
 			+ DATABASE_THIRD_PARTIES_TABLE
 			+ " tp ON sch."
-			+ KEY_OP_THIRD_PARTY
+			+ KEY_SCHEDULED_THIRD_PARTY
 			+ " = tp."
 			+ KEY_THIRD_PARTY_ROWID
 			+ " LEFT OUTER JOIN "
 			+ DATABASE_MODES_TABLE
 			+ " mode ON sch."
-			+ KEY_OP_MODE
+			+ KEY_SCHEDULED_MODE
 			+ " = mode."
 			+ KEY_MODE_ROWID
 			+ " LEFT OUTER JOIN "
 			+ DATABASE_TAGS_TABLE
-			+ " tag ON sch." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
+			+ " tag ON sch."
+			+ KEY_SCHEDULED_TAG
+			+ " = tag."
+			+ KEY_TAG_ROWID
+			+ " LEFT OUTER JOIN "
+			+ DATABASE_ACCOUNT_TABLE
+			+ " acc ON sch."
+			+ KEY_SCHEDULED_ACCOUNT_ID + " = acc." + KEY_ACCOUNT_ROWID;
 
 	public static final String[] SCHEDULED_OP_COLS_QUERY = {
 			"sch." + KEY_SCHEDULED_ROWID, "tp." + KEY_THIRD_PARTY_NAME,
 			"tag." + KEY_TAG_NAME, "mode." + KEY_MODE_NAME,
 			"sch." + KEY_SCHEDULED_SUM, "sch." + KEY_SCHEDULED_DATE,
-			"sch." + KEY_SCHEDULED_ACCOUNT_ID, "sch." + KEY_SCHEDULED_NOTES,
-			"sch." + KEY_SCHEDULED_END_DATE,
+			"sch." + KEY_SCHEDULED_ACCOUNT_ID, "acc." + KEY_ACCOUNT_NAME,
+			"sch." + KEY_SCHEDULED_NOTES, "sch." + KEY_SCHEDULED_END_DATE,
 			"sch." + KEY_SCHEDULED_PERIODICITY,
 			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT };
 
 	public OperationsDbAdapter(Context ctx, long accountRowId) {
 		super(ctx);
+		init(ctx, accountRowId);
+	}
+
+	public OperationsDbAdapter(Context ctx) {
+		super(ctx);
+		init(ctx, 0);
+	}
+
+	private void init(Context ctx, long accountRowId) {
 		mAccountId = accountRowId;
 		mInfoCursorMap = new HashMap<String, Cursor>();
 	}
@@ -290,7 +305,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 		initialValues.put(KEY_SCHEDULED_SUM, op.mSum);
 		initialValues.put(KEY_SCHEDULED_DATE, op.getDate());
-		initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, mAccountId);
+		initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
 		initialValues.put(KEY_SCHEDULED_NOTES, op.mNotes);
 		initialValues.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 		initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);

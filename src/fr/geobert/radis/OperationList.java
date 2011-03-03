@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
@@ -10,7 +9,6 @@ import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
@@ -35,7 +33,6 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -51,7 +48,6 @@ public class OperationList extends ListActivity {
 
 	private OperationsDbAdapter mDbHelper;
 	private Long mAccountId;
-	private String mAccountName;
 	private Cursor mCurAccount;
 	private final int NB_LAST_OPS = 20;
 	private MatrixCursor mLastOps = null;
@@ -67,34 +63,17 @@ public class OperationList extends ListActivity {
 	private QuickAddTextWatcher mQuickAddTextWatcher;
 	private CorrectCommaWatcher mCorrectCommaWatcher;
 
-	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
-		private Resources res = getResources();
+	private class InnerViewBinder extends OpViewBinder {
+
+		public InnerViewBinder() {
+			super(OperationList.this, OperationsDbAdapter.KEY_OP_SUM,
+					OperationsDbAdapter.KEY_OP_DATE, R.id.op_icon);
+		}
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
-
-			if (colName.equals(OperationsDbAdapter.KEY_OP_SUM)) {
-				TextView textView = ((TextView) view);
-				ImageView i = (ImageView) ((LinearLayout) view.getParent()
-						.getParent()).findViewById(R.id.op_icon);
-				double sum = cursor.getDouble(columnIndex);
-				if (sum >= 0.0) {
-					textView.setTextColor(res.getColor(R.color.positiveSum));
-					i.setImageResource(R.drawable.arrow_up16);
-				} else {
-					textView.setTextColor(res.getColor(R.color.text_color));
-					i.setImageResource(R.drawable.arrow_down16);
-				}
-				String txt = Formater.SUM_FORMAT.format(Double.valueOf(sum));
-				textView.setText(txt);
-				return true;
-			} else if (colName.equals(OperationsDbAdapter.KEY_OP_DATE)) {
-				Date date = new Date(cursor.getLong(columnIndex));
-				((TextView) view).setText(Formater.SHORT_DATE_FORMAT
-						.format(date));
-				return true;
-			} else if (colName.equals(OperationsDbAdapter.KEY_TAG_NAME)) {
+			if (colName.equals(OperationsDbAdapter.KEY_TAG_NAME)) {
 				TextView textView = ((TextView) view);
 				StringBuilder b = new StringBuilder();
 				String s = cursor.getString(columnIndex);
@@ -112,8 +91,9 @@ public class OperationList extends ListActivity {
 				}
 				textView.setText(b.toString());
 				return true;
+			} else {
+				return super.setViewValue(view, cursor, columnIndex);
 			}
-			return false;
 		}
 	}
 
@@ -172,7 +152,6 @@ public class OperationList extends ListActivity {
 			mHasResult = fillLastOps(result);
 			return null;
 		}
-
 	}
 
 	private void getMoreOps() {
@@ -203,13 +182,11 @@ public class OperationList extends ListActivity {
 		Bundle extras = getIntent().getExtras();
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
 				: null;
-		mAccountName = extras != null ? extras
-				.getString(CommonDbAdapter.KEY_ACCOUNT_NAME) : null;
-		setTitle(getString(R.string.app_name) + " - " + mAccountName);
 		mDbHelper = new OperationsDbAdapter(this, mAccountId);
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
+
 		mQuickAddThirdParty = (AutoCompleteTextView) findViewById(R.id.quickadd_third_party);
 		mQuickAddThirdParty.setAdapter(new InfoAdapter(this, mDbHelper,
 				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
@@ -236,8 +213,9 @@ public class OperationList extends ListActivity {
 				mQuickAddAmount, mQuickAddButton);
 		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
 		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
+
 		final GestureDetector gestureDetector = new GestureDetector(
-				new SwipeDetector(getListView(), new ListSwipeAction() {
+				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
 					public void run() {
 						OperationList.this.finish();
@@ -355,7 +333,7 @@ public class OperationList extends ListActivity {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.operations_list_menu, menu);
-		inflater.inflate(R.menu.advanced_actions, menu);
+		inflater.inflate(R.menu.common_menu, menu);
 		return true;
 	}
 
@@ -375,12 +353,20 @@ public class OperationList extends ListActivity {
 		case R.id.create_operation:
 			createOp();
 			return true;
+		case R.id.go_to_sch_op:
+			startScheduledOpsList();
+			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
 				return true;
 			}
 		}
 		return super.onMenuItemSelected(featureId, item);
+	}
+
+	private void startScheduledOpsList() {
+		Intent i = new Intent(this, ScheduledOpList.class);
+		startActivity(i);
 	}
 
 	@Override
