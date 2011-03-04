@@ -17,7 +17,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 public class InfoManager {
-	private OperationEditor mContext = null;
+	private CommonOpEditor mContext = null;
 	private AlertDialog.Builder mBuilder = null;
 	private AlertDialog mListDialog = null;
 	private Button mAddBut;
@@ -43,7 +43,7 @@ public class InfoManager {
 		}
 	};
 
-	InfoManager(OperationEditor context, OperationsDbAdapter dbHelper,
+	InfoManager(CommonOpEditor context, OperationsDbAdapter dbHelper,
 			String title, String table, String colName, int editId, int deleteId) {
 		mDbHelper = dbHelper;
 		mContext = context;

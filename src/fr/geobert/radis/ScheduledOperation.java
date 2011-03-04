@@ -49,7 +49,7 @@ public class ScheduledOperation extends Operation {
 	}
 	
 	public static String getUnitStr(final Activity context, final int unit, final int periodicity) {
-		String s = context.getResources().getStringArray(R.array.periodicity_units)[unit];
+		String s = context.getResources().getStringArray(R.array.periodicity_labels)[unit];
 		if (unit < 4) {
 			return s;
 		} else if (unit <= 6) {

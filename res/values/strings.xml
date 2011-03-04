@@ -102,7 +102,20 @@
 <string name="crash_dialog_ok_toast">Thank you !</string>
 <string name="empty_amount">Amount is empty</string>
 <string name="item_exists">Item already exists</string>
-<string-array name="periodicity_units">
+<string-array name="periodicity_choices">
+	<item>Periodicity</item>
+    <item>Once</item>
+    <item>Daily</item>
+    <item>Monthly</item>
+    <item>Yearly</item>
+    <item>Custom</item>
+</string-array>
+<string-array name="periodicity_custom_choices">
+    <item>Days</item>
+    <item>Monthes</item>
+    <item>Years</item>
+</string-array>
+<string-array name="periodicity_labels">
     <item>Once</item>
     <item>Daily</item>
     <item>Monthly</item>
@@ -111,6 +124,8 @@
     <item>Every %d months</item>
     <item>Every %d years</item>
 </string-array>
+<string name="every">Every</string>
+<string name="every_fem">Every</string>
 <string name="no_end_date">Forever</string>
 <string name="scheduling">Scheduling</string>
 <string name="basics">Basics</string>

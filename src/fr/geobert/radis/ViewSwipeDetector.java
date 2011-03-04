@@ -23,7 +23,7 @@ public class ViewSwipeDetector implements
 	@Override
 	public void onGesturePerformed(GestureOverlayView overlay, Gesture gesture) {
 		ArrayList<Prediction> predictions = mGesturelib.recognize(gesture);
-		if (predictions.size() > 0 && predictions.get(0).score > 18.0) {
+		if (predictions.size() > 0 && predictions.get(0).score > 5.0) {
 			Prediction prediction = predictions.get(0);
 			if (prediction.name.equals("LeftToRight")) {
 				if (null != mLToR) {

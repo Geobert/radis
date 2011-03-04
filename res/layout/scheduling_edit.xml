@@ -9,6 +9,7 @@
 	<LinearLayout android:id="@+id/custom_periodicity"
 		android:orientation="horizontal" android:layout_height="wrap_content"
 		android:layout_width="fill_parent" android:visibility="gone">
+		<TextView android:id="@+id/custom_periodicity_text" android:text="@string/every"/> 
 		<EditText android:id="@+id/custom_periodicity_value"
 			android:minEms="2" android:layout_height="wrap_content"
 			android:layout_width="wrap_content" />
