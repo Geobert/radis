@@ -68,45 +68,37 @@ public class CommonDbAdapter {
 			+ " integer primary key autoincrement, " + KEY_MODE_NAME
 			+ " text not null);";
 
-	public static final String KEY_SCHEDULED_DATE = "scheduled_date";
-	public static final String KEY_SCHEDULED_END_DATE = "scheduled_end_date";
-	public static final String KEY_SCHEDULED_PERIODICITY = "scheduled_periodicity";
-	public static final String KEY_SCHEDULED_THIRD_PARTY = "scheduled_third_party";
-	public static final String KEY_SCHEDULED_TAG = "scheduled_tag";
-	public static final String KEY_SCHEDULED_MODE = "scheduled_mode";
-	public static final String KEY_SCHEDULED_SUM = "scheduled_sum";
+	public static final String KEY_OP_DATE = "date";
+	public static final String KEY_OP_THIRD_PARTY = "third_party";
+	public static final String KEY_OP_TAG = "tag";
+	public static final String KEY_OP_MODE = "mode";
+	public static final String KEY_OP_SUM = "sum";
+	public static final String KEY_OP_SCHEDULED_ID = "scheduled_id";
+	public static final String KEY_OP_ACCOUNT_ID = "account_id";
+	public static final String KEY_OP_ROWID = "_id";
+	public static final String KEY_OP_NOTES = "notes";
+
+	public static final String KEY_SCHEDULED_END_DATE = "end_date";
+	public static final String KEY_SCHEDULED_PERIODICITY = "periodicity";
 	public static final String KEY_SCHEDULED_ACCOUNT_ID = "scheduled_account_id";
 	public static final String KEY_SCHEDULED_ROWID = "_id";
-	public static final String KEY_SCHEDULED_NOTES = "scheduled_notes";
-	public static final String KEY_SCHEDULED_PERIODICITY_UNIT = "scheduled_preiodicity_units";
+	public static final String KEY_SCHEDULED_PERIODICITY_UNIT = "periodicity_units";
 
 	protected static final String DATABASE_SCHEDULED_CREATE = "create table "
 			+ DATABASE_SCHEDULED_TABLE + "(" + KEY_SCHEDULED_ROWID
-			+ " integer primary key autoincrement, "
-			+ KEY_SCHEDULED_THIRD_PARTY + " integer, " + KEY_SCHEDULED_TAG
-			+ " integer, " + KEY_SCHEDULED_SUM + " real not null, "
-			+ KEY_SCHEDULED_ACCOUNT_ID + " integer not null, "
-			+ KEY_SCHEDULED_MODE + " integer, " + KEY_SCHEDULED_DATE
+			+ " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY
+			+ " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
+			+ " real not null, " + KEY_SCHEDULED_ACCOUNT_ID
+			+ " integer not null, " + KEY_OP_MODE + " integer, " + KEY_OP_DATE
 			+ " integer not null, " + KEY_SCHEDULED_END_DATE + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY_UNIT + " integer not null, "
-			+ KEY_SCHEDULED_NOTES + " text, FOREIGN KEY ("
-			+ KEY_SCHEDULED_THIRD_PARTY + ") REFERENCES "
-			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
-			+ "), FOREIGN KEY (" + KEY_SCHEDULED_TAG + ") REFERENCES "
-			+ DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID + "), FOREIGN KEY ("
-			+ KEY_SCHEDULED_MODE + ") REFERENCES " + DATABASE_MODES_TABLE + "("
-			+ KEY_MODE_ROWID + "));";
-
-	public static final String KEY_OP_DATE = "op_date";
-	public static final String KEY_OP_THIRD_PARTY = "op_third_party";
-	public static final String KEY_OP_TAG = "op_tag";
-	public static final String KEY_OP_MODE = "op_mode";
-	public static final String KEY_OP_SUM = "op_sum";
-	public static final String KEY_OP_SCHEDULED_ID = "op_scheduled_id";
-	public static final String KEY_OP_ACCOUNT_ID = "op_account_id";
-	public static final String KEY_OP_ROWID = "_id";
-	public static final String KEY_OP_NOTES = "op_notes";
+			+ KEY_OP_NOTES + " text, FOREIGN KEY (" + KEY_OP_THIRD_PARTY
+			+ ") REFERENCES " + DATABASE_THIRD_PARTIES_TABLE + "("
+			+ KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG
+			+ ") REFERENCES " + DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID
+			+ "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES "
+			+ DATABASE_MODES_TABLE + "(" + KEY_MODE_ROWID + "));";
 
 	protected static final String DATABASE_OP_CREATE = "create table "
 			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID
@@ -144,12 +136,9 @@ public class CommonDbAdapter {
 			+ "; UPDATE "
 			+ DATABASE_SCHEDULED_TABLE
 			+ " SET "
-			+ KEY_SCHEDULED_THIRD_PARTY
+			+ KEY_OP_THIRD_PARTY
 			+ " = null WHERE "
-			+ KEY_SCHEDULED_THIRD_PARTY
-			+ " = old."
-			+ KEY_THIRD_PARTY_ROWID
-			+ "; END";
+			+ KEY_OP_THIRD_PARTY + " = old." + KEY_THIRD_PARTY_ROWID + "; END";
 	protected static final String TRIGGER_ON_DELETE_MODE_CREATE = "CREATE TRIGGER on_delete_mode AFTER DELETE ON "
 			+ DATABASE_MODES_TABLE
 			+ " BEGIN UPDATE "
@@ -163,9 +152,9 @@ public class CommonDbAdapter {
 			+ "; UPDATE "
 			+ DATABASE_SCHEDULED_TABLE
 			+ " SET "
-			+ KEY_SCHEDULED_MODE
+			+ KEY_OP_MODE
 			+ " = null WHERE "
-			+ KEY_SCHEDULED_MODE
+			+ KEY_OP_MODE
 			+ " = old."
 			+ KEY_MODE_ROWID
 			+ "; END";
@@ -182,9 +171,9 @@ public class CommonDbAdapter {
 			+ "; UPDATE "
 			+ DATABASE_SCHEDULED_TABLE
 			+ " SET "
-			+ KEY_SCHEDULED_TAG
+			+ KEY_OP_TAG
 			+ " = null WHERE "
-			+ KEY_SCHEDULED_TAG
+			+ KEY_OP_TAG
 			+ " = old."
 			+ KEY_TAG_ROWID
 			+ "; END";
@@ -273,16 +262,13 @@ public class CommonDbAdapter {
 			case 5:
 				// must recreate operations table as ALTER does not support
 				// ALTER COLUMN in SQLITE
+				db.execSQL("DROP TRIGGER on_delete_third_party");
+				db.execSQL("DROP TRIGGER on_delete_mode");
+				db.execSQL("DROP TRIGGER on_delete_tag");
 
 				db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
 				db.execSQL(DATABASE_SCHEDULED_CREATE);
 				db.execSQL(DATABASE_OP_CREATE);
-				db.execSQL("DROP TRIGGER on_delete_third_party");
-				db.execSQL("DROP TRIGGER on_delete_mode");
-				db.execSQL("DROP TRIGGER on_delete_tag");
-				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
-				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
-				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 				db.execSQL("INSERT INTO operations ("
 						+ KEY_OP_ACCOUNT_ID
 						+ ", "
@@ -301,6 +287,10 @@ public class CommonDbAdapter {
 						+ KEY_OP_NOTES
 						+ ") SELECT old.op_account_id, old.op_third_party, old.op_tag, old.op_sum, old.op_mode, old.op_date, old.op_scheduled_id, old.op_notes FROM operations_old old;");
 				db.execSQL("DROP TABLE operations_old;");
+				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+
 			default:
 				break;
 			}

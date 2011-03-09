@@ -43,17 +43,10 @@ public class OperationEditor extends CommonOpEditor {
 			Cursor opCursor = mDbHelper.fetchOneOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentOp = new Operation(opCursor);
-			mOpSumText.setText(mCurrentOp.getSumStr());
 		} else {
 			mCurrentOp = new Operation();
-			if (mCurrentOp.mSum == 0.0) {
-				mOpSumText.setText("");
-			} else {
-				mOpSumText.setText(mCurrentOp.getSumStr());
-			}
 			mSumTextWatcher.setAutoNegate(true);
 		}
-		Tools.setSumTextGravity(mOpSumText);
 		Operation op = mCurrentOp;
 		mPreviousSum = op.mSum;
 		populateCommonFields(op);
@@ -67,14 +60,6 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void saveOpAndSetActivityResult() throws ParseException {
-		saveState();
-		Intent res = new Intent();
-		res.putExtra("sum", mCurrentOp.mSum);
-		res.putExtra("oldSum", mPreviousSum);
-		setResult(RESULT_OK, res);
-	}
-
-	private void saveState() throws ParseException {
 		Operation op = mCurrentOp;
 		fillOperationWithInputs(op);
 		if (mRowId == null) {
@@ -85,6 +70,10 @@ public class OperationEditor extends CommonOpEditor {
 		} else {
 			mDbHelper.updateOp(mRowId, op);
 		}
+		Intent res = new Intent();
+		res.putExtra("sum", mCurrentOp.mSum);
+		res.putExtra("oldSum", mPreviousSum);
+		setResult(RESULT_OK, res);
 	}
 
 	@Override

@@ -37,6 +37,7 @@ public class AccountList extends ListActivity {
 
 	private CommonDbAdapter mDbHelper;
 	private long mAccountToDelete = 0;
+	private View mScheduledListBtn;
 	public static AccountList ACTIVITY;
 	public static PendingIntent RESTART_INTENT;
 
@@ -51,6 +52,13 @@ public class AccountList extends ListActivity {
 		setContentView(R.layout.account_list);
 		mDbHelper = new CommonDbAdapter(this);
 		mDbHelper.open();
+		mScheduledListBtn = findViewById(R.id.startScheduledListBtn);
+		mScheduledListBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				startScheduledOpsList();
+			}
+		});
 		fillData();
 		setTitle(getString(R.string.app_name) + " - "
 				+ getString(R.string.accounts_list));
@@ -109,9 +117,6 @@ public class AccountList extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.create_account:
 			createAccount();
-			return true;
-		case R.id.go_to_sch_op:
-			startScheduledOpsList();
 			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
@@ -215,7 +220,7 @@ public class AccountList extends ListActivity {
 				R.layout.account_row, accountsCursor, from, to);
 		accounts.setViewBinder(new InnerViewBinder());
 		setListAdapter(accounts);
-
+		mScheduledListBtn.setEnabled(accounts.getCount() > 0);
 	}
 
 	private void createAccount() {

@@ -118,7 +118,7 @@ public class Operation implements Parcelable {
 		
 	}
 	
-	protected void readFromParcel(Parcel in) {
+	private void readFromParcel(Parcel in) {
         setDay(in.readInt());
         setMonth(in.readInt());
         setYear(in.readInt());

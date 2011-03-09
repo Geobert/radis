@@ -46,26 +46,26 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 			+ KEY_OP_ACCOUNT_ID + " = %d";
 
 	private static final String SCHEDULED_OP_ORDERING = "sch."
-			+ KEY_SCHEDULED_DATE + " desc, sch." + KEY_SCHEDULED_ROWID
+			+ KEY_OP_DATE + " desc, sch." + KEY_SCHEDULED_ROWID
 			+ " desc";
 
 	private final String DATABASE_SCHEDULED_TABLE_JOINTURE = DATABASE_SCHEDULED_TABLE
 			+ " sch LEFT OUTER JOIN "
 			+ DATABASE_THIRD_PARTIES_TABLE
 			+ " tp ON sch."
-			+ KEY_SCHEDULED_THIRD_PARTY
+			+ KEY_OP_THIRD_PARTY
 			+ " = tp."
 			+ KEY_THIRD_PARTY_ROWID
 			+ " LEFT OUTER JOIN "
 			+ DATABASE_MODES_TABLE
 			+ " mode ON sch."
-			+ KEY_SCHEDULED_MODE
+			+ KEY_OP_MODE
 			+ " = mode."
 			+ KEY_MODE_ROWID
 			+ " LEFT OUTER JOIN "
 			+ DATABASE_TAGS_TABLE
 			+ " tag ON sch."
-			+ KEY_SCHEDULED_TAG
+			+ KEY_OP_TAG
 			+ " = tag."
 			+ KEY_TAG_ROWID
 			+ " LEFT OUTER JOIN "
@@ -76,9 +76,9 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	public static final String[] SCHEDULED_OP_COLS_QUERY = {
 			"sch." + KEY_SCHEDULED_ROWID, "tp." + KEY_THIRD_PARTY_NAME,
 			"tag." + KEY_TAG_NAME, "mode." + KEY_MODE_NAME,
-			"sch." + KEY_SCHEDULED_SUM, "sch." + KEY_SCHEDULED_DATE,
+			"sch." + KEY_OP_SUM, "sch." + KEY_OP_DATE,
 			"sch." + KEY_SCHEDULED_ACCOUNT_ID, "acc." + KEY_ACCOUNT_NAME,
-			"sch." + KEY_SCHEDULED_NOTES, "sch." + KEY_SCHEDULED_END_DATE,
+			"sch." + KEY_OP_NOTES, "sch." + KEY_SCHEDULED_END_DATE,
 			"sch." + KEY_SCHEDULED_PERIODICITY,
 			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT };
 
@@ -281,7 +281,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 	public Cursor fetchOneScheduledOp(long rowId) {
 		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
-				SCHEDULED_OP_COLS_QUERY, "ops." + KEY_OP_ROWID + " = " + rowId,
+				SCHEDULED_OP_COLS_QUERY, "sch." + KEY_OP_ROWID + " = " + rowId,
 				null, null, null, null, null);
 		if (c != null) {
 			c.moveToFirst();
@@ -293,20 +293,20 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		ContentValues initialValues = new ContentValues();
 		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
-				KEY_SCHEDULED_THIRD_PARTY, mThirdPartiesMap, initialValues);
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
 
 		key = op.mTag;
-		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_SCHEDULED_TAG,
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG,
 				mTagsMap, initialValues);
 
 		key = op.mMode;
-		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_SCHEDULED_MODE,
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
 				mModesMap, initialValues);
 
-		initialValues.put(KEY_SCHEDULED_SUM, op.mSum);
-		initialValues.put(KEY_SCHEDULED_DATE, op.getDate());
+		initialValues.put(KEY_OP_SUM, op.mSum);
+		initialValues.put(KEY_OP_DATE, op.getDate());
 		initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
-		initialValues.put(KEY_SCHEDULED_NOTES, op.mNotes);
+		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 		initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
 		initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
@@ -318,19 +318,19 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
-				KEY_SCHEDULED_THIRD_PARTY, mThirdPartiesMap, args);
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, args);
 
 		key = op.mTag;
-		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_SCHEDULED_TAG,
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG,
 				mTagsMap, args);
 
 		key = op.mMode;
-		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_SCHEDULED_MODE,
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
 				mModesMap, args);
 
-		args.put(KEY_SCHEDULED_SUM, op.mSum);
-		args.put(KEY_SCHEDULED_DATE, op.getDate());
-		args.put(KEY_SCHEDULED_NOTES, op.mNotes);
+		args.put(KEY_OP_SUM, op.mSum);
+		args.put(KEY_OP_DATE, op.getDate());
+		args.put(KEY_OP_NOTES, op.mNotes);
 		args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 		args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
 		args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);

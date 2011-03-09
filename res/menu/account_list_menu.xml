@@ -2,5 +2,4 @@
 <menu
   xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/create_account" android:icon="@android:drawable/ic_menu_add" android:title="@string/create_account"></item>
-    <item android:id="@+id/go_to_sch_op" android:icon="@drawable/clock72" android:title="@string/scheduled_ops"></item>
 </menu>

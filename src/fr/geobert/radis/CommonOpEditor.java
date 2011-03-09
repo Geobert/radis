@@ -60,8 +60,8 @@ public abstract class CommonOpEditor extends Activity {
 		}
 
 		setView();
-		init(savedInstanceState);
 		initDbHelper();
+		init(savedInstanceState);
 	}
 
 	protected void init(Bundle savedInstanceState) {
@@ -208,6 +208,12 @@ public abstract class CommonOpEditor extends Activity {
 		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
 		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
 		mNotesText.setText(op.mNotes);
+		Tools.setSumTextGravity(mOpSumText);
+		if (mCurrentOp.mSum == 0.0) {
+			mOpSumText.setText("");
+		} else {
+			mOpSumText.setText(mCurrentOp.getSumStr());
+		}
 	}
 
 	protected void initListeners() {

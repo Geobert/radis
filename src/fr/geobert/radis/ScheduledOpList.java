@@ -2,48 +2,66 @@ package fr.geobert.radis;
 
 import java.util.Date;
 
+import org.acra.ErrorReporter;
+
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 public class ScheduledOpList extends ListActivity {
 	private OperationsDbAdapter mDbHelper;
+
+	private AdapterContextMenuInfo mOpToDelete;
+
+	// activities ids
 	private static final int ACTIVITY_SCH_OP_CREATE = 0;
 	private static final int ACTIVITY_SCH_OP_EDIT = 1;
-	
+
+	// context menu ids
+	private static final int DELETE_OP_ID = Menu.FIRST + 1;
+	private static final int EDIT_OP_ID = Menu.FIRST + 2;
+
+	// dialog ids
 	private static final int DIALOG_DELETE = 0;
-	
+
 	private class InnerViewBinder extends OpViewBinder {
 
 		public InnerViewBinder() {
-			super(ScheduledOpList.this, OperationsDbAdapter.KEY_SCHEDULED_SUM,
-					OperationsDbAdapter.KEY_SCHEDULED_DATE, R.id.scheduled_icon);
+			super(ScheduledOpList.this, OperationsDbAdapter.KEY_OP_SUM,
+					OperationsDbAdapter.KEY_OP_DATE, R.id.scheduled_icon);
 		}
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
-			if (colName.equals(OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
+			if (colName
+					.equals(OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
 				StringBuilder b = new StringBuilder();
 				int periodicityUnit = cursor.getInt(columnIndex);
-				int periodicity = cursor.getInt(columnIndex + 1);
-				long endDate = cursor.getLong(columnIndex + 2);
-				b.append(ScheduledOperation.getUnitStr(ScheduledOpList.this, periodicityUnit, periodicity));
-				b.append(" / ");
+				int periodicity = cursor.getInt(columnIndex - 1);
+				long endDate = cursor.getLong(columnIndex - 2);
+				b.append(ScheduledOperation.getUnitStr(ScheduledOpList.this,
+						periodicityUnit, periodicity));
+				b.append(" - ");
 				if (endDate > 0) {
 					b.append(Formater.DATE_FORMAT.format(new Date(endDate)));
 				} else {
-					b.append(ScheduledOpList.this.getString(R.string.no_end_date));
+					b.append(ScheduledOpList.this
+							.getString(R.string.no_end_date));
 				}
 				((TextView) view).setText(b.toString());
 				return true;
@@ -71,20 +89,35 @@ public class ScheduledOpList extends ListActivity {
 	private void fillData() {
 		Cursor c = mDbHelper.fetchAllScheduledOps();
 		startManagingCursor(c);
-		String[] from = new String[] { OperationsDbAdapter.KEY_SCHEDULED_DATE,
+		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
 				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-				OperationsDbAdapter.KEY_SCHEDULED_SUM,
+				OperationsDbAdapter.KEY_OP_SUM,
 				OperationsDbAdapter.KEY_ACCOUNT_NAME,
-				OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT, 
+				OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT,
 				OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY,
-				OperationsDbAdapter.KEY_SCHEDULED_END_DATE,};
+				OperationsDbAdapter.KEY_SCHEDULED_END_DATE, };
 
 		int[] to = new int[] { R.id.scheduled_date, R.id.scheduled_third_party,
-				R.id.scheduled_sum, R.id.scheduled_account, R.id.op_infos };
+				R.id.scheduled_sum, R.id.scheduled_account,
+				R.id.scheduled_infos };
 		SimpleCursorAdapter operations = new SimpleCursorAdapter(this,
-				R.layout.operation_row, c, from, to);
+				R.layout.scheduled_row, c, from, to);
 		operations.setViewBinder(new InnerViewBinder());
 		setListAdapter(operations);
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if (resultCode == RESULT_OK) {
+			try {
+				fillData();
+			} catch (Exception e) {
+				ErrorReporter.getInstance().handleException(e);
+				Tools.popError(ScheduledOpList.this, e.getMessage(),
+						Tools.createRestartClickListener());
+			}
+		}
 	}
 
 	@Override
@@ -119,8 +152,62 @@ public class ScheduledOpList extends ListActivity {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		// TODO Auto-generated method stub
-		return super.onCreateDialog(id);
+		switch (id) {
+		case DIALOG_DELETE:
+			return Tools.createDeleteConfirmationDialog(this,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							try {
+								deleteSchOp(mOpToDelete);
+								fillData();
+								mOpToDelete = null;
+							} catch (Exception e) {
+								Tools.popError(ScheduledOpList.this,
+										e.getMessage(),
+										Tools.createRestartClickListener());
+							}
+
+						}
+					});
+		default:
+			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
+		}
+	}
+
+	private void deleteSchOp(AdapterContextMenuInfo info) {
+		mDbHelper.deleteScheduledOp(info.id);
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		if (((AdapterContextMenuInfo) menuInfo).id != -1) {
+			super.onCreateContextMenu(menu, v, menuInfo);
+			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
+			menu.add(0, DELETE_OP_ID, 0, R.string.delete);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		switch (item.getItemId()) {
+		case DELETE_OP_ID:
+			showDialog(DIALOG_DELETE);
+			mOpToDelete = info;
+			return true;
+		case EDIT_OP_ID:
+			startEditScheduledOperation(info.id);
+			return true;
+		}
+		return super.onContextItemSelected(item);
+	}
+
+	private void startEditScheduledOperation(long id) {
+		Intent i = new Intent(this, ScheduledOperationEditor.class);
+		i.putExtra(Tools.EXTRAS_OP_ID, id);
+		startActivityForResult(i, ACTIVITY_SCH_OP_EDIT);
 	}
 
 	@Override
@@ -144,7 +231,7 @@ public class ScheduledOpList extends ListActivity {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.create_scheduled_operation:
-			createScheduledOp();
+			startCreateScheduledOp();
 			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
@@ -154,10 +241,10 @@ public class ScheduledOpList extends ListActivity {
 		return super.onMenuItemSelected(featureId, item);
 	}
 
-	private void createScheduledOp() {
+	private void startCreateScheduledOp() {
 		Intent i = new Intent(this, ScheduledOperationEditor.class);
 		i.putExtra(Tools.EXTRAS_OP_ID, -1l);
-		startActivityForResult(i, ACTIVITY_SCH_OP_CREATE);		
+		startActivityForResult(i, ACTIVITY_SCH_OP_CREATE);
 	}
 
 	@Override

@@ -351,7 +351,7 @@ public class OperationList extends ListActivity {
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
 		case R.id.create_operation:
-			createOp();
+			startCreateOp();
 			return true;
 		case R.id.go_to_sch_op:
 			startScheduledOpsList();
@@ -447,7 +447,7 @@ public class OperationList extends ListActivity {
 		setListAdapter(operations);
 	}
 
-	private void createOp() {
+	private void startCreateOp() {
 		Intent i = new Intent(this, OperationEditor.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, mAccountId);
 		i.putExtra(Tools.EXTRAS_OP_ID, -1l);

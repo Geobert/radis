@@ -103,7 +103,6 @@
 <string name="empty_amount">Amount is empty</string>
 <string name="item_exists">Item already exists</string>
 <string-array name="periodicity_choices">
-	<item>Periodicity</item>
     <item>Once</item>
     <item>Daily</item>
     <item>Monthly</item>
@@ -131,4 +130,6 @@
 <string name="basics">Basics</string>
 <string name="end_date">End date</string>
 <string name="scheduled_ops">Schedule</string>
+<string name="account">Account</string>
+<string name="periodicity">Periodicity</string>
 </resources>
