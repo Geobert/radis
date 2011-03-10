@@ -189,15 +189,16 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					android.R.layout.simple_spinner_item, c, from, to);
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mAccountSpinner.setAdapter(adapter);
-
-			int pos = -1;
-			boolean found = false;
-			do {
-				pos = pos + 1;
-				found = adapter.getItemId(pos) == mCurrentSchOp.mAccountId;
-			} while (!found && pos < adapter.getCount());
-			if (found) {
-				mAccountSpinner.setSelection(pos);
+			if (mCurrentSchOp.mAccountId != 0) {
+				int pos = -1;
+				boolean found = false;
+				do {
+					pos = pos + 1;
+					found = adapter.getItemId(pos) == mCurrentSchOp.mAccountId;
+				} while (!found && pos < adapter.getCount());
+				if (found) {
+					mAccountSpinner.setSelection(pos);
+				}
 			}
 		}
 	}
