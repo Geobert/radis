@@ -12,10 +12,12 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
@@ -84,6 +86,29 @@ public class ScheduledOpList extends ListActivity {
 		mDbHelper.open();
 		fillData();
 
+		final GestureDetector gestureDetector = new GestureDetector(
+				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
+					@Override
+					public void run() {
+						ScheduledOpList.this.finish();
+					}
+				}, new ListSwipeAction() {
+					@Override
+					public void run() {
+						if (mRowId > 0) {
+							startEditScheduledOperation(mRowId);
+						}
+					}
+				}));
+		View.OnTouchListener gestureListener = new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (gestureDetector.onTouchEvent(event)) {
+					return true;
+				}
+				return false;
+			}
+		};
+		getListView().setOnTouchListener(gestureListener);
 	}
 
 	private void fillData() {
