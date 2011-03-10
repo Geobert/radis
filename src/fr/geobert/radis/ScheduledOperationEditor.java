@@ -109,15 +109,18 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void populateFields() {
+	protected void fetchOrCreateCurrentOp() {
 		if (mRowId != null) {
 			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentSchOp = new ScheduledOperation(opCursor);
 		} else {
 			mCurrentSchOp = new ScheduledOperation();
-			mSumTextWatcher.setAutoNegate(true);
 		}
+	}
+	
+	@Override
+	protected void populateFields() {
 		ScheduledOperation op = mCurrentSchOp;
 		mCurrentOp = op;
 		populateCommonFields(op);
@@ -253,6 +256,28 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		}
 	}
 
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putBoolean("isOnBasics", mOnBasics);
+		super.onSaveInstanceState(outState);
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		mCurrentSchOp = savedInstanceState.getParcelable("currentOp");
+		mOnBasics = savedInstanceState.getBoolean("isOnBasics");
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+	
+	@Override
+	protected void onResume() {
+		if (!mOnBasics) {
+			mViewFlipper.showNext();
+			mHeaderFlipper.showNext();
+		}
+		super.onResume();
+	}
+	
 	private void flip(ViewFlipper flipper, final boolean l2r) {
 		if (l2r) {
 			flipper.setInAnimation(ScheduledOperationEditor.this,

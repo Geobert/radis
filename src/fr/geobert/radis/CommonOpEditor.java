@@ -50,6 +50,8 @@ public abstract class CommonOpEditor extends Activity {
 	protected abstract void populateFields();
 
 	protected abstract void saveOpAndSetActivityResult() throws ParseException;
+	
+	protected abstract void fetchOrCreateCurrentOp();
 
 	// default and common behaviors
 	@Override
@@ -195,6 +197,7 @@ public abstract class CommonOpEditor extends Activity {
 	protected void onResume() {
 		super.onResume();
 		if (!mOnRestore) {
+			fetchOrCreateCurrentOp();
 			populateFields();
 		} else {
 			mOnRestore = false;
@@ -211,6 +214,7 @@ public abstract class CommonOpEditor extends Activity {
 		Tools.setSumTextGravity(mOpSumText);
 		if (mCurrentOp.mSum == 0.0) {
 			mOpSumText.setText("");
+			mSumTextWatcher.setAutoNegate(true);
 		} else {
 			mOpSumText.setText(mCurrentOp.getSumStr());
 		}
@@ -336,14 +340,7 @@ public abstract class CommonOpEditor extends Activity {
 			ErrorReporter.getInstance().handleException(
 					new NullPointerException("op was not correctly restored"));
 		}
-		Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
-		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
-		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
-		mOpSumText.setText(op.getSumStr());
-		Tools.setSumTextGravity(mOpSumText);
-		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
-		mNotesText.setText(op.mNotes);
-
+		populateFields();
 		mOnRestore = true;
 	}
 }

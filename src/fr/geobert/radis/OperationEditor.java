@@ -12,23 +12,15 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Bundle extras = getIntent().getExtras();
+		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
+				: null;
 		super.onCreate(savedInstanceState);
-		setView();
-		init(savedInstanceState);
 	}
 
 	@Override
 	protected void setView() {
 		setContentView(R.layout.operation_edit);
-	}
-
-	// to be called after setContentView
-	@Override
-	protected void init(Bundle savedInstanceState) {
-		Bundle extras = getIntent().getExtras();
-		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
-				: null;
-		super.init(savedInstanceState);
 	}
 
 	@Override
@@ -38,15 +30,18 @@ public class OperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void populateFields() {
+	protected void fetchOrCreateCurrentOp() {
 		if (mRowId != null) {
 			Cursor opCursor = mDbHelper.fetchOneOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentOp = new Operation(opCursor);
 		} else {
 			mCurrentOp = new Operation();
-			mSumTextWatcher.setAutoNegate(true);
 		}
+	}
+	
+	@Override
+	protected void populateFields() {
 		Operation op = mCurrentOp;
 		mPreviousSum = op.mSum;
 		populateCommonFields(op);
