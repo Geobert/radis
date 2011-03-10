@@ -27,7 +27,7 @@
 				<include layout="@layout/scheduling_edit" />
 			</ViewFlipper>
 		</ScrollView>
-		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
+		<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton" android:layout_weight="0" >
 			<Button android:id="@+id/confirm_op" android:text="@string/ok"
 				android:layout_weight="1" android:layout_width="fill_parent"
 				android:layout_height="wrap_content" />
