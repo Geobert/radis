@@ -352,8 +352,8 @@ public class CommonDbAdapter {
 		mCurAccount = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_DESC,
 				KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_OP_SUM,
-				KEY_ACCOUNT_CURRENCY }, KEY_ACCOUNT_ROWID + "=" + rowId, null,
-				null, null, null, null);
+				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE },
+				KEY_ACCOUNT_ROWID + "=" + rowId, null, null, null, null, null);
 		Cursor c = mCurAccount;
 		if (c != null) {
 			c.moveToFirst();
@@ -380,7 +380,7 @@ public class CommonDbAdapter {
 				+ rowId, null) > 0;
 	}
 
-	public double updateCurrentSum(long rowId, Cursor op) {
+	public double updateCurrentSum(long rowId, long date) {
 		Cursor account = getCurAccountIfDiff(rowId);
 		double start = account.getDouble(account
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
@@ -389,9 +389,8 @@ public class CommonDbAdapter {
 		ContentValues args = new ContentValues();
 		double curSum = start + opSum;
 		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
-		if (null != op) {
-			args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op
-					.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE)));
+		if (0 != date) {
+			args.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 		}
 		mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
 				+ rowId, null);

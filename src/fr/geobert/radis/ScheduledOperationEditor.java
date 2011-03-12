@@ -1,6 +1,7 @@
 package fr.geobert.radis;
 
 import java.text.ParseException;
+import java.util.GregorianCalendar;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -61,6 +62,15 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		mPeriodicitySpinner = (Spinner) findViewById(R.id.periodicity_choice);
 		mCustomPeriodicityCont = findViewById(R.id.custom_periodicity);
 		mCustomPeriodicityVal = (EditText) findViewById(R.id.custom_periodicity_value);
+		mCustomPeriodicityVal
+				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+					@Override
+					public void onFocusChange(View v, boolean hasFocus) {
+						if (hasFocus) {
+							((EditText) v).selectAll();
+						}
+					}
+				});
 		mCustomPeriodicityUnit = (Spinner) findViewById(R.id.custom_periodicity_choice);
 		mCustomPeriodicityText = (TextView) findViewById(R.id.custom_periodicity_text);
 		mEndDatePicker = (DatePicker) findViewById(R.id.edit_end_date);
@@ -118,14 +128,14 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			mCurrentSchOp = new ScheduledOperation();
 		}
 	}
-	
+
 	@Override
 	protected void populateFields() {
 		ScheduledOperation op = mCurrentSchOp;
 		mCurrentOp = op;
 		populateCommonFields(op);
-		mCustomPeriodicityVal.setText(Integer
-				.toString(mCurrentSchOp.mPeriodicity));
+		mCustomPeriodicityVal.setText(mCurrentSchOp.mPeriodicity == 0 ? ""
+				: Integer.toString(mCurrentSchOp.mPeriodicity));
 		populateAccountSpinner();
 		poputatePeriodicitySpinner();
 		populateCustomPeriodicitySpinner();
@@ -148,8 +158,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		mCustomPeriodicityUnit.setAdapter(adapter);
 
 		int unit = mCurrentSchOp.mPeriodicityUnit;
-		if (unit > 3) {
-			mCustomPeriodicityUnit.setSelection(unit - 4);
+		if (unit >= ScheduledOperation.CUSTOM_DAILY_PERIOD) {
+			mCustomPeriodicityUnit.setSelection(unit
+					- ScheduledOperation.CUSTOM_DAILY_PERIOD);
 		}
 	}
 
@@ -173,7 +184,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					}
 				});
 		int unit = mCurrentSchOp.mPeriodicityUnit;
-		if (unit <= 3) {
+		if (unit < ScheduledOperation.CUSTOM_DAILY_PERIOD) {
 			mPeriodicitySpinner.setSelection(unit);
 		}
 	}
@@ -214,7 +225,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	protected void saveOpAndSetActivityResult() throws ParseException {
 		ScheduledOperation op = mCurrentSchOp;
-		fillOperationWithInputs(op);
 		if (mRowId == null) {
 			long id = mDbHelper.createScheduledOp(op);
 			if (id > 0) {
@@ -242,8 +252,8 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			op.mPeriodicity = Integer.parseInt(mCustomPeriodicityVal.getText()
 					.toString());
 			op.mPeriodicityUnit = mCustomPeriodicityUnit
-					.getSelectedItemPosition() + 4; // +4 is to match values in
-													// ScheduledOperation
+					.getSelectedItemPosition()
+					+ ScheduledOperation.CUSTOM_DAILY_PERIOD;
 		}
 		if (mEndDatePicker.isEnabled()) {
 			DatePicker dp = mEndDatePicker;
@@ -251,9 +261,34 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			op.setEndDay(dp.getDayOfMonth());
 			op.setEndMonth(dp.getMonth());
 			op.setEndYear(dp.getYear());
+
 		} else {
 			op.mEndDate.clear();
 		}
+	}
+
+	@Override
+	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
+		boolean res = super.isFormValid(errMsg);
+		ScheduledOperation op = mCurrentSchOp;
+		fillOperationWithInputs(op);
+		final boolean hasEnd = op.getEndDate() > 0;
+		if (hasEnd && (op.getDate() > op.getEndDate())) {
+			if (errMsg.length() > 0) {
+				errMsg.append("\n");
+			}
+			errMsg.append(getString(R.string.end_date_incorrect));
+			res = false;
+		}
+		if ((op.mPeriodicityUnit >= ScheduledOperation.CUSTOM_DAILY_PERIOD)
+				&& op.mPeriodicity <= 0) {
+			if (errMsg.length() > 0) {
+				errMsg.append("\n");
+			}
+			errMsg.append(getString(R.string.periodicity_must_be_greater_0));
+			res = false;
+		}
+		return res;
 	}
 
 	@Override
@@ -261,14 +296,14 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		outState.putBoolean("isOnBasics", mOnBasics);
 		super.onSaveInstanceState(outState);
 	}
-	
+
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		mCurrentSchOp = savedInstanceState.getParcelable("currentOp");
 		mOnBasics = savedInstanceState.getBoolean("isOnBasics");
 		super.onRestoreInstanceState(savedInstanceState);
 	}
-	
+
 	@Override
 	protected void onResume() {
 		if (!mOnBasics) {
@@ -277,7 +312,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		}
 		super.onResume();
 	}
-	
+
 	private void flip(ViewFlipper flipper, final boolean l2r) {
 		if (l2r) {
 			flipper.setInAnimation(ScheduledOperationEditor.this,

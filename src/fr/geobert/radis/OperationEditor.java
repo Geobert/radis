@@ -48,15 +48,8 @@ public class OperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void initListeners() {
-		super.initListeners();
-
-	}
-
-	@Override
 	protected void saveOpAndSetActivityResult() throws ParseException {
 		Operation op = mCurrentOp;
-		fillOperationWithInputs(op);
 		if (mRowId == null) {
 			long id = mDbHelper.createOp(op);
 			if (id > 0) {

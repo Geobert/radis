@@ -22,9 +22,12 @@ public class Tools {
 	// these are here because database force to use "_id" to be able to use
 	// SimpleCursorAdaptater, so KEY_ACCOUNT_ROWID == KEY_OP_ROWID and make bug
 	// when used in Bundle's extras
-	public static String EXTRAS_OP_ID = "op_id";
-	public static String EXTRAS_ACCOUNT_ID = "account_id";
+	public final static String EXTRAS_OP_ID = "op_id";
+	public final static String EXTRAS_ACCOUNT_ID = "account_id";
 
+	// Intents actions
+	public final static String RADIS_START = "fr.geobert.radis.STARTED"; 
+	
 	// debug mode stuff
 	public static boolean DEBUG_MODE = true;
 	public static final int DEBUG_DIALOG = 9876;

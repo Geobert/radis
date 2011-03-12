@@ -45,9 +45,8 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	private static final String RESTRICT_TO_ACCOUNT = "ops."
 			+ KEY_OP_ACCOUNT_ID + " = %d";
 
-	private static final String SCHEDULED_OP_ORDERING = "sch."
-			+ KEY_OP_DATE + " desc, sch." + KEY_SCHEDULED_ROWID
-			+ " desc";
+	private static final String SCHEDULED_OP_ORDERING = "sch." + KEY_OP_DATE
+			+ " desc, sch." + KEY_SCHEDULED_ROWID + " desc";
 
 	private final String DATABASE_SCHEDULED_TABLE_JOINTURE = DATABASE_SCHEDULED_TABLE
 			+ " sch LEFT OUTER JOIN "
@@ -190,6 +189,10 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	}
 
 	public long createOp(Operation op) {
+		return createOp(op, mAccountId);
+	}
+
+	public long createOp(Operation op, final long accountId) {
 		ContentValues initialValues = new ContentValues();
 		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
@@ -205,7 +208,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 
 		initialValues.put(KEY_OP_SUM, op.mSum);
 		initialValues.put(KEY_OP_DATE, op.getDate());
-		initialValues.put(KEY_OP_ACCOUNT_ID, mAccountId);
+		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 	}
@@ -296,8 +299,8 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
 
 		key = op.mTag;
-		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG,
-				mTagsMap, initialValues);
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				initialValues);
 
 		key = op.mMode;
 		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
@@ -321,8 +324,8 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				KEY_OP_THIRD_PARTY, mThirdPartiesMap, args);
 
 		key = op.mTag;
-		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG,
-				mTagsMap, args);
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				args);
 
 		key = op.mMode;
 		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,

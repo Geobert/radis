@@ -194,7 +194,7 @@ public class AccountEditor extends Activity {
 			}
 		} else {
 			mDbHelper.updateAccount(mRowId, name, desc, startSum, currency);
-			mDbHelper.updateCurrentSum(mRowId, null);
+			mDbHelper.updateCurrentSum(mRowId, 0);
 		}
 	}
 }

@@ -104,7 +104,6 @@
 <string name="empty_amount">Le montant est vide</string>
 <string name="item_exists">L\'élément existe déjà</string>
 <string-array name="periodicity_choices">
-    <item>Une seule fois</item>
     <item>Journalière</item>
     <item>Mensuelle</item>
     <item>Annuelle</item>
@@ -116,7 +115,6 @@
     <item>Années</item>
 </string-array>
 <string-array name="periodicity_labels">
-    <item>Une fois</item>
     <item>Journalière</item>
     <item>Mensuelle</item>
     <item>Annuelle</item>
@@ -133,4 +131,6 @@
 <string name="scheduled_ops">Échéancier</string>
 <string name="account">Compte</string>
 <string name="periodicity">Périodicité</string>
+<string name="end_date_incorrect">La date de fin est antérieure à celle de début</string>
+<string name="periodicity_must_be_greater_0">La périodicité doit être supérieure à zéro</string>
 </resources>

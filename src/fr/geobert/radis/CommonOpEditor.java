@@ -107,7 +107,8 @@ public abstract class CommonOpEditor extends Activity {
 		mOpSumText.setText(Formater.SUM_FORMAT.format(sum));
 	}
 
-	protected boolean isFormValid(StringBuilder errMsg) {
+	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
+		fillOperationWithInputs(mCurrentOp);
 		boolean res = true;
 		String sumStr = mOpSumText.getText().toString();
 		if (sumStr.length() == 0) {
@@ -210,6 +211,7 @@ public abstract class CommonOpEditor extends Activity {
 		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
 		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
 		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
+		
 		mNotesText.setText(op.mNotes);
 		Tools.setSumTextGravity(mOpSumText);
 		if (mCurrentOp.mSum == 0.0) {

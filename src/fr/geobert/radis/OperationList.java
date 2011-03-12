@@ -530,7 +530,8 @@ public class OperationList extends ListActivity {
 			Cursor c = mLastOps;
 			c.requery();
 			c.moveToFirst();
-			double curSum = mDbHelper.updateCurrentSum(mAccountId, c);
+			double curSum = mDbHelper.updateCurrentSum(mAccountId, c.getLong(c
+					.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE)));
 			updateFutureSumDisplay(curSum, c);
 			updateSumAtDateDisplay(null, curSum);
 		}
@@ -539,8 +540,8 @@ public class OperationList extends ListActivity {
 	private void updateFutureSumDisplay(double curSum, Cursor c) {
 		TextView t = (TextView) findViewById(R.id.future_sum);
 		if (c.isFirst()) {
-			Operation latestOp = new Operation(c);
-			latestOp.mSum = curSum; // to use existing formatter
+			Operation latestOp = new Operation(c); // to use existing formatter
+			latestOp.mSum = curSum;
 			t.setText(String.format(getString(R.string.sum_at),
 					latestOp.getDateStr(), latestOp.getSumStr()));
 		} else {

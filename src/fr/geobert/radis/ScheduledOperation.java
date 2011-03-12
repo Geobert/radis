@@ -8,17 +8,16 @@ import android.database.Cursor;
 import android.os.Parcel;
 
 public class ScheduledOperation extends Operation {
-	public static int ONCE_PERIOD = 0;
-	public static int DAILY_PERIOD = 1;
-	public static int MONTHLY_PERIOD = 2;
-	public static int YEARLY_PERIOD = 3;
-	public static int CUSTOM_DAILY_PERIOD = 4;
-	public static int CUSTOM_MONTHLY_PERIOD = 5;
-	public static int CUSTOM_YEARLY_PERIOD = 6;
+	public final static int WEEKLY_PERIOD = 0;
+	public final static int MONTHLY_PERIOD = 1;
+	public final static int YEARLY_PERIOD = 2;
+	public final static int CUSTOM_DAILY_PERIOD = 3;
+	public final static int CUSTOM_WEEKLY_PERIOD = 4;
+	public final static int CUSTOM_MONTHLY_PERIOD = 5;
+	public final static int CUSTOM_YEARLY_PERIOD = 6;
 
 	public int mPeriodicity;
 	public int mPeriodicityUnit;
-	public boolean mHasEnd;
 	public GregorianCalendar mEndDate;
 	public long mAccountId;
 
@@ -84,9 +83,9 @@ public class ScheduledOperation extends Operation {
 			final int periodicity) {
 		String s = context.getResources().getStringArray(
 				R.array.periodicity_labels)[unit];
-		if (unit < 4) {
+		if (unit < CUSTOM_DAILY_PERIOD) {
 			return s;
-		} else if (unit <= 6) {
+		} else if (unit <= CUSTOM_YEARLY_PERIOD) {
 			return String.format(s, periodicity);
 		}
 		return null;
@@ -110,5 +109,13 @@ public class ScheduledOperation extends Operation {
 		setEndDay(in.readInt());
 		setEndMonth(in.readInt());
 		setEndYear(in.readInt());
+	}
+	
+	public boolean isObsolete() {
+		return isObsolete(new GregorianCalendar().getTimeInMillis()); 
+	}
+	
+	public boolean isObsolete(final long dateInMillis) {
+		return (getEndDate() != 0) && (getEndDate() <= dateInMillis);
 	}
 }

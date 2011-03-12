@@ -26,8 +26,8 @@
 			android:text="@string/every" android:layout_width="wrap_content"
 			android:layout_height="wrap_content" android:paddingRight="5px" />
 		<EditText android:id="@+id/custom_periodicity_value"
-			android:minEms="2" android:layout_height="wrap_content"
-			android:layout_width="wrap_content" />
+			android:inputType="number|numberSigned|numberDecimal" android:minEms="2"
+			android:layout_height="wrap_content" android:layout_width="wrap_content" />
 		<Spinner android:id="@+id/custom_periodicity_choice"
 			android:layout_height="wrap_content" android:layout_width="fill_parent" />
 	</LinearLayout>

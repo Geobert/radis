@@ -41,9 +41,18 @@ public class AccountList extends ListActivity {
 	public static AccountList ACTIVITY;
 	public static PendingIntent RESTART_INTENT;
 
+	private boolean firstStart = true;
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		if (firstStart) {
+			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
+			i.setAction(Tools.RADIS_START);
+			sendBroadcast(i);
+			firstStart = false;
+		}
+		
 		if (!Formater.isInit()) {
 			Formater.init();
 		}

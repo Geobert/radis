@@ -87,6 +87,18 @@ public class Operation implements Parcelable {
 		mDate.setTimeInMillis(date);
 	}
 
+	public void addDay(int nbDays) {
+		mDate.add(Calendar.DAY_OF_MONTH, nbDays);
+	}
+	
+	public void addMonth(int nbMonths) {
+		mDate.add(Calendar.MONTH, nbMonths);
+	}
+	
+	public void addYear(int nbYears) {
+		mDate.add(Calendar.YEAR, nbYears);
+	}
+	
 	public String getSumStr() {
 		return Formater.SUM_FORMAT.format(mSum);
 	}
