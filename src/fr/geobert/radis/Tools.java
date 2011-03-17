@@ -1,5 +1,7 @@
 package fr.geobert.radis;
 
+import java.util.Calendar;
+
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -210,6 +212,13 @@ public class Tools {
 		return null;
 	}
 
+	public static void clearTimeOfCalendar(Calendar c) {
+		c.set(Calendar.HOUR_OF_DAY, 0);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        c.set(Calendar.MILLISECOND, 0);
+	}
+	
 	// ------------------------------------------------------
 	// DEBUG TOOLS
 	// ------------------------------------------------------

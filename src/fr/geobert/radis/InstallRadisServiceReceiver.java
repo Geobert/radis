@@ -17,7 +17,7 @@ public class InstallRadisServiceReceiver extends BroadcastReceiver {
 		PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
 
 		mgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(),
-				5000, pi); // TODO : AlarmManager.INTERVAL_DAY
+				15000, pi); // TODO : AlarmManager.INTERVAL_DAY
 		Log.d("Radis", "Radis alarm installed via " + intent.getAction());
 		
 	}

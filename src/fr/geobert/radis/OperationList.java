@@ -33,6 +33,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -90,6 +91,16 @@ public class OperationList extends ListActivity {
 					b.append('−');
 				}
 				textView.setText(b.toString());
+
+				ImageView i = (ImageView) ((LinearLayout) view.getParent()
+						.getParent()).findViewById(R.id.op_sch_icon);
+				if (cursor
+						.getLong(cursor
+								.getColumnIndex(OperationsDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+					i.setVisibility(View.VISIBLE);
+				} else {
+					i.setVisibility(View.INVISIBLE);
+				}
 				return true;
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
@@ -407,7 +418,7 @@ public class OperationList extends ListActivity {
 				Object[] values = { new Long(c.getLong(0)), c.getString(1),
 						c.getString(2), c.getString(3),
 						new Double(c.getDouble(4)), new Long(c.getLong(5)),
-						c.getString(6) };
+						c.getString(7), new Long(c.getLong(8)) };
 				lo.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -424,7 +435,8 @@ public class OperationList extends ListActivity {
 				OperationsDbAdapter.KEY_MODE_NAME,
 				OperationsDbAdapter.KEY_OP_SUM,
 				OperationsDbAdapter.KEY_OP_DATE,
-				OperationsDbAdapter.KEY_OP_NOTES });
+				OperationsDbAdapter.KEY_OP_NOTES,
+				OperationsDbAdapter.KEY_OP_SCHEDULED_ID });
 		startManagingCursor(mLastOps);
 		Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
 		startManagingCursor(c);

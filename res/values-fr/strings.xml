@@ -104,21 +104,23 @@
 <string name="empty_amount">Le montant est vide</string>
 <string name="item_exists">L\'élément existe déjà</string>
 <string-array name="periodicity_choices">
-    <item>Journalière</item>
+    <item>Hebdomadaire</item>
     <item>Mensuelle</item>
     <item>Annuelle</item>
     <item>Personnalisée</item>
 </string-array>
 <string-array name="periodicity_custom_choices">
     <item>Jours</item>
+    <item>Semaines</item>
     <item>Mois</item>
     <item>Années</item>
 </string-array>
 <string-array name="periodicity_labels">
-    <item>Journalière</item>
+    <item>Hebdomadaire</item>
     <item>Mensuelle</item>
     <item>Annuelle</item>
     <item>Tous les %d jours</item>
+    <item>Toutes les %d semaines</item>
     <item>Tous les %d mois</item>
     <item>Toutes les %d années</item>
 </string-array>
@@ -133,4 +135,8 @@
 <string name="periodicity">Périodicité</string>
 <string name="end_date_incorrect">La date de fin est antérieure à celle de début</string>
 <string name="periodicity_must_be_greater_0">La périodicité doit être supérieure à zéro</string>
+<string name="ask_delete_occurrences">Voulez-vous supprimer cette échéance ainsi que toutes ses occurrences ?</string>
+<string name="del_all_occurrences">Tout</string>
+<string name="cancel_delete_occurrences">Échéance</string>
+<string name="cancel_sch_deletion">Rien</string>
 </resources>

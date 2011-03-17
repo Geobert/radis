@@ -19,6 +19,9 @@
 			<ImageView android:src="@drawable/arrow_down16"
 				android:layout_width="wrap_content" android:layout_height="wrap_content"
 				android:id="@+id/op_icon" />
+				<ImageView android:src="@drawable/clock16"
+				android:layout_width="wrap_content" android:layout_height="wrap_content"
+				android:id="@+id/op_sch_icon" />
 		</LinearLayout>
 		<TextView android:id="@+id/op_infos" android:text="Courses / Carte Bleu"
 			style="@style/OpRowTextView.Infos" android:layout_weight="0"/>

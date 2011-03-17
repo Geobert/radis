@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.acra.ErrorReporter;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
@@ -39,6 +40,7 @@ public class ScheduledOpList extends ListActivity {
 
 	// dialog ids
 	private static final int DIALOG_DELETE = 0;
+	private static final int DIALOG_DELETE_OCCURRENCES = 1;
 
 	private class InnerViewBinder extends OpViewBinder {
 
@@ -179,28 +181,66 @@ public class ScheduledOpList extends ListActivity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case DIALOG_DELETE:
-			return Tools.createDeleteConfirmationDialog(this,
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int id) {
-							try {
-								deleteSchOp(mOpToDelete);
-								fillData();
-								mOpToDelete = null;
-							} catch (Exception e) {
-								Tools.popError(ScheduledOpList.this,
-										e.getMessage(),
-										Tools.createRestartClickListener());
-							}
-
-						}
-					});
+			return askDeleteOccurrences();
 		default:
 			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
 	}
 
-	private void deleteSchOp(AdapterContextMenuInfo info) {
-		mDbHelper.deleteScheduledOp(info.id);
+	private AlertDialog askDeleteOccurrences() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.ask_delete_occurrences)
+				.setCancelable(false)
+				.setPositiveButton(R.string.del_all_occurrences,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								deleteSchOp(true);
+							}
+						})
+				.setNeutralButton(R.string.cancel_delete_occurrences,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								deleteSchOp(false);
+							}
+						})
+				.setNegativeButton(R.string.cancel_sch_deletion,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+		return builder.create();
+	}
+
+	private void deleteSchOp(final boolean delAllOccurrences) {
+		AdapterContextMenuInfo op = mOpToDelete;
+		if (delAllOccurrences) {
+			Cursor schOp = mDbHelper.fetchOneScheduledOp(op.id);
+			startManagingCursor(schOp);
+			final long accountId = schOp
+					.getLong(schOp
+							.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
+			int nbDeleted = mDbHelper.deleteAllOccurrences(accountId, op.id);
+			// update account op sum, current sum and current date
+			final double total = nbDeleted
+					* schOp.getDouble(schOp
+							.getColumnIndex(OperationsDbAdapter.KEY_OP_SUM));
+			Cursor accountCursor = mDbHelper.fetchAccount(accountId);
+			startManagingCursor(accountCursor);
+			final double curSum = accountCursor.getDouble(accountCursor
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+			mDbHelper.updateOpSum(accountId, curSum - total);
+			Cursor lastOp = mDbHelper.fetchNLastOps(1, accountId);
+			if (null != lastOp) {
+				lastOp.moveToFirst();
+			}
+			startManagingCursor(lastOp);
+			mDbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
+					.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE)));
+		}
+		mDbHelper.deleteScheduledOp(op.id);
+		fillData();
+		mOpToDelete = null;
 	}
 
 	@Override

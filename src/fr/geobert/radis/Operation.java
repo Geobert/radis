@@ -15,6 +15,7 @@ public class Operation implements Parcelable {
 	public String mMode;
 	public String mNotes;
 	public double mSum;
+	public long mScheduledId;
 
 	public Operation(Cursor op) {
 		mThirdParty = op
@@ -22,28 +23,44 @@ public class Operation implements Parcelable {
 						.getColumnIndexOrThrow(OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
 		mMode = op.getString(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_MODE_NAME));
+		if (null == mMode) {
+			mMode = "";
+		}
 		mTag = op.getString(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_TAG_NAME));
+		if (null == mTag) {
+			mTag = "";
+		}
 		mSum = op.getDouble(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_SUM));
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getLong(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_DATE)));
+		Tools.clearTimeOfCalendar(mDate);
 		mNotes = op.getString(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_NOTES));
+		final int idx = op.getColumnIndex(OperationsDbAdapter.KEY_OP_SCHEDULED_ID);
+		if (idx >= 0) {
+			mScheduledId = op.getLong(idx);
+		} else {
+			mScheduledId = 0;
+		}
 	}
 
 	public Operation() {
 		mDate = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(mDate);
 		mSum = 0.0d;
 		mThirdParty = "";
 		mMode = "";
 		mTag = "";
 		mNotes = "";
+		mScheduledId = 0;
 	}
-	
+
 	public Operation(Parcel parcel) {
 		mDate = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(mDate);
 		readFromParcel(parcel);
 	}
 
@@ -85,20 +102,21 @@ public class Operation implements Parcelable {
 
 	public void setDate(long date) {
 		mDate.setTimeInMillis(date);
+		Tools.clearTimeOfCalendar(mDate);
 	}
 
 	public void addDay(int nbDays) {
 		mDate.add(Calendar.DAY_OF_MONTH, nbDays);
 	}
-	
+
 	public void addMonth(int nbMonths) {
 		mDate.add(Calendar.MONTH, nbMonths);
 	}
-	
+
 	public void addYear(int nbYears) {
 		mDate.add(Calendar.YEAR, nbYears);
 	}
-	
+
 	public String getSumStr() {
 		return Formater.SUM_FORMAT.format(mSum);
 	}
@@ -127,28 +145,28 @@ public class Operation implements Parcelable {
 		dest.writeString(mMode);
 		dest.writeString(mNotes);
 		dest.writeDouble(mSum);
-		
+		dest.writeLong(mScheduledId);
 	}
-	
+
 	private void readFromParcel(Parcel in) {
-        setDay(in.readInt());
-        setMonth(in.readInt());
-        setYear(in.readInt());
-        mThirdParty = in.readString();
-        mTag = in.readString();
-        mMode = in.readString();
-        mNotes = in.readString();
-        mSum = in.readDouble();
-    }
-	
-	public static final Parcelable.Creator<Operation> CREATOR =
-    	new Parcelable.Creator<Operation>() {
-            public Operation createFromParcel(Parcel in) {
-                return new Operation(in);
-            }
- 
-            public Operation[] newArray(int size) {
-                return new Operation[size];
-            }
-        };
+		setDay(in.readInt());
+		setMonth(in.readInt());
+		setYear(in.readInt());
+		mThirdParty = in.readString();
+		mTag = in.readString();
+		mMode = in.readString();
+		mNotes = in.readString();
+		mSum = in.readDouble();
+		mScheduledId = in.readLong();
+	}
+
+	public static final Parcelable.Creator<Operation> CREATOR = new Parcelable.Creator<Operation>() {
+		public Operation createFromParcel(Parcel in) {
+			return new Operation(in);
+		}
+
+		public Operation[] newArray(int size) {
+			return new Operation[size];
+		}
+	};
 }

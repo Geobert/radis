@@ -40,7 +40,8 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
 			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
 			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
-			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES };
+			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES,
+			"ops." + KEY_OP_SCHEDULED_ID };
 
 	private static final String RESTRICT_TO_ACCOUNT = "ops."
 			+ KEY_OP_ACCOUNT_ID + " = %d";
@@ -210,6 +211,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		initialValues.put(KEY_OP_DATE, op.getDate());
 		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
+		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
 		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 	}
 
@@ -219,8 +221,12 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 	}
 
 	public Cursor fetchNLastOps(int nbOps) {
+		return fetchNLastOps(nbOps, mAccountId);
+	}
+
+	public Cursor fetchNLastOps(int nbOps, final long accountId) {
 		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, mAccountId), null, null,
+				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
 				null, OP_ORDERING, Integer.toString(nbOps));
 	}
 
@@ -265,6 +271,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_DATE, op.getDate());
 		args.put(KEY_OP_NOTES, op.mNotes);
+		args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
 		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
 	}
@@ -341,9 +348,15 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				+ rowId, null) > 0;
 	}
 
-	public boolean deleteScheduledOp(long rowId) {
+	public boolean deleteScheduledOp(final long schOpId) {
 		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ROWID + "="
-				+ rowId, null) > 0;
+				+ schOpId, null) > 0;
+	}
+
+	public int deleteAllOccurrences(final long accountId, final long schOpId) {
+		return mDb.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ACCOUNT_ID + "="
+				+ accountId + " AND " + KEY_OP_SCHEDULED_ID + "=" + schOpId,
+				null);
 	}
 
 	// ------------------------------

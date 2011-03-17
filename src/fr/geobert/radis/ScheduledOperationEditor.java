@@ -93,9 +93,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			finish();
 		}
 		mGestureOverlay = (GestureOverlayView) findViewById(R.id.gesture_view);
-		if (!Tools.DEBUG_MODE) {
-			mGestureOverlay.setGestureVisible(false);
-		}
+		mGestureOverlay.setGestureVisible(false);
 		mGestureOverlay.addOnGesturePerformedListener(new ViewSwipeDetector(
 				mGesturelib, new Runnable() {
 					@Override

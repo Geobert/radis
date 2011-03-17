@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
+import android.util.Log;
 
 public class RadisService extends IntentService {
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
@@ -25,9 +26,12 @@ public class RadisService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		try {
 			mDbHelper = new OperationsDbAdapter(getApplicationContext());
+			mDbHelper.open();
 			processScheduledOps();
+			mDbHelper.close();
 		} finally {
 			getLock(this).release();
+			mDbHelper.close();
 		}
 		stopSelf();
 	}
@@ -36,10 +40,13 @@ public class RadisService extends IntentService {
 		Cursor c = mDbHelper.fetchAllScheduledOps();
 		if (c.isFirst()) {
 			GregorianCalendar today = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(today);
 			long todayInMillis = today.getTimeInMillis();
 			GregorianCalendar insertionDate = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(insertionDate);
 			insertionDate.set(Calendar.DAY_OF_MONTH,
 					ConfigManager.insertionDayOfMonth);
+
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			int insertionMonth = insertionDate.get(Calendar.MONTH);
 			HashMap<Long, Double> sumsPerAccount = new LinkedHashMap<Long, Double>();
@@ -47,16 +54,25 @@ public class RadisService extends IntentService {
 			do {
 				final long opRowId = c.getLong(c.getColumnIndex("_id"));
 				ScheduledOperation op = new ScheduledOperation(c);
+				final Long accountId = Long.valueOf(op.mAccountId);
 				double sum = 0;
+				boolean needUpdate = false;
 				if (!op.isObsolete(todayInMillis)) {
-					boolean needUpdate = false;
+					// insert past missed insertion
 					while (op.getDate() <= insertionDateInMillis) {
-						sum = sum + insertSchOp(op);
+						sum = sum + insertSchOp(op, opRowId);
 						needUpdate = true;
 					}
 					if (todayInMillis >= insertionDateInMillis) {
 						while (op.getMonth() <= (insertionMonth + 1)) {
-							sum = sum + insertSchOp(op);
+							Long date = greatestDatePerAccount.get(accountId);
+							if (null == date) {
+								date = Long.valueOf(0);
+							}
+							if (op.getDate() > date) {
+								greatestDatePerAccount.put(accountId, op.getDate());
+							}
+							sum = sum + insertSchOp(op, opRowId);
 							needUpdate = true;
 						}
 					}
@@ -64,20 +80,12 @@ public class RadisService extends IntentService {
 						mDbHelper.updateScheduledOp(opRowId, op);
 					}
 				}
-
-				Long accountId = Long.valueOf(op.mAccountId);
-				Double curSum = sumsPerAccount.get(accountId);
-				if (curSum == null) {
-					curSum = Double.valueOf(0);
-				}
-				sumsPerAccount.put(accountId, curSum + sum);
-
-				Long date = greatestDatePerAccount.get(accountId);
-				if (null == date) {
-					date = Long.valueOf(0);
-				}
-				if (op.getDate() > date) {
-					greatestDatePerAccount.put(accountId, date);
+				if (needUpdate) {
+					Double curSum = sumsPerAccount.get(accountId);
+					if (curSum == null) {
+						curSum = Double.valueOf(0);
+					}
+					sumsPerAccount.put(accountId, curSum + sum);
 				}
 			} while (c.moveToNext());
 			for (HashMap.Entry<Long, Double> e : sumsPerAccount.entrySet()) {
@@ -85,6 +93,7 @@ public class RadisService extends IntentService {
 						.longValue(), greatestDatePerAccount.get(e.getKey()));
 			}
 		}
+		c.close();
 	}
 
 	private void updateAccountSum(final double sumToAdd, final long accountId,
@@ -93,16 +102,19 @@ public class RadisService extends IntentService {
 		double curSum = accountCursor.getDouble(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		mDbHelper.updateOpSum(accountId, curSum + sumToAdd);
-		if (date > accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))) {
+		final long curDate = accountCursor.getLong(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
+		if (date > curDate) {
 			mDbHelper.updateCurrentSum(accountId, date);
 		} else {
 			mDbHelper.updateCurrentSum(accountId, 0);
 		}
+		accountCursor.close();
 	}
 
-	private double insertSchOp(ScheduledOperation op) {
+	private double insertSchOp(ScheduledOperation op, final long opRowId) {
 		final long accountId = op.mAccountId;
+		op.mScheduledId = opRowId;
 		mDbHelper.createOp(op, accountId);
 		switch (op.mPeriodicityUnit) {
 		case ScheduledOperation.WEEKLY_PERIOD:
@@ -127,6 +139,7 @@ public class RadisService extends IntentService {
 			op.addYear(op.mPeriodicity);
 			break;
 		}
+		Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
 		return op.mSum;
 	}
 

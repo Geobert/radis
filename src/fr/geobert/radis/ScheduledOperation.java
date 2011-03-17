@@ -28,6 +28,7 @@ public class ScheduledOperation extends Operation {
 		mEndDate = new GregorianCalendar();
 		mEndDate.setTimeInMillis(op.getLong(op
 				.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_END_DATE)));
+		Tools.clearTimeOfCalendar(mEndDate);
 		mPeriodicity = op.getInt(op
 				.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY));
 		mPeriodicityUnit = op
@@ -116,6 +117,6 @@ public class ScheduledOperation extends Operation {
 	}
 	
 	public boolean isObsolete(final long dateInMillis) {
-		return (getEndDate() != 0) && (getEndDate() <= dateInMillis);
+		return (getEndDate() > 0) && (getEndDate() <= dateInMillis);
 	}
 }
