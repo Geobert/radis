@@ -40,7 +40,7 @@
 		<item name="android:layout_width">fill_parent</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:gravity">top|left</item>
-		<item name="android:lines">3</item>
+		<item name="android:lines">2</item>
 	</style>
 	<style name="FormButton" parent="@android:style/Widget.Button">
 		<item name="android:layout_weight">1</item>

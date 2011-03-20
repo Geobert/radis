@@ -40,7 +40,6 @@ public class ScheduledOpList extends ListActivity {
 
 	// dialog ids
 	private static final int DIALOG_DELETE = 0;
-	private static final int DIALOG_DELETE_OCCURRENCES = 1;
 
 	private class InnerViewBinder extends OpViewBinder {
 

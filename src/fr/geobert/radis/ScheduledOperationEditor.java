@@ -1,7 +1,6 @@
 package fr.geobert.radis;
 
 import java.text.ParseException;
-import java.util.GregorianCalendar;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +13,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -21,12 +21,10 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.ViewFlipper;
 
 public class ScheduledOperationEditor extends CommonOpEditor {
 	private ViewFlipper mViewFlipper;
-	private ViewFlipper mHeaderFlipper;
 	private boolean mOnBasics = true;
 	private GestureOverlayView mGestureOverlay;
 	private GestureLibrary mGesturelib = null;
@@ -35,7 +33,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private Spinner mPeriodicitySpinner;
 	private EditText mCustomPeriodicityVal;
 	private Spinner mCustomPeriodicityUnit;
-	private TextView mCustomPeriodicityText;
 	private ScheduledOperation mCurrentSchOp;
 	private View mCustomPeriodicityCont;
 	private CheckBox mEndDateCheck;
@@ -57,7 +54,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	protected void init(Bundle savedInstanceState) {
 		super.init(savedInstanceState);
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper);
-		mHeaderFlipper = (ViewFlipper) findViewById(R.id.header_flipper);
 		mAccountSpinner = (Spinner) findViewById(R.id.account_choice);
 		mPeriodicitySpinner = (Spinner) findViewById(R.id.periodicity_choice);
 		mCustomPeriodicityCont = findViewById(R.id.custom_periodicity);
@@ -72,7 +68,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					}
 				});
 		mCustomPeriodicityUnit = (Spinner) findViewById(R.id.custom_periodicity_choice);
-		mCustomPeriodicityText = (TextView) findViewById(R.id.custom_periodicity_text);
 		mEndDatePicker = (DatePicker) findViewById(R.id.edit_end_date);
 		mEndDatePicker.setEnabled(false);
 		mEndDateCheck = (CheckBox) findViewById(R.id.end_date_check);
@@ -86,6 +81,27 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		});
 		mEndDateCheck.setChecked(false);
 
+		Button but = (Button) findViewById(R.id.GoToSchedulingBtn);
+		but.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (mOnBasics) {
+					mOnBasics = false;
+					flip(mViewFlipper, false);
+				}
+			}
+		});
+		but = (Button) findViewById(R.id.GoToBasicsBtn);
+		but.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!mOnBasics) {
+					mOnBasics = true;
+					flip(mViewFlipper, true);
+				}
+			}
+		});
+		
 		// Gestures init
 		mGesturelib = GestureLibraries.fromRawResource(this, R.raw.gestures);
 		if (!mGesturelib.load()) {
@@ -101,7 +117,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 						if (!mOnBasics) {
 							mOnBasics = true;
 							flip(mViewFlipper, true);
-							flip(mHeaderFlipper, true);
 						}
 					}
 				}, new Runnable() {
@@ -110,7 +125,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 						if (mOnBasics) {
 							mOnBasics = false;
 							flip(mViewFlipper, false);
-							flip(mHeaderFlipper, false);
 						}
 					}
 				}));
@@ -306,7 +320,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	protected void onResume() {
 		if (!mOnBasics) {
 			mViewFlipper.showNext();
-			mHeaderFlipper.showNext();
 		}
 		super.onResume();
 	}
