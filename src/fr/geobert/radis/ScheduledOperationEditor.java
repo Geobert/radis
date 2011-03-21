@@ -245,6 +245,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		} else {
 			mDbHelper.updateScheduledOp(mRowId, op);
 		}
+		RadisService.acquireStaticLock(this);
+		this.startService(new Intent(this, RadisService.class));
+
 		Intent res = new Intent();
 		setResult(RESULT_OK, res);
 	}
