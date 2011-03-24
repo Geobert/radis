@@ -1,4 +1,4 @@
-package fr.geobert.radis;
+package fr.geobert.radis.service;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -17,7 +17,7 @@ public class InstallRadisServiceReceiver extends BroadcastReceiver {
 		PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
 
 		mgr.setInexactRepeating(AlarmManager.RTC, System.currentTimeMillis(),
-				AlarmManager.INTERVAL_DAY, pi);
+				AlarmManager.INTERVAL_DAY, pi); // TODO AlarmManager.INTERVAL_DAY
 		Log.d("Radis", "Radis alarm installed via " + intent.getAction());
 		
 	}

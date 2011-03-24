@@ -7,4 +7,5 @@
             <item android:id="@+id/restore" android:title="@string/restore_db"></item>
         </menu>
     </item>
+    <item android:id="@+id/go_to_preferences" android:icon="@drawable/settings72" android:title="@string/preferences"></item>
 </menu>

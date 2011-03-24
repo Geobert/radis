@@ -1,7 +1,23 @@
-package fr.geobert.radis;
+package fr.geobert.radis.editor;
 
 import java.text.ParseException;
 
+import fr.geobert.radis.Operation;
+import fr.geobert.radis.R;
+import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.ViewSwipeDetector;
+import fr.geobert.radis.R.anim;
+import fr.geobert.radis.R.array;
+import fr.geobert.radis.R.id;
+import fr.geobert.radis.R.layout;
+import fr.geobert.radis.R.raw;
+import fr.geobert.radis.R.string;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.service.RadisService;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.gesture.GestureLibraries;
@@ -36,6 +52,8 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private ScheduledOperation mCurrentSchOp;
 	private View mCustomPeriodicityCont;
 	private CheckBox mEndDateCheck;
+
+	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
 
 	@Override
 	protected void setView() {
@@ -101,7 +119,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				}
 			}
 		});
-		
+
 		// Gestures init
 		mGesturelib = GestureLibraries.fromRawResource(this, R.raw.gestures);
 		if (!mGesturelib.load()) {
@@ -245,6 +263,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		} else {
 			mDbHelper.updateScheduledOp(mRowId, op);
 		}
+
+		showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
+
 		RadisService.acquireStaticLock(this);
 		this.startService(new Intent(this, RadisService.class));
 
@@ -252,6 +273,36 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		setResult(RESULT_OK, res);
 	}
 
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		switch (id) {
+		case ASK_UPDATE_OCCURENCES_DIALOG_ID:
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+			builder.setMessage(R.string.ask_update_occurences)
+					.setCancelable(false)
+					.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							updateAllOccurences();
+						}
+					})
+					.setNegativeButton(R.string.no,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog, int id) {
+									dialog.cancel();
+								}
+							});
+			return builder.create();
+		default:
+			return super.onCreateDialog(id);
+		}
+
+	}
+
+	private void updateAllOccurences() {
+		
+	}
+	
 	@Override
 	protected void fillOperationWithInputs(Operation operation)
 			throws ParseException {

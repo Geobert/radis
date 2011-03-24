@@ -1,9 +1,20 @@
-package fr.geobert.radis;
+package fr.geobert.radis.editor;
 
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Locale;
+
+import fr.geobert.radis.R;
+import fr.geobert.radis.R.anim;
+import fr.geobert.radis.R.array;
+import fr.geobert.radis.R.id;
+import fr.geobert.radis.R.layout;
+import fr.geobert.radis.R.string;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.tools.CorrectCommaWatcher;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 
 import android.app.Activity;
 import android.content.res.Resources;

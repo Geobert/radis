@@ -4,6 +4,10 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
+
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/preferences">
+    <EditTextPreference android:dialogTitle="@string/prefs_insertion_date_title" android:positiveButtonText="@string/ok" android:negativeButtonText="@string/cancel" android:title="@string/prefs_insertion_date_label" android:key="insertion_date" android:defaultValue="20" android:dialogMessage="@string/prefs_insertion_date_text" android:summary="@string/prefs_insertion_date_text"></EditTextPreference>
+</PreferenceScreen>

@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import fr.geobert.radis.db.OperationsDbAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;

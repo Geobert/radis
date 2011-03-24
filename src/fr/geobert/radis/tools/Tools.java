@@ -1,13 +1,13 @@
-package fr.geobert.radis;
+package fr.geobert.radis.tools;
 
 import java.util.Calendar;
-
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -19,6 +19,11 @@ import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
+import fr.geobert.radis.AccountList;
+import fr.geobert.radis.ConfigManager;
+import fr.geobert.radis.InfoAdapter;
+import fr.geobert.radis.R;
+import fr.geobert.radis.db.CommonDbAdapter;
 
 public class Tools {
 	// these are here because database force to use "_id" to be able to use
@@ -95,6 +100,10 @@ public class Tools {
 			return true;
 		case R.id.backup:
 			ctx.showDialog(R.id.backup);
+			return true;
+		case R.id.go_to_preferences:
+			Intent i = new Intent(ctx, ConfigManager.class);
+			ctx.startActivity(i);
 			return true;
 		}
 		return false;

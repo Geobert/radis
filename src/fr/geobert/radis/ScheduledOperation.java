@@ -3,6 +3,9 @@ package fr.geobert.radis;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Tools;
+
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Parcel;

@@ -1,6 +1,13 @@
-package fr.geobert.radis;
+package fr.geobert.radis.editor;
 
 import java.util.HashMap;
+
+import fr.geobert.radis.R;
+import fr.geobert.radis.R.id;
+import fr.geobert.radis.R.layout;
+import fr.geobert.radis.R.string;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Tools;
 
 import android.app.Activity;
 import android.app.AlertDialog;

@@ -1,8 +1,11 @@
-package fr.geobert.radis;
+package fr.geobert.radis.db;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import fr.geobert.radis.Operation;
+import fr.geobert.radis.ScheduledOperation;
 
 import android.content.ContentValues;
 import android.content.Context;

@@ -16,17 +16,17 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name="AccountEditor" android:launchMode="singleTop"
+		<activity android:name="editor.AccountEditor" android:launchMode="singleTop"
 			android:windowSoftInputMode="stateVisible|adjustResize"></activity>
 		<activity android:name="OperationList" android:label="test op list label"
 			android:launchMode="singleTop"></activity>
-		<activity android:name="OperationEditor" android:label="@string/op_edition"
+		<activity android:name="editor.OperationEditor" android:label="@string/op_edition"
 			android:launchMode="singleTop"></activity>
 		<activity android:name="org.acra.CrashReportDialog"
 			android:theme="@android:style/Theme.Dialog" android:launchMode="singleInstance"
 			android:excludeFromRecents="true" android:finishOnTaskLaunch="true" />
 		<activity android:name="ScheduledOpList" android:launchMode="singleTop"></activity>
-		<activity android:name="ScheduledOperationEditor"
+		<activity android:name="editor.ScheduledOperationEditor"
 			android:launchMode="singleTop"></activity>
 		<receiver android:name="InstallRadisServiceReceiver">
 			<intent-filter>
@@ -39,6 +39,7 @@
 		</service>
 		<receiver android:name="OnAlarmReceiver">
 		</receiver>
+		<activity android:launchMode="singleTop" android:name="ConfigManager"></activity>
 
 	</application>
 	<uses-sdk android:minSdkVersion="7" />

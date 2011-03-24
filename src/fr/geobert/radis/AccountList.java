@@ -3,6 +3,12 @@ package fr.geobert.radis;
 import java.util.Currency;
 import java.util.Date;
 
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.editor.AccountEditor;
+import fr.geobert.radis.service.InstallRadisServiceReceiver;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.PendingIntent;

@@ -4,6 +4,14 @@ import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
 
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.editor.OperationEditor;
+import fr.geobert.radis.tools.CorrectCommaWatcher;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.QuickAddTextWatcher;
+import fr.geobert.radis.tools.Tools;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;

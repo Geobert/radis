@@ -2,6 +2,8 @@ package fr.geobert.radis;
 
 import java.util.Date;
 
+import fr.geobert.radis.tools.Formater;
+
 import android.app.Activity;
 import android.content.res.Resources;
 import android.database.Cursor;

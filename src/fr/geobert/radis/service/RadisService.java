@@ -1,22 +1,31 @@
-package fr.geobert.radis;
+package fr.geobert.radis.service;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import fr.geobert.radis.ConfigManager;
+import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Tools;
+
+import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class RadisService extends IntentService {
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
 	private static PowerManager.WakeLock lockStatic = null;
-
 	private OperationsDbAdapter mDbHelper;
+	private SharedPreferences mPrefs;
 
 	public RadisService() {
 		super("RadisService");
@@ -25,6 +34,8 @@ public class RadisService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		try {
+			mPrefs = getSharedPreferences(ConfigManager.SHARED_PREF_NAME,
+					Activity.MODE_PRIVATE);
 			mDbHelper = new OperationsDbAdapter(getApplicationContext());
 			mDbHelper.open();
 			processScheduledOps();
@@ -45,7 +56,7 @@ public class RadisService extends IntentService {
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(insertionDate);
 			insertionDate.set(Calendar.DAY_OF_MONTH,
-					ConfigManager.insertionDayOfMonth);
+					mPrefs.getInt(ConfigManager.INSERTION_DATE, 0));
 
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			int insertionMonth = insertionDate.get(Calendar.MONTH);
@@ -70,7 +81,8 @@ public class RadisService extends IntentService {
 								date = Long.valueOf(0);
 							}
 							if (op.getDate() > date) {
-								greatestDatePerAccount.put(accountId, op.getDate());
+								greatestDatePerAccount.put(accountId,
+										op.getDate());
 							}
 							sum = sum + insertSchOp(op, opRowId);
 							needUpdate = true;

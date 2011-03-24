@@ -4,6 +4,12 @@ import java.util.Date;
 
 import org.acra.ErrorReporter;
 
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.editor.ScheduledOperationEditor;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
+
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;

@@ -1,5 +1,6 @@
-package fr.geobert.radis;
+package fr.geobert.radis.tools;
 
+import fr.geobert.radis.OperationList;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.AutoCompleteTextView;

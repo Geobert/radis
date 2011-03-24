@@ -1,9 +1,11 @@
-package fr.geobert.radis;
+package fr.geobert.radis.db;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+
+import fr.geobert.radis.tools.Tools;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -19,12 +21,12 @@ public class CommonDbAdapter {
 	protected static final String DATABASE_NAME = "radisDb";
 	protected static final int DATABASE_VERSION = 6;
 
-	protected static final String DATABASE_ACCOUNT_TABLE = "accounts";
-	protected static final String DATABASE_MODES_TABLE = "modes";
-	protected static final String DATABASE_THIRD_PARTIES_TABLE = "third_parties";
-	protected static final String DATABASE_TAGS_TABLE = "tags";
-	protected static final String DATABASE_OPERATIONS_TABLE = "operations";
-	protected static final String DATABASE_SCHEDULED_TABLE = "scheduled_ops";
+	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
+	public static final String DATABASE_MODES_TABLE = "modes";
+	public static final String DATABASE_THIRD_PARTIES_TABLE = "third_parties";
+	public static final String DATABASE_TAGS_TABLE = "tags";
+	public static final String DATABASE_OPERATIONS_TABLE = "operations";
+	public static final String DATABASE_SCHEDULED_TABLE = "scheduled_ops";
 
 	public static final String KEY_ACCOUNT_NAME = "account_name";
 	public static final String KEY_ACCOUNT_DESC = "account_desc";
