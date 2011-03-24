@@ -139,4 +139,12 @@
 <string name="del_all_occurrences">Tout</string>
 <string name="cancel_delete_occurrences">Échéance</string>
 <string name="cancel_sch_deletion">Rien</string>
+<string name="prefs_insertion_date_text">Jour du mois pour l\'insertion des échéances</string>
+<string name="prefs_insertion_date_title">Entrez le jour du mois</string>
+<string name="prefs_insertion_date_label">Date d\'insertion</string>
+<string name="preferences">Préférences</string>
+<string name="ask_update_occurences">Voulez-vous metter à jour les occurrences ?\nSinon, vous pouvez décorréler les occurrences existantes de cette échéance.</string>
+<string name="no">Non</string>
+<string name="update">Mettre à jour</string>
+<string name="disconnect">Décorréler</string>
 </resources>
