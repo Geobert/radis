@@ -2,19 +2,6 @@ package fr.geobert.radis.editor;
 
 import java.text.ParseException;
 
-import fr.geobert.radis.Operation;
-import fr.geobert.radis.R;
-import fr.geobert.radis.ScheduledOperation;
-import fr.geobert.radis.ViewSwipeDetector;
-import fr.geobert.radis.R.anim;
-import fr.geobert.radis.R.array;
-import fr.geobert.radis.R.id;
-import fr.geobert.radis.R.layout;
-import fr.geobert.radis.R.raw;
-import fr.geobert.radis.R.string;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.service.RadisService;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -38,6 +25,13 @@ import android.widget.EditText;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.ViewFlipper;
+import fr.geobert.radis.Operation;
+import fr.geobert.radis.R;
+import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.ViewSwipeDetector;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.service.RadisService;
 
 public class ScheduledOperationEditor extends CommonOpEditor {
 	private ViewFlipper mViewFlipper;
@@ -52,6 +46,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private ScheduledOperation mCurrentSchOp;
 	private View mCustomPeriodicityCont;
 	private CheckBox mEndDateCheck;
+	private ScheduledOperation mOriginalSchOp;
 
 	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
 
@@ -154,6 +149,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentSchOp = new ScheduledOperation(opCursor);
+			mOriginalSchOp = new ScheduledOperation(opCursor);
 		} else {
 			mCurrentSchOp = new ScheduledOperation();
 		}
@@ -252,25 +248,33 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				: View.GONE);
 	}
 
+	private void startInsertionServiceAndExit() {
+		RadisService.acquireStaticLock(this);
+		this.startService(new Intent(this, RadisService.class));
+		Intent res = new Intent();
+		setResult(RESULT_OK, res);
+		finish();
+	}
+
 	@Override
-	protected void saveOpAndSetActivityResult() throws ParseException {
+	protected void saveOpAndExit() throws ParseException {
 		ScheduledOperation op = mCurrentSchOp;
 		if (mRowId == null) {
 			long id = mDbHelper.createScheduledOp(op);
 			if (id > 0) {
 				mRowId = id;
 			}
+			startInsertionServiceAndExit();
 		} else {
-			mDbHelper.updateScheduledOp(mRowId, op);
+			if (!op.equals(mOriginalSchOp)) {
+				mDbHelper.updateScheduledOp(mRowId, op);
+				showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
+			} else { // nothing to update
+				Intent res = new Intent();
+				setResult(RESULT_OK, res);
+				finish();
+			}
 		}
-
-		showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
-
-		RadisService.acquireStaticLock(this);
-		this.startService(new Intent(this, RadisService.class));
-
-		Intent res = new Intent();
-		setResult(RESULT_OK, res);
 	}
 
 	@Override
@@ -280,15 +284,28 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);
 			builder.setMessage(R.string.ask_update_occurences)
 					.setCancelable(false)
-					.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							updateAllOccurences();
-						}
-					})
-					.setNegativeButton(R.string.no,
+					.setPositiveButton(R.string.update,
 							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog, int id) {
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which) {
+									updateAllOccurences();
+									startInsertionServiceAndExit();
+								}
+							})
+					.setNeutralButton(R.string.disconnect,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									mDbHelper.disconnectAllOccurrences(
+											mCurrentSchOp.mAccountId, mRowId);
+									startInsertionServiceAndExit();
+								}
+							})
+					.setNegativeButton(R.string.cancel,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
 									dialog.cancel();
 								}
 							});
@@ -300,9 +317,31 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	private void updateAllOccurences() {
-		
+		final long accountId = mCurrentSchOp.mAccountId;
+		int nbUpdated = mDbHelper.updateAllOccurrences(accountId, mRowId,
+				mCurrentSchOp);
+		double sumToAdd = nbUpdated * (mCurrentSchOp.mSum - mPreviousSum);
+		Cursor accountCursor = mDbHelper.fetchAccount(accountId);
+		double curSum = accountCursor.getDouble(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+		mDbHelper.updateOpSum(accountId, curSum + sumToAdd);
+		Cursor opCur = mDbHelper.fetchNLastOps(1, accountId);
+		if (null != opCur) {
+			opCur.moveToFirst();
+		}
+		final long date = opCur.getLong(opCur
+				.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE));
+		final long curDate = accountCursor.getLong(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
+		if (date > curDate) {
+			mDbHelper.updateCurrentSum(accountId, date);
+		} else {
+			mDbHelper.updateCurrentSum(accountId, 0);
+		}
+		accountCursor.close();
+		opCur.close();
 	}
-	
+
 	@Override
 	protected void fillOperationWithInputs(Operation operation)
 			throws ParseException {

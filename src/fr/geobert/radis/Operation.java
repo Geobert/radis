@@ -43,7 +43,8 @@ public class Operation implements Parcelable {
 		Tools.clearTimeOfCalendar(mDate);
 		mNotes = op.getString(op
 				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_NOTES));
-		final int idx = op.getColumnIndex(OperationsDbAdapter.KEY_OP_SCHEDULED_ID);
+		final int idx = op
+				.getColumnIndex(OperationsDbAdapter.KEY_OP_SCHEDULED_ID);
 		if (idx >= 0) {
 			mScheduledId = op.getLong(idx);
 		} else {
@@ -173,4 +174,11 @@ public class Operation implements Parcelable {
 			return new Operation[size];
 		}
 	};
+
+	public boolean equals(Operation op) {
+		return mDate.equals(op.mDate) && mThirdParty.equals(op.mThirdParty)
+				&& mTag.equals(op.mTag) && mMode.equals(op.mMode)
+				&& mNotes.equals(op.mNotes) && mSum == op.mSum
+				&& mScheduledId == op.mScheduledId;
+	}
 }

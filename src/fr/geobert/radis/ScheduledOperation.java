@@ -114,12 +114,21 @@ public class ScheduledOperation extends Operation {
 		setEndMonth(in.readInt());
 		setEndYear(in.readInt());
 	}
-	
+
 	public boolean isObsolete() {
-		return isObsolete(new GregorianCalendar().getTimeInMillis()); 
+		return isObsolete(new GregorianCalendar().getTimeInMillis());
 	}
-	
+
 	public boolean isObsolete(final long dateInMillis) {
 		return (getEndDate() > 0) && (getEndDate() <= dateInMillis);
+	}
+
+	@Override
+	public boolean equals(Operation op) {
+		ScheduledOperation schOp = (ScheduledOperation) op;
+		return super.equals(op) && mAccountId == schOp.mAccountId
+				&& mEndDate.equals(schOp.mEndDate)
+				&& mPeriodicity == schOp.mPeriodicity
+				&& mPeriodicityUnit == schOp.mPeriodicityUnit;
 	}
 }

@@ -142,6 +142,8 @@
 <string name="prefs_insertion_date_title">Enter day of month</string>
 <string name="prefs_insertion_date_label">Insertion date</string>
 <string name="preferences">Preferences</string>
-<string name="ask_update_occurences">Do you want to update all occurrences?</string>
+<string name="ask_update_occurences">Do you want to update all occurrences?\nIf not, existing occurences will be disconnected from this scheduling.</string>
 <string name="no">No</string>
+<string name="update">Update</string>
+<string name="disconnect">Disconnect</string>
 </resources>

@@ -16,28 +16,27 @@
 			</intent-filter>
 		</activity>
 
-		<activity android:name="editor.AccountEditor" android:launchMode="singleTop"
-			android:windowSoftInputMode="stateVisible|adjustResize"></activity>
+		<activity android:launchMode="singleTop"
+			android:windowSoftInputMode="stateVisible|adjustResize" android:name=".editor.AccountEditor"></activity>
 		<activity android:name="OperationList" android:label="test op list label"
 			android:launchMode="singleTop"></activity>
-		<activity android:name="editor.OperationEditor" android:label="@string/op_edition"
-			android:launchMode="singleTop"></activity>
+		<activity android:label="@string/op_edition"
+			android:launchMode="singleTop" android:name=".editor.OperationEditor"></activity>
 		<activity android:name="org.acra.CrashReportDialog"
 			android:theme="@android:style/Theme.Dialog" android:launchMode="singleInstance"
 			android:excludeFromRecents="true" android:finishOnTaskLaunch="true" />
 		<activity android:name="ScheduledOpList" android:launchMode="singleTop"></activity>
-		<activity android:name="editor.ScheduledOperationEditor"
-			android:launchMode="singleTop"></activity>
-		<receiver android:name="InstallRadisServiceReceiver">
+		<activity android:launchMode="singleTop" android:name=".editor.ScheduledOperationEditor"></activity>
+		<receiver android:name=".service.InstallRadisServiceReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED" />
 				<action android:name="com.android.vending.INSTALL_REFERRER" />
 				<action android:name="fr.geobert.radis.STARTED" />
 			</intent-filter>
 		</receiver>
-		<service android:name="RadisService">
+		<service android:name=".service.RadisService">
 		</service>
-		<receiver android:name="OnAlarmReceiver">
+		<receiver android:name=".service.OnAlarmReceiver">
 		</receiver>
 		<activity android:launchMode="singleTop" android:name="ConfigManager"></activity>
 

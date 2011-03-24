@@ -256,7 +256,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return c;
 	}
 
-	public boolean updateOp(long rowId, Operation op) {
+	private ContentValues createContentValuesFromOp(final Operation op, final boolean updateOccurrences) {
 		ContentValues args = new ContentValues();
 
 		String key = op.mThirdParty;
@@ -272,9 +272,16 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				mModesMap, args);
 
 		args.put(KEY_OP_SUM, op.mSum);
-		args.put(KEY_OP_DATE, op.getDate());
 		args.put(KEY_OP_NOTES, op.mNotes);
-		args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
+		if (!updateOccurrences) {
+			args.put(KEY_OP_DATE, op.getDate());
+			args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
+		}
+		return args;
+	}
+
+	public boolean updateOp(long rowId, final Operation op) {
+		ContentValues args = createContentValuesFromOp(op, false);
 		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
 	}
@@ -362,6 +369,21 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				null);
 	}
 
+	public int updateAllOccurrences(final long accountId, final long schOpId,
+			final Operation op) {
+		ContentValues args = createContentValuesFromOp(op, true);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ACCOUNT_ID
+				+ "=" + accountId + " AND " + KEY_OP_SCHEDULED_ID + "="
+				+ schOpId, null);
+	}
+
+	public int disconnectAllOccurrences(final long accountId, final long schOpId) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_OP_SCHEDULED_ID, 0);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ACCOUNT_ID
+				+ "=" + accountId + " AND " + KEY_OP_SCHEDULED_ID + "="
+				+ schOpId, null);
+	}
 	// ------------------------------
 	// INFOS (third party, tag, mode)
 	// ------------------------------

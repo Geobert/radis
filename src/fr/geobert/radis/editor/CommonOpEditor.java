@@ -52,7 +52,8 @@ public abstract class CommonOpEditor extends Activity {
 	protected CorrectCommaWatcher mSumTextWatcher;
 	protected boolean mOnRestore = false;
 	public String mCurrentInfoTable;
-
+	protected double mPreviousSum = 0.0;
+	
 	// abstract methods
 	protected abstract void setView();
 
@@ -60,11 +61,14 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected abstract void populateFields();
 
-	protected abstract void saveOpAndSetActivityResult() throws ParseException;
 	
 	protected abstract void fetchOrCreateCurrentOp();
 
 	// default and common behaviors
+	protected void saveOpAndExit() throws ParseException {
+		finish();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -222,7 +226,7 @@ public abstract class CommonOpEditor extends Activity {
 		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
 		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
 		mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
-		
+		mPreviousSum = op.mSum;
 		mNotesText.setText(op.mNotes);
 		Tools.setSumTextGravity(mOpSumText);
 		if (mCurrentOp.mSum == 0.0) {
@@ -289,8 +293,7 @@ public abstract class CommonOpEditor extends Activity {
 							StringBuilder errMsg = new StringBuilder();
 
 							if (isFormValid(errMsg)) {
-								saveOpAndSetActivityResult();
-								finish();
+								saveOpAndExit();
 							} else {
 								Tools.popError(CommonOpEditor.this,
 										errMsg.toString(), null);
@@ -339,7 +342,7 @@ public abstract class CommonOpEditor extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		outState.putDouble("previousSum", mPreviousSum);
 		mOnRestore = true;
 	}
 
@@ -355,5 +358,6 @@ public abstract class CommonOpEditor extends Activity {
 		}
 		populateFields();
 		mOnRestore = true;
+		mPreviousSum = savedInstanceState.getDouble("previousSum");
 	}
 }

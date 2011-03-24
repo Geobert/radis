@@ -14,7 +14,6 @@ import android.os.Bundle;
 
 public class OperationEditor extends CommonOpEditor {
 	protected Long mAccountId;
-	protected double mPreviousSum = 0.0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +48,11 @@ public class OperationEditor extends CommonOpEditor {
 	@Override
 	protected void populateFields() {
 		Operation op = mCurrentOp;
-		mPreviousSum = op.mSum;
 		populateCommonFields(op);
 	}
 
 	@Override
-	protected void saveOpAndSetActivityResult() throws ParseException {
+	protected void saveOpAndExit() throws ParseException {
 		Operation op = mCurrentOp;
 		if (mRowId == null) {
 			long id = mDbHelper.createOp(op);
@@ -68,18 +66,6 @@ public class OperationEditor extends CommonOpEditor {
 		res.putExtra("sum", mCurrentOp.mSum);
 		res.putExtra("oldSum", mPreviousSum);
 		setResult(RESULT_OK, res);
+		super.saveOpAndExit();
 	}
-
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		outState.putDouble("previousSum", mPreviousSum);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle state) {
-		super.onRestoreInstanceState(state);
-		mPreviousSum = state.getDouble("previousSum");
-	}
-
 }
