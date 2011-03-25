@@ -1,6 +1,7 @@
 package fr.geobert.radis.tools;
 
 import java.util.Calendar;
+
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -24,6 +25,7 @@ import fr.geobert.radis.ConfigManager;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.service.RadisService;
 
 public class Tools {
 	// these are here because database force to use "_id" to be able to use
@@ -33,7 +35,8 @@ public class Tools {
 	public final static String EXTRAS_ACCOUNT_ID = "account_id";
 
 	// Intents actions
-	public final static String RADIS_START = "fr.geobert.radis.STARTED"; 
+	public final static String INTENT_RADIS_STARTED = "fr.geobert.radis.STARTED"; 
+	public final static String INTENT_OP_INSERTED = "fr.geobert.radis.OP_INSERTED";
 	
 	// debug mode stuff
 	public static boolean DEBUG_MODE = true;
@@ -248,8 +251,8 @@ public class Tools {
 		return false;
 	}
 
-	public static Dialog getDebugDialog(Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = { "Trash DB", "Restart" };
+	public static Dialog getDebugDialog(final Context context, CommonDbAdapter dB) {
+		final CharSequence[] items = { "Trash DB", "Restart", "Call RadisService" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -266,6 +269,10 @@ public class Tools {
 					break;
 				case 1:
 					Tools.restartApp();
+					break;
+				case 2:
+					RadisService.acquireStaticLock(context);
+					context.startService(new Intent(context, RadisService.class));
 					break;
 				}
 			}

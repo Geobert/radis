@@ -4,19 +4,12 @@ import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
 
-import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.editor.OperationEditor;
-import fr.geobert.radis.tools.CorrectCommaWatcher;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.QuickAddTextWatcher;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
@@ -46,8 +39,16 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.editor.OperationEditor;
+import fr.geobert.radis.service.OnInsertionReceiver;
+import fr.geobert.radis.tools.CorrectCommaWatcher;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.QuickAddTextWatcher;
+import fr.geobert.radis.tools.Tools;
 
-public class OperationList extends ListActivity {
+public class OperationList extends ListActivity implements RadisListActivity {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 
@@ -71,7 +72,9 @@ public class OperationList extends ListActivity {
 	private Button mQuickAddButton;
 	private QuickAddTextWatcher mQuickAddTextWatcher;
 	private CorrectCommaWatcher mCorrectCommaWatcher;
-
+	private OnInsertionReceiver mOnInsertionReceiver;
+	private IntentFilter mOnInsertionIntentFilter;
+	
 	private class InnerViewBinder extends OpViewBinder {
 
 		public InnerViewBinder() {
@@ -233,6 +236,9 @@ public class OperationList extends ListActivity {
 		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
 		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
 
+		mOnInsertionReceiver = new OnInsertionReceiver(this);
+		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
+		
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
@@ -315,6 +321,7 @@ public class OperationList extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
 		mCorrectCommaWatcher.setAutoNegate(true);
 		try {
@@ -650,6 +657,7 @@ public class OperationList extends ListActivity {
 
 	@Override
 	protected void onPause() {
+		unregisterReceiver(mOnInsertionReceiver);
 		if (null != mUpdateSumTask) {
 			mUpdateSumTask.cancel(true);
 		}
@@ -705,6 +713,17 @@ public class OperationList extends ListActivity {
 					});
 		default:
 			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
+		}
+	}
+
+	@Override
+	public void updateDisplay(Intent intent) {
+		Object[] accountIds = (Object[])intent.getSerializableExtra("accountIds");
+		for (int i = 0; i < accountIds.length; ++i) {
+			if (((Long)accountIds[i]).equals(mAccountId)) {
+				fillData();
+				break;
+			}
 		}
 	}
 }

@@ -2,15 +2,13 @@ package fr.geobert.radis.editor;
 
 import java.text.ParseException;
 
-import fr.geobert.radis.Operation;
-import fr.geobert.radis.R;
-import fr.geobert.radis.R.layout;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.tools.Tools;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import fr.geobert.radis.Operation;
+import fr.geobert.radis.R;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Tools;
 
 public class OperationEditor extends CommonOpEditor {
 	protected Long mAccountId;

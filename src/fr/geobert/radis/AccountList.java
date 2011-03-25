@@ -6,6 +6,7 @@ import java.util.Date;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.editor.AccountEditor;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
+import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
@@ -14,6 +15,7 @@ import android.app.ListActivity;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteCursor;
@@ -32,7 +34,7 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-public class AccountList extends ListActivity {
+public class AccountList extends ListActivity implements RadisListActivity {
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
 
@@ -48,13 +50,16 @@ public class AccountList extends ListActivity {
 	public static PendingIntent RESTART_INTENT;
 
 	private boolean firstStart = true;
+	private OnInsertionReceiver mOnInsertionReceiver;
+	private IntentFilter mOnInsertionIntentFilter;
+	private Cursor mAccountsCursor;
 	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (firstStart) {
 			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
-			i.setAction(Tools.RADIS_START);
+			i.setAction(Tools.INTENT_RADIS_STARTED);
 			sendBroadcast(i);
 			firstStart = false;
 		}
@@ -81,6 +86,9 @@ public class AccountList extends ListActivity {
 		ACTIVITY = this;
 		RESTART_INTENT = PendingIntent.getActivity(this.getBaseContext(), 0,
 				new Intent(getIntent()), getIntent().getFlags());
+		mOnInsertionReceiver = new OnInsertionReceiver(this);
+		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
+		
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
@@ -171,7 +179,7 @@ public class AccountList extends ListActivity {
 
 	private void deleteAccount(long id) {
 		mDbHelper.deleteAccount(id);
-		fillData();
+		mAccountsCursor.requery();
 	}
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -216,9 +224,8 @@ public class AccountList extends ListActivity {
 	}
 
 	private void fillData() {
-		Cursor accountsCursor = mDbHelper.fetchAllAccounts();
-		startManagingCursor(accountsCursor);
-
+		mAccountsCursor = mDbHelper.fetchAllAccounts();
+		startManagingCursor(mAccountsCursor);
 		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
 				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM,
@@ -231,11 +238,11 @@ public class AccountList extends ListActivity {
 				R.id.account_balance_at };
 
 		// Now create a simple cursor adapter and set it to display
-		SimpleCursorAdapter accounts = new SimpleCursorAdapter(this,
-				R.layout.account_row, accountsCursor, from, to);
-		accounts.setViewBinder(new InnerViewBinder());
-		setListAdapter(accounts);
-		mScheduledListBtn.setEnabled(accounts.getCount() > 0);
+		SimpleCursorAdapter accountsAdapter = new SimpleCursorAdapter(this,
+				R.layout.account_row, mAccountsCursor, from, to);
+		accountsAdapter.setViewBinder(new InnerViewBinder());
+		setListAdapter(accountsAdapter);
+		mScheduledListBtn.setEnabled(accountsAdapter.getCount() > 0);
 	}
 
 	private void createAccount() {
@@ -282,5 +289,22 @@ public class AccountList extends ListActivity {
 		default:
 			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		unregisterReceiver(mOnInsertionReceiver);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
+	}
+
+	@Override
+	public void updateDisplay(Intent intent) {
+		mAccountsCursor.requery();
 	}
 }

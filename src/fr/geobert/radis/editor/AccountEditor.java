@@ -5,17 +5,6 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.Locale;
 
-import fr.geobert.radis.R;
-import fr.geobert.radis.R.anim;
-import fr.geobert.radis.R.array;
-import fr.geobert.radis.R.id;
-import fr.geobert.radis.R.layout;
-import fr.geobert.radis.R.string;
-import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.tools.CorrectCommaWatcher;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Activity;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -25,6 +14,11 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import fr.geobert.radis.R;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.tools.CorrectCommaWatcher;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 
 public class AccountEditor extends Activity {
 	private CommonDbAdapter mDbHelper;

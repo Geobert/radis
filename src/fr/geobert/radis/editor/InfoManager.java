@@ -2,13 +2,6 @@ package fr.geobert.radis.editor;
 
 import java.util.HashMap;
 
-import fr.geobert.radis.R;
-import fr.geobert.radis.R.id;
-import fr.geobert.radis.R.layout;
-import fr.geobert.radis.R.string;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -22,6 +15,9 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import fr.geobert.radis.R;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Tools;
 
 public class InfoManager {
 	private CommonOpEditor mContext = null;

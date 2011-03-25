@@ -5,17 +5,6 @@ import java.util.HashMap;
 
 import org.acra.ErrorReporter;
 
-import fr.geobert.radis.InfoAdapter;
-import fr.geobert.radis.Operation;
-import fr.geobert.radis.R;
-import fr.geobert.radis.R.id;
-import fr.geobert.radis.R.string;
-import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.tools.CorrectCommaWatcher;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -26,6 +15,14 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import fr.geobert.radis.InfoAdapter;
+import fr.geobert.radis.Operation;
+import fr.geobert.radis.R;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.CorrectCommaWatcher;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 
 public abstract class CommonOpEditor extends Activity {
 	protected static final int THIRD_PARTIES_DIALOG_ID = 1;

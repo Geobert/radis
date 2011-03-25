@@ -5,12 +5,6 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import fr.geobert.radis.ConfigManager;
-import fr.geobert.radis.ScheduledOperation;
-import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
@@ -18,8 +12,12 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.util.Log;
+import fr.geobert.radis.ConfigManager;
+import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.tools.Tools;
 
 public class RadisService extends IntentService {
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
@@ -100,9 +98,18 @@ public class RadisService extends IntentService {
 					sumsPerAccount.put(accountId, curSum + sum);
 				}
 			} while (c.moveToNext());
+			boolean needUpdate = false;
+			Long[] accountIds = sumsPerAccount.keySet().toArray(
+					new Long[sumsPerAccount.size()]);
 			for (HashMap.Entry<Long, Double> e : sumsPerAccount.entrySet()) {
+				needUpdate = true;
 				updateAccountSum(e.getValue().doubleValue(), e.getKey()
 						.longValue(), greatestDatePerAccount.get(e.getKey()));
+			}
+			if (needUpdate) {
+				Intent i = new Intent(Tools.INTENT_OP_INSERTED);
+				i.putExtra("accountIds", accountIds);
+				sendOrderedBroadcast(i, null);
 			}
 		}
 		c.close();
