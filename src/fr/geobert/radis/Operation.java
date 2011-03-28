@@ -21,6 +21,17 @@ public class Operation implements Parcelable {
 	public double mSum;
 	public long mScheduledId;
 
+	public Operation(Operation op) {
+		mDate = new GregorianCalendar();
+		mDate.setTimeInMillis(op.getDate());
+		mThirdParty = op.mThirdParty;
+		mTag = op.mTag;
+		mMode = op.mMode;
+		mNotes = op.mNotes;
+		mSum = op.mSum;
+		mScheduledId = op.mScheduledId;
+	}
+
 	public Operation(Cursor op) {
 		mThirdParty = op
 				.getString(op
@@ -176,9 +187,12 @@ public class Operation implements Parcelable {
 	};
 
 	public boolean equals(Operation op) {
-		return mDate.equals(op.mDate) && mThirdParty.equals(op.mThirdParty)
-				&& mTag.equals(op.mTag) && mMode.equals(op.mMode)
-				&& mNotes.equals(op.mNotes) && mSum == op.mSum
-				&& mScheduledId == op.mScheduledId;
+		return mDate.equals(op.mDate) && equalsButDate(op);
+	}
+
+	public boolean equalsButDate(Operation op) {
+		return mThirdParty.equals(op.mThirdParty) && mTag.equals(op.mTag)
+				&& mMode.equals(op.mMode) && mNotes.equals(op.mNotes)
+				&& mSum == op.mSum && mScheduledId == op.mScheduledId;
 	}
 }

@@ -256,7 +256,8 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return c;
 	}
 
-	private ContentValues createContentValuesFromOp(final Operation op, final boolean updateOccurrences) {
+	private ContentValues createContentValuesFromOp(final Operation op,
+			final boolean updateOccurrences) {
 		ContentValues args = new ContentValues();
 
 		String key = op.mThirdParty;
@@ -333,7 +334,8 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return mDb.insert(DATABASE_SCHEDULED_TABLE, null, initialValues);
 	}
 
-	public boolean updateScheduledOp(long rowId, ScheduledOperation op) {
+	public boolean updateScheduledOp(long rowId, ScheduledOperation op,
+			final boolean isUpdatedFromOccurence) {
 		ContentValues args = new ContentValues();
 
 		String key = op.mThirdParty;
@@ -349,11 +351,14 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				mModesMap, args);
 
 		args.put(KEY_OP_SUM, op.mSum);
-		args.put(KEY_OP_DATE, op.getDate());
 		args.put(KEY_OP_NOTES, op.mNotes);
-		args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
-		args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
-		args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+		if (!isUpdatedFromOccurence) {
+			args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
+			args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
+			args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+			args.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
+			args.put(KEY_OP_DATE, op.getDate());
+		}
 		return mDb.update(DATABASE_SCHEDULED_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
 	}
@@ -384,6 +389,7 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				+ "=" + accountId + " AND " + KEY_OP_SCHEDULED_ID + "="
 				+ schOpId, null);
 	}
+
 	// ------------------------------
 	// INFOS (third party, tag, mode)
 	// ------------------------------

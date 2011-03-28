@@ -24,6 +24,11 @@ public class ScheduledOperation extends Operation {
 	public GregorianCalendar mEndDate;
 	public long mAccountId;
 
+	public ScheduledOperation(Operation op, final long accountId) {
+		super(op);
+		mAccountId = accountId;
+	}
+	
 	public ScheduledOperation(Cursor op) {
 		super(op);
 		mAccountId = op.getLong(op

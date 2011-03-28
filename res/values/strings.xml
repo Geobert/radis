@@ -146,4 +146,5 @@
 <string name="no">No</string>
 <string name="update">Update</string>
 <string name="disconnect">Disconnect</string>
+<string name="ask_update_scheduling">This transaction is from a scheduled one. Do you want to update the scheduled transaction and all its occurences? If not, current transaction will be disconnected from the scheduled one.</string>
 </resources>

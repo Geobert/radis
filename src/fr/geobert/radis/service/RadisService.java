@@ -87,7 +87,7 @@ public class RadisService extends IntentService {
 						}
 					}
 					if (needUpdate) {
-						mDbHelper.updateScheduledOp(opRowId, op);
+						mDbHelper.updateScheduledOp(opRowId, op, false);
 					}
 				}
 				if (needUpdate) {
