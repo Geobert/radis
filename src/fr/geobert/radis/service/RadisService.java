@@ -135,29 +135,7 @@ public class RadisService extends IntentService {
 		final long accountId = op.mAccountId;
 		op.mScheduledId = opRowId;
 		mDbHelper.createOp(op, accountId);
-		switch (op.mPeriodicityUnit) {
-		case ScheduledOperation.WEEKLY_PERIOD:
-			op.addDay(7);
-			break;
-		case ScheduledOperation.MONTHLY_PERIOD:
-			op.addMonth(1);
-			break;
-		case ScheduledOperation.YEARLY_PERIOD:
-			op.addYear(1);
-			break;
-		case ScheduledOperation.CUSTOM_DAILY_PERIOD:
-			op.addDay(op.mPeriodicity);
-			break;
-		case ScheduledOperation.CUSTOM_WEEKLY_PERIOD:
-			op.addDay(7 * op.mPeriodicity);
-			break;
-		case ScheduledOperation.CUSTOM_MONTHLY_PERIOD:
-			op.addMonth(op.mPeriodicity);
-			break;
-		case ScheduledOperation.CUSTOM_YEARLY_PERIOD:
-			op.addYear(op.mPeriodicity);
-			break;
-		}
+		ScheduledOperation.addPeriodicityToDate(op);
 		Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
 		return op.mSum;
 	}

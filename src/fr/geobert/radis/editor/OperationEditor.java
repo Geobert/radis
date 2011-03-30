@@ -42,7 +42,7 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void fetchOrCreateCurrentOp() {
-		if (mRowId != null) {
+		if (mRowId != 0) {
 			Cursor opCursor = mDbHelper.fetchOneOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentOp = new Operation(opCursor);
@@ -74,7 +74,7 @@ public class OperationEditor extends CommonOpEditor {
 	@Override
 	protected void saveOpAndExit() throws ParseException {
 		Operation op = mCurrentOp;
-		if (mRowId == null) {
+		if (mRowId == 0) {
 			long id = mDbHelper.createOp(op);
 			if (id > 0) {
 				mRowId = id;

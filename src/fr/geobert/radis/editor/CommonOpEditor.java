@@ -43,14 +43,14 @@ public abstract class CommonOpEditor extends Activity {
 	protected AutoCompleteTextView mOpTagText;
 	protected DatePicker mDatePicker;
 	protected EditText mNotesText;
-	protected Long mRowId;
+	protected long mRowId;
 
 	protected HashMap<String, InfoManager> mInfoManagersMap;
 	protected CorrectCommaWatcher mSumTextWatcher;
 	protected boolean mOnRestore = false;
 	public String mCurrentInfoTable;
 	protected double mPreviousSum = 0.0;
-	
+
 	// abstract methods
 	protected abstract void setView();
 
@@ -58,14 +58,13 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected abstract void populateFields();
 
-	
 	protected abstract void fetchOrCreateCurrentOp();
 
 	// default and common behaviors
 	protected void saveOpAndExit() throws ParseException {
 		finish();
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -80,13 +79,10 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected void init(Bundle savedInstanceState) {
 		Bundle extras = getIntent().getExtras();
-		mRowId = (savedInstanceState == null) ? null
-				: (Long) savedInstanceState.getSerializable(Tools.EXTRAS_OP_ID);
-		if (mRowId == null) {
-			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : null;
-			if (mRowId == -1) {
-				mRowId = null;
-			}
+		mRowId = (savedInstanceState == null) ? 0 : ((Long) savedInstanceState
+				.getSerializable(Tools.EXTRAS_OP_ID)).longValue();
+		if (mRowId == 0) {
+			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
 		}
 
 		mOpThirdPartyText = (AutoCompleteTextView) findViewById(R.id.edit_op_third_party);
@@ -327,8 +323,8 @@ public abstract class CommonOpEditor extends Activity {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (mRowId != null) {
-			outState.putLong("rowId", mRowId.longValue());
+		if (mRowId != 0) {
+			outState.putLong("rowId", mRowId);
 		}
 
 		try {

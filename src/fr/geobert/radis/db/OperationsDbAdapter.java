@@ -233,15 +233,19 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 				null, OP_ORDERING, Integer.toString(nbOps));
 	}
 
-	public Cursor fetchOneOp(long rowId) {
+	public Cursor fetchOneOp(final long rowId, final long accountId) {
 		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
+				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
 						+ KEY_OP_ROWID + " = " + rowId, null, null, null, null,
 				null);
 		if (c != null) {
 			c.moveToFirst();
 		}
 		return c;
+	}
+	
+	public Cursor fetchOneOp(final long rowId) {
+		return fetchOneOp(rowId, mAccountId);
 	}
 
 	public Cursor fetchOpEarlierThan(long date, int nbOps) {
@@ -281,10 +285,17 @@ public class OperationsDbAdapter extends CommonDbAdapter {
 		return args;
 	}
 
-	public boolean updateOp(long rowId, final Operation op) {
+	public boolean updateOp(final long rowId, final Operation op) {
 		ContentValues args = createContentValuesFromOp(op, false);
 		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0;
+	}
+
+	public boolean updateOp(final long opId, final long schOpId) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_OP_SCHEDULED_ID, schOpId);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
+				+ opId, null) > 0;
 	}
 
 	// ----------------------

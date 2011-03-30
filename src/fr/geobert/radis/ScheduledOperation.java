@@ -27,8 +27,17 @@ public class ScheduledOperation extends Operation {
 	public ScheduledOperation(Operation op, final long accountId) {
 		super(op);
 		mAccountId = accountId;
+		mEndDate = new GregorianCalendar();
+		mEndDate.clear();
 	}
-	
+
+	public ScheduledOperation(Cursor op, final long accountId) {
+		super(op);
+		mAccountId = accountId;
+		mEndDate = new GregorianCalendar();
+		mEndDate.clear();
+	}
+
 	public ScheduledOperation(Cursor op) {
 		super(op);
 		mAccountId = op.getLong(op
@@ -135,5 +144,31 @@ public class ScheduledOperation extends Operation {
 				&& mEndDate.equals(schOp.mEndDate)
 				&& mPeriodicity == schOp.mPeriodicity
 				&& mPeriodicityUnit == schOp.mPeriodicityUnit;
+	}
+
+	static public void addPeriodicityToDate(ScheduledOperation op) {
+		switch (op.mPeriodicityUnit) {
+		case ScheduledOperation.WEEKLY_PERIOD:
+			op.addDay(7);
+			break;
+		case ScheduledOperation.MONTHLY_PERIOD:
+			op.addMonth(1);
+			break;
+		case ScheduledOperation.YEARLY_PERIOD:
+			op.addYear(1);
+			break;
+		case ScheduledOperation.CUSTOM_DAILY_PERIOD:
+			op.addDay(op.mPeriodicity);
+			break;
+		case ScheduledOperation.CUSTOM_WEEKLY_PERIOD:
+			op.addDay(7 * op.mPeriodicity);
+			break;
+		case ScheduledOperation.CUSTOM_MONTHLY_PERIOD:
+			op.addMonth(op.mPeriodicity);
+			break;
+		case ScheduledOperation.CUSTOM_YEARLY_PERIOD:
+			op.addYear(op.mPeriodicity);
+			break;
+		}
 	}
 }

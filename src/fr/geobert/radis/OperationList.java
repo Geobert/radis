@@ -42,6 +42,7 @@ import android.widget.Toast;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.db.OperationsDbAdapter;
 import fr.geobert.radis.editor.OperationEditor;
+import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
@@ -51,9 +52,12 @@ import fr.geobert.radis.tools.Tools;
 public class OperationList extends ListActivity implements RadisListActivity {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
+	private static final int CONVERT_OP_ID = Menu.FIRST + 3;
 
 	private static final int ACTIVITY_OP_CREATE = 0;
 	private static final int ACTIVITY_OP_EDIT = 1;
+	private static final int CREATE_SCH_OP = 2;
+
 	private static final int DIALOG_DELETE = 0;
 
 	private OperationsDbAdapter mDbHelper;
@@ -74,7 +78,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private CorrectCommaWatcher mCorrectCommaWatcher;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
-	
+
 	private class InnerViewBinder extends OpViewBinder {
 
 		public InnerViewBinder() {
@@ -238,7 +242,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
-		
+
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
@@ -369,6 +373,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		if (((AdapterContextMenuInfo) menuInfo).id != -1) {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
+			menu.add(0, CONVERT_OP_ID, 0, R.string.convert_into_scheduling);
 			menu.add(0, DELETE_OP_ID, 0, R.string.delete);
 		}
 	}
@@ -407,6 +412,9 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		case EDIT_OP_ID:
 			startOperationEdit(info.id);
 			return true;
+		case CONVERT_OP_ID:
+			startScheduledOpEditor(info.id);
+			return true;
 		}
 		return super.onContextItemSelected(item);
 	}
@@ -414,14 +422,27 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (resultCode == RESULT_OK) {
-			try {
-				fillData();
-				updateSums(data);
-			} catch (Exception e) {
-				ErrorReporter.getInstance().handleException(e);
-				Tools.popError(OperationList.this, e.getMessage(),
-						Tools.createRestartClickListener());
+		if (requestCode == ACTIVITY_OP_CREATE
+				|| requestCode == ACTIVITY_OP_EDIT) {
+			if (resultCode == RESULT_OK) {
+				try {
+					fillData();
+					updateSums(data);
+				} catch (Exception e) {
+					ErrorReporter.getInstance().handleException(e);
+					Tools.popError(OperationList.this, e.getMessage(),
+							Tools.createRestartClickListener());
+				}
+			}
+		} else if (requestCode == CREATE_SCH_OP) {
+			if (resultCode == RESULT_OK) {
+				final long schOpId = data.getLongExtra("schOperationId", 0);
+				final long opId = data.getLongExtra("opIdSource", 0);
+				if (opId > 0 && schOpId > 0) {
+					mDbHelper.updateOp(opId, schOpId);
+				} else {
+					// TODO error
+				}
 			}
 		}
 	}
@@ -618,6 +639,13 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		mOnRestore = false;
 	}
 
+	private void startScheduledOpEditor(long id) {
+		Intent i = new Intent(this, ScheduledOperationEditor.class);
+		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, mAccountId);
+		i.putExtra("operationId", id);
+		startActivityForResult(i, CREATE_SCH_OP);
+	}
+
 	private void startOperationEdit(long id) {
 		Intent i = new Intent(this, OperationEditor.class);
 		i.putExtra(Tools.EXTRAS_OP_ID, id);
@@ -718,9 +746,10 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	@Override
 	public void updateDisplay(Intent intent) {
-		Object[] accountIds = (Object[])intent.getSerializableExtra("accountIds");
+		Object[] accountIds = (Object[]) intent
+				.getSerializableExtra("accountIds");
 		for (int i = 0; i < accountIds.length; ++i) {
-			if (((Long)accountIds[i]).equals(mAccountId)) {
+			if (((Long) accountIds[i]).equals(mAccountId)) {
 				fillData();
 				break;
 			}

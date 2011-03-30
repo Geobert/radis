@@ -32,6 +32,7 @@ import fr.geobert.radis.ViewSwipeDetector;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.db.OperationsDbAdapter;
 import fr.geobert.radis.service.RadisService;
+import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOperationEditor extends CommonOpEditor {
 	private ViewFlipper mViewFlipper;
@@ -47,6 +48,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private View mCustomPeriodicityCont;
 	private CheckBox mEndDateCheck;
 	private ScheduledOperation mOriginalSchOp;
+	private long mOpIdSource;
 
 	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
 
@@ -66,11 +68,26 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	protected void init(Bundle savedInstanceState) {
 		super.init(savedInstanceState);
+		initWidgetReferences();
+		initWidgetBehavior();
+		initGesture();
+		
+		Bundle extras = getIntent().getExtras();
+		mOpIdSource = extras.getLong("operationId");
+	}
+
+	private void initWidgetReferences() {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper);
 		mAccountSpinner = (Spinner) findViewById(R.id.account_choice);
 		mPeriodicitySpinner = (Spinner) findViewById(R.id.periodicity_choice);
 		mCustomPeriodicityCont = findViewById(R.id.custom_periodicity);
 		mCustomPeriodicityVal = (EditText) findViewById(R.id.custom_periodicity_value);
+		mCustomPeriodicityUnit = (Spinner) findViewById(R.id.custom_periodicity_choice);
+		mEndDatePicker = (DatePicker) findViewById(R.id.edit_end_date);
+		mEndDateCheck = (CheckBox) findViewById(R.id.end_date_check);
+	}
+
+	private void initWidgetBehavior() {
 		mCustomPeriodicityVal
 				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 					@Override
@@ -80,10 +97,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 						}
 					}
 				});
-		mCustomPeriodicityUnit = (Spinner) findViewById(R.id.custom_periodicity_choice);
-		mEndDatePicker = (DatePicker) findViewById(R.id.edit_end_date);
+
 		mEndDatePicker.setEnabled(false);
-		mEndDateCheck = (CheckBox) findViewById(R.id.end_date_check);
+
 		mEndDateCheck.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 			@Override
 			public void onCheckedChanged(CompoundButton buttonView,
@@ -114,8 +130,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				}
 			}
 		});
+	}
 
-		// Gestures init
+	private void initGesture() {
 		mGesturelib = GestureLibraries.fromRawResource(this, R.raw.gestures);
 		if (!mGesturelib.load()) {
 			Log.w("GestureActivity", "could not load gesture library");
@@ -145,13 +162,22 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void fetchOrCreateCurrentOp() {
-		if (mRowId != null) {
+		if (mRowId != 0) {
 			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentSchOp = new ScheduledOperation(opCursor);
 			mOriginalSchOp = new ScheduledOperation(opCursor);
 		} else {
-			mCurrentSchOp = new ScheduledOperation();
+			if (mOpIdSource > 0) {
+				Bundle extras = getIntent().getExtras();
+				final long accountId = extras.getLong(Tools.EXTRAS_ACCOUNT_ID);
+				Cursor op = mDbHelper.fetchOneOp(mOpIdSource, accountId);
+				mCurrentSchOp = new ScheduledOperation(op, accountId);
+				mOriginalSchOp = new ScheduledOperation(op, accountId);
+				op.close();
+			} else {
+				mCurrentSchOp = new ScheduledOperation();
+			}
 		}
 	}
 
@@ -252,6 +278,10 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		RadisService.acquireStaticLock(this);
 		this.startService(new Intent(this, RadisService.class));
 		Intent res = new Intent();
+		if (mOpIdSource > 0) {
+			res.putExtra("schOperationId", mRowId);
+			res.putExtra("opIdSource", mOpIdSource);
+		}	
 		setResult(RESULT_OK, res);
 		finish();
 	}
@@ -259,7 +289,11 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	protected void saveOpAndExit() throws ParseException {
 		ScheduledOperation op = mCurrentSchOp;
-		if (mRowId == null) {
+		if (mRowId == 0) {
+			if ((mOpIdSource > 0) && (op.getDate() == mOriginalSchOp.getDate())) {
+				// do not insert another occurence with same date
+				ScheduledOperation.addPeriodicityToDate(op);
+			}
 			long id = mDbHelper.createScheduledOp(op);
 			if (id > 0) {
 				mRowId = id;
