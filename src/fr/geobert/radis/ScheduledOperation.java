@@ -139,6 +139,9 @@ public class ScheduledOperation extends Operation {
 
 	@Override
 	public boolean equals(Operation op) {
+		if (null == op) {
+			return false;
+		}
 		ScheduledOperation schOp = (ScheduledOperation) op;
 		return super.equals(op) && mAccountId == schOp.mAccountId
 				&& mEndDate.equals(schOp.mEndDate)

@@ -81,7 +81,7 @@ public abstract class CommonOpEditor extends Activity {
 		Bundle extras = getIntent().getExtras();
 		mRowId = (savedInstanceState == null) ? 0 : ((Long) savedInstanceState
 				.getSerializable(Tools.EXTRAS_OP_ID)).longValue();
-		if (mRowId == 0) {
+		if (mRowId <= 0) {
 			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
 		}
 
@@ -323,7 +323,7 @@ public abstract class CommonOpEditor extends Activity {
 
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
-		if (mRowId != 0) {
+		if (mRowId > 0) {
 			outState.putLong("rowId", mRowId);
 		}
 
@@ -342,7 +342,7 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		long rowId = savedInstanceState.getLong("rowId");
-		mRowId = rowId != 0 ? Long.valueOf(rowId) : null;
+		mRowId = rowId > 0 ? Long.valueOf(rowId) : 0;
 		Operation op = savedInstanceState.getParcelable("currentOp");
 		mCurrentOp = op;
 		if (null == op) {

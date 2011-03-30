@@ -162,7 +162,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void fetchOrCreateCurrentOp() {
-		if (mRowId != 0) {
+		if (mRowId > 0) {
 			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
 			startManagingCursor(opCursor);
 			mCurrentSchOp = new ScheduledOperation(opCursor);
@@ -289,7 +289,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	protected void saveOpAndExit() throws ParseException {
 		ScheduledOperation op = mCurrentSchOp;
-		if (mRowId == 0) {
+		if (mRowId <= 0) {
 			if ((mOpIdSource > 0) && (op.getDate() == mOriginalSchOp.getDate())) {
 				// do not insert another occurence with same date
 				ScheduledOperation.addPeriodicityToDate(op);

@@ -187,10 +187,16 @@ public class Operation implements Parcelable {
 	};
 
 	public boolean equals(Operation op) {
+		if (null == op) {
+			return false;
+		}
 		return mDate.equals(op.mDate) && equalsButDate(op);
 	}
 
 	public boolean equalsButDate(Operation op) {
+		if (null == op) {
+			return false;
+		}
 		return mThirdParty.equals(op.mThirdParty) && mTag.equals(op.mTag)
 				&& mMode.equals(op.mMode) && mNotes.equals(op.mNotes)
 				&& mSum == op.mSum && mScheduledId == op.mScheduledId;

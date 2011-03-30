@@ -579,7 +579,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			c.requery();
 			c.moveToFirst();
 			double curSum = mDbHelper.updateCurrentSum(mAccountId, c.getLong(c
-					.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE)));
+					.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_DATE)));
 			updateFutureSumDisplay(curSum, c);
 			updateSumAtDateDisplay(null, curSum);
 		}

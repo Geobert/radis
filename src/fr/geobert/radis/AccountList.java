@@ -79,7 +79,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 				startScheduledOpsList();
 			}
 		});
-		fillData();
+		
 		setTitle(getString(R.string.app_name) + " - "
 				+ getString(R.string.accounts_list));
 		registerForContextMenu(getListView());
@@ -180,6 +180,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	private void deleteAccount(long id) {
 		mDbHelper.deleteAccount(id);
 		mAccountsCursor.requery();
+		mScheduledListBtn.setEnabled(getListAdapter().getCount() > 0);
 	}
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -300,11 +301,13 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		fillData();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 	}
 
 	@Override
 	public void updateDisplay(Intent intent) {
 		mAccountsCursor.requery();
+		mScheduledListBtn.setEnabled(getListAdapter().getCount() > 0);
 	}
 }
