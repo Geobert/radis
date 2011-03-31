@@ -49,7 +49,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	public static AccountList ACTIVITY;
 	public static PendingIntent RESTART_INTENT;
 
-	private boolean firstStart = true;
+	private boolean mFirstStart = true;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
 	private Cursor mAccountsCursor;
@@ -57,13 +57,6 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (firstStart) {
-			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
-			i.setAction(Tools.INTENT_RADIS_STARTED);
-			sendBroadcast(i);
-			firstStart = false;
-		}
-		
 		if (!Formater.isInit()) {
 			Formater.init();
 		}
@@ -115,6 +108,13 @@ public class AccountList extends ListActivity implements RadisListActivity {
 			}
 		};
 		getListView().setOnTouchListener(gestureListener);
+		
+		if (mFirstStart) {
+			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
+			i.setAction(Tools.INTENT_RADIS_STARTED);
+			sendBroadcast(i);
+			mFirstStart = false;
+		}
 	}
 
 	@Override
