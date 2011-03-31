@@ -751,6 +751,12 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		for (int i = 0; i < accountIds.length; ++i) {
 			if (((Long) accountIds[i]).equals(mAccountId)) {
 				fillData();
+				try {
+					updateSumsAndSelection();
+				} catch (Exception e) {
+					ErrorReporter.getInstance().handleException(e);
+					e.printStackTrace();
+				}
 				break;
 			}
 		}
