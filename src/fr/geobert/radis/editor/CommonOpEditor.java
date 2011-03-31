@@ -263,7 +263,7 @@ public abstract class CommonOpEditor extends Activity {
 						try {
 							invertSign();
 						} catch (ParseException e) {
-							// TODO Auto-generated catch block
+							ErrorReporter.getInstance().handleSilentException(e);
 							e.printStackTrace();
 						}
 					}
@@ -308,11 +308,11 @@ public abstract class CommonOpEditor extends Activity {
 	}
 
 	protected void fillOperationWithInputs(Operation op) throws ParseException {
-		op.mThirdParty = mOpThirdPartyText.getText().toString();
-		op.mMode = mOpModeText.getText().toString();
-		op.mTag = mOpTagText.getText().toString();
+		op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
+		op.mMode = mOpModeText.getText().toString().trim();
+		op.mTag = mOpTagText.getText().toString().trim();
 		op.setSumStr(mOpSumText.getText().toString());
-		op.mNotes = mNotesText.getText().toString();
+		op.mNotes = mNotesText.getText().toString().trim();
 
 		DatePicker dp = mDatePicker;
 		dp.clearChildFocus(getCurrentFocus());

@@ -218,7 +218,7 @@ public class InfoManager {
 
 	private void saveText() {
 		EditText t = mEditorText;
-		String value = t.getText().toString();
+		String value = t.getText().toString().trim();
 		long rowId = mInfo.getLong("rowId");
 		if (rowId != 0) { // update
 			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value);

@@ -182,8 +182,8 @@ public class AccountEditor extends Activity {
 	}
 
 	private void saveState() {
-		String name = mAccountNameText.getText().toString();
-		String desc = mAccountDescText.getText().toString();
+		String name = mAccountNameText.getText().toString().trim();
+		String desc = mAccountDescText.getText().toString().trim();
 		double startSum = 0;
 		try {
 			startSum = Formater.SUM_FORMAT.parse(
