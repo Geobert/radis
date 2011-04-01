@@ -4,8 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
-
-import fr.geobert.radis.tools.Tools;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -15,6 +16,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
+import fr.geobert.radis.Operation;
+import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.tools.Tools;
 
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
@@ -185,13 +189,106 @@ public class CommonDbAdapter {
 	protected static final String ADD_CUR_DATE_COLUNM = "ALTER TABLE "
 			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
 			+ KEY_ACCOUNT_CUR_SUM_DATE + " integer not null DEFAULT 0";
+
+	private long mAccountId;
+
+	private LinkedHashMap<String, Long> mModesMap;
+	private LinkedHashMap<String, Long> mTagsMap;
+	private LinkedHashMap<String, Long> mThirdPartiesMap;
+
+	private HashMap<String, Cursor> mInfoCursorMap;
+
+	@SuppressWarnings("serial")
+	private static final HashMap<String, String> mInfoColMap = new HashMap<String, String>() {
+		{
+			put(DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME);
+			put(DATABASE_TAGS_TABLE, KEY_TAG_NAME);
+			put(DATABASE_MODES_TABLE, KEY_MODE_NAME);
+		}
+	};
+
+	private static final String OP_ORDERING = "ops." + KEY_OP_DATE
+			+ " desc, ops." + KEY_OP_ROWID + " desc";
+
+	private final String DATABASE_OP_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
+			+ " ops LEFT OUTER JOIN " + DATABASE_THIRD_PARTIES_TABLE
+			+ " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp."
+			+ KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN "
+			+ DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode."
+			+ KEY_MODE_ROWID + " LEFT OUTER JOIN " + DATABASE_TAGS_TABLE
+			+ " tag ON ops." + KEY_OP_TAG + " = tag." + KEY_TAG_ROWID;
+
+	public static final String[] OP_COLS_QUERY = { "ops." + KEY_OP_ROWID,
+			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
+			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
+			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES,
+			"ops." + KEY_OP_SCHEDULED_ID };
+
+	private static final String RESTRICT_TO_ACCOUNT = "ops."
+			+ KEY_OP_ACCOUNT_ID + " = %d";
+
+	private static final String SCHEDULED_OP_ORDERING = "sch." + KEY_OP_DATE
+			+ " desc, sch." + KEY_SCHEDULED_ROWID + " desc";
+
+	private final String DATABASE_SCHEDULED_TABLE_JOINTURE = DATABASE_SCHEDULED_TABLE
+			+ " sch LEFT OUTER JOIN "
+			+ DATABASE_THIRD_PARTIES_TABLE
+			+ " tp ON sch."
+			+ KEY_OP_THIRD_PARTY
+			+ " = tp."
+			+ KEY_THIRD_PARTY_ROWID
+			+ " LEFT OUTER JOIN "
+			+ DATABASE_MODES_TABLE
+			+ " mode ON sch."
+			+ KEY_OP_MODE
+			+ " = mode."
+			+ KEY_MODE_ROWID
+			+ " LEFT OUTER JOIN "
+			+ DATABASE_TAGS_TABLE
+			+ " tag ON sch."
+			+ KEY_OP_TAG
+			+ " = tag."
+			+ KEY_TAG_ROWID
+			+ " LEFT OUTER JOIN "
+			+ DATABASE_ACCOUNT_TABLE
+			+ " acc ON sch."
+			+ KEY_SCHEDULED_ACCOUNT_ID + " = acc." + KEY_ACCOUNT_ROWID;
+
+	public static final String[] SCHEDULED_OP_COLS_QUERY = {
+			"sch." + KEY_SCHEDULED_ROWID, "tp." + KEY_THIRD_PARTY_NAME,
+			"tag." + KEY_TAG_NAME, "mode." + KEY_MODE_NAME,
+			"sch." + KEY_OP_SUM, "sch." + KEY_OP_DATE,
+			"sch." + KEY_SCHEDULED_ACCOUNT_ID, "acc." + KEY_ACCOUNT_NAME,
+			"sch." + KEY_OP_NOTES, "sch." + KEY_SCHEDULED_END_DATE,
+			"sch." + KEY_SCHEDULED_PERIODICITY,
+			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT };
+
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
-	protected final Context mCtx;
+	protected Context mCtx;
 	protected Cursor mCurAccount;
 
-	public CommonDbAdapter(Context ctx) {
+	private static CommonDbAdapter mInstance = null;
+
+	public CommonDbAdapter() {
+	}
+
+	private void init(Context ctx, long accountRowId) {
 		this.mCtx = ctx;
+		mAccountId = accountRowId;
+		mInfoCursorMap = new HashMap<String, Cursor>();
+	}
+
+	public static CommonDbAdapter getInstance(Context ctx) {
+		return CommonDbAdapter.getInstance(ctx, 0);
+	}
+
+	public static CommonDbAdapter getInstance(Context ctx, final long accountId) {
+		if (null == mInstance) {
+			mInstance = new CommonDbAdapter();
+		}
+		mInstance.init(ctx, accountId);
+		return mInstance;
 	}
 
 	protected static class DatabaseHelper extends SQLiteOpenHelper {
@@ -311,13 +408,41 @@ public class CommonDbAdapter {
 	 *             if the database could be neither opened or created
 	 */
 	public CommonDbAdapter open() throws SQLException {
-		mDbHelper = new DatabaseHelper(mCtx);
-		mDb = mDbHelper.getWritableDatabase();
+		if (null == mDbHelper) {
+			mDbHelper = new DatabaseHelper(mCtx);
+			mDb = mDbHelper.getWritableDatabase();
+			fillCaches();
+		}
 		return this;
 	}
 
 	public void close() {
 		mDbHelper.close();
+	}
+
+	private void fillCache(String table, String[] cols, Map<String, Long> map) {
+		Cursor c = mDb.query(table, cols, null, null, null, null, null);
+		if (c.moveToFirst()) {
+			do {
+				String key = c.getString(1);
+				Long value = c.getLong(0);
+				map.put(key, value);
+			} while (c.moveToNext());
+		}
+		c.close();
+	}
+
+	private void fillCaches() {
+		mModesMap = new LinkedHashMap<String, Long>();
+		mTagsMap = new LinkedHashMap<String, Long>();
+		mThirdPartiesMap = new LinkedHashMap<String, Long>();
+
+		fillCache(DATABASE_MODES_TABLE, new String[] { KEY_MODE_ROWID,
+				KEY_MODE_NAME }, mModesMap);
+		fillCache(DATABASE_TAGS_TABLE, new String[] { KEY_TAG_ROWID,
+				KEY_TAG_NAME }, mTagsMap);
+		fillCache(DATABASE_THIRD_PARTIES_TABLE, new String[] {
+				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, mThirdPartiesMap);
 	}
 
 	public long createAccount(String name, String desc, double start_sum,
@@ -397,6 +522,317 @@ public class CommonDbAdapter {
 		mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
 				+ rowId, null);
 		return curSum;
+	}
+
+	public long getKeyIdOrCreate(String key, String table) throws SQLException {
+		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+			return getKeyIdOrCreate(key, mThirdPartiesMap, table,
+					KEY_THIRD_PARTY_NAME);
+		} else if (table.equals(DATABASE_TAGS_TABLE)) {
+			return getKeyIdOrCreate(key, mTagsMap, table, KEY_TAG_NAME);
+		} else if (table.equals(DATABASE_MODES_TABLE)) {
+			return getKeyIdOrCreate(key, mModesMap, table, KEY_MODE_NAME);
+		}
+		return 0;
+	}
+
+	public long getKeyIdIfExists(String key, String table) {
+		Long res = null;
+		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+			res = mThirdPartiesMap.get(key);
+		} else if (table.equals(DATABASE_TAGS_TABLE)) {
+			res = mTagsMap.get(key);
+		} else if (table.equals(DATABASE_MODES_TABLE)) {
+			res = mModesMap.get(key);
+		}
+		if (null != res) {
+			return res.longValue();
+		}
+		return -1;
+	}
+
+	private long getKeyIdOrCreate(String key, LinkedHashMap<String, Long> map,
+			String table, String col) throws SQLException {
+		key = key.trim();
+		if (key.length() == 0) {
+			return -1;
+		}
+		Long i = map.get(key);
+		if (null != i) {
+			return i.longValue();
+		} else {
+			ContentValues initialValues = new ContentValues();
+			initialValues.put(col, key);
+			long id = mDb.insert(table, null, initialValues);
+			if (id != -1) {
+				map.put(key, id);
+			} else {
+				throw new SQLException("Database insertion error : " + key
+						+ " in " + table);
+			}
+			return id;
+		}
+	}
+
+	private void putKeyId(String key, String keyTableName, String keyTableCol,
+			String opTableCol, LinkedHashMap<String, Long> keyMap,
+			ContentValues initialValues) {
+		long id = getKeyIdOrCreate(key, keyMap, keyTableName, keyTableCol);
+		if (id != -1) {
+			initialValues.put(opTableCol, id);
+		} else {
+			initialValues.putNull(opTableCol);
+		}
+	}
+
+	public long createOp(Operation op) {
+		return createOp(op, mAccountId);
+	}
+
+	public long createOp(Operation op, final long accountId) {
+		ContentValues initialValues = new ContentValues();
+		String key = op.mThirdParty;
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
+
+		key = op.mTag;
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				initialValues);
+
+		key = op.mMode;
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
+				mModesMap, initialValues);
+
+		initialValues.put(KEY_OP_SUM, op.mSum);
+		initialValues.put(KEY_OP_DATE, op.getDate());
+		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
+		initialValues.put(KEY_OP_NOTES, op.mNotes);
+		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
+		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
+	}
+
+	public boolean deleteOp(long rowId) {
+		return mDb.delete(DATABASE_OPERATIONS_TABLE,
+				KEY_OP_ROWID + "=" + rowId, null) > 0;
+	}
+
+	public Cursor fetchNLastOps(int nbOps) {
+		return fetchNLastOps(nbOps, mAccountId);
+	}
+
+	public Cursor fetchNLastOps(int nbOps, final long accountId) {
+		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
+				null, OP_ORDERING, Integer.toString(nbOps));
+	}
+
+	public Cursor fetchOneOp(final long rowId, final long accountId) {
+		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
+						+ KEY_OP_ROWID + " = " + rowId, null, null, null, null,
+				null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public Cursor fetchOneOp(final long rowId) {
+		return fetchOneOp(rowId, mAccountId);
+	}
+
+	public Cursor fetchOpEarlierThan(long date, int nbOps) {
+		Cursor c = null;
+		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
+						+ KEY_OP_DATE + " < " + date, null, null, null,
+				OP_ORDERING, Integer.toString(nbOps));
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	private ContentValues createContentValuesFromOp(final Operation op,
+			final boolean updateOccurrences) {
+		ContentValues args = new ContentValues();
+
+		String key = op.mThirdParty;
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, args);
+
+		key = op.mTag;
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				args);
+
+		key = op.mMode;
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
+				mModesMap, args);
+
+		args.put(KEY_OP_SUM, op.mSum);
+		args.put(KEY_OP_NOTES, op.mNotes);
+		if (!updateOccurrences) {
+			args.put(KEY_OP_DATE, op.getDate());
+			args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
+		}
+		return args;
+	}
+
+	public boolean updateOp(final long rowId, final Operation op) {
+		ContentValues args = createContentValuesFromOp(op, false);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
+				+ rowId, null) > 0;
+	}
+
+	public boolean updateOp(final long opId, final long schOpId) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_OP_SCHEDULED_ID, schOpId);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
+				+ opId, null) > 0;
+	}
+
+	// ----------------------
+	// SCHEDULED TRANSACTIONS
+	// ----------------------
+	public Cursor fetchAllScheduledOps() {
+		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
+				SCHEDULED_OP_COLS_QUERY, null, null, null, null,
+				SCHEDULED_OP_ORDERING);
+		if (null != c) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public Cursor fetchOneScheduledOp(long rowId) {
+		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
+				SCHEDULED_OP_COLS_QUERY, "sch." + KEY_OP_ROWID + " = " + rowId,
+				null, null, null, null, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public long createScheduledOp(ScheduledOperation op) {
+		ContentValues initialValues = new ContentValues();
+		String key = op.mThirdParty;
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, initialValues);
+
+		key = op.mTag;
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				initialValues);
+
+		key = op.mMode;
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
+				mModesMap, initialValues);
+
+		initialValues.put(KEY_OP_SUM, op.mSum);
+		initialValues.put(KEY_OP_DATE, op.getDate());
+		initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
+		initialValues.put(KEY_OP_NOTES, op.mNotes);
+		initialValues.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
+		initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
+		initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+		return mDb.insert(DATABASE_SCHEDULED_TABLE, null, initialValues);
+	}
+
+	public boolean updateScheduledOp(long rowId, ScheduledOperation op,
+			final boolean isUpdatedFromOccurence) {
+		ContentValues args = new ContentValues();
+
+		String key = op.mThirdParty;
+		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
+				KEY_OP_THIRD_PARTY, mThirdPartiesMap, args);
+
+		key = op.mTag;
+		putKeyId(key, DATABASE_TAGS_TABLE, KEY_TAG_NAME, KEY_OP_TAG, mTagsMap,
+				args);
+
+		key = op.mMode;
+		putKeyId(key, DATABASE_MODES_TABLE, KEY_MODE_NAME, KEY_OP_MODE,
+				mModesMap, args);
+
+		args.put(KEY_OP_SUM, op.mSum);
+		args.put(KEY_OP_NOTES, op.mNotes);
+		if (!isUpdatedFromOccurence) {
+			args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
+			args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
+			args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+			args.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
+			args.put(KEY_OP_DATE, op.getDate());
+		}
+		return mDb.update(DATABASE_SCHEDULED_TABLE, args, KEY_OP_ROWID + "="
+				+ rowId, null) > 0;
+	}
+
+	public boolean deleteScheduledOp(final long schOpId) {
+		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ROWID + "="
+				+ schOpId, null) > 0;
+	}
+
+	public int deleteAllOccurrences(final long accountId, final long schOpId) {
+		return mDb.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ACCOUNT_ID + "="
+				+ accountId + " AND " + KEY_OP_SCHEDULED_ID + "=" + schOpId,
+				null);
+	}
+
+	public int updateAllOccurrences(final long accountId, final long schOpId,
+			final Operation op) {
+		ContentValues args = createContentValuesFromOp(op, true);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ACCOUNT_ID
+				+ "=" + accountId + " AND " + KEY_OP_SCHEDULED_ID + "="
+				+ schOpId, null);
+	}
+
+	public int disconnectAllOccurrences(final long accountId, final long schOpId) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_OP_SCHEDULED_ID, 0);
+		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ACCOUNT_ID
+				+ "=" + accountId + " AND " + KEY_OP_SCHEDULED_ID + "="
+				+ schOpId, null);
+	}
+
+	// ------------------------------
+	// INFOS (third party, tag, mode)
+	// ------------------------------
+	public boolean updateInfo(String table, long rowId, String value) {
+		ContentValues args = new ContentValues();
+		args.put(mInfoColMap.get(table), value);
+		return mDb.update(table, args, "_id =" + rowId, null) > 0;
+	}
+
+	public long createInfo(String table, String value) {
+		ContentValues args = new ContentValues();
+		args.put(mInfoColMap.get(table), value);
+		return mDb.insert(table, null, args);
+	}
+
+	public boolean deleteInfo(String table, long rowId) {
+		boolean res = mDb.delete(table, "_id =" + rowId, null) > 0;
+		mInfoCursorMap.get(table).requery();
+		return res;
+	}
+
+	public Cursor fetchMatchingInfo(String table, String colName,
+			String constraint) {
+		String where;
+		String[] params;
+		if (null != constraint) {
+			where = colName + " LIKE ?";
+			params = new String[] { constraint.trim() + "%" };
+		} else {
+			where = null;
+			params = null;
+		}
+		Cursor c = mDb.query(table, new String[] { "_id", colName }, where,
+				params, null, null, colName + " asc");
+		if (null != c) {
+			c.moveToFirst();
+		}
+		mInfoCursorMap.put(table, c);
+		return c;
 	}
 
 	private Cursor getCurAccountIfDiff(long rowId) {

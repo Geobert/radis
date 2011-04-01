@@ -4,12 +4,6 @@ import java.util.Date;
 
 import org.acra.ErrorReporter;
 
-import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.editor.ScheduledOperationEditor;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -30,9 +24,13 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.editor.ScheduledOperationEditor;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOpList extends ListActivity {
-	private OperationsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 
 	private AdapterContextMenuInfo mOpToDelete;
 
@@ -50,15 +48,15 @@ public class ScheduledOpList extends ListActivity {
 	private class InnerViewBinder extends OpViewBinder {
 
 		public InnerViewBinder() {
-			super(ScheduledOpList.this, OperationsDbAdapter.KEY_OP_SUM,
-					OperationsDbAdapter.KEY_OP_DATE, R.id.scheduled_icon);
+			super(ScheduledOpList.this, CommonDbAdapter.KEY_OP_SUM,
+					CommonDbAdapter.KEY_OP_DATE, R.id.scheduled_icon);
 		}
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
 			if (colName
-					.equals(OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
+					.equals(CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
 				StringBuilder b = new StringBuilder();
 				int periodicityUnit = cursor.getInt(columnIndex);
 				int periodicity = cursor.getInt(columnIndex - 1);
@@ -89,7 +87,7 @@ public class ScheduledOpList extends ListActivity {
 		setTitle(R.string.scheduled_ops);
 		setContentView(R.layout.scheduled_list);
 		registerForContextMenu(getListView());
-		mDbHelper = new OperationsDbAdapter(this);
+		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
 		fillData();
 
@@ -121,13 +119,13 @@ public class ScheduledOpList extends ListActivity {
 	private void fillData() {
 		Cursor c = mDbHelper.fetchAllScheduledOps();
 		startManagingCursor(c);
-		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
-				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-				OperationsDbAdapter.KEY_OP_SUM,
-				OperationsDbAdapter.KEY_ACCOUNT_NAME,
-				OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT,
-				OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY,
-				OperationsDbAdapter.KEY_SCHEDULED_END_DATE, };
+		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+				CommonDbAdapter.KEY_OP_SUM,
+				CommonDbAdapter.KEY_ACCOUNT_NAME,
+				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT,
+				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY,
+				CommonDbAdapter.KEY_SCHEDULED_END_DATE, };
 
 		int[] to = new int[] { R.id.scheduled_date, R.id.scheduled_third_party,
 				R.id.scheduled_sum, R.id.scheduled_account,
@@ -224,12 +222,12 @@ public class ScheduledOpList extends ListActivity {
 			startManagingCursor(schOp);
 			final long accountId = schOp
 					.getLong(schOp
-							.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
+							.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
 			int nbDeleted = mDbHelper.deleteAllOccurrences(accountId, op.id);
 			// update account op sum, current sum and current date
 			final double total = nbDeleted
 					* schOp.getDouble(schOp
-							.getColumnIndex(OperationsDbAdapter.KEY_OP_SUM));
+							.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 			Cursor accountCursor = mDbHelper.fetchAccount(accountId);
 			startManagingCursor(accountCursor);
 			final double curSum = accountCursor.getDouble(accountCursor
@@ -241,7 +239,7 @@ public class ScheduledOpList extends ListActivity {
 			}
 			startManagingCursor(lastOp);
 			mDbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
-					.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE)));
+					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 		}
 		mDbHelper.deleteScheduledOp(op.id);
 		fillData();

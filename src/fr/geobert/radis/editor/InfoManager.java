@@ -16,7 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import fr.geobert.radis.R;
-import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.Tools;
 
 public class InfoManager {
@@ -28,7 +28,7 @@ public class InfoManager {
 	private Button mEditBut;
 	private int mSelectedInfo = -1;
 	private Cursor mCursor;
-	private OperationsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 	private Bundle mInfo;
 	private EditText mEditorText;
 	private Button mOkBut;
@@ -39,14 +39,14 @@ public class InfoManager {
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
 		{
-			put(OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+			put(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 					R.id.edit_op_third_party);
-			put(OperationsDbAdapter.DATABASE_TAGS_TABLE, R.id.edit_op_tag);
-			put(OperationsDbAdapter.DATABASE_MODES_TABLE, R.id.edit_op_mode);
+			put(CommonDbAdapter.DATABASE_TAGS_TABLE, R.id.edit_op_tag);
+			put(CommonDbAdapter.DATABASE_MODES_TABLE, R.id.edit_op_mode);
 		}
 	};
 
-	InfoManager(CommonOpEditor context, OperationsDbAdapter dbHelper,
+	InfoManager(CommonOpEditor context, CommonDbAdapter dbHelper,
 			String title, String table, String colName, int editId, int deleteId) {
 		mDbHelper = dbHelper;
 		mContext = context;

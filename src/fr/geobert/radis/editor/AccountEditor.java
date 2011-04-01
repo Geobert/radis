@@ -37,7 +37,7 @@ public class AccountEditor extends Activity {
 		if (!Formater.isInit()) {
 			Formater.init();
 		}
-		mDbHelper = new CommonDbAdapter(this);
+		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
 		setContentView(R.layout.account_creation);
 		setTitle(R.string.account_edit);

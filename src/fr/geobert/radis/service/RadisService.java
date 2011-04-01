@@ -16,13 +16,12 @@ import android.util.Log;
 import fr.geobert.radis.ConfigManager;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
 import fr.geobert.radis.tools.Tools;
 
 public class RadisService extends IntentService {
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
 	private static PowerManager.WakeLock lockStatic = null;
-	private OperationsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 	private SharedPreferences mPrefs;
 
 	public RadisService() {
@@ -34,7 +33,7 @@ public class RadisService extends IntentService {
 		try {
 			mPrefs = getSharedPreferences(ConfigManager.SHARED_PREF_NAME,
 					Activity.MODE_PRIVATE);
-			mDbHelper = new OperationsDbAdapter(getApplicationContext());
+			mDbHelper = CommonDbAdapter.getInstance(getApplicationContext());
 			mDbHelper.open();
 			processScheduledOps();
 			mDbHelper.close();

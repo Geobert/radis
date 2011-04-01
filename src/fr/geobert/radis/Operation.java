@@ -4,13 +4,12 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.Tools;
-
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 
 public class Operation implements Parcelable {
 	protected GregorianCalendar mDate;
@@ -35,27 +34,27 @@ public class Operation implements Parcelable {
 	public Operation(Cursor op) {
 		mThirdParty = op
 				.getString(op
-						.getColumnIndexOrThrow(OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
+						.getColumnIndexOrThrow(CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mMode = op.getString(op
-				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_MODE_NAME));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_MODE_NAME));
 		if (null == mMode) {
 			mMode = "";
 		}
 		mTag = op.getString(op
-				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_TAG_NAME));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_TAG_NAME));
 		if (null == mTag) {
 			mTag = "";
 		}
 		mSum = op.getDouble(op
-				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_SUM));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_SUM));
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getLong(op
-				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_DATE)));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_DATE)));
 		Tools.clearTimeOfCalendar(mDate);
 		mNotes = op.getString(op
-				.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_NOTES));
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_NOTES));
 		final int idx = op
-				.getColumnIndex(OperationsDbAdapter.KEY_OP_SCHEDULED_ID);
+				.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID);
 		if (idx >= 0) {
 			mScheduledId = op.getLong(idx);
 		} else {

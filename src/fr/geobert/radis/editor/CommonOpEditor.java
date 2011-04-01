@@ -19,7 +19,6 @@ import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
@@ -36,7 +35,7 @@ public abstract class CommonOpEditor extends Activity {
 	protected static final int DELETE_MODE_DIALOG_ID = 9;
 
 	protected Operation mCurrentOp;
-	protected OperationsDbAdapter mDbHelper;
+	protected CommonDbAdapter mDbHelper;
 	protected AutoCompleteTextView mOpThirdPartyText;
 	protected EditText mOpSumText;
 	protected AutoCompleteTextView mOpModeText;
@@ -87,19 +86,19 @@ public abstract class CommonOpEditor extends Activity {
 
 		mOpThirdPartyText = (AutoCompleteTextView) findViewById(R.id.edit_op_third_party);
 		mOpThirdPartyText.setAdapter(new InfoAdapter(this, mDbHelper,
-				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-				OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
+				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mOpModeText = (AutoCompleteTextView) findViewById(R.id.edit_op_mode);
 		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
-				OperationsDbAdapter.DATABASE_MODES_TABLE,
-				OperationsDbAdapter.KEY_MODE_NAME));
+				CommonDbAdapter.DATABASE_MODES_TABLE,
+				CommonDbAdapter.KEY_MODE_NAME));
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
 		mSumTextWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
 		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
 		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
-				OperationsDbAdapter.DATABASE_TAGS_TABLE,
-				OperationsDbAdapter.KEY_TAG_NAME));
+				CommonDbAdapter.DATABASE_TAGS_TABLE,
+				CommonDbAdapter.KEY_TAG_NAME));
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 		mInfoManagersMap = new HashMap<String, InfoManager>();
@@ -142,19 +141,19 @@ public abstract class CommonOpEditor extends Activity {
 		switch (id) {
 		case THIRD_PARTIES_DIALOG_ID:
 			return createInfoListDialog(
-					OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-					OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
+					CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+					CommonDbAdapter.KEY_THIRD_PARTY_NAME,
 					getString(R.string.third_parties),
 					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
 		case TAGS_DIALOG_ID:
 			return createInfoListDialog(
-					OperationsDbAdapter.DATABASE_TAGS_TABLE,
-					OperationsDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
+					CommonDbAdapter.DATABASE_TAGS_TABLE,
+					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
 					EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID);
 		case MODES_DIALOG_ID:
 			return createInfoListDialog(
-					OperationsDbAdapter.DATABASE_MODES_TABLE,
-					OperationsDbAdapter.KEY_MODE_NAME,
+					CommonDbAdapter.DATABASE_MODES_TABLE,
+					CommonDbAdapter.KEY_MODE_NAME,
 					getString(R.string.modes), EDIT_MODE_DIALOG_ID,
 					DELETE_MODE_DIALOG_ID);
 		case EDIT_THIRD_PARTY_DIALOG_ID:

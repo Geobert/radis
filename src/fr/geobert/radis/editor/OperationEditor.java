@@ -13,7 +13,7 @@ import android.os.Bundle;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
-import fr.geobert.radis.db.OperationsDbAdapter;
+import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.Tools;
 
 public class OperationEditor extends CommonOpEditor {
@@ -36,7 +36,7 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void initDbHelper() {
-		mDbHelper = new OperationsDbAdapter(this, mAccountId);
+		mDbHelper = CommonDbAdapter.getInstance(this, mAccountId);
 		mDbHelper.open();
 	}
 

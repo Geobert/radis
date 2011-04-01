@@ -3,12 +3,11 @@ package fr.geobert.radis;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import fr.geobert.radis.db.OperationsDbAdapter;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Parcel;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOperation extends Operation {
 	public final static int WEEKLY_PERIOD = 0;
@@ -41,16 +40,16 @@ public class ScheduledOperation extends Operation {
 	public ScheduledOperation(Cursor op) {
 		super(op);
 		mAccountId = op.getLong(op
-				.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
+				.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
 		mEndDate = new GregorianCalendar();
 		mEndDate.setTimeInMillis(op.getLong(op
-				.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_END_DATE)));
+				.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_END_DATE)));
 		Tools.clearTimeOfCalendar(mEndDate);
 		mPeriodicity = op.getInt(op
-				.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY));
+				.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_PERIODICITY));
 		mPeriodicityUnit = op
 				.getInt(op
-						.getColumnIndex(OperationsDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT));
+						.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT));
 	}
 
 	public ScheduledOperation() {

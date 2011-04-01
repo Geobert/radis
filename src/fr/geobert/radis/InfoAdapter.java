@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import fr.geobert.radis.db.OperationsDbAdapter;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
@@ -9,16 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
+import fr.geobert.radis.db.CommonDbAdapter;
 
 public class InfoAdapter extends CursorAdapter {
 	private String mColName = null;
 	private String mTableName = null;
 	private String mCurrentConstraint;
 	private Activity mCtx;
-	private OperationsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 	// private String boldFormat = "<u><b>$1</b></u>";
 
-	public InfoAdapter(Activity context, OperationsDbAdapter dBHelper, String tableName, String colName) {
+	public InfoAdapter(Activity context, CommonDbAdapter dBHelper, String tableName, String colName) {
 		super(context, null);
 		mColName = colName;
 		mTableName = tableName;

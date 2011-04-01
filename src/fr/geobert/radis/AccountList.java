@@ -63,7 +63,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
-		mDbHelper = new CommonDbAdapter(this);
+		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
 		mScheduledListBtn = findViewById(R.id.startScheduledListBtn);
 		mScheduledListBtn.setOnClickListener(new View.OnClickListener() {

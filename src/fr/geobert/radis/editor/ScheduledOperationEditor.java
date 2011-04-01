@@ -30,7 +30,6 @@ import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.ViewSwipeDetector;
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.Tools;
 
@@ -60,7 +59,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void initDbHelper() {
-		mDbHelper = new OperationsDbAdapter(this, 0);
+		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
 	}
 
@@ -246,9 +245,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		startManagingCursor(c);
 		if (c.isFirst()) {
 			String[] from = new String[] {
-					OperationsDbAdapter.KEY_ACCOUNT_NAME,
-					OperationsDbAdapter.KEY_ACCOUNT_ROWID,
-					OperationsDbAdapter.KEY_ACCOUNT_CURRENCY };
+					CommonDbAdapter.KEY_ACCOUNT_NAME,
+					CommonDbAdapter.KEY_ACCOUNT_ROWID,
+					CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
 
 			int[] to = new int[] { android.R.id.text1 };
 			SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
@@ -353,7 +352,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	}
 
-	public static void updateAllOccurences(OperationsDbAdapter dbHelper,
+	public static void updateAllOccurences(CommonDbAdapter dbHelper,
 			final ScheduledOperation op, final double prevSum, final long rowId) {
 		final long accountId = op.mAccountId;
 		int nbUpdated = dbHelper.updateAllOccurrences(accountId, rowId, op);
@@ -367,7 +366,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			opCur.moveToFirst();
 		}
 		final long date = opCur.getLong(opCur
-				.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE));
+				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 		final long curDate = accountCursor.getLong(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		if (date > curDate) {

@@ -40,7 +40,6 @@ import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.db.OperationsDbAdapter;
 import fr.geobert.radis.editor.OperationEditor;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
@@ -60,7 +59,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	private static final int DIALOG_DELETE = 0;
 
-	private OperationsDbAdapter mDbHelper;
+	private CommonDbAdapter mDbHelper;
 	private Long mAccountId;
 	private Cursor mCurAccount;
 	private final int NB_LAST_OPS = 20;
@@ -82,14 +81,14 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private class InnerViewBinder extends OpViewBinder {
 
 		public InnerViewBinder() {
-			super(OperationList.this, OperationsDbAdapter.KEY_OP_SUM,
-					OperationsDbAdapter.KEY_OP_DATE, R.id.op_icon);
+			super(OperationList.this, CommonDbAdapter.KEY_OP_SUM,
+					CommonDbAdapter.KEY_OP_DATE, R.id.op_icon);
 		}
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
-			if (colName.equals(OperationsDbAdapter.KEY_TAG_NAME)) {
+			if (colName.equals(CommonDbAdapter.KEY_TAG_NAME)) {
 				TextView textView = ((TextView) view);
 				StringBuilder b = new StringBuilder();
 				String s = cursor.getString(columnIndex);
@@ -111,7 +110,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 						.getParent()).findViewById(R.id.op_sch_icon);
 				if (cursor
 						.getLong(cursor
-								.getColumnIndex(OperationsDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+								.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
 					i.setVisibility(View.VISIBLE);
 				} else {
 					i.setVisibility(View.INVISIBLE);
@@ -184,7 +183,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		MatrixCursor c = mLastOps;
 		c.moveToLast();
 		Long earliestOpDate = c.getLong(c
-				.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE));
+				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 		new GetMoreOps().execute(earliestOpDate);
 	}
 
@@ -208,15 +207,15 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		Bundle extras = getIntent().getExtras();
 		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
 				: null;
-		mDbHelper = new OperationsDbAdapter(this, mAccountId);
+		mDbHelper = CommonDbAdapter.getInstance(this, mAccountId);
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
 
 		mQuickAddThirdParty = (AutoCompleteTextView) findViewById(R.id.quickadd_third_party);
 		mQuickAddThirdParty.setAdapter(new InfoAdapter(this, mDbHelper,
-				OperationsDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-				OperationsDbAdapter.KEY_THIRD_PARTY_NAME));
+				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
 		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(),
@@ -465,25 +464,25 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	private void fillData() {
 		mLastOps = new MatrixCursor(new String[] {
-				OperationsDbAdapter.KEY_OP_ROWID,
-				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-				OperationsDbAdapter.KEY_TAG_NAME,
-				OperationsDbAdapter.KEY_MODE_NAME,
-				OperationsDbAdapter.KEY_OP_SUM,
-				OperationsDbAdapter.KEY_OP_DATE,
-				OperationsDbAdapter.KEY_OP_NOTES,
-				OperationsDbAdapter.KEY_OP_SCHEDULED_ID });
+				CommonDbAdapter.KEY_OP_ROWID,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+				CommonDbAdapter.KEY_TAG_NAME,
+				CommonDbAdapter.KEY_MODE_NAME,
+				CommonDbAdapter.KEY_OP_SUM,
+				CommonDbAdapter.KEY_OP_DATE,
+				CommonDbAdapter.KEY_OP_NOTES,
+				CommonDbAdapter.KEY_OP_SCHEDULED_ID });
 		startManagingCursor(mLastOps);
 		Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
 		startManagingCursor(c);
 		fillLastOps(c);
 
 		MatrixCursor opsCursor = mLastOps;
-		String[] from = new String[] { OperationsDbAdapter.KEY_OP_DATE,
-				OperationsDbAdapter.KEY_THIRD_PARTY_NAME,
-				OperationsDbAdapter.KEY_OP_SUM,
-				OperationsDbAdapter.KEY_TAG_NAME,
-				OperationsDbAdapter.KEY_MODE_NAME };
+		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+				CommonDbAdapter.KEY_OP_SUM,
+				CommonDbAdapter.KEY_TAG_NAME,
+				CommonDbAdapter.KEY_MODE_NAME };
 
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
 				R.id.op_infos };
@@ -506,7 +505,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
 		double sum = c.getDouble(c
-				.getColumnIndex(OperationsDbAdapter.KEY_OP_SUM));
+				.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		updateSums(sum, 0.0);
 		mDbHelper.deleteOp(info.id);
 	}
@@ -542,7 +541,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			boolean hasNext = c.moveToPrevious();
 			while (hasNext) {
 				double s = c.getDouble(c
-						.getColumnIndex(OperationsDbAdapter.KEY_OP_SUM));
+						.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 				sum = sum + s;
 				hasNext = c.moveToPrevious();
 			}
@@ -557,7 +556,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			long dateLong = date.getTimeInMillis();
 			do {
 				long opDate = ops.getLong(ops
-						.getColumnIndex(OperationsDbAdapter.KEY_OP_DATE));
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 				if (opDate <= dateLong) {
 					break;
 				}
@@ -579,7 +578,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			c.requery();
 			c.moveToFirst();
 			double curSum = mDbHelper.updateCurrentSum(mAccountId, c.getLong(c
-					.getColumnIndexOrThrow(OperationsDbAdapter.KEY_OP_DATE)));
+					.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_DATE)));
 			updateFutureSumDisplay(curSum, c);
 			updateSumAtDateDisplay(null, curSum);
 		}
