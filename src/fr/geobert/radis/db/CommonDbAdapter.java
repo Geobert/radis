@@ -271,12 +271,13 @@ public class CommonDbAdapter {
 	private static CommonDbAdapter mInstance = null;
 
 	public CommonDbAdapter() {
+		mInfoCursorMap = new HashMap<String, Cursor>();
 	}
 
 	private void init(Context ctx, long accountRowId) {
 		this.mCtx = ctx;
 		mAccountId = accountRowId;
-		mInfoCursorMap = new HashMap<String, Cursor>();
+		
 	}
 
 	public static CommonDbAdapter getInstance(Context ctx) {
