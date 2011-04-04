@@ -122,9 +122,6 @@ public class CommonDbAdapter {
 			+ ") REFERENCES " + DATABASE_SCHEDULED_TABLE + "("
 			+ KEY_SCHEDULED_ROWID + "));";
 
-	protected static final String DATABASE_OP_DROP = "drop table if exists "
-			+ DATABASE_OPERATIONS_TABLE + ";";
-
 	// meta
 	protected static final String INDEX_ON_ACCOUNT_ID_CREATE = "CREATE INDEX IF NOT EXISTS account_id_idx ON "
 			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ACCOUNT_ID + ")";
@@ -465,7 +462,6 @@ public class CommonDbAdapter {
 	}
 
 	public boolean deleteAccount(long rowId) {
-		mDb.execSQL(String.format(DATABASE_OP_DROP, rowId));
 		return mDb.delete(DATABASE_ACCOUNT_TABLE, KEY_ACCOUNT_ROWID + "="
 				+ rowId, null) > 0;
 	}
