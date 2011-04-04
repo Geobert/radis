@@ -269,7 +269,8 @@ public class CommonDbAdapter {
 	protected Cursor mCurAccount;
 
 	private static CommonDbAdapter mInstance = null;
-	//private static int mRefCounter = 0;
+
+	// private static int mRefCounter = 0;
 
 	public CommonDbAdapter() {
 		mInfoCursorMap = new HashMap<String, Cursor>();
@@ -513,11 +514,12 @@ public class CommonDbAdapter {
 	}
 
 	public double updateCurrentSum(long rowId, long date) {
-		Cursor account = getCurAccountIfDiff(rowId);
+		Cursor account = fetchAccount(rowId);
 		double start = account.getDouble(account
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
 		double opSum = account.getDouble(account
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+		account.close();
 		ContentValues args = new ContentValues();
 		double curSum = start + opSum;
 		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
@@ -838,21 +840,6 @@ public class CommonDbAdapter {
 		}
 		mInfoCursorMap.put(table, c);
 		return c;
-	}
-
-	private Cursor getCurAccountIfDiff(long rowId) {
-		Cursor account = mCurAccount;
-		if (null == account
-				|| !account.isFirst()
-				|| account
-						.getLong(account
-								.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_ROWID)) != rowId) {
-			account = fetchAccount(rowId);
-		} else {
-			account.requery();
-			account.moveToFirst();
-		}
-		return account;
 	}
 
 	public void trashDatabase() {
