@@ -8,7 +8,7 @@
 	<LinearLayout android:padding="5px" android:layout_width="fill_parent"
 		xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/scheduled_op_editor"
 		android:layout_height="fill_parent" android:orientation="vertical">
-		<ScrollView android:layout_width="fill_parent"
+		<ScrollView android:layout_width="fill_parent" android:id="@+id/flipper_scrollview"
 			android:layout_height="fill_parent" android:layout_weight="1"
 			android:fillViewport="true">
 			<ViewFlipper android:id="@+id/flipper"

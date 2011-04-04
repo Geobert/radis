@@ -4,6 +4,7 @@ import java.text.ParseException;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -14,6 +15,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +24,7 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ScrollView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.ViewFlipper;
@@ -48,6 +51,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private CheckBox mEndDateCheck;
 	private ScheduledOperation mOriginalSchOp;
 	private long mOpIdSource;
+	private ScrollView mFlipperScroll;
 
 	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
 
@@ -84,6 +88,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		mCustomPeriodicityUnit = (Spinner) findViewById(R.id.custom_periodicity_choice);
 		mEndDatePicker = (DatePicker) findViewById(R.id.edit_end_date);
 		mEndDateCheck = (CheckBox) findViewById(R.id.end_date_check);
+		mFlipperScroll = (ScrollView) findViewById(R.id.flipper_scrollview);
 	}
 
 	private void initViewBehavior() {
@@ -469,6 +474,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					R.anim.exit_by_left);
 			flipper.showNext();
 		}
+		mFlipperScroll.fullScroll(ScrollView.FOCUS_UP);
+		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		mgr.hideSoftInputFromWindow(mOpSumText.getWindowToken(), 0);
 	}
 
 }
