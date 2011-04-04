@@ -108,9 +108,8 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 				ImageView i = (ImageView) ((LinearLayout) view.getParent()
 						.getParent()).findViewById(R.id.op_sch_icon);
-				if (cursor
-						.getLong(cursor
-								.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+				if (cursor.getLong(cursor
+						.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
 					i.setVisibility(View.VISIBLE);
 				} else {
 					i.setVisibility(View.INVISIBLE);
@@ -187,41 +186,36 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		new GetMoreOps().execute(earliestOpDate);
 	}
 
-	/** Called when the activity is first created. */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		if (!Formater.isInit()) {
-			Formater.init();
-		}
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.operation_list);
-		registerForContextMenu(getListView());
-
-		LayoutInflater inf = getLayoutInflater();
-		View footer = inf
-				.inflate(R.layout.op_list_footer, getListView(), false);
-		mLoadingIcon = (ImageView) footer.findViewById(R.id.loading_icon);
-		getListView().addFooterView(footer);
-
-		Bundle extras = getIntent().getExtras();
-		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
-				: null;
+	protected void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this, mAccountId);
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
+	}
 
+	private void initReferences() {
 		mQuickAddThirdParty = (AutoCompleteTextView) findViewById(R.id.quickadd_third_party);
-		mQuickAddThirdParty.setAdapter(new InfoAdapter(this, mDbHelper,
-				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
+		mQuickAddButton = (Button) findViewById(R.id.quickadd_validate);
+
 		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(),
 				mQuickAddAmount).setAutoNegate(true);
+
+		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
+				mQuickAddAmount, mQuickAddButton);
+
+		mOnInsertionReceiver = new OnInsertionReceiver(this);
+		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
+	}
+
+	private void initViewBehavior() {
+		mQuickAddThirdParty.setAdapter(new InfoAdapter(this, mDbHelper,
+				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+
 		mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher);
-		mQuickAddButton = (Button) findViewById(R.id.quickadd_validate);
+
 		mQuickAddButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -234,13 +228,9 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			}
 		});
 		OperationList.setQuickAddButEnabled(mQuickAddButton, false);
-		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
-				mQuickAddAmount, mQuickAddButton);
+
 		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
 		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
-
-		mOnInsertionReceiver = new OnInsertionReceiver(this);
-		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
@@ -265,6 +255,31 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			}
 		};
 		getListView().setOnTouchListener(gestureListener);
+	}
+
+	/** Called when the activity is first created. */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		if (!Formater.isInit()) {
+			Formater.init();
+		}
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+		setContentView(R.layout.operation_list);
+		registerForContextMenu(getListView());
+
+		LayoutInflater inf = getLayoutInflater();
+		View footer = inf
+				.inflate(R.layout.op_list_footer, getListView(), false);
+		mLoadingIcon = (ImageView) footer.findViewById(R.id.loading_icon);
+		getListView().addFooterView(footer);
+
+		Bundle extras = getIntent().getExtras();
+		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
+				: null;
+
+		initReferences();
+
 	}
 
 	public static void setQuickAddButEnabled(Button but, boolean b) {
@@ -324,6 +339,8 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		initDbHelper();
+		initViewBehavior();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
 		mCorrectCommaWatcher.setAutoNegate(true);
@@ -421,6 +438,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
+		//mDbHelper.open();
 		if (requestCode == ACTIVITY_OP_CREATE
 				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
@@ -466,10 +484,8 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		mLastOps = new MatrixCursor(new String[] {
 				CommonDbAdapter.KEY_OP_ROWID,
 				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
-				CommonDbAdapter.KEY_TAG_NAME,
-				CommonDbAdapter.KEY_MODE_NAME,
-				CommonDbAdapter.KEY_OP_SUM,
-				CommonDbAdapter.KEY_OP_DATE,
+				CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_MODE_NAME,
+				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_OP_NOTES,
 				CommonDbAdapter.KEY_OP_SCHEDULED_ID });
 		startManagingCursor(mLastOps);
@@ -480,8 +496,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		MatrixCursor opsCursor = mLastOps;
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
-				CommonDbAdapter.KEY_OP_SUM,
-				CommonDbAdapter.KEY_TAG_NAME,
+				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_TAG_NAME,
 				CommonDbAdapter.KEY_MODE_NAME };
 
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
@@ -504,8 +519,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private void deleteOp(AdapterContextMenuInfo info) throws Exception {
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
-		double sum = c.getDouble(c
-				.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+		double sum = c.getDouble(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		updateSums(sum, 0.0);
 		mDbHelper.deleteOp(info.id);
 	}
@@ -513,17 +527,13 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	// generic function for getAccountOpSum and getAccountCurSum
 	private double getAccountSum(String col) throws Exception {
 		Cursor c = mCurAccount;
-		if (c.isClosed()) {
+		if ((!c.isClosed()) && c.requery() && c.moveToFirst()) {
+			return c.getDouble(c.getColumnIndexOrThrow(col));
+		} else {
 			mCurAccount = mDbHelper.fetchAccount(mAccountId);
 			startManagingCursor(mCurAccount);
 			c = mCurAccount;
 			return c.getDouble(c.getColumnIndex(col));
-		} else {
-			if (c.requery() && c.moveToFirst()) {
-				return c.getDouble(c.getColumnIndexOrThrow(col));
-			} else {
-				throw new Exception("Error while requery");
-			}
 		}
 	}
 
@@ -688,6 +698,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		if (null != mUpdateSumTask) {
 			mUpdateSumTask.cancel(true);
 		}
+		//mDbHelper.close();
 		super.onPause();
 	}
 

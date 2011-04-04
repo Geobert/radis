@@ -54,6 +54,12 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	private IntentFilter mOnInsertionIntentFilter;
 	private Cursor mAccountsCursor;
 	
+	
+	private void initDbHelper() {
+		mDbHelper = CommonDbAdapter.getInstance(this);
+		mDbHelper.open();
+	}
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,8 +69,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
+		
 		mScheduledListBtn = findViewById(R.id.startScheduledListBtn);
 		mScheduledListBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -296,11 +301,13 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	protected void onPause() {
 		super.onPause();
 		unregisterReceiver(mOnInsertionReceiver);
+		//mDbHelper.close();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		initDbHelper();
 		fillData();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 	}

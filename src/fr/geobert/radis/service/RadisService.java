@@ -36,10 +36,10 @@ public class RadisService extends IntentService {
 			mDbHelper = CommonDbAdapter.getInstance(getApplicationContext());
 			mDbHelper.open();
 			processScheduledOps();
-			mDbHelper.close();
+			//mDbHelper.close();
 		} finally {
 			getLock(this).release();
-			mDbHelper.close();
+			//mDbHelper.close();
 		}
 		stopSelf();
 	}

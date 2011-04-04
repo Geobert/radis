@@ -269,6 +269,7 @@ public class CommonDbAdapter {
 	protected Cursor mCurAccount;
 
 	private static CommonDbAdapter mInstance = null;
+	//private static int mRefCounter = 0;
 
 	public CommonDbAdapter() {
 		mInfoCursorMap = new HashMap<String, Cursor>();
@@ -277,7 +278,7 @@ public class CommonDbAdapter {
 	private void init(Context ctx, long accountRowId) {
 		this.mCtx = ctx;
 		mAccountId = accountRowId;
-		
+
 	}
 
 	public static CommonDbAdapter getInstance(Context ctx) {
@@ -419,6 +420,9 @@ public class CommonDbAdapter {
 
 	public void close() {
 		mDbHelper.close();
+		mDbHelper = null;
+		mDb.close();
+		mDb = null;
 	}
 
 	private void fillCache(String table, String[] cols, Map<String, Long> map) {
@@ -853,14 +857,12 @@ public class CommonDbAdapter {
 
 	public void trashDatabase() {
 		close();
-		mDb.close();
 		mCtx.deleteDatabase(DATABASE_NAME);
 		Tools.restartApp();
 	}
 
 	public boolean backupDatabase() {
 		close();
-		mDb.close();
 		try {
 			File sd = Environment.getExternalStorageDirectory();
 			File data = Environment.getDataDirectory();
@@ -893,7 +895,6 @@ public class CommonDbAdapter {
 
 	public boolean restoreDatabase() {
 		close();
-		mDb.close();
 		try {
 			File sd = Environment.getExternalStorageDirectory();
 

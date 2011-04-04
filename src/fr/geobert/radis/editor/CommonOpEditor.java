@@ -72,7 +72,6 @@ public abstract class CommonOpEditor extends Activity {
 		}
 
 		setView();
-		initDbHelper();
 		init(savedInstanceState);
 	}
 
@@ -85,23 +84,27 @@ public abstract class CommonOpEditor extends Activity {
 		}
 
 		mOpThirdPartyText = (AutoCompleteTextView) findViewById(R.id.edit_op_third_party);
-		mOpThirdPartyText.setAdapter(new InfoAdapter(this, mDbHelper,
-				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mOpModeText = (AutoCompleteTextView) findViewById(R.id.edit_op_mode);
-		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
-				CommonDbAdapter.DATABASE_MODES_TABLE,
-				CommonDbAdapter.KEY_MODE_NAME));
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
+		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
 		mSumTextWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
-		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
-		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
-				CommonDbAdapter.DATABASE_TAGS_TABLE,
-				CommonDbAdapter.KEY_TAG_NAME));
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 		mInfoManagersMap = new HashMap<String, InfoManager>();
+	}
+
+	protected void initViewAdapters() {
+		mOpThirdPartyText.setAdapter(new InfoAdapter(this, mDbHelper,
+				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
+				CommonDbAdapter.DATABASE_MODES_TABLE,
+				CommonDbAdapter.KEY_MODE_NAME));
+		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
+				CommonDbAdapter.DATABASE_TAGS_TABLE,
+				CommonDbAdapter.KEY_TAG_NAME));
+
 	}
 
 	private void invertSign() throws ParseException {
@@ -146,16 +149,13 @@ public abstract class CommonOpEditor extends Activity {
 					getString(R.string.third_parties),
 					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
 		case TAGS_DIALOG_ID:
-			return createInfoListDialog(
-					CommonDbAdapter.DATABASE_TAGS_TABLE,
+			return createInfoListDialog(CommonDbAdapter.DATABASE_TAGS_TABLE,
 					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
 					EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID);
 		case MODES_DIALOG_ID:
-			return createInfoListDialog(
-					CommonDbAdapter.DATABASE_MODES_TABLE,
-					CommonDbAdapter.KEY_MODE_NAME,
-					getString(R.string.modes), EDIT_MODE_DIALOG_ID,
-					DELETE_MODE_DIALOG_ID);
+			return createInfoListDialog(CommonDbAdapter.DATABASE_MODES_TABLE,
+					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes),
+					EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID);
 		case EDIT_THIRD_PARTY_DIALOG_ID:
 		case EDIT_TAG_DIALOG_ID:
 		case EDIT_MODE_DIALOG_ID:
@@ -204,13 +204,21 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		initDbHelper();
 		if (!mOnRestore) {
 			fetchOrCreateCurrentOp();
 			populateFields();
 		} else {
 			mOnRestore = false;
 		}
+		initViewAdapters();
 		initListeners();
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		//mDbHelper.close();
 	}
 
 	protected void populateCommonFields(Operation op) {
@@ -262,7 +270,8 @@ public abstract class CommonOpEditor extends Activity {
 						try {
 							invertSign();
 						} catch (ParseException e) {
-							ErrorReporter.getInstance().handleSilentException(e);
+							ErrorReporter.getInstance()
+									.handleSilentException(e);
 							e.printStackTrace();
 						}
 					}

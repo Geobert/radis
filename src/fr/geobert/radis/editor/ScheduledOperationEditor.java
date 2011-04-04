@@ -67,15 +67,15 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	protected void init(Bundle savedInstanceState) {
 		super.init(savedInstanceState);
-		initWidgetReferences();
-		initWidgetBehavior();
+		initViewReferences();
+		initViewBehavior();
 		initGesture();
 		
 		Bundle extras = getIntent().getExtras();
 		mOpIdSource = extras.getLong("operationId");
 	}
 
-	private void initWidgetReferences() {
+	private void initViewReferences() {
 		mViewFlipper = (ViewFlipper) findViewById(R.id.flipper);
 		mAccountSpinner = (Spinner) findViewById(R.id.account_choice);
 		mPeriodicitySpinner = (Spinner) findViewById(R.id.periodicity_choice);
@@ -86,7 +86,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		mEndDateCheck = (CheckBox) findViewById(R.id.end_date_check);
 	}
 
-	private void initWidgetBehavior() {
+	private void initViewBehavior() {
 		mCustomPeriodicityVal
 				.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 					@Override

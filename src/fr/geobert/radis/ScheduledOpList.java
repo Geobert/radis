@@ -55,8 +55,7 @@ public class ScheduledOpList extends ListActivity {
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
-			if (colName
-					.equals(CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
+			if (colName.equals(CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
 				StringBuilder b = new StringBuilder();
 				int periodicityUnit = cursor.getInt(columnIndex);
 				int periodicity = cursor.getInt(columnIndex - 1);
@@ -78,6 +77,11 @@ public class ScheduledOpList extends ListActivity {
 		}
 	}
 
+	private void initDbHelper() {
+		mDbHelper = CommonDbAdapter.getInstance(this);
+		mDbHelper.open();
+	}
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -87,9 +91,6 @@ public class ScheduledOpList extends ListActivity {
 		setTitle(R.string.scheduled_ops);
 		setContentView(R.layout.scheduled_list);
 		registerForContextMenu(getListView());
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
-		fillData();
 
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
@@ -121,8 +122,7 @@ public class ScheduledOpList extends ListActivity {
 		startManagingCursor(c);
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
-				CommonDbAdapter.KEY_OP_SUM,
-				CommonDbAdapter.KEY_ACCOUNT_NAME,
+				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_ACCOUNT_NAME,
 				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT,
 				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY,
 				CommonDbAdapter.KEY_SCHEDULED_END_DATE, };
@@ -152,14 +152,14 @@ public class ScheduledOpList extends ListActivity {
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
 	}
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
+		initDbHelper();
+		fillData();
 	}
 
 	@Override
@@ -220,9 +220,8 @@ public class ScheduledOpList extends ListActivity {
 		if (delAllOccurrences) {
 			Cursor schOp = mDbHelper.fetchOneScheduledOp(op.id);
 			startManagingCursor(schOp);
-			final long accountId = schOp
-					.getLong(schOp
-							.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
+			final long accountId = schOp.getLong(schOp
+					.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
 			int nbDeleted = mDbHelper.deleteAllOccurrences(accountId, op.id);
 			// update account op sum, current sum and current date
 			final double total = nbDeleted

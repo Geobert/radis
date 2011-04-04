@@ -37,8 +37,7 @@ public class AccountEditor extends Activity {
 		if (!Formater.isInit()) {
 			Formater.init();
 		}
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
+		
 		setContentView(R.layout.account_creation);
 		setTitle(R.string.account_edit);
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
@@ -174,6 +173,8 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
+		mDbHelper = CommonDbAdapter.getInstance(this);
+		mDbHelper.open();
 		if (!mOnRestore) {
 			populateFields();
 		} else {
@@ -181,6 +182,11 @@ public class AccountEditor extends Activity {
 		}
 	}
 
+	@Override
+	protected void onPause() {
+		super.onPause();
+		//mDbHelper.close();
+	}
 	private void saveState() {
 		String name = mAccountNameText.getText().toString().trim();
 		String desc = mAccountDescText.getText().toString().trim();
