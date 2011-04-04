@@ -74,7 +74,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		initViewReferences();
 		initViewBehavior();
 		initGesture();
-		
+
 		Bundle extras = getIntent().getExtras();
 		mOpIdSource = extras.getLong("operationId");
 	}
@@ -249,8 +249,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		Cursor c = mDbHelper.fetchAllAccounts();
 		startManagingCursor(c);
 		if (c.isFirst()) {
-			String[] from = new String[] {
-					CommonDbAdapter.KEY_ACCOUNT_NAME,
+			String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
 					CommonDbAdapter.KEY_ACCOUNT_ROWID,
 					CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
 
@@ -285,7 +284,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		if (mOpIdSource > 0) {
 			res.putExtra("schOperationId", mRowId);
 			res.putExtra("opIdSource", mOpIdSource);
-		}	
+		}
 		setResult(RESULT_OK, res);
 		finish();
 	}
@@ -294,7 +293,12 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	protected void saveOpAndExit() throws ParseException {
 		ScheduledOperation op = mCurrentSchOp;
 		if (mRowId <= 0) {
-			if ((mOpIdSource > 0) && (op.getDate() == mOriginalSchOp.getDate())) {
+			if (mOpIdSource > 0) { // is converting a transaction into a
+									// schedule
+				if ((op.getDate() != mOriginalSchOp.getDate())) {
+					// change the date of the source transaction
+					mDbHelper.updateOp(mOpIdSource, op);
+				}
 				// do not insert another occurence with same date
 				ScheduledOperation.addPeriodicityToDate(op);
 			}
