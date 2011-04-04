@@ -52,6 +52,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 	private static final int CONVERT_OP_ID = Menu.FIRST + 3;
+	private static final int EDIT_SCH_OP_ID = Menu.FIRST + 4;
 
 	private static final int ACTIVITY_OP_CREATE = 0;
 	private static final int ACTIVITY_OP_EDIT = 1;
@@ -386,10 +387,17 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
-		if (((AdapterContextMenuInfo) menuInfo).id != -1) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
+		if (info.id != -1) {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
-			menu.add(0, CONVERT_OP_ID, 0, R.string.convert_into_scheduling);
+			Cursor c = mDbHelper.fetchOneOp(info.id);
+			startManagingCursor(c);
+			if (c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+				menu.add(0, EDIT_SCH_OP_ID, 0, R.string.edit_scheduling);
+			} else {
+				menu.add(0, CONVERT_OP_ID, 0, R.string.convert_into_scheduling);
+			}
 			menu.add(0, DELETE_OP_ID, 0, R.string.delete);
 		}
 	}
@@ -429,7 +437,14 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			startOperationEdit(info.id);
 			return true;
 		case CONVERT_OP_ID:
-			startScheduledOpEditor(info.id);
+			startScheduledOpEditor(info.id, true);
+			return true;
+		case EDIT_SCH_OP_ID:
+			Cursor c = mDbHelper.fetchOneOp(info.id);
+			startManagingCursor(c);
+			startScheduledOpEditor(c.getLong(c
+					.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)),
+					false);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -438,7 +453,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		//mDbHelper.open();
+		// mDbHelper.open();
 		if (requestCode == ACTIVITY_OP_CREATE
 				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
@@ -648,10 +663,14 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		mOnRestore = false;
 	}
 
-	private void startScheduledOpEditor(long id) {
+	private void startScheduledOpEditor(final long id, final boolean conversion) {
 		Intent i = new Intent(this, ScheduledOperationEditor.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, mAccountId);
-		i.putExtra("operationId", id);
+		if (conversion) {
+			i.putExtra("operationId", id);
+		} else {
+			i.putExtra(Tools.EXTRAS_OP_ID, id);
+		}
 		startActivityForResult(i, CREATE_SCH_OP);
 	}
 
@@ -698,7 +717,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		if (null != mUpdateSumTask) {
 			mUpdateSumTask.cancel(true);
 		}
-		//mDbHelper.close();
+		// mDbHelper.close();
 		super.onPause();
 	}
 

@@ -148,4 +148,5 @@
 <string name="disconnect">Disconnect</string>
 <string name="ask_update_scheduling">This transaction is from a scheduled one. Do you want to update the scheduled transaction and all its occurences? If not, current transaction will be disconnected from the scheduled one.</string>
 <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
+<string name="edit_scheduling">Edit scheduled transaction</string>
 </resources>

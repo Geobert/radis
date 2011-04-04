@@ -112,7 +112,7 @@ public class OperationEditor extends CommonOpEditor {
 											mCurrentOp, mAccountId);
 									mDbHelper.updateScheduledOp(
 											mCurrentOp.mScheduledId, op, true);
-									ScheduledOperationEditor
+									ScheduledOperation
 											.updateAllOccurences(mDbHelper, op,
 													mPreviousSum,
 													mCurrentOp.mScheduledId);

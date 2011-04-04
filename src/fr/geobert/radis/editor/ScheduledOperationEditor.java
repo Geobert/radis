@@ -331,10 +331,15 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									ScheduledOperationEditor
-											.updateAllOccurences(mDbHelper,
-													mCurrentSchOp,
-													mPreviousSum, mRowId);
+									if (mCurrentSchOp
+											.periodicityEquals(mOriginalSchOp)) {
+										ScheduledOperation.updateAllOccurences(
+												mDbHelper, mCurrentSchOp,
+												mPreviousSum, mRowId);
+									} else {
+										ScheduledOperation.deleteAllOccurences(
+												mDbHelper, mRowId);
+									}
 									startInsertionServiceAndExit();
 								}
 							})
@@ -359,32 +364,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			return super.onCreateDialog(id);
 		}
 
-	}
-
-	public static void updateAllOccurences(CommonDbAdapter dbHelper,
-			final ScheduledOperation op, final double prevSum, final long rowId) {
-		final long accountId = op.mAccountId;
-		int nbUpdated = dbHelper.updateAllOccurrences(accountId, rowId, op);
-		double sumToAdd = nbUpdated * (op.mSum - prevSum);
-		Cursor accountCursor = dbHelper.fetchAccount(accountId);
-		double curSum = accountCursor.getDouble(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-		dbHelper.updateOpSum(accountId, curSum + sumToAdd);
-		Cursor opCur = dbHelper.fetchNLastOps(1, accountId);
-		if (null != opCur) {
-			opCur.moveToFirst();
-		}
-		final long date = opCur.getLong(opCur
-				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		final long curDate = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
-		if (date > curDate) {
-			dbHelper.updateCurrentSum(accountId, date);
-		} else {
-			dbHelper.updateCurrentSum(accountId, 0);
-		}
-		accountCursor.close();
-		opCur.close();
 	}
 
 	@Override

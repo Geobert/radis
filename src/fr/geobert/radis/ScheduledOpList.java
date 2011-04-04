@@ -218,27 +218,7 @@ public class ScheduledOpList extends ListActivity {
 	private void deleteSchOp(final boolean delAllOccurrences) {
 		AdapterContextMenuInfo op = mOpToDelete;
 		if (delAllOccurrences) {
-			Cursor schOp = mDbHelper.fetchOneScheduledOp(op.id);
-			startManagingCursor(schOp);
-			final long accountId = schOp.getLong(schOp
-					.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
-			int nbDeleted = mDbHelper.deleteAllOccurrences(accountId, op.id);
-			// update account op sum, current sum and current date
-			final double total = nbDeleted
-					* schOp.getDouble(schOp
-							.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-			Cursor accountCursor = mDbHelper.fetchAccount(accountId);
-			startManagingCursor(accountCursor);
-			final double curSum = accountCursor.getDouble(accountCursor
-					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-			mDbHelper.updateOpSum(accountId, curSum - total);
-			Cursor lastOp = mDbHelper.fetchNLastOps(1, accountId);
-			if (null != lastOp) {
-				lastOp.moveToFirst();
-			}
-			startManagingCursor(lastOp);
-			mDbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
-					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+			ScheduledOperation.deleteAllOccurences(mDbHelper, op.id);
 		}
 		mDbHelper.deleteScheduledOp(op.id);
 		fillData();

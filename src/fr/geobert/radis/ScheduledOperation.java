@@ -148,6 +148,65 @@ public class ScheduledOperation extends Operation {
 				&& mPeriodicityUnit == schOp.mPeriodicityUnit;
 	}
 
+	public boolean periodicityEquals(ScheduledOperation schOp) {
+		return mPeriodicity == schOp.mPeriodicity
+				&& mPeriodicityUnit == schOp.mPeriodicityUnit;
+	}
+
+	public static void deleteAllOccurences(CommonDbAdapter dbHelper,
+			final long schOpId) {
+		Cursor schOp = dbHelper.fetchOneScheduledOp(schOpId);
+
+		final long accountId = schOp.getLong(schOp
+				.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
+		int nbDeleted = dbHelper.deleteAllOccurrences(accountId, schOpId);
+		// update account op sum, current sum and current date
+		final double total = nbDeleted
+				* schOp.getDouble(schOp
+						.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+		schOp.close();
+		Cursor accountCursor = dbHelper.fetchAccount(accountId);
+
+		final double curSum = accountCursor.getDouble(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+		accountCursor.close();
+		dbHelper.updateOpSum(accountId, curSum - total);
+		Cursor lastOp = dbHelper.fetchNLastOps(1, accountId);
+		if (null != lastOp) {
+			lastOp.moveToFirst();
+		}
+
+		dbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
+				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+		lastOp.close();
+	}
+
+	public static void updateAllOccurences(CommonDbAdapter dbHelper,
+			final ScheduledOperation op, final double prevSum, final long rowId) {
+		final long accountId = op.mAccountId;
+		int nbUpdated = dbHelper.updateAllOccurrences(accountId, rowId, op);
+		double sumToAdd = nbUpdated * (op.mSum - prevSum);
+		Cursor accountCursor = dbHelper.fetchAccount(accountId);
+		double curSum = accountCursor.getDouble(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+		dbHelper.updateOpSum(accountId, curSum + sumToAdd);
+		Cursor opCur = dbHelper.fetchNLastOps(1, accountId);
+		if (null != opCur) {
+			opCur.moveToFirst();
+		}
+		final long date = opCur.getLong(opCur
+				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+		final long curDate = accountCursor.getLong(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
+		if (date > curDate) {
+			dbHelper.updateCurrentSum(accountId, date);
+		} else {
+			dbHelper.updateCurrentSum(accountId, 0);
+		}
+		accountCursor.close();
+		opCur.close();
+	}
+
 	static public void addPeriodicityToDate(ScheduledOperation op) {
 		switch (op.mPeriodicityUnit) {
 		case ScheduledOperation.WEEKLY_PERIOD:
