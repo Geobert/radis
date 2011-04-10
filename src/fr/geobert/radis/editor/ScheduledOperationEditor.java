@@ -399,23 +399,25 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
 		boolean res = super.isFormValid(errMsg);
-		ScheduledOperation op = mCurrentSchOp;
-		fillOperationWithInputs(op);
-		final boolean hasEnd = op.getEndDate() > 0;
-		if (hasEnd && (op.getDate() > op.getEndDate())) {
-			if (errMsg.length() > 0) {
-				errMsg.append("\n");
+		if (res) {
+			ScheduledOperation op = mCurrentSchOp;
+			fillOperationWithInputs(op);
+			final boolean hasEnd = op.getEndDate() > 0;
+			if (hasEnd && (op.getDate() > op.getEndDate())) {
+				if (errMsg.length() > 0) {
+					errMsg.append("\n");
+				}
+				errMsg.append(getString(R.string.end_date_incorrect));
+				res = false;
 			}
-			errMsg.append(getString(R.string.end_date_incorrect));
-			res = false;
-		}
-		if ((op.mPeriodicityUnit >= ScheduledOperation.CUSTOM_DAILY_PERIOD)
-				&& op.mPeriodicity <= 0) {
-			if (errMsg.length() > 0) {
-				errMsg.append("\n");
+			if ((op.mPeriodicityUnit >= ScheduledOperation.CUSTOM_DAILY_PERIOD)
+					&& op.mPeriodicity <= 0) {
+				if (errMsg.length() > 0) {
+					errMsg.append("\n");
+				}
+				errMsg.append(getString(R.string.periodicity_must_be_greater_0));
+				res = false;
 			}
-			errMsg.append(getString(R.string.periodicity_must_be_greater_0));
-			res = false;
 		}
 		return res;
 	}

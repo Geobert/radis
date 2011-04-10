@@ -92,7 +92,6 @@ public class OperationEditor extends CommonOpEditor {
 				}
 			}
 		}
-
 	}
 
 	@Override

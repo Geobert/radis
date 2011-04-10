@@ -118,9 +118,8 @@ public abstract class CommonOpEditor extends Activity {
 	}
 
 	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
-		fillOperationWithInputs(mCurrentOp);
 		boolean res = true;
-		String sumStr = mOpSumText.getText().toString();
+		String sumStr = mOpSumText.getText().toString().trim();
 		if (sumStr.length() == 0) {
 			if (errMsg.length() > 0) {
 				errMsg.append("\n");
@@ -294,6 +293,7 @@ public abstract class CommonOpEditor extends Activity {
 							StringBuilder errMsg = new StringBuilder();
 
 							if (isFormValid(errMsg)) {
+								fillOperationWithInputs(mCurrentOp);
 								saveOpAndExit();
 							} else {
 								Tools.popError(CommonOpEditor.this,
