@@ -266,6 +266,7 @@ public class Tools {
 				switch (item) {
 				case 0:
 					mDb.trashDatabase();
+					Tools.restartApp();
 					break;
 				case 1:
 					Tools.restartApp();
