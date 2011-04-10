@@ -276,7 +276,6 @@ public class CommonDbAdapter {
 	private void init(Context ctx, long accountRowId) {
 		this.mCtx = ctx;
 		mAccountId = accountRowId;
-
 	}
 
 	public static CommonDbAdapter getInstance(Context ctx) {
@@ -417,10 +416,12 @@ public class CommonDbAdapter {
 	}
 
 	public void close() {
-		mDbHelper.close();
-		mDbHelper = null;
-		mDb.close();
-		mDb = null;
+		if (null != mDbHelper) {
+			mDbHelper.close();
+			mDbHelper = null;
+			mDb.close();
+			mDb = null;
+		}
 	}
 
 	private void fillCache(String table, String[] cols, Map<String, Long> map) {
@@ -841,7 +842,6 @@ public class CommonDbAdapter {
 	public void trashDatabase() {
 		close();
 		mCtx.deleteDatabase(DATABASE_NAME);
-		Tools.restartApp();
 	}
 
 	public boolean backupDatabase() {

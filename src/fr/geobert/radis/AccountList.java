@@ -53,6 +53,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
 	private Cursor mAccountsCursor;
+	private SimpleCursorAdapter mAccountsAdapter;
 	
 	
 	private void initDbHelper() {
@@ -69,7 +70,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
-		
+		mAccountsAdapter = null;
 		mScheduledListBtn = findViewById(R.id.startScheduledListBtn);
 		mScheduledListBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -244,11 +245,15 @@ public class AccountList extends ListActivity implements RadisListActivity {
 				R.id.account_balance_at };
 
 		// Now create a simple cursor adapter and set it to display
-		SimpleCursorAdapter accountsAdapter = new SimpleCursorAdapter(this,
-				R.layout.account_row, mAccountsCursor, from, to);
-		accountsAdapter.setViewBinder(new InnerViewBinder());
-		setListAdapter(accountsAdapter);
-		mScheduledListBtn.setEnabled(accountsAdapter.getCount() > 0);
+		if (null == mAccountsAdapter) {
+			mAccountsAdapter  = new SimpleCursorAdapter(this,
+					R.layout.account_row, mAccountsCursor, from, to);
+			mAccountsAdapter.setViewBinder(new InnerViewBinder());
+			setListAdapter(mAccountsAdapter);
+		} else {
+			mAccountsAdapter.changeCursor(mAccountsCursor);
+		}
+		mScheduledListBtn.setEnabled(mAccountsAdapter.getCount() > 0);
 	}
 
 	private void createAccount() {
@@ -257,13 +262,8 @@ public class AccountList extends ListActivity implements RadisListActivity {
 	}
 
 	private void openOperationsList(int position, long accountId) {
-		SQLiteCursor data = (SQLiteCursor) getListView().getItemAtPosition(
-				position);
-		String accountName = data.getString(data
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME));
 		Intent i = new Intent(this, OperationList.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, accountId);
-		i.putExtra(CommonDbAdapter.KEY_ACCOUNT_NAME, accountName);
 		startActivity(i);
 	}
 
