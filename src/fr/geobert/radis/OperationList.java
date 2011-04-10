@@ -726,6 +726,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		super.onSaveInstanceState(outState);
 		outState.putCharSequence("third_party", mQuickAddThirdParty.getText());
 		outState.putCharSequence("amount", mQuickAddAmount.getText());
+		outState.putLong("accountId", mAccountId);
 	}
 
 	@Override
@@ -733,6 +734,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
 		mQuickAddThirdParty.setText(state.getCharSequence("third_party"));
 		mQuickAddAmount.setText(state.getCharSequence("amount"));
+		mAccountId = state.getLong("accountId");
 		mOnRestore = true;
 	}
 
