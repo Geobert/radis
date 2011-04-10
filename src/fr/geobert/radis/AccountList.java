@@ -3,13 +3,6 @@ package fr.geobert.radis;
 import java.util.Currency;
 import java.util.Date;
 
-import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.editor.AccountEditor;
-import fr.geobert.radis.service.InstallRadisServiceReceiver;
-import fr.geobert.radis.service.OnInsertionReceiver;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.Tools;
-
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.PendingIntent;
@@ -18,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteCursor;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -33,6 +25,12 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.editor.AccountEditor;
+import fr.geobert.radis.service.InstallRadisServiceReceiver;
+import fr.geobert.radis.service.OnInsertionReceiver;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 
 public class AccountList extends ListActivity implements RadisListActivity {
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;

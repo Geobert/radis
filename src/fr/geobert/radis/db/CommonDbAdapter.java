@@ -18,7 +18,6 @@ import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.ScheduledOperation;
-import fr.geobert.radis.tools.Tools;
 
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
