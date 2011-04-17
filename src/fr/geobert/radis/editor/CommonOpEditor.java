@@ -1,5 +1,6 @@
 package fr.geobert.radis.editor;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.HashMap;
 
@@ -77,8 +78,17 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected void init(Bundle savedInstanceState) {
 		Bundle extras = getIntent().getExtras();
-		mRowId = (savedInstanceState == null) ? 0 : ((Long) savedInstanceState
-				.getSerializable(Tools.EXTRAS_OP_ID)).longValue();
+		if (savedInstanceState == null) {
+			mRowId = 0;
+		} else {
+			Serializable s = savedInstanceState
+					.getSerializable(Tools.EXTRAS_OP_ID);
+			if (s == null) {
+				mRowId = 0;
+			} else {
+				mRowId = ((Long) s).longValue();
+			}
+		}
 		if (mRowId <= 0) {
 			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
 		}
@@ -217,7 +227,7 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		//mDbHelper.close();
+		// mDbHelper.close();
 	}
 
 	protected void populateCommonFields(Operation op) {
