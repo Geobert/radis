@@ -58,7 +58,7 @@ public class ScheduledOperation extends Operation {
 		mEndDate = new GregorianCalendar();
 		mEndDate.clear();
 		mPeriodicity = 0;
-		mPeriodicityUnit = 0;
+		mPeriodicityUnit = 1; // default periodicity to MONTHLY, happens more often
 	}
 
 	public ScheduledOperation(Parcel parcel) {
