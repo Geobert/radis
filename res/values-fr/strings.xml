@@ -150,4 +150,5 @@
 <string name="ask_update_scheduling">Cette opération proviens d\'une échéance. Voulez-vous mettre à jour cette échéance et toutes ses occurences ? Si non, cette opération sera décorrélée de l\'échéance.</string>
 <string name="convert_into_scheduling">Convertir en échéance</string>
 <string name="edit_scheduling">Modifier l\'échéance</string>
+<string name="process_scheduled_transactions">Traiter les échéances</string>
 </resources>

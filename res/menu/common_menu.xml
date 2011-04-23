@@ -5,6 +5,7 @@
         <menu>
             <item android:id="@+id/backup" android:title="@string/backup_db"></item>
             <item android:id="@+id/restore" android:title="@string/restore_db"></item>
+            <item android:id="@+id/process_scheduling" android:title="@string/process_scheduled_transactions"></item>
         </menu>
     </item>
     <item android:id="@+id/go_to_preferences" android:icon="@drawable/settings72" android:title="@string/preferences"></item>

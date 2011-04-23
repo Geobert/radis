@@ -36,9 +36,9 @@ public class Tools {
 	public final static String EXTRAS_ACCOUNT_ID = "account_id";
 
 	// Intents actions
-	public final static String INTENT_RADIS_STARTED = "fr.geobert.radis.STARTED"; 
+	public final static String INTENT_RADIS_STARTED = "fr.geobert.radis.STARTED";
 	public final static String INTENT_OP_INSERTED = "fr.geobert.radis.OP_INSERTED";
-	
+
 	// debug mode stuff
 	public static boolean DEBUG_MODE = true;
 	public static final int DEBUG_DIALOG = 9876;
@@ -126,6 +126,9 @@ public class Tools {
 		case R.id.backup:
 			msgId = R.string.backup_confirm;
 			break;
+		case R.id.process_scheduling:
+			msgId = R.string.process_scheduled_transactions;
+			break;
 		default:
 			break;
 		}
@@ -186,7 +189,7 @@ public class Tools {
 		};
 	}
 
-	public static Dialog onDefaultCreateDialog(Activity ctx, int id,
+	public static Dialog onDefaultCreateDialog(final Activity ctx, int id,
 			CommonDbAdapter db) {
 		mDb = db;
 		mActivity = ctx;
@@ -221,17 +224,27 @@ public class Tools {
 		case R.string.backup_failed:
 		case R.string.restore_failed:
 			return createFailAndRestartDialog(ctx, id);
+		case R.string.process_scheduled_transactions:
+			return Tools.getAdvancedDialog(ctx, id,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							RadisService.acquireStaticLock(ctx);
+							ctx.startService(new Intent(ctx, RadisService.class));
+						}
+
+					});
 		}
 		return null;
 	}
 
 	public static void clearTimeOfCalendar(Calendar c) {
 		c.set(Calendar.HOUR_OF_DAY, 0);
-        c.set(Calendar.MINUTE, 0);
-        c.set(Calendar.SECOND, 0);
-        c.set(Calendar.MILLISECOND, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
 	}
-	
+
 	// ------------------------------------------------------
 	// DEBUG TOOLS
 	// ------------------------------------------------------
@@ -252,8 +265,10 @@ public class Tools {
 		return false;
 	}
 
-	public static Dialog getDebugDialog(final Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = { "Trash DB", "Restart", "Call RadisService", "Install RadisService" };
+	public static Dialog getDebugDialog(final Context context,
+			CommonDbAdapter dB) {
+		final CharSequence[] items = { "Trash DB", "Restart",
+				"Install RadisService" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -273,11 +288,8 @@ public class Tools {
 					Tools.restartApp();
 					break;
 				case 2:
-					RadisService.acquireStaticLock(context);
-					context.startService(new Intent(context, RadisService.class));
-					break;
-				case 3:
-					Intent i = new Intent(context, InstallRadisServiceReceiver.class);
+					Intent i = new Intent(context,
+							InstallRadisServiceReceiver.class);
 					i.setAction(Tools.INTENT_RADIS_STARTED);
 					context.sendBroadcast(i);
 					break;
