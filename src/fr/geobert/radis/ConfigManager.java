@@ -32,7 +32,7 @@ public class ConfigManager extends PreferenceActivity {
 			}
 		});
 		
-		ListPreference account_choice = (ListPreference) findPreference(DEFAULT_ACCOUNT);
+		//ListPreference account_choice = (ListPreference) findPreference(DEFAULT_ACCOUNT);
 		
 		
 	}

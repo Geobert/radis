@@ -163,21 +163,8 @@ public class ScheduledOpList extends ListActivity {
 	}
 
 	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		// TODO Auto-generated method stub
-		super.onSaveInstanceState(outState);
-	}
-
-	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-		// TODO Auto-generated method stub
-		super.onListItemClick(l, v, position, id);
-	}
-
-	@Override
-	protected void onRestoreInstanceState(Bundle state) {
-		// TODO Auto-generated method stub
-		super.onRestoreInstanceState(state);
+		startEditScheduledOperation(id);
 	}
 
 	@Override
