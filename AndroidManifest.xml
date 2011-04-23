@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest package="fr.geobert.radis" xmlns:android="http://schemas.android.com/apk/res/android"
-	android:versionName="0.5.1" android:versionCode="7">
+	android:versionCode="8" android:versionName="0.5.2">
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
-	
+
 	<application android:label="@string/app_name" android:icon="@drawable/radis"
 		android:name="Radis" android:debuggable="false">
 		<activity android:label="@string/app_name" android:name="AccountList"
@@ -26,7 +26,8 @@
 			android:theme="@android:style/Theme.Dialog" android:launchMode="singleInstance"
 			android:excludeFromRecents="true" android:finishOnTaskLaunch="true" />
 		<activity android:name="ScheduledOpList" android:launchMode="singleTop"></activity>
-		<activity android:launchMode="singleTop" android:name=".editor.ScheduledOperationEditor"></activity>
+		<activity android:launchMode="singleTop"
+			android:name=".editor.ScheduledOperationEditor"></activity>
 		<receiver android:name=".service.InstallRadisServiceReceiver">
 			<intent-filter>
 				<action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -38,7 +39,6 @@
 		<receiver android:name=".service.OnAlarmReceiver">
 		</receiver>
 		<activity android:launchMode="singleTop" android:name="ConfigManager"></activity>
-
 	</application>
 	<uses-sdk android:minSdkVersion="7" />
 
