@@ -151,4 +151,6 @@
 <string name="convert_into_scheduling">Convertir en échéance</string>
 <string name="edit_scheduling">Modifier l\'échéance</string>
 <string name="process_scheduled_transactions">Traiter les échéances</string>
+<string name="autostart_account">Démarrer sur un compte</string>
+<string name="on_start_account">Compte au démarrage</string>
 </resources>

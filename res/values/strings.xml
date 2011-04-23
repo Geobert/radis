@@ -150,4 +150,6 @@
 <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
 <string name="edit_scheduling">Edit scheduled transaction</string>
 <string name="process_scheduled_transactions">Process scheduled transactions</string>
+<string name="autostart_account">Start on a default account</string>
+<string name="on_start_account">Account to start</string>
 </resources>
