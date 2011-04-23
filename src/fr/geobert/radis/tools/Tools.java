@@ -25,6 +25,7 @@ import fr.geobert.radis.ConfigManager;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
 
 public class Tools {
@@ -252,7 +253,7 @@ public class Tools {
 	}
 
 	public static Dialog getDebugDialog(final Context context, CommonDbAdapter dB) {
-		final CharSequence[] items = { "Trash DB", "Restart", "Call RadisService" };
+		final CharSequence[] items = { "Trash DB", "Restart", "Call RadisService", "Install RadisService" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -274,6 +275,11 @@ public class Tools {
 				case 2:
 					RadisService.acquireStaticLock(context);
 					context.startService(new Intent(context, RadisService.class));
+					break;
+				case 3:
+					Intent i = new Intent(context, InstallRadisServiceReceiver.class);
+					i.setAction(Tools.INTENT_RADIS_STARTED);
+					context.sendBroadcast(i);
 					break;
 				}
 			}

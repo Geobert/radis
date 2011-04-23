@@ -49,14 +49,14 @@ public class RadisService extends IntentService {
 		if (c.isFirst()) {
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
-			long todayInMillis = today.getTimeInMillis();
+			final long todayInMillis = today.getTimeInMillis();
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(insertionDate);
 			insertionDate.set(Calendar.DAY_OF_MONTH,
-					mPrefs.getInt(ConfigManager.INSERTION_DATE, 0));
-			long insertionDateInMillis = insertionDate.getTimeInMillis();
-			int insertionMonth = insertionDate.get(Calendar.MONTH);
+					mPrefs.getInt(ConfigManager.INSERTION_DATE, 20));
+			final long insertionDateInMillis = insertionDate.getTimeInMillis();
+			final int insertionMonth = insertionDate.get(Calendar.MONTH);
 
 			HashMap<Long, Double> sumsPerAccount = new LinkedHashMap<Long, Double>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
