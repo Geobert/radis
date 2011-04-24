@@ -5,11 +5,9 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.PowerManager;
 import android.util.Log;

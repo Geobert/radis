@@ -932,16 +932,17 @@ public class CommonDbAdapter {
 		Cursor c = mDb.query(DATABASE_PREFS_TABLE, new String[] {
 				KEY_PREF_NAME, KEY_PREF_VALUE }, KEY_PREF_NAME + "='" + key
 				+ "'", null, null, null, null);
-		if (null != c && c.moveToFirst()) {
-			String s = c.getString(1);
-			c.close();
-			if (null == s) {
-				return defaultValue;
-			} else {
-				mExistingPref.add(key);
-				return s;
+		String res = defaultValue;
+		if (null != c) {
+			if (c.moveToFirst()) {
+				String s = c.getString(1);
+				if (null != s) {
+					mExistingPref.add(key);
+					res = s;
+				} 
 			}
+			c.close();
 		}
-		return defaultValue;
+		return res;
 	}
 }

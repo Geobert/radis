@@ -154,4 +154,5 @@
 <string name="on_start_account">Account to start</string>
 <string name="must_be_day_of_month">You must input a day of month between 1 and 31</string>
 <string name="error_on_write_prefs">Error while writing preferences</string>
+<string name="pref_start_account_label">Account to start: %s</string>
 </resources>
