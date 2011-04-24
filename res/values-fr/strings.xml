@@ -139,7 +139,7 @@
 <string name="del_all_occurrences">Tout</string>
 <string name="cancel_delete_occurrences">Échéance</string>
 <string name="cancel_sch_deletion">Rien</string>
-<string name="prefs_insertion_date_text">Jour du mois pour l\'insertion des échéances</string>
+<string name="prefs_insertion_date_text">L\'insertion des échéances se fera le %s du mois</string>
 <string name="prefs_insertion_date_title">Entrez le jour du mois</string>
 <string name="prefs_insertion_date_label">Date d\'insertion</string>
 <string name="preferences">Préférences</string>
@@ -153,4 +153,5 @@
 <string name="process_scheduled_transactions">Traiter les échéances</string>
 <string name="autostart_account">Démarrer sur un compte</string>
 <string name="on_start_account">Compte au démarrage</string>
+<string name="must_be_day_of_month">Vous devez saisir un jour du mois entre 1 et 31</string>
 </resources>

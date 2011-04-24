@@ -138,7 +138,7 @@
 <string name="del_all_occurrences">All</string>
 <string name="cancel_delete_occurrences">This</string>
 <string name="cancel_sch_deletion">None</string>
-<string name="prefs_insertion_date_text">Day of month for scheduled transaction insertion</string>
+<string name="prefs_insertion_date_text">Scheduled transaction insertion day of month: %s</string>
 <string name="prefs_insertion_date_title">Enter day of month</string>
 <string name="prefs_insertion_date_label">Insertion date</string>
 <string name="preferences">Preferences</string>
@@ -152,4 +152,6 @@
 <string name="process_scheduled_transactions">Process scheduled transactions</string>
 <string name="autostart_account">Start on a default account</string>
 <string name="on_start_account">Account to start</string>
+<string name="must_be_day_of_month">You must input a day of month between 1 and 31</string>
+<string name="error_on_write_prefs">Error while writing preferences</string>
 </resources>

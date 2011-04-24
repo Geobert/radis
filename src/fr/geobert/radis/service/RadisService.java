@@ -22,7 +22,6 @@ public class RadisService extends IntentService {
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
 	private static PowerManager.WakeLock lockStatic = null;
 	private CommonDbAdapter mDbHelper;
-	private SharedPreferences mPrefs;
 
 	public RadisService() {
 		super("RadisService");
@@ -31,15 +30,13 @@ public class RadisService extends IntentService {
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		try {
-			mPrefs = getSharedPreferences(ConfigManager.SHARED_PREF_NAME,
-					Activity.MODE_PRIVATE);
 			mDbHelper = CommonDbAdapter.getInstance(getApplicationContext());
 			mDbHelper.open();
 			processScheduledOps();
-			//mDbHelper.close();
+			// mDbHelper.close();
 		} finally {
 			getLock(this).release();
-			//mDbHelper.close();
+			// mDbHelper.close();
 		}
 		stopSelf();
 	}
@@ -53,8 +50,9 @@ public class RadisService extends IntentService {
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(insertionDate);
-			insertionDate.set(Calendar.DAY_OF_MONTH,
-					mPrefs.getInt(ConfigManager.INSERTION_DATE, 20));
+			int cfgDate = Integer.parseInt(mDbHelper.getPref(
+					ConfigManager.KEY_INSERTION_DATE, "20"));
+			insertionDate.set(Calendar.DAY_OF_MONTH, cfgDate);
 			final long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonth = insertionDate.get(Calendar.MONTH);
 

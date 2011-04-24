@@ -279,9 +279,7 @@ public abstract class CommonOpEditor extends Activity {
 						try {
 							invertSign();
 						} catch (ParseException e) {
-							ErrorReporter.getInstance()
-									.handleSilentException(e);
-							e.printStackTrace();
+							// nothing to do
 						}
 					}
 				});
