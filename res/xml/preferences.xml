@@ -3,9 +3,11 @@
 	android:title="@string/preferences">
 	<EditTextPreference android:dialogTitle="@string/prefs_insertion_date_title"
 		android:positiveButtonText="@string/ok" android:negativeButtonText="@string/cancel"
-		android:title="@string/prefs_insertion_date_label" android:key="insertion_date" android:summary="@string/prefs_insertion_date_text" android:inputType="number" android:persistent="true"></EditTextPreference>
-	<!-- <CheckBoxPreference android:disableDependentsState="false" android:title="@string/autostart_account" 
-		android:key="autostart_account"></CheckBoxPreference> -->
-	<!-- <ListPreference android:key="default_account_choice" android:dependency="autostart_account" 
-		android:title="@string/on_start_account"></ListPreference> -->
+		android:title="@string/prefs_insertion_date_label" android:key="insertion_date"
+		android:summary="@string/prefs_insertion_date_text" android:inputType="number"
+		android:persistent="true"></EditTextPreference>
+	<CheckBoxPreference android:disableDependentsState="false"
+		android:title="@string/autostart_account" android:key="autostart_account"></CheckBoxPreference>
+	<ListPreference android:key="default_account_choice"
+		android:dependency="autostart_account" android:title="@string/on_start_account"></ListPreference>
 </PreferenceScreen>

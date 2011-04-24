@@ -154,4 +154,5 @@
 <string name="autostart_account">Démarrer sur un compte</string>
 <string name="on_start_account">Compte au démarrage</string>
 <string name="must_be_day_of_month">Vous devez saisir un jour du mois entre 1 et 31</string>
+<string name="pref_start_account_label">Compte par défaut : %s</string>
 </resources>
