@@ -7,6 +7,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -19,14 +20,14 @@ public class ConfigManager extends PreferenceActivity implements
 	public final static String KEY_INSERTION_DATE = "insertion_date";
 	public final static String KEY_AUTOSTART_ACCOUNT = "autostart_account";
 	public final static String KEY_DEFAULT_ACCOUNT = "default_account_choice";
-	public final static String SHARED_PREF_NAME = "RadisPrefs";
+	public final static String SHARED_PREF_NAME = "radis_prefs";
 	private CommonDbAdapter mDbHelper;
+	private ListPreference mAccountsChoice;
 
 	private SharedPreferences getSharedPreferences() {
 		return super.getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
 	}
 
-	@Override
 	public SharedPreferences getSharedPreferences(String name, int mode) {
 		return getSharedPreferences();
 	}
@@ -43,7 +44,7 @@ public class ConfigManager extends PreferenceActivity implements
 		super.onCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.preferences);
-		ListPreference accountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
+		mAccountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
 		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
 		Cursor accounts = mDbHelper.fetchAllAccounts();
@@ -58,9 +59,9 @@ public class ConfigManager extends PreferenceActivity implements
 
 			} while (accounts.moveToNext());
 
-			accountsChoice.setEntries(entries.toArray(new CharSequence[entries
+			mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries
 					.size()]));
-			accountsChoice.setEntryValues(values
+			mAccountsChoice.setEntryValues(values
 					.toArray(new CharSequence[entries.size()]));
 		}
 		accounts.close();
@@ -98,26 +99,27 @@ public class ConfigManager extends PreferenceActivity implements
 		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
 		SharedPreferences sharedPref = getSharedPreferences();
-		SharedPreferences defaultSharedPref = PreferenceManager
-				.getDefaultSharedPreferences(this);
+
 		SharedPreferences.Editor edit = sharedPref.edit();
-		SharedPreferences.Editor defaultEdit = defaultSharedPref.edit();
 		String value = mDbHelper.getPref(KEY_INSERTION_DATE, "20");
 		edit.putString(KEY_INSERTION_DATE, value);
-		defaultEdit.putString(KEY_INSERTION_DATE, value);
-		
-		value = mDbHelper.getPref(KEY_AUTOSTART_ACCOUNT, "false");
-		final boolean b = Boolean.parseBoolean(value);
+		EditTextPreference ep = (EditTextPreference) findPreference(KEY_INSERTION_DATE);
+		ep.getEditText().setText(value);
+
+		final boolean b = Boolean.parseBoolean(mDbHelper.getPref(
+				KEY_AUTOSTART_ACCOUNT, "false"));
 		edit.putBoolean(KEY_AUTOSTART_ACCOUNT, b);
-		defaultEdit.putBoolean(KEY_AUTOSTART_ACCOUNT, b);
 		CheckBoxPreference chk = (CheckBoxPreference) findPreference(KEY_AUTOSTART_ACCOUNT);
 		chk.setChecked(b);
-		
+
 		value = mDbHelper.getPref(KEY_DEFAULT_ACCOUNT, "");
-		
-		
+		for (CharSequence s : mAccountsChoice.getEntryValues()) {
+			if (value.equals(s)) {
+				mAccountsChoice.setValue(s.toString());
+			}
+		}
+
 		edit.commit();
-		defaultEdit.commit();
 		updateLabel(KEY_INSERTION_DATE);
 		updateLabel(KEY_AUTOSTART_ACCOUNT);
 		updateLabel(KEY_DEFAULT_ACCOUNT);
