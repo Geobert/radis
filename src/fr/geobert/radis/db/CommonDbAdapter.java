@@ -24,7 +24,7 @@ import fr.geobert.radis.ScheduledOperation;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 7;
+	protected static final int DATABASE_VERSION = 6;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -32,7 +32,6 @@ public class CommonDbAdapter {
 	public static final String DATABASE_TAGS_TABLE = "tags";
 	public static final String DATABASE_OPERATIONS_TABLE = "operations";
 	public static final String DATABASE_SCHEDULED_TABLE = "scheduled_ops";
-	public static final String DATABASE_PREFS_TABLE = "prefs";
 
 	public static final String KEY_ACCOUNT_NAME = "account_name";
 	public static final String KEY_ACCOUNT_DESC = "account_desc";
@@ -123,15 +122,6 @@ public class CommonDbAdapter {
 			+ KEY_MODE_ROWID + "), FOREIGN KEY (" + KEY_OP_SCHEDULED_ID
 			+ ") REFERENCES " + DATABASE_SCHEDULED_TABLE + "("
 			+ KEY_SCHEDULED_ROWID + "));";
-
-	public static final String KEY_PREF_ROWID = "_id";
-	public static final String KEY_PREF_NAME = "key";
-	public static final String KEY_PREF_VALUE = "value";
-
-	private static final String DATABASE_PREFS_CREATE = "create table "
-			+ DATABASE_PREFS_TABLE + "(" + KEY_PREF_ROWID
-			+ " integer primary key autoincrement, " + KEY_PREF_NAME
-			+ " text not null, " + KEY_PREF_VALUE + " text not null);";
 
 	// meta
 	protected static final String INDEX_ON_ACCOUNT_ID_CREATE = "CREATE INDEX IF NOT EXISTS account_id_idx ON "
@@ -319,7 +309,6 @@ public class CommonDbAdapter {
 			db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 			db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 			db.execSQL(DATABASE_SCHEDULED_CREATE);
-			db.execSQL(DATABASE_PREFS_CREATE);
 		}
 
 		@Override
@@ -400,8 +389,6 @@ public class CommonDbAdapter {
 				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
-			case 6:
-				db.execSQL(DATABASE_PREFS_CREATE);
 			default:
 				break;
 			}
@@ -911,38 +898,5 @@ public class CommonDbAdapter {
 			e.printStackTrace();
 		}
 		return false;
-	}
-
-	// PREFERENCES, I do not use SharedPreferences due to Galaxy S bug
-	private Set<String> mExistingPref = new HashSet<String>();
-
-	public void putPref(final String key, final String value) {
-		ContentValues values = new ContentValues();
-		values.put(KEY_PREF_VALUE, value);
-		if (mExistingPref.contains(key)) {
-			mDb.update(DATABASE_PREFS_TABLE, values, KEY_PREF_NAME + "='" + key
-					+ "'", null);
-		} else {
-			values.put(KEY_PREF_NAME, key);
-			mDb.insert(DATABASE_PREFS_TABLE, null, values);
-		}
-	}
-
-	public String getPref(final String key, final String defaultValue) {
-		Cursor c = mDb.query(DATABASE_PREFS_TABLE, new String[] {
-				KEY_PREF_NAME, KEY_PREF_VALUE }, KEY_PREF_NAME + "='" + key
-				+ "'", null, null, null, null);
-		String res = defaultValue;
-		if (null != c) {
-			if (c.moveToFirst()) {
-				String s = c.getString(1);
-				if (null != s) {
-					mExistingPref.add(key);
-					res = s;
-				} 
-			}
-			c.close();
-		}
-		return res;
 	}
 }

@@ -14,18 +14,23 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.tools.PrefsManager;
 
-public class ConfigManager extends PreferenceActivity implements
+public class RadisConfiguration extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
 	public final static String KEY_INSERTION_DATE = "insertion_date";
 	public final static String KEY_AUTOSTART_ACCOUNT = "autostart_account";
 	public final static String KEY_DEFAULT_ACCOUNT = "default_account_choice";
-	public final static String SHARED_PREF_NAME = "radis_prefs";
-	private CommonDbAdapter mDbHelper;
+
 	private ListPreference mAccountsChoice;
 
+	private PrefsManager getPrefs() {
+		return PrefsManager.getInstance(this);
+	}
+
 	private SharedPreferences getSharedPreferences() {
-		return super.getSharedPreferences(SHARED_PREF_NAME, MODE_PRIVATE);
+		return super.getSharedPreferences(PrefsManager.SHARED_PREF_NAME,
+				MODE_PRIVATE);
 	}
 
 	public SharedPreferences getSharedPreferences(String name, int mode) {
@@ -45,9 +50,9 @@ public class ConfigManager extends PreferenceActivity implements
 
 		addPreferencesFromResource(R.xml.preferences);
 		mAccountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
-		Cursor accounts = mDbHelper.fetchAllAccounts();
+		CommonDbAdapter dbHelper = CommonDbAdapter.getInstance(this);
+		dbHelper.open();
+		Cursor accounts = dbHelper.fetchAllAccounts();
 		if (accounts.isFirst()) {
 			ArrayList<CharSequence> entries = new ArrayList<CharSequence>();
 			ArrayList<CharSequence> values = new ArrayList<CharSequence>();
@@ -72,13 +77,16 @@ public class ConfigManager extends PreferenceActivity implements
 		String value;
 
 		if (KEY_INSERTION_DATE.equals(key)) {
-			value = notEmpty(getSharedPreferences().getString(key, null));
+			value = getPrefs().getString(key, "20");
 			summary = getString(R.string.prefs_insertion_date_text,
 					value == null ? "" : value);
 		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
 			ListPreference l = (ListPreference) findPreference(key);
-			value = l.getEntry().toString();
-			summary = getString(R.string.pref_start_account_label, value);
+			CharSequence s = l.getEntry();
+			if (null != s) {
+				value = s.toString();
+				summary = getString(R.string.pref_start_account_label, value);
+			}
 		}
 
 		if (summary != null) {
@@ -96,30 +104,24 @@ public class ConfigManager extends PreferenceActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
-		SharedPreferences sharedPref = getSharedPreferences();
-
-		SharedPreferences.Editor edit = sharedPref.edit();
-		String value = mDbHelper.getPref(KEY_INSERTION_DATE, "20");
-		edit.putString(KEY_INSERTION_DATE, value);
+		String value = getPrefs().getString(KEY_INSERTION_DATE, "20");
 		EditTextPreference ep = (EditTextPreference) findPreference(KEY_INSERTION_DATE);
 		ep.getEditText().setText(value);
 
-		final boolean b = Boolean.parseBoolean(mDbHelper.getPref(
-				KEY_AUTOSTART_ACCOUNT, "false"));
-		edit.putBoolean(KEY_AUTOSTART_ACCOUNT, b);
+		final boolean b = getPrefs().getBoolean(KEY_AUTOSTART_ACCOUNT, false)
+				.booleanValue();
 		CheckBoxPreference chk = (CheckBoxPreference) findPreference(KEY_AUTOSTART_ACCOUNT);
 		chk.setChecked(b);
 
-		value = mDbHelper.getPref(KEY_DEFAULT_ACCOUNT, "");
-		for (CharSequence s : mAccountsChoice.getEntryValues()) {
-			if (value.equals(s)) {
-				mAccountsChoice.setValue(s.toString());
+		value = getPrefs().getString(KEY_DEFAULT_ACCOUNT);
+		if (value != null) {
+			for (CharSequence s : mAccountsChoice.getEntryValues()) {
+				if (value.equals(s)) {
+					mAccountsChoice.setValue(s.toString());
+				}
 			}
 		}
 
-		edit.commit();
 		updateLabel(KEY_INSERTION_DATE);
 		updateLabel(KEY_AUTOSTART_ACCOUNT);
 		updateLabel(KEY_DEFAULT_ACCOUNT);
@@ -135,18 +137,19 @@ public class ConfigManager extends PreferenceActivity implements
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
-		updateLabel(key);
 		String value = "";
 		if (KEY_INSERTION_DATE.equals(key)) {
 			value = notEmpty(getSharedPreferences().getString(key, null));
 		} else if (KEY_AUTOSTART_ACCOUNT.equals(key)) {
-			value = String
-					.valueOf(getSharedPreferences().getBoolean(key, true));
+			value = String.valueOf(getSharedPreferences()
+					.getBoolean(key, false));
 		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
 			ListPreference l = (ListPreference) findPreference(key);
 			value = l.getValue();
 		}
-		mDbHelper.putPref(key, value);
+		getPrefs().put(key, value);
+		getPrefs().commit();
+		updateLabel(key);
 	}
 
 }

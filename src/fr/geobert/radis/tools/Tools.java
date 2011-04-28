@@ -21,7 +21,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 import fr.geobert.radis.AccountList;
-import fr.geobert.radis.ConfigManager;
+import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
@@ -106,7 +106,7 @@ public class Tools {
 			ctx.showDialog(R.id.backup);
 			return true;
 		case R.id.go_to_preferences:
-			Intent i = new Intent(ctx, ConfigManager.class);
+			Intent i = new Intent(ctx, RadisConfiguration.class);
 			ctx.startActivity(i);
 			return true;
 		}

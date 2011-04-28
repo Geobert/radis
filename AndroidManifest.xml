@@ -7,7 +7,7 @@
 	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
 
 	<application android:label="@string/app_name" android:icon="@drawable/radis"
-		android:name="Radis" android:debuggable="false">
+		android:name="Radis" android:debuggable="true">
 		<activity android:label="@string/app_name" android:name="AccountList"
 			android:launchMode="singleTop">
 			<intent-filter>
@@ -38,7 +38,7 @@
 		</service>
 		<receiver android:name=".service.OnAlarmReceiver">
 		</receiver>
-		<activity android:launchMode="singleTop" android:name="ConfigManager"></activity>
+		<activity android:launchMode="singleTop" android:name="RadisConfiguration"></activity>
 	</application>
 	<uses-sdk android:minSdkVersion="7" />
 

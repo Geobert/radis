@@ -11,9 +11,10 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
 import android.util.Log;
-import fr.geobert.radis.ConfigManager;
+import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
 
 public class RadisService extends IntentService {
@@ -48,8 +49,8 @@ public class RadisService extends IntentService {
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(insertionDate);
-			int cfgDate = Integer.parseInt(mDbHelper.getPref(
-					ConfigManager.KEY_INSERTION_DATE, "20"));
+			int cfgDate = PrefsManager.getInstance(this)
+					.getInt(RadisConfiguration.KEY_INSERTION_DATE, 20).intValue();
 			insertionDate.set(Calendar.DAY_OF_MONTH, cfgDate);
 			final long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonth = insertionDate.get(Calendar.MONTH);
