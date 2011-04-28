@@ -138,15 +138,16 @@ public class RadisConfiguration extends PreferenceActivity implements
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
 		String value = "";
-		if (KEY_INSERTION_DATE.equals(key)) {
-			value = notEmpty(getSharedPreferences().getString(key, null));
-		} else if (KEY_AUTOSTART_ACCOUNT.equals(key)) {
-			value = String.valueOf(getSharedPreferences()
-					.getBoolean(key, false));
-		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
-			ListPreference l = (ListPreference) findPreference(key);
+		Preference p = findPreference(key);
+		if (p instanceof EditTextPreference) {
+			value = notEmpty(sharedPreferences.getString(key, null));
+		} else if (p instanceof CheckBoxPreference) {
+			value = String.valueOf(sharedPreferences.getBoolean(key, false));
+		} else if (p instanceof ListPreference) {
+			ListPreference l = (ListPreference) p;
 			value = l.getValue();
 		}
+
 		getPrefs().put(key, value);
 		getPrefs().commit();
 		updateLabel(key);
