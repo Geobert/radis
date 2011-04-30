@@ -49,7 +49,11 @@ public class RadisConfiguration extends PreferenceActivity implements
 		super.onCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.preferences);
-		mAccountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
+		//mAccountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
+		//initAccountChoices();
+	}
+
+	private void initAccountChoices() {
 		CommonDbAdapter dbHelper = CommonDbAdapter.getInstance(this);
 		dbHelper.open();
 		Cursor accounts = dbHelper.fetchAllAccounts();
@@ -71,7 +75,7 @@ public class RadisConfiguration extends PreferenceActivity implements
 		}
 		accounts.close();
 	}
-
+	
 	private void updateLabel(String key) {
 		String summary = null;
 		String value;
@@ -108,23 +112,24 @@ public class RadisConfiguration extends PreferenceActivity implements
 		EditTextPreference ep = (EditTextPreference) findPreference(KEY_INSERTION_DATE);
 		ep.getEditText().setText(value);
 
-		final boolean b = getPrefs().getBoolean(KEY_AUTOSTART_ACCOUNT, false)
-				.booleanValue();
-		CheckBoxPreference chk = (CheckBoxPreference) findPreference(KEY_AUTOSTART_ACCOUNT);
-		chk.setChecked(b);
-
-		value = getPrefs().getString(KEY_DEFAULT_ACCOUNT);
-		if (value != null) {
-			for (CharSequence s : mAccountsChoice.getEntryValues()) {
-				if (value.equals(s)) {
-					mAccountsChoice.setValue(s.toString());
-				}
-			}
-		}
+		// final boolean b = getPrefs().getBoolean(KEY_AUTOSTART_ACCOUNT, false)
+		// .booleanValue();
+		// CheckBoxPreference chk = (CheckBoxPreference)
+		// findPreference(KEY_AUTOSTART_ACCOUNT);
+		// chk.setChecked(b);
+		//
+		// value = getPrefs().getString(KEY_DEFAULT_ACCOUNT);
+		// if (value != null) {
+		// for (CharSequence s : mAccountsChoice.getEntryValues()) {
+		// if (value.equals(s)) {
+		// mAccountsChoice.setValue(s.toString());
+		// }
+		// }
+		// }
 
 		updateLabel(KEY_INSERTION_DATE);
-		updateLabel(KEY_AUTOSTART_ACCOUNT);
-		updateLabel(KEY_DEFAULT_ACCOUNT);
+		// updateLabel(KEY_AUTOSTART_ACCOUNT);
+		// updateLabel(KEY_DEFAULT_ACCOUNT);
 		getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 	}
 
