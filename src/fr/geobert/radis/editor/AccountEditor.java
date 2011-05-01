@@ -1,5 +1,6 @@
 package fr.geobert.radis.editor;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Currency;
@@ -37,7 +38,7 @@ public class AccountEditor extends Activity {
 		if (!Formater.isInit()) {
 			Formater.init();
 		}
-		
+
 		setContentView(R.layout.account_creation);
 		setTitle(R.string.account_edit);
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
@@ -75,7 +76,8 @@ public class AccountEditor extends Activity {
 					setResult(RESULT_OK);
 					saveState();
 					finish();
-					AccountEditor.this.overridePendingTransition(R.anim.enter_from_right, 0);
+					AccountEditor.this.overridePendingTransition(
+							R.anim.enter_from_right, 0);
 				} else {
 					Tools.popError(AccountEditor.this, errMsg.toString(), null);
 				}
@@ -86,7 +88,8 @@ public class AccountEditor extends Activity {
 			public void onClick(View view) {
 				setResult(RESULT_CANCELED);
 				finish();
-				AccountEditor.this.overridePendingTransition(R.anim.enter_from_right, 0);
+				AccountEditor.this.overridePendingTransition(
+						R.anim.enter_from_right, 0);
 			}
 		});
 
@@ -122,15 +125,15 @@ public class AccountEditor extends Activity {
 		if (mRowId != null) {
 			Cursor account = mDbHelper.fetchAccount(mRowId);
 			startManagingCursor(account);
-			mAccountNameText
-					.setText(account.getString(account
-							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME)));
-			mAccountDescText
-					.setText(account.getString(account
-							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_DESC)));
-			mAccountStartSumText
-					.setText(Formater.SUM_FORMAT.format(account.getDouble(account
-							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM))));
+			mAccountNameText.setText(account.getString(account
+					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME)));
+			mAccountDescText.setText(account.getString(account
+					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_DESC)));
+			BigDecimal d = new BigDecimal(
+					account.getLong(account
+							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM)))
+					.movePointLeft(2);
+			mAccountStartSumText.setText(Formater.SUM_FORMAT.format(d.doubleValue()));
 			String currencyStr = account
 					.getString(account
 							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_CURRENCY));
@@ -185,18 +188,16 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onPause() {
 		super.onPause();
-		//mDbHelper.close();
+		// mDbHelper.close();
 	}
+
 	private void saveState() {
 		String name = mAccountNameText.getText().toString().trim();
 		String desc = mAccountDescText.getText().toString().trim();
-		double startSum = 0;
-		try {
-			startSum = Formater.SUM_FORMAT.parse(
-					mAccountStartSumText.getText().toString()).doubleValue();
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		long startSum = 0;
+		BigDecimal d = new BigDecimal(mAccountStartSumText.getText().toString())
+				.movePointRight(2);
+		startSum = d.longValue();
 		String currency = mAccountCurrency.getSelectedItem().toString();
 		if (mRowId == null) {
 			long id = mDbHelper.createAccount(name, desc, startSum, currency);

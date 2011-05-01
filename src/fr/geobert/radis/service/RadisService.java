@@ -55,14 +55,14 @@ public class RadisService extends IntentService {
 			final long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonth = insertionDate.get(Calendar.MONTH);
 
-			HashMap<Long, Double> sumsPerAccount = new LinkedHashMap<Long, Double>();
+			HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
 
 			do {
 				final long opRowId = c.getLong(c.getColumnIndex("_id"));
 				ScheduledOperation op = new ScheduledOperation(c);
 				final Long accountId = Long.valueOf(op.mAccountId);
-				double sum = 0;
+				long sum = 0;
 				boolean needUpdate = false;
 				if (!op.isObsolete(todayInMillis)) {
 					// insert past missed insertion
@@ -89,9 +89,9 @@ public class RadisService extends IntentService {
 					}
 				}
 				if (needUpdate) {
-					Double curSum = sumsPerAccount.get(accountId);
+					Long curSum = sumsPerAccount.get(accountId);
 					if (curSum == null) {
-						curSum = Double.valueOf(0);
+						curSum = Long.valueOf(0);
 					}
 					sumsPerAccount.put(accountId, curSum + sum);
 				}
@@ -99,9 +99,9 @@ public class RadisService extends IntentService {
 			boolean needUpdate = false;
 			Long[] accountIds = sumsPerAccount.keySet().toArray(
 					new Long[sumsPerAccount.size()]);
-			for (HashMap.Entry<Long, Double> e : sumsPerAccount.entrySet()) {
+			for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
 				needUpdate = true;
-				updateAccountSum(e.getValue().doubleValue(), e.getKey()
+				updateAccountSum(e.getValue().longValue(), e.getKey()
 						.longValue(), greatestDatePerAccount.get(e.getKey()));
 			}
 			if (needUpdate) {
@@ -113,10 +113,10 @@ public class RadisService extends IntentService {
 		c.close();
 	}
 
-	private void updateAccountSum(final double sumToAdd, final long accountId,
+	private void updateAccountSum(final long sumToAdd, final long accountId,
 			final long date) {
 		Cursor accountCursor = mDbHelper.fetchAccount(accountId);
-		double curSum = accountCursor.getDouble(accountCursor
+		long curSum = accountCursor.getLong(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		mDbHelper.updateOpSum(accountId, curSum + sumToAdd);
 		final long curDate = accountCursor.getLong(accountCursor
@@ -129,7 +129,7 @@ public class RadisService extends IntentService {
 		accountCursor.close();
 	}
 
-	private double insertSchOp(ScheduledOperation op, final long opRowId) {
+	private long insertSchOp(ScheduledOperation op, final long opRowId) {
 		final long accountId = op.mAccountId;
 		op.mScheduledId = opRowId;
 		mDbHelper.createOp(op, accountId);

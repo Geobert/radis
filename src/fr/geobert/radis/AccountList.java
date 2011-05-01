@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
 
@@ -196,13 +197,14 @@ public class AccountList extends ListActivity implements RadisListActivity {
 
 			if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) {
 				TextView textView = ((TextView) view);
-				double sum = cursor.getDouble(columnIndex);
-				if (sum < 0.0) {
+				long sum = cursor.getLong(columnIndex);
+				if (sum < 0) {
 					textView.setTextColor(res.getColor(R.color.op_alert));
 				} else {
 					textView.setTextColor(res.getColor(R.color.positiveSum));
 				}
-				String txt = Formater.SUM_FORMAT.format(Double.valueOf(sum));
+				BigDecimal d = new BigDecimal(sum).movePointLeft(2);
+				String txt = Formater.SUM_FORMAT.format(d.doubleValue());
 				textView.setText(txt
 						+ " "
 						+ Currency

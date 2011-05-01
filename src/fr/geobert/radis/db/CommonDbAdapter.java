@@ -24,7 +24,7 @@ import fr.geobert.radis.ScheduledOperation;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 6;
+	protected static final int DATABASE_VERSION = 7;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -46,10 +46,10 @@ public class CommonDbAdapter {
 			+ DATABASE_ACCOUNT_TABLE + "(" + KEY_ACCOUNT_ROWID
 			+ " integer primary key autoincrement, " + KEY_ACCOUNT_NAME
 			+ " text not null, " + KEY_ACCOUNT_DESC + " text not null, "
-			+ KEY_ACCOUNT_START_SUM + " real not null, " + KEY_ACCOUNT_OP_SUM
-			+ " real not null, " + KEY_ACCOUNT_CUR_SUM + " real not null, "
-			+ KEY_ACCOUNT_CUR_SUM_DATE + " integer not null, "
-			+ KEY_ACCOUNT_CURRENCY + " text not null);";
+			+ KEY_ACCOUNT_START_SUM + " integer not null, "
+			+ KEY_ACCOUNT_OP_SUM + " integer not null, " + KEY_ACCOUNT_CUR_SUM
+			+ " integer not null, " + KEY_ACCOUNT_CUR_SUM_DATE
+			+ " integer not null, " + KEY_ACCOUNT_CURRENCY + " text not null);";
 
 	public static final String KEY_THIRD_PARTY_ROWID = "_id";
 	public static final String KEY_THIRD_PARTY_NAME = "third_party_name";
@@ -95,7 +95,7 @@ public class CommonDbAdapter {
 			+ DATABASE_SCHEDULED_TABLE + "(" + KEY_SCHEDULED_ROWID
 			+ " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY
 			+ " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
-			+ " real not null, " + KEY_SCHEDULED_ACCOUNT_ID
+			+ " integer not null, " + KEY_SCHEDULED_ACCOUNT_ID
 			+ " integer not null, " + KEY_OP_MODE + " integer, " + KEY_OP_DATE
 			+ " integer not null, " + KEY_SCHEDULED_END_DATE + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY + " integer, "
@@ -111,7 +111,7 @@ public class CommonDbAdapter {
 			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID
 			+ " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY
 			+ " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
-			+ " real not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
+			+ " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
 			+ KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, "
 			+ KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID
 			+ " integer, FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES "
@@ -389,6 +389,81 @@ public class CommonDbAdapter {
 				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+			case 6:
+				db.execSQL("DROP TRIGGER on_delete_third_party");
+				db.execSQL("DROP TRIGGER on_delete_mode");
+				db.execSQL("DROP TRIGGER on_delete_tag");
+
+				db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
+				db.execSQL("ALTER TABLE scheduled_ops RENAME TO scheduled_ops_old;");
+				db.execSQL("ALTER TABLE accounts RENAME TO accounts_old;");
+				db.execSQL(DATABASE_ACCOUNT_CREATE);
+				db.execSQL(DATABASE_SCHEDULED_CREATE);
+				db.execSQL(DATABASE_OP_CREATE);
+
+				db.execSQL("INSERT INTO accounts ("
+						+ KEY_ACCOUNT_CUR_SUM
+						+ ", "
+						+ KEY_ACCOUNT_CUR_SUM_DATE
+						+ ", "
+						+ KEY_ACCOUNT_CURRENCY
+						+ ", "
+						+ KEY_ACCOUNT_DESC
+						+ ", "
+						+ KEY_ACCOUNT_NAME
+						+ ", "
+						+ KEY_ACCOUNT_OP_SUM
+						+ ", "
+						+ KEY_ACCOUNT_START_SUM
+						+ ") SELECT ROUND(old.account_current_sum, 2) * 100, old.account_current_sum_date, old.account_currency, old.account_desc, old.account_name, ROUND(old.account_operations_sum, 2) * 100, ROUND(old.account_start_sum, 2) * 100 FROM accounts_old old;");
+
+				db.execSQL("INSERT INTO operations ("
+						+ KEY_OP_ACCOUNT_ID
+						+ ", "
+						+ KEY_OP_THIRD_PARTY
+						+ ", "
+						+ KEY_OP_TAG
+						+ ", "
+						+ KEY_OP_SUM
+						+ ", "
+						+ KEY_OP_MODE
+						+ ", "
+						+ KEY_OP_DATE
+						+ ", "
+						+ KEY_OP_SCHEDULED_ID
+						+ ", "
+						+ KEY_OP_NOTES
+						+ ") SELECT old.account_id, old.third_party, old.tag, ROUND(old.sum, 2) * 100, old.mode, old.date, old.scheduled_id, old.notes FROM operations_old old;");
+
+				db.execSQL("INSERT INTO scheduled_ops ("
+						+ KEY_OP_THIRD_PARTY
+						+ ", "
+						+ KEY_OP_TAG
+						+ ", "
+						+ KEY_OP_SUM
+						+ ", "
+						+ KEY_OP_MODE
+						+ ", "
+						+ KEY_OP_DATE
+						+ ", "
+						+ KEY_OP_NOTES
+						+ ", "
+						+ KEY_SCHEDULED_ACCOUNT_ID
+						+ ", "
+						+ KEY_SCHEDULED_END_DATE
+						+ ", "
+						+ KEY_SCHEDULED_PERIODICITY
+						+ ", "
+						+ KEY_SCHEDULED_PERIODICITY_UNIT
+						+ ") SELECT old.third_party, old.tag, ROUND(old.sum, 2) * 100, old.mode, old.date, old.notes, old.scheduled_account_id, old.end_date, old.periodicity, old.periodicity_units FROM scheduled_ops_old old;");
+
+				db.execSQL("DROP TABLE accounts_old;");
+				db.execSQL("DROP TABLE operations_old;");
+				db.execSQL("DROP TABLE scheduled_ops_old;");
+				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
+				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+				break;
 			default:
 				break;
 			}
@@ -449,7 +524,7 @@ public class CommonDbAdapter {
 				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, mThirdPartiesMap);
 	}
 
-	public long createAccount(String name, String desc, double start_sum,
+	public long createAccount(String name, String desc, long start_sum,
 			String currency) {
 		ContentValues initialValues = new ContentValues();
 		initialValues.put(KEY_ACCOUNT_NAME, name);
@@ -478,12 +553,13 @@ public class CommonDbAdapter {
 		return c;
 	}
 
-	public Cursor fetchAccount(long rowId) throws SQLException {
+	public Cursor fetchAccount(long accountId) throws SQLException {
 		mCurAccount = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_DESC,
 				KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_OP_SUM,
 				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE },
-				KEY_ACCOUNT_ROWID + "=" + rowId, null, null, null, null, null);
+				KEY_ACCOUNT_ROWID + "=" + accountId, null, null, null, null,
+				null);
 		Cursor c = mCurAccount;
 		if (c != null) {
 			c.moveToFirst();
@@ -492,39 +568,39 @@ public class CommonDbAdapter {
 
 	}
 
-	public boolean updateAccount(long rowId, String name, String desc,
-			double start_sum, String currency) {
+	public boolean updateAccount(long accountId, String name, String desc,
+			long start_sum, String currency) {
 		ContentValues args = new ContentValues();
 		args.put(KEY_ACCOUNT_NAME, name);
 		args.put(KEY_ACCOUNT_DESC, desc);
 		args.put(KEY_ACCOUNT_START_SUM, start_sum);
 		args.put(KEY_ACCOUNT_CURRENCY, currency);
 		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
-				+ rowId, null) > 0;
+				+ accountId, null) > 0;
 	}
 
-	public boolean updateOpSum(long rowId, double newSum) {
+	public boolean updateOpSum(long accountId, long newSum) {
 		ContentValues args = new ContentValues();
 		args.put(KEY_ACCOUNT_OP_SUM, newSum);
 		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
-				+ rowId, null) > 0;
+				+ accountId, null) > 0;
 	}
 
-	public double updateCurrentSum(long rowId, long date) {
-		Cursor account = fetchAccount(rowId);
-		double start = account.getDouble(account
+	public long updateCurrentSum(long accountId, long date) {
+		Cursor account = fetchAccount(accountId);
+		long start = account.getLong(account
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
-		double opSum = account.getDouble(account
+		long opSum = account.getLong(account
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		account.close();
 		ContentValues args = new ContentValues();
-		double curSum = start + opSum;
+		long curSum = start + opSum;
 		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
 		if (0 != date) {
 			args.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 		}
 		mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
-				+ rowId, null);
+				+ accountId, null);
 		return curSum;
 	}
 
@@ -628,6 +704,12 @@ public class CommonDbAdapter {
 		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
 				null, OP_ORDERING, Integer.toString(nbOps));
+	}
+
+	public Cursor fetchAllOps(final long accountId) {
+		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
+				null, OP_ORDERING, null);
 	}
 
 	public Cursor fetchOneOp(final long rowId, final long accountId) {
@@ -899,4 +981,31 @@ public class CommonDbAdapter {
 		}
 		return false;
 	}
+
+	public void consolidateSums() {
+		final long accountId = mAccountId;
+		if (0 != accountId) {
+			Cursor c = fetchAccount(accountId);
+			final long startSum = c.getLong(c
+					.getColumnIndex(KEY_ACCOUNT_START_SUM));
+			final long opSum = c.getLong(c
+					.getColumnIndex(KEY_ACCOUNT_OP_SUM));
+			final long curSum = c.getLong(c
+					.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+			c.close();
+			long recalculatedOpSum = 0;
+			c = fetchAllOps(accountId);
+			if (null != c) {
+				if (c.moveToFirst()) {
+					do {
+						recalculatedOpSum += c.getDouble(c
+								.getColumnIndex(KEY_OP_SUM));
+					} while (c.moveToNext());
+					long newCurSum = startSum + recalculatedOpSum;
+					// updateOpSum(accountId, recalculatedOpSum);
+				}
+			}
+		}
+	}
+
 }

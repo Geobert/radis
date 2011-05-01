@@ -161,13 +161,13 @@ public class ScheduledOperation extends Operation {
 				.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
 		int nbDeleted = dbHelper.deleteAllOccurrences(accountId, schOpId);
 		// update account op sum, current sum and current date
-		final double total = nbDeleted
-				* schOp.getDouble(schOp
+		final long total = nbDeleted
+				* schOp.getLong(schOp
 						.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		schOp.close();
 		Cursor accountCursor = dbHelper.fetchAccount(accountId);
 
-		final double curSum = accountCursor.getDouble(accountCursor
+		final long curSum = accountCursor.getLong(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		accountCursor.close();
 		dbHelper.updateOpSum(accountId, curSum - total);
@@ -182,12 +182,12 @@ public class ScheduledOperation extends Operation {
 	}
 
 	public static void updateAllOccurences(CommonDbAdapter dbHelper,
-			final ScheduledOperation op, final double prevSum, final long rowId) {
+			final ScheduledOperation op, final long prevSum, final long rowId) {
 		final long accountId = op.mAccountId;
 		int nbUpdated = dbHelper.updateAllOccurrences(accountId, rowId, op);
-		double sumToAdd = nbUpdated * (op.mSum - prevSum);
+		long sumToAdd = nbUpdated * (op.mSum - prevSum);
 		Cursor accountCursor = dbHelper.fetchAccount(accountId);
-		double curSum = accountCursor.getDouble(accountCursor
+		long curSum = accountCursor.getLong(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		dbHelper.updateOpSum(accountId, curSum + sumToAdd);
 		Cursor opCur = dbHelper.fetchNLastOps(1, accountId);

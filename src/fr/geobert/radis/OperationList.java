@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import java.math.BigDecimal;
 import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
@@ -67,7 +68,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private MatrixCursor mLastOps = null;
 	private GregorianCalendar mLastSelectedDate;
 	private ImageView mLoadingIcon;
-	private AsyncTask<Void, Void, Double> mUpdateSumTask;
+	private AsyncTask<Void, Void, Long> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
 	private AdapterContextMenuInfo mOpToDelete = null;
@@ -315,7 +316,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	}
 
 	private void updateSumsAndSelection() throws Exception {
-		double curSum = getAccountCurSum();
+		long curSum = getAccountCurSum();
 		Cursor c = mLastOps;
 		c.requery();
 		c.moveToFirst();
@@ -484,9 +485,9 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		if (c.moveToFirst()) {
 			do {
 				Object[] values = { new Long(c.getLong(0)), c.getString(1),
-						c.getString(2), c.getString(3),
-						new Double(c.getDouble(4)), new Long(c.getLong(5)),
-						c.getString(7), new Long(c.getLong(8)) };
+						c.getString(2), c.getString(3), new Long(c.getLong(4)),
+						new Long(c.getLong(5)), c.getString(7),
+						new Long(c.getLong(8)) };
 				lo.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -534,39 +535,39 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private void deleteOp(AdapterContextMenuInfo info) throws Exception {
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
-		double sum = c.getDouble(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-		updateSums(sum, 0.0);
+		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+		updateSums(sum, 0L);
 		mDbHelper.deleteOp(info.id);
 	}
 
 	// generic function for getAccountOpSum and getAccountCurSum
-	private double getAccountSum(String col) throws Exception {
+	private long getAccountSum(String col) throws Exception {
 		Cursor c = mCurAccount;
 		if ((!c.isClosed()) && c.requery() && c.moveToFirst()) {
-			return c.getDouble(c.getColumnIndexOrThrow(col));
+			return c.getLong(c.getColumnIndexOrThrow(col));
 		} else {
 			mCurAccount = mDbHelper.fetchAccount(mAccountId);
 			startManagingCursor(mCurAccount);
 			c = mCurAccount;
-			return c.getDouble(c.getColumnIndex(col));
+			return c.getLong(c.getColumnIndex(col));
 		}
 	}
 
-	private double getAccountOpSum() throws Exception {
+	private long getAccountOpSum() throws Exception {
 		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_OP_SUM);
 	}
 
-	private double getAccountCurSum() throws Exception {
+	private long getAccountCurSum() throws Exception {
 		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM);
 	}
 
-	private double computeSumFromCursor(Cursor c) {
-		double sum = 0.0;
+	private long computeSumFromCursor(Cursor c) {
+		long sum = 0L;
 		if (null != c && !c.isBeforeFirst() && !c.isAfterLast()) {
 			boolean hasNext = c.moveToPrevious();
 			while (hasNext) {
-				double s = c.getDouble(c
-						.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+				long s = c
+						.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 				sum = sum + s;
 				hasNext = c.moveToPrevious();
 			}
@@ -592,24 +593,24 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	private void updateSums(Intent data) throws Exception {
 		Bundle extras = data.getExtras();
-		updateSums(extras.getDouble("oldSum"), extras.getDouble("sum"));
+		updateSums(extras.getLong("oldSum"), extras.getLong("sum"));
 	}
 
-	private void updateSums(double oldSum, double sum) throws Exception {
-		double opSum = getAccountOpSum();
+	private void updateSums(long oldSum, long sum) throws Exception {
+		long opSum = getAccountOpSum();
 		opSum = opSum - oldSum + sum;
 		if (mDbHelper.updateOpSum(mAccountId, opSum)) {
 			Cursor c = mLastOps;
 			c.requery();
 			c.moveToFirst();
-			double curSum = mDbHelper.updateCurrentSum(mAccountId, c.getLong(c
+			long curSum = mDbHelper.updateCurrentSum(mAccountId, c.getLong(c
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_DATE)));
 			updateFutureSumDisplay(curSum, c);
 			updateSumAtDateDisplay(null, curSum);
 		}
 	}
 
-	private void updateFutureSumDisplay(double curSum, Cursor c) {
+	private void updateFutureSumDisplay(long curSum, Cursor c) {
 		TextView t = (TextView) findViewById(R.id.future_sum);
 		if (c.isFirst()) {
 			Operation latestOp = new Operation(c); // to use existing formatter
@@ -621,7 +622,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		}
 	}
 
-	private void updateSumAtDateDisplay(GregorianCalendar date, double curSum) {
+	private void updateSumAtDateDisplay(GregorianCalendar date, long curSum) {
 		// TODO maybe no need date param as we use this function only with
 		// current time
 		if (null == date) {
@@ -698,16 +699,16 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		}
 	}
 
-	private void updateSumAtSelectedOpDisplay(Cursor data, double accountCurSum) {
+	private void updateSumAtSelectedOpDisplay(Cursor data, long accountCurSum) {
 		if (null != data) {
 			int position = data.getPosition();
 			mLastSelectedPosition = position;
 			selectOpAndAdjustOffset(getListView(), position);
 			TextView t = (TextView) findViewById(R.id.date_sum);
-			t.setText(String.format(
-					getString(R.string.sum_at_selection),
-					Formater.SUM_FORMAT.format(accountCurSum
-							- computeSumFromCursor(data))));
+			BigDecimal d = new BigDecimal(accountCurSum
+					- computeSumFromCursor(data)).movePointLeft(2);
+			t.setText(String.format(getString(R.string.sum_at_selection),
+					Formater.SUM_FORMAT.format(d.doubleValue())));
 		}
 	}
 
