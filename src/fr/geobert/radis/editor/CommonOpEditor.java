@@ -1,6 +1,7 @@
 package fr.geobert.radis.editor;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.HashMap;
 
@@ -49,7 +50,7 @@ public abstract class CommonOpEditor extends Activity {
 	protected CorrectCommaWatcher mSumTextWatcher;
 	protected boolean mOnRestore = false;
 	public String mCurrentInfoTable;
-	protected double mPreviousSum = 0.0;
+	protected long mPreviousSum = 0L;
 
 	// abstract methods
 	protected abstract void setView();
@@ -351,7 +352,7 @@ public abstract class CommonOpEditor extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		outState.putDouble("previousSum", mPreviousSum);
+		outState.putLong("previousSum", mPreviousSum);
 		mOnRestore = true;
 	}
 
@@ -367,6 +368,6 @@ public abstract class CommonOpEditor extends Activity {
 		}
 		populateFields();
 		mOnRestore = true;
-		mPreviousSum = savedInstanceState.getDouble("previousSum");
+		mPreviousSum = savedInstanceState.getLong("previousSum");
 	}
 }

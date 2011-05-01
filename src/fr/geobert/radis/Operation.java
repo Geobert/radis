@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -17,7 +18,7 @@ public class Operation implements Parcelable {
 	public String mTag;
 	public String mMode;
 	public String mNotes;
-	public double mSum;
+	public long mSum;
 	public long mScheduledId;
 
 	public Operation(Operation op) {
@@ -45,7 +46,7 @@ public class Operation implements Parcelable {
 		if (null == mTag) {
 			mTag = "";
 		}
-		mSum = op.getDouble(op
+		mSum = op.getLong(op
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_SUM));
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getLong(op
@@ -65,7 +66,7 @@ public class Operation implements Parcelable {
 	public Operation() {
 		mDate = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(mDate);
-		mSum = 0.0d;
+		mSum = 0L;
 		mThirdParty = "";
 		mMode = "";
 		mTag = "";
@@ -133,11 +134,13 @@ public class Operation implements Parcelable {
 	}
 
 	public String getSumStr() {
-		return Formater.SUM_FORMAT.format(mSum);
+		BigDecimal d = new BigDecimal(mSum).movePointLeft(2);
+		return Formater.SUM_FORMAT.format(d.doubleValue());
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
-		mSum = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
+		BigDecimal d = new BigDecimal(sumStr).movePointRight(2);
+		mSum = d.longValue();
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {
@@ -159,7 +162,7 @@ public class Operation implements Parcelable {
 		dest.writeString(mTag);
 		dest.writeString(mMode);
 		dest.writeString(mNotes);
-		dest.writeDouble(mSum);
+		dest.writeLong(mSum);
 		dest.writeLong(mScheduledId);
 	}
 
@@ -171,7 +174,7 @@ public class Operation implements Parcelable {
 		mTag = in.readString();
 		mMode = in.readString();
 		mNotes = in.readString();
-		mSum = in.readDouble();
+		mSum = in.readLong();
 		mScheduledId = in.readLong();
 	}
 
