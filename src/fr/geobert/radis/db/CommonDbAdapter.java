@@ -988,10 +988,9 @@ public class CommonDbAdapter {
 			Cursor c = fetchAccount(accountId);
 			final long startSum = c.getLong(c
 					.getColumnIndex(KEY_ACCOUNT_START_SUM));
-			final long opSum = c.getLong(c
-					.getColumnIndex(KEY_ACCOUNT_OP_SUM));
-			final long curSum = c.getLong(c
-					.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+			final long opSum = c.getLong(c.getColumnIndex(KEY_ACCOUNT_OP_SUM));
+			final long curSum = c
+					.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
 			c.close();
 			long recalculatedOpSum = 0;
 			c = fetchAllOps(accountId);
@@ -1002,7 +1001,8 @@ public class CommonDbAdapter {
 								.getColumnIndex(KEY_OP_SUM));
 					} while (c.moveToNext());
 					long newCurSum = startSum + recalculatedOpSum;
-					// updateOpSum(accountId, recalculatedOpSum);
+					updateOpSum(accountId, recalculatedOpSum);
+					updateCurrentSum(accountId, 0);
 				}
 			}
 		}

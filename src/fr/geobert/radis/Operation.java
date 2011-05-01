@@ -139,7 +139,7 @@ public class Operation implements Parcelable {
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
-		BigDecimal d = new BigDecimal(sumStr).movePointRight(2);
+		BigDecimal d = new BigDecimal(sumStr.replace(',', '.')).movePointRight(2);
 		mSum = d.longValue();
 	}
 

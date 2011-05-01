@@ -268,7 +268,7 @@ public class Tools {
 	public static Dialog getDebugDialog(final Context context,
 			CommonDbAdapter dB) {
 		final CharSequence[] items = { "Trash DB", "Restart",
-				"Install RadisService" };
+				"Install RadisService", "Recompute sums" };
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -292,6 +292,9 @@ public class Tools {
 							InstallRadisServiceReceiver.class);
 					i.setAction(Tools.INTENT_RADIS_STARTED);
 					context.sendBroadcast(i);
+					break;
+				case 3:
+					mDb.consolidateSums();
 					break;
 				}
 			}
