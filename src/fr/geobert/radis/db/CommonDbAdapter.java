@@ -291,7 +291,7 @@ public class CommonDbAdapter {
 		return mInstance;
 	}
 
-	protected static class DatabaseHelper extends SQLiteOpenHelper {
+	protected class DatabaseHelper extends SQLiteOpenHelper {
 
 		DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -533,6 +533,16 @@ public class CommonDbAdapter {
 				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+
+				c = db.query(DATABASE_ACCOUNT_TABLE,
+						new String[] { KEY_ACCOUNT_ROWID }, null, null, null,
+						null, null);
+				if (null != c && c.moveToFirst()) {
+					do {
+						CommonDbAdapter.this.consolidateSums(c.getLong(0), db);
+					} while (c.moveToNext());
+					c.close();
+				}
 				break;
 			default:
 				break;
@@ -1053,24 +1063,23 @@ public class CommonDbAdapter {
 	}
 
 	public void consolidateSums() {
-		consolidateSums(mAccountId);
+		consolidateSums(mAccountId, null);
 	}
 
-	private void consolidateSums(final long accountId) {
+	private void consolidateSums(final long accountId, SQLiteDatabase db) {
 		if (0 != accountId) {
-			Cursor c = fetchAccount(accountId);
-			c.close();
+			if (null != db) {
+				mDb = db;
+			}
 			long recalculatedOpSum = 0;
-			c = fetchAllOps(accountId);
-			if (null != c) {
-				if (c.moveToFirst()) {
-					do {
-						recalculatedOpSum += c.getDouble(c
-								.getColumnIndex(KEY_OP_SUM));
-					} while (c.moveToNext());
-					updateOpSum(accountId, recalculatedOpSum);
-					updateCurrentSum(accountId, 0);
-				}
+			Cursor c = fetchAllOps(accountId);
+			if (null != c && c.moveToFirst()) {
+				do {
+					recalculatedOpSum += c.getDouble(c
+							.getColumnIndex(KEY_OP_SUM));
+				} while (c.moveToNext());
+				updateOpSum(accountId, recalculatedOpSum);
+				updateCurrentSum(accountId, 0);
 			}
 		}
 	}
