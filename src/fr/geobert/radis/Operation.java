@@ -134,12 +134,11 @@ public class Operation implements Parcelable {
 	}
 
 	public String getSumStr() {
-		BigDecimal d = new BigDecimal(mSum).movePointLeft(2);
-		return Formater.SUM_FORMAT.format(d.doubleValue());
+		return Formater.SUM_FORMAT.format(mSum / 100);
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
-		BigDecimal d = new BigDecimal(sumStr.replace(',', '.')).movePointRight(2);
+		BigDecimal d = new BigDecimal(Formater.SUM_FORMAT.parse(sumStr).doubleValue()).movePointRight(2);
 		mSum = d.longValue();
 	}
 

@@ -58,7 +58,8 @@ public class ScheduledOperation extends Operation {
 		mEndDate = new GregorianCalendar();
 		mEndDate.clear();
 		mPeriodicity = 0;
-		mPeriodicityUnit = 1; // default periodicity to MONTHLY, happens more often
+		mPeriodicityUnit = 1; // default periodicity to MONTHLY, happens more
+								// often
 	}
 
 	public ScheduledOperation(Parcel parcel) {
@@ -172,13 +173,11 @@ public class ScheduledOperation extends Operation {
 		accountCursor.close();
 		dbHelper.updateOpSum(accountId, curSum - total);
 		Cursor lastOp = dbHelper.fetchNLastOps(1, accountId);
-		if (null != lastOp) {
-			lastOp.moveToFirst();
+		if (null != lastOp && lastOp.moveToFirst()) {
+			dbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
+					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+			lastOp.close();
 		}
-
-		dbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
-				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-		lastOp.close();
 	}
 
 	public static void updateAllOccurences(CommonDbAdapter dbHelper,
@@ -191,20 +190,19 @@ public class ScheduledOperation extends Operation {
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
 		dbHelper.updateOpSum(accountId, curSum + sumToAdd);
 		Cursor opCur = dbHelper.fetchNLastOps(1, accountId);
-		if (null != opCur) {
-			opCur.moveToFirst();
+		if (null != opCur && opCur.moveToFirst()) {
+			final long date = opCur.getLong(opCur
+					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+			final long curDate = accountCursor.getLong(accountCursor
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
+			if (date > curDate) {
+				dbHelper.updateCurrentSum(accountId, date);
+			} else {
+				dbHelper.updateCurrentSum(accountId, 0);
+			}
+			accountCursor.close();
+			opCur.close();
 		}
-		final long date = opCur.getLong(opCur
-				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		final long curDate = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
-		if (date > curDate) {
-			dbHelper.updateCurrentSum(accountId, date);
-		} else {
-			dbHelper.updateCurrentSum(accountId, 0);
-		}
-		accountCursor.close();
-		opCur.close();
 	}
 
 	static public void addPeriodicityToDate(ScheduledOperation op) {

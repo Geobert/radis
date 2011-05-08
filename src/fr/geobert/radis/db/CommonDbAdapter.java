@@ -454,17 +454,15 @@ public class CommonDbAdapter {
 				if (null != c && c.moveToFirst()) {
 					do {
 						ContentValues initialValues = new ContentValues();
-						initialValues.put(KEY_OP_THIRD_PARTY, c.getInt(c
-								.getColumnIndex(KEY_OP_THIRD_PARTY)));
+						initialValues.put(KEY_OP_THIRD_PARTY,
+								c.getInt(c.getColumnIndex(KEY_OP_THIRD_PARTY)));
 						initialValues.put(KEY_OP_TAG,
 								c.getInt(c.getColumnIndex(KEY_OP_TAG)));
 						double d = c.getDouble(c.getColumnIndex(KEY_OP_SUM));
 						long l = Math.round(d * 100);
 						initialValues.put(KEY_OP_SUM, l);
-						initialValues
-								.put(KEY_SCHEDULED_ACCOUNT_ID,
-										c.getInt(c
-												.getColumnIndex(KEY_SCHEDULED_ACCOUNT_ID)));
+						initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, c.getInt(c
+								.getColumnIndex(KEY_SCHEDULED_ACCOUNT_ID)));
 						initialValues.put(KEY_OP_MODE,
 								c.getInt(c.getColumnIndex(KEY_OP_MODE)));
 						initialValues.put(KEY_OP_DATE,
@@ -519,12 +517,12 @@ public class CommonDbAdapter {
 								c.getInt(c.getColumnIndex(KEY_OP_MODE)));
 						initialValues.put(KEY_OP_DATE,
 								c.getLong(c.getColumnIndex(KEY_OP_DATE)));
-						initialValues
-								.put(KEY_OP_SCHEDULED_ID, c.getLong(c
-										.getColumnIndex(KEY_OP_SCHEDULED_ID)));
+						initialValues.put(KEY_OP_SCHEDULED_ID, c.getLong(c
+								.getColumnIndex(KEY_OP_SCHEDULED_ID)));
 						initialValues.put(KEY_OP_NOTES,
 								c.getString(c.getColumnIndex(KEY_OP_NOTES)));
-						db.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
+						db.insert(DATABASE_OPERATIONS_TABLE, null,
+								initialValues);
 					} while (c.moveToNext());
 					c.close();
 				}
@@ -1055,14 +1053,12 @@ public class CommonDbAdapter {
 	}
 
 	public void consolidateSums() {
-		final long accountId = mAccountId;
+		consolidateSums(mAccountId);
+	}
+
+	private void consolidateSums(final long accountId) {
 		if (0 != accountId) {
 			Cursor c = fetchAccount(accountId);
-			final long startSum = c.getLong(c
-					.getColumnIndex(KEY_ACCOUNT_START_SUM));
-			final long opSum = c.getLong(c.getColumnIndex(KEY_ACCOUNT_OP_SUM));
-			final long curSum = c
-					.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
 			c.close();
 			long recalculatedOpSum = 0;
 			c = fetchAllOps(accountId);
@@ -1072,7 +1068,6 @@ public class CommonDbAdapter {
 						recalculatedOpSum += c.getDouble(c
 								.getColumnIndex(KEY_OP_SUM));
 					} while (c.moveToNext());
-					long newCurSum = startSum + recalculatedOpSum;
 					updateOpSum(accountId, recalculatedOpSum);
 					updateCurrentSum(accountId, 0);
 				}

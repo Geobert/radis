@@ -190,6 +190,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	protected void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this, mAccountId);
+		assert null != mDbHelper;
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
