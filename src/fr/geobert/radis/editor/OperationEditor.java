@@ -96,7 +96,6 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
-		// TODO Auto-generated method stub
 		switch (id) {
 		case ASK_UPDATE_SCHEDULED_DIALOG_ID:
 			AlertDialog.Builder builder = new AlertDialog.Builder(this);

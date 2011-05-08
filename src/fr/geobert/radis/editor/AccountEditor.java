@@ -129,11 +129,9 @@ public class AccountEditor extends Activity {
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME)));
 			mAccountDescText.setText(account.getString(account
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_DESC)));
-			BigDecimal d = new BigDecimal(
-					account.getLong(account
-							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM)))
-					.movePointLeft(2);
-			mAccountStartSumText.setText(Formater.SUM_FORMAT.format(d.doubleValue()));
+			mAccountStartSumText
+					.setText(Formater.SUM_FORMAT.format(account.getLong(account
+							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM)) / 100.0d));
 			String currencyStr = account
 					.getString(account
 							.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_CURRENCY));
@@ -194,19 +192,26 @@ public class AccountEditor extends Activity {
 	private void saveState() {
 		String name = mAccountNameText.getText().toString().trim();
 		String desc = mAccountDescText.getText().toString().trim();
-		long startSum = 0;
-		BigDecimal d = new BigDecimal(mAccountStartSumText.getText().toString())
-				.movePointRight(2);
-		startSum = d.longValue();
-		String currency = mAccountCurrency.getSelectedItem().toString();
-		if (mRowId == null) {
-			long id = mDbHelper.createAccount(name, desc, startSum, currency);
-			if (id > 0) {
-				mRowId = id;
+		try {
+			long startSum = Math
+					.round(Formater.SUM_FORMAT.parse(
+							mAccountStartSumText.getText().toString())
+							.doubleValue() * 100);
+			String currency = mAccountCurrency.getSelectedItem().toString();
+			if (mRowId == null) {
+				long id = mDbHelper.createAccount(name, desc, startSum,
+						currency);
+				if (id > 0) {
+					mRowId = id;
+				}
+			} else {
+				mDbHelper.updateAccount(mRowId, name, desc, startSum, currency);
+				mDbHelper.updateCurrentSum(mRowId, 0);
 			}
-		} else {
-			mDbHelper.updateAccount(mRowId, name, desc, startSum, currency);
-			mDbHelper.updateCurrentSum(mRowId, 0);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
+
 	}
 }

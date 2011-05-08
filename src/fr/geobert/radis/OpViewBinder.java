@@ -1,9 +1,6 @@
 package fr.geobert.radis;
 
-import java.math.BigDecimal;
 import java.util.Date;
-
-import fr.geobert.radis.tools.Formater;
 
 import android.app.Activity;
 import android.content.res.Resources;
@@ -13,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import fr.geobert.radis.tools.Formater;
 
 public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 	protected Resources mRes;
@@ -42,8 +40,7 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 				textView.setTextColor(mRes.getColor(R.color.text_color));
 				i.setImageResource(R.drawable.arrow_down16);
 			}
-			BigDecimal d = new BigDecimal(sum).movePointLeft(2);
-			String txt = Formater.SUM_FORMAT.format(d.doubleValue());
+			String txt = Formater.SUM_FORMAT.format(sum / 100.0d);
 			textView.setText(txt);
 			return true;
 		} else if (colName.equals(mDateColName)) {

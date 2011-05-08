@@ -203,8 +203,7 @@ public class AccountList extends ListActivity implements RadisListActivity {
 				} else {
 					textView.setTextColor(res.getColor(R.color.positiveSum));
 				}
-				BigDecimal d = new BigDecimal(sum).movePointLeft(2);
-				String txt = Formater.SUM_FORMAT.format(d.doubleValue());
+				String txt = Formater.SUM_FORMAT.format(sum / 100.0d);
 				textView.setText(txt
 						+ " "
 						+ Currency

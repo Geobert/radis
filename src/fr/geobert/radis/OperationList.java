@@ -706,10 +706,10 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			mLastSelectedPosition = position;
 			selectOpAndAdjustOffset(getListView(), position);
 			TextView t = (TextView) findViewById(R.id.date_sum);
-			BigDecimal d = new BigDecimal(accountCurSum
-					- computeSumFromCursor(data)).movePointLeft(2);
-			t.setText(String.format(getString(R.string.sum_at_selection),
-					Formater.SUM_FORMAT.format(d.doubleValue())));
+			t.setText(String
+					.format(getString(R.string.sum_at_selection),
+							Formater.SUM_FORMAT
+									.format((accountCurSum - computeSumFromCursor(data)) / 100.0d)));
 		}
 	}
 

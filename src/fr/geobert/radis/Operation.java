@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -33,9 +32,8 @@ public class Operation implements Parcelable {
 	}
 
 	public Operation(Cursor op) {
-		mThirdParty = op
-				.getString(op
-						.getColumnIndexOrThrow(CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+		mThirdParty = op.getString(op
+				.getColumnIndexOrThrow(CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mMode = op.getString(op
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_MODE_NAME));
 		if (null == mMode) {
@@ -46,16 +44,14 @@ public class Operation implements Parcelable {
 		if (null == mTag) {
 			mTag = "";
 		}
-		mSum = op.getLong(op
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_SUM));
+		mSum = op.getLong(op.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_SUM));
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getLong(op
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_DATE)));
 		Tools.clearTimeOfCalendar(mDate);
 		mNotes = op.getString(op
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_NOTES));
-		final int idx = op
-				.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID);
+		final int idx = op.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID);
 		if (idx >= 0) {
 			mScheduledId = op.getLong(idx);
 		} else {
@@ -134,12 +130,12 @@ public class Operation implements Parcelable {
 	}
 
 	public String getSumStr() {
-		return Formater.SUM_FORMAT.format(mSum / 100);
+		return Formater.SUM_FORMAT.format(mSum / 100.0d);
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
-		BigDecimal d = new BigDecimal(Formater.SUM_FORMAT.parse(sumStr).doubleValue()).movePointRight(2);
-		mSum = d.longValue();
+		double d = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
+		mSum = Math.round(d * 100);
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {
