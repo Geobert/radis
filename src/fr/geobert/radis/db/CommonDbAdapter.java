@@ -394,68 +394,140 @@ public class CommonDbAdapter {
 				db.execSQL("DROP TRIGGER on_delete_mode");
 				db.execSQL("DROP TRIGGER on_delete_tag");
 
-				db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
-				db.execSQL("ALTER TABLE scheduled_ops RENAME TO scheduled_ops_old;");
 				db.execSQL("ALTER TABLE accounts RENAME TO accounts_old;");
 				db.execSQL(DATABASE_ACCOUNT_CREATE);
+				Cursor c = db.query("accounts_old", new String[] {
+						KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME,
+						KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY,
+						KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_DESC,
+						KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_START_SUM }, null,
+						null, null, null, null);
+				if (null != c && c.moveToFirst()) {
+					do {
+						ContentValues initialValues = new ContentValues();
+						initialValues
+								.put(KEY_ACCOUNT_NAME, c.getString(c
+										.getColumnIndex(KEY_ACCOUNT_NAME)));
+						initialValues
+								.put(KEY_ACCOUNT_DESC, c.getString(c
+										.getColumnIndex(KEY_ACCOUNT_DESC)));
+						double d = c.getDouble(c
+								.getColumnIndex(KEY_ACCOUNT_START_SUM));
+						long l = Math.round(d * 100);
+						initialValues.put(KEY_ACCOUNT_START_SUM, l);
+						d = c.getDouble(c.getColumnIndex(KEY_ACCOUNT_OP_SUM));
+						l = Math.round(d * 100);
+						initialValues.put(KEY_ACCOUNT_OP_SUM, l);
+						d = c.getDouble(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+						l = Math.round(d * 100);
+						initialValues.put(KEY_ACCOUNT_CUR_SUM, l);
+						initialValues.put(KEY_ACCOUNT_CURRENCY, c.getString(c
+								.getColumnIndex(KEY_ACCOUNT_CURRENCY)));
+						initialValues.put(KEY_ACCOUNT_CUR_SUM_DATE, c.getLong(c
+								.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE)));
+						long id = db.insert(DATABASE_ACCOUNT_TABLE, null,
+								initialValues);
+						initialValues = new ContentValues();
+						initialValues.put(KEY_OP_ACCOUNT_ID, id);
+						db.update(
+								DATABASE_OPERATIONS_TABLE,
+								initialValues,
+								KEY_OP_ACCOUNT_ID
+										+ "="
+										+ c.getLong(c
+												.getColumnIndex(KEY_ACCOUNT_ROWID)),
+								null);
+
+					} while (c.moveToNext());
+					c.close();
+				}
+
+				db.execSQL("ALTER TABLE scheduled_ops RENAME TO scheduled_ops_old;");
 				db.execSQL(DATABASE_SCHEDULED_CREATE);
+				c = db.query("scheduled_ops_old", new String[] {
+						KEY_SCHEDULED_ROWID, KEY_OP_THIRD_PARTY, KEY_OP_TAG,
+						KEY_OP_SUM, KEY_SCHEDULED_ACCOUNT_ID, KEY_OP_MODE,
+						KEY_OP_DATE, KEY_SCHEDULED_END_DATE,
+						KEY_SCHEDULED_PERIODICITY,
+						KEY_SCHEDULED_PERIODICITY_UNIT, KEY_OP_NOTES }, null,
+						null, null, null, null);
+				if (null != c && c.moveToFirst()) {
+					do {
+						ContentValues initialValues = new ContentValues();
+						initialValues.put(KEY_OP_THIRD_PARTY, c.getInt(c
+								.getColumnIndex(KEY_OP_THIRD_PARTY)));
+						initialValues.put(KEY_OP_TAG,
+								c.getInt(c.getColumnIndex(KEY_OP_TAG)));
+						double d = c.getDouble(c.getColumnIndex(KEY_OP_SUM));
+						long l = Math.round(d * 100);
+						initialValues.put(KEY_OP_SUM, l);
+						initialValues
+								.put(KEY_SCHEDULED_ACCOUNT_ID,
+										c.getInt(c
+												.getColumnIndex(KEY_SCHEDULED_ACCOUNT_ID)));
+						initialValues.put(KEY_OP_MODE,
+								c.getInt(c.getColumnIndex(KEY_OP_MODE)));
+						initialValues.put(KEY_OP_DATE,
+								c.getLong(c.getColumnIndex(KEY_OP_DATE)));
+						initialValues.put(KEY_SCHEDULED_END_DATE, c.getLong(c
+								.getColumnIndex(KEY_SCHEDULED_END_DATE)));
+						initialValues.put(KEY_SCHEDULED_PERIODICITY, c.getInt(c
+								.getColumnIndex(KEY_SCHEDULED_PERIODICITY)));
+						initialValues
+								.put(KEY_SCHEDULED_PERIODICITY_UNIT,
+										c.getInt(c
+												.getColumnIndex(KEY_SCHEDULED_PERIODICITY_UNIT)));
+						initialValues.put(KEY_OP_NOTES,
+								c.getString(c.getColumnIndex(KEY_OP_NOTES)));
+						long id = db.insert(DATABASE_SCHEDULED_TABLE, null,
+								initialValues);
+						initialValues = new ContentValues();
+						initialValues.put(KEY_OP_SCHEDULED_ID, id);
+						db.update(
+								DATABASE_OPERATIONS_TABLE,
+								initialValues,
+								KEY_OP_SCHEDULED_ID
+										+ "="
+										+ c.getLong(c
+												.getColumnIndex(KEY_SCHEDULED_ROWID)),
+								null);
+
+					} while (c.moveToNext());
+					c.close();
+				}
+
+				db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
 				db.execSQL(DATABASE_OP_CREATE);
-
-				db.execSQL("INSERT INTO accounts ("
-						+ KEY_ACCOUNT_CUR_SUM
-						+ ", "
-						+ KEY_ACCOUNT_CUR_SUM_DATE
-						+ ", "
-						+ KEY_ACCOUNT_CURRENCY
-						+ ", "
-						+ KEY_ACCOUNT_DESC
-						+ ", "
-						+ KEY_ACCOUNT_NAME
-						+ ", "
-						+ KEY_ACCOUNT_OP_SUM
-						+ ", "
-						+ KEY_ACCOUNT_START_SUM
-						+ ") SELECT ROUND(old.account_current_sum, 2) * 100, old.account_current_sum_date, old.account_currency, old.account_desc, old.account_name, ROUND(old.account_operations_sum, 2) * 100, ROUND(old.account_start_sum, 2) * 100 FROM accounts_old old;");
-
-				db.execSQL("INSERT INTO operations ("
-						+ KEY_OP_ACCOUNT_ID
-						+ ", "
-						+ KEY_OP_THIRD_PARTY
-						+ ", "
-						+ KEY_OP_TAG
-						+ ", "
-						+ KEY_OP_SUM
-						+ ", "
-						+ KEY_OP_MODE
-						+ ", "
-						+ KEY_OP_DATE
-						+ ", "
-						+ KEY_OP_SCHEDULED_ID
-						+ ", "
-						+ KEY_OP_NOTES
-						+ ") SELECT old.account_id, old.third_party, old.tag, ROUND(old.sum, 2) * 100, old.mode, old.date, old.scheduled_id, old.notes FROM operations_old old;");
-
-				db.execSQL("INSERT INTO scheduled_ops ("
-						+ KEY_OP_THIRD_PARTY
-						+ ", "
-						+ KEY_OP_TAG
-						+ ", "
-						+ KEY_OP_SUM
-						+ ", "
-						+ KEY_OP_MODE
-						+ ", "
-						+ KEY_OP_DATE
-						+ ", "
-						+ KEY_OP_NOTES
-						+ ", "
-						+ KEY_SCHEDULED_ACCOUNT_ID
-						+ ", "
-						+ KEY_SCHEDULED_END_DATE
-						+ ", "
-						+ KEY_SCHEDULED_PERIODICITY
-						+ ", "
-						+ KEY_SCHEDULED_PERIODICITY_UNIT
-						+ ") SELECT old.third_party, old.tag, ROUND(old.sum, 2) * 100, old.mode, old.date, old.notes, old.scheduled_account_id, old.end_date, old.periodicity, old.periodicity_units FROM scheduled_ops_old old;");
+				c = db.query("operations_old", new String[] { KEY_OP_ROWID,
+						KEY_OP_ACCOUNT_ID, KEY_OP_THIRD_PARTY, KEY_OP_TAG,
+						KEY_OP_SUM, KEY_OP_MODE, KEY_OP_DATE,
+						KEY_OP_SCHEDULED_ID, KEY_OP_NOTES }, null, null, null,
+						null, null);
+				if (null != c && c.moveToFirst()) {
+					do {
+						ContentValues initialValues = new ContentValues();
+						initialValues.put(KEY_OP_THIRD_PARTY,
+								c.getInt(c.getColumnIndex(KEY_OP_THIRD_PARTY)));
+						initialValues.put(KEY_OP_TAG,
+								c.getInt(c.getColumnIndex(KEY_OP_TAG)));
+						double d = c.getDouble(c.getColumnIndex(KEY_OP_SUM));
+						long l = Math.round(d * 100);
+						initialValues.put(KEY_OP_SUM, l);
+						initialValues.put(KEY_OP_ACCOUNT_ID,
+								c.getLong(c.getColumnIndex(KEY_OP_ACCOUNT_ID)));
+						initialValues.put(KEY_OP_MODE,
+								c.getInt(c.getColumnIndex(KEY_OP_MODE)));
+						initialValues.put(KEY_OP_DATE,
+								c.getLong(c.getColumnIndex(KEY_OP_DATE)));
+						initialValues
+								.put(KEY_OP_SCHEDULED_ID, c.getLong(c
+										.getColumnIndex(KEY_OP_SCHEDULED_ID)));
+						initialValues.put(KEY_OP_NOTES,
+								c.getString(c.getColumnIndex(KEY_OP_NOTES)));
+						db.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
+					} while (c.moveToNext());
+					c.close();
+				}
 
 				db.execSQL("DROP TABLE accounts_old;");
 				db.execSQL("DROP TABLE operations_old;");
