@@ -130,11 +130,7 @@ public class ScheduledOperation extends Operation {
 	}
 
 	public boolean isObsolete() {
-		return isObsolete(new GregorianCalendar().getTimeInMillis());
-	}
-
-	public boolean isObsolete(final long dateInMillis) {
-		return (getEndDate() > 0) && (getEndDate() <= dateInMillis);
+		return (getEndDate() > 0) && (getEndDate() <= getDate());
 	}
 
 	@Override
