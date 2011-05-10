@@ -60,10 +60,14 @@ public class RadisService extends IntentService {
 			final long todayInMillis = today.getTimeInMillis();
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
-			int cfgDate = PrefsManager.getInstance(this)
+			int insertionDayOfMonth = PrefsManager.getInstance(this)
 					.getInt(RadisConfiguration.KEY_INSERTION_DATE, 25)
 					.intValue();
-			insertionDate.set(Calendar.DAY_OF_MONTH, cfgDate);
+			final int maxDayOfCurMonth = today
+					.getActualMaximum(Calendar.DAY_OF_MONTH);
+			insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
+					: insertionDayOfMonth;
+			insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
 			Tools.clearTimeOfCalendar(insertionDate);
 			final long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonthLimit = insertionDate.get(Calendar.MONTH) + 1;
@@ -85,7 +89,8 @@ public class RadisService extends IntentService {
 					}
 					if (todayInMillis >= insertionDateInMillis) {
 						while (op.getMonth() <= insertionMonthLimit) {
-							keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
+							keepGreatestDate(greatestDatePerAccount, accountId,
+									op.getDate());
 							sum = sum + insertSchOp(op, opRowId);
 							needUpdate = true;
 						}
@@ -100,7 +105,8 @@ public class RadisService extends IntentService {
 						curSum = Long.valueOf(0);
 					}
 					sumsPerAccount.put(accountId, curSum + sum);
-					keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
+					keepGreatestDate(greatestDatePerAccount, accountId,
+							op.getDate());
 				}
 			} while (c.moveToNext());
 			boolean needUpdate = false;
