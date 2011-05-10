@@ -81,23 +81,22 @@ public class RadisService extends IntentService {
 				final Long accountId = Long.valueOf(op.mAccountId);
 				long sum = 0;
 				boolean needUpdate = false;
-				if (!op.isObsolete(todayInMillis)) {
-					// insert all scheduled of the past until current month
-					while (op.getMonth() <= today.get(Calendar.MONTH)) {
+
+				// insert all scheduled of the past until current month
+				while (op.getMonth() <= today.get(Calendar.MONTH) && !op.isObsolete()) {
+					sum = sum + insertSchOp(op, opRowId);
+					needUpdate = true;
+				}
+				if (todayInMillis >= insertionDateInMillis) {
+					while (op.getMonth() <= insertionMonthLimit && !op.isObsolete()) {
+						keepGreatestDate(greatestDatePerAccount, accountId,
+								op.getDate());
 						sum = sum + insertSchOp(op, opRowId);
 						needUpdate = true;
 					}
-					if (todayInMillis >= insertionDateInMillis) {
-						while (op.getMonth() <= insertionMonthLimit) {
-							keepGreatestDate(greatestDatePerAccount, accountId,
-									op.getDate());
-							sum = sum + insertSchOp(op, opRowId);
-							needUpdate = true;
-						}
-					}
-					if (needUpdate) {
-						mDbHelper.updateScheduledOp(opRowId, op, false);
-					}
+				}
+				if (needUpdate) {
+					mDbHelper.updateScheduledOp(opRowId, op, false);
 				}
 				if (needUpdate) {
 					Long curSum = sumsPerAccount.get(accountId);
