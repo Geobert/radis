@@ -41,6 +41,17 @@ public class RadisService extends IntentService {
 		stopSelf();
 	}
 
+	private void keepGreatestDate(HashMap<Long, Long> greatestDatePerAccount,
+			final long accountId, final long curOpDate) {
+		Long date = greatestDatePerAccount.get(accountId);
+		if (null == date) {
+			date = Long.valueOf(0);
+		}
+		if (curOpDate > date) {
+			greatestDatePerAccount.put(accountId, curOpDate);
+		}
+	}
+
 	private void processScheduledOps() {
 		Cursor c = mDbHelper.fetchAllScheduledOps();
 		if (c.isFirst()) {
@@ -49,12 +60,13 @@ public class RadisService extends IntentService {
 			final long todayInMillis = today.getTimeInMillis();
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
-			Tools.clearTimeOfCalendar(insertionDate);
 			int cfgDate = PrefsManager.getInstance(this)
-					.getInt(RadisConfiguration.KEY_INSERTION_DATE, 20).intValue();
+					.getInt(RadisConfiguration.KEY_INSERTION_DATE, 25)
+					.intValue();
 			insertionDate.set(Calendar.DAY_OF_MONTH, cfgDate);
+			Tools.clearTimeOfCalendar(insertionDate);
 			final long insertionDateInMillis = insertionDate.getTimeInMillis();
-			final int insertionMonth = insertionDate.get(Calendar.MONTH);
+			final int insertionMonthLimit = insertionDate.get(Calendar.MONTH) + 1;
 
 			HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
@@ -66,21 +78,14 @@ public class RadisService extends IntentService {
 				long sum = 0;
 				boolean needUpdate = false;
 				if (!op.isObsolete(todayInMillis)) {
-					// insert past missed insertion
-					while (op.getDate() <= insertionDateInMillis) {
+					// insert all scheduled of the past until current month
+					while (op.getMonth() <= today.get(Calendar.MONTH)) {
 						sum = sum + insertSchOp(op, opRowId);
 						needUpdate = true;
 					}
 					if (todayInMillis >= insertionDateInMillis) {
-						while (op.getMonth() <= (insertionMonth + 1)) {
-							Long date = greatestDatePerAccount.get(accountId);
-							if (null == date) {
-								date = Long.valueOf(0);
-							}
-							if (op.getDate() > date) {
-								greatestDatePerAccount.put(accountId,
-										op.getDate());
-							}
+						while (op.getMonth() <= insertionMonthLimit) {
+							keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
 							sum = sum + insertSchOp(op, opRowId);
 							needUpdate = true;
 						}
@@ -95,6 +100,7 @@ public class RadisService extends IntentService {
 						curSum = Long.valueOf(0);
 					}
 					sumsPerAccount.put(accountId, curSum + sum);
+					keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
 				}
 			} while (c.moveToNext());
 			boolean needUpdate = false;
