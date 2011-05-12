@@ -71,7 +71,7 @@
 <string name="tags">Tags</string>
 <string name="modes">Payment method</string>
 <string name="third_parties">Third party</string>
-<string name="get_more_op">Previous transaction…</string>
+<string name="get_more_op">Previous month…</string>
 <string name="delete_confirmation">Really delete?</string>
 <string name="yes">Yes</string>
 <string name="advanced">Advanced actions</string>

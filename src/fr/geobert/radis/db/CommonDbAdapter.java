@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -20,6 +20,7 @@ import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.tools.Tools;
 
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
@@ -786,6 +787,15 @@ public class CommonDbAdapter {
 				null, OP_ORDERING, Integer.toString(nbOps));
 	}
 
+	public Cursor fetchLastOp(final long accountId) {
+		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
+						+ KEY_OP_DATE + " = (SELECT max(ops." + KEY_OP_DATE
+						+ ") FROM " + DATABASE_OP_TABLE_JOINTURE, null, null,
+				null, OP_ORDERING, null);
+		return c;
+	}
+
 	public Cursor fetchAllOps(final long accountId) {
 		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
@@ -813,6 +823,30 @@ public class CommonDbAdapter {
 				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
 						+ KEY_OP_DATE + " < " + date, null, null, null,
 				OP_ORDERING, Integer.toString(nbOps));
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	public Cursor fetchOpOfMonth(final int curMonth) {
+		Cursor c = null;
+		GregorianCalendar startDate = new GregorianCalendar();
+		GregorianCalendar endDate = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(startDate);
+		Tools.clearTimeOfCalendar(endDate);
+		startDate.set(Calendar.MONTH, curMonth);
+		endDate.set(Calendar.MONTH, curMonth);
+		startDate.set(Calendar.DAY_OF_MONTH,
+				startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+		endDate.set(Calendar.DAY_OF_MONTH,
+				endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
+						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis() + " AND ops."
+						+ KEY_OP_DATE + " >= " + startDate.getTimeInMillis(), null, null, null,
+				OP_ORDERING, null);
 		if (c != null) {
 			c.moveToFirst();
 		}

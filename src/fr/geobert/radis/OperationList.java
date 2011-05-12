@@ -1,6 +1,6 @@
 package fr.geobert.radis;
 
-import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
@@ -149,7 +149,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		}
 	}
 
-	private class GetMoreOps extends AsyncTask<Long, Void, Void> {
+	private class GetMoreOps extends AsyncTask<Integer, Void, Void> {
 		private boolean mHasResult = false;
 
 		@Override
@@ -171,9 +171,8 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		}
 
 		@Override
-		protected Void doInBackground(Long... params) {
-			Cursor result = mDbHelper
-					.fetchOpEarlierThan(params[0], NB_LAST_OPS);
+		protected Void doInBackground(Integer... params) {
+			Cursor result = mDbHelper.fetchOpOfMonth(params[0]);
 			startManagingCursor(result);
 			mHasResult = fillLastOps(result);
 			return null;
@@ -183,9 +182,12 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private void getMoreOps() {
 		MatrixCursor c = mLastOps;
 		c.moveToLast();
-		Long earliestOpDate = c.getLong(c
+		long earliestOpDate = c.getLong(c
 				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		new GetMoreOps().execute(earliestOpDate);
+		GregorianCalendar opDate = new GregorianCalendar();
+		opDate.setTimeInMillis(earliestOpDate);
+		opDate.roll(Calendar.MONTH, -1); 
+		new GetMoreOps().execute(opDate.get(Calendar.MONTH));
 	}
 
 	protected void initDbHelper() {
@@ -506,9 +508,22 @@ public class OperationList extends ListActivity implements RadisListActivity {
 				CommonDbAdapter.KEY_OP_NOTES,
 				CommonDbAdapter.KEY_OP_SCHEDULED_ID });
 		startManagingCursor(mLastOps);
-		Cursor c = mDbHelper.fetchNLastOps(NB_LAST_OPS);
+		GregorianCalendar today = new GregorianCalendar();
+		Cursor c = mDbHelper.fetchOpOfMonth(today.get(Calendar.MONTH));
 		startManagingCursor(c);
 		fillLastOps(c);
+
+		while (mLastOps.getCount() <= 0) {
+			c.close();
+			c = mDbHelper.fetchLastOp(mAccountId);
+			if (c != null && c.moveToFirst()) {
+				today.setTimeInMillis(c.getLong(c
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+			}
+			c = mDbHelper.fetchOpOfMonth(today.get(Calendar.MONTH));
+			startManagingCursor(c);
+			fillLastOps(c);
+		}
 
 		MatrixCursor opsCursor = mLastOps;
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
@@ -564,13 +579,17 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	private long computeSumFromCursor(Cursor c) {
 		long sum = 0L;
+		int i = 0;
+
 		if (null != c && !c.isBeforeFirst() && !c.isAfterLast()) {
 			boolean hasNext = c.moveToPrevious();
+
 			while (hasNext) {
 				long s = c
 						.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 				sum = sum + s;
 				hasNext = c.moveToPrevious();
+				i++;
 			}
 		}
 		return sum;
