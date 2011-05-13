@@ -513,7 +513,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		startManagingCursor(c);
 		fillLastOps(c);
 
-		while (mLastOps.getCount() <= 0) {
+		if (mLastOps.getCount() <= 0) {
 			c.close();
 			c = mDbHelper.fetchLastOp(mAccountId);
 			if (c != null && c.moveToFirst()) {

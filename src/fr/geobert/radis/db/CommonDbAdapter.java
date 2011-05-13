@@ -791,7 +791,7 @@ public class CommonDbAdapter {
 		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
 						+ KEY_OP_DATE + " = (SELECT max(ops." + KEY_OP_DATE
-						+ ") FROM " + DATABASE_OP_TABLE_JOINTURE, null, null,
+						+ ") FROM " + DATABASE_OPERATIONS_TABLE + ") ", null, null,
 				null, OP_ORDERING, null);
 		return c;
 	}
