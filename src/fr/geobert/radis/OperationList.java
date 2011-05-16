@@ -177,8 +177,6 @@ public class OperationList extends ListActivity implements RadisListActivity {
 				GregorianCalendar opDate = new GregorianCalendar();
 				opDate.setTimeInMillis(c.getLong(c
 						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-				int month = opDate.get(Calendar.MONTH);
-				int day = opDate.get(Calendar.DAY_OF_MONTH);
 				c.close();
 				Cursor result = mDbHelper.fetchOpOfMonth(opDate
 						.get(Calendar.MONTH));
@@ -198,8 +196,6 @@ public class OperationList extends ListActivity implements RadisListActivity {
 				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 		GregorianCalendar cal = new GregorianCalendar();
 		cal.setTimeInMillis(earliestOpDate);
-		int month = cal.get(Calendar.MONTH);
-		int day = cal.get(Calendar.DAY_OF_MONTH);
 		new GetMoreOps().execute(earliestOpDate);
 	}
 
