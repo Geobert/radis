@@ -791,8 +791,8 @@ public class CommonDbAdapter {
 		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
 						+ KEY_OP_DATE + " = (SELECT max(ops." + KEY_OP_DATE
-						+ ") FROM " + DATABASE_OPERATIONS_TABLE + ") ", null, null,
-				null, OP_ORDERING, null);
+						+ ") FROM " + DATABASE_OPERATIONS_TABLE + ") ", null,
+				null, null, OP_ORDERING, null);
 		return c;
 	}
 
@@ -842,10 +842,41 @@ public class CommonDbAdapter {
 		endDate.set(Calendar.DAY_OF_MONTH,
 				endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 
-		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+		c = mDb.query(
+				DATABASE_OP_TABLE_JOINTURE,
+				OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
-						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis() + " AND ops."
-						+ KEY_OP_DATE + " >= " + startDate.getTimeInMillis(), null, null, null,
+						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis()
+						+ " AND ops." + KEY_OP_DATE + " >= "
+						+ startDate.getTimeInMillis(), null, null, null,
+				OP_ORDERING, null);
+		if (c != null) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
+	// start < end
+	public Cursor fetchOpBetweenMonthes(final int startMonth, final int endMonth) {
+		Cursor c = null;
+		GregorianCalendar startDate = new GregorianCalendar();
+		GregorianCalendar endDate = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(startDate);
+		Tools.clearTimeOfCalendar(endDate);
+		startDate.set(Calendar.MONTH, startMonth);
+		endDate.set(Calendar.MONTH, endMonth);
+		startDate.set(Calendar.DAY_OF_MONTH,
+				startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+		endDate.set(Calendar.DAY_OF_MONTH,
+				endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+
+		c = mDb.query(
+				DATABASE_OP_TABLE_JOINTURE,
+				OP_COLS_QUERY,
+				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
+						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis()
+						+ " AND ops." + KEY_OP_DATE + " >= "
+						+ startDate.getTimeInMillis(), null, null, null,
 				OP_ORDERING, null);
 		if (c != null) {
 			c.moveToFirst();

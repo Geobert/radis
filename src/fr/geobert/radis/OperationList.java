@@ -149,7 +149,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		}
 	}
 
-	private class GetMoreOps extends AsyncTask<Integer, Void, Void> {
+	private class GetMoreOps extends AsyncTask<Long, Void, Void> {
 		private boolean mHasResult = false;
 
 		@Override
@@ -171,10 +171,22 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		}
 
 		@Override
-		protected Void doInBackground(Integer... params) {
-			Cursor result = mDbHelper.fetchOpOfMonth(params[0]);
-			startManagingCursor(result);
-			mHasResult = fillLastOps(result);
+		protected Void doInBackground(Long... params) {
+			Cursor c = mDbHelper.fetchOpEarlierThan(params[0], 1);
+			if (c.moveToFirst()) {
+				GregorianCalendar opDate = new GregorianCalendar();
+				opDate.setTimeInMillis(c.getLong(c
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+				int month = opDate.get(Calendar.MONTH);
+				int day = opDate.get(Calendar.DAY_OF_MONTH);
+				c.close();
+				Cursor result = mDbHelper.fetchOpOfMonth(opDate
+						.get(Calendar.MONTH));
+				startManagingCursor(result);
+				mHasResult = fillLastOps(result);
+			} else {
+				mHasResult = false;
+			}
 			return null;
 		}
 	}
@@ -184,10 +196,11 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		c.moveToLast();
 		long earliestOpDate = c.getLong(c
 				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		GregorianCalendar opDate = new GregorianCalendar();
-		opDate.setTimeInMillis(earliestOpDate);
-		opDate.roll(Calendar.MONTH, -1); 
-		new GetMoreOps().execute(opDate.get(Calendar.MONTH));
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTimeInMillis(earliestOpDate);
+		int month = cal.get(Calendar.MONTH);
+		int day = cal.get(Calendar.DAY_OF_MONTH);
+		new GetMoreOps().execute(earliestOpDate);
 	}
 
 	protected void initDbHelper() {
@@ -508,19 +521,15 @@ public class OperationList extends ListActivity implements RadisListActivity {
 				CommonDbAdapter.KEY_OP_NOTES,
 				CommonDbAdapter.KEY_OP_SCHEDULED_ID });
 		startManagingCursor(mLastOps);
-		GregorianCalendar today = new GregorianCalendar();
-		Cursor c = mDbHelper.fetchOpOfMonth(today.get(Calendar.MONTH));
-		startManagingCursor(c);
-		fillLastOps(c);
-
-		if (mLastOps.getCount() <= 0) {
-			c.close();
-			c = mDbHelper.fetchLastOp(mAccountId);
-			if (c != null && c.moveToFirst()) {
-				today.setTimeInMillis(c.getLong(c
-						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-			}
-			c = mDbHelper.fetchOpOfMonth(today.get(Calendar.MONTH));
+		Cursor lastOp = mDbHelper.fetchLastOp(mAccountId);
+		GregorianCalendar latest = new GregorianCalendar();
+		if (lastOp != null && lastOp.moveToFirst()) {
+			latest.setTimeInMillis(lastOp.getLong(lastOp
+					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+			GregorianCalendar today = new GregorianCalendar();
+			Cursor c = mDbHelper.fetchOpBetweenMonthes(
+					today.get(Calendar.MONTH), latest.get(Calendar.MONTH));
+			lastOp.close();
 			startManagingCursor(c);
 			fillLastOps(c);
 		}
