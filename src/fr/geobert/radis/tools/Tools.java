@@ -109,6 +109,9 @@ public class Tools {
 			Intent i = new Intent(ctx, RadisConfiguration.class);
 			ctx.startActivity(i);
 			return true;
+		case R.id.process_scheduling:
+			ctx.showDialog(R.id.process_scheduling);
+			return true;
 		}
 		return false;
 	}
@@ -224,7 +227,7 @@ public class Tools {
 		case R.string.backup_failed:
 		case R.string.restore_failed:
 			return createFailAndRestartDialog(ctx, id);
-		case R.string.process_scheduled_transactions:
+		case R.id.process_scheduling:
 			return Tools.getAdvancedDialog(ctx, id,
 					new DialogInterface.OnClickListener() {
 						@Override
