@@ -81,7 +81,7 @@ public class RadisConfiguration extends PreferenceActivity implements
 		String value;
 
 		if (KEY_INSERTION_DATE.equals(key)) {
-			value = getPrefs().getString(key, "20");
+			value = getPrefs().getString(key, "25");
 			summary = getString(R.string.prefs_insertion_date_text,
 					value == null ? "" : value);
 		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
