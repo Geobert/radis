@@ -20,12 +20,13 @@ import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.Tools;
 
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 7;
+	protected static final int DATABASE_VERSION = 8;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -54,26 +55,31 @@ public class CommonDbAdapter {
 
 	public static final String KEY_THIRD_PARTY_ROWID = "_id";
 	public static final String KEY_THIRD_PARTY_NAME = "third_party_name";
+	public static final String KEY_THIRD_PARTY_NORMALIZED_NAME = "third_party_norm_name";
 
 	private static final String DATABASE_THIRD_PARTIES_CREATE = "create table "
 			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
 			+ " integer primary key autoincrement, " + KEY_THIRD_PARTY_NAME
+			+ " text not null, " + KEY_THIRD_PARTY_NORMALIZED_NAME
 			+ " text not null);";
 
 	public static final String KEY_TAG_ROWID = "_id";
 	public static final String KEY_TAG_NAME = "tag_name";
+	public static final String KEY_TAG_NORMALIZED_NAME = "tag_norm_name";
 
 	private static final String DATABASE_TAGS_CREATE = "create table "
 			+ DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID
 			+ " integer primary key autoincrement, " + KEY_TAG_NAME
-			+ " text not null);";
+			+ " text not null, " + KEY_TAG_NORMALIZED_NAME + " text not null);";
 
 	public static final String KEY_MODE_ROWID = "_id";
 	public static final String KEY_MODE_NAME = "mode_name";
+	public static final String KEY_MODE_NORMALIZED_NAME = "mode_norm_name";
 
 	private static final String DATABASE_MODES_CREATE = "create table "
 			+ DATABASE_MODES_TABLE + "(" + KEY_MODE_ROWID
 			+ " integer primary key autoincrement, " + KEY_MODE_NAME
+			+ " text not null, " + KEY_MODE_NORMALIZED_NAME
 			+ " text not null);";
 
 	public static final String KEY_OP_DATE = "date";
@@ -188,6 +194,15 @@ public class CommonDbAdapter {
 	protected static final String ADD_CUR_DATE_COLUNM = "ALTER TABLE "
 			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
 			+ KEY_ACCOUNT_CUR_SUM_DATE + " integer not null DEFAULT 0";
+	protected static final String ADD_NORMALIZED_THIRD_PARTY = "ALTER TABLE "
+			+ DATABASE_THIRD_PARTIES_TABLE + " ADD COLUMN "
+			+ KEY_THIRD_PARTY_NORMALIZED_NAME + " text not null DEFAULT ''";
+	protected static final String ADD_NORMALIZED_TAG = "ALTER TABLE "
+			+ DATABASE_TAGS_TABLE + " ADD COLUMN " + KEY_TAG_NORMALIZED_NAME
+			+ " text not null DEFAULT ''";
+	protected static final String ADD_NORMALIZED_MODE = "ALTER TABLE "
+			+ DATABASE_MODES_TABLE + " ADD COLUMN " + KEY_MODE_NORMALIZED_NAME
+			+ " text not null DEFAULT ''";
 
 	private long mAccountId;
 
@@ -262,14 +277,21 @@ public class CommonDbAdapter {
 			"sch." + KEY_SCHEDULED_PERIODICITY,
 			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT };
 
+	@SuppressWarnings("serial")
+	private static final HashMap<String, String> mColNameNormName = new HashMap<String, String>() {
+		{
+			put(CommonDbAdapter.KEY_THIRD_PARTY_NAME, CommonDbAdapter.KEY_THIRD_PARTY_NORMALIZED_NAME);
+			put(CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_TAG_NORMALIZED_NAME);
+			put(CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_MODE_NORMALIZED_NAME);
+		}
+	};
+	
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected Context mCtx;
 	protected Cursor mCurAccount;
 
 	private static CommonDbAdapter mInstance = null;
-
-	// private static int mRefCounter = 0;
 
 	public CommonDbAdapter() {
 		mInfoCursorMap = new HashMap<String, Cursor>();
@@ -390,7 +412,7 @@ public class CommonDbAdapter {
 				db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
-			case 6:
+			case 6: {
 				db.execSQL("DROP TRIGGER on_delete_third_party");
 				db.execSQL("DROP TRIGGER on_delete_mode");
 				db.execSQL("DROP TRIGGER on_delete_tag");
@@ -544,7 +566,73 @@ public class CommonDbAdapter {
 					} while (c.moveToNext());
 					c.close();
 				}
-				break;
+			}
+			case 7: {
+				db.execSQL(ADD_NORMALIZED_THIRD_PARTY);
+				db.execSQL(ADD_NORMALIZED_TAG);
+				db.execSQL(ADD_NORMALIZED_MODE);
+				Cursor c = db.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
+						KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null,
+						null, null, null, null);
+				if (c != null && c.moveToFirst()) {
+					do {
+						ContentValues v = new ContentValues();
+						v.put(KEY_THIRD_PARTY_NORMALIZED_NAME, AsciiUtils
+								.convertNonAscii(c.getString(c
+										.getColumnIndex(KEY_THIRD_PARTY_NAME))));
+						db.update(
+								DATABASE_THIRD_PARTIES_TABLE,
+								v,
+								KEY_THIRD_PARTY_ROWID
+										+ "="
+										+ Long.toString(c.getLong(c
+												.getColumnIndex(KEY_THIRD_PARTY_ROWID))),
+								null);
+					} while (c.moveToNext());
+					c.close();
+				}
+				c = db.query(DATABASE_TAGS_TABLE, new String[] {
+						KEY_TAG_ROWID, KEY_TAG_NAME }, null,
+						null, null, null, null);
+				if (c != null && c.moveToFirst()) {
+					do {
+						ContentValues v = new ContentValues();
+						v.put(KEY_TAG_NORMALIZED_NAME, AsciiUtils
+								.convertNonAscii(c.getString(c
+										.getColumnIndex(KEY_TAG_NAME))));
+						db.update(
+								DATABASE_TAGS_TABLE,
+								v,
+								KEY_TAG_ROWID
+										+ "="
+										+ Long.toString(c.getLong(c
+												.getColumnIndex(KEY_TAG_ROWID))),
+								null);
+					} while (c.moveToNext());
+					c.close();
+				}
+				
+				c = db.query(DATABASE_MODES_TABLE, new String[] {
+						KEY_MODE_ROWID, KEY_MODE_NAME }, null,
+						null, null, null, null);
+				if (c != null && c.moveToFirst()) {
+					do {
+						ContentValues v = new ContentValues();
+						v.put(KEY_MODE_NORMALIZED_NAME, AsciiUtils
+								.convertNonAscii(c.getString(c
+										.getColumnIndex(KEY_MODE_NAME))));
+						db.update(
+								DATABASE_MODES_TABLE,
+								v,
+								KEY_MODE_ROWID
+										+ "="
+										+ Long.toString(c.getLong(c
+												.getColumnIndex(KEY_MODE_ROWID))),
+								null);
+					} while (c.moveToNext());
+					c.close();
+				}
+			}
 			default:
 				break;
 			}
@@ -1046,12 +1134,12 @@ public class CommonDbAdapter {
 		return res;
 	}
 
-	public Cursor fetchMatchingInfo(String table, String colName,
+	public Cursor fetchMatchingInfo(String table, String colName, 
 			String constraint) {
 		String where;
 		String[] params;
 		if (null != constraint) {
-			where = colName + " LIKE ?";
+			where = mColNameNormName.get(colName) + " LIKE ?";
 			params = new String[] { constraint.trim() + "%" };
 		} else {
 			where = null;

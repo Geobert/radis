@@ -1,11 +1,9 @@
 package fr.geobert.radis.tools;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
-import fr.geobert.radis.InfoAdapter;
 
 public class MyAutoCompleteTextView extends AutoCompleteTextView {
 	public MyAutoCompleteTextView(Context context) {
