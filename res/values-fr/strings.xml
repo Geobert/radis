@@ -102,6 +102,7 @@
 <string name="crash_dialog_comment_prompt">Ou peut-être désirez vous ajouter des détails sur le probème avant ?</string>
 <string name="crash_dialog_ok_toast">Merci pour votre aide précieuse !</string>
 <string name="empty_amount">Le montant est vide</string>
+<string name="empty_third_party">Le tiers est vide</string>
 <string name="item_exists">L\'élément existe déjà</string>
 <string-array name="periodicity_choices">
     <item>Hebdomadaire</item>

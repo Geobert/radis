@@ -103,7 +103,7 @@ public abstract class CommonOpEditor extends Activity {
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 		mInfoManagersMap = new HashMap<String, InfoManager>();
-		
+
 		mOpThirdPartyText.setNextFocusDownId(R.id.edit_op_sum);
 		mOpSumText.setNextFocusDownId(R.id.edit_op_tag);
 		mOpTagText.setNextFocusDownId(R.id.edit_op_mode);
@@ -134,8 +134,16 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
 		boolean res = true;
-		String sumStr = mOpSumText.getText().toString().trim();
-		if (sumStr.length() == 0) {
+		String str = mOpThirdPartyText.getText().toString().trim();
+		if (str.length() == 0) {
+			if (errMsg.length() > 0) {
+				errMsg.append("\n");
+			}
+			errMsg.append(getString(R.string.empty_third_party));
+			res = false;
+		}
+		str = mOpSumText.getText().toString().trim();
+		if (str.length() == 0) {
 			if (errMsg.length() > 0) {
 				errMsg.append("\n");
 			}
