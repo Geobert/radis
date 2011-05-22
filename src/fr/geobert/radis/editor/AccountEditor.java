@@ -1,6 +1,5 @@
 package fr.geobert.radis.editor;
 
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Currency;

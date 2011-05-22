@@ -14,10 +14,10 @@
 		android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1"
 		android:text="@string/no_operation" android:textSize="25px"
 		android:gravity="center" />
-	<LinearLayout style="@style/QuickAddLayout">
-		<AutoCompleteTextView android:id="@+id/quickadd_third_party"
+	<LinearLayout android:id="@+id/quick_add_layout" style="@style/QuickAddLayout">
+		<fr.geobert.radis.tools.MyAutoCompleteTextView android:id="@+id/quickadd_third_party"
 			android:hint="@string/third_party" style="@style/QuickAddEditText"
-			android:completionThreshold="1" />
+			android:completionThreshold="1" android:dropDownAnchor="@id/quick_add_layout" />
 		<EditText android:id="@+id/quickadd_amount" style="@style/QuickAddEditText.Sum"
 			android:hint="@string/sum" />
 		<Button android:id="@+id/quickadd_validate" style="@style/QuickAddBaseButton" />

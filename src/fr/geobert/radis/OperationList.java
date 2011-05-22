@@ -46,6 +46,7 @@ import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.QuickAddTextWatcher;
 import fr.geobert.radis.tools.Tools;
 
@@ -64,7 +65,6 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private CommonDbAdapter mDbHelper;
 	private Long mAccountId;
 	private Cursor mCurAccount;
-	private final int NB_LAST_OPS = 20;
 	private MatrixCursor mLastOps = null;
 	private GregorianCalendar mLastSelectedDate;
 	private ImageView mLoadingIcon;
@@ -72,7 +72,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
 	private AdapterContextMenuInfo mOpToDelete = null;
-	private AutoCompleteTextView mQuickAddThirdParty;
+	private MyAutoCompleteTextView mQuickAddThirdParty;
 	private EditText mQuickAddAmount;
 	private Button mQuickAddButton;
 	private QuickAddTextWatcher mQuickAddTextWatcher;
@@ -208,10 +208,10 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	}
 
 	private void initReferences() {
-		mQuickAddThirdParty = (AutoCompleteTextView) findViewById(R.id.quickadd_third_party);
+		mQuickAddThirdParty = (MyAutoCompleteTextView) findViewById(R.id.quickadd_third_party);
 		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
 		mQuickAddButton = (Button) findViewById(R.id.quickadd_validate);
-
+		mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount);
 		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(),
 				mQuickAddAmount).setAutoNegate(true);

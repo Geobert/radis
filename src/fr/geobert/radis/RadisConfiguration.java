@@ -11,7 +11,6 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.PrefsManager;

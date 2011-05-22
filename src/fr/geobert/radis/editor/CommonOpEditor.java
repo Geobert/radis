@@ -1,7 +1,6 @@
 package fr.geobert.radis.editor;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.HashMap;
 
@@ -23,6 +22,7 @@ import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.Tools;
 
 public abstract class CommonOpEditor extends Activity {
@@ -94,15 +94,20 @@ public abstract class CommonOpEditor extends Activity {
 			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
 		}
 
-		mOpThirdPartyText = (AutoCompleteTextView) findViewById(R.id.edit_op_third_party);
-		mOpModeText = (AutoCompleteTextView) findViewById(R.id.edit_op_mode);
+		mOpThirdPartyText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_third_party);
+		mOpModeText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_mode);
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
-		mOpTagText = (AutoCompleteTextView) findViewById(R.id.edit_op_tag);
+		mOpTagText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_tag);
 		mSumTextWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
 				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 		mInfoManagersMap = new HashMap<String, InfoManager>();
+		
+		mOpThirdPartyText.setNextFocusDownId(R.id.edit_op_sum);
+		mOpSumText.setNextFocusDownId(R.id.edit_op_tag);
+		mOpTagText.setNextFocusDownId(R.id.edit_op_mode);
+		mOpModeText.setNextFocusDownId(R.id.edit_op_notes);
 	}
 
 	protected void initViewAdapters() {
@@ -115,7 +120,6 @@ public abstract class CommonOpEditor extends Activity {
 		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
 				CommonDbAdapter.DATABASE_TAGS_TABLE,
 				CommonDbAdapter.KEY_TAG_NAME));
-
 	}
 
 	private void invertSign() throws ParseException {

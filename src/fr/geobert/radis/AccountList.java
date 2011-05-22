@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Date;
 

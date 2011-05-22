@@ -1,7 +1,5 @@
 package fr.geobert.radis.tools;
 
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
