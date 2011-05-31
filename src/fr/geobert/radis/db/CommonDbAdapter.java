@@ -812,6 +812,7 @@ public class CommonDbAdapter {
 		} else {
 			ContentValues initialValues = new ContentValues();
 			initialValues.put(col, key);
+			initialValues.put(mColNameNormName.get(col), AsciiUtils.convertNonAscii(key));
 			long id = mDb.insert(table, null, initialValues);
 			if (id != -1) {
 				map.put(key, id);
