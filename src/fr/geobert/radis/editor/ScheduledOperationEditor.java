@@ -299,7 +299,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					// change the date of the source transaction
 					mDbHelper.updateOp(mOpIdSource, op);
 				}
-				// do not insert another occurence with same date
+				// do not insert another occurrence with same date
 				ScheduledOperation.addPeriodicityToDate(op);
 			}
 			long id = mDbHelper.createScheduledOp(op);

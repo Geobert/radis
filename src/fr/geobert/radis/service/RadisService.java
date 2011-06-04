@@ -97,8 +97,6 @@ public class RadisService extends IntentService {
 				}
 				if (needUpdate) {
 					mDbHelper.updateScheduledOp(opRowId, op, false);
-				}
-				if (needUpdate) {
 					Long curSum = sumsPerAccount.get(accountId);
 					if (curSum == null) {
 						curSum = Long.valueOf(0);
