@@ -163,16 +163,20 @@ public class ScheduledOperation extends Operation {
 						.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		schOp.close();
 		Cursor accountCursor = dbHelper.fetchAccount(accountId);
-
-		final long curSum = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-		accountCursor.close();
-		dbHelper.updateOpSum(accountId, curSum - total);
-		Cursor lastOp = dbHelper.fetchNLastOps(1, accountId);
-		if (null != lastOp && lastOp.moveToFirst()) {
-			dbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
-					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-			lastOp.close();
+		if (accountCursor.isFirst()) {
+			final long curSum = accountCursor.getLong(accountCursor
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+			
+			dbHelper.updateOpSum(accountId, curSum - total);
+			Cursor lastOp = dbHelper.fetchNLastOps(1, accountId);
+			if (null != lastOp && lastOp.moveToFirst()) {
+				dbHelper.updateCurrentSum(accountId, lastOp.getLong(lastOp
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+				lastOp.close();
+			}
+		}
+		if (null != accountCursor) {
+			accountCursor.close();
 		}
 	}
 
