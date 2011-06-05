@@ -134,6 +134,7 @@ public class Operation implements Parcelable {
 	}
 
 	public void setSumStr(String sumStr) throws ParseException {
+		sumStr = sumStr.replace('+', ' ').trim();
 		double d = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
 		mSum = Math.round(d * 100);
 	}

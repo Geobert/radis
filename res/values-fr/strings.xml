@@ -54,7 +54,6 @@
 <string name="tag">Catégorie</string>
 <string name="date">Date</string>
 <string name="mode">Mode de paiement</string>
-<string name="allowed_sum_digits">0123456789-.,</string>
 <string name="credit">Crédit</string>
 <string name="debit">Débit</string>
 <string name="current_sum">Solde</string>

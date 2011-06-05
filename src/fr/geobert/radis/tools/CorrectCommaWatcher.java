@@ -35,9 +35,12 @@ public class CorrectCommaWatcher implements TextWatcher {
 				}
 			}
 		}
-		if (mAutoNegate) {
-			if (s.length() > 0) {
-				char c = s.charAt(0);
+		if (s.length() > 0) {
+			char c = s.charAt(0);
+			if (c == '+') {
+				mAutoNegate = false;
+			}
+			if (mAutoNegate) {
 				if (c != '.' && c != ',' && c != '-') {
 					mAutoNegate = false;
 					s.insert(0, "-");
