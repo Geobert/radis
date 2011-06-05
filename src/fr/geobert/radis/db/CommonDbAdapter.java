@@ -1076,7 +1076,7 @@ public class CommonDbAdapter {
 
 		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_NOTES, op.mNotes);
-		if (!isUpdatedFromOccurence) {
+		if (!isUpdatedFromOccurence) { // update from schedule editor
 			args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 			args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
 			args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);

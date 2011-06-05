@@ -471,7 +471,9 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			if (resultCode == RESULT_OK) {
 				try {
 					fillData();
-					updateSums(data);
+					if (data.getBooleanExtra("sumUpdateNeeded", false)) {
+						updateSums(data);
+					}
 				} catch (Exception e) {
 					ErrorReporter.getInstance().handleException(e);
 					Tools.popError(OperationList.this, e.getMessage(),

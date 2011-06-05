@@ -58,17 +58,15 @@ public class OperationEditor extends CommonOpEditor {
 		populateCommonFields(op);
 	}
 
-	private void setResAndExit() {
-		try {
-			Intent res = new Intent();
+	private void setResAndExit(boolean sumUpdateIsNeeded) {
+		Intent res = new Intent();
+		if (sumUpdateIsNeeded) {
 			res.putExtra("sum", mCurrentOp.mSum);
 			res.putExtra("oldSum", mPreviousSum);
-			setResult(RESULT_OK, res);
-			super.saveOpAndExit();
-		} catch (ParseException e) {
-			ErrorReporter.getInstance().handleException(e);
-			e.printStackTrace();
 		}
+		res.putExtra("sumUpdateNeeded", sumUpdateIsNeeded);
+		setResult(RESULT_OK, res);
+		finish();
 	}
 
 	@Override
@@ -79,16 +77,16 @@ public class OperationEditor extends CommonOpEditor {
 			if (id > 0) {
 				mRowId = id;
 			}
-			setResAndExit();
+			setResAndExit(true);
 		} else {
 			if (op.equals(mOriginalOp)) {
-				setResAndExit();
+				setResAndExit(true);
 			} else {
 				if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
 					showDialog(ASK_UPDATE_SCHEDULED_DIALOG_ID);
 				} else {
 					mDbHelper.updateOp(mRowId, op);
-					setResAndExit();
+					setResAndExit(true);
 				}
 			}
 		}
@@ -110,11 +108,10 @@ public class OperationEditor extends CommonOpEditor {
 											mCurrentOp, mAccountId);
 									mDbHelper.updateScheduledOp(
 											mCurrentOp.mScheduledId, op, true);
-									ScheduledOperation
-											.updateAllOccurences(mDbHelper, op,
-													mPreviousSum,
-													mCurrentOp.mScheduledId);
-									OperationEditor.this.setResAndExit();
+									ScheduledOperation.updateAllOccurences(
+											mDbHelper, op, mPreviousSum,
+											mCurrentOp.mScheduledId);
+									OperationEditor.this.setResAndExit(false);
 								}
 							})
 					.setNeutralButton(R.string.disconnect,
@@ -123,7 +120,7 @@ public class OperationEditor extends CommonOpEditor {
 										int id) {
 									mCurrentOp.mScheduledId = 0;
 									mDbHelper.updateOp(mRowId, mCurrentOp);
-									OperationEditor.this.setResAndExit();
+									OperationEditor.this.setResAndExit(true);
 								}
 							})
 					.setNegativeButton(R.string.cancel,
