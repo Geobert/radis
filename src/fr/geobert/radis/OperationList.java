@@ -172,6 +172,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		@Override
 		protected Void doInBackground(Long... params) {
 			Cursor c = mDbHelper.fetchOpEarlierThan(params[0], 1);
+			startManagingCursor(c);
 			if (c.moveToFirst()) {
 				GregorianCalendar opDate = new GregorianCalendar();
 				opDate.setTimeInMillis(c.getLong(c
@@ -526,11 +527,12 @@ public class OperationList extends ListActivity implements RadisListActivity {
 			GregorianCalendar today = new GregorianCalendar();
 			Cursor c = mDbHelper.fetchOpBetweenMonthes(
 					today.get(Calendar.MONTH), latest.get(Calendar.MONTH));
-			lastOp.close();
 			startManagingCursor(c);
 			fillLastOps(c);
 		}
-
+		if (lastOp != null) {
+			lastOp.close();
+		}
 		MatrixCursor opsCursor = mLastOps;
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_THIRD_PARTY_NAME,

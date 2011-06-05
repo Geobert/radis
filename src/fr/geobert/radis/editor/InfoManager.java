@@ -35,6 +35,7 @@ public class InfoManager {
 	private AutoCompleteTextView mInfoText;
 	private int mEditId;
 	private int mDeleteId;
+	private String mOldValue;
 
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
@@ -176,6 +177,7 @@ public class InfoManager {
 		if (null != info) {
 			// dialog.setTitle(info.getString("title"));
 			String tmp = info.getString("value");
+			mOldValue = tmp;
 			t.setText(tmp);
 		}
 		t.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -221,7 +223,7 @@ public class InfoManager {
 		String value = t.getText().toString().trim();
 		long rowId = mInfo.getLong("rowId");
 		if (rowId != 0) { // update
-			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value);
+			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value, mOldValue);
 		} else { // create
 			long id = mDbHelper.getKeyIdIfExists(value, mInfo.getString("table"));
 			if (id > 0) { // already existing value, update

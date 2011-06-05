@@ -672,7 +672,7 @@ public class CommonDbAdapter {
 		Cursor c = mDb.query(table, cols, null, null, null, null, null);
 		if (c.moveToFirst()) {
 			do {
-				String key = c.getString(1);
+				String key = c.getString(1).toLowerCase();
 				Long value = c.getLong(0);
 				map.put(key, value);
 			} while (c.moveToNext());
@@ -686,11 +686,11 @@ public class CommonDbAdapter {
 		mThirdPartiesMap = new LinkedHashMap<String, Long>();
 
 		fillCache(DATABASE_MODES_TABLE, new String[] { KEY_MODE_ROWID,
-				KEY_MODE_NAME }, mModesMap);
+				KEY_MODE_NORMALIZED_NAME }, mModesMap);
 		fillCache(DATABASE_TAGS_TABLE, new String[] { KEY_TAG_ROWID,
-				KEY_TAG_NAME }, mTagsMap);
+				KEY_TAG_NORMALIZED_NAME }, mTagsMap);
 		fillCache(DATABASE_THIRD_PARTIES_TABLE, new String[] {
-				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, mThirdPartiesMap);
+				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NORMALIZED_NAME }, mThirdPartiesMap);
 	}
 
 	public long createAccount(String name, String desc, long start_sum,
@@ -788,11 +788,11 @@ public class CommonDbAdapter {
 	public long getKeyIdIfExists(String key, String table) {
 		Long res = null;
 		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
-			res = mThirdPartiesMap.get(key);
+			res = mThirdPartiesMap.get(key.toLowerCase());
 		} else if (table.equals(DATABASE_TAGS_TABLE)) {
-			res = mTagsMap.get(key);
+			res = mTagsMap.get(key.toLowerCase());
 		} else if (table.equals(DATABASE_MODES_TABLE)) {
-			res = mModesMap.get(key);
+			res = mModesMap.get(key.toLowerCase());
 		}
 		if (null != res) {
 			return res.longValue();
@@ -802,17 +802,18 @@ public class CommonDbAdapter {
 
 	private long getKeyIdOrCreate(String key, LinkedHashMap<String, Long> map,
 			String table, String col) throws SQLException {
-		key = key.trim();
+		String origKey = key;
+		key = AsciiUtils.convertNonAscii(key).trim();
 		if (key.length() == 0) {
 			return -1;
 		}
-		Long i = map.get(key);
+		Long i = map.get(key.toLowerCase());
 		if (null != i) {
 			return i.longValue();
 		} else {
 			ContentValues initialValues = new ContentValues();
-			initialValues.put(col, key);
-			initialValues.put(mColNameNormName.get(col), AsciiUtils.convertNonAscii(key));
+			initialValues.put(col, origKey);
+			initialValues.put(mColNameNormName.get(col), key);
 			long id = mDb.insert(table, null, initialValues);
 			if (id != -1) {
 				map.put(key, id);
@@ -1117,16 +1118,43 @@ public class CommonDbAdapter {
 	// ------------------------------
 	// INFOS (third party, tag, mode)
 	// ------------------------------
-	public boolean updateInfo(String table, long rowId, String value) {
+	public boolean updateInfo(String table, long rowId, String value, String oldValue) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
-		return mDb.update(table, args, "_id =" + rowId, null) > 0;
+		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils.convertNonAscii(value));
+		int res = mDb.update(table, args, "_id =" + rowId, null);
+		
+		// update cache
+		Map<String, Long> m = null;
+		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+			m = mThirdPartiesMap;
+		} else if (table.equals(DATABASE_TAGS_TABLE)) {
+			m = mTagsMap;
+		} else if (table.equals(DATABASE_MODES_TABLE)) {
+			m = mModesMap;
+		}
+		m.remove(oldValue);
+		m.put(value.toLowerCase(), rowId);
+		return res > 0;
 	}
 
 	public long createInfo(String table, String value) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
-		return mDb.insert(table, null, args);
+		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils.convertNonAscii(value));
+		long res = mDb.insert(table, null, args);
+		if (res > 0) { // update cache
+			Map<String, Long> m = null;
+			if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+				m = mThirdPartiesMap;
+			} else if (table.equals(DATABASE_TAGS_TABLE)) {
+				m = mTagsMap;
+			} else if (table.equals(DATABASE_MODES_TABLE)) {
+				m = mModesMap;
+			}
+			m.put(AsciiUtils.convertNonAscii(value).toLowerCase(), res);
+		}
+		return res;
 	}
 
 	public boolean deleteInfo(String table, long rowId) {
