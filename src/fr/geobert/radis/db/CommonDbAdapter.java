@@ -189,8 +189,7 @@ public class CommonDbAdapter {
 			+ KEY_TAG_ROWID
 			+ "; END";
 	protected static final String ADD_NOTES_COLUNM = "ALTER TABLE "
-			+ DATABASE_OPERATIONS_TABLE + " ADD COLUMN " + KEY_OP_NOTES
-			+ " text";
+			+ DATABASE_OPERATIONS_TABLE + " ADD COLUMN op_notes text";
 	protected static final String ADD_CUR_DATE_COLUNM = "ALTER TABLE "
 			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
 			+ KEY_ACCOUNT_CUR_SUM_DATE + " integer not null DEFAULT 0";
@@ -280,12 +279,15 @@ public class CommonDbAdapter {
 	@SuppressWarnings("serial")
 	private static final HashMap<String, String> mColNameNormName = new HashMap<String, String>() {
 		{
-			put(CommonDbAdapter.KEY_THIRD_PARTY_NAME, CommonDbAdapter.KEY_THIRD_PARTY_NORMALIZED_NAME);
-			put(CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_TAG_NORMALIZED_NAME);
-			put(CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_MODE_NORMALIZED_NAME);
+			put(CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+					CommonDbAdapter.KEY_THIRD_PARTY_NORMALIZED_NAME);
+			put(CommonDbAdapter.KEY_TAG_NAME,
+					CommonDbAdapter.KEY_TAG_NORMALIZED_NAME);
+			put(CommonDbAdapter.KEY_MODE_NAME,
+					CommonDbAdapter.KEY_MODE_NORMALIZED_NAME);
 		}
 	};
-	
+
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected Context mCtx;
@@ -591,9 +593,8 @@ public class CommonDbAdapter {
 					} while (c.moveToNext());
 					c.close();
 				}
-				c = db.query(DATABASE_TAGS_TABLE, new String[] {
-						KEY_TAG_ROWID, KEY_TAG_NAME }, null,
-						null, null, null, null);
+				c = db.query(DATABASE_TAGS_TABLE, new String[] { KEY_TAG_ROWID,
+						KEY_TAG_NAME }, null, null, null, null, null);
 				if (c != null && c.moveToFirst()) {
 					do {
 						ContentValues v = new ContentValues();
@@ -611,10 +612,10 @@ public class CommonDbAdapter {
 					} while (c.moveToNext());
 					c.close();
 				}
-				
+
 				c = db.query(DATABASE_MODES_TABLE, new String[] {
-						KEY_MODE_ROWID, KEY_MODE_NAME }, null,
-						null, null, null, null);
+						KEY_MODE_ROWID, KEY_MODE_NAME }, null, null, null,
+						null, null);
 				if (c != null && c.moveToFirst()) {
 					do {
 						ContentValues v = new ContentValues();
@@ -690,7 +691,8 @@ public class CommonDbAdapter {
 		fillCache(DATABASE_TAGS_TABLE, new String[] { KEY_TAG_ROWID,
 				KEY_TAG_NORMALIZED_NAME }, mTagsMap);
 		fillCache(DATABASE_THIRD_PARTIES_TABLE, new String[] {
-				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NORMALIZED_NAME }, mThirdPartiesMap);
+				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NORMALIZED_NAME },
+				mThirdPartiesMap);
 	}
 
 	public long createAccount(String name, String desc, long start_sum,
@@ -1118,12 +1120,14 @@ public class CommonDbAdapter {
 	// ------------------------------
 	// INFOS (third party, tag, mode)
 	// ------------------------------
-	public boolean updateInfo(String table, long rowId, String value, String oldValue) {
+	public boolean updateInfo(String table, long rowId, String value,
+			String oldValue) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils.convertNonAscii(value));
+		args.put(mColNameNormName.get(mInfoColMap.get(table)),
+				AsciiUtils.convertNonAscii(value));
 		int res = mDb.update(table, args, "_id =" + rowId, null);
-		
+
 		// update cache
 		Map<String, Long> m = null;
 		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
@@ -1141,7 +1145,8 @@ public class CommonDbAdapter {
 	public long createInfo(String table, String value) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils.convertNonAscii(value));
+		args.put(mColNameNormName.get(mInfoColMap.get(table)),
+				AsciiUtils.convertNonAscii(value));
 		long res = mDb.insert(table, null, args);
 		if (res > 0) { // update cache
 			Map<String, Long> m = null;
@@ -1163,7 +1168,7 @@ public class CommonDbAdapter {
 		return res;
 	}
 
-	public Cursor fetchMatchingInfo(String table, String colName, 
+	public Cursor fetchMatchingInfo(String table, String colName,
 			String constraint) {
 		String where;
 		String[] params;
