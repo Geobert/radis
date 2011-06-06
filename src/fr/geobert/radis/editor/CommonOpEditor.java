@@ -244,6 +244,14 @@ public abstract class CommonOpEditor extends Activity {
 	}
 
 	protected void populateCommonFields(Operation op) {
+		if (null == op) {
+			ErrorReporter.getInstance().handleException(
+					new NullPointerException("populateCommonFields: op was not correctly restored"));
+		}
+		if (null == op.mThirdParty) {
+			ErrorReporter.getInstance().handleException(
+					new NullPointerException("populateCommonFields: mThirdParty was not correctly restored"));
+		}
 		Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
 		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
 		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
@@ -374,10 +382,6 @@ public abstract class CommonOpEditor extends Activity {
 		mRowId = rowId > 0 ? Long.valueOf(rowId) : 0;
 		Operation op = savedInstanceState.getParcelable("currentOp");
 		mCurrentOp = op;
-		if (null == op) {
-			ErrorReporter.getInstance().handleException(
-					new NullPointerException("op was not correctly restored"));
-		}
 		populateFields();
 		mOnRestore = true;
 		mPreviousSum = savedInstanceState.getLong("previousSum");
