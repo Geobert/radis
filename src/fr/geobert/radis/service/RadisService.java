@@ -60,8 +60,10 @@ public class RadisService extends IntentService {
 			final long todayInMillis = today.getTimeInMillis();
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
-			int insertionDayOfMonth = PrefsManager.getInstance(this)
-					.getInt(RadisConfiguration.KEY_INSERTION_DATE, 25)
+			int insertionDayOfMonth = PrefsManager
+					.getInstance(this)
+					.getInt(RadisConfiguration.KEY_INSERTION_DATE,
+							Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE))
 					.intValue();
 			final int maxDayOfCurMonth = today
 					.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -83,12 +85,14 @@ public class RadisService extends IntentService {
 				boolean needUpdate = false;
 
 				// insert all scheduled of the past until current month
-				while (op.getMonth() <= today.get(Calendar.MONTH) && !op.isObsolete()) {
+				while (op.getMonth() <= today.get(Calendar.MONTH)
+						&& !op.isObsolete()) {
 					sum = sum + insertSchOp(op, opRowId);
 					needUpdate = true;
 				}
 				if (todayInMillis >= insertionDateInMillis) {
-					while (op.getMonth() <= insertionMonthLimit && !op.isObsolete()) {
+					while (op.getMonth() <= insertionMonthLimit
+							&& !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId,
 								op.getDate());
 						sum = sum + insertSchOp(op, opRowId);
@@ -112,7 +116,7 @@ public class RadisService extends IntentService {
 			for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
 				needUpdate = true;
 				updateAccountSum(e.getValue().longValue(), e.getKey()
-						.longValue(), greatestDatePerAccount.get(e.getKey()));
+						.longValue(), greatestDatePerAccount.get(e.getKey()), mDbHelper);
 			}
 			if (needUpdate) {
 				Intent i = new Intent(Tools.INTENT_OP_INSERTED);
@@ -123,18 +127,18 @@ public class RadisService extends IntentService {
 		c.close();
 	}
 
-	private void updateAccountSum(final long sumToAdd, final long accountId,
-			final long date) {
-		Cursor accountCursor = mDbHelper.fetchAccount(accountId);
+	public static void updateAccountSum(final long sumToAdd, final long accountId,
+			final long date, CommonDbAdapter dbHelper) {
+		Cursor accountCursor = dbHelper.fetchAccount(accountId);
 		long curSum = accountCursor.getLong(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-		mDbHelper.updateOpSum(accountId, curSum + sumToAdd);
+		dbHelper.updateOpSum(accountId, curSum + sumToAdd);
 		final long curDate = accountCursor.getLong(accountCursor
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		if (date > curDate) {
-			mDbHelper.updateCurrentSum(accountId, date);
+			dbHelper.updateCurrentSum(accountId, date);
 		} else {
-			mDbHelper.updateCurrentSum(accountId, 0);
+			dbHelper.updateCurrentSum(accountId, 0);
 		}
 		accountCursor.close();
 	}

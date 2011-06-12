@@ -151,9 +151,11 @@
 <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
 <string name="edit_scheduling">Edit scheduled transaction</string>
 <string name="process_scheduled_transactions">Process scheduled transactions</string>
-<string name="autostart_account">Start on a default account</string>
-<string name="on_start_account">Account to start</string>
 <string name="must_be_day_of_month">You must input a day of month between 1 and 31</string>
 <string name="error_on_write_prefs">Error while writing preferences</string>
-<string name="pref_start_account_label">Account to start: %s</string>
+<string name="quickadd_account">Target account for quick add</string>
+<string name="quickadd_account_desc">Target account for homescreen quick add: %s</string>
+<string name="quickadd_target">Add transaction to: %s</string>
+<string name="quickadd_target_to_configure">Go to preferences to choose default account</string>
+<string name="quickadd_target_no_account">Create account to enable</string>
 </resources>

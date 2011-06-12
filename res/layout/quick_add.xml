@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:id="@+id/quick_add_layout"
+	xmlns:android="http://schemas.android.com/apk/res/android" style="@style/QuickAddLayout">
+	<fr.geobert.radis.tools.MyAutoCompleteTextView
+		android:id="@+id/quickadd_third_party" android:hint="@string/third_party"
+		style="@style/QuickAddEditText" android:completionThreshold="1"
+		android:dropDownAnchor="@id/quick_add_layout" />
+	<EditText android:id="@+id/quickadd_amount" style="@style/QuickAddEditText.Sum"
+		android:hint="@string/sum" />
+	<Button android:id="@+id/quickadd_validate" style="@style/QuickAddBaseButton" />
+</LinearLayout>

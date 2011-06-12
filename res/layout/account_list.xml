@@ -3,21 +3,37 @@
 	android:orientation="vertical" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 	<ListView android:id="@+id/android:list" android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:divider="#4b4b4b" android:layout_weight="1"
-		android:dividerHeight="1px" />
+		android:layout_height="fill_parent" android:divider="#4b4b4b"
+		android:layout_weight="1" android:dividerHeight="1px" />
 
-	<TextView android:id="@+id/android:empty" android:layout_weight="1"
-		android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:text="@string/no_account" android:textSize="25px"
-		android:gravity="center" />
+	<TextView android:id="@+id/android:empty"
+		android:layout_weight="1" android:layout_width="fill_parent"
+		android:layout_height="fill_parent" android:text="@string/no_account"
+		android:textSize="25px" android:gravity="center" />
 
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:gravity="center_horizontal" android:paddingTop="5px"
-		android:layout_weight="0">
-		<Button android:id="@+id/startScheduledListBtn"
+		android:gravity="bottom" android:paddingTop="5px"
+		android:layout_margin="0dip" android:layout_weight="0">
+		<LinearLayout android:orientation="horizontal"
 			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:text="@string/scheduled_ops" android:layout_weight="0"/>
-
+			android:gravity="center_horizontal" android:paddingTop="5dip" android:paddingBottom="5dip"
+			android:layout_margin="0dip" android:layout_weight="0">
+			<Button android:id="@+id/startAccountEditorBtn"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:text="@string/create" android:drawableLeft="@android:drawable/ic_menu_add"
+				android:gravity="left|center_vertical" android:drawablePadding="5dip"
+				android:layout_weight="1" />
+			<Button android:id="@+id/startScheduledListBtn"
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:text="@string/scheduled_ops" android:drawableLeft="@drawable/clock72"
+				android:gravity="left|center_vertical" android:drawablePadding="5dip"
+				android:layout_weight="1" />
+		</LinearLayout>
+		<TextView android:id="@+id/quickadd_target_text"
+			android:background="@drawable/line_gradient"
+			android:paddingLeft="5dip" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" />
+		<include layout="@layout/quick_add" />
 	</LinearLayout>
 </LinearLayout>

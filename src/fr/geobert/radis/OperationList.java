@@ -31,7 +31,6 @@ import android.view.animation.AnimationUtils;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,7 +48,7 @@ import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.QuickAddTextWatcher;
 import fr.geobert.radis.tools.Tools;
 
-public class OperationList extends ListActivity implements RadisListActivity {
+public class OperationList extends ListActivity implements RadisListActivity, QuickAddInterface {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 	private static final int CONVERT_OP_ID = Menu.FIRST + 3;
@@ -71,13 +70,9 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
 	private AdapterContextMenuInfo mOpToDelete = null;
-	private MyAutoCompleteTextView mQuickAddThirdParty;
-	private EditText mQuickAddAmount;
-	private Button mQuickAddButton;
-	private QuickAddTextWatcher mQuickAddTextWatcher;
-	private CorrectCommaWatcher mCorrectCommaWatcher;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
+	private QuickAddController mQuickAddController;
 
 	private class InnerViewBinder extends OpViewBinder {
 
@@ -205,47 +200,20 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
+		mQuickAddController.setDbHelper(mDbHelper);	
 	}
 
 	private void initReferences() {
-		mQuickAddThirdParty = (MyAutoCompleteTextView) findViewById(R.id.quickadd_third_party);
-		mQuickAddAmount = (EditText) findViewById(R.id.quickadd_amount);
-		mQuickAddButton = (Button) findViewById(R.id.quickadd_validate);
-		mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount);
-		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
-				.getDecimalFormatSymbols().getDecimalSeparator(),
-				mQuickAddAmount).setAutoNegate(true);
-
-		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
-				mQuickAddAmount, mQuickAddButton);
-
+		mQuickAddController = new QuickAddController(this, this);
+		mQuickAddController.setDbHelper(mDbHelper);
+		mQuickAddController.setAccount(mAccountId);
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 	}
 
 	private void initViewBehavior() {
-		mQuickAddThirdParty.setAdapter(new InfoAdapter(this, mDbHelper,
-				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
-
-		mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher);
-
-		mQuickAddButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				try {
-					quickAddOp();
-				} catch (Exception e) {
-					Tools.popError(OperationList.this, e.getMessage(), null);
-					e.printStackTrace();
-				}
-			}
-		});
-		OperationList.setQuickAddButEnabled(mQuickAddButton, false);
-
-		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
-		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
-
+		
+		mQuickAddController.initViewBehavior();
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
@@ -296,37 +264,6 @@ public class OperationList extends ListActivity implements RadisListActivity {
 
 	}
 
-	public static void setQuickAddButEnabled(Button but, boolean b) {
-		but.setEnabled(b);
-		int drawable;
-		if (b) {
-			drawable = R.drawable.btn_check_buttonless_on;
-		} else {
-			drawable = R.drawable.btn_check_buttonless_off;
-		}
-		but.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
-	}
-
-	private void quickAddOp() throws Exception {
-		Operation op = new Operation();
-		op.mThirdParty = mQuickAddThirdParty.getText().toString();
-		op.setSumStr(mQuickAddAmount.getText().toString());
-		mDbHelper.createOp(op);
-		fillData();
-
-		// TODO both calls have overlapped operations, clean it
-		updateSums(0, op.mSum);
-		updateSumsAndSelection();
-
-		mQuickAddAmount.setText("");
-		mQuickAddThirdParty.setText("");
-		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-		mgr.hideSoftInputFromWindow(mQuickAddAmount.getWindowToken(), 0);
-		mCorrectCommaWatcher.setAutoNegate(true);
-		mQuickAddAmount.clearFocus();
-		mQuickAddThirdParty.clearFocus();
-	}
-
 	private void updateSumsAndSelection() throws Exception {
 		long curSum = getAccountCurSum();
 		Cursor c = mLastOps;
@@ -346,7 +283,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		mQuickAddThirdParty.clearFocus();
+		mQuickAddController.clearFocus();
 
 	}
 
@@ -357,7 +294,7 @@ public class OperationList extends ListActivity implements RadisListActivity {
 		initViewBehavior();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
-		mCorrectCommaWatcher.setAutoNegate(true);
+		mQuickAddController.setAutoNegate(true);
 		try {
 			updateSumsAndSelection();
 			getListView().setOnItemSelectedListener(
@@ -753,16 +690,14 @@ public class OperationList extends ListActivity implements RadisListActivity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putCharSequence("third_party", mQuickAddThirdParty.getText());
-		outState.putCharSequence("amount", mQuickAddAmount.getText());
+		mQuickAddController.onSaveInstanceState(outState);
 		outState.putLong("accountId", mAccountId);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle state) {
 		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
-		mQuickAddThirdParty.setText(state.getCharSequence("third_party"));
-		mQuickAddAmount.setText(state.getCharSequence("amount"));
+		mQuickAddController.onRestoreInstanceState(state);
 		mAccountId = state.getLong("accountId");
 		mOnRestore = true;
 	}
@@ -810,15 +745,20 @@ public class OperationList extends ListActivity implements RadisListActivity {
 				.getSerializableExtra("accountIds");
 		for (int i = 0; i < accountIds.length; ++i) {
 			if (((Long) accountIds[i]).equals(mAccountId)) {
-				fillData();
-				try {
-					updateSumsAndSelection();
-				} catch (Exception e) {
-					ErrorReporter.getInstance().handleException(e);
-					e.printStackTrace();
-				}
+				updateSumsDisplay();
 				break;
 			}
+		}
+	}
+
+	@Override
+	public void updateSumsDisplay() {
+		fillData();
+		try {
+			updateSumsAndSelection();
+		} catch (Exception e) {
+			ErrorReporter.getInstance().handleException(e);
+			e.printStackTrace();
 		}
 	}
 }

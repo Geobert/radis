@@ -1,6 +1,6 @@
 package fr.geobert.radis.tools;
 
-import fr.geobert.radis.OperationList;
+import fr.geobert.radis.QuickAddController;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.AutoCompleteTextView;
@@ -22,7 +22,7 @@ public class QuickAddTextWatcher implements TextWatcher {
 	@Override
 	public void afterTextChanged(Editable s) {
 		EditText amount = mAmount;
-		OperationList
+		QuickAddController
 				.setQuickAddButEnabled(
 						mQuickAdd,
 						((mThirdParty.length() != 0) && (amount.length() != 0) && !(amount

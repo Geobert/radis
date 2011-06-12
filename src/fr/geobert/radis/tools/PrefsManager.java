@@ -10,7 +10,11 @@ import java.io.StreamCorruptedException;
 import java.util.HashMap;
 
 import android.content.Context;
+import android.content.SharedPreferences.Editor;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceManager;
 import android.util.Log;
+import fr.geobert.radis.RadisConfiguration;
 
 public class PrefsManager {
 	public final static String SHARED_PREF_NAME = "radis_prefs";
@@ -28,11 +32,11 @@ public class PrefsManager {
 		} catch (FileNotFoundException e) {
 			mPrefs = new HashMap<String, String>();
 		} catch (StreamCorruptedException e) {
-			Log.e("RADIS", e.getMessage());
+			Log.e("RADIS", "StreamCorruptedException: " + e.getMessage());
 		} catch (IOException e) {
-			Log.e("RADIS", e.getMessage());
+			Log.e("RADIS", "IOException: " + e.getMessage());
 		} catch (ClassNotFoundException e) {
-			Log.e("RADIS", e.getMessage());
+			Log.e("RADIS", "ClassNotFoundException: " + e.getMessage());
 		}
 	}
 
@@ -63,10 +67,10 @@ public class PrefsManager {
 	}
 
 	public String getString(final String key, final String defValue) {
-		String v = mPrefs.get(key); 
+		String v = mPrefs.get(key);
 		return v != null ? v : defValue;
 	}
-	
+
 	public Boolean getBoolean(final String key) {
 		String v = mPrefs.get(key);
 		try {
@@ -107,8 +111,46 @@ public class PrefsManager {
 		}
 	}
 
+	public Long getLong(final String key) {
+		String v = mPrefs.get(key);
+		try {
+			Long b = Long.valueOf(v);
+			return b;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public Long getLong(final String key, final long defValue) {
+		String v = mPrefs.get(key);
+		try {
+			Long b = Long.valueOf(v);
+			return b != null ? b : defValue;
+		} catch (Exception e) {
+			return defValue;
+		}
+	}
+
 	public void put(final String key, final Object value) {
 		mPrefs.put(key, value.toString());
 	}
 
+	public void clearAccountRelated() {
+		Editor editor = mCurrentCtx.getSharedPreferences(SHARED_PREF_NAME,
+				PreferenceActivity.MODE_PRIVATE).edit();
+		editor.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+		editor.commit();
+		mPrefs.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+		commit();
+	}
+
+	public void resetAll() {
+		clearAccountRelated();
+		mPrefs.remove(RadisConfiguration.KEY_INSERTION_DATE);
+		commit();
+		Editor editor = mCurrentCtx.getSharedPreferences(SHARED_PREF_NAME,
+				PreferenceActivity.MODE_PRIVATE).edit();
+		editor.clear();
+		editor.commit();
+	}
 }

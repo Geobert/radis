@@ -18,8 +18,8 @@ import fr.geobert.radis.tools.PrefsManager;
 public class RadisConfiguration extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
 	public final static String KEY_INSERTION_DATE = "insertion_date";
-	public final static String KEY_AUTOSTART_ACCOUNT = "autostart_account";
-	public final static String KEY_DEFAULT_ACCOUNT = "default_account_choice";
+	public final static String KEY_DEFAULT_ACCOUNT = "quickadd_account";
+	public final static String DEFAULT_INSERTION_DATE = "25";
 
 	private ListPreference mAccountsChoice;
 
@@ -48,17 +48,17 @@ public class RadisConfiguration extends PreferenceActivity implements
 		super.onCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.preferences);
-		//mAccountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
-		//initAccountChoices();
+		mAccountsChoice = (ListPreference) findPreference(KEY_DEFAULT_ACCOUNT);
+		initAccountChoices();
 	}
 
 	private void initAccountChoices() {
 		CommonDbAdapter dbHelper = CommonDbAdapter.getInstance(this);
 		dbHelper.open();
 		Cursor accounts = dbHelper.fetchAllAccounts();
+		ArrayList<CharSequence> entries = new ArrayList<CharSequence>();
+		ArrayList<CharSequence> values = new ArrayList<CharSequence>();
 		if (accounts.isFirst()) {
-			ArrayList<CharSequence> entries = new ArrayList<CharSequence>();
-			ArrayList<CharSequence> values = new ArrayList<CharSequence>();
 			do {
 				entries.add(accounts.getString(accounts
 						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_NAME)));
@@ -66,21 +66,20 @@ public class RadisConfiguration extends PreferenceActivity implements
 						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID))));
 
 			} while (accounts.moveToNext());
-
-			mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries
-					.size()]));
-			mAccountsChoice.setEntryValues(values
-					.toArray(new CharSequence[entries.size()]));
 		}
+		mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries
+				.size()]));
+		mAccountsChoice.setEntryValues(values.toArray(new CharSequence[entries
+				.size()]));
 		accounts.close();
 	}
-	
+
 	private void updateLabel(String key) {
 		String summary = null;
 		String value;
 
 		if (KEY_INSERTION_DATE.equals(key)) {
-			value = getPrefs().getString(key, "25");
+			value = getPrefs().getString(key, DEFAULT_INSERTION_DATE);
 			summary = getString(R.string.prefs_insertion_date_text,
 					value == null ? "" : value);
 		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
@@ -88,7 +87,7 @@ public class RadisConfiguration extends PreferenceActivity implements
 			CharSequence s = l.getEntry();
 			if (null != s) {
 				value = s.toString();
-				summary = getString(R.string.pref_start_account_label, value);
+				summary = getString(R.string.quickadd_account_desc, value);
 			}
 		}
 
@@ -107,28 +106,21 @@ public class RadisConfiguration extends PreferenceActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		String value = getPrefs().getString(KEY_INSERTION_DATE, "20");
+		String value = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE);
 		EditTextPreference ep = (EditTextPreference) findPreference(KEY_INSERTION_DATE);
 		ep.getEditText().setText(value);
 
-		// final boolean b = getPrefs().getBoolean(KEY_AUTOSTART_ACCOUNT, false)
-		// .booleanValue();
-		// CheckBoxPreference chk = (CheckBoxPreference)
-		// findPreference(KEY_AUTOSTART_ACCOUNT);
-		// chk.setChecked(b);
-		//
-		// value = getPrefs().getString(KEY_DEFAULT_ACCOUNT);
-		// if (value != null) {
-		// for (CharSequence s : mAccountsChoice.getEntryValues()) {
-		// if (value.equals(s)) {
-		// mAccountsChoice.setValue(s.toString());
-		// }
-		// }
-		// }
+		value = getPrefs().getString(KEY_DEFAULT_ACCOUNT);
+		if (value != null) {
+			for (CharSequence s : mAccountsChoice.getEntryValues()) {
+				if (value.equals(s)) {
+					mAccountsChoice.setValue(s.toString());
+				}
+			}
+		}
 
 		updateLabel(KEY_INSERTION_DATE);
-		// updateLabel(KEY_AUTOSTART_ACCOUNT);
-		// updateLabel(KEY_DEFAULT_ACCOUNT);
+		updateLabel(KEY_DEFAULT_ACCOUNT);
 		getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 	}
 
@@ -145,8 +137,6 @@ public class RadisConfiguration extends PreferenceActivity implements
 		Preference p = findPreference(key);
 		if (p instanceof EditTextPreference) {
 			value = notEmpty(sharedPreferences.getString(key, null));
-		} else if (p instanceof CheckBoxPreference) {
-			value = String.valueOf(sharedPreferences.getBoolean(key, false));
 		} else if (p instanceof ListPreference) {
 			ListPreference l = (ListPreference) p;
 			value = l.getValue();
