@@ -12,7 +12,6 @@ import java.util.HashMap;
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 

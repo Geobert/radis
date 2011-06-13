@@ -963,7 +963,10 @@ public class CommonDbAdapter {
 				startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
 		endDate.set(Calendar.DAY_OF_MONTH,
 				endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-
+		if (startMonth > endMonth) {
+			endDate.roll(Calendar.YEAR, 1);
+		}
+		
 		c = mDb.query(
 				DATABASE_OP_TABLE_JOINTURE,
 				OP_COLS_QUERY,

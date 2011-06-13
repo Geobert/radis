@@ -28,10 +28,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -42,10 +40,9 @@ import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.editor.OperationEditor;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
-import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.MyAutoCompleteTextView;
-import fr.geobert.radis.tools.QuickAddTextWatcher;
+import fr.geobert.radis.tools.QuickAddInterface;
+import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
 
 public class OperationList extends ListActivity implements RadisListActivity, QuickAddInterface {
@@ -462,8 +459,14 @@ public class OperationList extends ListActivity implements RadisListActivity, Qu
 			latest.setTimeInMillis(lastOp.getLong(lastOp
 					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 			GregorianCalendar today = new GregorianCalendar();
-			Cursor c = mDbHelper.fetchOpBetweenMonthes(
-					today.get(Calendar.MONTH), latest.get(Calendar.MONTH));
+			Cursor c;
+			if (today.before(latest)) {
+				c = mDbHelper.fetchOpBetweenMonthes(
+						today.get(Calendar.MONTH), latest.get(Calendar.MONTH));
+			} else {
+				c = mDbHelper.fetchOpBetweenMonthes(
+						latest.get(Calendar.MONTH), today.get(Calendar.MONTH));
+			}
 			startManagingCursor(c);
 			fillLastOps(c);
 		}

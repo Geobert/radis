@@ -1,6 +1,6 @@
 package fr.geobert.radis.service;
 
-import fr.geobert.radis.RadisListActivity;
+import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
 import android.content.BroadcastReceiver;
 import android.content.Context;

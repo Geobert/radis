@@ -7,13 +7,12 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import fr.geobert.radis.R.drawable;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.MyAutoCompleteTextView;
+import fr.geobert.radis.tools.QuickAddInterface;
 import fr.geobert.radis.tools.QuickAddTextWatcher;
 import fr.geobert.radis.tools.Tools;
 
