@@ -581,9 +581,12 @@ public class CommonDbAdapter {
 				if (c != null && c.moveToFirst()) {
 					do {
 						ContentValues v = new ContentValues();
-						v.put(KEY_THIRD_PARTY_NORMALIZED_NAME, AsciiUtils
-								.convertNonAscii(c.getString(c
-										.getColumnIndex(KEY_THIRD_PARTY_NAME))).toLowerCase());
+						v.put(KEY_THIRD_PARTY_NORMALIZED_NAME,
+								AsciiUtils
+										.convertNonAscii(
+												c.getString(c
+														.getColumnIndex(KEY_THIRD_PARTY_NAME)))
+										.toLowerCase());
 						db.update(
 								DATABASE_THIRD_PARTIES_TABLE,
 								v,
@@ -600,9 +603,11 @@ public class CommonDbAdapter {
 				if (c != null && c.moveToFirst()) {
 					do {
 						ContentValues v = new ContentValues();
-						v.put(KEY_TAG_NORMALIZED_NAME, AsciiUtils
-								.convertNonAscii(c.getString(c
-										.getColumnIndex(KEY_TAG_NAME))).toLowerCase());
+						v.put(KEY_TAG_NORMALIZED_NAME,
+								AsciiUtils.convertNonAscii(
+										c.getString(c
+												.getColumnIndex(KEY_TAG_NAME)))
+										.toLowerCase());
 						db.update(
 								DATABASE_TAGS_TABLE,
 								v,
@@ -621,9 +626,12 @@ public class CommonDbAdapter {
 				if (c != null && c.moveToFirst()) {
 					do {
 						ContentValues v = new ContentValues();
-						v.put(KEY_MODE_NORMALIZED_NAME, AsciiUtils
-								.convertNonAscii(c.getString(c
-										.getColumnIndex(KEY_MODE_NAME))).toLowerCase());
+						v.put(KEY_MODE_NORMALIZED_NAME,
+								AsciiUtils
+										.convertNonAscii(
+												c.getString(c
+														.getColumnIndex(KEY_MODE_NAME)))
+										.toLowerCase());
 						db.update(
 								DATABASE_MODES_TABLE,
 								v,
@@ -950,9 +958,18 @@ public class CommonDbAdapter {
 		return c;
 	}
 
-	// start < end
-	public Cursor fetchOpBetweenMonthes(final int startMonth, final int endMonth) {
+	public Cursor fetchOpBetweenDate(final GregorianCalendar today,
+			final GregorianCalendar latest) {
 		Cursor c = null;
+		int startMonth;
+		int endMonth;
+		if (today.before(latest)) {
+			startMonth = today.get(Calendar.MONTH);
+			endMonth = latest.get(Calendar.MONTH);
+		} else {
+			startMonth = latest.get(Calendar.MONTH);
+			endMonth = today.get(Calendar.MONTH);
+		}
 		GregorianCalendar startDate = new GregorianCalendar();
 		GregorianCalendar endDate = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(startDate);
@@ -966,7 +983,7 @@ public class CommonDbAdapter {
 		if (startMonth > endMonth) {
 			endDate.roll(Calendar.YEAR, 1);
 		}
-		
+
 		c = mDb.query(
 				DATABASE_OP_TABLE_JOINTURE,
 				OP_COLS_QUERY,
@@ -1129,8 +1146,8 @@ public class CommonDbAdapter {
 			String oldValue) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table)),
-				AsciiUtils.convertNonAscii(value).trim().toLowerCase());
+		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils
+				.convertNonAscii(value).trim().toLowerCase());
 		int res = mDb.update(table, args, "_id =" + rowId, null);
 
 		// update cache
@@ -1150,8 +1167,8 @@ public class CommonDbAdapter {
 	public long createInfo(String table, String value) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table)),
-				AsciiUtils.convertNonAscii(value).trim().toLowerCase());
+		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils
+				.convertNonAscii(value).trim().toLowerCase());
 		long res = mDb.insert(table, null, args);
 		if (res > 0) { // update cache
 			Map<String, Long> m = null;

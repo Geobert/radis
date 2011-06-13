@@ -45,7 +45,8 @@ import fr.geobert.radis.tools.QuickAddInterface;
 import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
 
-public class OperationList extends ListActivity implements RadisListActivity, QuickAddInterface {
+public class OperationList extends ListActivity implements RadisListActivity,
+		QuickAddInterface {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 	private static final int CONVERT_OP_ID = Menu.FIRST + 3;
@@ -197,7 +198,7 @@ public class OperationList extends ListActivity implements RadisListActivity, Qu
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
-		mQuickAddController.setDbHelper(mDbHelper);	
+		mQuickAddController.setDbHelper(mDbHelper);
 	}
 
 	private void initReferences() {
@@ -209,7 +210,7 @@ public class OperationList extends ListActivity implements RadisListActivity, Qu
 	}
 
 	private void initViewBehavior() {
-		
+
 		mQuickAddController.initViewBehavior();
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
@@ -459,14 +460,7 @@ public class OperationList extends ListActivity implements RadisListActivity, Qu
 			latest.setTimeInMillis(lastOp.getLong(lastOp
 					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 			GregorianCalendar today = new GregorianCalendar();
-			Cursor c;
-			if (today.before(latest)) {
-				c = mDbHelper.fetchOpBetweenMonthes(
-						today.get(Calendar.MONTH), latest.get(Calendar.MONTH));
-			} else {
-				c = mDbHelper.fetchOpBetweenMonthes(
-						latest.get(Calendar.MONTH), today.get(Calendar.MONTH));
-			}
+			Cursor c = mDbHelper.fetchOpBetweenDate(today, latest);
 			startManagingCursor(c);
 			fillLastOps(c);
 		}
