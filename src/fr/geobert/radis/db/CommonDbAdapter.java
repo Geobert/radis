@@ -26,7 +26,7 @@ import fr.geobert.radis.tools.Tools;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 8;
+	protected static final int DATABASE_VERSION = 9;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -573,6 +573,8 @@ public class CommonDbAdapter {
 				db.execSQL(ADD_NORMALIZED_THIRD_PARTY);
 				db.execSQL(ADD_NORMALIZED_TAG);
 				db.execSQL(ADD_NORMALIZED_MODE);
+			}
+			case 8: {
 				Cursor c = db.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
 						KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null,
 						null, null, null, null);
@@ -581,7 +583,7 @@ public class CommonDbAdapter {
 						ContentValues v = new ContentValues();
 						v.put(KEY_THIRD_PARTY_NORMALIZED_NAME, AsciiUtils
 								.convertNonAscii(c.getString(c
-										.getColumnIndex(KEY_THIRD_PARTY_NAME))));
+										.getColumnIndex(KEY_THIRD_PARTY_NAME))).toLowerCase());
 						db.update(
 								DATABASE_THIRD_PARTIES_TABLE,
 								v,
@@ -600,7 +602,7 @@ public class CommonDbAdapter {
 						ContentValues v = new ContentValues();
 						v.put(KEY_TAG_NORMALIZED_NAME, AsciiUtils
 								.convertNonAscii(c.getString(c
-										.getColumnIndex(KEY_TAG_NAME))));
+										.getColumnIndex(KEY_TAG_NAME))).toLowerCase());
 						db.update(
 								DATABASE_TAGS_TABLE,
 								v,
@@ -621,7 +623,7 @@ public class CommonDbAdapter {
 						ContentValues v = new ContentValues();
 						v.put(KEY_MODE_NORMALIZED_NAME, AsciiUtils
 								.convertNonAscii(c.getString(c
-										.getColumnIndex(KEY_MODE_NAME))));
+										.getColumnIndex(KEY_MODE_NAME))).toLowerCase());
 						db.update(
 								DATABASE_MODES_TABLE,
 								v,
@@ -804,12 +806,12 @@ public class CommonDbAdapter {
 
 	private long getKeyIdOrCreate(String key, LinkedHashMap<String, Long> map,
 			String table, String col) throws SQLException {
-		String origKey = key;
-		key = AsciiUtils.convertNonAscii(key).trim();
+		String origKey = key.toString();
+		key = AsciiUtils.convertNonAscii(key).trim().toLowerCase();
 		if (key.length() == 0) {
 			return -1;
 		}
-		Long i = map.get(key.toLowerCase());
+		Long i = map.get(key);
 		if (null != i) {
 			return i.longValue();
 		} else {
@@ -1125,7 +1127,7 @@ public class CommonDbAdapter {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
 		args.put(mColNameNormName.get(mInfoColMap.get(table)),
-				AsciiUtils.convertNonAscii(value));
+				AsciiUtils.convertNonAscii(value).trim().toLowerCase());
 		int res = mDb.update(table, args, "_id =" + rowId, null);
 
 		// update cache
@@ -1146,7 +1148,7 @@ public class CommonDbAdapter {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table), value);
 		args.put(mColNameNormName.get(mInfoColMap.get(table)),
-				AsciiUtils.convertNonAscii(value));
+				AsciiUtils.convertNonAscii(value).trim().toLowerCase());
 		long res = mDb.insert(table, null, args);
 		if (res > 0) { // update cache
 			Map<String, Long> m = null;
@@ -1157,7 +1159,7 @@ public class CommonDbAdapter {
 			} else if (table.equals(DATABASE_MODES_TABLE)) {
 				m = mModesMap;
 			}
-			m.put(AsciiUtils.convertNonAscii(value).toLowerCase(), res);
+			m.put(AsciiUtils.convertNonAscii(value).trim().toLowerCase(), res);
 		}
 		return res;
 	}
