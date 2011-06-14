@@ -34,6 +34,9 @@ public class Operation implements Parcelable {
 	public Operation(Cursor op) {
 		mThirdParty = op.getString(op
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+		if (null == mThirdParty) {
+			mThirdParty = "";
+		}
 		mMode = op.getString(op
 				.getColumnIndexOrThrow(CommonDbAdapter.KEY_MODE_NAME));
 		if (null == mMode) {
