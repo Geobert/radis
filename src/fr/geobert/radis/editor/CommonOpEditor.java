@@ -244,14 +244,6 @@ public abstract class CommonOpEditor extends Activity {
 	}
 
 	protected void populateCommonFields(Operation op) {
-		if (null == op) {
-			ErrorReporter.getInstance().handleException(
-					new NullPointerException("populateCommonFields: op was not correctly restored"));
-		}
-		if (null == op.mThirdParty) {
-			ErrorReporter.getInstance().handleException(
-					new NullPointerException("populateCommonFields: mThirdParty was not correctly restored"));
-		}
 		Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
 		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
 		Tools.setTextWithoutComplete(mOpTagText, op.mTag);
