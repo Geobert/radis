@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -19,14 +21,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.Operation;
+import fr.geobert.radis.OperationList;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.tools.AsciiUtils;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
 
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 9;
+	protected static final int DATABASE_VERSION = 10;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -43,6 +48,8 @@ public class CommonDbAdapter {
 	public static final String KEY_ACCOUNT_CURRENCY = "account_currency";
 	public static final String KEY_ACCOUNT_ROWID = "_id";
 	public static final String KEY_ACCOUNT_CUR_SUM_DATE = "account_current_sum_date";
+	public static final String KEY_ACCOUNT_PROJECTION_MODE = "account_projection_mode";
+	public static final String KEY_ACCOUNT_PROJECTION_DATE = "account_projection_date";
 
 	private static final String DATABASE_ACCOUNT_CREATE = "create table "
 			+ DATABASE_ACCOUNT_TABLE + "(" + KEY_ACCOUNT_ROWID
@@ -51,7 +58,9 @@ public class CommonDbAdapter {
 			+ KEY_ACCOUNT_START_SUM + " integer not null, "
 			+ KEY_ACCOUNT_OP_SUM + " integer not null, " + KEY_ACCOUNT_CUR_SUM
 			+ " integer not null, " + KEY_ACCOUNT_CUR_SUM_DATE
-			+ " integer not null, " + KEY_ACCOUNT_CURRENCY + " text not null);";
+			+ " integer not null, " + KEY_ACCOUNT_CURRENCY + " text not null, "
+			+ KEY_ACCOUNT_PROJECTION_MODE + " integer not null, "
+			+ KEY_ACCOUNT_PROJECTION_DATE + " string);";
 
 	public static final String KEY_THIRD_PARTY_ROWID = "_id";
 	public static final String KEY_THIRD_PARTY_NAME = "third_party_name";
@@ -202,6 +211,12 @@ public class CommonDbAdapter {
 	protected static final String ADD_NORMALIZED_MODE = "ALTER TABLE "
 			+ DATABASE_MODES_TABLE + " ADD COLUMN " + KEY_MODE_NORMALIZED_NAME
 			+ " text not null DEFAULT ''";
+	protected static final String ADD_PROJECTION_MODE_COLUNM = "ALTER TABLE "
+			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
+			+ KEY_ACCOUNT_PROJECTION_MODE + " integer not null DEFAULT 0";
+	protected static final String ADD_PROJECTION_MODE_DATE = "ALTER TABLE "
+			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
+			+ KEY_ACCOUNT_PROJECTION_DATE + " string";
 
 	private long mAccountId;
 
@@ -292,6 +307,8 @@ public class CommonDbAdapter {
 	protected SQLiteDatabase mDb;
 	protected Context mCtx;
 	protected Cursor mCurAccount;
+	protected int mProjectionMode;
+	protected long mProjectionDate;
 
 	private static CommonDbAdapter mInstance = null;
 
@@ -341,7 +358,7 @@ public class CommonDbAdapter {
 			Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
 					+ newVersion + ", converting to new database");
 			switch (oldVersion) {
-			case 1:
+			case 1: {
 				db.execSQL(DATABASE_OP_CREATE);
 				Cursor allAccounts = db.query(DATABASE_ACCOUNT_TABLE,
 						new String[] {}, null, null, null, null, null);
@@ -376,6 +393,7 @@ public class CommonDbAdapter {
 					db.execSQL(INDEX_ON_ACCOUNT_ID_CREATE);
 					db.execSQL(TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
 				}
+			}
 			case 2:
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
@@ -644,6 +662,21 @@ public class CommonDbAdapter {
 					c.close();
 				}
 			}
+			case 9: {
+				db.execSQL(ADD_PROJECTION_MODE_COLUNM);
+				db.execSQL(ADD_PROJECTION_MODE_DATE);
+				Cursor allAccounts = db.query(DATABASE_ACCOUNT_TABLE,
+						new String[] {}, null, null, null, null, null);
+				if (allAccounts.moveToFirst()) {
+					do {
+						consolidateSums(allAccounts.getLong(allAccounts
+								.getColumnIndex(KEY_ACCOUNT_ROWID)), db);
+					} while (allAccounts.moveToNext());
+				}
+				if (null != allAccounts) {
+					allAccounts.close();
+				}
+			}
 			default:
 				break;
 			}
@@ -706,16 +739,92 @@ public class CommonDbAdapter {
 	}
 
 	public long createAccount(String name, String desc, long start_sum,
-			String currency) {
+			String currency, int projectionMode, String projectionDate)
+			throws ParseException {
 		ContentValues initialValues = new ContentValues();
 		initialValues.put(KEY_ACCOUNT_NAME, name);
 		initialValues.put(KEY_ACCOUNT_DESC, desc);
 		initialValues.put(KEY_ACCOUNT_START_SUM, start_sum);
-		initialValues.put(KEY_ACCOUNT_OP_SUM, 0);
-		initialValues.put(KEY_ACCOUNT_CUR_SUM, start_sum);
+
 		initialValues.put(KEY_ACCOUNT_CURRENCY, currency);
-		initialValues.put(KEY_ACCOUNT_CUR_SUM_DATE, 0);
+		initialValues.put(KEY_ACCOUNT_PROJECTION_MODE, projectionMode);
+		initialValues.put(KEY_ACCOUNT_PROJECTION_DATE, projectionDate);
+
+		setCurrentSumAndDate(initialValues, start_sum, projectionMode,
+				projectionDate);
 		return mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
+	}
+
+	private long computeSumFromCursor(Cursor c) {
+		long sum = 0L;
+		if (c.moveToFirst()) {
+			do {
+				long s = c
+						.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+				sum = sum + s;
+			} while (c.moveToNext());
+		}
+		return sum;
+	}
+
+	// called on create and update account
+	private void setCurrentSumAndDate(ContentValues values,
+			final long start_sum, final int projectionMode,
+			final String projectionDate) throws ParseException {
+		long date = 0;
+		long opSum = 0;
+		switch (projectionMode) {
+		case 0: {
+			if (mAccountId > 0) {
+				Cursor allOps = fetchAllOps(mAccountId);
+				if (null != allOps) {
+					if (allOps.moveToFirst()) {
+						date = allOps.getLong(allOps
+								.getColumnIndex(KEY_OP_DATE));
+						opSum = computeSumFromCursor(allOps);
+					}
+					allOps.close();
+				}
+			}
+		}
+			break;
+		case 1: {
+			GregorianCalendar projDate = new GregorianCalendar();
+			if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
+					.parseInt(projectionDate)) {
+				projDate.roll(Calendar.MONTH, 1);
+			}
+			projDate.set(Calendar.DAY_OF_MONTH,
+					Integer.parseInt(projectionDate));
+			projDate.roll(Calendar.DAY_OF_MONTH, 1);
+			Cursor op = fetchOpEarlierThan(projDate.getTimeInMillis(), 0);
+			if (null != op) {
+				if (op.moveToFirst()) {
+					opSum = computeSumFromCursor(op);
+				}
+				op.close();
+			}
+			date = projDate.getTimeInMillis();
+		}
+			break;
+		case 2: {
+			Date projDate = Formater.DATE_FORMAT.parse(projectionDate);
+			Cursor op = fetchOpEarlierThan(projDate.getTime(), 0);
+			if (null != op) {
+				if (op.moveToFirst()) {
+					opSum = computeSumFromCursor(op);
+				}
+				op.close();
+			}
+			date = projDate.getTime();
+		}
+			break;
+		default:
+			break;
+		}
+		values.put(KEY_ACCOUNT_OP_SUM, opSum);
+		values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum);
+		values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 	}
 
 	public boolean deleteAccount(long rowId) {
@@ -726,8 +835,9 @@ public class CommonDbAdapter {
 	public Cursor fetchAllAccounts() {
 		Cursor c = mDb.query(DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
-				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE }, null, null,
-				null, null, null);
+				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE,
+				KEY_ACCOUNT_PROJECTION_MODE, KEY_ACCOUNT_PROJECTION_DATE },
+				null, null, null, null, null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -738,51 +848,111 @@ public class CommonDbAdapter {
 		mCurAccount = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] {
 				KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_DESC,
 				KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_OP_SUM,
-				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE },
+				KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE,
+				KEY_ACCOUNT_PROJECTION_MODE, KEY_ACCOUNT_PROJECTION_DATE },
 				KEY_ACCOUNT_ROWID + "=" + accountId, null, null, null, null,
 				null);
 		Cursor c = mCurAccount;
 		if (c != null) {
 			c.moveToFirst();
+			mProjectionMode = mCurAccount.getInt(8);
+			switch (mProjectionMode) {
+			case 0:
+				mProjectionDate = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
+				break;
+			case 1: {
+				GregorianCalendar projDate = new GregorianCalendar();
+				if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
+						.parseInt(mCurAccount.getString(9))) {
+					projDate.roll(Calendar.MONTH, 1);
+				}
+				projDate.set(Calendar.DAY_OF_MONTH,
+						Integer.parseInt(mCurAccount.getString(9)));
+				mProjectionDate = projDate.getTimeInMillis();
+			}
+				break;
+			case 2:
+				try {
+					Date projDate = Formater.DATE_FORMAT.parse(mCurAccount
+							.getString(9));
+					mProjectionDate = projDate.getTime();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+				break;
+			default:
+				break;
+			}
 		}
 		return c;
 
 	}
 
+	public boolean updateAccountProjectionDate(long accountId,
+			ProjectionDateController projectionController)
+			throws ParseException {
+		ContentValues args = new ContentValues();
+		if (accountId == mAccountId && projectionController.hasChanged()) {
+			long start_sum = mCurAccount.getLong(mCurAccount
+					.getColumnIndex(KEY_ACCOUNT_START_SUM));
+			args.put(KEY_ACCOUNT_PROJECTION_MODE,
+					projectionController.getMode());
+			args.put(KEY_ACCOUNT_PROJECTION_DATE,
+					projectionController.getDate());
+
+			setCurrentSumAndDate(args, start_sum,
+					projectionController.getMode(),
+					projectionController.getDate());
+			return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID
+					+ "=" + accountId, null) > 0;
+		}
+		return true;
+	}
+
 	public boolean updateAccount(long accountId, String name, String desc,
-			long start_sum, String currency) {
+			long start_sum, String currency,
+			ProjectionDateController projectionController)
+			throws ParseException {
 		ContentValues args = new ContentValues();
 		args.put(KEY_ACCOUNT_NAME, name);
 		args.put(KEY_ACCOUNT_DESC, desc);
 		args.put(KEY_ACCOUNT_START_SUM, start_sum);
 		args.put(KEY_ACCOUNT_CURRENCY, currency);
+		args.put(KEY_ACCOUNT_PROJECTION_MODE, projectionController.getMode());
+		args.put(KEY_ACCOUNT_PROJECTION_DATE, projectionController.getDate());
+		setCurrentSumAndDate(args, start_sum, projectionController.getMode(),
+				projectionController.getDate());
 		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
 				+ accountId, null) > 0;
 	}
 
-	public boolean updateOpSum(long accountId, long newSum) {
+	public void updateProjection(long accountId, long sumToAdd, long opDate) {
 		ContentValues args = new ContentValues();
-		args.put(KEY_ACCOUNT_OP_SUM, newSum);
-		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
-				+ accountId, null) > 0;
-	}
-
-	public long updateCurrentSum(long accountId, long date) {
-		Cursor account = fetchAccount(accountId);
-		long start = account.getLong(account
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
-		long opSum = account.getLong(account
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-		account.close();
-		ContentValues args = new ContentValues();
-		long curSum = start + opSum;
-		args.put(KEY_ACCOUNT_CUR_SUM, curSum);
-		if (0 != date) {
-			args.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
+		if (mProjectionMode == 0 && opDate > mProjectionDate || opDate == 0) {
+			if (opDate == 0) {
+				Cursor op = fetchLastOp(accountId);
+				args.put(KEY_ACCOUNT_CUR_SUM_DATE,
+						op.getLong(op.getColumnIndex(KEY_OP_DATE)));
+			} else {
+				args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
+			}
 		}
-		mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
-				+ accountId, null);
-		return curSum;
+		Cursor accountCursor = mCurAccount;
+		accountCursor.requery();
+		accountCursor.moveToFirst();
+		long opSum = accountCursor.getLong(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+		long startSum = accountCursor.getLong(accountCursor
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
+		args.put(KEY_ACCOUNT_OP_SUM, opSum + sumToAdd);
+		args.put(KEY_ACCOUNT_CUR_SUM, startSum + opSum + sumToAdd);
+		if (mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
+				+ accountId, null) > 0) {
+			if (mProjectionMode == 0) {
+				mProjectionDate = opDate;
+			}
+		}
 	}
 
 	public long getKeyIdOrCreate(String key, String table) throws SQLException {
@@ -848,11 +1018,12 @@ public class CommonDbAdapter {
 		}
 	}
 
-	public long createOp(Operation op) {
+	// return boolean saying if we need an update of OP_SUM
+	public boolean createOp(Operation op) {
 		return createOp(op, mAccountId);
 	}
 
-	public long createOp(Operation op, final long accountId) {
+	public boolean createOp(Operation op, final long accountId) {
 		ContentValues initialValues = new ContentValues();
 		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
@@ -871,12 +1042,25 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
-		return mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
+		if (mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues) > -1) {
+			return checkNeedUpdateProjection(op);
+		}
+		return false;
+	}
+
+	private boolean checkNeedUpdateProjection(Operation op) {
+		return op.getDate() <= mProjectionDate;
 	}
 
 	public boolean deleteOp(long rowId) {
-		return mDb.delete(DATABASE_OPERATIONS_TABLE,
-				KEY_OP_ROWID + "=" + rowId, null) > 0;
+		Cursor c = fetchOneOp(rowId);
+		Operation op = new Operation(c);
+		c.close();
+		if (mDb.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID + "=" + rowId,
+				null) > 0) {
+			return checkNeedUpdateProjection(op);
+		}
+		return false;
 	}
 
 	public Cursor fetchNLastOps(int nbOps) {
@@ -921,10 +1105,11 @@ public class CommonDbAdapter {
 
 	public Cursor fetchOpEarlierThan(long date, int nbOps) {
 		Cursor c = null;
+		String limit = nbOps == 0 ? null : Integer.toString(nbOps);
 		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, mAccountId) + " AND ops."
 						+ KEY_OP_DATE + " < " + date, null, null, null,
-				OP_ORDERING, Integer.toString(nbOps));
+				OP_ORDERING, limit);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -1023,17 +1208,21 @@ public class CommonDbAdapter {
 		return args;
 	}
 
+	// return if need to update OP_SUM
 	public boolean updateOp(final long rowId, final Operation op) {
 		ContentValues args = createContentValuesFromOp(op, false);
-		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
-				+ rowId, null) > 0;
+		if (mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
+				+ rowId, null) > 0) {
+			return checkNeedUpdateProjection(op);
+		}
+		return false;
 	}
 
-	public boolean updateOp(final long opId, final long schOpId) {
+	public void updateOp(final long opId, final long schOpId) {
 		ContentValues args = new ContentValues();
 		args.put(KEY_OP_SCHEDULED_ID, schOpId);
-		return mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
-				+ opId, null) > 0;
+		mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "=" + opId,
+				null);
 	}
 
 	// ----------------------
@@ -1275,21 +1464,30 @@ public class CommonDbAdapter {
 		consolidateSums(mAccountId, null);
 	}
 
-	private void consolidateSums(final long accountId, SQLiteDatabase db) {
+	public void consolidateSums(final long accountId, SQLiteDatabase db) {
 		if (0 != accountId) {
 			if (null != db) {
 				mDb = db;
 			}
-			long recalculatedOpSum = 0;
-			Cursor c = fetchAllOps(accountId);
-			if (null != c && c.moveToFirst()) {
-				do {
-					recalculatedOpSum += c.getDouble(c
-							.getColumnIndex(KEY_OP_SUM));
-				} while (c.moveToNext());
-				updateOpSum(accountId, recalculatedOpSum);
-				updateCurrentSum(accountId, 0);
+			if (accountId != 0) {
+				mAccountId = accountId;
 			}
+			ContentValues values = new ContentValues();
+			Cursor account = fetchAccount(accountId);
+			try {
+				setCurrentSumAndDate(values, account.getLong(account
+						.getColumnIndex(KEY_ACCOUNT_START_SUM)),
+						account.getInt(account
+								.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
+						account.getString(account
+								.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+				mDb.update(DATABASE_ACCOUNT_TABLE, values, KEY_ACCOUNT_ROWID
+						+ "=" + accountId, null);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			account.close();
 		}
 	}
 

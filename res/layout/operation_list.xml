@@ -5,8 +5,8 @@
 	<LinearLayout style="@style/SumsLayout">
 		<TextView android:id="@+id/date_sum" android:text="Solde à la selection = 2040.00"
 			style="@style/SumsTextView" />
-		<TextView android:id="@+id/future_sum" style="@style/SumsTextView"
-			android:gravity="right" android:text="Solde au 25/12/2010 = 2000.00" />
+		<Button android:id="@+id/future_sum" style="@style/SumsHeaderButton"  
+			android:gravity="right" android:text="Au 25/12/2010 = 2000,00" />
 	</LinearLayout>
 	<ListView android:id="@+id/android:list" style="@style/OpListView" />
 

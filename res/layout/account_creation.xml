@@ -11,8 +11,6 @@
 				/> -->
 			<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText"
 				android:hint="@string/name" />
-			<!-- <TextView style="@style/EditorTextView" android:text="@string/start_sum" 
-				/> -->
 			<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum"
 				android:hint="@string/start_sum" />
 			<TextView style="@style/EditorTextView" android:text="@string/currency" />
@@ -20,8 +18,15 @@
 				android:layout_height="wrap_content" android:layout_width="fill_parent"
 				android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
 			</Spinner>
-<!--			<TextView style="@style/EditorTextView" android:text="@string/description" />-->
-			<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText" android:hint="@string/description" />
+			<TextView style="@style/EditorTextView" android:text="@string/projection_date" />
+			<Spinner android:id="@+id/projection_date_spinner"
+				android:layout_height="wrap_content" android:layout_width="fill_parent"
+				android:drawSelectorOnTop="true" android:prompt="@string/projection_date_mode" />
+			<EditText android:id="@+id/projection_date_value" style="@style/EditorEditText.Date"
+				 android:layout_marginBottom="5dip" />
+
+			<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText"
+				android:hint="@string/description" />
 
 		</LinearLayout>
 	</ScrollView>

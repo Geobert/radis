@@ -19,6 +19,10 @@
 		<item name="android:layout_weight">1</item>
 		<item name="android:gravity">center_vertical</item>
 	</style>
+	<style name="EditorEditText.Date">
+	    <item name="android:digits">@string/date_chars</item>
+	    <item name="android:inputType">number|numberSigned|numberDecimal</item>
+	</style>
 	<style name="EditorBaseButton.DateButton">
 		<item name="android:layout_width">fill_parent</item>
 	</style>
@@ -66,6 +70,17 @@
 		<item name="android:layout_weight">1</item>
 		<item name="android:padding">3dip</item>
 		<item name="android:textSize">11.5sp</item>
+	</style>
+	<style name="SumsHeaderButton" parent="@android:style/Widget.Button">
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_weight">0</item>
+		<item name="android:padding">3dip</item>
+		<item name="android:layout_marginRight">3dip</item>
+		<item name="android:layout_marginBottom">3dip</item>
+		<item name="android:textSize">11.5sp</item>
+		<item name="android:textColor">#cccccc</item>
+		<item name="android:background">@drawable/header_button_selector</item>
 	</style>
 	<style name="SumsLayout">
 		<item name="android:orientation">horizontal</item>

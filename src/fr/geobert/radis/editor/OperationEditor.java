@@ -61,6 +61,7 @@ public class OperationEditor extends CommonOpEditor {
 		if (sumUpdateIsNeeded) {
 			res.putExtra("sum", mCurrentOp.mSum);
 			res.putExtra("oldSum", mPreviousSum);
+			res.putExtra("opDate", mCurrentOp.getDate());
 		}
 		res.putExtra("sumUpdateNeeded", sumUpdateIsNeeded);
 		setResult(RESULT_OK, res);
@@ -71,20 +72,15 @@ public class OperationEditor extends CommonOpEditor {
 	protected void saveOpAndExit() throws ParseException {
 		Operation op = mCurrentOp;
 		if (mRowId <= 0) {
-			long id = mDbHelper.createOp(op);
-			if (id > 0) {
-				mRowId = id;
-			}
-			setResAndExit(true);
+			setResAndExit(mDbHelper.createOp(op));
 		} else {
 			if (op.equals(mOriginalOp)) {
-				setResAndExit(true);
+				setResAndExit(false);
 			} else {
 				if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
 					showDialog(ASK_UPDATE_SCHEDULED_DIALOG_ID);
 				} else {
-					mDbHelper.updateOp(mRowId, op);
-					setResAndExit(true);
+					setResAndExit(mDbHelper.updateOp(mRowId, op));
 				}
 			}
 		}
@@ -117,8 +113,9 @@ public class OperationEditor extends CommonOpEditor {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									mCurrentOp.mScheduledId = 0;
-									mDbHelper.updateOp(mRowId, mCurrentOp);
-									OperationEditor.this.setResAndExit(true);
+									OperationEditor.this
+											.setResAndExit(mDbHelper.updateOp(
+													mRowId, mCurrentOp));
 								}
 							})
 					.setNegativeButton(R.string.cancel,

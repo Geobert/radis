@@ -30,6 +30,7 @@ import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -41,6 +42,8 @@ import fr.geobert.radis.editor.OperationEditor;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.ProjectionDateController;
+import fr.geobert.radis.tools.QuickAddController;
 import fr.geobert.radis.tools.QuickAddInterface;
 import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
@@ -57,6 +60,7 @@ public class OperationList extends ListActivity implements RadisListActivity,
 	private static final int CREATE_SCH_OP = 2;
 
 	private static final int DIALOG_DELETE = 0;
+	private static final int DIALOG_PROJECTION = 1;
 
 	private CommonDbAdapter mDbHelper;
 	private Long mAccountId;
@@ -71,6 +75,8 @@ public class OperationList extends ListActivity implements RadisListActivity,
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
 	private QuickAddController mQuickAddController;
+	private Button mProjectionBtn;
+	private long mProjectionDate;
 
 	private class InnerViewBinder extends OpViewBinder {
 
@@ -198,6 +204,8 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
+		mProjectionDate = mCurAccount.getLong(mCurAccount
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		mQuickAddController.setDbHelper(mDbHelper);
 	}
 
@@ -207,10 +215,10 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		mQuickAddController.setAccount(mAccountId);
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
+		mProjectionBtn = (Button) findViewById(R.id.future_sum);
 	}
 
 	private void initViewBehavior() {
-
 		mQuickAddController.initViewBehavior();
 		final GestureDetector gestureDetector = new GestureDetector(
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
@@ -235,6 +243,12 @@ public class OperationList extends ListActivity implements RadisListActivity,
 			}
 		};
 		getListView().setOnTouchListener(gestureListener);
+		mProjectionBtn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				OperationList.this.showDialog(DIALOG_PROJECTION);
+			}
+		});
 	}
 
 	/** Called when the activity is first created. */
@@ -267,7 +281,7 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		Cursor c = mLastOps;
 		c.requery();
 		c.moveToFirst();
-		updateFutureSumDisplay(curSum, c);
+		updateFutureSumDisplay();
 		if (mLastSelectedPosition == null) {
 			updateSumAtDateDisplay(new GregorianCalendar(), curSum);
 		} else {
@@ -408,7 +422,7 @@ public class OperationList extends ListActivity implements RadisListActivity,
 				try {
 					fillData();
 					if (data.getBooleanExtra("sumUpdateNeeded", false)) {
-						updateSums(data);
+						updateSumsAfterOpEdit(data);
 					}
 				} catch (Exception e) {
 					ErrorReporter.getInstance().handleException(e);
@@ -494,8 +508,10 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-		updateSums(sum, 0L);
-		mDbHelper.deleteOp(info.id);
+
+		if (mDbHelper.deleteOp(info.id)) {
+			updateSumsAfterOpEdit(sum, 0L, 0);
+		}
 	}
 
 	// generic function for getAccountOpSum and getAccountCurSum
@@ -519,19 +535,32 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM);
 	}
 
-	private long computeSumFromCursor(Cursor c) {
+	private long computeSumFromCursor(Cursor op) {
 		long sum = 0L;
-		int i = 0;
-
-		if (null != c && !c.isBeforeFirst() && !c.isAfterLast()) {
-			boolean hasNext = c.moveToPrevious();
-
-			while (hasNext) {
-				long s = c
-						.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-				sum = sum + s;
-				hasNext = c.moveToPrevious();
-				i++;
+		long opDate = op
+				.getLong(op.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
+			if (opDate <= mProjectionDate) {
+				boolean hasPrev = op.moveToPrevious();
+				opDate = op.getLong(op
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+				while (hasPrev && opDate <= mProjectionDate) {
+					long s = op.getLong(op
+							.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+					sum = sum + s;
+					hasPrev = op.moveToPrevious();
+				}
+				sum = -sum;
+			} else {
+				boolean hasNext = op.moveToNext();
+				opDate = op.getLong(op
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+				while (hasNext && opDate > mProjectionDate) {
+					long s = op.getLong(op
+							.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+					sum = sum + s;
+					hasNext = op.moveToNext();
+				}
 			}
 		}
 		return sum;
@@ -553,32 +582,35 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		return ops;
 	}
 
-	private void updateSums(Intent data) throws Exception {
+	private void updateSumsAfterOpEdit(Intent data) throws Exception {
 		Bundle extras = data.getExtras();
-		updateSums(extras.getLong("oldSum"), extras.getLong("sum"));
+		updateSumsAfterOpEdit(extras.getLong("oldSum"), extras.getLong("sum"),
+				extras.getLong("opDate"));
 	}
 
-	private void updateSums(long oldSum, long sum) throws Exception {
-		long opSum = getAccountOpSum();
-		opSum = opSum - oldSum + sum;
-		if (mDbHelper.updateOpSum(mAccountId, opSum)) {
-			Cursor c = mLastOps;
-			c.requery();
-			c.moveToFirst();
-			long curSum = mDbHelper.updateCurrentSum(mAccountId, c.getLong(c
-					.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_DATE)));
-			updateFutureSumDisplay(curSum, c);
-			updateSumAtDateDisplay(null, curSum);
-		}
+	private void updateSumsAfterOpEdit(long oldSum, long sum, long date)
+			throws Exception {
+//		long opSum = getAccountOpSum();
+//		opSum = opSum - oldSum + sum;
+		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
+		updateFutureSumDisplay();
+		updateSumAtDateDisplay(null, getAccountCurSum());
+
 	}
 
-	private void updateFutureSumDisplay(long curSum, Cursor c) {
+	private void updateFutureSumDisplay() {
 		TextView t = (TextView) findViewById(R.id.future_sum);
-		if (c.isFirst()) {
-			Operation latestOp = new Operation(c); // to use existing formatter
-			latestOp.mSum = curSum;
-			t.setText(String.format(getString(R.string.sum_at),
-					latestOp.getDateStr(), latestOp.getSumStr()));
+		String format = getString(R.string.sum_at);
+		if (mLastOps.moveToFirst()) {
+			Cursor account = mCurAccount;
+			account.requery();
+			account.moveToFirst();
+			t.setText(String.format(
+					format,
+					Formater.DATE_FORMAT.format(account.getLong(account
+							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
+					Formater.SUM_FORMAT.format(account.getLong(account
+							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
 		} else {
 			t.setText("");
 		}
@@ -670,7 +702,7 @@ public class OperationList extends ListActivity implements RadisListActivity,
 			t.setText(String
 					.format(getString(R.string.sum_at_selection),
 							Formater.SUM_FORMAT
-									.format((accountCurSum - computeSumFromCursor(data)) / 100.0d)));
+									.format((accountCurSum + computeSumFromCursor(data)) / 100.0d)));
 		}
 	}
 
@@ -731,6 +763,9 @@ public class OperationList extends ListActivity implements RadisListActivity,
 
 						}
 					});
+		case DIALOG_PROJECTION:
+			return ProjectionDateController.getDialog(this, mCurAccount,
+					mDbHelper);
 		default:
 			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}

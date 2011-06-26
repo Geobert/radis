@@ -87,16 +87,22 @@ public class RadisService extends IntentService {
 				// insert all scheduled of the past until current month
 				while (op.getMonth() <= today.get(Calendar.MONTH)
 						&& !op.isObsolete()) {
-					sum = sum + insertSchOp(op, opRowId);
-					needUpdate = true;
+					long opSum = insertSchOp(op, opRowId);
+					if (opSum != 0) {
+						sum = sum + opSum;
+						needUpdate = true;
+					}
 				}
 				if (todayInMillis >= insertionDateInMillis) {
 					while (op.getMonth() <= insertionMonthLimit
 							&& !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId,
 								op.getDate());
-						sum = sum + insertSchOp(op, opRowId);
-						needUpdate = true;
+						long opSum = insertSchOp(op, opRowId);
+						if (opSum != 0) {
+							sum = sum + opSum;
+							needUpdate = true;
+						}
 					}
 				}
 				if (needUpdate) {
@@ -128,28 +134,17 @@ public class RadisService extends IntentService {
 	}
 
 	public static void updateAccountSum(final long sumToAdd, final long accountId,
-			final long date, CommonDbAdapter dbHelper) {
-		Cursor accountCursor = dbHelper.fetchAccount(accountId);
-		long curSum = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-		dbHelper.updateOpSum(accountId, curSum + sumToAdd);
-		final long curDate = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
-		if (date > curDate) {
-			dbHelper.updateCurrentSum(accountId, date);
-		} else {
-			dbHelper.updateCurrentSum(accountId, 0);
-		}
-		accountCursor.close();
+			final long opDate, CommonDbAdapter dbHelper) {
+		dbHelper.updateProjection(accountId, sumToAdd, opDate);
 	}
 
 	private long insertSchOp(ScheduledOperation op, final long opRowId) {
 		final long accountId = op.mAccountId;
 		op.mScheduledId = opRowId;
-		mDbHelper.createOp(op, accountId);
+		boolean needUpdate = mDbHelper.createOp(op, accountId);
 		ScheduledOperation.addPeriodicityToDate(op);
 		Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
-		return op.mSum;
+		return needUpdate ? op.mSum : 0;
 	}
 
 	public static void acquireStaticLock(Context context) {

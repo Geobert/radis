@@ -18,6 +18,7 @@ import fr.geobert.radis.R;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
 
 public class AccountEditor extends Activity {
@@ -26,6 +27,7 @@ public class AccountEditor extends Activity {
 	private EditText mAccountStartSumText;
 	private EditText mAccountDescText;
 	private Spinner mAccountCurrency;
+	private ProjectionDateController mProjectionController;
 	private Long mRowId;
 	private ArrayAdapter<CharSequence> mCurrAdapter;
 
@@ -93,11 +95,14 @@ public class AccountEditor extends Activity {
 		});
 
 		fillCurrencySpinner();
+		mProjectionController = new ProjectionDateController(this);
 	}
 
 	private void fillCurrencySpinner() {
 		mCurrAdapter = ArrayAdapter.createFromResource(this,
 				R.array.all_currencies, android.R.layout.simple_spinner_item);
+		mCurrAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mAccountCurrency.setAdapter(mCurrAdapter);
 	}
 
@@ -140,6 +145,7 @@ public class AccountEditor extends Activity {
 			}
 			int pos = Arrays.binarySearch(allCurrencies, currencyStr);
 			mAccountCurrency.setSelection(pos);
+			mProjectionController.populateFields(account);
 		} else {
 			int pos = Arrays
 					.binarySearch(allCurrencies,
@@ -157,6 +163,7 @@ public class AccountEditor extends Activity {
 				.toString());
 		outState.putInt("currency", mAccountCurrency.getSelectedItemPosition());
 		outState.putString("desc", mAccountDescText.getText().toString());
+		mProjectionController.onSaveInstanceState(outState);
 		mOnRestore = true;
 	}
 
@@ -167,6 +174,7 @@ public class AccountEditor extends Activity {
 		mAccountStartSumText.setText(state.getString("startSum"));
 		mAccountCurrency.setSelection(state.getInt("currency"));
 		mAccountDescText.setText(state.getString("desc"));
+		mProjectionController.onRestoreInstanceState(state);
 		mOnRestore = true;
 	}
 
@@ -175,6 +183,7 @@ public class AccountEditor extends Activity {
 		super.onResume();
 		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
+		mProjectionController.setDbHelper(mDbHelper);
 		if (!mOnRestore) {
 			populateFields();
 		} else {
@@ -199,13 +208,14 @@ public class AccountEditor extends Activity {
 			String currency = mAccountCurrency.getSelectedItem().toString();
 			if (mRowId == null) {
 				long id = mDbHelper.createAccount(name, desc, startSum,
-						currency);
+						currency, mProjectionController.getMode(),
+						mProjectionController.getDate());
 				if (id > 0) {
 					mRowId = id;
 				}
 			} else {
-				mDbHelper.updateAccount(mRowId, name, desc, startSum, currency);
-				mDbHelper.updateCurrentSum(mRowId, 0);
+				mDbHelper.updateAccount(mRowId, name, desc, startSum, currency,
+						mProjectionController);
 			}
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block

@@ -16,38 +16,6 @@
 	<string name="currency">Devise</string>
 	<string name="delete">Supprimer</string>
 	<string name="account_prompt">Sélectionnez une devise</string>
-	<string-array name="all_currencies">
-		<item>AUD</item>
-		<item>BRL</item>
-		<!-- <item>BWP</item> -->
-		<!-- <item>BZD</item> -->
-		<item>CAD</item>
-		<item>CHF</item>
-		<item>CNY</item>
-		<!-- <item>CZK</item> -->
-		<!-- <item>DKK</item> -->
-		<item>EUR</item>
-		<item>GBP</item>
-		<item>HKD</item>
-		<!-- <item>INR</item> -->
-		<!-- <item>JMD</item> -->
-		<item>JPY</item>
-		<!-- <item>KRW</item> -->
-		<!-- <item>NOK</item> -->
-		<!-- <item>NZD</item> -->
-		<!-- <item>PHP</item> -->
-		<!-- <item>PKR</item> -->
-		<!-- <item>PLN</item> -->
-		<!-- <item>RUB</item> -->
-		<item>SEK</item>
-		<item>SGD</item>
-		<!-- <item>TRY</item> -->
-		<!-- <item>TTD</item> -->
-		<item>TWD</item>
-		<item>USD</item>
-		<!-- <item>ZAR</item> -->
-		<!-- <item>ZWD</item> -->
-	</string-array>
 	<string name="edit">Modifier</string>
 	<string name="ok">Ok</string>
 	<string name="third_party">Tiers</string>
@@ -175,4 +143,14 @@
 	<string name="quickadd_target_to_configure">Allez dans les préférences pour choisir le compte
 	</string>
 	<string name="quickadd_target_no_account">Créer un compte pour activer</string>
+	<string name="projection_date">Date de projection</string>
+	<string name="projection_day_of_month">Jour du mois</string>
+	<string name="projection_full_date">jj/MM/yyyy</string>
+	<string name="projection_date_mode">Mode de projection</string>
+	<string-array name="projection_modes">
+		<item>Au plus loin</item>
+		<item>Un jour du mois suivant</item>
+		<item>Une date absolue</item>
+	</string-array>
+	<string name="bad_format_for_date">La date est invalide</string>
 </resources>

@@ -1,6 +1,5 @@
 package fr.geobert.radis.tools;
 
-import fr.geobert.radis.QuickAddController;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.AutoCompleteTextView;

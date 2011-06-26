@@ -32,6 +32,7 @@ import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.PrefsManager;
+import fr.geobert.radis.tools.QuickAddController;
 import fr.geobert.radis.tools.QuickAddInterface;
 import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
