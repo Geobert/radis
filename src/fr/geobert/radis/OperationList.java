@@ -544,10 +544,7 @@ public class OperationList extends ListActivity implements
 			if (opDate <= mProjectionDate) {
 				boolean hasPrev = op.moveToPrevious();
 				opDate = op.getLong(dateIdx);
-				Date p = new Date(mProjectionDate);
-				Date t = new Date(opDate);
 				while (hasPrev && opDate <= mProjectionDate) {
-					t = new Date(opDate);
 					long s = op.getLong(opSumIdx);
 					sum = sum + s;
 					hasPrev = op.moveToPrevious();
