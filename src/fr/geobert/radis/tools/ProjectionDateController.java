@@ -116,7 +116,7 @@ public class ProjectionDateController {
 						.getText().toString()));
 	}
 
-	public static AlertDialog getDialog(Activity activity, Cursor account,
+	public static AlertDialog getDialog(Activity activity,
 			CommonDbAdapter dbHelper) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		LayoutInflater inflater = (LayoutInflater) activity.getLayoutInflater();
@@ -136,16 +136,24 @@ public class ProjectionDateController {
 		builder.setView(layout);
 		AlertDialog dialog = builder.create();
 		mInstance = new ProjectionDateController(layout, activity);
-		mInstance.populateFields(account);
 		mInstance.setDbHelper(dbHelper);
+
 		return dialog;
+	}
+
+	public static void onPrepareDialog(Cursor account) {
+		mInstance.populateFields(account);
 	}
 
 	protected void saveProjectionDate() {
 		try {
 			mDbHelper.updateAccountProjectionDate(mAccountId, mInstance);
+			if (mActivity instanceof UpdateDisplayInterface) {
+				((UpdateDisplayInterface) mActivity).updateDisplay(null);
+			}
 		} catch (ParseException e) {
-			Tools.popError(mActivity, mActivity.getString(R.string.bad_format_for_date), null);
+			Tools.popError(mActivity,
+					mActivity.getString(R.string.bad_format_for_date), null);
 			e.printStackTrace();
 		}
 	}

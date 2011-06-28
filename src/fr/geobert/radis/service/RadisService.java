@@ -60,6 +60,7 @@ public class RadisService extends IntentService {
 			final long todayInMillis = today.getTimeInMillis();
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(insertionDate);
 			int insertionDayOfMonth = PrefsManager
 					.getInstance(this)
 					.getInt(RadisConfiguration.KEY_INSERTION_DATE,

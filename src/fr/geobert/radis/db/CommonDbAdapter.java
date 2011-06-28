@@ -21,7 +21,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.Operation;
-import fr.geobert.radis.OperationList;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.Formater;
@@ -665,16 +664,42 @@ public class CommonDbAdapter {
 			case 9: {
 				db.execSQL(ADD_PROJECTION_MODE_COLUNM);
 				db.execSQL(ADD_PROJECTION_MODE_DATE);
-				Cursor allAccounts = db.query(DATABASE_ACCOUNT_TABLE,
-						new String[] {}, null, null, null, null, null);
-				if (allAccounts.moveToFirst()) {
+				Cursor c = db.query(DATABASE_ACCOUNT_TABLE, new String[] {},
+						null, null, null, null, null);
+				if (c.moveToFirst()) {
 					do {
-						consolidateSums(allAccounts.getLong(allAccounts
-								.getColumnIndex(KEY_ACCOUNT_ROWID)), db);
-					} while (allAccounts.moveToNext());
+						consolidateSums(
+								c.getLong(c.getColumnIndex(KEY_ACCOUNT_ROWID)),
+								db);
+					} while (c.moveToNext());
 				}
-				if (null != allAccounts) {
-					allAccounts.close();
+				if (null != c) {
+					c.close();
+				}
+				c = db.query(DATABASE_OPERATIONS_TABLE, new String[] {
+						KEY_OP_ROWID, KEY_OP_DATE }, null, null, null, null,
+						null);
+				if (null != c) {
+					if (c.moveToFirst()) {
+						ContentValues values;
+						do {
+							values = new ContentValues();
+							GregorianCalendar d = new GregorianCalendar();
+							d.setTimeInMillis(c.getLong(c
+									.getColumnIndex(KEY_OP_DATE)));
+							Tools.clearTimeOfCalendar(d);
+							values.put(KEY_OP_DATE, d.getTimeInMillis());
+							db.update(
+									DATABASE_OPERATIONS_TABLE,
+									values,
+									KEY_OP_ROWID
+											+ "="
+											+ c.getLong(c
+													.getColumnIndex(KEY_OP_ROWID)),
+									null);
+						} while (c.moveToNext());
+					}
+					c.close();
 				}
 			}
 			default:
@@ -790,14 +815,17 @@ public class CommonDbAdapter {
 			break;
 		case 1: {
 			GregorianCalendar projDate = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(projDate);
 			if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
 					.parseInt(projectionDate)) {
 				projDate.roll(Calendar.MONTH, 1);
 			}
 			projDate.set(Calendar.DAY_OF_MONTH,
 					Integer.parseInt(projectionDate));
-			projDate.roll(Calendar.DAY_OF_MONTH, 1);
+			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
 			Cursor op = fetchOpEarlierThan(projDate.getTimeInMillis(), 0);
+			projDate.roll(Calendar.DAY_OF_MONTH, -1); // restore date after
+														// query
 			if (null != op) {
 				if (op.moveToFirst()) {
 					opSum = computeSumFromCursor(op);
@@ -809,6 +837,9 @@ public class CommonDbAdapter {
 			break;
 		case 2: {
 			Date projDate = Formater.DATE_FORMAT.parse(projectionDate);
+			projDate.setHours(0);
+			projDate.setMinutes(0);
+			projDate.setSeconds(0);
 			Cursor op = fetchOpEarlierThan(projDate.getTime(), 0);
 			if (null != op) {
 				if (op.moveToFirst()) {
@@ -858,10 +889,12 @@ public class CommonDbAdapter {
 			mProjectionMode = mCurAccount.getInt(8);
 			switch (mProjectionMode) {
 			case 0:
-				mProjectionDate = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
+				mProjectionDate = c.getLong(c
+						.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
 				break;
 			case 1: {
 				GregorianCalendar projDate = new GregorianCalendar();
+				Tools.clearTimeOfCalendar(projDate);
 				if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
 						.parseInt(mCurAccount.getString(9))) {
 					projDate.roll(Calendar.MONTH, 1);
@@ -875,6 +908,9 @@ public class CommonDbAdapter {
 				try {
 					Date projDate = Formater.DATE_FORMAT.parse(mCurAccount
 							.getString(9));
+					projDate.setHours(0);
+					projDate.setMinutes(0);
+					projDate.setSeconds(0);
 					mProjectionDate = projDate.getTime();
 				} catch (ParseException e) {
 					e.printStackTrace();
@@ -932,8 +968,13 @@ public class CommonDbAdapter {
 		if (mProjectionMode == 0 && opDate > mProjectionDate || opDate == 0) {
 			if (opDate == 0) {
 				Cursor op = fetchLastOp(accountId);
-				args.put(KEY_ACCOUNT_CUR_SUM_DATE,
-						op.getLong(op.getColumnIndex(KEY_OP_DATE)));
+				if (null != op) {
+					if (op.moveToFirst()) {
+						args.put(KEY_ACCOUNT_CUR_SUM_DATE,
+								op.getLong(op.getColumnIndex(KEY_OP_DATE)));
+					}
+					op.close();
+				}
 			} else {
 				args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
 			}
@@ -1063,10 +1104,6 @@ public class CommonDbAdapter {
 		return false;
 	}
 
-	public Cursor fetchNLastOps(int nbOps) {
-		return fetchNLastOps(nbOps, mAccountId);
-	}
-
 	public Cursor fetchNLastOps(int nbOps, final long accountId) {
 		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
@@ -1083,9 +1120,13 @@ public class CommonDbAdapter {
 	}
 
 	public Cursor fetchAllOps(final long accountId) {
-		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
+		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
 				null, OP_ORDERING, null);
+		if (null != c) {
+			c.moveToFirst();
+		}
+		return c;
 	}
 
 	public Cursor fetchOneOp(final long rowId, final long accountId) {

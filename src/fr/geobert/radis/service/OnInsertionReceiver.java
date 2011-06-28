@@ -1,6 +1,6 @@
 package fr.geobert.radis.service;
 
-import fr.geobert.radis.tools.RadisListActivity;
+import fr.geobert.radis.tools.UpdateDisplayInterface;
 import fr.geobert.radis.tools.Tools;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,9 +8,9 @@ import android.content.Intent;
 
 public class OnInsertionReceiver extends BroadcastReceiver {
 
-	private RadisListActivity mActivity;
+	private UpdateDisplayInterface mActivity;
 
-	public OnInsertionReceiver(RadisListActivity activity) {
+	public OnInsertionReceiver(UpdateDisplayInterface activity) {
 		super();
 		mActivity = activity;
 	}

@@ -33,12 +33,10 @@ import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.QuickAddController;
-import fr.geobert.radis.tools.QuickAddInterface;
-import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class AccountList extends ListActivity implements RadisListActivity,
-		QuickAddInterface {
+public class AccountList extends ListActivity implements UpdateDisplayInterface {
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
 
@@ -394,10 +392,5 @@ public class AccountList extends ListActivity implements RadisListActivity,
 	public void updateDisplay(Intent intent) {
 		mAccountsCursor.requery();
 		mScheduledListBtn.setEnabled(getListAdapter().getCount() > 0);
-	}
-
-	@Override
-	public void updateSumsDisplay() {
-		mAccountsCursor.requery();
 	}
 }

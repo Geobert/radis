@@ -1,6 +1,7 @@
 package fr.geobert.radis;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
@@ -44,12 +45,11 @@ import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.QuickAddController;
-import fr.geobert.radis.tools.QuickAddInterface;
-import fr.geobert.radis.tools.RadisListActivity;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class OperationList extends ListActivity implements RadisListActivity,
-		QuickAddInterface {
+public class OperationList extends ListActivity implements
+		UpdateDisplayInterface {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 	private static final int CONVERT_OP_ID = Menu.FIRST + 3;
@@ -283,7 +283,9 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		c.moveToFirst();
 		updateFutureSumDisplay();
 		if (mLastSelectedPosition == null) {
-			updateSumAtDateDisplay(new GregorianCalendar(), curSum);
+			GregorianCalendar today = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(today);
+			updateSumAtDateDisplay(today, curSum);
 		} else {
 			int position = mLastSelectedPosition.intValue();
 			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
@@ -470,10 +472,12 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		startManagingCursor(mLastOps);
 		Cursor lastOp = mDbHelper.fetchLastOp(mAccountId);
 		GregorianCalendar latest = new GregorianCalendar();
+		Tools.clearTimeOfCalendar(latest);
 		if (lastOp != null && lastOp.moveToFirst()) {
 			latest.setTimeInMillis(lastOp.getLong(lastOp
 					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 			GregorianCalendar today = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(today);
 			Cursor c = mDbHelper.fetchOpBetweenDate(today, latest);
 			startManagingCursor(c);
 			fillLastOps(c);
@@ -527,39 +531,42 @@ public class OperationList extends ListActivity implements RadisListActivity,
 		}
 	}
 
-	private long getAccountOpSum() throws Exception {
-		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_OP_SUM);
-	}
-
 	private long getAccountCurSum() throws Exception {
 		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM);
 	}
 
 	private long computeSumFromCursor(Cursor op) {
 		long sum = 0L;
-		long opDate = op
-				.getLong(op.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+		final int dateIdx = op.getColumnIndex(CommonDbAdapter.KEY_OP_DATE);
+		final int opSumIdx = op.getColumnIndex(CommonDbAdapter.KEY_OP_SUM);
+		long opDate = op.getLong(dateIdx);
 		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
 			if (opDate <= mProjectionDate) {
 				boolean hasPrev = op.moveToPrevious();
-				opDate = op.getLong(op
-						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+				opDate = op.getLong(dateIdx);
+				Date p = new Date(mProjectionDate);
+				Date t = new Date(opDate);
 				while (hasPrev && opDate <= mProjectionDate) {
-					long s = op.getLong(op
-							.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+					t = new Date(opDate);
+					long s = op.getLong(opSumIdx);
 					sum = sum + s;
 					hasPrev = op.moveToPrevious();
+					if (hasPrev) {
+						opDate = op.getLong(dateIdx);
+					}
 				}
 				sum = -sum;
 			} else {
+				sum = op.getLong(opSumIdx);
 				boolean hasNext = op.moveToNext();
-				opDate = op.getLong(op
-						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+				opDate = op.getLong(dateIdx);
 				while (hasNext && opDate > mProjectionDate) {
-					long s = op.getLong(op
-							.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+					long s = op.getLong(opSumIdx);
 					sum = sum + s;
 					hasNext = op.moveToNext();
+					if (hasNext) {
+						opDate = op.getLong(dateIdx);
+					}
 				}
 			}
 		}
@@ -590,8 +597,8 @@ public class OperationList extends ListActivity implements RadisListActivity,
 
 	private void updateSumsAfterOpEdit(long oldSum, long sum, long date)
 			throws Exception {
-//		long opSum = getAccountOpSum();
-//		opSum = opSum - oldSum + sum;
+		// long opSum = getAccountOpSum();
+		// opSum = opSum - oldSum + sum;
 		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
 		updateFutureSumDisplay();
 		updateSumAtDateDisplay(null, getAccountCurSum());
@@ -623,6 +630,7 @@ public class OperationList extends ListActivity implements RadisListActivity,
 			date = mLastSelectedDate;
 			if (null == date) {
 				date = new GregorianCalendar();
+				Tools.clearTimeOfCalendar(date);
 			}
 		}
 		mLastSelectedDate = date;
@@ -764,27 +772,38 @@ public class OperationList extends ListActivity implements RadisListActivity,
 						}
 					});
 		case DIALOG_PROJECTION:
-			return ProjectionDateController.getDialog(this, mCurAccount,
-					mDbHelper);
+			return ProjectionDateController.getDialog(this, mDbHelper);
 		default:
 			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
 	}
 
 	@Override
-	public void updateDisplay(Intent intent) {
-		Object[] accountIds = (Object[]) intent
-				.getSerializableExtra("accountIds");
-		for (int i = 0; i < accountIds.length; ++i) {
-			if (((Long) accountIds[i]).equals(mAccountId)) {
-				updateSumsDisplay();
-				break;
-			}
+	protected void onPrepareDialog(int id, Dialog dialog) {
+		if (id == DIALOG_PROJECTION) {
+			ProjectionDateController.onPrepareDialog(mCurAccount);
 		}
 	}
 
 	@Override
-	public void updateSumsDisplay() {
+	public void updateDisplay(Intent intent) {
+		if (null != intent) {
+			Object[] accountIds = (Object[]) intent
+					.getSerializableExtra("accountIds");
+			for (int i = 0; i < accountIds.length; ++i) {
+				if (((Long) accountIds[i]).equals(mAccountId)) {
+					updateSumsDisplay();
+					break;
+				}
+			}
+		} else {
+			updateSumsDisplay();
+		}
+	}
+
+	private void updateSumsDisplay() {
+		mProjectionDate = mCurAccount.getLong(mCurAccount
+				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
 		try {
 			updateSumsAndSelection();
@@ -793,4 +812,5 @@ public class OperationList extends ListActivity implements RadisListActivity,
 			e.printStackTrace();
 		}
 	}
+
 }

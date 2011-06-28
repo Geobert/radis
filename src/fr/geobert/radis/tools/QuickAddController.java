@@ -23,10 +23,10 @@ public class QuickAddController {
 	private CorrectCommaWatcher mCorrectCommaWatcher;
 	private Activity mActivity;
 	private CommonDbAdapter mDbHelper;
-	private QuickAddInterface mProtocol;
+	private UpdateDisplayInterface mProtocol;
 	private long mAccountId = 0;
 
-	public QuickAddController(Activity activity, QuickAddInterface protocol) {
+	public QuickAddController(Activity activity, UpdateDisplayInterface protocol) {
 		mActivity = activity;
 
 		mProtocol = protocol;
@@ -86,7 +86,7 @@ public class QuickAddController {
 		if (mDbHelper.createOp(op, mAccountId)) {
 			RadisService.updateAccountSum(op.mSum, mAccountId, op.getDate(),
 					mDbHelper);
-			mProtocol.updateSumsDisplay();
+			mProtocol.updateDisplay(null);
 		}
 		mQuickAddAmount.setText("");
 		mQuickAddThirdParty.setText("");

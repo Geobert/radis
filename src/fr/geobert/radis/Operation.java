@@ -23,6 +23,7 @@ public class Operation implements Parcelable {
 	public Operation(Operation op) {
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getDate());
+		Tools.clearTimeOfCalendar(mDate);
 		mThirdParty = op.mThirdParty;
 		mTag = op.mTag;
 		mMode = op.mMode;

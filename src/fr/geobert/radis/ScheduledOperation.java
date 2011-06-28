@@ -157,6 +157,9 @@ public class ScheduledOperation extends Operation {
 				.getColumnIndex(CommonDbAdapter.KEY_SCHEDULED_ACCOUNT_ID));
 		dbHelper.deleteAllOccurrences(accountId, schOpId);
 		dbHelper.consolidateSums(accountId, null);
+		if (null != schOp) {
+			schOp.close();
+		}
 	}
 
 	public static void updateAllOccurences(CommonDbAdapter dbHelper,
