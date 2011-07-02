@@ -836,18 +836,20 @@ public class CommonDbAdapter {
 		}
 			break;
 		case 2: {
-			Date projDate = Formater.DATE_FORMAT.parse(projectionDate);
-			projDate.setHours(0);
-			projDate.setMinutes(0);
-			projDate.setSeconds(0);
-			Cursor op = fetchOpEarlierThan(projDate.getTime(), 0);
+			GregorianCalendar projDate = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(projDate);
+			projDate.setTime(Formater.DATE_FORMAT.parse(projectionDate));
+			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
+			Cursor op = fetchOpEarlierThan(projDate.getTimeInMillis(), 0);
+			projDate.roll(Calendar.DAY_OF_MONTH, -1); // restore date after
+			// query
 			if (null != op) {
 				if (op.moveToFirst()) {
 					opSum = computeSumFromCursor(op);
 				}
 				op.close();
 			}
-			date = projDate.getTime();
+			date = projDate.getTimeInMillis();
 		}
 			break;
 		default:
@@ -940,8 +942,8 @@ public class CommonDbAdapter {
 			setCurrentSumAndDate(args, start_sum,
 					projectionController.getMode(),
 					projectionController.getDate());
-			return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID
-					+ "=" + accountId, null) > 0;
+			return mDb.update(DATABASE_ACCOUNT_TABLE, args,
+					KEY_ACCOUNT_ROWID + "=" + accountId, null) > 0;
 		}
 		return true;
 	}
@@ -957,8 +959,11 @@ public class CommonDbAdapter {
 		args.put(KEY_ACCOUNT_CURRENCY, currency);
 		args.put(KEY_ACCOUNT_PROJECTION_MODE, projectionController.getMode());
 		args.put(KEY_ACCOUNT_PROJECTION_DATE, projectionController.getDate());
+		long sav = mAccountId;
+		mAccountId = accountId;
 		setCurrentSumAndDate(args, start_sum, projectionController.getMode(),
 				projectionController.getDate());
+		mAccountId = sav;
 		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
 				+ accountId, null) > 0;
 	}

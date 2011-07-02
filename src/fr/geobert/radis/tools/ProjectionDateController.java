@@ -58,6 +58,7 @@ public class ProjectionDateController {
 			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
 					long arg3) {
 				mProjectionDate.setEnabled(pos > 0);
+				mProjectionDate.setText("");
 				ProjectionDateController.this.setHint(pos);
 			}
 
@@ -130,7 +131,6 @@ public class ProjectionDateController {
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
-						mInstance = null;
 					}
 				});
 		builder.setView(layout);

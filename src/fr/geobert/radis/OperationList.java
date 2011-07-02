@@ -543,26 +543,30 @@ public class OperationList extends ListActivity implements
 		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
 			if (opDate <= mProjectionDate) {
 				boolean hasPrev = op.moveToPrevious();
-				opDate = op.getLong(dateIdx);
-				while (hasPrev && opDate <= mProjectionDate) {
-					long s = op.getLong(opSumIdx);
-					sum = sum + s;
-					hasPrev = op.moveToPrevious();
-					if (hasPrev) {
-						opDate = op.getLong(dateIdx);
+				if (hasPrev) {
+					opDate = op.getLong(dateIdx);
+					while (hasPrev && opDate <= mProjectionDate) {
+						long s = op.getLong(opSumIdx);
+						sum = sum + s;
+						hasPrev = op.moveToPrevious();
+						if (hasPrev) {
+							opDate = op.getLong(dateIdx);
+						}
 					}
+					sum = -sum;
 				}
-				sum = -sum;
 			} else {
 				sum = op.getLong(opSumIdx);
 				boolean hasNext = op.moveToNext();
-				opDate = op.getLong(dateIdx);
-				while (hasNext && opDate > mProjectionDate) {
-					long s = op.getLong(opSumIdx);
-					sum = sum + s;
-					hasNext = op.moveToNext();
-					if (hasNext) {
-						opDate = op.getLong(dateIdx);
+				if (hasNext) {
+					opDate = op.getLong(dateIdx);
+					while (hasNext && opDate > mProjectionDate) {
+						long s = op.getLong(opSumIdx);
+						sum = sum + s;
+						hasNext = op.moveToNext();
+						if (hasNext) {
+							opDate = op.getLong(dateIdx);
+						}
 					}
 				}
 			}
@@ -799,6 +803,8 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void updateSumsDisplay() {
+		mCurAccount.requery();
+		mCurAccount.moveToFirst();
 		mProjectionDate = mCurAccount.getLong(mCurAccount
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
