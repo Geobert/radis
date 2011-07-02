@@ -1,7 +1,6 @@
 package fr.geobert.radis;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;

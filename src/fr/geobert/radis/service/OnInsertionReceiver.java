@@ -1,10 +1,10 @@
 package fr.geobert.radis.service;
 
-import fr.geobert.radis.tools.UpdateDisplayInterface;
-import fr.geobert.radis.tools.Tools;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.UpdateDisplayInterface;
 
 public class OnInsertionReceiver extends BroadcastReceiver {
 

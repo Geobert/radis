@@ -10,8 +10,6 @@ import android.widget.EditText;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
-import fr.geobert.radis.R.drawable;
-import fr.geobert.radis.R.id;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.service.RadisService;
 
