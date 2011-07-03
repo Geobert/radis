@@ -217,7 +217,7 @@ public class CommonDbAdapter {
 			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
 			+ KEY_ACCOUNT_PROJECTION_DATE + " string";
 
-	private long mAccountId;
+	public long mAccountId;
 
 	private LinkedHashMap<String, Long> mModesMap;
 	private LinkedHashMap<String, Long> mTagsMap;

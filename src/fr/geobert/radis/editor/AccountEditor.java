@@ -183,6 +183,7 @@ public class AccountEditor extends Activity {
 		super.onResume();
 		mDbHelper = CommonDbAdapter.getInstance(this);
 		mDbHelper.open();
+		mDbHelper.mAccountId = mRowId == null ? 0 : mRowId.longValue();
 		mProjectionController.setDbHelper(mDbHelper);
 		if (!mOnRestore) {
 			populateFields();
