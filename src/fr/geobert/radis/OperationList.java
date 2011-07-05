@@ -612,6 +612,7 @@ public class OperationList extends ListActivity implements
 			Cursor account = mCurAccount;
 			account.requery();
 			account.moveToFirst();
+			t.setVisibility(View.VISIBLE);
 			t.setText(String.format(
 					format,
 					Formater.DATE_FORMAT.format(account.getLong(account
@@ -619,7 +620,7 @@ public class OperationList extends ListActivity implements
 					Formater.SUM_FORMAT.format(account.getLong(account
 							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
 		} else {
-			t.setText("");
+			t.setVisibility(View.INVISIBLE);
 		}
 	}
 
@@ -702,15 +703,18 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void updateSumAtSelectedOpDisplay(Cursor data, long accountCurSum) {
-		if (null != data) {
+		TextView t = (TextView) findViewById(R.id.date_sum);
+		if (null != data && !data.isBeforeFirst() && !data.isAfterLast()) {
 			int position = data.getPosition();
 			mLastSelectedPosition = position;
 			selectOpAndAdjustOffset(getListView(), position);
-			TextView t = (TextView) findViewById(R.id.date_sum);
 			t.setText(String
 					.format(getString(R.string.sum_at_selection),
 							Formater.SUM_FORMAT
 									.format((accountCurSum + computeSumFromCursor(data)) / 100.0d)));
+		} else {
+			t.setText(String.format(getString(R.string.sum_at_selection),
+					Formater.SUM_FORMAT.format((accountCurSum / 100.0d))));
 		}
 	}
 

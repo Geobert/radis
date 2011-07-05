@@ -25,6 +25,7 @@ public class ProjectionDateController {
 	private long mAccountId;
 	private int mOrigProjMode;
 	private String mOrigProjDate;
+	private int mCurPos;
 
 	protected static ProjectionDateController mInstance;
 
@@ -56,9 +57,11 @@ public class ProjectionDateController {
 
 			@Override
 			public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
-					long arg3) {
+					long id) {
 				mProjectionDate.setEnabled(pos > 0);
-				mProjectionDate.setText("");
+				if (pos != mCurPos) {
+					mProjectionDate.setText("");
+				}
 				ProjectionDateController.this.setHint(pos);
 			}
 
@@ -94,13 +97,14 @@ public class ProjectionDateController {
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID));
 		int pos = account.getInt(account
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_PROJECTION_MODE));
+		mCurPos = pos;
+		setHint(pos);
 		mOrigProjMode = pos;
 		mProjectionMode.setSelection(pos);
 		mOrigProjDate = account.getString(account
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_PROJECTION_DATE));
-		mProjectionDate.setText(mOrigProjDate);
 		mProjectionDate.setEnabled(pos > 0);
-		setHint(pos);
+		mProjectionDate.setText(mOrigProjDate);
 	}
 
 	public int getMode() {
@@ -132,7 +136,7 @@ public class ProjectionDateController {
 					public void onClick(DialogInterface dialog, int id) {
 						dialog.cancel();
 					}
-				});
+				}).setTitle(R.string.projection_date);
 		builder.setView(layout);
 		AlertDialog dialog = builder.create();
 		mInstance = new ProjectionDateController(layout, activity);
