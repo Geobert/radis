@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.acra.ErrorReporter;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -915,6 +917,7 @@ public class CommonDbAdapter {
 					projDate.setSeconds(0);
 					mProjectionDate = projDate.getTime();
 				} catch (ParseException e) {
+					ErrorReporter.getInstance().handleSilentException(e);
 					e.printStackTrace();
 				}
 
@@ -942,8 +945,8 @@ public class CommonDbAdapter {
 			setCurrentSumAndDate(args, start_sum,
 					projectionController.getMode(),
 					projectionController.getDate());
-			return mDb.update(DATABASE_ACCOUNT_TABLE, args,
-					KEY_ACCOUNT_ROWID + "=" + accountId, null) > 0;
+			return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID
+					+ "=" + accountId, null) > 0;
 		}
 		return true;
 	}

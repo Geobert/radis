@@ -3,8 +3,6 @@ package fr.geobert.radis;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.acra.ErrorReporter;
-
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -275,7 +273,7 @@ public class OperationList extends ListActivity implements
 
 	}
 
-	private void updateSumsAndSelection() throws Exception {
+	private void updateSumsAndSelection() {
 		long curSum = getAccountCurSum();
 		Cursor c = mLastOps;
 		c.requery();
@@ -308,34 +306,23 @@ public class OperationList extends ListActivity implements
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
 		mQuickAddController.setAutoNegate(true);
-		try {
-			updateSumsAndSelection();
-			getListView().setOnItemSelectedListener(
-					new AdapterView.OnItemSelectedListener() {
-						public void onItemSelected(AdapterView<?> parentView,
-								View childView, int position, long id) {
-							mLastOps.moveToPosition(position);
-							SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-							adapter.setSelectedPosition(position);
-							try {
-								updateSumAtSelectedOpDisplay(mLastOps,
-										getAccountCurSum());
-							} catch (Exception e) {
-								Tools.popError(OperationList.this,
-										e.getMessage(),
-										Tools.createRestartClickListener());
-							}
-						}
+		updateSumsAndSelection();
+		getListView().setOnItemSelectedListener(
+				new AdapterView.OnItemSelectedListener() {
+					public void onItemSelected(AdapterView<?> parentView,
+							View childView, int position, long id) {
+						mLastOps.moveToPosition(position);
+						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+						adapter.setSelectedPosition(position);
+						updateSumAtSelectedOpDisplay(mLastOps,
+								getAccountCurSum());
+					}
 
-						public void onNothingSelected(AdapterView<?> parentView) {
-							((SelectedCursorAdapter) getListAdapter())
-									.setSelectedPosition(-1);
-						}
-					});
-		} catch (Exception e) {
-			Tools.popError(OperationList.this, e.getMessage(),
-					Tools.createRestartClickListener());
-		}
+					public void onNothingSelected(AdapterView<?> parentView) {
+						((SelectedCursorAdapter) getListAdapter())
+								.setSelectedPosition(-1);
+					}
+				});
 	}
 
 	@Override
@@ -420,15 +407,9 @@ public class OperationList extends ListActivity implements
 		if (requestCode == ACTIVITY_OP_CREATE
 				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
-				try {
-					fillData();
-					if (data.getBooleanExtra("sumUpdateNeeded", false)) {
-						updateSumsAfterOpEdit(data);
-					}
-				} catch (Exception e) {
-					ErrorReporter.getInstance().handleException(e);
-					Tools.popError(OperationList.this, e.getMessage(),
-							Tools.createRestartClickListener());
+				fillData();
+				if (data.getBooleanExtra("sumUpdateNeeded", false)) {
+					updateSumsAfterOpEdit(data);
 				}
 			}
 		} else if (requestCode == CREATE_SCH_OP) {
@@ -507,7 +488,7 @@ public class OperationList extends ListActivity implements
 		startActivityForResult(i, ACTIVITY_OP_CREATE);
 	}
 
-	private void deleteOp(AdapterContextMenuInfo info) throws Exception {
+	private void deleteOp(AdapterContextMenuInfo info) {
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
@@ -518,7 +499,7 @@ public class OperationList extends ListActivity implements
 	}
 
 	// generic function for getAccountOpSum and getAccountCurSum
-	private long getAccountSum(String col) throws Exception {
+	private long getAccountSum(String col) {
 		Cursor c = mCurAccount;
 		if ((!c.isClosed()) && c.requery() && c.moveToFirst()) {
 			return c.getLong(c.getColumnIndexOrThrow(col));
@@ -530,7 +511,7 @@ public class OperationList extends ListActivity implements
 		}
 	}
 
-	private long getAccountCurSum() throws Exception {
+	private long getAccountCurSum() {
 		return getAccountSum(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM);
 	}
 
@@ -589,14 +570,13 @@ public class OperationList extends ListActivity implements
 		return ops;
 	}
 
-	private void updateSumsAfterOpEdit(Intent data) throws Exception {
+	private void updateSumsAfterOpEdit(Intent data) {
 		Bundle extras = data.getExtras();
 		updateSumsAfterOpEdit(extras.getLong("oldSum"), extras.getLong("sum"),
 				extras.getLong("opDate"));
 	}
 
-	private void updateSumsAfterOpEdit(long oldSum, long sum, long date)
-			throws Exception {
+	private void updateSumsAfterOpEdit(long oldSum, long sum, long date) {
 		// long opSum = getAccountOpSum();
 		// opSum = opSum - oldSum + sum;
 		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
@@ -691,12 +671,7 @@ public class OperationList extends ListActivity implements
 		if (id != -1) {
 			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
 					position);
-			try {
-				updateSumAtSelectedOpDisplay(data, getAccountCurSum());
-			} catch (Exception e) {
-				Tools.popError(OperationList.this, e.getMessage(),
-						Tools.createRestartClickListener());
-			}
+			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
 			getMoreOps();
 		}
@@ -763,16 +738,9 @@ public class OperationList extends ListActivity implements
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							try {
-								deleteOp(mOpToDelete);
-								fillData();
-								mOpToDelete = null;
-							} catch (Exception e) {
-								Tools.popError(OperationList.this,
-										e.getMessage(),
-										Tools.createRestartClickListener());
-							}
-
+							deleteOp(mOpToDelete);
+							fillData();
+							mOpToDelete = null;
 						}
 					});
 		case DIALOG_PROJECTION:
@@ -811,12 +779,7 @@ public class OperationList extends ListActivity implements
 		mProjectionDate = mCurAccount.getLong(mCurAccount
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
-		try {
-			updateSumsAndSelection();
-		} catch (Exception e) {
-			ErrorReporter.getInstance().handleException(e);
-			e.printStackTrace();
-		}
+		updateSumsAndSelection();
 	}
 
 }
