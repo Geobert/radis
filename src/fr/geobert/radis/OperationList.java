@@ -74,6 +74,7 @@ public class OperationList extends ListActivity implements
 	private QuickAddController mQuickAddController;
 	private Button mProjectionBtn;
 	private long mProjectionDate;
+	private int mNbGetMoreOps;
 
 	private class InnerViewBinder extends OpViewBinder {
 
@@ -155,6 +156,8 @@ public class OperationList extends ListActivity implements
 			if (!mHasResult) {
 				Toast.makeText(OperationList.this, R.string.no_more_ops,
 						Toast.LENGTH_LONG).show();
+			} else {
+				OperationList.this.mNbGetMoreOps++;
 			}
 		}
 
@@ -190,8 +193,8 @@ public class OperationList extends ListActivity implements
 		c.moveToLast();
 		long earliestOpDate = c.getLong(c
 				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTimeInMillis(earliestOpDate);
+		// GregorianCalendar cal = new GregorianCalendar();
+		// cal.setTimeInMillis(earliestOpDate);
 		new GetMoreOps().execute(earliestOpDate);
 	}
 
@@ -270,7 +273,7 @@ public class OperationList extends ListActivity implements
 				: null;
 
 		initReferences();
-
+		mNbGetMoreOps = 0;
 	}
 
 	private void updateSumsAndSelection() {
@@ -305,6 +308,11 @@ public class OperationList extends ListActivity implements
 		initViewBehavior();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
+		int i = mNbGetMoreOps;
+		while (i > 0) {
+			getMoreOps();
+			--i;
+		}
 		mQuickAddController.setAutoNegate(true);
 		updateSumsAndSelection();
 		getListView().setOnItemSelectedListener(
@@ -708,6 +716,7 @@ public class OperationList extends ListActivity implements
 		super.onSaveInstanceState(outState);
 		mQuickAddController.onSaveInstanceState(outState);
 		outState.putLong("accountId", mAccountId);
+		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
 	}
 
 	@Override
@@ -716,6 +725,7 @@ public class OperationList extends ListActivity implements
 		mQuickAddController.onRestoreInstanceState(state);
 		mAccountId = state.getLong("accountId");
 		mOnRestore = true;
+		mNbGetMoreOps = state.getInt("mNbGetMoreOps");
 	}
 
 	@Override
