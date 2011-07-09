@@ -2,6 +2,8 @@ package fr.geobert.radis;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -147,6 +149,11 @@ public class OperationList extends ListActivity implements
 
 	private class GetMoreOps extends AsyncTask<Long, Void, Void> {
 		private boolean mHasResult = false;
+		private boolean mIsRestoring;
+
+		public GetMoreOps(final boolean isRestoring) {
+			mIsRestoring = isRestoring;
+		}
 
 		@Override
 		protected void onPostExecute(Void result) {
@@ -157,7 +164,11 @@ public class OperationList extends ListActivity implements
 				Toast.makeText(OperationList.this, R.string.no_more_ops,
 						Toast.LENGTH_LONG).show();
 			} else {
-				OperationList.this.mNbGetMoreOps++;
+				if (!mIsRestoring) {
+					OperationList.this.mNbGetMoreOps++;
+				} else {
+					updateSumsAndSelection();
+				}
 			}
 		}
 
@@ -188,14 +199,18 @@ public class OperationList extends ListActivity implements
 		}
 	}
 
-	private void getMoreOps() {
+	private void getMoreOps(final int nbTimes) {
 		MatrixCursor c = mLastOps;
 		c.moveToLast();
 		long earliestOpDate = c.getLong(c
 				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		// GregorianCalendar cal = new GregorianCalendar();
-		// cal.setTimeInMillis(earliestOpDate);
-		new GetMoreOps().execute(earliestOpDate);
+		if (nbTimes > 0) {
+			GregorianCalendar cal = new GregorianCalendar();
+			cal.setTimeInMillis(earliestOpDate);
+			cal.roll(Calendar.MONTH, - nbTimes + 1);
+			earliestOpDate = cal.getTimeInMillis();
+		}
+		new GetMoreOps(nbTimes > 0).execute(earliestOpDate);
 	}
 
 	protected void initDbHelper() {
@@ -288,9 +303,11 @@ public class OperationList extends ListActivity implements
 			updateSumAtDateDisplay(today, curSum);
 		} else {
 			int position = mLastSelectedPosition.intValue();
-			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
-					position);
-			updateSumAtSelectedOpDisplay(data, curSum);
+			if (position < getListView().getCount()) {
+				MatrixCursor data = (MatrixCursor) getListView()
+						.getItemAtPosition(position);
+				updateSumAtSelectedOpDisplay(data, curSum);
+			}
 		}
 	}
 
@@ -308,10 +325,10 @@ public class OperationList extends ListActivity implements
 		initViewBehavior();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
+
 		int i = mNbGetMoreOps;
-		while (i > 0) {
-			getMoreOps();
-			--i;
+		if (i > 0) {
+			getMoreOps(i);
 		}
 		mQuickAddController.setAutoNegate(true);
 		updateSumsAndSelection();
@@ -681,7 +698,7 @@ public class OperationList extends ListActivity implements
 					position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
-			getMoreOps();
+			getMoreOps(0);
 		}
 	}
 
