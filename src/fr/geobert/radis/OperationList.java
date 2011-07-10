@@ -179,9 +179,13 @@ public class OperationList extends ListActivity implements
 					OperationList.this, R.anim.rotation));
 		}
 
-		@Override
-		protected Void doInBackground(Long... params) {
-			Cursor c = mDbHelper.fetchOpEarlierThan(params[0], 1);
+		private void getOps() {
+			Cursor c = mLastOps;
+			c.moveToLast();
+			long earliestOpDate = c.getLong(c
+					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+
+			c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1);
 			startManagingCursor(c);
 			if (c.moveToFirst()) {
 				GregorianCalendar opDate = new GregorianCalendar();
@@ -195,22 +199,25 @@ public class OperationList extends ListActivity implements
 			} else {
 				mHasResult = false;
 			}
+		}
+
+		@Override
+		protected Void doInBackground(Long... params) {
+			if (mIsRestoring) {
+				int i = mNbGetMoreOps;
+				while (i > 0) {
+					getOps();
+					--i;
+				}
+			} else {
+				getOps();
+			}
 			return null;
 		}
 	}
 
 	private void getMoreOps(final int nbTimes) {
-		MatrixCursor c = mLastOps;
-		c.moveToLast();
-		long earliestOpDate = c.getLong(c
-				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		if (nbTimes > 0) {
-			GregorianCalendar cal = new GregorianCalendar();
-			cal.setTimeInMillis(earliestOpDate);
-			cal.roll(Calendar.MONTH, - nbTimes + 1);
-			earliestOpDate = cal.getTimeInMillis();
-		}
-		new GetMoreOps(nbTimes > 0).execute(earliestOpDate);
+		new GetMoreOps(nbTimes > 0).execute();
 	}
 
 	protected void initDbHelper() {
