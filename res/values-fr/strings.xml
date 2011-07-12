@@ -112,6 +112,7 @@
 	<string name="end_date_incorrect">La date de fin est antérieure à celle de début
 	</string>
 	<string name="periodicity_must_be_greater_0">La périodicité doit être supérieure à zéro</string>
+	<string name="periodicity_must_be_num">La périodicité doit être un chiffre ou un nombre</string>
 	<string name="ask_delete_occurrences">Voulez-vous supprimer cette échéance ainsi que
 		toutes ses occurrences ?</string>
 	<string name="del_all_occurrences">Tout</string>
