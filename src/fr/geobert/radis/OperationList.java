@@ -150,9 +150,11 @@ public class OperationList extends ListActivity implements
 	private class GetMoreOps extends AsyncTask<Long, Void, Void> {
 		private boolean mHasResult = false;
 		private boolean mIsRestoring;
-
+		private int mEffectiveRetrieval;
+		
 		public GetMoreOps(final boolean isRestoring) {
 			mIsRestoring = isRestoring;
+			mEffectiveRetrieval = 0;
 		}
 
 		@Override
@@ -161,6 +163,9 @@ public class OperationList extends ListActivity implements
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (!mHasResult) {
+				if (mIsRestoring) {
+					OperationList.this.mNbGetMoreOps = mEffectiveRetrieval;
+				}
 				Toast.makeText(OperationList.this, R.string.no_more_ops,
 						Toast.LENGTH_LONG).show();
 			} else {
@@ -169,6 +174,7 @@ public class OperationList extends ListActivity implements
 				} else {
 					updateSumsAndSelection();
 				}
+				mEffectiveRetrieval++;
 			}
 		}
 
@@ -182,22 +188,26 @@ public class OperationList extends ListActivity implements
 		private void getOps() {
 			Cursor c = mLastOps;
 			c.moveToLast();
-			long earliestOpDate = c.getLong(c
-					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-
-			c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1);
-			startManagingCursor(c);
-			if (c.moveToFirst()) {
-				GregorianCalendar opDate = new GregorianCalendar();
-				opDate.setTimeInMillis(c.getLong(c
-						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-				c.close();
-				Cursor result = mDbHelper.fetchOpOfMonth(opDate
-						.get(Calendar.MONTH));
-				startManagingCursor(result);
-				mHasResult = fillLastOps(result);
+			if (c.isBeforeFirst() || c.isAfterLast()) {
+				mNbGetMoreOps = 0;
 			} else {
-				mHasResult = false;
+				long earliestOpDate = c.getLong(c
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+
+				c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1);
+				startManagingCursor(c);
+				if (c.moveToFirst()) {
+					GregorianCalendar opDate = new GregorianCalendar();
+					opDate.setTimeInMillis(c.getLong(c
+							.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+					c.close();
+					Cursor result = mDbHelper.fetchOpOfMonth(opDate
+							.get(Calendar.MONTH));
+					startManagingCursor(result);
+					mHasResult = fillLastOps(result);
+				} else {
+					mHasResult = false;
+				}
 			}
 		}
 
@@ -715,10 +725,9 @@ public class OperationList extends ListActivity implements
 			int position = data.getPosition();
 			mLastSelectedPosition = position;
 			selectOpAndAdjustOffset(getListView(), position);
-			t.setText(String
-					.format(getString(R.string.sum_at_selection),
-							Formater.SUM_FORMAT
-									.format((accountCurSum + computeSumFromCursor(data)) / 100.0d)));
+			long sum = accountCurSum + computeSumFromCursor(data);
+			t.setText(String.format(getString(R.string.sum_at_selection),
+					Formater.SUM_FORMAT.format(sum / 100.0d)));
 		} else {
 			t.setText(String.format(getString(R.string.sum_at_selection),
 					Formater.SUM_FORMAT.format((accountCurSum / 100.0d))));

@@ -401,14 +401,16 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		boolean res = super.isFormValid(errMsg);
 		if (res) {
 			ScheduledOperation op = mCurrentSchOp;
-			try {
-				Integer.parseInt(mCustomPeriodicityVal.getText().toString());
-			} catch (NumberFormatException e) {
-				if (errMsg.length() > 0) {
-					errMsg.append("\n");
+			if (mCustomPeriodicityUnit.getSelectedItemPosition() >= ScheduledOperation.CUSTOM_DAILY_PERIOD) {
+				try {
+					Integer.parseInt(mCustomPeriodicityVal.getText().toString());
+				} catch (NumberFormatException e) {
+					if (errMsg.length() > 0) {
+						errMsg.append("\n");
+					}
+					errMsg.append(getString(R.string.periodicity_must_be_num));
+					res = false;
 				}
-				errMsg.append(getString(R.string.periodicity_must_be_num));
-				res = false;
 			}
 			if (res) {
 				fillOperationWithInputs(op);
