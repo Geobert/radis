@@ -151,15 +151,24 @@ public class OperationList extends ListActivity implements
 		private boolean mHasResult = false;
 		private boolean mIsRestoring;
 		private int mEffectiveRetrieval;
-		
+		private MatrixCursor mAccumulator;
+
 		public GetMoreOps(final boolean isRestoring) {
 			mIsRestoring = isRestoring;
 			mEffectiveRetrieval = 0;
+			mAccumulator = new MatrixCursor(new String[] {
+					CommonDbAdapter.KEY_OP_ROWID,
+					CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+					CommonDbAdapter.KEY_TAG_NAME,
+					CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_OP_SUM,
+					CommonDbAdapter.KEY_OP_DATE, CommonDbAdapter.KEY_OP_NOTES,
+					CommonDbAdapter.KEY_OP_SCHEDULED_ID });
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
-			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
+			fillMatrixCursor(mLastOps, mAccumulator);
+			mAccumulator.close();
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (!mHasResult) {
@@ -176,6 +185,7 @@ public class OperationList extends ListActivity implements
 				}
 				mEffectiveRetrieval++;
 			}
+			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
 		}
 
 		@Override
@@ -204,7 +214,7 @@ public class OperationList extends ListActivity implements
 					Cursor result = mDbHelper.fetchOpOfMonth(opDate
 							.get(Calendar.MONTH));
 					startManagingCursor(result);
-					mHasResult = fillLastOps(result);
+					mHasResult = fillMatrixCursor(mAccumulator, result);
 				} else {
 					mHasResult = false;
 				}
@@ -467,15 +477,27 @@ public class OperationList extends ListActivity implements
 		}
 	}
 
-	private boolean fillLastOps(Cursor c) {
-		MatrixCursor lo = mLastOps;
+	private boolean fillMatrixCursor(MatrixCursor m, Cursor c) {
 		if (c.moveToFirst()) {
 			do {
-				Object[] values = { new Long(c.getLong(0)), c.getString(1),
-						c.getString(2), c.getString(3), new Long(c.getLong(4)),
-						new Long(c.getLong(5)), c.getString(7),
-						new Long(c.getLong(8)) };
-				lo.addRow(values);
+				Object[] values = {
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_ROWID))),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_THIRD_PARTY_NAME)),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_TAG_NAME)),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_MODE_NAME)),
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_SUM))),
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE))),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_NOTES)),
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))) };
+				m.addRow(values);
 			} while (c.moveToNext());
 			return true;
 		} else {
@@ -502,7 +524,7 @@ public class OperationList extends ListActivity implements
 			Tools.clearTimeOfCalendar(today);
 			Cursor c = mDbHelper.fetchOpBetweenDate(today, latest);
 			startManagingCursor(c);
-			fillLastOps(c);
+			fillMatrixCursor(mLastOps, c);
 		}
 		if (lastOp != null) {
 			lastOp.close();
