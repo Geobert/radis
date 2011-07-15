@@ -894,8 +894,7 @@ public class CommonDbAdapter {
 	}
 
 	private void initProjectionDate(Cursor c) {
-		if (c != null) {
-			c.moveToFirst();
+		if (c != null && c.moveToFirst()) {
 			mProjectionMode = c.getInt(8);
 			switch (mProjectionMode) {
 			case 0:
@@ -905,8 +904,8 @@ public class CommonDbAdapter {
 			case 1: {
 				GregorianCalendar projDate = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(projDate);
-				if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
-						.parseInt(c.getString(9))) {
+				if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer.parseInt(c
+						.getString(9))) {
 					projDate.roll(Calendar.MONTH, 1);
 				}
 				projDate.set(Calendar.DAY_OF_MONTH,
@@ -916,8 +915,7 @@ public class CommonDbAdapter {
 				break;
 			case 2:
 				try {
-					Date projDate = Formater.DATE_FORMAT.parse(c
-							.getString(9));
+					Date projDate = Formater.DATE_FORMAT.parse(c.getString(9));
 					projDate.setHours(0);
 					projDate.setMinutes(0);
 					projDate.setSeconds(0);
@@ -1097,16 +1095,18 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
 		if (mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues) > -1) {
-			Cursor c = fetchAccount(accountId);
-			initProjectionDate(c);
-			c.close();
-			return checkNeedUpdateProjection(op);
+			return checkNeedUpdateProjection(op, accountId);
 		}
 		return false;
 	}
 
-	private boolean checkNeedUpdateProjection(Operation op) {
-		return op.getDate() <= mProjectionDate;
+	private boolean checkNeedUpdateProjection(Operation op, final long accountId) {
+		if (mProjectionDate == 0) {
+			Cursor c = fetchAccount(accountId);
+			initProjectionDate(c);
+			c.close();
+		}
+		return (op.getDate() <= mProjectionDate) || (mProjectionDate == 0);
 	}
 
 	public boolean deleteOp(long rowId) {
@@ -1115,7 +1115,7 @@ public class CommonDbAdapter {
 		c.close();
 		if (mDb.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID + "=" + rowId,
 				null) > 0) {
-			return checkNeedUpdateProjection(op);
+			return checkNeedUpdateProjection(op, mAccountId);
 		}
 		return false;
 	}
@@ -1270,7 +1270,7 @@ public class CommonDbAdapter {
 		ContentValues args = createContentValuesFromOp(op, false);
 		if (mDb.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ROWID + "="
 				+ rowId, null) > 0) {
-			return checkNeedUpdateProjection(op);
+			return checkNeedUpdateProjection(op, mAccountId);
 		}
 		return false;
 	}

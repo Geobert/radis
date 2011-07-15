@@ -9,6 +9,7 @@ import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -92,8 +93,14 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				createAccount();
 			}
 		});
+		String versionName = "";
+		try {
+			versionName = getPackageManager().getPackageInfo(getPackageName(),
+					0).versionName;
+		} catch (NameNotFoundException e) {
+		}
 
-		setTitle(getString(R.string.app_name) + " - "
+		setTitle(getString(R.string.app_name) + " " + versionName + " - "
 				+ getString(R.string.accounts_list));
 		registerForContextMenu(getListView());
 		ACTIVITY = this;
@@ -387,7 +394,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 			mQuickAddController.setAccount(0);
 		}
 	}
-	
+
 	@Override
 	public void updateDisplay(Intent intent) {
 		mAccountsCursor.requery();
