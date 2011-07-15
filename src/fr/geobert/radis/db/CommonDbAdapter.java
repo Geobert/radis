@@ -888,9 +888,15 @@ public class CommonDbAdapter {
 				KEY_ACCOUNT_ROWID + "=" + accountId, null, null, null, null,
 				null);
 		Cursor c = mCurAccount;
+		initProjectionDate(c);
+		return c;
+
+	}
+
+	private void initProjectionDate(Cursor c) {
 		if (c != null) {
 			c.moveToFirst();
-			mProjectionMode = mCurAccount.getInt(8);
+			mProjectionMode = c.getInt(8);
 			switch (mProjectionMode) {
 			case 0:
 				mProjectionDate = c.getLong(c
@@ -900,17 +906,17 @@ public class CommonDbAdapter {
 				GregorianCalendar projDate = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(projDate);
 				if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
-						.parseInt(mCurAccount.getString(9))) {
+						.parseInt(c.getString(9))) {
 					projDate.roll(Calendar.MONTH, 1);
 				}
 				projDate.set(Calendar.DAY_OF_MONTH,
-						Integer.parseInt(mCurAccount.getString(9)));
+						Integer.parseInt(c.getString(9)));
 				mProjectionDate = projDate.getTimeInMillis();
 			}
 				break;
 			case 2:
 				try {
-					Date projDate = Formater.DATE_FORMAT.parse(mCurAccount
+					Date projDate = Formater.DATE_FORMAT.parse(c
 							.getString(9));
 					projDate.setHours(0);
 					projDate.setMinutes(0);
@@ -926,8 +932,6 @@ public class CommonDbAdapter {
 				break;
 			}
 		}
-		return c;
-
 	}
 
 	public boolean updateAccountProjectionDate(long accountId,
@@ -987,7 +991,7 @@ public class CommonDbAdapter {
 				args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
 			}
 		}
-		Cursor accountCursor = mCurAccount;
+		Cursor accountCursor = fetchAccount(accountId);
 		accountCursor.requery();
 		accountCursor.moveToFirst();
 		long opSum = accountCursor.getLong(accountCursor
@@ -1002,6 +1006,7 @@ public class CommonDbAdapter {
 				mProjectionDate = opDate;
 			}
 		}
+		accountCursor.close();
 	}
 
 	public long getKeyIdOrCreate(String key, String table) throws SQLException {
@@ -1092,6 +1097,9 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
 		if (mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues) > -1) {
+			Cursor c = fetchAccount(accountId);
+			initProjectionDate(c);
+			c.close();
 			return checkNeedUpdateProjection(op);
 		}
 		return false;
