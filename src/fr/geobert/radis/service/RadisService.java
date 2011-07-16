@@ -144,7 +144,7 @@ public class RadisService extends IntentService {
 		op.mScheduledId = opRowId;
 		boolean needUpdate = mDbHelper.createOp(op, accountId);
 		ScheduledOperation.addPeriodicityToDate(op);
-		Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
+		//Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
 		return needUpdate ? op.mSum : 0;
 	}
 

@@ -1097,16 +1097,21 @@ public class CommonDbAdapter {
 		if (mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues) > -1) {
 			return checkNeedUpdateProjection(op, accountId);
 		}
+		Log.e("Radis", "error in creating op");
 		return false;
 	}
 
 	private boolean checkNeedUpdateProjection(Operation op, final long accountId) {
-		if (mProjectionDate == 0) {
+//		if (mProjectionDate == 0) {
 			Cursor c = fetchAccount(accountId);
 			initProjectionDate(c);
 			c.close();
-		}
-		return (op.getDate() <= mProjectionDate) || (mProjectionDate == 0);
+		//}
+		boolean res = (op.getDate() <= mProjectionDate)
+				|| (mProjectionDate == 0);
+		Log.d("Radis", "checkNeedUpdateProjection : " + res + "/"
+				+ mProjectionDate + "/" + op.getDate());
+		return res;
 	}
 
 	public boolean deleteOp(long rowId) {

@@ -246,8 +246,10 @@ public class OperationList extends ListActivity implements
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
-		mProjectionDate = mCurAccount.getLong(mCurAccount
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
+		if (mCurAccount.moveToFirst()) {
+			mProjectionDate = mCurAccount.getLong(mCurAccount
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
+		}
 		mQuickAddController.setDbHelper(mDbHelper);
 	}
 
@@ -495,8 +497,9 @@ public class OperationList extends ListActivity implements
 								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE))),
 						c.getString(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_NOTES)),
-						new Long(c.getLong(c
-								.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))) };
+						new Long(
+								c.getLong(c
+										.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))) };
 				m.addRow(values);
 			} while (c.moveToNext());
 			return true;
