@@ -1105,10 +1105,12 @@ public class CommonDbAdapter {
 		Cursor c = fetchAccount(accountId);
 		initProjectionDate(c);
 		c.close();
-		boolean res = (op.getDate() <= mProjectionDate)
-				|| (mProjectionDate == 0);
+		final long opDate = op.getDate();
+		final long projDate = mProjectionDate;
+		boolean res = ((mProjectionMode > 0) && (opDate <= projDate))
+				|| ((mProjectionMode == 0) && (opDate >= projDate)) || (projDate == 0) ;
 		Log.d("Radis", "checkNeedUpdateProjection : " + res + "/"
-				+ mProjectionDate + "/" + op.getDate());
+				+ projDate + "/" + opDate);
 		return res;
 	}
 
