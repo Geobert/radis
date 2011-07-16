@@ -1102,11 +1102,9 @@ public class CommonDbAdapter {
 	}
 
 	private boolean checkNeedUpdateProjection(Operation op, final long accountId) {
-//		if (mProjectionDate == 0) {
-			Cursor c = fetchAccount(accountId);
-			initProjectionDate(c);
-			c.close();
-		//}
+		Cursor c = fetchAccount(accountId);
+		initProjectionDate(c);
+		c.close();
 		boolean res = (op.getDate() <= mProjectionDate)
 				|| (mProjectionDate == 0);
 		Log.d("Radis", "checkNeedUpdateProjection : " + res + "/"

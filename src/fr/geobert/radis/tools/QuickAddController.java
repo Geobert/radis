@@ -3,7 +3,6 @@ package fr.geobert.radis.tools;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -78,19 +77,15 @@ public class QuickAddController {
 	}
 
 	private void quickAddOp() throws Exception {
-		Log.d("Radis", "quickAddOp");
 		Operation op = new Operation();
 		op.mThirdParty = mQuickAddThirdParty.getText().toString();
 		op.setSumStr(mQuickAddAmount.getText().toString());
-		Log.d("Radis", "mAccountId: " + mAccountId);
 		assert (mAccountId != 0);
 		if (mDbHelper.createOp(op, mAccountId)) {
-			Log.d("Radis", "quickAddOp, createOp ok");
 			RadisService.updateAccountSum(op.mSum, mAccountId, op.getDate(),
 					mDbHelper);
 			mProtocol.updateDisplay(null);
 		}
-		Log.d("Radis", "quickAddOp, after if update");
 		mQuickAddAmount.setText("");
 		mQuickAddThirdParty.setText("");
 		InputMethodManager mgr = (InputMethodManager) mActivity
