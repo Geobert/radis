@@ -1107,7 +1107,7 @@ public class CommonDbAdapter {
 		c.close();
 		final long opDate = op.getDate();
 		final long projDate = mProjectionDate;
-		boolean res = ((mProjectionMode > 0) && (opDate <= projDate))
+		boolean res = (opDate <= projDate)
 				|| ((mProjectionMode == 0) && (opDate >= projDate)) || (projDate == 0) ;
 		Log.d("Radis", "checkNeedUpdateProjection : " + res + "/"
 				+ projDate + "/" + opDate);
