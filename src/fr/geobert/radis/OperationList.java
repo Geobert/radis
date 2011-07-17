@@ -2,8 +2,6 @@ package fr.geobert.radis;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import android.app.Dialog;
 import android.app.ListActivity;
@@ -355,9 +353,8 @@ public class OperationList extends ListActivity implements
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		fillData();
 
-		int i = mNbGetMoreOps;
-		if (i > 0) {
-			getMoreOps(i);
+		if (mNbGetMoreOps > 0) {
+			getMoreOps(mNbGetMoreOps);
 		}
 		mQuickAddController.setAutoNegate(true);
 		updateSumsAndSelection();
@@ -847,6 +844,9 @@ public class OperationList extends ListActivity implements
 		mProjectionDate = mCurAccount.getLong(mCurAccount
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
+		if (mNbGetMoreOps > 0) {
+			getMoreOps(mNbGetMoreOps);
+		}
 		updateSumsAndSelection();
 	}
 
