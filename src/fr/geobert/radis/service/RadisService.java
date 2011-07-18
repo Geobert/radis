@@ -10,7 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
-import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
@@ -106,8 +105,8 @@ public class RadisService extends IntentService {
 						}
 					}
 				}
+				mDbHelper.updateScheduledOp(opRowId, op, false);
 				if (needUpdate) {
-					mDbHelper.updateScheduledOp(opRowId, op, false);
 					Long curSum = sumsPerAccount.get(accountId);
 					if (curSum == null) {
 						curSum = Long.valueOf(0);
