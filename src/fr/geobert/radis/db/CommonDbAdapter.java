@@ -1109,8 +1109,7 @@ public class CommonDbAdapter {
 		final long projDate = mProjectionDate;
 		boolean res = (opDate <= projDate)
 				|| ((mProjectionMode == 0) && (opDate >= projDate)) || (projDate == 0) ;
-		Log.d("Radis", "checkNeedUpdateProjection : " + res + "/"
-				+ projDate + "/" + opDate);
+		//Log.d("Radis", "checkNeedUpdateProjection : " + res);
 		return res;
 	}
 

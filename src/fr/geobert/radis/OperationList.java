@@ -172,9 +172,10 @@ public class OperationList extends ListActivity implements
 			if (!mHasResult) {
 				if (mIsRestoring) {
 					OperationList.this.mNbGetMoreOps = mEffectiveRetrieval;
+				} else {
+					Toast.makeText(OperationList.this, R.string.no_more_ops,
+							Toast.LENGTH_LONG).show();
 				}
-				Toast.makeText(OperationList.this, R.string.no_more_ops,
-						Toast.LENGTH_LONG).show();
 			} else {
 				if (!mIsRestoring) {
 					OperationList.this.mNbGetMoreOps++;
@@ -560,6 +561,7 @@ public class OperationList extends ListActivity implements
 		if (mDbHelper.deleteOp(info.id)) {
 			updateSumsAfterOpEdit(sum, 0L, 0);
 		}
+		updateSumsDisplay();
 	}
 
 	// generic function for getAccountOpSum and getAccountCurSum
@@ -706,6 +708,7 @@ public class OperationList extends ListActivity implements
 		int relativePos = position - firstIdx;
 		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 		adapter.setSelectedPosition(position);
+		//l.setSelection(position);
 		l.setSelectionFromTop(position, mOnRestore ? 0
 				: ((relativePos - 1) * offset) + firstOffset + relativePos);
 		mOnRestore = false;
