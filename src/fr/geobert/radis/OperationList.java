@@ -150,7 +150,8 @@ public class OperationList extends ListActivity implements
 		private boolean mIsRestoring;
 		private int mEffectiveRetrieval;
 		private MatrixCursor mAccumulator;
-
+		private Cursor mLops;
+		
 		public GetMoreOps(final boolean isRestoring) {
 			mIsRestoring = isRestoring;
 			mEffectiveRetrieval = 0;
@@ -192,12 +193,13 @@ public class OperationList extends ListActivity implements
 			mLoadingIcon.setVisibility(View.VISIBLE);
 			mLoadingIcon.startAnimation(AnimationUtils.loadAnimation(
 					OperationList.this, R.anim.rotation));
+			mLops = mLastOps;
 		}
 
 		private void getOps() {
-			Cursor c = mLastOps;
-			c.moveToLast();
-			if (c.isBeforeFirst() || c.isAfterLast()) {
+			Cursor c = mLops;
+			boolean moveToLast = c.moveToLast();
+			if (!moveToLast || c.isBeforeFirst() || c.isAfterLast()) {
 				mNbGetMoreOps = 0;
 			} else {
 				long earliestOpDate = c.getLong(c
@@ -322,7 +324,6 @@ public class OperationList extends ListActivity implements
 	private void updateSumsAndSelection() {
 		long curSum = getAccountCurSum();
 		Cursor c = mLastOps;
-		c.requery();
 		c.moveToFirst();
 		updateFutureSumDisplay();
 		if (mLastSelectedPosition == null) {
@@ -708,7 +709,7 @@ public class OperationList extends ListActivity implements
 		int relativePos = position - firstIdx;
 		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 		adapter.setSelectedPosition(position);
-		//l.setSelection(position);
+		// l.setSelection(position);
 		l.setSelectionFromTop(position, mOnRestore ? 0
 				: ((relativePos - 1) * offset) + firstOffset + relativePos);
 		mOnRestore = false;
