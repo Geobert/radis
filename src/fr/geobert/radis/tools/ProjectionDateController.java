@@ -159,6 +159,10 @@ public class ProjectionDateController {
 			Tools.popError(mActivity,
 					mActivity.getString(R.string.bad_format_for_date), null);
 			e.printStackTrace();
+		} catch (NumberFormatException e) {
+			Tools.popError(mActivity,
+					mActivity.getString(R.string.bad_format_for_date), null);
+			e.printStackTrace();
 		}
 	}
 
