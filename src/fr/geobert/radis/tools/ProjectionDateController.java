@@ -19,7 +19,7 @@ import fr.geobert.radis.db.CommonDbAdapter;
 
 public class ProjectionDateController {
 	private Spinner mProjectionMode;
-	private EditText mProjectionDate;
+	public EditText mProjectionDate;
 	private Activity mActivity;
 	private CommonDbAdapter mDbHelper;
 	private long mAccountId;
