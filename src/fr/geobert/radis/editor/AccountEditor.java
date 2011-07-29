@@ -120,6 +120,12 @@ public class AccountEditor extends Activity {
 			errMsg.append(getString(R.string.no_start_amount));
 			res = false;
 		}
+		if (mProjectionController.getDate().trim().length() == 0) {
+			if (errMsg.length() > 0)
+				errMsg.append("\n");
+			errMsg.append(getString(R.string.bad_format_for_date));
+			res = false;
+		}
 		return res;
 	}
 
