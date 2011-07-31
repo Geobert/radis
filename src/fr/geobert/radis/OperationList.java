@@ -75,6 +75,7 @@ public class OperationList extends ListActivity implements
 	private Button mProjectionBtn;
 	private long mProjectionDate;
 	private int mNbGetMoreOps;
+	private int mLastSelectionFromTop;
 
 	private class InnerViewBinder extends OpViewBinder {
 
@@ -151,7 +152,7 @@ public class OperationList extends ListActivity implements
 		private int mEffectiveRetrieval;
 		private MatrixCursor mAccumulator;
 		private Cursor mLops;
-		
+
 		public GetMoreOps(final boolean isRestoring) {
 			mIsRestoring = isRestoring;
 			mEffectiveRetrieval = 0;
@@ -167,6 +168,7 @@ public class OperationList extends ListActivity implements
 		@Override
 		protected void onPostExecute(Void result) {
 			fillMatrixCursor(mLastOps, mAccumulator);
+			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
 			mAccumulator.close();
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
@@ -185,7 +187,6 @@ public class OperationList extends ListActivity implements
 				}
 				mEffectiveRetrieval++;
 			}
-			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
 		}
 
 		@Override
@@ -332,7 +333,8 @@ public class OperationList extends ListActivity implements
 			updateSumAtDateDisplay(today, curSum);
 		} else {
 			int position = mLastSelectedPosition.intValue();
-			if (position < getListView().getCount()) {
+			// if (position < getListView().getCount()) {
+			if (position < mLastOps.getCount()) {
 				MatrixCursor data = (MatrixCursor) getListView()
 						.getItemAtPosition(position);
 				updateSumAtSelectedOpDisplay(data, curSum);
@@ -687,7 +689,9 @@ public class OperationList extends ListActivity implements
 
 	private void selectOpAndAdjustOffset(ListView l, int position) {
 		// Get the top position from the first visible element
-		int firstIdx = l.getFirstVisiblePosition();
+		final int firstIdx = l.getFirstVisiblePosition();
+		final int lastIdx = l.getLastVisiblePosition();
+
 		int offset = 77;
 		int firstOffset = offset;
 		int count = l.getChildCount();
@@ -697,21 +701,27 @@ public class OperationList extends ListActivity implements
 		if (null != firstView) {
 			offset = firstView.getHeight();
 			firstOffset = firstView.getBottom() - (relativeFirstIdx * offset)
-					- relativeFirstIdx; // getBottom = px according to virtual
-			// ListView (not only what we see on
-			// screen), - (firstIdx * offset) =
-			// remove
-			// all the previous items height, -
-			// firstIdx
-			// = remove the separator height
+					- relativeFirstIdx;
+			// getBottom = px according to virtual ListView (not only what we
+			// see on
+			// screen), - (firstIdx * offset) = remove all the previous items
+			// height, -
+			// firstIdx = remove the separator height
 		}
 
 		int relativePos = position - firstIdx;
 		SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 		adapter.setSelectedPosition(position);
-		// l.setSelection(position);
-		l.setSelectionFromTop(position, mOnRestore ? 0
-				: ((relativePos - 1) * offset) + firstOffset + relativePos);
+
+		// check if the selected pos is visible on screen
+		int posFromTop;
+		if ((position >= firstIdx) && (position < lastIdx)) {
+			posFromTop = mOnRestore ? 0 : ((relativePos - 1) * offset)
+					+ firstOffset + relativePos;
+		} else {
+			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop : (int) (Tools.SCREEN_HEIGHT * 0.3);
+		}
+		l.setSelectionFromTop(position, posFromTop);
 		mOnRestore = false;
 	}
 
@@ -776,6 +786,12 @@ public class OperationList extends ListActivity implements
 		mQuickAddController.onSaveInstanceState(outState);
 		outState.putLong("accountId", mAccountId);
 		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
+		ListView l = getListView(); 
+		final int firstIdx = l.getFirstVisiblePosition();
+		int pos = ((SelectedCursorAdapter) getListAdapter()).selectedPos;
+		View v = l.getChildAt(pos - firstIdx);
+		mLastSelectionFromTop = v.getTop();
+		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
 	}
 
 	@Override
@@ -785,6 +801,7 @@ public class OperationList extends ListActivity implements
 		mAccountId = state.getLong("accountId");
 		mOnRestore = true;
 		mNbGetMoreOps = state.getInt("mNbGetMoreOps");
+		mLastSelectionFromTop = state.getInt("mLastSelectionFromTop");
 	}
 
 	@Override

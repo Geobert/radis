@@ -42,9 +42,12 @@ public class Tools {
 	// debug mode stuff
 	public static boolean DEBUG_MODE = true;
 	public static final int DEBUG_DIALOG = 9876;
+	
+	public static int SCREEN_HEIGHT;
 
-	public static void checkDebugMode(Context ctx) {
+	public static void checkDebugMode(Activity ctx) {
 		// See if we're a debug or a release build
+		SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
 		try {
 			PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
 					ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS);
