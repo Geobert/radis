@@ -1183,13 +1183,17 @@ public class CommonDbAdapter {
 		GregorianCalendar endDate = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(startDate);
 		Tools.clearTimeOfCalendar(endDate);
+		
+		startDate.set(Calendar.DAY_OF_MONTH, 1);
+		endDate.set(Calendar.DAY_OF_MONTH, 1);
+		
 		startDate.set(Calendar.MONTH, curMonth);
 		endDate.set(Calendar.MONTH, curMonth);
+		
 		startDate.set(Calendar.DAY_OF_MONTH,
 				startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
 		endDate.set(Calendar.DAY_OF_MONTH,
 				endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-
 		c = mDb.query(
 				DATABASE_OP_TABLE_JOINTURE,
 				OP_COLS_QUERY,
