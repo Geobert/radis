@@ -790,7 +790,9 @@ public class OperationList extends ListActivity implements
 		final int firstIdx = l.getFirstVisiblePosition();
 		int pos = ((SelectedCursorAdapter) getListAdapter()).selectedPos;
 		View v = l.getChildAt(pos - firstIdx);
-		mLastSelectionFromTop = v.getTop();
+		if (v != null) {
+			mLastSelectionFromTop = v.getTop();
+		}
 		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
 	}
 
