@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
+
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
@@ -70,9 +71,20 @@ public class RadisService extends IntentService {
 			insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
 					: insertionDayOfMonth;
 			insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
+
 			Tools.clearTimeOfCalendar(insertionDate);
-			final long insertionDateInMillis = insertionDate.getTimeInMillis();
+			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonthLimit = insertionDate.get(Calendar.MONTH) + 1;
+
+			long lastInsertDate = PrefsManager.getInstance(this).getLong(
+					"LAST_INSERT_DATE", 0);
+			// Log.d("Radis", "lastInsertDate: " + lastInsertDate);
+			// Log.d("Radis", "insertionDateInMillis: " +
+			// insertionDateInMillis);
+			if (lastInsertDate > insertionDateInMillis) {
+				insertionDate.add(Calendar.MONTH, 1);
+				insertionDateInMillis = insertionDate.getTimeInMillis();
+			}
 
 			HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
@@ -122,19 +134,27 @@ public class RadisService extends IntentService {
 			for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
 				needUpdate = true;
 				updateAccountSum(e.getValue().longValue(), e.getKey()
-						.longValue(), greatestDatePerAccount.get(e.getKey()), mDbHelper);
+						.longValue(), greatestDatePerAccount.get(e.getKey()),
+						mDbHelper);
 			}
 			if (needUpdate) {
 				Intent i = new Intent(Tools.INTENT_OP_INSERTED);
 				i.putExtra("accountIds", accountIds);
 				sendOrderedBroadcast(i, null);
 			}
+			// Log.d("Radis", "put todayInMillis: " + todayInMillis);
+			PrefsManager.getInstance(this).put("LAST_INSERT_DATE",
+					todayInMillis);
+			PrefsManager.getInstance(this).commit();
+			if (lastInsertDate == 0) {
+				processScheduledOps();
+			}
 		}
 		c.close();
 	}
 
-	public static void updateAccountSum(final long sumToAdd, final long accountId,
-			final long opDate, CommonDbAdapter dbHelper) {
+	public static void updateAccountSum(final long sumToAdd,
+			final long accountId, final long opDate, CommonDbAdapter dbHelper) {
 		dbHelper.updateProjection(accountId, sumToAdd, opDate);
 	}
 
@@ -143,7 +163,7 @@ public class RadisService extends IntentService {
 		op.mScheduledId = opRowId;
 		boolean needUpdate = mDbHelper.createOp(op, accountId);
 		ScheduledOperation.addPeriodicityToDate(op);
-		//Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
+		// Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
 		return needUpdate ? op.mSum : 0;
 	}
 

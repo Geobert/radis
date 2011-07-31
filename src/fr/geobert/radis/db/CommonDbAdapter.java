@@ -1231,7 +1231,7 @@ public class CommonDbAdapter {
 		endDate.set(Calendar.DAY_OF_MONTH,
 				endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 		if (startMonth > endMonth) {
-			endDate.roll(Calendar.YEAR, 1);
+			endDate.add(Calendar.YEAR, 1);
 		}
 
 		c = mDb.query(
