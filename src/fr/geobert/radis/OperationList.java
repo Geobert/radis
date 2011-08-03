@@ -173,19 +173,18 @@ public class OperationList extends ListActivity implements
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (!mHasResult) {
-				if (mIsRestoring) {
-					OperationList.this.mNbGetMoreOps = mEffectiveRetrieval;
-				} else {
+				if (!mIsRestoring) {
 					Toast.makeText(OperationList.this, R.string.no_more_ops,
 							Toast.LENGTH_LONG).show();
+				} else {
+					OperationList.this.mNbGetMoreOps = this.mEffectiveRetrieval;
 				}
 			} else {
-				if (!mIsRestoring) {
-					OperationList.this.mNbGetMoreOps++;
-				} else {
+				if (mIsRestoring) {
 					updateSumsAndSelection();
+				} else {
+					OperationList.this.mNbGetMoreOps++;
 				}
-				mEffectiveRetrieval++;
 			}
 		}
 
@@ -217,6 +216,7 @@ public class OperationList extends ListActivity implements
 							.get(Calendar.MONTH));
 					startManagingCursor(result);
 					mHasResult = fillMatrixCursor(mAccumulator, result);
+					mLops = mAccumulator;
 				} else {
 					mHasResult = false;
 				}
@@ -229,6 +229,9 @@ public class OperationList extends ListActivity implements
 				int i = mNbGetMoreOps;
 				while (i > 0) {
 					getOps();
+					if (mHasResult) {
+						mEffectiveRetrieval++;
+					}
 					--i;
 				}
 			} else {
@@ -319,7 +322,7 @@ public class OperationList extends ListActivity implements
 				: null;
 
 		initReferences();
-		mNbGetMoreOps = 0;
+		mNbGetMoreOps = 1;
 	}
 
 	private void updateSumsAndSelection() {
@@ -719,7 +722,8 @@ public class OperationList extends ListActivity implements
 			posFromTop = mOnRestore ? 0 : ((relativePos - 1) * offset)
 					+ firstOffset + relativePos;
 		} else {
-			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop : (int) (Tools.SCREEN_HEIGHT * 0.3);
+			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
+					: (int) (Tools.SCREEN_HEIGHT * 0.3);
 		}
 		l.setSelectionFromTop(position, posFromTop);
 		mOnRestore = false;
@@ -786,7 +790,7 @@ public class OperationList extends ListActivity implements
 		mQuickAddController.onSaveInstanceState(outState);
 		outState.putLong("accountId", mAccountId);
 		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
-		ListView l = getListView(); 
+		ListView l = getListView();
 		final int firstIdx = l.getFirstVisiblePosition();
 		int pos = ((SelectedCursorAdapter) getListAdapter()).selectedPos;
 		View v = l.getChildAt(pos - firstIdx);
