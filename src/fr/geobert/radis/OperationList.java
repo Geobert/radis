@@ -63,7 +63,6 @@ public class OperationList extends ListActivity implements
 	private Long mAccountId;
 	private Cursor mCurAccount;
 	private MatrixCursor mLastOps = null;
-	private GregorianCalendar mLastSelectedDate;
 	private ImageView mLoadingIcon;
 	private AsyncTask<Void, Void, Long> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
@@ -323,6 +322,8 @@ public class OperationList extends ListActivity implements
 
 		initReferences();
 		mNbGetMoreOps = 1;
+		mLastSelectedPosition = null;
+		mLastSelectionFromTop = 0;
 	}
 
 	private void updateSumsAndSelection() {
@@ -563,8 +564,11 @@ public class OperationList extends ListActivity implements
 		Cursor c = mDbHelper.fetchOneOp(info.id);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-
+		updateLastSelectionFromTop();
 		if (mDbHelper.deleteOp(info.id)) {
+			if (info.position < mLastSelectedPosition) {
+				mLastSelectedPosition--;
+			}
 			updateSumsAfterOpEdit(sum, 0L, 0);
 		}
 		updateSumsDisplay();
@@ -677,17 +681,14 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void updateSumAtDateDisplay(GregorianCalendar date, long curSum) {
-		// TODO maybe no need date param as we use this function only with
-		// current time
+		Cursor data = null;
 		if (null == date) {
-			date = mLastSelectedDate;
-			if (null == date) {
-				date = new GregorianCalendar();
-				Tools.clearTimeOfCalendar(date);
-			}
+			data = (MatrixCursor) getListView().getItemAtPosition(
+					mLastSelectedPosition);
+		} else {
+			data = findLastOpBeforeDate(date);
 		}
-		mLastSelectedDate = date;
-		updateSumAtSelectedOpDisplay(findLastOpBeforeDate(date), curSum);
+		updateSumAtSelectedOpDisplay(data, curSum);
 	}
 
 	private void selectOpAndAdjustOffset(ListView l, int position) {
@@ -719,7 +720,7 @@ public class OperationList extends ListActivity implements
 		// check if the selected pos is visible on screen
 		int posFromTop;
 		if ((position >= firstIdx) && (position < lastIdx)) {
-			posFromTop = mOnRestore ? 0 : ((relativePos - 1) * offset)
+			posFromTop = mOnRestore ? mLastSelectionFromTop : ((relativePos - 1) * offset)
 					+ firstOffset + relativePos;
 		} else {
 			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
@@ -727,6 +728,7 @@ public class OperationList extends ListActivity implements
 		}
 		l.setSelectionFromTop(position, posFromTop);
 		mOnRestore = false;
+		mLastSelectedPosition = Integer.valueOf(position);
 	}
 
 	private void startScheduledOpEditor(final long id, final boolean conversion) {
@@ -780,16 +782,11 @@ public class OperationList extends ListActivity implements
 		if (null != mUpdateSumTask) {
 			mUpdateSumTask.cancel(true);
 		}
-		// mDbHelper.close();
 		super.onPause();
 	}
 
-	@Override
-	protected void onSaveInstanceState(Bundle outState) {
-		super.onSaveInstanceState(outState);
-		mQuickAddController.onSaveInstanceState(outState);
-		outState.putLong("accountId", mAccountId);
-		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
+	
+	private void updateLastSelectionFromTop() {
 		ListView l = getListView();
 		final int firstIdx = l.getFirstVisiblePosition();
 		int pos = ((SelectedCursorAdapter) getListAdapter()).selectedPos;
@@ -797,6 +794,15 @@ public class OperationList extends ListActivity implements
 		if (v != null) {
 			mLastSelectionFromTop = v.getTop();
 		}
+	}
+	
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		mQuickAddController.onSaveInstanceState(outState);
+		outState.putLong("accountId", mAccountId);
+		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
+		updateLastSelectionFromTop();
 		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
 	}
 
