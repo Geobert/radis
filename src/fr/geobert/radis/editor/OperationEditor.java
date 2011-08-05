@@ -62,6 +62,7 @@ public class OperationEditor extends CommonOpEditor {
 			res.putExtra("sum", mCurrentOp.mSum);
 			res.putExtra("oldSum", mPreviousSum);
 			res.putExtra("opDate", mCurrentOp.getDate());
+			res.putExtra("newRowId", mCurrentOp.mRowId);
 		}
 		res.putExtra("sumUpdateNeeded", sumUpdateIsNeeded);
 		setResult(RESULT_OK, res);

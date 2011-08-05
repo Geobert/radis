@@ -19,6 +19,7 @@ public class Operation implements Parcelable {
 	public String mNotes;
 	public long mSum;
 	public long mScheduledId;
+	public long mRowId;
 
 	public Operation(Operation op) {
 		mDate = new GregorianCalendar();

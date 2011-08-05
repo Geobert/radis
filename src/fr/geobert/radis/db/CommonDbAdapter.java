@@ -1094,7 +1094,8 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
-		if (mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues) > -1) {
+		op.mRowId = mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues); 
+		if (op.mRowId > -1) {
 			return checkNeedUpdateProjection(op, accountId);
 		}
 		Log.e("Radis", "error in creating op");

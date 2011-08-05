@@ -31,6 +31,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -240,8 +241,8 @@ public class OperationList extends ListActivity implements
 		}
 	}
 
-	private void getMoreOps(final int nbTimes) {
-		new GetMoreOps(nbTimes > 0).execute();
+	private void getMoreOps(final boolean isRestoring) {
+		new GetMoreOps(isRestoring).execute();
 	}
 
 	protected void initDbHelper() {
@@ -362,7 +363,7 @@ public class OperationList extends ListActivity implements
 		fillData();
 
 		if (mNbGetMoreOps > 0) {
-			getMoreOps(mNbGetMoreOps);
+			getMoreOps(true);
 		}
 		mQuickAddController.setAutoNegate(true);
 		updateSumsAndSelection();
@@ -466,7 +467,29 @@ public class OperationList extends ListActivity implements
 		if (requestCode == ACTIVITY_OP_CREATE
 				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
+				// TODO voir si updateSumsDisplay est appelé après, il fait
+				// aussi fillData et getMoreOps
 				fillData();
+				if (mNbGetMoreOps >= 0) {
+					getMoreOps(true);
+				}
+				long newRowId = data.getLongExtra("newRowId", -1);
+				if (newRowId > -1) {
+					ListAdapter adap = getListAdapter();
+					int position = 0;
+					for (; position < adap.getCount(); ++position) {
+						if (newRowId == adap.getItemId(position)) {
+							break;
+						}
+					}
+					if (null == mLastSelectedPosition) {
+						mLastSelectedPosition = 0;
+					}
+					if (position <= mLastSelectedPosition
+							&& mLastSelectedPosition < mLastOps.getCount() - 1) {
+						mLastSelectedPosition++;
+					}
+				}
 				if (data.getBooleanExtra("sumUpdateNeeded", false)) {
 					updateSumsAfterOpEdit(data);
 				}
@@ -684,7 +707,7 @@ public class OperationList extends ListActivity implements
 		Cursor data = null;
 		if (null == date) {
 			data = (MatrixCursor) getListView().getItemAtPosition(
-					mLastSelectedPosition);
+					mLastSelectedPosition == null ? 0 : mLastSelectedPosition);
 		} else {
 			data = findLastOpBeforeDate(date);
 		}
@@ -720,8 +743,8 @@ public class OperationList extends ListActivity implements
 		// check if the selected pos is visible on screen
 		int posFromTop;
 		if ((position >= firstIdx) && (position < lastIdx)) {
-			posFromTop = mOnRestore ? mLastSelectionFromTop : ((relativePos - 1) * offset)
-					+ firstOffset + relativePos;
+			posFromTop = mOnRestore ? mLastSelectionFromTop
+					: ((relativePos - 1) * offset) + firstOffset + relativePos;
 		} else {
 			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
 					: (int) (Tools.SCREEN_HEIGHT * 0.3);
@@ -757,7 +780,7 @@ public class OperationList extends ListActivity implements
 					position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
-			getMoreOps(0);
+			getMoreOps(false);
 		}
 	}
 
@@ -785,7 +808,6 @@ public class OperationList extends ListActivity implements
 		super.onPause();
 	}
 
-	
 	private void updateLastSelectionFromTop() {
 		ListView l = getListView();
 		final int firstIdx = l.getFirstVisiblePosition();
@@ -795,7 +817,7 @@ public class OperationList extends ListActivity implements
 			mLastSelectionFromTop = v.getTop();
 		}
 	}
-	
+
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
@@ -878,7 +900,7 @@ public class OperationList extends ListActivity implements
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
 		if (mNbGetMoreOps > 0) {
-			getMoreOps(mNbGetMoreOps);
+			getMoreOps(true);
 		}
 		updateSumsAndSelection();
 	}
