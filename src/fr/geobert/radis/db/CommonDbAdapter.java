@@ -52,6 +52,15 @@ public class CommonDbAdapter {
 	public static final String KEY_ACCOUNT_PROJECTION_MODE = "account_projection_mode";
 	public static final String KEY_ACCOUNT_PROJECTION_DATE = "account_projection_date";
 
+	private static final String DATABASE_ACCOUNT_CREATE_v7 = "create table "
+		+ DATABASE_ACCOUNT_TABLE + "(" + KEY_ACCOUNT_ROWID
+		+ " integer primary key autoincrement, " + KEY_ACCOUNT_NAME
+		+ " text not null, " + KEY_ACCOUNT_DESC + " text not null, "
+		+ KEY_ACCOUNT_START_SUM + " integer not null, "
+		+ KEY_ACCOUNT_OP_SUM + " integer not null, " + KEY_ACCOUNT_CUR_SUM
+		+ " integer not null, " + KEY_ACCOUNT_CUR_SUM_DATE
+		+ " integer not null, " + KEY_ACCOUNT_CURRENCY + " text not null);";
+	
 	private static final String DATABASE_ACCOUNT_CREATE = "create table "
 			+ DATABASE_ACCOUNT_TABLE + "(" + KEY_ACCOUNT_ROWID
 			+ " integer primary key autoincrement, " + KEY_ACCOUNT_NAME
@@ -62,7 +71,7 @@ public class CommonDbAdapter {
 			+ " integer not null, " + KEY_ACCOUNT_CURRENCY + " text not null, "
 			+ KEY_ACCOUNT_PROJECTION_MODE + " integer not null, "
 			+ KEY_ACCOUNT_PROJECTION_DATE + " string);";
-
+	
 	public static final String KEY_THIRD_PARTY_ROWID = "_id";
 	public static final String KEY_THIRD_PARTY_NAME = "third_party_name";
 	public static final String KEY_THIRD_PARTY_NORMALIZED_NAME = "third_party_norm_name";
@@ -439,7 +448,7 @@ public class CommonDbAdapter {
 				db.execSQL("DROP TRIGGER on_delete_tag");
 
 				db.execSQL("ALTER TABLE accounts RENAME TO accounts_old;");
-				db.execSQL(DATABASE_ACCOUNT_CREATE);
+				db.execSQL(DATABASE_ACCOUNT_CREATE_v7);
 				Cursor c = db.query("accounts_old", new String[] {
 						KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME,
 						KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY,
