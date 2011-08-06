@@ -991,17 +991,18 @@ public class CommonDbAdapter {
 		}
 		Cursor accountCursor = fetchAccount(accountId);
 		accountCursor.requery();
-		accountCursor.moveToFirst();
-		long opSum = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
-		long startSum = accountCursor.getLong(accountCursor
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
-		args.put(KEY_ACCOUNT_OP_SUM, opSum + sumToAdd);
-		args.put(KEY_ACCOUNT_CUR_SUM, startSum + opSum + sumToAdd);
-		if (mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
-				+ accountId, null) > 0) {
-			if (mProjectionMode == 0) {
-				mProjectionDate = opDate;
+		if (accountCursor.moveToFirst()) {
+			long opSum = accountCursor.getLong(accountCursor
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_OP_SUM));
+			long startSum = accountCursor.getLong(accountCursor
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_START_SUM));
+			args.put(KEY_ACCOUNT_OP_SUM, opSum + sumToAdd);
+			args.put(KEY_ACCOUNT_CUR_SUM, startSum + opSum + sumToAdd);
+			if (mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID
+					+ "=" + accountId, null) > 0) {
+				if (mProjectionMode == 0) {
+					mProjectionDate = opDate;
+				}
 			}
 		}
 		accountCursor.close();
@@ -1094,7 +1095,7 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
-		op.mRowId = mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues); 
+		op.mRowId = mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 		if (op.mRowId > -1) {
 			return checkNeedUpdateProjection(op, accountId);
 		}
@@ -1109,8 +1110,9 @@ public class CommonDbAdapter {
 		final long opDate = op.getDate();
 		final long projDate = mProjectionDate;
 		boolean res = (opDate <= projDate)
-				|| ((mProjectionMode == 0) && (opDate >= projDate)) || (projDate == 0) ;
-		//Log.d("Radis", "checkNeedUpdateProjection : " + res);
+				|| ((mProjectionMode == 0) && (opDate >= projDate))
+				|| (projDate == 0);
+		// Log.d("Radis", "checkNeedUpdateProjection : " + res);
 		return res;
 	}
 
@@ -1184,13 +1186,13 @@ public class CommonDbAdapter {
 		GregorianCalendar endDate = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(startDate);
 		Tools.clearTimeOfCalendar(endDate);
-		
+
 		startDate.set(Calendar.DAY_OF_MONTH, 1);
 		endDate.set(Calendar.DAY_OF_MONTH, 1);
-		
+
 		startDate.set(Calendar.MONTH, curMonth);
 		endDate.set(Calendar.MONTH, curMonth);
-		
+
 		startDate.set(Calendar.DAY_OF_MONTH,
 				startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
 		endDate.set(Calendar.DAY_OF_MONTH,
