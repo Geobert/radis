@@ -372,24 +372,6 @@ public class OperationList extends ListActivity implements
 		}
 		mQuickAddController.setAutoNegate(true);
 		updateSumsAndSelection();
-		// getListView().setOnItemSelectedListener(
-		// new AdapterView.OnItemSelectedListener() {
-		// public void onItemSelected(AdapterView<?> parentView,
-		// View childView, int position, long id) {
-		// Log.d("Radis", "onItemSelected listener");
-		// mLastOps.moveToPosition(position);
-		// SelectedCursorAdapter adapter = (SelectedCursorAdapter)
-		// getListAdapter();
-		// adapter.setSelectedPosition(position);
-		// updateSumAtSelectedOpDisplay(mLastOps,
-		// getAccountCurSum());
-		// }
-		//
-		// public void onNothingSelected(AdapterView<?> parentView) {
-		// ((SelectedCursorAdapter) getListAdapter())
-		// .setSelectedPosition(-1);
-		// }
-		// });
 	}
 
 	@Override
