@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -26,7 +27,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -186,6 +186,9 @@ public class OperationList extends ListActivity implements
 					OperationList.this.mNbGetMoreOps++;
 				}
 			}
+			Log.d("Radis",
+					"post getMoreOps mLastOps.getCount() : "
+							+ mLastOps.getCount());
 		}
 
 		@Override
@@ -332,6 +335,8 @@ public class OperationList extends ListActivity implements
 		Cursor c = mLastOps;
 		c.moveToFirst();
 		updateFutureSumDisplay();
+		Log.d("Radis", "updateSumsAndSelection mLastSelectedPosition : "
+				+ mLastSelectedPosition);
 		if (mLastSelectedPosition == null) {
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
@@ -367,22 +372,24 @@ public class OperationList extends ListActivity implements
 		}
 		mQuickAddController.setAutoNegate(true);
 		updateSumsAndSelection();
-		getListView().setOnItemSelectedListener(
-				new AdapterView.OnItemSelectedListener() {
-					public void onItemSelected(AdapterView<?> parentView,
-							View childView, int position, long id) {
-						mLastOps.moveToPosition(position);
-						SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
-						adapter.setSelectedPosition(position);
-						updateSumAtSelectedOpDisplay(mLastOps,
-								getAccountCurSum());
-					}
-
-					public void onNothingSelected(AdapterView<?> parentView) {
-						((SelectedCursorAdapter) getListAdapter())
-								.setSelectedPosition(-1);
-					}
-				});
+		// getListView().setOnItemSelectedListener(
+		// new AdapterView.OnItemSelectedListener() {
+		// public void onItemSelected(AdapterView<?> parentView,
+		// View childView, int position, long id) {
+		// Log.d("Radis", "onItemSelected listener");
+		// mLastOps.moveToPosition(position);
+		// SelectedCursorAdapter adapter = (SelectedCursorAdapter)
+		// getListAdapter();
+		// adapter.setSelectedPosition(position);
+		// updateSumAtSelectedOpDisplay(mLastOps,
+		// getAccountCurSum());
+		// }
+		//
+		// public void onNothingSelected(AdapterView<?> parentView) {
+		// ((SelectedCursorAdapter) getListAdapter())
+		// .setSelectedPosition(-1);
+		// }
+		// });
 	}
 
 	@Override
@@ -460,6 +467,35 @@ public class OperationList extends ListActivity implements
 		return super.onContextItemSelected(item);
 	}
 
+	private void afterAddOp(Intent data) {
+		long newRowId = data.getLongExtra("newRowId", -1);
+		Log.d("Radis", "afterAddOp newRowId: " + newRowId);
+		if (newRowId > -1) {
+			ListAdapter adap = getListAdapter();
+			int position = 0;
+			for (; position < adap.getCount(); ++position) {
+				if (newRowId == adap.getItemId(position)) {
+					break;
+				}
+			}
+			if (null == mLastSelectedPosition) {
+				Log.d("Radis", "mLastSelectedPosition INIT");
+				mLastSelectedPosition = 0;
+			}
+			Log.d("Radis", "mLastSelectedPosition: " + mLastSelectedPosition);
+			Log.d("Radis", "position: " + position);
+			Log.d("Radis", "mLastOps.getCount(): " + mLastOps.getCount());
+			if (position <= mLastSelectedPosition
+					&& mLastSelectedPosition < mLastOps.getCount() - 1) {
+				Log.d("Radis", "mLastSelectedPosition is incremeted");
+				mLastSelectedPosition++;
+			}
+		}
+		if (data.getBooleanExtra("sumUpdateNeeded", false)) {
+			updateSumsAfterOpEdit(data);
+		}
+	}
+
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -467,32 +503,8 @@ public class OperationList extends ListActivity implements
 		if (requestCode == ACTIVITY_OP_CREATE
 				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
-				// TODO voir si updateSumsDisplay est appelé après, il fait
-				// aussi fillData et getMoreOps
-				fillData();
-				if (mNbGetMoreOps >= 0) {
-					getMoreOps(true);
-				}
-				long newRowId = data.getLongExtra("newRowId", -1);
-				if (newRowId > -1) {
-					ListAdapter adap = getListAdapter();
-					int position = 0;
-					for (; position < adap.getCount(); ++position) {
-						if (newRowId == adap.getItemId(position)) {
-							break;
-						}
-					}
-					if (null == mLastSelectedPosition) {
-						mLastSelectedPosition = 0;
-					}
-					if (position <= mLastSelectedPosition
-							&& mLastSelectedPosition < mLastOps.getCount() - 1) {
-						mLastSelectedPosition++;
-					}
-				}
-				if (data.getBooleanExtra("sumUpdateNeeded", false)) {
-					updateSumsAfterOpEdit(data);
-				}
+				updateSumsDisplay();
+				afterAddOp(data);
 			}
 		} else if (requestCode == CREATE_SCH_OP) {
 			if (resultCode == RESULT_OK) {
@@ -622,10 +634,20 @@ public class OperationList extends ListActivity implements
 		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
 			if (opDate <= mProjectionDate) {
 				boolean hasPrev = op.moveToPrevious();
+				Log.d("Radis",
+						"computeSumFromCursor op is <= projDate, hasPrev : "
+								+ hasPrev);
+
 				if (hasPrev) {
 					opDate = op.getLong(dateIdx);
+					Log.d("Radis",
+							"computeSumFromCursor opDate : "
+									+ Tools.getDateStr(opDate)
+									+ " / projDate : "
+									+ Tools.getDateStr(mProjectionDate));
 					while (hasPrev && opDate <= mProjectionDate) {
 						long s = op.getLong(opSumIdx);
+						Log.d("Radis", "computeSumFromCursor add " + s);
 						sum = sum + s;
 						hasPrev = op.moveToPrevious();
 						if (hasPrev) {
@@ -637,10 +659,19 @@ public class OperationList extends ListActivity implements
 			} else {
 				sum = op.getLong(opSumIdx);
 				boolean hasNext = op.moveToNext();
+				Log.d("Radis",
+						"computeSumFromCursor op is > projDate, hasNext : "
+								+ hasNext);
 				if (hasNext) {
 					opDate = op.getLong(dateIdx);
+					Log.d("Radis",
+							"computeSumFromCursor opDate : "
+									+ Tools.getDateStr(opDate)
+									+ " / projDate : "
+									+ Tools.getDateStr(mProjectionDate));
 					while (hasNext && opDate > mProjectionDate) {
 						long s = op.getLong(opSumIdx);
+						Log.d("Radis", "computeSumFromCursor add " + s);
 						sum = sum + s;
 						hasNext = op.moveToNext();
 						if (hasNext) {
@@ -650,6 +681,7 @@ public class OperationList extends ListActivity implements
 				}
 			}
 		}
+		Log.d("Radis", "computeSumFromCursor after sum = " + sum);
 		return sum;
 	}
 
@@ -704,6 +736,7 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void updateSumAtDateDisplay(GregorianCalendar date, long curSum) {
+		Log.d("Radis", "updateSumAtDateDisplay date : " + date);
 		Cursor data = null;
 		if (null == date) {
 			data = (MatrixCursor) getListView().getItemAtPosition(
@@ -751,6 +784,9 @@ public class OperationList extends ListActivity implements
 		}
 		l.setSelectionFromTop(position, posFromTop);
 		mOnRestore = false;
+		Log.d("Radis",
+				"selectOpAndAdjustOffset setting mLastSelectedPosition: "
+						+ position);
 		mLastSelectedPosition = Integer.valueOf(position);
 	}
 
@@ -774,8 +810,12 @@ public class OperationList extends ListActivity implements
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Log.d("Radis", "onListItemClick ");
 		super.onListItemClick(l, v, position, id);
 		if (id != -1) {
+			mLastOps.moveToPosition(position);
+			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
+			adapter.setSelectedPosition(position);
 			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
 					position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
@@ -788,6 +828,9 @@ public class OperationList extends ListActivity implements
 		TextView t = (TextView) findViewById(R.id.date_sum);
 		if (null != data && !data.isBeforeFirst() && !data.isAfterLast()) {
 			int position = data.getPosition();
+			Log.d("Radis",
+					"updateSumAtSelectedOpDisplay setting mLastSelectedPosition: "
+							+ position);
 			mLastSelectedPosition = position;
 			selectOpAndAdjustOffset(getListView(), position);
 			long sum = accountCurSum + computeSumFromCursor(data);
@@ -831,6 +874,8 @@ public class OperationList extends ListActivity implements
 	@Override
 	protected void onRestoreInstanceState(Bundle state) {
 		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
+		Log.d("Radis", "onRestoreInstanceState setting mLastSelectedPosition: "
+				+ mLastSelectedPosition);
 		mQuickAddController.onRestoreInstanceState(state);
 		mAccountId = state.getLong("accountId");
 		mOnRestore = true;

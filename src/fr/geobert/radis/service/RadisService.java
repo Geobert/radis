@@ -95,7 +95,12 @@ public class RadisService extends IntentService {
 				final Long accountId = Long.valueOf(op.mAccountId);
 				long sum = 0;
 				boolean needUpdate = false;
-
+				Cursor accountCursor = mDbHelper.fetchAccount(accountId);
+				if (null == accountCursor || !accountCursor.moveToFirst()) {
+					c.moveToNext();
+					continue;
+				}
+				
 				// insert all scheduled of the past until current month
 				while (op.getMonth() <= today.get(Calendar.MONTH)
 						&& !op.isObsolete()) {

@@ -1,6 +1,7 @@
 package fr.geobert.radis.tools;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -323,8 +324,16 @@ public class Tools {
 		sumText.setGravity(gravity);
 	}
 
-	// private static void fillDatabase(CommonDbAdapter db) {
-	// mDb = db;
-	//
-	// }
+	public static String getDateStr(long date) {
+		GregorianCalendar g = new GregorianCalendar();
+		g.setTimeInMillis(date);
+		return getDateStr(g);
+	}
+	
+	public static String getDateStr(Calendar cal) {
+		return String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)) + "/"
+				+ String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/"
+				+ cal.get(Calendar.YEAR);
+	}
+
 }
