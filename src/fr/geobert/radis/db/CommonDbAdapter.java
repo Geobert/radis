@@ -587,15 +587,7 @@ public class CommonDbAdapter {
 				db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 				db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 
-				c = db.query(DATABASE_ACCOUNT_TABLE,
-						new String[] { KEY_ACCOUNT_ROWID }, null, null, null,
-						null, null);
-				if (null != c && c.moveToFirst()) {
-					do {
-						CommonDbAdapter.this.consolidateSums(c.getLong(0), db);
-					} while (c.moveToNext());
-					c.close();
-				}
+				
 			}
 			case 7: {
 				db.execSQL(ADD_NORMALIZED_THIRD_PARTY);
@@ -714,6 +706,15 @@ public class CommonDbAdapter {
 				}
 			}
 			default:
+				Cursor c = db.query(DATABASE_ACCOUNT_TABLE,
+						new String[] { KEY_ACCOUNT_ROWID }, null, null, null,
+						null, null);
+				if (null != c && c.moveToFirst()) {
+					do {
+						CommonDbAdapter.this.consolidateSums(c.getLong(0), db);
+					} while (c.moveToNext());
+					c.close();
+				}
 				break;
 			}
 
