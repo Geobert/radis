@@ -47,9 +47,9 @@ public class InfoManager {
 		}
 	};
 
-	InfoManager(CommonOpEditor context, CommonDbAdapter dbHelper,
+	InfoManager(CommonOpEditor context, 
 			String title, String table, String colName, int editId, int deleteId) {
-		mDbHelper = dbHelper;
+		mDbHelper = CommonDbAdapter.getInstance(context);
 		mContext = context;
 		mInfo = new Bundle();
 		mInfo.putString("title", title);
@@ -81,7 +81,7 @@ public class InfoManager {
 
 		builder.setView(layout);
 		mBuilder = builder;
-		Cursor c = dbHelper.fetchMatchingInfo(table, colName, null);
+		Cursor c = mDbHelper.fetchMatchingInfo(table, colName, null);
 		fillData(c, colName);
 
 		mCursor = c;
