@@ -171,10 +171,23 @@ public class Operation implements Parcelable {
 		setDay(in.readInt());
 		setMonth(in.readInt());
 		setYear(in.readInt());
+		
 		mThirdParty = in.readString();
+		if (null == mThirdParty) {
+			mThirdParty = "";
+		}
+			
 		mTag = in.readString();
+		if (null == mTag) {
+			mTag = "";
+		}
+
 		mMode = in.readString();
 		mNotes = in.readString();
+		if (null == mMode) {
+			mMode = "";
+		}
+
 		mSum = in.readLong();
 		mScheduledId = in.readLong();
 	}
