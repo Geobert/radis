@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.HashMap;
 
+import org.acra.ErrorReporter;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -148,42 +150,83 @@ public abstract class CommonOpEditor extends Activity {
 		return res;
 	}
 
-	private Dialog createInfoListDialog(String table, String colName, String title, int editId,
-			int deletiId) {
-		InfoManager i = new InfoManager(this, title, table, colName, editId, deletiId);
-		mInfoManagersMap.put(table, i);
-		return i.getListDialog();
+	private InfoManager createInfoManagerIfNeeded(String table, String colName, String title,
+			int editId, int deletiId) {
+		InfoManager i = mInfoManagersMap.get(table);
+		if (null == i) {
+			i = new InfoManager(this, title, table, colName, editId, deletiId);
+			mInfoManagersMap.put(table, i);
+		}
+		return i;
 	}
 
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case THIRD_PARTIES_DIALOG_ID:
-			return createInfoListDialog(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+			return createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+					CommonDbAdapter.KEY_THIRD_PARTY_NAME, getString(R.string.third_parties),
+					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID).getListDialog();
+		case TAGS_DIALOG_ID:
+			return createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_TAGS_TABLE,
+					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
+					DELETE_TAG_DIALOG_ID).getListDialog();
+		case MODES_DIALOG_ID:
+			return createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_MODES_TABLE,
+					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
+					DELETE_MODE_DIALOG_ID).getListDialog();
+		case EDIT_THIRD_PARTY_DIALOG_ID: {
+			InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 					CommonDbAdapter.KEY_THIRD_PARTY_NAME, getString(R.string.third_parties),
 					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
-		case TAGS_DIALOG_ID:
-			return createInfoListDialog(CommonDbAdapter.DATABASE_TAGS_TABLE,
-					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
-					DELETE_TAG_DIALOG_ID);
-		case MODES_DIALOG_ID:
-			return createInfoListDialog(CommonDbAdapter.DATABASE_MODES_TABLE,
-					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
-					DELETE_MODE_DIALOG_ID);
-		case EDIT_THIRD_PARTY_DIALOG_ID:
-		case EDIT_TAG_DIALOG_ID:
-		case EDIT_MODE_DIALOG_ID:
-			InfoManager i = mInfoManagersMap.get(mCurrentInfoTable);
 			Dialog d = i.getEditDialog();
 			i.initEditDialog(d);
 			return d;
+		}
+		case EDIT_TAG_DIALOG_ID: {
+			InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_TAGS_TABLE,
+					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
+					DELETE_TAG_DIALOG_ID);
+			Dialog d = i.getEditDialog();
+			i.initEditDialog(d);
+			return d;
+		}
+		case EDIT_MODE_DIALOG_ID: {
+			InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_MODES_TABLE,
+					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
+					DELETE_MODE_DIALOG_ID);
+			Dialog d = i.getEditDialog();
+			i.initEditDialog(d);
+			return d;
+		}
 		case DELETE_THIRD_PARTY_DIALOG_ID:
+			return Tools.createDeleteConfirmationDialog(this,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+									CommonDbAdapter.KEY_THIRD_PARTY_NAME, getString(R.string.third_parties),
+									EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
+							i.deleteInfo();
+						}
+					});
 		case DELETE_TAG_DIALOG_ID:
+			return Tools.createDeleteConfirmationDialog(this,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_TAGS_TABLE,
+									CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
+									DELETE_TAG_DIALOG_ID);
+							i.deleteInfo();
+						}
+					});
 		case DELETE_MODE_DIALOG_ID:
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							mInfoManagersMap.get(mCurrentInfoTable).deleteInfo();
+							InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_MODES_TABLE,
+									CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
+									DELETE_MODE_DIALOG_ID);
+							i.deleteInfo();
 						}
 					});
 		default:
@@ -345,8 +388,7 @@ public abstract class CommonOpEditor extends Activity {
 			fillOperationWithInputs(op);
 			outState.putParcelable("currentOp", op);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			ErrorReporter.getInstance().handleSilentException(e);
 		}
 		outState.putLong("previousSum", mPreviousSum);
 		mOnRestore = true;
