@@ -464,6 +464,9 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 				mLastSelectedPosition++;
 			}
 		}
+		if (mLastSelectedPosition >= mLastOps.getCount()) {
+			mLastSelectedPosition = mLastOps.getCount() - 1;
+		}
 		if (data.getBooleanExtra("sumUpdateNeeded", false)) {
 			updateSumsAfterOpEdit(data);
 		}
