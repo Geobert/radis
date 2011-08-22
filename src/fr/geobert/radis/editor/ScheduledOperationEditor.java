@@ -448,6 +448,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		mOnBasics = savedInstanceState.getBoolean("isOnBasics");
 		mOriginalSchOp = savedInstanceState.getParcelable("originalOp");
 		super.onRestoreInstanceState(savedInstanceState);
+		if (null == mDbHelper) {
+			initDbHelper();
+		}
 	}
 
 	@Override
