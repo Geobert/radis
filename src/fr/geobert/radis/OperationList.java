@@ -204,7 +204,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 				c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1);
 				startManagingCursor(c);
-				if (c.moveToFirst()) {
+				if (c.moveToFirst() && c.isFirst()) {
 					GregorianCalendar opDate = new GregorianCalendar();
 					opDate.setTimeInMillis(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 					c.close();
