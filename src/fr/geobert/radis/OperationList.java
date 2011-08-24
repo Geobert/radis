@@ -68,7 +68,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	private ImageView mLoadingIcon;
 	private AsyncTask<Void, Void, Long> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
-	private boolean mOnRestore = false;	
+	private boolean mOnRestore = false;
 	private AdapterContextMenuInfo mOpToDelete = null;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
@@ -495,7 +495,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	private boolean fillMatrixCursor(MatrixCursor m, Cursor c) {
-		if (c.moveToFirst()) {
+		if (!c.isClosed() && c.moveToFirst() && c.isFirst()) {
 			do {
 				Object[] values = {
 						new Long(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_ROWID))),
