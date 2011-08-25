@@ -389,7 +389,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			} else {
 				ErrorReporter.getInstance().handleSilentException(
 						new Exception("OperationLiest.onCreateContextMenu : invalid cursor for id "
-								+ info.id));
+								+ info.id + ", cursor count: " + c.getCount()));
 			}
 		}
 	}
