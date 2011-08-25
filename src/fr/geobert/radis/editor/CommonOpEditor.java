@@ -62,7 +62,7 @@ public abstract class CommonOpEditor extends Activity {
 	protected abstract void fetchOrCreateCurrentOp();
 
 	// default and common behaviors
-	protected void saveOpAndExit() throws ParseException {
+	protected void saveOpAndExit() {
 		finish();
 	}
 
@@ -129,7 +129,7 @@ public abstract class CommonOpEditor extends Activity {
 		mOpSumText.setText(Formater.SUM_FORMAT.format(sum));
 	}
 
-	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
+	protected boolean isFormValid(StringBuilder errMsg) {
 		boolean res = true;
 		String str = mOpThirdPartyText.getText().toString().trim();
 		if (str.length() == 0) {
@@ -146,6 +146,16 @@ public abstract class CommonOpEditor extends Activity {
 			}
 			errMsg.append(getString(R.string.empty_amount));
 			res = false;
+		} else {
+			try {
+				Formater.SUM_FORMAT.parse(str).doubleValue();
+			} catch (ParseException e) {
+				if (errMsg.length() > 0) {
+					errMsg.append("\n");
+				}
+				errMsg.append(getString(R.string.invalid_amount));
+				res = false;
+			}
 		}
 		return res;
 	}
@@ -203,9 +213,11 @@ public abstract class CommonOpEditor extends Activity {
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-									CommonDbAdapter.KEY_THIRD_PARTY_NAME, getString(R.string.third_parties),
-									EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
+							InfoManager i = createInfoManagerIfNeeded(
+									CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+									CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+									getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID,
+									DELETE_THIRD_PARTY_DIALOG_ID);
 							i.deleteInfo();
 						}
 					});
@@ -213,9 +225,10 @@ public abstract class CommonOpEditor extends Activity {
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_TAGS_TABLE,
-									CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
-									DELETE_TAG_DIALOG_ID);
+							InfoManager i = createInfoManagerIfNeeded(
+									CommonDbAdapter.DATABASE_TAGS_TABLE,
+									CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
+									EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID);
 							i.deleteInfo();
 						}
 					});
@@ -223,9 +236,10 @@ public abstract class CommonOpEditor extends Activity {
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_MODES_TABLE,
-									CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
-									DELETE_MODE_DIALOG_ID);
+							InfoManager i = createInfoManagerIfNeeded(
+									CommonDbAdapter.DATABASE_MODES_TABLE,
+									CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes),
+									EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID);
 							i.deleteInfo();
 						}
 					});
@@ -339,17 +353,13 @@ public abstract class CommonOpEditor extends Activity {
 		findViewById(R.id.confirm_op).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
-				try {
-					StringBuilder errMsg = new StringBuilder();
+				StringBuilder errMsg = new StringBuilder();
 
-					if (isFormValid(errMsg)) {
-						fillOperationWithInputs(mCurrentOp);
-						saveOpAndExit();
-					} else {
-						Tools.popError(CommonOpEditor.this, errMsg.toString(), null);
-					}
-				} catch (ParseException e) {
-					Tools.popError(CommonOpEditor.this, e.getMessage(), null);
+				if (isFormValid(errMsg)) {
+					fillOperationWithInputs(mCurrentOp);
+					saveOpAndExit();
+				} else {
+					Tools.popError(CommonOpEditor.this, errMsg.toString(), null);
 				}
 			}
 		});
@@ -363,7 +373,7 @@ public abstract class CommonOpEditor extends Activity {
 		return super.onKeyLongPress(keyCode, event);
 	}
 
-	protected void fillOperationWithInputs(Operation op) throws ParseException {
+	protected void fillOperationWithInputs(Operation op) {
 		op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
 		op.mMode = mOpModeText.getText().toString().trim();
 		op.mTag = mOpTagText.getText().toString().trim();
@@ -383,13 +393,9 @@ public abstract class CommonOpEditor extends Activity {
 			outState.putLong("rowId", mRowId);
 		}
 
-		try {
-			Operation op = mCurrentOp;
-			fillOperationWithInputs(op);
-			outState.putParcelable("currentOp", op);
-		} catch (ParseException e) {
-			ErrorReporter.getInstance().handleSilentException(e);
-		}
+		Operation op = mCurrentOp;
+		fillOperationWithInputs(op);
+		outState.putParcelable("currentOp", op);
 		outState.putLong("previousSum", mPreviousSum);
 		mOnRestore = true;
 	}

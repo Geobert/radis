@@ -290,7 +290,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void saveOpAndExit() throws ParseException {
+	protected void saveOpAndExit() {
 		ScheduledOperation op = mCurrentSchOp;
 		if (mRowId <= 0) {
 			if (mOpIdSource > 0) { // is converting a transaction into a
@@ -367,8 +367,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void fillOperationWithInputs(Operation operation)
-			throws ParseException {
+	protected void fillOperationWithInputs(Operation operation) {
 		super.fillOperationWithInputs(operation);
 		ScheduledOperation op = (ScheduledOperation) operation;
 		op.mAccountId = mAccountSpinner.getSelectedItemId();
@@ -397,7 +396,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected boolean isFormValid(StringBuilder errMsg) throws ParseException {
+	protected boolean isFormValid(StringBuilder errMsg)  {
 		boolean res = super.isFormValid(errMsg);
 		if (res) {
 			ScheduledOperation op = mCurrentSchOp;

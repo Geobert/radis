@@ -92,6 +92,7 @@
 	<string name="will_restart">Application will be restart.</string>
 	<string name="no_more_ops">No more transaction</string>
 	<string name="no_start_amount">Start amount is empty</string>
+	<string name="invalid_amount">Amount is invalid</string>
 	<string name="misc">Misc</string>
 	<string name="notes">Notes</string>
 	<string name="balance_at">Balance at %s</string>

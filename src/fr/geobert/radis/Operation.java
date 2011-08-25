@@ -138,9 +138,14 @@ public class Operation implements Parcelable {
 		return Formater.SUM_FORMAT.format(mSum / 100.0d);
 	}
 
-	public void setSumStr(String sumStr) throws ParseException {
+	public void setSumStr(String sumStr) {
 		sumStr = sumStr.replace('+', ' ').trim();
-		double d = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
+		double d;
+		try {
+			d = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
+		} catch (ParseException e) {
+			d = 0d;
+		}
 		mSum = Math.round(d * 100);
 	}
 

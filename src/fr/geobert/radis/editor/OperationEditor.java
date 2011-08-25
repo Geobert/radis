@@ -70,7 +70,7 @@ public class OperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void saveOpAndExit() throws ParseException {
+	protected void saveOpAndExit() {
 		Operation op = mCurrentOp;
 		if (mRowId <= 0) {
 			setResAndExit(mDbHelper.createOp(op));
