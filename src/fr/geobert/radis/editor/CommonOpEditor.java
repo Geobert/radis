@@ -139,7 +139,7 @@ public abstract class CommonOpEditor extends Activity {
 			errMsg.append(getString(R.string.empty_third_party));
 			res = false;
 		}
-		str = mOpSumText.getText().toString().trim();
+		str = mOpSumText.getText().toString().replace('+', ' ').trim();
 		if (str.length() == 0) {
 			if (errMsg.length() > 0) {
 				errMsg.append("\n");
