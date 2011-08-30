@@ -248,7 +248,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private void populateAccountSpinner() {
 		Cursor c = mDbHelper.fetchAllAccounts();
 		startManagingCursor(c);
-		if (c.isFirst()) {
+		if (c != null && c.isFirst()) {
 			String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
 					CommonDbAdapter.KEY_ACCOUNT_ROWID,
 					CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
