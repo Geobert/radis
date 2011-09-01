@@ -386,10 +386,6 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 					menu.add(0, CONVERT_OP_ID, 0, R.string.convert_into_scheduling);
 				}
 				menu.add(0, DELETE_OP_ID, 0, R.string.delete);
-			} else {
-				ErrorReporter.getInstance().handleSilentException(
-						new Exception("OperationLiest.onCreateContextMenu : invalid cursor for id "
-								+ info.id + ", cursor count: " + c.getCount()));
 			}
 		}
 	}
