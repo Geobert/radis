@@ -474,7 +474,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		// mDbHelper.open();
 		if (requestCode == ACTIVITY_OP_CREATE || requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
-				updateSumsDisplay();
+				updateSumsDisplay(requestCode == ACTIVITY_OP_CREATE);
 				afterAddOp(data);
 			}
 		} else if (requestCode == CREATE_SCH_OP) {
@@ -878,12 +878,16 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	private void updateSumsDisplay() {
+		updateSumsDisplay(true);
+	}
+	
+	private void updateSumsDisplay(boolean restoreOps) {
 		mCurAccount.requery();
 		mCurAccount.moveToFirst();
 		mProjectionDate = mCurAccount.getLong(mCurAccount
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
-		if (mNbGetMoreOps > 0) {
+		if (restoreOps && mNbGetMoreOps > 0) {
 			getMoreOps(true);
 		}
 		updateSumsAndSelection();
