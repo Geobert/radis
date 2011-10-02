@@ -1,78 +1,50 @@
 package fr.geobert.radis.tools;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.StreamCorruptedException;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
 import android.preference.PreferenceActivity;
-import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.db.CommonDbAdapter;
 
-public class PrefsManager {
+public class DBPrefsManager {
 	public final static String SHARED_PREF_NAME = "radis_prefs";
-	private static PrefsManager mInstance;
-	private HashMap<String, String> mPrefs;
+	private static DBPrefsManager mInstance;
 	private Context mCurrentCtx;
+	private CommonDbAdapter mDb;
+	private HashMap<String, String> mCache;
 
-	@SuppressWarnings("unchecked")
-	private PrefsManager(Context ctx) {
-		FileInputStream fis;
-		try {
-			fis = ctx.openFileInput(SHARED_PREF_NAME);
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			mPrefs = (HashMap<String, String>) ois.readObject();
-		} catch (FileNotFoundException e) {
-			mPrefs = new HashMap<String, String>();
-		} catch (StreamCorruptedException e) {
-			Log.e("RADIS", "StreamCorruptedException: " + e.getMessage());
-		} catch (IOException e) {
-			Log.e("RADIS", "IOException: " + e.getMessage());
-		} catch (ClassNotFoundException e) {
-			Log.e("RADIS", "ClassNotFoundException: " + e.getMessage());
-		}
+	private DBPrefsManager(Context ctx) {
+		mDb = CommonDbAdapter.getInstance(ctx);
+		fillCache();
 	}
 
-	public static PrefsManager getInstance(Context ctx) {
+	private void fillCache() {
+		mCache = mDb.getAllPrefs();
+	}
+
+	public static DBPrefsManager getInstance(Context ctx) {
 		if (null == mInstance) {
-			mInstance = new PrefsManager(ctx);
+			mInstance = new DBPrefsManager(ctx);
 		}
 		mInstance.mCurrentCtx = ctx;
 		return mInstance;
 	}
 
-	public boolean commit() {
-		try {
-			FileOutputStream fos = mCurrentCtx.openFileOutput(SHARED_PREF_NAME,
-					Context.MODE_PRIVATE);
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(mPrefs);
-			return true;
-		} catch (FileNotFoundException e) {
-			return false;
-		} catch (IOException e) {
-			return false;
-		}
-	}
+	
 
 	public String getString(final String key) {
-		return mPrefs.get(key);
+		return mCache.get(key);
 	}
 
 	public String getString(final String key, final String defValue) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		return v != null ? v : defValue;
 	}
 
 	public Boolean getBoolean(final String key) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		try {
 			Boolean b = Boolean.valueOf(v);
 			return b;
@@ -82,7 +54,7 @@ public class PrefsManager {
 	}
 
 	public Boolean getBoolean(final String key, final boolean defValue) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		try {
 			Boolean b = Boolean.valueOf(v);
 			return b != null ? b : defValue;
@@ -92,7 +64,7 @@ public class PrefsManager {
 	}
 
 	public Integer getInt(final String key) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		try {
 			Integer b = Integer.valueOf(v);
 			return b;
@@ -102,7 +74,7 @@ public class PrefsManager {
 	}
 
 	public Integer getInt(final String key, final int defValue) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		try {
 			Integer b = Integer.valueOf(v);
 			return b != null ? b : defValue;
@@ -112,7 +84,7 @@ public class PrefsManager {
 	}
 
 	public Long getLong(final String key) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		try {
 			Long b = Long.valueOf(v);
 			return b;
@@ -122,7 +94,7 @@ public class PrefsManager {
 	}
 
 	public Long getLong(final String key, final long defValue) {
-		String v = mPrefs.get(key);
+		String v = mCache.get(key);
 		try {
 			Long b = Long.valueOf(v);
 			return b != null ? b : defValue;
@@ -132,7 +104,8 @@ public class PrefsManager {
 	}
 
 	public void put(final String key, final Object value) {
-		mPrefs.put(key, value.toString());
+		mCache.put(key, value.toString());
+		mDb.setPref(key, value.toString());
 	}
 
 	public void clearAccountRelated() {
@@ -140,21 +113,17 @@ public class PrefsManager {
 				PreferenceActivity.MODE_PRIVATE).edit();
 		editor.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
 		editor.commit();
-		mPrefs.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
-		commit();
+		mDb.deletePref(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+		mCache.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
 	}
 
 	public void resetAll() {
 		clearAccountRelated();
-		mPrefs.remove(RadisConfiguration.KEY_INSERTION_DATE);
-		commit();
+		mDb.deletePref(RadisConfiguration.KEY_INSERTION_DATE);
+		mCache.remove(RadisConfiguration.KEY_INSERTION_DATE);
 		Editor editor = mCurrentCtx.getSharedPreferences(SHARED_PREF_NAME,
 				PreferenceActivity.MODE_PRIVATE).edit();
 		editor.clear();
-		editor.commit();
-	}
-	
-	public HashMap<String, String> getRawData() {
-		return mPrefs;
+		editor.commit();	
 	}
 }

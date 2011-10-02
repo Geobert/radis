@@ -11,9 +11,11 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.acra.ErrorReporter;
 
+import android.app.Application;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -26,13 +28,14 @@ import fr.geobert.radis.Operation;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
 
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 10;
+	protected static final int DATABASE_VERSION = 11;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -40,6 +43,7 @@ public class CommonDbAdapter {
 	public static final String DATABASE_TAGS_TABLE = "tags";
 	public static final String DATABASE_OPERATIONS_TABLE = "operations";
 	public static final String DATABASE_SCHEDULED_TABLE = "scheduled_ops";
+	public static final String DATABASE_PREFS_TABLE = "preferences";
 
 	public static final String KEY_ACCOUNT_NAME = "account_name";
 	public static final String KEY_ACCOUNT_DESC = "account_desc";
@@ -134,6 +138,13 @@ public class CommonDbAdapter {
 			+ "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES " + DATABASE_MODES_TABLE + "("
 			+ KEY_MODE_ROWID + "), FOREIGN KEY (" + KEY_OP_SCHEDULED_ID + ") REFERENCES "
 			+ DATABASE_SCHEDULED_TABLE + "(" + KEY_SCHEDULED_ROWID + "));";
+
+	public static final String KEY_PREFS_ROWID = "_id";
+	public static final String KEY_PREFS_NAME = "pref_name";
+	public static final String KEY_PREFS_VALUE = "pref_value";
+	protected static final String DATABASE_PREFS_CREATE = "create table " + DATABASE_PREFS_TABLE
+			+ "(" + KEY_PREFS_ROWID + " integer primary key autoincrement, " + KEY_PREFS_NAME
+			+ " text not null, " + KEY_PREFS_VALUE + " text not null);";
 
 	// meta
 	protected static final String INDEX_ON_ACCOUNT_ID_CREATE = "CREATE INDEX IF NOT EXISTS account_id_idx ON "
@@ -299,9 +310,11 @@ public class CommonDbAdapter {
 	}
 
 	protected class DatabaseHelper extends SQLiteOpenHelper {
+		private Context mCtx;
 
 		DatabaseHelper(Context context) {
 			super(context, DATABASE_NAME, null, DATABASE_VERSION);
+			mCtx = context;
 		}
 
 		@Override
@@ -316,6 +329,7 @@ public class CommonDbAdapter {
 			db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
 			db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 			db.execSQL(DATABASE_SCHEDULED_CREATE);
+			db.execSQL(DATABASE_PREFS_CREATE);
 		}
 
 		@Override
@@ -604,6 +618,16 @@ public class CommonDbAdapter {
 						} while (c.moveToNext());
 					}
 					c.close();
+				}
+			}
+			case 10: {
+				db.execSQL(DATABASE_PREFS_CREATE);
+				PrefsManager prefs = PrefsManager.getInstance(mCtx);
+				HashMap<String, String> allPrefs = prefs.getRawData();
+				if (null != allPrefs) {
+					for (Entry<String, String> elt : allPrefs.entrySet()) {
+						setPref(elt.getKey(), elt.getValue());
+					}
 				}
 			}
 			default:
@@ -1315,6 +1339,57 @@ public class CommonDbAdapter {
 		return c;
 	}
 
+	// ------------
+	// Preferences
+	// ------------
+	public void setPref(final String key, final String value) {
+		ContentValues values = new ContentValues();
+		values.put(KEY_PREFS_VALUE, value);
+		if (null == getPref(key)) {
+			values.put(KEY_PREFS_NAME, key);
+			// insert
+			mDb.insert(DATABASE_PREFS_TABLE, null, values);
+		} else {
+			// update
+			mDb.update(DATABASE_PREFS_TABLE, values, KEY_PREFS_NAME + "='" + key + "'", null);
+		}
+	}
+
+	public String getPref(final String key) {
+		String res = null;
+		Cursor c = mDb.query(DATABASE_PREFS_TABLE, new String[] { KEY_PREFS_VALUE }, KEY_PREFS_NAME
+				+ "='" + key + "'", null, null, null, null);
+		if (null != c) {
+			if (c.moveToFirst()) {
+				res = c.getString(0);
+			}
+			c.close();
+		}
+		return res;
+	}
+
+	public HashMap<String, String> getAllPrefs() {
+		HashMap<String, String> res = new HashMap<String, String>();
+		Cursor c = mDb.query(DATABASE_PREFS_TABLE,
+				new String[] { KEY_PREFS_NAME, KEY_PREFS_VALUE }, null, null, null, null, null);
+		if (null != c) {
+			if (c.moveToFirst()) {
+				do {
+					res.put(c.getString(0), c.getString(1));
+				} while (c.moveToNext());
+			}
+			c.close();
+		}
+		return res;
+	}
+
+	public void deletePref(final String key) {
+		mDb.delete(DATABASE_PREFS_TABLE, KEY_PREFS_NAME + "='" + key + "'", null);
+	}
+
+	// -------------
+	// Global tools
+	// -------------
 	public void trashDatabase() {
 		close();
 		mCtx.deleteDatabase(DATABASE_NAME);

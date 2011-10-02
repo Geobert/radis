@@ -12,7 +12,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.tools.PrefsManager;
+import fr.geobert.radis.tools.DBPrefsManager;
 
 public class RadisConfiguration extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
@@ -22,13 +22,12 @@ public class RadisConfiguration extends PreferenceActivity implements
 
 	private ListPreference mAccountsChoice;
 
-	private PrefsManager getPrefs() {
-		return PrefsManager.getInstance(this);
+	private DBPrefsManager getPrefs() {
+		return DBPrefsManager.getInstance(this);
 	}
 
 	private SharedPreferences getSharedPreferences() {
-		return super.getSharedPreferences(PrefsManager.SHARED_PREF_NAME,
-				MODE_PRIVATE);
+		return super.getSharedPreferences(DBPrefsManager.SHARED_PREF_NAME, MODE_PRIVATE);
 	}
 
 	public SharedPreferences getSharedPreferences(String name, int mode) {
@@ -66,21 +65,19 @@ public class RadisConfiguration extends PreferenceActivity implements
 
 			} while (accounts.moveToNext());
 		}
-		mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries
-				.size()]));
-		mAccountsChoice.setEntryValues(values.toArray(new CharSequence[entries
-				.size()]));
+		mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries.size()]));
+		mAccountsChoice.setEntryValues(values.toArray(new CharSequence[entries.size()]));
 		accounts.close();
 	}
 
 	private void updateLabel(String key) {
 		String summary = null;
-		String value;
-
+		String value = null;
+		
 		if (KEY_INSERTION_DATE.equals(key)) {
 			value = getPrefs().getString(key, DEFAULT_INSERTION_DATE);
-			summary = getString(R.string.prefs_insertion_date_text,
-					value == null ? "" : value);
+			String s = getString(R.string.prefs_insertion_date_text);
+			summary = String.format(s, value);
 		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
 			ListPreference l = (ListPreference) findPreference(key);
 			CharSequence s = l.getEntry();
@@ -89,7 +86,6 @@ public class RadisConfiguration extends PreferenceActivity implements
 				summary = getString(R.string.quickadd_account_desc, value);
 			}
 		}
-
 		if (summary != null) {
 			PreferenceScreen ps = getPreferenceScreen();
 			if (ps != null) {
@@ -130,8 +126,7 @@ public class RadisConfiguration extends PreferenceActivity implements
 	}
 
 	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-			String key) {
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		String value = "";
 		Preference p = findPreference(key);
 		if (p instanceof EditTextPreference) {
@@ -142,7 +137,6 @@ public class RadisConfiguration extends PreferenceActivity implements
 		}
 
 		getPrefs().put(key, value);
-		getPrefs().commit();
 		updateLabel(key);
 	}
 

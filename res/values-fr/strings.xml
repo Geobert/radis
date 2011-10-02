@@ -119,8 +119,7 @@
 	<string name="del_all_occurrences">Tout</string>
 	<string name="cancel_delete_occurrences">Échéance</string>
 	<string name="cancel_sch_deletion">Rien</string>
-	<string name="prefs_insertion_date_text">L\'insertion des échéances se fera le %s du mois
-	</string>
+	<string name="prefs_insertion_date_text">L\'insertion des échéances se fera le %s du mois</string>
 	<string name="prefs_insertion_date_title">Entrez le jour du mois</string>
 	<string name="prefs_insertion_date_label">Date d\'insertion</string>
 	<string name="preferences">Préférences</string>

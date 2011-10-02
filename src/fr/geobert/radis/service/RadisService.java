@@ -10,11 +10,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
-
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
-import fr.geobert.radis.tools.PrefsManager;
+import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Tools;
 
 public class RadisService extends IntentService {
@@ -61,7 +60,7 @@ public class RadisService extends IntentService {
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(insertionDate);
-			int insertionDayOfMonth = PrefsManager
+			int insertionDayOfMonth = DBPrefsManager
 					.getInstance(this)
 					.getInt(RadisConfiguration.KEY_INSERTION_DATE,
 							Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE))
@@ -76,7 +75,7 @@ public class RadisService extends IntentService {
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonthLimit = insertionDate.get(Calendar.MONTH) + 1;
 
-			long lastInsertDate = PrefsManager.getInstance(this).getLong(
+			long lastInsertDate = DBPrefsManager.getInstance(this).getLong(
 					"LAST_INSERT_DATE", 0);
 			// Log.d("Radis", "lastInsertDate: " + lastInsertDate);
 			// Log.d("Radis", "insertionDateInMillis: " +
@@ -148,9 +147,8 @@ public class RadisService extends IntentService {
 				sendOrderedBroadcast(i, null);
 			}
 			// Log.d("Radis", "put todayInMillis: " + todayInMillis);
-			PrefsManager.getInstance(this).put("LAST_INSERT_DATE",
+			DBPrefsManager.getInstance(this).put("LAST_INSERT_DATE",
 					todayInMillis);
-			PrefsManager.getInstance(this).commit();
 			if (lastInsertDate == 0) {
 				processScheduledOps();
 			}

@@ -304,7 +304,7 @@ public class Tools {
 					mDb.consolidateSums();
 					break;
 				case 4:
-					PrefsManager.getInstance(context).resetAll();
+					DBPrefsManager.getInstance(context).resetAll();
 					break;
 				}
 			}

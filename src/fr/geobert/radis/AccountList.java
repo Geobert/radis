@@ -31,6 +31,7 @@ import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.editor.AccountEditor;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
+import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.QuickAddController;
@@ -230,7 +231,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		mAccountsCursor.requery();
 		mScheduledListBtn.setEnabled(getListAdapter().getCount() > 0);
 		if (null != mViewBinder && id == mViewBinder.accountId) {
-			PrefsManager.getInstance(this).clearAccountRelated();
+			DBPrefsManager.getInstance(this).clearAccountRelated();
 			mViewBinder.accountId = 0;
 		}
 		updateTargetTextView();
@@ -309,13 +310,13 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		if (null == mAccountsAdapter) {
 			mAccountsAdapter = new SimpleCursorAdapter(this,
 					R.layout.account_row, mAccountsCursor, from, to);
-			mViewBinder = new InnerViewBinder(PrefsManager.getInstance(this)
+			mViewBinder = new InnerViewBinder(DBPrefsManager.getInstance(this)
 					.getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0));
 			mAccountsAdapter.setViewBinder(mViewBinder);
 			setListAdapter(mAccountsAdapter);
 		} else {
 			mAccountsAdapter.changeCursor(mAccountsCursor);
-			mViewBinder.accountId = PrefsManager.getInstance(this).getLong(
+			mViewBinder.accountId = DBPrefsManager.getInstance(this).getLong(
 					RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0);
 		}
 
@@ -383,7 +384,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 
 	private void updateTargetTextView() {
 		if (mAccountsCursor.getCount() > 0) {
-			long accountId = PrefsManager.getInstance(this).getLong(
+			long accountId = DBPrefsManager.getInstance(this).getLong(
 					RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0);
 			mQuickAddController.setAccount(accountId);
 			if (accountId == 0) {
