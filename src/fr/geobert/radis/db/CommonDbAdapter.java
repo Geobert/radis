@@ -626,7 +626,10 @@ public class CommonDbAdapter {
 				HashMap<String, String> allPrefs = prefs.getRawData();
 				if (null != allPrefs) {
 					for (Entry<String, String> elt : allPrefs.entrySet()) {
-						setPref(elt.getKey(), elt.getValue());
+						ContentValues values = new ContentValues();
+						values.put(KEY_PREFS_VALUE, elt.getValue());
+						values.put(KEY_PREFS_NAME, elt.getKey());
+						db.insert(DATABASE_PREFS_TABLE, null, values);
 					}
 				}
 			}
@@ -829,10 +832,12 @@ public class CommonDbAdapter {
 			case 1: {
 				GregorianCalendar projDate = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(projDate);
-				if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer.parseInt(c.getString(9))) {
+				projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(c.getString(9)));
+				GregorianCalendar today = new GregorianCalendar();
+				Tools.clearTimeOfCalendar(today);
+				if (projDate.compareTo(today) <= 0) {
 					projDate.roll(Calendar.MONTH, 1);
 				}
-				projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(c.getString(9)));
 				mProjectionDate = projDate.getTimeInMillis();
 			}
 				break;
