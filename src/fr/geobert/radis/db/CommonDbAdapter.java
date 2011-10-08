@@ -862,16 +862,33 @@ public class CommonDbAdapter {
 
 	public boolean updateAccountProjectionDate(long accountId,
 			ProjectionDateController projectionController) throws ParseException {
-		ContentValues args = new ContentValues();
 		if (accountId == mAccountId && projectionController.hasChanged()) {
-			long start_sum = mCurAccount.getLong(mCurAccount.getColumnIndex(KEY_ACCOUNT_START_SUM));
-			args.put(KEY_ACCOUNT_PROJECTION_MODE, projectionController.getMode());
-			args.put(KEY_ACCOUNT_PROJECTION_DATE, projectionController.getDate());
+			updateAccountProjectionDate(accountId, projectionController.getMode(),
+					projectionController.getDate(), mCurAccount);
+		}
+		return true;
+	}
 
-			setCurrentSumAndDate(args, start_sum, projectionController.getMode(),
-					projectionController.getDate());
-			return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "=" + accountId,
-					null) > 0;
+	private boolean updateAccountProjectionDate(long accountId, final int projMode,
+			final String projDate, Cursor account) throws ParseException {
+		ContentValues args = new ContentValues();
+		long start_sum = mCurAccount.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM));
+		args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode);
+		args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate);
+
+		setCurrentSumAndDate(args, start_sum, projMode, projDate);
+		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "=" + accountId, null) > 0;
+	}
+
+	public boolean updateAccountProjectionDate(long accountId) throws ParseException {
+		Cursor c = fetchAccount(accountId);
+		if (null != c) {
+			if (c.moveToFirst()) {
+				return updateAccountProjectionDate(accountId,
+						c.getInt(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
+						c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), c);
+			}
+			c.close();
 		}
 		return true;
 	}
