@@ -202,13 +202,13 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			} else {
 				long earliestOpDate = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 
-				c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1);
+				c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1, mAccountId);
 				startManagingCursor(c);
 				if (c.moveToFirst() && c.isFirst()) {
 					GregorianCalendar opDate = new GregorianCalendar();
 					opDate.setTimeInMillis(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 					c.close();
-					Cursor result = mDbHelper.fetchOpOfMonth(opDate.get(Calendar.MONTH));
+					Cursor result = mDbHelper.fetchOpOfMonth(opDate.get(Calendar.MONTH), mAccountId);
 					startManagingCursor(result);
 					mHasResult = fillMatrixCursor(mAccumulator, result);
 					mLops = mAccumulator;
@@ -241,7 +241,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	protected void initDbHelper() {
-		mDbHelper = CommonDbAdapter.getInstance(this, mAccountId);
+		mDbHelper = CommonDbAdapter.getInstance(this);
 		assert null != mDbHelper;
 		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
@@ -377,7 +377,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		if (info.id != -1) {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			menu.add(0, EDIT_OP_ID, 0, R.string.edit);
-			Cursor c = mDbHelper.fetchOneOp(info.id);
+			Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 			startManagingCursor(c);
 			if (!c.isBeforeFirst() && !c.isAfterLast()) {
 				if (c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
@@ -427,7 +427,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			startScheduledOpEditor(info.id, true);
 			return true;
 		case EDIT_SCH_OP_ID:
-			Cursor c = mDbHelper.fetchOneOp(info.id);
+			Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 			startManagingCursor(c);
 			startScheduledOpEditor(
 					c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)), false);
@@ -525,7 +525,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 					.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
-			Cursor c = mDbHelper.fetchOpBetweenDate(today, latest);
+			Cursor c = mDbHelper.fetchOpBetweenDate(today, latest, mAccountId);
 			startManagingCursor(c);
 			fillMatrixCursor(mLastOps, c);
 		}
@@ -554,11 +554,11 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	private void deleteOp(AdapterContextMenuInfo info) {
-		Cursor c = mDbHelper.fetchOneOp(info.id);
+		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		updateLastSelectionFromTop();
-		if (mDbHelper.deleteOp(info.id)) {
+		if (mDbHelper.deleteOp(info.id, mAccountId)) {
 			if (info.position < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}

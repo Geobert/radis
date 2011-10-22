@@ -1,7 +1,5 @@
 package fr.geobert.radis.editor;
 
-import java.text.ParseException;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -52,9 +50,18 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private ScheduledOperation mOriginalSchOp;
 	private long mOpIdSource;
 	private ScrollView mFlipperScroll;
+	protected Long mAccountId;
 
 	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
 
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		Bundle extras = getIntent().getExtras();
+		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
+				: null;
+		super.onCreate(savedInstanceState);
+	}
+	
 	@Override
 	protected void setView() {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -297,7 +304,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 									// schedule
 				if ((op.getDate() != mOriginalSchOp.getDate())) {
 					// change the date of the source transaction
-					mDbHelper.updateOp(mOpIdSource, op);
+					mDbHelper.updateOp(mOpIdSource, op, mAccountId);
 				}
 				// do not insert another occurrence with same date
 				ScheduledOperation.addPeriodicityToDate(op);

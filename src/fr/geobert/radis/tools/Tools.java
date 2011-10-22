@@ -275,7 +275,7 @@ public class Tools {
 	public static Dialog getDebugDialog(final Context context,
 			CommonDbAdapter dB) {
 		final CharSequence[] items = { "Trash DB", "Restart",
-				"Install RadisService", "Recompute sums", "Trash Prefs"};
+				"Install RadisService", "Trash Prefs"};
 		mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
@@ -301,9 +301,6 @@ public class Tools {
 					context.sendBroadcast(i);
 					break;
 				case 3:
-					mDb.consolidateSums();
-					break;
-				case 4:
 					DBPrefsManager.getInstance(context).resetAll();
 					break;
 				}
