@@ -557,14 +557,16 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+		Log.d("Radis", "deleteOp sum " + sum);
 		updateLastSelectionFromTop();
 		if (mDbHelper.deleteOp(info.id, mAccountId)) {
 			if (info.position < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
 			updateSumsAfterOpEdit(sum, 0L, 0);
+		} else {
+			updateSumsDisplay();
 		}
-		updateSumsDisplay();
 	}
 
 	// generic function for getAccountOpSum and getAccountCurSum
@@ -592,15 +594,15 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
 			if (opDate <= mProjectionDate) {
 				boolean hasPrev = op.moveToPrevious();
-				Log.d("Radis", "computeSumFromCursor op is <= projDate, hasPrev : " + hasPrev);
+//				Log.d("Radis", "computeSumFromCursor op is <= projDate, hasPrev : " + hasPrev);
 
 				if (hasPrev) {
 					opDate = op.getLong(dateIdx);
-					Log.d("Radis", "computeSumFromCursor opDate : " + Tools.getDateStr(opDate)
-							+ " / projDate : " + Tools.getDateStr(mProjectionDate));
+//					Log.d("Radis", "computeSumFromCursor opDate : " + Tools.getDateStr(opDate)
+//							+ " / projDate : " + Tools.getDateStr(mProjectionDate));
 					while (hasPrev && opDate <= mProjectionDate) {
 						long s = op.getLong(opSumIdx);
-						Log.d("Radis", "computeSumFromCursor add " + s);
+//						Log.d("Radis", "computeSumFromCursor add " + s);
 						sum = sum + s;
 						hasPrev = op.moveToPrevious();
 						if (hasPrev) {
@@ -612,14 +614,14 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			} else {
 				sum = op.getLong(opSumIdx);
 				boolean hasNext = op.moveToNext();
-				Log.d("Radis", "computeSumFromCursor op is > projDate, hasNext : " + hasNext);
+//				Log.d("Radis", "computeSumFromCursor op is > projDate, hasNext : " + hasNext);
 				if (hasNext) {
 					opDate = op.getLong(dateIdx);
-					Log.d("Radis", "computeSumFromCursor opDate : " + Tools.getDateStr(opDate)
-							+ " / projDate : " + Tools.getDateStr(mProjectionDate));
+//					Log.d("Radis", "computeSumFromCursor opDate : " + Tools.getDateStr(opDate)
+//							+ " / projDate : " + Tools.getDateStr(mProjectionDate));
 					while (hasNext && opDate > mProjectionDate) {
 						long s = op.getLong(opSumIdx);
-						Log.d("Radis", "computeSumFromCursor add " + s);
+//						Log.d("Radis", "computeSumFromCursor add " + s);
 						sum = sum + s;
 						hasNext = op.moveToNext();
 						if (hasNext) {
@@ -655,9 +657,11 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	private void updateSumsAfterOpEdit(long oldSum, long sum, long date) {
+		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : " + sum);
 		// long opSum = getAccountOpSum();
 		// opSum = opSum - oldSum + sum;
 		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
+//		updateSumsDisplay();
 		updateFutureSumDisplay();
 		updateSumAtDateDisplay(null, getAccountCurSum());
 
@@ -681,7 +685,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	private void updateSumAtDateDisplay(GregorianCalendar date, long curSum) {
-		Log.d("Radis", "updateSumAtDateDisplay date : " + date);
+		Log.d("Radis", "updateSumAtDateDisplay date : " + date + " / curSum :" + curSum);
 		Cursor data = null;
 		if (null == date) {
 			data = (MatrixCursor) getListView().getItemAtPosition(
@@ -773,6 +777,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 					+ position);
 			mLastSelectedPosition = position;
 			selectOpAndAdjustOffset(getListView(), position);
+			Log.d("Radis", "updateSumAtSelectedOpDisplay accountCurSum : " + accountCurSum);
 			long sum = accountCurSum + computeSumFromCursor(data);
 			t.setText(String.format(getString(R.string.sum_at_selection),
 					Formater.SUM_FORMAT.format(sum / 100.0d)));
@@ -887,6 +892,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		mProjectionDate = mCurAccount.getLong(mCurAccount
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
+		Log.d("Radis", "updateSumsDisplay mNbGetMoreOps : " + mNbGetMoreOps);
 		if (restoreOps && mNbGetMoreOps > 0) {
 			getMoreOps(true);
 		}
