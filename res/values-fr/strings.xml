@@ -154,4 +154,5 @@
 		<item>Une date absolue</item>
 	</string-array>
 	<string name="bad_format_for_date">La date est invalide</string>
+	<string name="recompute_account_sums">Recalculer le compte</string>
 </resources>

@@ -24,7 +24,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ListView;
@@ -188,8 +187,8 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-
 		inflater.inflate(R.menu.common_menu, menu);
+		menu.findItem(R.id.recompute_account).setVisible(false);
 		return true;
 	}
 

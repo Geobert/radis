@@ -95,7 +95,13 @@ public class RadisService extends IntentService {
 				long sum = 0;
 				boolean needUpdate = false;
 				Cursor accountCursor = mDbHelper.fetchAccount(accountId);
-				if (null == accountCursor || !accountCursor.moveToFirst()) {
+				if (null != accountCursor) {
+					if (!accountCursor.moveToFirst()) {
+						c.moveToNext();
+						continue;
+					}
+					accountCursor.close();
+				} else {
 					c.moveToNext();
 					continue;
 				}

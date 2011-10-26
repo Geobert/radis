@@ -586,12 +586,12 @@ public class CommonDbAdapter {
 				db.execSQL(ADD_PROJECTION_MODE_DATE);
 				Cursor c = db.query(DATABASE_ACCOUNT_TABLE, new String[] {}, null, null, null,
 						null, null);
-				if (c.moveToFirst()) {
-					do {
-						consolidateSums(c.getLong(c.getColumnIndex(KEY_ACCOUNT_ROWID)), db);
-					} while (c.moveToNext());
-				}
 				if (null != c) {
+					if (c.moveToFirst()) {
+						do {
+							consolidateSums(c.getLong(c.getColumnIndex(KEY_ACCOUNT_ROWID)), db);
+						} while (c.moveToNext());
+					}
 					c.close();
 				}
 				c = db.query(DATABASE_OPERATIONS_TABLE, new String[] { KEY_OP_ROWID, KEY_OP_DATE },
@@ -629,10 +629,12 @@ public class CommonDbAdapter {
 			default:
 				Cursor c = db.query(DATABASE_ACCOUNT_TABLE, new String[] { KEY_ACCOUNT_ROWID },
 						null, null, null, null, null);
-				if (null != c && c.moveToFirst()) {
-					do {
-						CommonDbAdapter.this.consolidateSums(c.getLong(0), db);
-					} while (c.moveToNext());
+				if (null != c) {
+					if (c.moveToFirst()) {
+						do {
+							CommonDbAdapter.this.consolidateSums(c.getLong(0), db);
+						} while (c.moveToNext());
+					}
 					c.close();
 				}
 				break;
@@ -726,7 +728,8 @@ public class CommonDbAdapter {
 	// called on create and update account
 	private void setCurrentSumAndDate(long accountId, ContentValues values, final long start_sum,
 			final int projectionMode, final String projectionDate) throws ParseException {
-		Log.d("Radis", "setCurrentSumAndDate start_sum = " + start_sum + " / projMode:" + projectionMode );
+		Log.d("Radis", "setCurrentSumAndDate start_sum = " + start_sum + " / projMode:"
+				+ projectionMode);
 		long date = 0;
 		long opSum = 0;
 		switch (projectionMode) {
@@ -1116,7 +1119,8 @@ public class CommonDbAdapter {
 		return c;
 	}
 
-	public Cursor fetchOpBetweenDate(final GregorianCalendar today, final GregorianCalendar latest, final long accountId) {
+	public Cursor fetchOpBetweenDate(final GregorianCalendar today, final GregorianCalendar latest,
+			final long accountId) {
 		Cursor c = null;
 		int startMonth;
 		int endMonth;

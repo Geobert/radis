@@ -185,4 +185,5 @@
 		<item>Absolute date</item>
 	</string-array>
 	<string name="bad_format_for_date">Date is not valid</string>
+	<string name="recompute_account_sums">Recompute account</string>
 </resources>
