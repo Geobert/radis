@@ -280,7 +280,6 @@ public class CommonDbAdapter {
 	protected DatabaseHelper mDbHelper;
 	protected SQLiteDatabase mDb;
 	protected Context mCtx;
-	protected Cursor mCurAccount;
 	protected int mProjectionMode;
 	protected long mProjectionDate;
 
@@ -811,12 +810,11 @@ public class CommonDbAdapter {
 	}
 
 	public Cursor fetchAccount(long accountId) throws SQLException {
-		mCurAccount = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] { KEY_ACCOUNT_ROWID,
+		Cursor c = mDb.query(true, DATABASE_ACCOUNT_TABLE, new String[] { KEY_ACCOUNT_ROWID,
 				KEY_ACCOUNT_NAME, KEY_ACCOUNT_DESC, KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_CUR_SUM,
 				KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE,
 				KEY_ACCOUNT_PROJECTION_MODE, KEY_ACCOUNT_PROJECTION_DATE }, KEY_ACCOUNT_ROWID + "="
 				+ accountId, null, null, null, null, null);
-		Cursor c = mCurAccount;
 		initProjectionDate(c);
 		return c;
 
@@ -864,15 +862,17 @@ public class CommonDbAdapter {
 			ProjectionDateController projectionController) throws ParseException {
 		if (projectionController.hasChanged()) {
 			updateAccountProjectionDate(accountId, projectionController.getMode(),
-					projectionController.getDate(), mCurAccount);
+					projectionController.getDate());
 		}
 		return true;
 	}
 
 	private boolean updateAccountProjectionDate(long accountId, final int projMode,
-			final String projDate, Cursor account) throws ParseException {
+			final String projDate) throws ParseException {
+		Cursor account = fetchAccount(accountId);
 		ContentValues args = new ContentValues();
 		long start_sum = account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM));
+		account.close();
 		args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode);
 		args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate);
 
@@ -882,15 +882,16 @@ public class CommonDbAdapter {
 
 	public boolean updateAccountProjectionDate(long accountId) throws ParseException {
 		Cursor c = fetchAccount(accountId);
+		boolean res = true;
 		if (null != c) {
 			if (c.moveToFirst()) {
-				return updateAccountProjectionDate(accountId,
+				res = updateAccountProjectionDate(accountId,
 						c.getInt(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
-						c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), c);
+						c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
 			}
 			c.close();
 		}
-		return true;
+		return res;
 	}
 
 	public boolean updateAccount(long accountId, String name, String desc, long start_sum,
