@@ -1473,18 +1473,22 @@ public class CommonDbAdapter {
 			}
 			ContentValues values = new ContentValues();
 			Cursor account = fetchAccount(accountId);
-			try {
-				setCurrentSumAndDate(accountId, values,
-						account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM)),
-						account.getInt(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
-						account.getString(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
-				mDb.update(DATABASE_ACCOUNT_TABLE, values, KEY_ACCOUNT_ROWID + "=" + accountId,
-						null);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			if (account != null) {
+				if (account.moveToFirst()) {
+					try {
+						setCurrentSumAndDate(accountId, values, account.getLong(account
+								.getColumnIndex(KEY_ACCOUNT_START_SUM)), account.getInt(account
+								.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)), account
+								.getString(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+						mDb.update(DATABASE_ACCOUNT_TABLE, values, KEY_ACCOUNT_ROWID + "="
+								+ accountId, null);
+					} catch (ParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				account.close();
 			}
-			account.close();
 		}
 	}
 
