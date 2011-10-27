@@ -75,6 +75,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	private long mProjectionDate;
 	private int mNbGetMoreOps;
 	private int mLastSelectionFromTop;
+	private boolean receiverIsRegistered;
 
 	private class InnerViewBinder extends OpViewBinder {
 
@@ -256,6 +257,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		mQuickAddController = new QuickAddController(this, this);
 		mQuickAddController.setDbHelper(mDbHelper);
 		mQuickAddController.setAccount(mAccountId);
+		receiverIsRegistered = false;
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 		mProjectionBtn = (Button) findViewById(R.id.future_sum);
@@ -330,9 +332,11 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			Tools.clearTimeOfCalendar(today);
 			updateSumAtDateDisplay(today, curSum);
 		} else {
-			int position = mLastSelectedPosition.intValue(); 
-			if (position < getListView().getCount()) { // attempt to fix IndexOutOfBoundsException (issue 106)
-			//if (position < mLastOps.getCount()) {
+			int position = mLastSelectedPosition.intValue();
+			if (position < getListView().getCount()) { // attempt to fix
+														// IndexOutOfBoundsException
+														// (issue 106)
+				// if (position < mLastOps.getCount()) {
 				MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(position);
 				updateSumAtSelectedOpDisplay(data, curSum);
 			}
@@ -351,7 +355,10 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		super.onResume();
 		initDbHelper();
 		initViewBehavior();
-		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
+		if (!receiverIsRegistered) {
+			receiverIsRegistered = true;
+			registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
+		}
 		fillData();
 
 		if (mNbGetMoreOps > 0) {
@@ -799,7 +806,10 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 	@Override
 	protected void onPause() {
-		unregisterReceiver(mOnInsertionReceiver);
+		if (receiverIsRegistered) {
+			receiverIsRegistered = false;
+			unregisterReceiver(mOnInsertionReceiver);
+		}
 		if (null != mUpdateSumTask) {
 			mUpdateSumTask.cancel(true);
 		}
