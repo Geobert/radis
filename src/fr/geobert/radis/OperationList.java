@@ -330,9 +330,9 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			Tools.clearTimeOfCalendar(today);
 			updateSumAtDateDisplay(today, curSum);
 		} else {
-			int position = mLastSelectedPosition.intValue();
-			// if (position < getListView().getCount()) {
-			if (position < mLastOps.getCount()) {
+			int position = mLastSelectedPosition.intValue(); 
+			if (position < getListView().getCount()) { // attempt to fix IndexOutOfBoundsException (issue 106)
+			//if (position < mLastOps.getCount()) {
 				MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(position);
 				updateSumAtSelectedOpDisplay(data, curSum);
 			}
