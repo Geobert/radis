@@ -8,7 +8,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.util.HashMap;
-import java.util.Hashtable;
 
 import android.content.Context;
 import android.content.SharedPreferences.Editor;
