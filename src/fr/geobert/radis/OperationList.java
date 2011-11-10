@@ -74,7 +74,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	private Button mProjectionBtn;
 	private long mProjectionDate;
 	private int mNbGetMoreOps;
-	private int mLastSelectionFromTop;
+	private int mLastSelectionFromTop; // last pos from top of ListView
 	private boolean receiverIsRegistered;
 
 	private class InnerViewBinder extends OpViewBinder {
@@ -321,28 +321,6 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		mLastSelectionFromTop = 0;
 	}
 
-	private void updateSumsAndSelection() {
-		long curSum = getAccountCurSum();
-		Cursor c = mLastOps;
-		c.moveToFirst();
-		updateFutureSumDisplay();
-		Log.d("Radis", "updateSumsAndSelection mLastSelectedPosition : " + mLastSelectedPosition);
-		if (mLastSelectedPosition == null) {
-			GregorianCalendar today = new GregorianCalendar();
-			Tools.clearTimeOfCalendar(today);
-			updateSumAtDateDisplay(today, curSum);
-		} else {
-			int position = mLastSelectedPosition.intValue();
-			if (position < getListView().getCount()) { // attempt to fix
-														// IndexOutOfBoundsException
-														// (issue 106)
-				// if (position < mLastOps.getCount()) {
-				MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(position);
-				updateSumAtSelectedOpDisplay(data, curSum);
-			}
-		}
-	}
-
 	@Override
 	protected void onStart() {
 		super.onStart();
@@ -408,7 +386,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			return true;
 		case R.id.recompute_account:
 			mDbHelper.consolidateSums(mAccountId);
-			updateSumsDisplay();
+			updateSumsDisplay(true);
 			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
@@ -475,7 +453,9 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			mLastSelectedPosition = mLastOps.getCount() - 1;
 		}
 		if (data.getBooleanExtra("sumUpdateNeeded", false)) {
-			updateSumsAfterOpEdit(data);
+			Bundle extras = data.getExtras();
+			updateSumsAfterOpEdit(extras.getLong("oldSum"), extras.getLong("sum"),
+					extras.getLong("opDate"));
 		}
 	}
 
@@ -569,14 +549,14 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		Log.d("Radis", "deleteOp sum " + sum);
-		updateLastSelectionFromTop();
+		updateLastSelectionIdxFromTop();
 		if (mDbHelper.deleteOp(info.id, mAccountId)) {
 			if (info.position < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
 			updateSumsAfterOpEdit(sum, 0L, 0);
 		} else {
-			updateSumsDisplay();
+			updateSumsDisplay(true);
 		}
 	}
 
@@ -667,52 +647,6 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		return ops;
 	}
 
-	private void updateSumsAfterOpEdit(Intent data) {
-		Bundle extras = data.getExtras();
-		updateSumsAfterOpEdit(extras.getLong("oldSum"), extras.getLong("sum"),
-				extras.getLong("opDate"));
-	}
-
-	private void updateSumsAfterOpEdit(long oldSum, long sum, long date) {
-		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : " + sum);
-		// long opSum = getAccountOpSum();
-		// opSum = opSum - oldSum + sum;
-		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
-		// updateSumsDisplay();
-		updateFutureSumDisplay();
-		updateSumAtDateDisplay(null, getAccountCurSum());
-
-	}
-
-	private void updateFutureSumDisplay() {
-		TextView t = (TextView) findViewById(R.id.future_sum);
-		String format = getString(R.string.sum_at);
-		if (mLastOps.moveToFirst()) {
-			Cursor account = mCurAccount;
-			account.requery();
-			account.moveToFirst();
-			t.setVisibility(View.VISIBLE);
-			t.setText(String.format(format, Formater.DATE_FORMAT.format(account.getLong(account
-					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
-					Formater.SUM_FORMAT.format(account.getLong(account
-							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
-		} else {
-			t.setVisibility(View.INVISIBLE);
-		}
-	}
-
-	private void updateSumAtDateDisplay(GregorianCalendar date, long curSum) {
-		Log.d("Radis", "updateSumAtDateDisplay date : " + date + " / curSum :" + curSum);
-		Cursor data = null;
-		if (null == date) {
-			data = (MatrixCursor) getListView().getItemAtPosition(
-					mLastSelectedPosition == null ? 0 : mLastSelectedPosition);
-		} else {
-			data = findLastOpBeforeDate(date);
-		}
-		updateSumAtSelectedOpDisplay(data, curSum);
-	}
-
 	private void selectOpAndAdjustOffset(ListView l, int position) {
 		// Get the top position from the first visible element
 		final int firstIdx = l.getFirstVisiblePosition();
@@ -786,24 +720,6 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		}
 	}
 
-	private void updateSumAtSelectedOpDisplay(Cursor data, long accountCurSum) {
-		TextView t = (TextView) findViewById(R.id.date_sum);
-		if (null != data && !data.isBeforeFirst() && !data.isAfterLast()) {
-			int position = data.getPosition();
-			Log.d("Radis", "updateSumAtSelectedOpDisplay setting mLastSelectedPosition: "
-					+ position);
-			mLastSelectedPosition = position;
-			selectOpAndAdjustOffset(getListView(), position);
-			Log.d("Radis", "updateSumAtSelectedOpDisplay accountCurSum : " + accountCurSum);
-			long sum = accountCurSum + computeSumFromCursor(data);
-			t.setText(String.format(getString(R.string.sum_at_selection),
-					Formater.SUM_FORMAT.format(sum / 100.0d)));
-		} else {
-			t.setText(String.format(getString(R.string.sum_at_selection),
-					Formater.SUM_FORMAT.format((accountCurSum / 100.0d))));
-		}
-	}
-
 	@Override
 	protected void onPause() {
 		if (receiverIsRegistered) {
@@ -816,23 +732,13 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		super.onPause();
 	}
 
-	private void updateLastSelectionFromTop() {
-		ListView l = getListView();
-		final int firstIdx = l.getFirstVisiblePosition();
-		int pos = ((SelectedCursorAdapter) getListAdapter()).selectedPos;
-		View v = l.getChildAt(pos - firstIdx);
-		if (v != null) {
-			mLastSelectionFromTop = v.getTop();
-		}
-	}
-
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		mQuickAddController.onSaveInstanceState(outState);
 		outState.putLong("accountId", mAccountId);
 		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
-		updateLastSelectionFromTop();
+		updateLastSelectionIdxFromTop();
 		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
 	}
 
@@ -887,23 +793,33 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		}
 	}
 
+	private void updateLastSelectionIdxFromTop() {
+		ListView l = getListView();
+		final int firstIdx = l.getFirstVisiblePosition();
+		int pos = ((SelectedCursorAdapter) getListAdapter()).selectedPos;
+		View v = l.getChildAt(pos - firstIdx);
+		if (v != null) {
+			mLastSelectionFromTop = v.getTop();
+		}
+	}
+
+	// used by UpdateDisplayInterface
 	@Override
 	public void updateDisplay(Intent intent) {
 		if (null != intent) {
+			// intent is from insert service where modified accountIds were saved
+			// if one of them is the current accountId, updateDisplay, if not, 
+			// currently displayed account do not need to be refreshed
 			Object[] accountIds = (Object[]) intent.getSerializableExtra("accountIds");
 			for (int i = 0; i < accountIds.length; ++i) {
 				if (((Long) accountIds[i]).equals(mAccountId)) {
-					updateSumsDisplay();
+					updateSumsDisplay(true);
 					break;
 				}
 			}
 		} else {
-			updateSumsDisplay();
+			updateSumsDisplay(true);
 		}
-	}
-
-	private void updateSumsDisplay() {
-		updateSumsDisplay(true);
 	}
 
 	private void updateSumsDisplay(boolean restoreOps) {
@@ -912,11 +828,74 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		mProjectionDate = mCurAccount.getLong(mCurAccount
 				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE));
 		fillData();
-		Log.d("Radis", "updateSumsDisplay mNbGetMoreOps : " + mNbGetMoreOps);
 		if (restoreOps && mNbGetMoreOps > 0) {
 			getMoreOps(true);
 		}
 		updateSumsAndSelection();
+	}
+
+	// update db projection sum and display
+	private void updateSumsAfterOpEdit(long oldSum, long sum, long date) {
+		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : " + sum);
+		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
+		updateSumsAndSelection();
+	}
+
+	// update projection's sum
+	private void updateFutureSumDisplay() {
+		TextView t = (TextView) findViewById(R.id.future_sum);
+		String format = getString(R.string.sum_at);
+		if (mLastOps.moveToFirst()) {
+			Cursor account = mCurAccount;
+			account.requery();
+			account.moveToFirst();
+			t.setVisibility(View.VISIBLE);
+			t.setText(String.format(format, Formater.DATE_FORMAT.format(account.getLong(account
+					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
+					Formater.SUM_FORMAT.format(account.getLong(account
+							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
+		} else {
+			t.setVisibility(View.INVISIBLE);
+		}
+	}
+
+	// used to display the left sum at current op (data)
+	// and scroll to the current op (selectOpAndAdjustOffset)
+	private void updateSumAtSelectedOpDisplay(Cursor data, long accountCurSum) {
+		TextView t = (TextView) findViewById(R.id.date_sum);
+		if (null != data && !data.isBeforeFirst() && !data.isAfterLast()) {
+			int position = data.getPosition();
+			mLastSelectedPosition = position;
+			selectOpAndAdjustOffset(getListView(), position);
+			long sum = accountCurSum + computeSumFromCursor(data);
+			t.setText(String.format(getString(R.string.sum_at_selection),
+					Formater.SUM_FORMAT.format(sum / 100.0d)));
+		} else {
+			t.setText(String.format(getString(R.string.sum_at_selection),
+					Formater.SUM_FORMAT.format((accountCurSum / 100.0d))));
+		}
+	}
+
+	private void updateSumsAndSelection() {
+		long curSum = getAccountCurSum();
+		Cursor c = mLastOps;
+		c.moveToFirst();
+		updateFutureSumDisplay();
+		Log.d("Radis", "updateSumsAndSelection mLastSelectedPosition : " + mLastSelectedPosition);
+		if (mLastSelectedPosition == null) {
+			GregorianCalendar today = new GregorianCalendar();
+			Tools.clearTimeOfCalendar(today);
+			updateSumAtSelectedOpDisplay(findLastOpBeforeDate(today), curSum);
+		} else {
+			int position = mLastSelectedPosition.intValue();
+			if (position < getListView().getCount()) { // attempt to fix
+														// IndexOutOfBoundsException
+														// (issue 106)
+				// if (position < mLastOps.getCount()) {
+				MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(position);
+				updateSumAtSelectedOpDisplay(data, curSum);
+			}
+		}
 	}
 
 }
