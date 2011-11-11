@@ -6,11 +6,13 @@
 		android:layout_height="fill_parent" android:divider="#4b4b4b"
 		android:layout_weight="1" android:dividerHeight="1px" />
 
-	<TextView android:id="@+id/android:empty"
-		android:layout_weight="1" android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:text="@string/no_account"
-		android:textSize="25px" android:gravity="center" />
-
+	<ViewStub
+            android:id="@android:id/empty"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_weight="1"
+            android:layout="@layout/empty_account_list" />
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
 		android:gravity="bottom" android:paddingTop="5px"
