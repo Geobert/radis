@@ -13,6 +13,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -30,7 +31,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -76,20 +76,57 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	private int mNbGetMoreOps;
 	private int mLastSelectionFromTop; // last pos from top of ListView
 	private boolean receiverIsRegistered;
+	private SelectedCursorAdapter mOpListCursorAdapter;
+	
+	private static class OpRowHolder {
+        public TextView separator;
+        public ImageView scheduledImg;
+        public StringBuilder tagBuilder = new StringBuilder();
+    }
+	
+	// used in InnerViewBinder
+	private static GregorianCalendar date1 = new GregorianCalendar();
+	private static GregorianCalendar date2 = new GregorianCalendar();
 
 	private class InnerViewBinder extends OpViewBinder {
+		/**
+		 * State of ListView item that has never been determined.
+		 */
+		private static final int STATE_UNKNOWN = 0;
 
-		public InnerViewBinder() {
+		/**
+		 * State of a ListView item that is sectioned. A sectioned item must
+		 * display the separator.
+		 */
+		private static final int STATE_SECTIONED_CELL = 1;
+
+		/**
+		 * State of a ListView item that is not sectioned and therefore does not
+		 * display the separator.
+		 */
+		private static final int STATE_REGULAR_CELL = 2;
+
+		private int[] mCellStates = null;
+
+		public InnerViewBinder(Cursor c) {
 			super(OperationList.this, CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_OP_DATE,
 					R.id.op_icon);
+			initCache(c);
+		}
+
+		public void initCache(Cursor cursor) {
+			Log.d("Radis", "initCache");
+			mCellStates = cursor == null ? null : new int[cursor.getCount()];
 		}
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
 			if (colName.equals(CommonDbAdapter.KEY_TAG_NAME)) {
+				final OpRowHolder h = (OpRowHolder) ((View)view.getParent().getParent()).getTag();
 				TextView textView = ((TextView) view);
-				StringBuilder b = new StringBuilder();
+				StringBuilder b = h.tagBuilder;
+				b.setLength(0);
 				String s = cursor.getString(columnIndex);
 				if (null != s) {
 					b.append(s);
@@ -105,16 +142,64 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 				}
 				textView.setText(b.toString());
 
-				ImageView i = (ImageView) ((LinearLayout) view.getParent().getParent())
-						.findViewById(R.id.op_sch_icon);
+				ImageView i = h.scheduledImg;
 				if (cursor.getLong(cursor.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
 					i.setVisibility(View.VISIBLE);
 				} else {
 					i.setVisibility(View.INVISIBLE);
 				}
+
+				boolean needSeparator = false;
+				final int position = cursor.getPosition();
+				assert (mCellStates != null);
+				date1.setTimeInMillis(cursor.getLong(cursor
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+				switch (mCellStates[position]) {
+				case STATE_SECTIONED_CELL:
+					needSeparator = true;
+					break;
+
+				case STATE_REGULAR_CELL:
+					needSeparator = false;
+					break;
+
+				case STATE_UNKNOWN:
+				default:
+					// A separator is needed if it's the first itemview of the
+					// ListView or if the group of the current cell is different
+					// from the previous itemview.
+					if (position == 0) {
+						needSeparator = true;
+					} else {
+						cursor.moveToPosition(position - 1);
+						date2.setTimeInMillis(cursor.getLong(cursor
+								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+						if (date1.get(GregorianCalendar.MONTH) != date2
+								.get(GregorianCalendar.MONTH)) {
+							needSeparator = true;
+						}
+						cursor.moveToPosition(position);
+					}
+				}
+				TextView separator = h.separator;
+				if (needSeparator) {
+					separator.setText(DateFormat.format("MMMM", date1));
+					separator.setVisibility(View.VISIBLE);
+				} else {
+					separator.setVisibility(View.GONE);
+				}
 				return true;
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
+			}
+		}
+
+		public void increaseCache(MatrixCursor c) {
+			Log.d("Radis", "increaseCache");
+			int[] tmp = mCellStates;
+			initCache(c);
+			for (int i = 0; i < tmp.length; ++i) {
+				mCellStates[i] = tmp[i];
 			}
 		}
 	}
@@ -124,12 +209,20 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 		SelectedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
 			super(context, layout, c, from, to);
+			InnerViewBinder viewBinder = new InnerViewBinder(c);
+			setViewBinder(viewBinder);
 		}
 
 		public void setSelectedPosition(int pos) {
 			selectedPos = pos;
 			// inform the view of this change
 			notifyDataSetChanged();
+		}
+
+		@Override
+		public void changeCursor(Cursor c) {
+			super.changeCursor(c);
+			((InnerViewBinder) getViewBinder()).initCache(c);
 		}
 
 		@Override
@@ -140,6 +233,16 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			} else {
 				v.setBackgroundResource(R.drawable.op_line);
 			}
+			return v;
+		}
+		
+		@Override
+		public View newView(Context context, Cursor cursor, ViewGroup parent) {
+			View v = super.newView(context, cursor, parent);
+			OpRowHolder h = new OpRowHolder();
+			h.separator = (TextView)v.findViewById(R.id.separator);
+			h.scheduledImg = (ImageView)v.findViewById(R.id.op_sch_icon);
+			v.setTag(h);
 			return v;
 		}
 	}
@@ -164,6 +267,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		@Override
 		protected void onPostExecute(Void result) {
 			fillMatrixCursor(mLastOps, mAccumulator);
+			((InnerViewBinder) ((SelectedCursorAdapter) getListAdapter()).getViewBinder())
+					.increaseCache(mLastOps);
 			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
 			mAccumulator.close();
 			mLoadingIcon.clearAnimation();
@@ -523,7 +628,6 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			}
 			lastOp.close();
 		}
-		MatrixCursor opsCursor = mLastOps;
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_THIRD_PARTY_NAME, CommonDbAdapter.KEY_OP_SUM,
 				CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_MODE_NAME };
@@ -531,10 +635,13 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos };
 
 		// Now create a simple cursor adapter and set it to display
-		SelectedCursorAdapter operations = new SelectedCursorAdapter(this, R.layout.operation_row,
-				opsCursor, from, to);
-		operations.setViewBinder(new InnerViewBinder());
-		setListAdapter(operations);
+		if (mOpListCursorAdapter == null) {
+			mOpListCursorAdapter = new SelectedCursorAdapter(this, R.layout.operation_row,
+					mLastOps, from, to);
+			setListAdapter(mOpListCursorAdapter);
+		} else {
+			mOpListCursorAdapter.changeCursor(mLastOps);
+		}
 	}
 
 	private void startCreateOp() {
@@ -555,8 +662,10 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 				mLastSelectedPosition--;
 			}
 			updateSumsAfterOpEdit(sum, 0L, 0);
+			fillData();
 		} else {
 			updateSumsDisplay(true);
+			// fillData() is called inside updateSumsDisplay
 		}
 	}
 
@@ -775,7 +884,6 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							deleteOp(mOpToDelete);
-							fillData();
 							mOpToDelete = null;
 						}
 					});
@@ -807,8 +915,9 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	@Override
 	public void updateDisplay(Intent intent) {
 		if (null != intent) {
-			// intent is from insert service where modified accountIds were saved
-			// if one of them is the current accountId, updateDisplay, if not, 
+			// intent is from insert service where modified accountIds were
+			// saved
+			// if one of them is the current accountId, updateDisplay, if not,
 			// currently displayed account do not need to be refreshed
 			Object[] accountIds = (Object[]) intent.getSerializableExtra("accountIds");
 			for (int i = 0; i < accountIds.length; ++i) {
@@ -843,7 +952,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 	// update projection's sum
 	private void updateFutureSumDisplay() {
-		TextView t = (TextView) findViewById(R.id.future_sum);
+		Button t = (Button) findViewById(R.id.future_sum);
 		String format = getString(R.string.sum_at);
 		if (mLastOps.moveToFirst()) {
 			Cursor account = mCurAccount;
