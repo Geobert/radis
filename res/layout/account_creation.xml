@@ -1,39 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:padding="5px" android:layout_width="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content" android:orientation="vertical">
-	<ScrollView android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:layout_weight="1"
-		android:fillViewport="true">
-		<LinearLayout android:padding="5px" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" android:orientation="vertical">
-			<!-- <TextView android:text="@string/name" style="@style/EditorTextView" 
-				/> -->
-			<EditText android:id="@+id/edit_account_name" style="@style/EditorEditText"
-				android:hint="@string/name" />
-			<EditText android:id="@+id/edit_account_start_sum" style="@style/EditorEditText.Sum"
-				android:hint="@string/start_sum" />
-			<TextView style="@style/EditorTextView" android:text="@string/currency" />
-			<Spinner android:id="@+id/currency_spinner"
-				android:layout_height="wrap_content" android:layout_width="fill_parent"
-				android:drawSelectorOnTop="true" android:prompt="@string/account_prompt">
-			</Spinner>
-			<TextView style="@style/EditorTextView" android:text="@string/projection_date" />
-			<Spinner android:id="@+id/projection_date_spinner"
-				android:layout_height="wrap_content" android:layout_width="fill_parent"
-				android:drawSelectorOnTop="true" android:prompt="@string/projection_date_mode" />
-			<EditText android:id="@+id/projection_date_value" style="@style/EditorEditText.Date"
-				 android:layout_marginBottom="5dip" />
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="5px" >
 
-			<EditText android:id="@+id/edit_account_desc" style="@style/DescEditText"
-				android:hint="@string/description" />
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:fillViewport="true" >
 
-		</LinearLayout>
-	</ScrollView>
-	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
-		<Button android:id="@+id/confirm_creation" android:text="@string/ok"
-			style="@style/FormButton" />
-		<Button android:id="@+id/cancel_creation" android:text="@string/cancel"
-			style="@style/FormButton" />
-	</LinearLayout>
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="5px" >
+
+            <!--
+                 <TextView android:text="@string/name" style="@style/EditorTextView" 
+				/>
+            -->
+
+            <EditText
+                android:id="@+id/edit_account_name"
+                style="@style/EditorEditText"
+                android:hint="@string/name" />
+
+            <EditText
+                android:id="@+id/edit_account_start_sum"
+                style="@style/EditorEditText.Sum"
+                android:hint="@string/start_sum" />
+
+            <TextView
+                style="@style/EditorTextView"
+                android:text="@string/currency" />
+
+            <Spinner
+                android:id="@+id/currency_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:drawSelectorOnTop="true"
+                android:prompt="@string/account_prompt" >
+            </Spinner>
+
+            <EditText
+                android:id="@+id/custom_currency"
+                style="@style/EditorEditText"
+                android:maxLength="3"
+                android:layout_marginBottom="5dip"
+                android:hint="@string/custom_currency_hint" />
+
+            <TextView
+                style="@style/EditorTextView"
+                android:text="@string/projection_date" />
+
+            <Spinner
+                android:id="@+id/projection_date_spinner"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:drawSelectorOnTop="true"
+                android:prompt="@string/projection_date_mode" />
+
+            <EditText
+                android:id="@+id/projection_date_value"
+                style="@style/EditorEditText.Date"
+                android:layout_marginBottom="5dip" />
+
+            <EditText
+                android:id="@+id/edit_account_desc"
+                style="@style/DescEditText"
+                android:hint="@string/description" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton" >
+
+        <Button
+            android:id="@+id/confirm_creation"
+            style="@style/FormButton"
+            android:text="@string/ok" />
+
+        <Button
+            android:id="@+id/cancel_creation"
+            style="@style/FormButton"
+            android:text="@string/cancel" />
+    </LinearLayout>
+
 </LinearLayout>

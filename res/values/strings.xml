@@ -15,37 +15,14 @@
 	<string name="delete">Delete</string>
 	<string name="account_prompt">Select a currency</string>
 	<string-array name="all_currencies">
-		<item>AUD</item>
-		<item>BRL</item>
-		<!-- <item>BWP</item> -->
-		<!-- <item>BZD</item> -->
 		<item>CAD</item>
-		<item>CHF</item>
-		<item>CNY</item>
-		<!-- <item>CZK</item> -->
-		<!-- <item>DKK</item> -->
 		<item>EUR</item>
 		<item>GBP</item>
-		<item>HKD</item>
-		<!-- <item>INR</item> -->
-		<!-- <item>JMD</item> -->
 		<item>JPY</item>
-		<!-- <item>KRW</item> -->
-		<!-- <item>NOK</item> -->
-		<!-- <item>NZD</item> -->
-		<!-- <item>PHP</item> -->
-		<!-- <item>PKR</item> -->
-		<!-- <item>PLN</item> -->
-		<!-- <item>RUB</item> -->
-		<item>SEK</item>
-		<item>SGD</item>
-		<!-- <item>TRY</item> -->
-		<!-- <item>TTD</item> -->
-		<item>TWD</item>
 		<item>USD</item>
-		<!-- <item>ZAR</item> -->
-		<!-- <item>ZWD</item> -->
+		<item>Custom</item>
 	</string-array>
+	<string name="custom_currency_hint">Enter ISO 4217 currency code</string>
 	<string name="edit">Edit</string>
 	<string name="ok">Ok</string>
 	<string name="third_party">Third party</string>
@@ -186,4 +163,5 @@
 	</string-array>
 	<string name="bad_format_for_date">Date is not valid</string>
 	<string name="recompute_account_sums">Recompute account</string>
+	<string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your currency code)</string>
 </resources>

@@ -155,4 +155,14 @@
 	</string-array>
 	<string name="bad_format_for_date">La date est invalide</string>
 	<string name="recompute_account_sums">Recalculer le compte</string>
+	<string-array name="all_currencies">
+		<item>CAD</item>
+		<item>EUR</item>
+		<item>GBP</item>
+		<item>JPY</item>
+		<item>USD</item>
+		<item>Autre</item>
+	</string-array>
+	<string name="custom_currency_hint">Entrez un code de devise ISO 4217</string>
+	<string name="bad_format_for_currency">La devise doit être au format ISO 4217 (regardez sur wikipedia si vous le connaissez pas le code de votre devise)</string>
 </resources>
