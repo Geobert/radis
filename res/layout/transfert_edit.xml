@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <DatePicker
+        android:id="@+id/edit_transfert_date"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="5px"
+        android:paddingTop="5px" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5px"
+            android:text="@string/transfert_from" />
+
+        <Spinner
+            android:id="@+id/from_account_choice"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="5px"
+            android:prompt="@string/transfert_from" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="5px"
+            android:text="@string/transfert_to" />
+
+        <Spinner
+            android:id="@+id/to_account_choice"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/EditorHorizontalLinearLayout" >
+
+        <EditText
+            android:id="@+id/edit_transfert_sum"
+            style="@style/EditorEditText.Sum"
+            android:hint="@string/sum" />
+
+        <Button
+            android:id="@+id/edit_transfert_sign"
+            style="@style/EditorBaseButton"
+            android:drawableLeft="@drawable/plus_moins" />
+    </LinearLayout>
+
+    <LinearLayout style="@style/EditorHorizontalLinearLayout" >
+
+        <fr.geobert.radis.tools.MyAutoCompleteTextView
+            android:id="@+id/edit_transfert_tag"
+            style="@style/EditorEditText"
+            android:completionThreshold="1"
+            android:hint="@string/tag" />
+
+        <Button
+            android:id="@+id/edit_transfert_tags_list"
+            style="@style/EditorBaseButton.ListButton" />
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/edit_tranfert_notes"
+        style="@style/DescEditText"
+        android:hint="@string/notes"
+        android:lines="2" />
+
+</LinearLayout>

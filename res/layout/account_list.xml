@@ -19,7 +19,7 @@
 		android:layout_margin="0dip" android:layout_weight="0">
 		<LinearLayout android:orientation="horizontal"
 			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:gravity="center_horizontal" android:paddingTop="5dip" android:paddingBottom="5dip"
+			android:gravity="center_horizontal" android:paddingTop="5dip" android:paddingBottom="0dip"
 			android:layout_margin="0dip" android:layout_weight="0">
 			<Button android:id="@+id/startAccountEditorBtn"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -31,6 +31,17 @@
 				android:text="@string/scheduled_ops" android:drawableLeft="@drawable/clock72"
 				android:gravity="left|center_vertical" android:drawablePadding="5dip"
 				android:layout_weight="1" />
+		</LinearLayout>
+		<LinearLayout android:orientation="horizontal"
+			android:layout_width="fill_parent" android:layout_height="wrap_content"
+			android:gravity="center_horizontal" android:paddingTop="0dip" android:paddingBottom="5dip"
+			android:layout_margin="0dip" android:layout_weight="0">
+			<Button android:id="@+id/startTransfertEditorBtn" 
+				android:layout_width="fill_parent" android:layout_height="wrap_content"
+				android:text="@string/transfert" android:drawableLeft="@android:drawable/ic_menu_add"
+				android:gravity="left|center_vertical" android:drawablePadding="5dip"
+				android:layout_weight="1" />
+		    
 		</LinearLayout>
 		<TextView android:id="@+id/quickadd_target_text"
 			android:background="@drawable/line_gradient"

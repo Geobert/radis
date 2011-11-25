@@ -164,4 +164,8 @@
 	<string name="bad_format_for_date">Date is not valid</string>
 	<string name="recompute_account_sums">Recompute account</string>
 	<string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your currency code)</string>
+	<string name="transfert_from">Transfert from account</string>
+	<string name="transfert_to">To account</string>
+	<string name="transfert_between">Make a transfert</string>
+	<string name="transfert">Transfert</string>
 </resources>

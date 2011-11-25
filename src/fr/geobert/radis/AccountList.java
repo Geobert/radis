@@ -203,9 +203,6 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.create_account:
-			createAccount();
-			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
 				return true;
@@ -226,6 +223,11 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		AccountList.this.overridePendingTransition(R.anim.enter_from_left, 0);
 	}
 
+	private void startTransfertEdit() {
+		Intent i = new Intent(this, TransfertEditor.class);
+		startActivity(i);
+	}
+	
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();

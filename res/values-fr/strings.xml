@@ -165,4 +165,8 @@
 	</string-array>
 	<string name="custom_currency_hint">Entrez un code de devise ISO 4217</string>
 	<string name="bad_format_for_currency">La devise doit être au format ISO 4217 (regardez sur wikipedia si vous le connaissez pas le code de votre devise)</string>
+	<string name="transfert_from">Transfert depuis le compte</string>
+	<string name="transfert_to">Vers le compte</string>
+	<string name="transfert_between">Effectuer un transfert</string>
+	<string name="transfert">Transfert</string>
 </resources>
