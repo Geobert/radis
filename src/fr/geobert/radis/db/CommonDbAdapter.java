@@ -624,6 +624,48 @@ public class CommonDbAdapter {
 					}
 				}
 			}
+			case 11: {
+				Cursor c = db.query(DATABASE_OPERATIONS_TABLE, null, KEY_OP_ROWID
+						+ "=(SELECT max(_id) FROM " + DATABASE_OPERATIONS_TABLE + ")", null, null,
+						null, null);
+				if (c != null) {
+					long lastSum;
+					long curSum;
+					if (c.moveToFirst()) {
+						lastSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
+						curSum = lastSum;
+						int del = db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID
+								+ ">600",
+								null);
+//						Log.d("Radis", "before loop del :" + del);
+						do {
+							lastSum = curSum;
+							int nbDel = db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID
+									+ "=(SELECT max(_id) FROM " + DATABASE_OPERATIONS_TABLE + ")",
+									null);
+//							Log.d("Radis", "rowId = " + c.getLong(c.getColumnIndex(KEY_OP_ROWID)));
+							c.close();
+							c = db.query(DATABASE_OPERATIONS_TABLE, null, KEY_OP_ROWID
+									+ "=(SELECT max(_id) FROM " + DATABASE_OPERATIONS_TABLE + ")",
+									null, null, null, null);
+							if (null != c) {
+								if (c.moveToFirst()) {
+									curSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
+								} else {
+									c.close();
+									curSum = 0;
+								}
+							} else {
+								curSum = 0;
+							}
+//							Log.d("Radis", "lastSum = " + lastSum + ", curSum = " + curSum
+//									+ ", nbDel = " + nbDel );
+						} while (curSum == lastSum);
+					} else {
+						c.close();
+					}
+				}
+			}
 			default:
 				Cursor c = db.query(DATABASE_ACCOUNT_TABLE, new String[] { KEY_ACCOUNT_ROWID },
 						null, null, null, null, null);

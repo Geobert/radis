@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
+import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
@@ -73,7 +74,7 @@ public class RadisService extends IntentService {
 
 			Tools.clearTimeOfCalendar(insertionDate);
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
-			final int insertionMonthLimit = insertionDate.get(Calendar.MONTH) + 1;
+			final int insertionMonthLimit = (insertionDate.get(Calendar.MONTH) + 1) % 11;
 
 			long lastInsertDate = DBPrefsManager.getInstance(this).getLong(
 					"LAST_INSERT_DATE", 0);
@@ -107,25 +108,36 @@ public class RadisService extends IntentService {
 				}
 				
 				// insert all scheduled of the past until current month
+				Log.d("Radis", "insert all scheduled of the past until current month");
+				int i = 0;
 				while (op.getMonth() <= today.get(Calendar.MONTH)
 						&& !op.isObsolete()) {
 					long opSum = insertSchOp(op, opRowId);
+					i++;
 					if (opSum != 0) {
 						sum = sum + opSum;
 						needUpdate = true;
 					}
 				}
+				Log.d("Radis", "inserted " + i + " past scheduled op until current month");
+				i = 0;
+				
 				if (todayInMillis >= insertionDateInMillis) {
-					while (op.getMonth() <= insertionMonthLimit
+					Log.d("Radis", "insert current month scheduled op, limit = " + insertionMonthLimit + " op month = " + op.getMonth());
+					while ((op.getMonth() < insertionMonthLimit) || (op.getMonth() == 11)
 							&& !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId,
 								op.getDate());
+						Log.d("Radis", "op month before : " + op.getMonth());
 						long opSum = insertSchOp(op, opRowId);
+						Log.d("Radis", "op month after : " + op.getMonth());
+						i++;
 						if (opSum != 0) {
 							sum = sum + opSum;
 							needUpdate = true;
 						}
 					}
+					Log.d("Radis", "inserted " + i + " ops current month scheduled op");
 				}
 				mDbHelper.updateScheduledOp(opRowId, op, false);
 				if (needUpdate) {
