@@ -41,8 +41,8 @@ public class RadisService extends IntentService {
 		stopSelf();
 	}
 
-	private void keepGreatestDate(HashMap<Long, Long> greatestDatePerAccount,
-			final long accountId, final long curOpDate) {
+	private void keepGreatestDate(HashMap<Long, Long> greatestDatePerAccount, final long accountId,
+			final long curOpDate) {
 		Long date = greatestDatePerAccount.get(accountId);
 		if (null == date) {
 			date = Long.valueOf(0);
@@ -64,10 +64,8 @@ public class RadisService extends IntentService {
 			int insertionDayOfMonth = DBPrefsManager
 					.getInstance(this)
 					.getInt(RadisConfiguration.KEY_INSERTION_DATE,
-							Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE))
-					.intValue();
-			final int maxDayOfCurMonth = today
-					.getActualMaximum(Calendar.DAY_OF_MONTH);
+							Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE)).intValue();
+			final int maxDayOfCurMonth = today.getActualMaximum(Calendar.DAY_OF_MONTH);
 			insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
 					: insertionDayOfMonth;
 			insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
@@ -76,8 +74,7 @@ public class RadisService extends IntentService {
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			final int insertionMonthLimit = (insertionDate.get(Calendar.MONTH) + 1) % 11;
 
-			long lastInsertDate = DBPrefsManager.getInstance(this).getLong(
-					"LAST_INSERT_DATE", 0);
+			long lastInsertDate = DBPrefsManager.getInstance(this).getLong("LAST_INSERT_DATE", 0);
 			// Log.d("Radis", "lastInsertDate: " + lastInsertDate);
 			// Log.d("Radis", "insertionDateInMillis: " +
 			// insertionDateInMillis);
@@ -106,12 +103,12 @@ public class RadisService extends IntentService {
 					c.moveToNext();
 					continue;
 				}
-				
+
 				// insert all scheduled of the past until current month
 				Log.d("Radis", "insert all scheduled of the past until current month");
 				int i = 0;
-				while (op.getMonth() <= today.get(Calendar.MONTH)
-						&& !op.isObsolete()) {
+				while ((op.getMonth() <= today.get(Calendar.MONTH))
+						&& (op.getYear() <= today.get(Calendar.YEAR)) && !op.isObsolete()) {
 					long opSum = insertSchOp(op, opRowId);
 					i++;
 					if (opSum != 0) {
@@ -121,13 +118,13 @@ public class RadisService extends IntentService {
 				}
 				Log.d("Radis", "inserted " + i + " past scheduled op until current month");
 				i = 0;
-				
+
 				if (todayInMillis >= insertionDateInMillis) {
-					Log.d("Radis", "insert current month scheduled op, limit = " + insertionMonthLimit + " op month = " + op.getMonth());
-					while ((op.getMonth() < insertionMonthLimit) || (op.getMonth() == 11)
-							&& !op.isObsolete()) {
-						keepGreatestDate(greatestDatePerAccount, accountId,
-								op.getDate());
+					Log.d("Radis", "insert current month scheduled op, limit = "
+							+ insertionMonthLimit + " op month = " + op.getMonth());
+					while (((op.getMonth() < insertionMonthLimit) || (op.getMonth() == 11))
+							&& (op.getYear() <= today.get(Calendar.YEAR)) && !op.isObsolete()) {
+						keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
 						Log.d("Radis", "op month before : " + op.getMonth());
 						long opSum = insertSchOp(op, opRowId);
 						Log.d("Radis", "op month after : " + op.getMonth());
@@ -146,18 +143,15 @@ public class RadisService extends IntentService {
 						curSum = Long.valueOf(0);
 					}
 					sumsPerAccount.put(accountId, curSum + sum);
-					keepGreatestDate(greatestDatePerAccount, accountId,
-							op.getDate());
+					keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
 				}
 			} while (c.moveToNext());
 			boolean needUpdate = false;
-			Long[] accountIds = sumsPerAccount.keySet().toArray(
-					new Long[sumsPerAccount.size()]);
+			Long[] accountIds = sumsPerAccount.keySet().toArray(new Long[sumsPerAccount.size()]);
 			for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
 				needUpdate = true;
-				updateAccountSum(e.getValue().longValue(), e.getKey()
-						.longValue(), greatestDatePerAccount.get(e.getKey()),
-						mDbHelper);
+				updateAccountSum(e.getValue().longValue(), e.getKey().longValue(),
+						greatestDatePerAccount.get(e.getKey()), mDbHelper);
 			}
 			if (needUpdate) {
 				Intent i = new Intent(Tools.INTENT_OP_INSERTED);
@@ -165,8 +159,7 @@ public class RadisService extends IntentService {
 				sendOrderedBroadcast(i, null);
 			}
 			// Log.d("Radis", "put todayInMillis: " + todayInMillis);
-			DBPrefsManager.getInstance(this).put("LAST_INSERT_DATE",
-					todayInMillis);
+			DBPrefsManager.getInstance(this).put("LAST_INSERT_DATE", todayInMillis);
 			if (lastInsertDate == 0) {
 				processScheduledOps();
 			}
@@ -174,8 +167,8 @@ public class RadisService extends IntentService {
 		c.close();
 	}
 
-	public static void updateAccountSum(final long sumToAdd,
-			final long accountId, final long opDate, CommonDbAdapter dbHelper) {
+	public static void updateAccountSum(final long sumToAdd, final long accountId,
+			final long opDate, CommonDbAdapter dbHelper) {
 		dbHelper.updateProjection(accountId, sumToAdd, opDate);
 	}
 
@@ -183,8 +176,9 @@ public class RadisService extends IntentService {
 		final long accountId = op.mAccountId;
 		op.mScheduledId = opRowId;
 		boolean needUpdate = mDbHelper.createOp(op, accountId);
+		Log.d("Radis", "before addPeriodicity : " + op.getDateStr());
 		ScheduledOperation.addPeriodicityToDate(op);
-		// Log.d("Radis", String.format("inserted op %s", op.mThirdParty));
+		Log.d("Radis", "after addPeriodicity : " + op.getDateStr());
 		return needUpdate ? op.mSum : 0;
 	}
 
@@ -194,11 +188,9 @@ public class RadisService extends IntentService {
 
 	synchronized private static PowerManager.WakeLock getLock(Context context) {
 		if (lockStatic == null) {
-			PowerManager mgr = (PowerManager) context
-					.getSystemService(Context.POWER_SERVICE);
+			PowerManager mgr = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 
-			lockStatic = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-					LOCK_NAME_STATIC);
+			lockStatic = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOCK_NAME_STATIC);
 			lockStatic.setReferenceCounted(true);
 		}
 

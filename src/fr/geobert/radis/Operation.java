@@ -123,15 +123,15 @@ public class Operation implements Parcelable {
 	}
 
 	public void addDay(int nbDays) {
-		mDate.roll(Calendar.DAY_OF_MONTH, nbDays);
+		mDate.add(Calendar.DAY_OF_MONTH, nbDays);
 	}
 
 	public void addMonth(int nbMonths) {
-		mDate.roll(Calendar.MONTH, nbMonths);
+		mDate.add(Calendar.MONTH, nbMonths);
 	}
 
 	public void addYear(int nbYears) {
-		mDate.roll(Calendar.YEAR, nbYears);
+		mDate.add(Calendar.YEAR, nbYears);
 	}
 
 	public String getSumStr() {
