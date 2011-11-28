@@ -666,22 +666,6 @@ public class CommonDbAdapter {
 					}
 				}
 			}
-			case 12: {
-				ContentValues v = new ContentValues();
-				v.put("name", "operations");
-				Cursor c = db.query(DATABASE_OPERATIONS_TABLE, new String[] { "_id" }, null, null, null, null, "_id");
-				if (null != c) {
-					if (c.moveToLast()) {
-						long lastId = c.getLong(0);
-						long curId = lastId;
-//						do {
-//							
-//						} while ((curId - lastId) > 1 );
-					}
-					c.close();
-				}
-				
-			}
 			default:
 				Cursor c = db.query(DATABASE_ACCOUNT_TABLE, new String[] { KEY_ACCOUNT_ROWID },
 						null, null, null, null, null);
