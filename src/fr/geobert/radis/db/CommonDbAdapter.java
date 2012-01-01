@@ -1136,7 +1136,7 @@ public class CommonDbAdapter {
 		return c;
 	}
 
-	public Cursor fetchOpOfMonth(final int curMonth, final long accountId) {
+	public Cursor fetchOpOfMonth(final GregorianCalendar date, final long accountId) {
 		Cursor c = null;
 		GregorianCalendar startDate = new GregorianCalendar();
 		GregorianCalendar endDate = new GregorianCalendar();
@@ -1146,8 +1146,11 @@ public class CommonDbAdapter {
 		startDate.set(Calendar.DAY_OF_MONTH, 1);
 		endDate.set(Calendar.DAY_OF_MONTH, 1);
 
-		startDate.set(Calendar.MONTH, curMonth);
-		endDate.set(Calendar.MONTH, curMonth);
+		startDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
+		endDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
+		
+		startDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
+		endDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
 
 		startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
 		endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH));

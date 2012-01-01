@@ -108,7 +108,7 @@ public class RadisService extends IntentService {
 				Log.d("Radis", "insert all scheduled of the past until current month");
 				int i = 0;
 				while ((op.getMonth() <= today.get(Calendar.MONTH))
-						&& (op.getYear() <= today.get(Calendar.YEAR)) && !op.isObsolete()) {
+						|| (op.getYear() <= today.get(Calendar.YEAR)) && !op.isObsolete()) {
 					long opSum = insertSchOp(op, opRowId);
 					i++;
 					if (opSum != 0) {

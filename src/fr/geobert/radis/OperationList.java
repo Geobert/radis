@@ -313,7 +313,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 					opDate.setTimeInMillis(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 					c.close();
 					Cursor result = mDbHelper
-							.fetchOpOfMonth(opDate.get(Calendar.MONTH), mAccountId);
+							.fetchOpOfMonth(opDate, mAccountId);
 					startManagingCursor(result);
 					mHasResult = fillMatrixCursor(mAccumulator, result);
 					mLops = mAccumulator;
