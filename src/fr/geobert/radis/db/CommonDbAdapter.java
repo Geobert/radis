@@ -1167,27 +1167,16 @@ public class CommonDbAdapter {
 	public Cursor fetchOpBetweenDate(final GregorianCalendar today, final GregorianCalendar latest,
 			final long accountId) {
 		Cursor c = null;
-		int startMonth;
-		int endMonth;
+		GregorianCalendar startDate;
+		GregorianCalendar endDate;
 		if (today.before(latest)) {
-			startMonth = today.get(Calendar.MONTH);
-			endMonth = latest.get(Calendar.MONTH);
+			startDate = today;
+			endDate = latest;
 		} else {
-			startMonth = latest.get(Calendar.MONTH);
-			endMonth = today.get(Calendar.MONTH);
+			startDate = latest;
+			endDate = today;
 		}
-		GregorianCalendar startDate = new GregorianCalendar();
-		GregorianCalendar endDate = new GregorianCalendar();
-		Tools.clearTimeOfCalendar(startDate);
-		Tools.clearTimeOfCalendar(endDate);
-		startDate.set(Calendar.MONTH, startMonth);
-		endDate.set(Calendar.MONTH, endMonth);
-		startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
-		endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-		if (startMonth > endMonth) {
-			endDate.add(Calendar.YEAR, 1);
-		}
-
+		
 		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
 				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops." + KEY_OP_DATE + " <= "
 						+ endDate.getTimeInMillis() + " AND ops." + KEY_OP_DATE + " >= "
