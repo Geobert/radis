@@ -172,7 +172,7 @@ public class Operation implements Parcelable {
 		dest.writeLong(mScheduledId);
 	}
 
-	private void readFromParcel(Parcel in) {
+	protected void readFromParcel(Parcel in) {
 		setDay(in.readInt());
 		setMonth(in.readInt());
 		setYear(in.readInt());

@@ -6,6 +6,8 @@ import java.util.GregorianCalendar;
 import android.app.Activity;
 import android.database.Cursor;
 import android.os.Parcel;
+import android.os.Parcelable;
+import android.util.Log;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.Tools;
 
@@ -64,9 +66,6 @@ public class ScheduledOperation extends Operation {
 
 	public ScheduledOperation(Parcel parcel) {
 		super(parcel);
-		mEndDate = new GregorianCalendar();
-		mEndDate.clear();
-		readFromParcel(parcel);
 	}
 
 	public int getEndMonth() {
@@ -120,14 +119,29 @@ public class ScheduledOperation extends Operation {
 		dest.writeInt(getEndYear());
 	}
 
-	private void readFromParcel(Parcel in) {
+	@Override
+	protected void readFromParcel(Parcel in) {
+		Log.d("Radis", "schedule operation readFromParcel");
+		super.readFromParcel(in);
 		mPeriodicity = in.readInt();
 		mPeriodicityUnit = in.readInt();
 		mAccountId = in.readLong();
+		mEndDate = new GregorianCalendar();
+		mEndDate.clear();
 		setEndDay(in.readInt());
 		setEndMonth(in.readInt());
 		setEndYear(in.readInt());
 	}
+	
+	public static final Parcelable.Creator<ScheduledOperation> CREATOR = new Parcelable.Creator<ScheduledOperation>() {
+		public ScheduledOperation createFromParcel(Parcel in) {
+			return new ScheduledOperation(in);
+		}
+
+		public ScheduledOperation[] newArray(int size) {
+			return new ScheduledOperation[size];
+		}
+	};
 
 	public boolean isObsolete() {
 		return (getEndDate() > 0) && (getEndDate() <= getDate());

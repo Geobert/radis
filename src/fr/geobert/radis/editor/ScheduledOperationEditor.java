@@ -61,17 +61,11 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				: null;
 		super.onCreate(savedInstanceState);
 	}
-	
+
 	@Override
 	protected void setView() {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.scheduled_operation_edit);
-	}
-
-	@Override
-	protected void initDbHelper() {
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
 	}
 
 	// to be called after setContentView
@@ -403,7 +397,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected boolean isFormValid(StringBuilder errMsg)  {
+	protected boolean isFormValid(StringBuilder errMsg) {
 		boolean res = super.isFormValid(errMsg);
 		if (res) {
 			ScheduledOperation op = mCurrentSchOp;
@@ -445,18 +439,16 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	protected void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean("isOnBasics", mOnBasics);
 		outState.putParcelable("originalOp", mOriginalSchOp);
+		outState.putParcelable("currentSchOp", mCurrentSchOp);
 		super.onSaveInstanceState(outState);
 	}
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		mCurrentSchOp = savedInstanceState.getParcelable("currentOp");
+		mCurrentSchOp = savedInstanceState.getParcelable("currentSchOp");
 		mOnBasics = savedInstanceState.getBoolean("isOnBasics");
 		mOriginalSchOp = savedInstanceState.getParcelable("originalOp");
 		super.onRestoreInstanceState(savedInstanceState);
-		if (null == mDbHelper) {
-			initDbHelper();
-		}
 	}
 
 	@Override

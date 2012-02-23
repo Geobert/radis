@@ -31,12 +31,6 @@ public class OperationEditor extends CommonOpEditor {
 	}
 
 	@Override
-	protected void initDbHelper() {
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
-	}
-
-	@Override
 	protected void fetchOrCreateCurrentOp() {
 		if (mRowId > 0) {
 			Cursor opCursor = mDbHelper.fetchOneOp(mRowId, mAccountId);

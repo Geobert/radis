@@ -53,7 +53,10 @@ public abstract class CommonOpEditor extends Activity {
 	// abstract methods
 	protected abstract void setView();
 
-	protected abstract void initDbHelper();
+	protected void initDbHelper() {
+		mDbHelper = CommonDbAdapter.getInstance(this);
+		mDbHelper.open();
+	}
 
 	protected abstract void populateFields();
 
@@ -77,19 +80,19 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected void init(Bundle savedInstanceState) {
 		Bundle extras = getIntent().getExtras();
-		if (savedInstanceState == null) {
-			mRowId = 0;
-		} else {
-			Serializable s = savedInstanceState.getSerializable(Tools.EXTRAS_OP_ID);
-			if (s == null) {
-				mRowId = 0;
-			} else {
-				mRowId = ((Long) s).longValue();
-			}
-		}
-		if (mRowId <= 0) {
+//		if (savedInstanceState == null) {
+//			mRowId = 0;
+//		} else {
+//			Serializable s = savedInstanceState.getSerializable(Tools.EXTRAS_OP_ID);
+//			if (s == null) {
+//				mRowId = 0;
+//			} else {
+//				mRowId = ((Long) s).longValue();
+//			}
+//		}
+//		if (mRowId <= 0) {
 			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
-		}
+//		}
 
 		mOpThirdPartyText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_third_party);
 		mOpModeText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_mode);
@@ -272,8 +275,8 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		initDbHelper();
 		if (!mOnRestore) {
+			initDbHelper();
 			fetchOrCreateCurrentOp();
 			populateFields();
 		} else {
@@ -388,7 +391,7 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onSaveInstanceState(Bundle outState) {
 		if (mRowId > 0) {
-			outState.putLong("rowId", mRowId);
+			outState.putLong(Tools.EXTRAS_OP_ID, mRowId);
 		}
 
 		Operation op = mCurrentOp;
@@ -400,12 +403,13 @@ public abstract class CommonOpEditor extends Activity {
 
 	@Override
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
-		long rowId = savedInstanceState.getLong("rowId");
+		mOnRestore = true;
+		long rowId = savedInstanceState.getLong(Tools.EXTRAS_OP_ID);
 		mRowId = rowId > 0 ? Long.valueOf(rowId) : 0;
 		Operation op = savedInstanceState.getParcelable("currentOp");
 		mCurrentOp = op;
+		initDbHelper();
 		populateFields();
-		mOnRestore = true;
 		mPreviousSum = savedInstanceState.getLong("previousSum");
 	}
 }
