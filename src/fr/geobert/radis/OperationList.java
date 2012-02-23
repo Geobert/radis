@@ -860,6 +860,7 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		mOnRestore = true;
 		mNbGetMoreOps = state.getInt("mNbGetMoreOps");
 		mLastSelectionFromTop = state.getInt("mLastSelectionFromTop");
+		initDbHelper();
 	}
 
 	@Override
