@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.util.Currency;
 import java.util.Date;
 
+import org.acra.ErrorReporter;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.app.PendingIntent;
@@ -281,13 +283,20 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 					textView.setTextColor(res.getColor(R.color.positiveSum));
 				}
 				String txt = Formater.SUM_FORMAT.format(sum / 100.0d);
+				try {
 				textView.setText(txt
 						+ " "
 						+ Currency.getInstance(
 								cursor.getString(cursor
 										.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)))
 								.getSymbol());
-
+				} catch (IllegalArgumentException e) {
+					// TODO : clean this code after resolving issue 130
+					textView.setText("???");
+					ErrorReporter.getInstance().putCustomData("erroneousCurrency", cursor.getString(cursor
+							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)));
+					ErrorReporter.getInstance().handleSilentException(e);
+				}
 				return true;
 			} else if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE)) {
 				TextView textView = ((TextView) view);

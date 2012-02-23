@@ -145,6 +145,7 @@ public class AccountEditor extends Activity {
 				}
 			}
 		}
+		// check projection date format
 		if (mProjectionController.mProjectionDate.isEnabled()
 				&& mProjectionController.getDate().trim().length() == 0) {
 			if (errMsg.length() > 0)
