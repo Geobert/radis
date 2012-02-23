@@ -1167,8 +1167,30 @@ public class CommonDbAdapter {
 	public Cursor fetchOpBetweenDate(final GregorianCalendar today, final GregorianCalendar latest,
 			final long accountId) {
 		Cursor c = null;
+//		int startMonth;
+//		int endMonth;
+//		if (today.before(latest)) {
+//			startMonth = today.get(Calendar.MONTH);
+//			endMonth = latest.get(Calendar.MONTH);
+//		} else {
+//			startMonth = latest.get(Calendar.MONTH);
+//			endMonth = today.get(Calendar.MONTH);
+//		}
+//		GregorianCalendar startDate = new GregorianCalendar();
+//		GregorianCalendar endDate = new GregorianCalendar();
+//		Tools.clearTimeOfCalendar(startDate);
+//		Tools.clearTimeOfCalendar(endDate);
+//		startDate.set(Calendar.MONTH, startMonth);
+//		endDate.set(Calendar.MONTH, endMonth);
+//		startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+//		endDate.set(Calendar.DAY_OF_MONTH, endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+//		if (startMonth > endMonth) {
+//			endDate.add(Calendar.YEAR, 1);
+//		} 
+
 		GregorianCalendar startDate;
 		GregorianCalendar endDate;
+
 		if (today.before(latest)) {
 			startDate = today;
 			endDate = latest;

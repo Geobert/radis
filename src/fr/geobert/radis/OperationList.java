@@ -1,6 +1,5 @@
 package fr.geobert.radis;
 
-import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Dialog;

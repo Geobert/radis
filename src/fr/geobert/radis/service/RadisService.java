@@ -58,30 +58,37 @@ public class RadisService extends IntentService {
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
 			final long todayInMillis = today.getTimeInMillis();
+			GregorianCalendar currentMonth = new GregorianCalendar();
+			currentMonth.setTimeInMillis(todayInMillis);
+			Tools.clearTimeOfCalendar(currentMonth);
+			currentMonth.set(Calendar.DAY_OF_MONTH, currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
 
 			GregorianCalendar insertionDate = new GregorianCalendar();
-			Tools.clearTimeOfCalendar(insertionDate);
 			int insertionDayOfMonth = DBPrefsManager
 					.getInstance(this)
 					.getInt(RadisConfiguration.KEY_INSERTION_DATE,
 							Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE)).intValue();
 			final int maxDayOfCurMonth = today.getActualMaximum(Calendar.DAY_OF_MONTH);
+			
+			// manage February if insertionDayOfMonth is 29, 30 or 31
 			insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
 					: insertionDayOfMonth;
+			
 			insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
-
 			Tools.clearTimeOfCalendar(insertionDate);
+			
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
-			final int insertionMonthLimit = (insertionDate.get(Calendar.MONTH) + 1) % 11;
+			
+			GregorianCalendar limitInsertionDate = new GregorianCalendar();
+			limitInsertionDate.setTimeInMillis(insertionDateInMillis);
+			limitInsertionDate.add(Calendar.MONTH, 1);
 
-			long lastInsertDate = DBPrefsManager.getInstance(this).getLong("LAST_INSERT_DATE", 0);
-			// Log.d("Radis", "lastInsertDate: " + lastInsertDate);
-			// Log.d("Radis", "insertionDateInMillis: " +
-			// insertionDateInMillis);
+			final long lastInsertDate = DBPrefsManager.getInstance(this).getLong("LAST_INSERT_DATE", 0);
 			if (lastInsertDate > insertionDateInMillis) {
 				insertionDate.add(Calendar.MONTH, 1);
 				insertionDateInMillis = insertionDate.getTimeInMillis();
 			}
+			limitInsertionDate.set(Calendar.DAY_OF_MONTH, limitInsertionDate.getActualMaximum(Calendar.DAY_OF_MONTH));
 
 			HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
@@ -106,9 +113,8 @@ public class RadisService extends IntentService {
 
 				// insert all scheduled of the past until current month
 				Log.d("Radis", "insert all scheduled of the past until current month");
-				int i = 0;
-				while ((op.getMonth() <= today.get(Calendar.MONTH))
-						|| (op.getYear() <= today.get(Calendar.YEAR)) && !op.isObsolete()) {
+				int i = 0; // for logging purpose
+				while (op.getDate() < currentMonth.getTimeInMillis() && !op.isObsolete()) {
 					long opSum = insertSchOp(op, opRowId);
 					i++;
 					if (opSum != 0) {
@@ -118,12 +124,8 @@ public class RadisService extends IntentService {
 				}
 				Log.d("Radis", "inserted " + i + " past scheduled op until current month");
 				i = 0;
-
 				if (todayInMillis >= insertionDateInMillis) {
-					Log.d("Radis", "insert current month scheduled op, limit = "
-							+ insertionMonthLimit + " op month = " + op.getMonth());
-					while (((op.getMonth() < insertionMonthLimit) || (op.getMonth() == 11))
-							&& (op.getYear() <= today.get(Calendar.YEAR)) && !op.isObsolete()) {
+					while (op.getDate() < limitInsertionDate.getTimeInMillis() && !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
 						Log.d("Radis", "op month before : " + op.getMonth());
 						long opSum = insertSchOp(op, opRowId);
