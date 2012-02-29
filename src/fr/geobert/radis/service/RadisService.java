@@ -15,6 +15,7 @@ import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.DBPrefsManager;
+import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
 public class RadisService extends IntentService {
@@ -58,37 +59,47 @@ public class RadisService extends IntentService {
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
 			final long todayInMillis = today.getTimeInMillis();
+			Log.d("Radis", "today : " + Formater.DATE_FORMAT.format(today.getTime()));
+			
 			GregorianCalendar currentMonth = new GregorianCalendar();
 			currentMonth.setTimeInMillis(todayInMillis);
 			Tools.clearTimeOfCalendar(currentMonth);
 			currentMonth.set(Calendar.DAY_OF_MONTH, currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
-
+			Log.d("Radis", "currentMonth : " + Formater.DATE_FORMAT.format(currentMonth.getTime()));
+			
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			int insertionDayOfMonth = DBPrefsManager
 					.getInstance(this)
 					.getInt(RadisConfiguration.KEY_INSERTION_DATE,
 							Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE)).intValue();
 			final int maxDayOfCurMonth = today.getActualMaximum(Calendar.DAY_OF_MONTH);
-			
+			Log.d("Radis", "maxDayOfCurMonth : " + maxDayOfCurMonth);
+			Log.d("Radis", "insertionDayOfMonth : " + insertionDayOfMonth);
 			// manage February if insertionDayOfMonth is 29, 30 or 31
 			insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
 					: insertionDayOfMonth;
+			Log.d("Radis", "final insertionDayOfMonth : " + insertionDayOfMonth);
 			
 			insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
 			Tools.clearTimeOfCalendar(insertionDate);
+			Log.d("Radis", "insertionDate : " + Formater.DATE_FORMAT.format(insertionDate.getTime()));
 			
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			
 			GregorianCalendar limitInsertionDate = new GregorianCalendar();
 			limitInsertionDate.setTimeInMillis(insertionDateInMillis);
 			limitInsertionDate.add(Calendar.MONTH, 1);
+			Log.d("Radis", "limitInsertionDate : " + Formater.DATE_FORMAT.format(limitInsertionDate.getTime()));
 
-			final long lastInsertDate = DBPrefsManager.getInstance(this).getLong("LAST_INSERT_DATE", 0);
+			final long lastInsertDate = DBPrefsManager.getInstance(this).getLong("LAST_INSERT_DATE", todayInMillis);
+			Log.d("Radis", "lastInsertDate : " + Formater.DATE_FORMAT.format(lastInsertDate));
 			if (lastInsertDate > insertionDateInMillis) {
 				insertionDate.add(Calendar.MONTH, 1);
+				Log.d("Radis", "modified insertionDate : " + Formater.DATE_FORMAT.format(insertionDate.getTime()));
 				insertionDateInMillis = insertionDate.getTimeInMillis();
 			}
 			limitInsertionDate.set(Calendar.DAY_OF_MONTH, limitInsertionDate.getActualMaximum(Calendar.DAY_OF_MONTH));
+			Log.d("Radis", "final limitInsertionDate : " + Formater.DATE_FORMAT.format(limitInsertionDate.getTime()));
 
 			HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
@@ -114,7 +125,7 @@ public class RadisService extends IntentService {
 				// insert all scheduled of the past until current month
 				Log.d("Radis", "insert all scheduled of the past until current month");
 				int i = 0; // for logging purpose
-				while (op.getDate() < currentMonth.getTimeInMillis() && !op.isObsolete()) {
+				while (op.getDate() <= currentMonth.getTimeInMillis() && !op.isObsolete()) {
 					long opSum = insertSchOp(op, opRowId);
 					i++;
 					if (opSum != 0) {
@@ -162,9 +173,9 @@ public class RadisService extends IntentService {
 			}
 			// Log.d("Radis", "put todayInMillis: " + todayInMillis);
 			DBPrefsManager.getInstance(this).put("LAST_INSERT_DATE", todayInMillis);
-			if (lastInsertDate == 0) {
-				processScheduledOps();
-			}
+//			if (lastInsertDate == 0) {
+//				processScheduledOps();
+//			}
 		}
 		c.close();
 	}
