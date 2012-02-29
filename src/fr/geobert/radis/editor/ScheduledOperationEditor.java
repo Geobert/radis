@@ -401,7 +401,8 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		boolean res = super.isFormValid(errMsg);
 		if (res) {
 			ScheduledOperation op = mCurrentSchOp;
-			if (mCustomPeriodicityUnit.getSelectedItemPosition() >= ScheduledOperation.CUSTOM_DAILY_PERIOD) {
+			if (mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner
+					.getAdapter().getCount() - 1)) {
 				try {
 					Integer.parseInt(mCustomPeriodicityVal.getText().toString());
 				} catch (NumberFormatException e) {
