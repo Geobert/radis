@@ -2,6 +2,8 @@ package fr.geobert.radis;
 
 import java.util.GregorianCalendar;
 
+import org.acra.ErrorReporter;
+
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -45,7 +48,8 @@ import fr.geobert.radis.tools.QuickAddController;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class OperationList extends ListActivity implements UpdateDisplayInterface {
+public class OperationList extends ListActivity implements
+		UpdateDisplayInterface {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
 	private static final int CONVERT_OP_ID = Menu.FIRST + 3;
@@ -76,13 +80,13 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	private int mLastSelectionFromTop; // last pos from top of ListView
 	private boolean receiverIsRegistered;
 	private SelectedCursorAdapter mOpListCursorAdapter;
-	
+
 	private static class OpRowHolder {
-        public TextView separator;
-        public ImageView scheduledImg;
-        public StringBuilder tagBuilder = new StringBuilder();
-    }
-	
+		public TextView separator;
+		public ImageView scheduledImg;
+		public StringBuilder tagBuilder = new StringBuilder();
+	}
+
 	// used in InnerViewBinder
 	private static GregorianCalendar date1 = new GregorianCalendar();
 	private static GregorianCalendar date2 = new GregorianCalendar();
@@ -108,8 +112,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		private int[] mCellStates = null;
 
 		public InnerViewBinder(Cursor c) {
-			super(OperationList.this, CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_OP_DATE,
-					R.id.op_icon);
+			super(OperationList.this, CommonDbAdapter.KEY_OP_SUM,
+					CommonDbAdapter.KEY_OP_DATE, R.id.op_icon);
 			initCache(c);
 		}
 
@@ -122,7 +126,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
 			if (colName.equals(CommonDbAdapter.KEY_TAG_NAME)) {
-				final OpRowHolder h = (OpRowHolder) ((View)view.getParent().getParent()).getTag();
+				final OpRowHolder h = (OpRowHolder) ((View) view.getParent()
+						.getParent()).getTag();
 				TextView textView = ((TextView) view);
 				StringBuilder b = h.tagBuilder;
 				b.setLength(0);
@@ -142,7 +147,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 				textView.setText(b.toString());
 
 				ImageView i = h.scheduledImg;
-				if (cursor.getLong(cursor.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+				if (cursor.getLong(cursor
+						.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
 					i.setVisibility(View.VISIBLE);
 				} else {
 					i.setVisibility(View.INVISIBLE);
@@ -206,7 +212,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	private class SelectedCursorAdapter extends SimpleCursorAdapter {
 		private int selectedPos = -1;
 
-		SelectedCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
+		SelectedCursorAdapter(Context context, int layout, Cursor c,
+				String[] from, int[] to) {
 			super(context, layout, c, from, to);
 			InnerViewBinder viewBinder = new InnerViewBinder(c);
 			setViewBinder(viewBinder);
@@ -234,13 +241,13 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			}
 			return v;
 		}
-		
+
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 			View v = super.newView(context, cursor, parent);
 			OpRowHolder h = new OpRowHolder();
-			h.separator = (TextView)v.findViewById(R.id.separator);
-			h.scheduledImg = (ImageView)v.findViewById(R.id.op_sch_icon);
+			h.separator = (TextView) v.findViewById(R.id.separator);
+			h.scheduledImg = (ImageView) v.findViewById(R.id.op_sch_icon);
 			v.setTag(h);
 			return v;
 		}
@@ -256,8 +263,10 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		public GetMoreOps(final boolean isRestoring) {
 			mIsRestoring = isRestoring;
 			mEffectiveRetrieval = 0;
-			mAccumulator = new MatrixCursor(new String[] { CommonDbAdapter.KEY_OP_ROWID,
-					CommonDbAdapter.KEY_THIRD_PARTY_NAME, CommonDbAdapter.KEY_TAG_NAME,
+			mAccumulator = new MatrixCursor(new String[] {
+					CommonDbAdapter.KEY_OP_ROWID,
+					CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+					CommonDbAdapter.KEY_TAG_NAME,
 					CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_OP_SUM,
 					CommonDbAdapter.KEY_OP_DATE, CommonDbAdapter.KEY_OP_NOTES,
 					CommonDbAdapter.KEY_OP_SCHEDULED_ID });
@@ -266,16 +275,16 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		@Override
 		protected void onPostExecute(Void result) {
 			fillMatrixCursor(mLastOps, mAccumulator);
-			((InnerViewBinder) ((SelectedCursorAdapter) getListAdapter()).getViewBinder())
-					.increaseCache(mLastOps);
+			((InnerViewBinder) ((SelectedCursorAdapter) getListAdapter())
+					.getViewBinder()).increaseCache(mLastOps);
 			((SelectedCursorAdapter) getListAdapter()).notifyDataSetChanged();
 			mAccumulator.close();
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (!mHasResult) {
 				if (!mIsRestoring) {
-					Toast.makeText(OperationList.this, R.string.no_more_ops, Toast.LENGTH_LONG)
-							.show();
+					Toast.makeText(OperationList.this, R.string.no_more_ops,
+							Toast.LENGTH_LONG).show();
 				} else {
 					OperationList.this.mNbGetMoreOps = this.mEffectiveRetrieval;
 				}
@@ -286,14 +295,16 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 					OperationList.this.mNbGetMoreOps++;
 				}
 			}
-			Log.d("Radis", "post getMoreOps mLastOps.getCount() : " + mLastOps.getCount());
+			Log.d("Radis",
+					"post getMoreOps mLastOps.getCount() : "
+							+ mLastOps.getCount());
 		}
 
 		@Override
 		protected void onPreExecute() {
 			mLoadingIcon.setVisibility(View.VISIBLE);
-			mLoadingIcon.startAnimation(AnimationUtils.loadAnimation(OperationList.this,
-					R.anim.rotation));
+			mLoadingIcon.startAnimation(AnimationUtils.loadAnimation(
+					OperationList.this, R.anim.rotation));
 			mLops = mLastOps;
 		}
 
@@ -303,21 +314,31 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			if (!moveToLast || c.isBeforeFirst() || c.isAfterLast()) {
 				mNbGetMoreOps = 0;
 			} else {
-				long earliestOpDate = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+				try {
+					long earliestOpDate = c.getLong(c
+							.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 
-				c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1, mAccountId);
-				startManagingCursor(c);
-				if (c.moveToFirst() && c.isFirst()) {
-					GregorianCalendar opDate = new GregorianCalendar();
-					opDate.setTimeInMillis(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-					c.close();
-					Cursor result = mDbHelper
-							.fetchOpOfMonth(opDate, mAccountId);
-					startManagingCursor(result);
-					mHasResult = fillMatrixCursor(mAccumulator, result);
-					mLops = mAccumulator;
-				} else {
-					mHasResult = false;
+					c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1,
+							mAccountId);
+					startManagingCursor(c);
+					if (c.moveToFirst() && c.isFirst()) {
+						GregorianCalendar opDate = new GregorianCalendar();
+						opDate.setTimeInMillis(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
+						c.close();
+						Cursor result = mDbHelper.fetchOpOfMonth(opDate,
+								mAccountId);
+						startManagingCursor(result);
+						mHasResult = fillMatrixCursor(mAccumulator, result);
+						mLops = mAccumulator;
+					} else {
+						mHasResult = false;
+					}
+				} catch (CursorIndexOutOfBoundsException e) {
+					mNbGetMoreOps = 0;
+					ErrorReporter.getInstance().putCustomData("mLops.getCount()", Integer.toBinaryString(c.getCount()));
+					ErrorReporter.getInstance().handleSilentException(e);
+					
 				}
 			}
 		}
@@ -369,8 +390,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 	private void initViewBehavior() {
 		mQuickAddController.initViewBehavior();
-		final GestureDetector gestureDetector = new GestureDetector(new ListViewSwipeDetector(
-				getListView(), new ListSwipeAction() {
+		final GestureDetector gestureDetector = new GestureDetector(
+				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
 					public void run() {
 						OperationList.this.finish();
@@ -412,12 +433,14 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		registerForContextMenu(getListView());
 
 		LayoutInflater inf = getLayoutInflater();
-		View footer = inf.inflate(R.layout.op_list_footer, getListView(), false);
+		View footer = inf
+				.inflate(R.layout.op_list_footer, getListView(), false);
 		mLoadingIcon = (ImageView) footer.findViewById(R.id.loading_icon);
 		getListView().addFooterView(footer);
 
 		Bundle extras = getIntent().getExtras();
-		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID) : null;
+		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
+				: null;
 
 		initReferences();
 		mNbGetMoreOps = 1;
@@ -461,7 +484,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		if (info.id != -1) {
 			super.onCreateContextMenu(menu, v, menuInfo);
@@ -469,10 +493,12 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 			startManagingCursor(c);
 			if (!c.isBeforeFirst() && !c.isAfterLast()) {
-				if (c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+				if (c.getLong(c
+						.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
 					menu.add(0, EDIT_SCH_OP_ID, 0, R.string.edit_scheduling);
 				} else {
-					menu.add(0, CONVERT_OP_ID, 0, R.string.convert_into_scheduling);
+					menu.add(0, CONVERT_OP_ID, 0,
+							R.string.convert_into_scheduling);
 				}
 				menu.add(0, DELETE_OP_ID, 0, R.string.delete);
 			}
@@ -507,7 +533,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_OP_ID:
 			showDialog(DIALOG_DELETE);
@@ -522,8 +549,9 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		case EDIT_SCH_OP_ID:
 			Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 			startManagingCursor(c);
-			startScheduledOpEditor(
-					c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)), false);
+			startScheduledOpEditor(c.getLong(c
+					.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)),
+					false);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -558,8 +586,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		}
 		if (data.getBooleanExtra("sumUpdateNeeded", false)) {
 			Bundle extras = data.getExtras();
-			updateSumsAfterOpEdit(extras.getLong("oldSum"), extras.getLong("sum"),
-					extras.getLong("opDate"));
+			updateSumsAfterOpEdit(extras.getLong("oldSum"),
+					extras.getLong("sum"), extras.getLong("opDate"));
 		}
 	}
 
@@ -567,7 +595,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		// mDbHelper.open();
-		if (requestCode == ACTIVITY_OP_CREATE || requestCode == ACTIVITY_OP_EDIT) {
+		if (requestCode == ACTIVITY_OP_CREATE
+				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
 				updateSumsDisplay(requestCode == ACTIVITY_OP_CREATE);
 				afterAddOp(data);
@@ -589,14 +618,23 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		if (!c.isClosed() && c.moveToFirst() && c.isFirst()) {
 			do {
 				Object[] values = {
-						new Long(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_ROWID))),
-						c.getString(c.getColumnIndex(CommonDbAdapter.KEY_THIRD_PARTY_NAME)),
-						c.getString(c.getColumnIndex(CommonDbAdapter.KEY_TAG_NAME)),
-						c.getString(c.getColumnIndex(CommonDbAdapter.KEY_MODE_NAME)),
-						new Long(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM))),
-						new Long(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_DATE))),
-						c.getString(c.getColumnIndex(CommonDbAdapter.KEY_OP_NOTES)),
-						new Long(c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))) };
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_ROWID))),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_THIRD_PARTY_NAME)),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_TAG_NAME)),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_MODE_NAME)),
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_SUM))),
+						new Long(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE))),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_NOTES)),
+						new Long(
+								c.getLong(c
+										.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))) };
 				m.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -606,10 +644,12 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 	}
 
 	private void fillData() {
-		mLastOps = new MatrixCursor(new String[] { CommonDbAdapter.KEY_OP_ROWID,
-				CommonDbAdapter.KEY_THIRD_PARTY_NAME, CommonDbAdapter.KEY_TAG_NAME,
-				CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_OP_SUM,
-				CommonDbAdapter.KEY_OP_DATE, CommonDbAdapter.KEY_OP_NOTES,
+		mLastOps = new MatrixCursor(new String[] {
+				CommonDbAdapter.KEY_OP_ROWID,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+				CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_MODE_NAME,
+				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_OP_DATE,
+				CommonDbAdapter.KEY_OP_NOTES,
 				CommonDbAdapter.KEY_OP_SCHEDULED_ID });
 		startManagingCursor(mLastOps);
 		Cursor lastOp = mDbHelper.fetchLastOp(mAccountId);
@@ -621,22 +661,25 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 				GregorianCalendar today = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(today);
-				Cursor c = mDbHelper.fetchOpBetweenDate(today, latest, mAccountId);
+				Cursor c = mDbHelper.fetchOpBetweenDate(today, latest,
+						mAccountId);
 				startManagingCursor(c);
 				fillMatrixCursor(mLastOps, c);
 			}
 			lastOp.close();
 		}
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
-				CommonDbAdapter.KEY_THIRD_PARTY_NAME, CommonDbAdapter.KEY_OP_SUM,
-				CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_MODE_NAME };
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_TAG_NAME,
+				CommonDbAdapter.KEY_MODE_NAME };
 
-		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos };
+		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
+				R.id.op_infos };
 
 		// Now create a simple cursor adapter and set it to display
 		if (mOpListCursorAdapter == null) {
-			mOpListCursorAdapter = new SelectedCursorAdapter(this, R.layout.operation_row,
-					mLastOps, from, to);
+			mOpListCursorAdapter = new SelectedCursorAdapter(this,
+					R.layout.operation_row, mLastOps, from, to);
 			setListAdapter(mOpListCursorAdapter);
 		} else {
 			mOpListCursorAdapter.changeCursor(mLastOps);
@@ -746,7 +789,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		if (ops.moveToFirst()) {
 			long dateLong = date.getTimeInMillis();
 			do {
-				long opDate = ops.getLong(ops.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+				long opDate = ops.getLong(ops
+						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 				if (opDate <= dateLong) {
 					break;
 				}
@@ -768,7 +812,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		View firstView = l.getChildAt(relativeFirstIdx);
 		if (null != firstView) {
 			offset = firstView.getHeight();
-			firstOffset = firstView.getBottom() - (relativeFirstIdx * offset) - relativeFirstIdx;
+			firstOffset = firstView.getBottom() - (relativeFirstIdx * offset)
+					- relativeFirstIdx;
 			// getBottom = px according to virtual ListView (not only what we
 			// see on
 			// screen), - (firstIdx * offset) = remove all the previous items
@@ -783,15 +828,17 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		// check if the selected pos is visible on screen
 		int posFromTop;
 		if ((position >= firstIdx) && (position < lastIdx)) {
-			posFromTop = mOnRestore ? mLastSelectionFromTop : ((relativePos - 1) * offset)
-					+ firstOffset + relativePos;
+			posFromTop = mOnRestore ? mLastSelectionFromTop
+					: ((relativePos - 1) * offset) + firstOffset + relativePos;
 		} else {
 			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
 					: (int) (Tools.SCREEN_HEIGHT * 0.3);
 		}
 		l.setSelectionFromTop(position, posFromTop);
 		mOnRestore = false;
-		Log.d("Radis", "selectOpAndAdjustOffset setting mLastSelectedPosition: " + position);
+		Log.d("Radis",
+				"selectOpAndAdjustOffset setting mLastSelectedPosition: "
+						+ position);
 		mLastSelectedPosition = Integer.valueOf(position);
 	}
 
@@ -821,7 +868,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			mLastOps.moveToPosition(position);
 			SelectedCursorAdapter adapter = (SelectedCursorAdapter) getListAdapter();
 			adapter.setSelectedPosition(position);
-			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(position);
+			MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(
+					position);
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
 			getMoreOps(false);
@@ -919,7 +967,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			// saved
 			// if one of them is the current accountId, updateDisplay, if not,
 			// currently displayed account do not need to be refreshed
-			Object[] accountIds = (Object[]) intent.getSerializableExtra("accountIds");
+			Object[] accountIds = (Object[]) intent
+					.getSerializableExtra("accountIds");
 			for (int i = 0; i < accountIds.length; ++i) {
 				if (((Long) accountIds[i]).equals(mAccountId)) {
 					updateSumsDisplay(true);
@@ -945,7 +994,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 
 	// update db projection sum and display
 	private void updateSumsAfterOpEdit(long oldSum, long sum, long date) {
-		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : " + sum);
+		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : "
+				+ sum);
 		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
 		updateSumsAndSelection();
 	}
@@ -959,8 +1009,10 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 			account.requery();
 			account.moveToFirst();
 			t.setVisibility(View.VISIBLE);
-			t.setText(String.format(format, Formater.DATE_FORMAT.format(account.getLong(account
-					.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
+			t.setText(String.format(
+					format,
+					Formater.DATE_FORMAT.format(account.getLong(account
+							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
 					Formater.SUM_FORMAT.format(account.getLong(account
 							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
 		} else {
@@ -990,7 +1042,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 		Cursor c = mLastOps;
 		c.moveToFirst();
 		updateFutureSumDisplay();
-		Log.d("Radis", "updateSumsAndSelection mLastSelectedPosition : " + mLastSelectedPosition);
+		Log.d("Radis", "updateSumsAndSelection mLastSelectedPosition : "
+				+ mLastSelectedPosition);
 		if (mLastSelectedPosition == null) {
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
@@ -1001,7 +1054,8 @@ public class OperationList extends ListActivity implements UpdateDisplayInterfac
 														// IndexOutOfBoundsException
 														// (issue 106)
 				// if (position < mLastOps.getCount()) {
-				MatrixCursor data = (MatrixCursor) getListView().getItemAtPosition(position);
+				MatrixCursor data = (MatrixCursor) getListView()
+						.getItemAtPosition(position);
 				updateSumAtSelectedOpDisplay(data, curSum);
 			}
 		}
