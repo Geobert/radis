@@ -40,14 +40,15 @@ public class InfoManager {
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
 		{
-			put(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE, R.id.edit_op_third_party);
+			put(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+					R.id.edit_op_third_party);
 			put(CommonDbAdapter.DATABASE_TAGS_TABLE, R.id.edit_op_tag);
 			put(CommonDbAdapter.DATABASE_MODES_TABLE, R.id.edit_op_mode);
 		}
 	};
 
-	InfoManager(CommonOpEditor context, String title, String table, String colName, int editId,
-			int deleteId) {
+	InfoManager(CommonOpEditor context, String title, String table,
+			String colName, int editId, int deleteId) {
 		mDbHelper = CommonDbAdapter.getInstance(context);
 		mContext = context;
 		mInfo = new Bundle();
@@ -75,7 +76,8 @@ public class InfoManager {
 		mAddBut = (Button) layout.findViewById(R.id.create_info);
 		mDelBut = (Button) layout.findViewById(R.id.del_info);
 		mEditBut = (Button) layout.findViewById(R.id.edit_info);
-		mInfoText = (AutoCompleteTextView) context.findViewById(EDITTEXT_OF_INFO.get(table));
+		mInfoText = (AutoCompleteTextView) context
+				.findViewById(EDITTEXT_OF_INFO.get(table));
 
 		builder.setView(layout);
 		mBuilder = builder;
@@ -107,18 +109,20 @@ public class InfoManager {
 
 	protected void infoSelected() {
 		ListView lv = mListDialog.getListView();
-		mCursor.moveToPosition(lv.getCheckedItemPosition());
-		Tools.setTextWithoutComplete(mInfoText,
-				mCursor.getString(mCursor.getColumnIndex(mInfo.getString("colName"))));
+		if (mCursor.moveToPosition(lv.getCheckedItemPosition())) {
+			Tools.setTextWithoutComplete(mInfoText, mCursor.getString(mCursor
+					.getColumnIndex(mInfo.getString("colName"))));
+		}
 	}
 
 	public void fillData(Cursor c, String colName) {
-		mBuilder.setSingleChoiceItems(c, -1, colName, new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int item) {
-				mSelectedInfo = item;
-				refreshToolbarStatus((AlertDialog) dialog);
-			}
-		});
+		mBuilder.setSingleChoiceItems(c, -1, colName,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						mSelectedInfo = item;
+						refreshToolbarStatus((AlertDialog) dialog);
+					}
+				});
 	}
 
 	public AlertDialog getListDialog() {
@@ -162,8 +166,8 @@ public class InfoManager {
 		ListView lv = mListDialog.getListView();
 		mCursor.moveToPosition(lv.getCheckedItemPosition());
 		Bundle info = mInfo;
-		info.putString("value",
-				mCursor.getString(mCursor.getColumnIndex(mInfo.getString("colName"))));
+		info.putString("value", mCursor.getString(mCursor.getColumnIndex(mInfo
+				.getString("colName"))));
 		info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
 		mContext.mCurrentInfoTable = info.getString("table");
 		mContext.showDialog(mEditId);
@@ -182,8 +186,9 @@ public class InfoManager {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				if (hasFocus) {
-					dialog.getWindow().setSoftInputMode(
-							WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+					dialog.getWindow()
+							.setSoftInputMode(
+									WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
 				}
 			}
 		});
@@ -220,11 +225,14 @@ public class InfoManager {
 		String value = t.getText().toString().trim();
 		long rowId = mInfo.getLong("rowId");
 		if (rowId != 0) { // update
-			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value, mOldValue);
+			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value,
+					mOldValue);
 		} else { // create
-			long id = mDbHelper.getKeyIdIfExists(value, mInfo.getString("table"));
+			long id = mDbHelper.getKeyIdIfExists(value,
+					mInfo.getString("table"));
 			if (id > 0) { // already existing value, update
-				Tools.popError(mContext, mContext.getString(R.string.item_exists), null);
+				Tools.popError(mContext,
+						mContext.getString(R.string.item_exists), null);
 			} else {
 				mDbHelper.createInfo(mInfo.getString("table"), value);
 			}
