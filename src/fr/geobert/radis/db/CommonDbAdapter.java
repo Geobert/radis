@@ -696,6 +696,8 @@ public class CommonDbAdapter {
 	public CommonDbAdapter open() throws SQLException {
 		if (null == mDbHelper) {
 			mDbHelper = new DatabaseHelper(mCtx);
+		}
+		if (null == mDb) {
 			mDb = mDbHelper.getWritableDatabase();
 			fillCaches();
 		}
@@ -711,6 +713,9 @@ public class CommonDbAdapter {
 				mDb = null;
 			}
 		} catch (Exception e) {
+		} finally {
+			mDb = null;
+			mDbHelper = null;
 		}
 	}
 
