@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
@@ -317,7 +318,10 @@ public class OperationList extends ListActivity implements
 				try {
 					long earliestOpDate = c.getLong(c
 							.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-
+					Log.d("Radis",
+							"earliestOpDate : "
+									+ Formater.DATE_FORMAT
+											.format(earliestOpDate));
 					c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1,
 							mAccountId);
 					startManagingCursor(c);
@@ -326,6 +330,10 @@ public class OperationList extends ListActivity implements
 						opDate.setTimeInMillis(c.getLong(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 						c.close();
+						Log.d("Radis",
+								"opDate : "
+										+ Formater.DATE_FORMAT
+												.format(opDate.getTimeInMillis()));
 						Cursor result = mDbHelper.fetchOpOfMonth(opDate,
 								mAccountId);
 						startManagingCursor(result);
@@ -336,9 +344,11 @@ public class OperationList extends ListActivity implements
 					}
 				} catch (CursorIndexOutOfBoundsException e) {
 					mNbGetMoreOps = 0;
-					ErrorReporter.getInstance().putCustomData("mLops.getCount()", Integer.toBinaryString(c.getCount()));
+					ErrorReporter.getInstance().putCustomData(
+							"mLops.getCount()",
+							Integer.toBinaryString(c.getCount()));
 					ErrorReporter.getInstance().handleSilentException(e);
-					
+
 				}
 			}
 		}
@@ -659,9 +669,10 @@ public class OperationList extends ListActivity implements
 			if (lastOp.moveToFirst()) {
 				latest.setTimeInMillis(lastOp.getLong(lastOp
 						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
-				GregorianCalendar today = new GregorianCalendar();
-				Tools.clearTimeOfCalendar(today);
-				Cursor c = mDbHelper.fetchOpBetweenDate(today, latest,
+				GregorianCalendar currentMonth = new GregorianCalendar();
+				Tools.clearTimeOfCalendar(currentMonth);
+				currentMonth.set(Calendar.DAY_OF_MONTH, currentMonth.getActualMinimum(Calendar.DAY_OF_MONTH));
+				Cursor c = mDbHelper.fetchOpBetweenDate(currentMonth, latest,
 						mAccountId);
 				startManagingCursor(c);
 				fillMatrixCursor(mLastOps, c);
