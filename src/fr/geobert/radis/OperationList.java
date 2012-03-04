@@ -334,7 +334,7 @@ public class OperationList extends ListActivity implements
 								"opDate : "
 										+ Formater.DATE_FORMAT
 												.format(opDate.getTimeInMillis()));
-						Cursor result = mDbHelper.fetchOpOfMonth(opDate,
+						Cursor result = mDbHelper.fetchOpOfMonth(opDate, earliestOpDate,
 								mAccountId);
 						startManagingCursor(result);
 						mHasResult = fillMatrixCursor(mAccumulator, result);
