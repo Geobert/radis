@@ -398,6 +398,7 @@ public abstract class CommonOpEditor extends Activity {
 		fillOperationWithInputs(op);
 		outState.putParcelable("currentOp", op);
 		outState.putLong("previousSum", mPreviousSum);
+		outState.putString("mCurrentInfoTable", mCurrentInfoTable);
 		mOnRestore = true;
 	}
 
@@ -408,6 +409,7 @@ public abstract class CommonOpEditor extends Activity {
 		mRowId = rowId > 0 ? Long.valueOf(rowId) : 0;
 		Operation op = savedInstanceState.getParcelable("currentOp");
 		mCurrentOp = op;
+		mCurrentInfoTable = savedInstanceState.getString("mCurrentInfoTable");
 		initDbHelper();
 		populateFields();
 		mPreviousSum = savedInstanceState.getLong("previousSum");
