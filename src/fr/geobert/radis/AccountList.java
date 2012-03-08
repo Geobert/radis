@@ -3,6 +3,7 @@ package fr.geobert.radis;
 import java.text.ParseException;
 import java.util.Currency;
 import java.util.Date;
+import java.util.Locale;
 
 import org.acra.ErrorReporter;
 
@@ -67,7 +68,8 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	private InnerViewBinder mViewBinder;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
-		SimpleAccountCursorAdapter(Context context, int layout, Cursor c, String[] from, int[] to) {
+		SimpleAccountCursorAdapter(Context context, int layout, Cursor c,
+				String[] from, int[] to) {
 			super(context, layout, c, from, to);
 		}
 
@@ -116,7 +118,8 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		});
 		String versionName = "";
 		try {
-			versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+			versionName = getPackageManager().getPackageInfo(getPackageName(),
+					0).versionName;
 		} catch (NameNotFoundException e) {
 		}
 
@@ -129,8 +132,8 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 
-		final GestureDetector gestureDetector = new GestureDetector(new ListViewSwipeDetector(
-				getListView(), new ListSwipeAction() {
+		final GestureDetector gestureDetector = new GestureDetector(
+				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
 					public void run() {
 						if (mRowId > 0) {
@@ -195,7 +198,8 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	}
 
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 		menu.add(0, EDIT_ACCOUNT_ID, 0, R.string.edit);
 		menu.add(0, DELETE_ACCOUNT_ID, 0, R.string.delete);
@@ -229,10 +233,11 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		Intent i = new Intent(this, TransfertEditor.class);
 		startActivity(i);
 	}
-	
+
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_ACCOUNT_ID:
 			mAccountToDelete = info.id;
@@ -269,10 +274,13 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 			String colName = cursor.getColumnName(columnIndex);
 
 			if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_NAME)) {
-				if (cursor.getLong(cursor.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)) == accountId) {
-					mQuickAddText.setText(AccountList.this.getString(R.string.quickadd_target,
-							cursor.getString(cursor
-									.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_NAME))));
+				if (cursor.getLong(cursor
+						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)) == accountId) {
+					mQuickAddText
+							.setText(AccountList.this.getString(
+									R.string.quickadd_target,
+									cursor.getString(cursor
+											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_NAME))));
 				}
 			} else if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) {
 				TextView textView = ((TextView) view);
@@ -284,17 +292,31 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				}
 				String txt = Formater.SUM_FORMAT.format(sum / 100.0d);
 				try {
-				textView.setText(txt
-						+ " "
-						+ Currency.getInstance(
-								cursor.getString(cursor
-										.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)))
-								.getSymbol());
+					textView.setText(txt
+							+ " "
+							+ Currency
+									.getInstance(
+											cursor.getString(cursor
+													.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)))
+									.getSymbol());
 				} catch (IllegalArgumentException e) {
 					// TODO : clean this code after resolving issue 130
-					textView.setText("???");
-					ErrorReporter.getInstance().putCustomData("erroneousCurrency", cursor.getString(cursor
-							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)));
+					Currency currency = Currency.getInstance(Locale
+							.getDefault());
+					textView.setText(currency.getSymbol());
+					mDbHelper
+							.updateAccountCurrency(
+									cursor.getLong(cursor
+											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)),
+									currency.getCurrencyCode());
+					ErrorReporter
+							.getInstance()
+							.putCustomData(
+									"erroneousCurrency",
+									cursor.getString(cursor
+											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)));
+					ErrorReporter.getInstance().putCustomData(
+							"defaultCurrency", currency.getSymbol());
 					ErrorReporter.getInstance().handleSilentException(e);
 				}
 				return true;
@@ -302,7 +324,8 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				TextView textView = ((TextView) view);
 				long dateLong = cursor.getLong(cursor.getColumnIndex(colName));
 				if (dateLong > 0) {
-					textView.setText(String.format(getString(R.string.balance_at),
+					textView.setText(String.format(
+							getString(R.string.balance_at),
 							Formater.DATE_FORMAT.format(new Date(dateLong))));
 				} else {
 					textView.setText("");
@@ -318,19 +341,21 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		startManagingCursor(mAccountsCursor);
 		// Create an array to specify the fields we want to display in the list
 		String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
-				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM, CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE,
+				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM,
+				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE,
 				CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
 
 		// and an array of the fields we want to bind those fields to (in this
 		// case just text1)
-		int[] to = new int[] { R.id.account_name, R.id.account_sum, R.id.account_balance_at };
+		int[] to = new int[] { R.id.account_name, R.id.account_sum,
+				R.id.account_balance_at };
 
 		// Now create a simple cursor adapter and set it to display
 		if (null == mAccountsAdapter) {
-			mAccountsAdapter = new SimpleAccountCursorAdapter(this, R.layout.account_row,
-					mAccountsCursor, from, to);
-			mViewBinder = new InnerViewBinder(DBPrefsManager.getInstance(this).getLong(
-					RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0));
+			mAccountsAdapter = new SimpleAccountCursorAdapter(this,
+					R.layout.account_row, mAccountsCursor, from, to);
+			mViewBinder = new InnerViewBinder(DBPrefsManager.getInstance(this)
+					.getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0));
 			mAccountsAdapter.setViewBinder(mViewBinder);
 			setListAdapter(mAccountsAdapter);
 		} else {

@@ -1068,6 +1068,13 @@ public class CommonDbAdapter {
 		return res;
 	}
 
+	public boolean updateAccountCurrency(long accountId, String currency) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_ACCOUNT_CURRENCY, currency);
+		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
+				+ accountId, null) > 0;
+	}
+	
 	public boolean updateAccount(long accountId, String name, String desc,
 			long start_sum, String currency,
 			ProjectionDateController projectionController)
