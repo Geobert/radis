@@ -15,7 +15,7 @@ import fr.geobert.radis.tools.Formater;
 public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 	protected Resources mRes;
 	private CharSequence mSumColName;
-	private CharSequence mDateColName;
+	protected CharSequence mDateColName;
 	private int mArrowIconId;
 
 	public OpViewBinder(Activity context, CharSequence sumColName, CharSequence dateColName, int arrowIconId) {

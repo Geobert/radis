@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 
 public class Formater {
 	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-			"dd/MM/yyyy");
+			"dd/MM/yy");
 	public static SimpleDateFormat SHORT_DATE_FORMAT = new SimpleDateFormat(
 			"dd/MM");
 	public static DecimalFormat SUM_FORMAT;

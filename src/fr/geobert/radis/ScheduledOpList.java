@@ -71,6 +71,11 @@ public class ScheduledOpList extends ListActivity {
 				}
 				((TextView) view).setText(b.toString());
 				return true;
+			} else if (colName.equals(mDateColName)) {
+				Date date = new Date(cursor.getLong(columnIndex));
+				((TextView) view).setText(Formater.DATE_FORMAT
+						.format(date));
+				return true;
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
 			}
