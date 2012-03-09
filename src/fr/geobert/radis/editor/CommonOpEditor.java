@@ -71,7 +71,7 @@ public abstract class CommonOpEditor extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!Formater.isInit()) {
-			Formater.init();
+			Formater.init(this);
 		}
 
 		setView();

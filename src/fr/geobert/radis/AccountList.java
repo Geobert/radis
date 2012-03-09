@@ -95,7 +95,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		if (!Formater.isInit()) {
-			Formater.init();
+			Formater.init(this);
 		}
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);

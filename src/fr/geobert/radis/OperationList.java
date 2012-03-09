@@ -436,7 +436,7 @@ public class OperationList extends ListActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!Formater.isInit()) {
-			Formater.init();
+			Formater.init(this);
 		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.operation_list);

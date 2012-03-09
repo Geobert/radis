@@ -91,7 +91,7 @@ public class ScheduledOpList extends ListActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!Formater.isInit()) {
-			Formater.init();
+			Formater.init(this);
 		}
 		setTitle(R.string.scheduled_ops);
 		setContentView(R.layout.scheduled_list);

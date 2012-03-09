@@ -164,5 +164,6 @@
     <string name="transfert_to">To account</string>
     <string name="transfert_between">Make a transfert</string>
     <string name="transfert">Transfert</string>
-
+	<string name="long_date_format">MM/dd/yy</string>
+	<string name="short_date_format">MM/dd</string>
 </resources>

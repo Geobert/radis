@@ -169,4 +169,6 @@
 	<string name="transfert_between">Effectuer un transfert</string>
 	<string name="transfert">Transfert</string>
 	<string name="error_on_write_prefs">Erreur lors de l\'écriture des préférences</string>
+	<string name="long_date_format">dd/MM/yy</string>
+	<string name="short_date_format">dd/MM</string>
 </resources>

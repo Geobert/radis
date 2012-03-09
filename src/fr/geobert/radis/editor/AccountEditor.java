@@ -41,7 +41,7 @@ public class AccountEditor extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		if (!Formater.isInit()) {
-			Formater.init();
+			Formater.init(this);
 		}
 
 		setContentView(R.layout.account_creation);
