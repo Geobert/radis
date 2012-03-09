@@ -1,169 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<string name="app_name">Radis</string>
-	<string name="no_account">No account. Press "menu" to create one.</string>
-	<string name="create_account">Create account</string>
-	<string name="name">Name</string>
-	<string name="account_creation">Account creation</string>
-	<string name="description">Description</string>
-	<string name="start_sum">Start amount</string>
-	<string name="create">Create</string>
-	<string name="cancel">Cancel</string>
-	<string name="accounts_list">Account list</string>
-	<string name="currency">Currency</string>
-	<string name="delete">Delete</string>
-	<string name="account_prompt">Select a currency</string>
-	<string-array name="all_currencies">
-		<item>CAD</item>
-		<item>EUR</item>
-		<item>GBP</item>
-		<item>JPY</item>
-		<item>USD</item>
-		<item>Custom</item>
-	</string-array>
-	<string name="custom_currency_hint">Enter ISO 4217 currency code</string>
-	<string name="edit">Edit</string>
-	<string name="ok">Ok</string>
-	<string name="third_party">Third party</string>
-	<string name="sum">Amount</string>
-	<string name="tag">Category</string>
-	<string name="date">Date</string>
-	<string name="mode">Payment method</string>
-	<string name="credit">Credit</string>
-	<string name="debit">Debit</string>
-	<string name="current_sum">Balance</string>
-	<string name="sum_at">At %1$s = %2$s</string>
+    <string name="app_name">Radis</string>
+    <string name="no_account">No account. Press "menu" to create one.</string>
+    <string name="create_account">Create account</string>
+    <string name="name">Name</string>
+    <string name="account_creation">Account creation</string>
+    <string name="description">Description</string>
+    <string name="start_sum">Start amount</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="accounts_list">Account list</string>
+    <string name="currency">Currency</string>
+    <string name="delete">Delete</string>
+    <string name="account_prompt">Select a currency</string>
 
-	<string name="no_operation">No transaction. Press "menu" to create one.
-	</string>
-	<string name="new_op">New transaction</string>
-	<string name="tp_account_name">Account %s</string>
-	<string name="account_edit">Account edition</string>
-	<string name="op_edition">Transaction edition</string>
-	<string name="future_sum_at">Future balance at %1$s = %2$s</string>
-	<string name="sum_at_selection">Balance at selection = %1$s</string>
-	<string name="list_of">List of %s</string>
+    <string-array name="all_currencies">
+        <item>CAD</item>
+        <item>EUR</item>
+        <item>GBP</item>
+        <item>JPY</item>
+        <item>USD</item>
+        <item>Custom</item>
+    </string-array>
 
-	<string name="tags">Tags</string>
-	<string name="modes">Payment method</string>
-	<string name="third_parties">Third party</string>
-	<string name="get_more_op">Previous month…</string>
-	<string name="delete_confirmation">Really delete?</string>
-	<string name="yes">Yes</string>
-	<string name="advanced">Advanced actions</string>
-	<string name="backup_db">Backup database</string>
-	<string name="restore_db">Restore database</string>
-	<string name="restore_confirm">Restore will override current data! This can\'t be
+    <string name="custom_currency_hint">Enter ISO 4217 currency code</string>
+    <string name="edit">Edit</string>
+    <string name="ok">Ok</string>
+    <string name="third_party">Third party</string>
+    <string name="sum">Amount</string>
+    <string name="tag">Category</string>
+    <string name="date">Date</string>
+    <string name="mode">Payment method</string>
+    <string name="credit">Credit</string>
+    <string name="debit">Debit</string>
+    <string name="current_sum">Balance</string>
+    <string name="sum_at">At %1$s = %2$s</string>
+    <string name="allowed_sum_digits">0123456789+-.,</string>
+    <string name="date_chars">0123456789/</string>
+    <string name="no_operation">o transaction. Press "menu" to create one.</string>
+    <string name="new_op">New transaction</string>
+    <string name="tp_account_name">Account %s</string>
+    <string name="account_edit">Account edition</string>
+    <string name="op_edition">Transaction edition</string>
+    <string name="future_sum_at">Future balance at %1$s = %2$s</string>
+    <string name="sum_at_selection">Balance at selection = %1$s</string>
+    <string name="list_of">List of %s</string>
+    <string name="tags">Tags</string>
+    <string name="modes">Payment method</string>
+    <string name="third_parties">Third party</string>
+    <string name="get_more_op">Previous month…</string>
+    <string name="delete_confirmation">Really delete?</string>
+    <string name="yes">Yes</string>
+    <string name="advanced">Advanced actions</string>
+    <string name="backup_db">Backup database</string>
+    <string name="restore_db">Restore database</string>
+    <string name="restore_confirm">Restore will override current data! This can\'t be
 		undone.</string>
-	<string name="backup_confirm">Backup will override last backup if it exists!
-	</string>
-	<string name="to_continue">Continue</string>
-	<string name="backup_success">Backup successed!</string>
-	<string name="backup_failed">Backup failed.</string>
-	<string name="restore_success">Restoration successed!</string>
-	<string name="restore_failed">Restoration failed.</string>
-	<string name="restarting">Restarting…</string>
-	<string name="will_restart">Application will be restart.</string>
-	<string name="no_more_ops">No more transaction</string>
-	<string name="no_start_amount">Start amount is empty</string>
-	<string name="invalid_amount">Amount is invalid</string>
-	<string name="misc">Misc</string>
-	<string name="notes">Notes</string>
-	<string name="balance_at">Balance at %s</string>
-	<string name="crash_notif_ticker_text">Unexpected error, please send a report…</string>
-	<string name="crash_notif_title">Radis has crashed…</string>
-	<string name="crash_notif_text">Please click here to help fix the issue.</string>
-	<string name="crash_dialog_title">Radis has crashed</string>
-	<string name="crash_dialog_text">An unexpected error occurred forcing the
+    <string name="backup_confirm">ackup will override last backup if it exists!</string>
+    <string name="to_continue">Continue</string>
+    <string name="backup_success">Backup successed!</string>
+    <string name="backup_failed">Backup failed.</string>
+    <string name="restore_success">Restoration successed!</string>
+    <string name="restore_failed">Restoration failed.</string>
+    <string name="restarting">Restarting…</string>
+    <string name="will_restart">Application will be restart.</string>
+    <string name="no_more_ops">No more transaction</string>
+    <string name="no_start_amount">Start amount is empty</string>
+    <string name="invalid_amount">Amount is invalid</string>
+    <string name="misc">Misc</string>
+    <string name="notes">Notes</string>
+    <string name="balance_at">Balance at %s</string>
+    <string name="crash_notif_ticker_text">Unexpected error, please send a report…</string>
+    <string name="crash_notif_title">Radis has crashed…</string>
+    <string name="crash_notif_text">Please click here to help fix the issue.</string>
+    <string name="crash_dialog_title">Radis has crashed</string>
+    <string name="crash_dialog_text">An unexpected error occurred forcing the
 		application to stop. Please help us fix this by sending us error data,
 		all you have to do is click \'OK\'.</string>
-	<string name="crash_dialog_comment_prompt">You might add your comments about the problem
+    <string name="crash_dialog_comment_prompt">You might add your comments about the problem
 		below:</string>
-	<string name="crash_dialog_ok_toast">Thank you !</string>
-	<string name="empty_amount">Amount is empty</string>
-	<string name="empty_third_party">Third party is empty</string>
-	<string name="item_exists">Item already exists</string>
-	<string-array name="periodicity_choices">
-		<item>Weekly</item>
-		<item>Monthly</item>
-		<item>Yearly</item>
-		<item>Custom</item>
-	</string-array>
-	<string-array name="periodicity_custom_choices">
-		<item>Days</item>
-		<item>Weeks</item>
-		<item>Monthes</item>
-		<item>Years</item>
-	</string-array>
-	<string-array name="periodicity_labels">
-		<item>Weekly</item>
-		<item>Monthly</item>
-		<item>Yearly</item>
-		<item>Every %d days</item>
-		<item>Every %d weeks</item>
-		<item>Every %d months</item>
-		<item>Every %d years</item>
-	</string-array>
-	<string name="every">Every</string>
-	<string name="every_fem">Every</string>
-	<string name="no_end_date">Forever</string>
-	<string name="scheduling">Scheduling</string>
-	<string name="basics">Basics</string>
-	<string name="end_date">End date</string>
-	<string name="scheduled_ops">Schedule</string>
-	<string name="account">Account</string>
-	<string name="periodicity">Periodicity</string>
-	<string name="end_date_incorrect">End date is before start date</string>
-	<string name="periodicity_must_be_greater_0">Periodicity must be greater than zero</string>
-	<string name="periodicity_must_be_num">Periodicity must be a number</string>
-	<string name="ask_delete_occurrences">Do you want to delete this scheduled transaction
+    <string name="crash_dialog_ok_toast">Thank you !</string>
+    <string name="empty_amount">Amount is empty</string>
+    <string name="empty_third_party">Third party is empty</string>
+    <string name="item_exists">Item already exists</string>
+
+    <string-array name="periodicity_choices">
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+        <item>Custom</item>
+    </string-array>
+    <string-array name="periodicity_custom_choices">
+        <item>Days</item>
+        <item>Weeks</item>
+        <item>Monthes</item>
+        <item>Years</item>
+    </string-array>
+    <string-array name="periodicity_labels">
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+        <item>Every %d days</item>
+        <item>Every %d weeks</item>
+        <item>Every %d months</item>
+        <item>Every %d years</item>
+    </string-array>
+
+    <string name="every">Every</string>
+    <string name="every_fem">Every</string>
+    <string name="no_end_date">Forever</string>
+    <string name="scheduling">Scheduling</string>
+    <string name="basics">Basics</string>
+    <string name="end_date">End date</string>
+    <string name="scheduled_ops">Schedule</string>
+    <string name="account">Account</string>
+    <string name="periodicity">Periodicity</string>
+    <string name="end_date_incorrect">End date is before start date</string>
+    <string name="periodicity_must_be_greater_0">Periodicity must be greater than zero</string>
+    <string name="periodicity_must_be_num">Periodicity must be a number</string>
+    <string name="ask_delete_occurrences">Do you want to delete this scheduled transaction
 		and all occurrences of this scheduled operation?</string>
-	<string name="del_all_occurrences">All</string>
-	<string name="cancel_delete_occurrences">This</string>
-	<string name="cancel_sch_deletion">None</string>
-	<string name="prefs_insertion_date_text">Scheduled transaction insertion day of month: %s
-	</string>
-	<string name="prefs_insertion_date_title">Enter day of month</string>
-	<string name="prefs_insertion_date_label">Insertion date</string>
-	<string name="preferences">Preferences</string>
-	<string name="ask_update_occurences">Do you want to update all occurrences?\nIf not,
-		existing occurences will be disconnected from this scheduling.
-	</string>
-	<string name="no">No</string>
-	<string name="update">Update</string>
-	<string name="disconnect">Disconnect</string>
-	<string name="ask_update_scheduling">This transaction is from a scheduled one. Do you
+    <string name="del_all_occurrences">All</string>
+    <string name="cancel_delete_occurrences">This</string>
+    <string name="cancel_sch_deletion">None</string>
+    <string name="prefs_insertion_date_text">cheduled transaction insertion day of month: %s</string>
+    <string name="prefs_insertion_date_title">Enter day of month</string>
+    <string name="prefs_insertion_date_label">Insertion date</string>
+    <string name="preferences">Preferences</string>
+    <string name="ask_update_occurences">o you want to update all occurrences?\nIf not,
+		existing occurences will be disconnected from this scheduling.</string>
+    <string name="no">No</string>
+    <string name="update">Update</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="ask_update_scheduling">his transaction is from a scheduled one. Do you
 		want to update the scheduled transaction and all its occurences? If
-		not, current transaction will be disconnected from the scheduled one.
-	</string>
-	<string name="convert_into_scheduling">Convert into a scheduled transaction</string>
-	<string name="edit_scheduling">Edit scheduled transaction</string>
-	<string name="process_scheduled_transactions">Process scheduled transactions</string>
-	<string name="must_be_day_of_month">You must input a day of month between 1 and 31
-	</string>
-	<string name="error_on_write_prefs">Error while writing preferences</string>
-	<string name="quickadd_account">Target account for quick add</string>
-	<string name="quickadd_account_desc">Target account for homescreen quick add: %s
-	</string>
-	<string name="quickadd_target">Add transaction to: %s</string>
-	<string name="quickadd_target_to_configure">Go to preferences to choose default account
-	</string>
-	<string name="quickadd_target_no_account">Create account to enable</string>
-	<string name="projection_date">Projection date</string>
-	<string name="projection_day_of_month">Day of Month</string>
-	<string name="projection_full_date">jj/MM/yyyy</string>
-	<string name="projection_date_mode">Projection mode</string>
-	<string-array name="projection_modes">
-		<item>To farest transaction</item>
-		<item>Day of next month</item>
-		<item>Absolute date</item>
-	</string-array>
-	<string name="bad_format_for_date">Date is not valid</string>
-	<string name="recompute_account_sums">Recompute account</string>
-	<string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your currency code)</string>
-	<string name="transfert_from">Transfert from account</string>
-	<string name="transfert_to">To account</string>
-	<string name="transfert_between">Make a transfert</string>
-	<string name="transfert">Transfert</string>
+		not, current transaction will be disconnected from the scheduled one.</string>
+    <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
+    <string name="edit_scheduling">Edit scheduled transaction</string>
+    <string name="process_scheduled_transactions">Process scheduled transactions</string>
+    <string name="must_be_day_of_month">ou must input a day of month between 1 and 31</string>
+    <string name="error_on_write_prefs">Error while writing preferences</string>
+    <string name="quickadd_account">Target account for quick add</string>
+    <string name="quickadd_account_desc">arget account for homescreen quick add: %s</string>
+    <string name="quickadd_target">Add transaction to: %s</string>
+    <string name="quickadd_target_to_configure">o to preferences to choose default account</string>
+    <string name="quickadd_target_no_account">Create account to enable</string>
+    <string name="projection_date">Projection date</string>
+    <string name="projection_day_of_month">Day of Month</string>
+    <string name="projection_full_date">jj/MM/yyyy</string>
+    <string name="projection_date_mode">Projection mode</string>
+
+    <string-array name="projection_modes">
+        <item>To farest transaction</item>
+        <item>Day of next month</item>
+        <item>Absolute date</item>
+    </string-array>
+
+    <string name="bad_format_for_date">Date is not valid</string>
+    <string name="recompute_account_sums">Recompute account</string>
+    <string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your currency code)</string>
+    <string name="transfert_from">Transfert from account</string>
+    <string name="transfert_to">To account</string>
+    <string name="transfert_between">Make a transfert</string>
+    <string name="transfert">Transfert</string>
+
 </resources>

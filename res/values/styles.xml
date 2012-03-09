@@ -96,14 +96,15 @@
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:textColor">@color/text_color</item>
-		<item name="android:paddingLeft">3dip</item>
-		<item name="android:paddingRight">3dip</item>
-		<item name="android:textSize">20sp</item>
+		<item name="android:paddingLeft">3dp</item>
+		<item name="android:paddingRight">3dp</item>
+		<item name="android:paddingBottom">2dp</item>
+		<item name="android:textSize">18dp</item>
 		<item name="android:singleLine">true</item>
 	</style>
 	<style name="OpRowTextView.Infos">
 		<item name="android:gravity">right</item>
-		<item name="android:textSize">14sp</item>
+		<item name="android:textSize">12dp</item>
 	</style>
 	<style name="OpRowTextView.Sums">
 		<item name="android:minWidth">60sp</item>
