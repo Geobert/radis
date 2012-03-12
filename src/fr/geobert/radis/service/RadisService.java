@@ -59,13 +59,13 @@ public class RadisService extends IntentService {
 			GregorianCalendar today = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(today);
 			final long todayInMillis = today.getTimeInMillis();
-			Log.d("Radis", "today : " + Formater.DATE_FORMAT.format(today.getTime()));
+			Log.d("Radis", "today : " + Formater.getFullDateFormater(getApplicationContext()).format(today.getTime()));
 			
 			GregorianCalendar currentMonth = new GregorianCalendar();
 			currentMonth.setTimeInMillis(todayInMillis);
 			Tools.clearTimeOfCalendar(currentMonth);
 			currentMonth.set(Calendar.DAY_OF_MONTH, currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
-			Log.d("Radis", "currentMonth : " + Formater.DATE_FORMAT.format(currentMonth.getTime()));
+			Log.d("Radis", "currentMonth : " + Formater.getFullDateFormater(getApplicationContext()).format(currentMonth.getTime()));
 			
 			GregorianCalendar insertionDate = new GregorianCalendar();
 			int insertionDayOfMonth = DBPrefsManager
@@ -82,24 +82,24 @@ public class RadisService extends IntentService {
 			
 			insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
 			Tools.clearTimeOfCalendar(insertionDate);
-			Log.d("Radis", "insertionDate : " + Formater.DATE_FORMAT.format(insertionDate.getTime()));
+			Log.d("Radis", "insertionDate : " + Formater.getFullDateFormater(getApplicationContext()).format(insertionDate.getTime()));
 			
 			long insertionDateInMillis = insertionDate.getTimeInMillis();
 			
 			GregorianCalendar limitInsertionDate = new GregorianCalendar();
 			limitInsertionDate.setTimeInMillis(insertionDateInMillis);
 			limitInsertionDate.add(Calendar.MONTH, 1);
-			Log.d("Radis", "limitInsertionDate : " + Formater.DATE_FORMAT.format(limitInsertionDate.getTime()));
+			Log.d("Radis", "limitInsertionDate : " + Formater.getFullDateFormater(getApplicationContext()).format(limitInsertionDate.getTime()));
 
 			final long lastInsertDate = DBPrefsManager.getInstance(this).getLong("LAST_INSERT_DATE", todayInMillis);
-			Log.d("Radis", "lastInsertDate : " + Formater.DATE_FORMAT.format(lastInsertDate));
+			Log.d("Radis", "lastInsertDate : " + Formater.getFullDateFormater(getApplicationContext()).format(lastInsertDate));
 			if (lastInsertDate > insertionDateInMillis) {
 				insertionDate.add(Calendar.MONTH, 1);
-				Log.d("Radis", "modified insertionDate : " + Formater.DATE_FORMAT.format(insertionDate.getTime()));
+				Log.d("Radis", "modified insertionDate : " + Formater.getFullDateFormater(getApplicationContext()).format(insertionDate.getTime()));
 				insertionDateInMillis = insertionDate.getTimeInMillis();
 			}
 			limitInsertionDate.set(Calendar.DAY_OF_MONTH, limitInsertionDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-			Log.d("Radis", "final limitInsertionDate : " + Formater.DATE_FORMAT.format(limitInsertionDate.getTime()));
+			Log.d("Radis", "final limitInsertionDate : " + Formater.getFullDateFormater(getApplicationContext()).format(limitInsertionDate.getTime()));
 
 			HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
 			HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();

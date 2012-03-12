@@ -35,7 +35,7 @@ public class QuickAddController {
 		mQuickAddButton = (Button) activity
 				.findViewById(R.id.quickadd_validate);
 		mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount);
-		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT
+		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
 				.getDecimalFormatSymbols().getDecimalSeparator(),
 				mQuickAddAmount).setAutoNegate(true);
 

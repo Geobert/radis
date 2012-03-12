@@ -87,8 +87,13 @@ public class Tools {
 
 	public static Dialog createDeleteConfirmationDialog(Context ctx,
 			DialogInterface.OnClickListener onClick) {
+		return Tools.createDeleteConfirmationDialog(ctx, onClick, R.string.delete_confirmation);
+	}
+
+	public static Dialog createDeleteConfirmationDialog(Context ctx,
+			DialogInterface.OnClickListener onClick, final int msgId) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-		builder.setMessage(R.string.delete_confirmation)
+		builder.setMessage(msgId)
 				.setCancelable(false)
 				.setPositiveButton(R.string.yes, onClick)
 				.setNegativeButton(R.string.cancel,
@@ -99,7 +104,7 @@ public class Tools {
 						});
 		return builder.create();
 	}
-
+	
 	public static boolean onDefaultMenuSelected(Activity ctx, int featureId,
 			MenuItem item) {
 		switch (item.getItemId()) {

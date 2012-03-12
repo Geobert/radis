@@ -64,7 +64,7 @@ public class ScheduledOpList extends ListActivity {
 						periodicityUnit, periodicity));
 				b.append(" - ");
 				if (endDate > 0) {
-					b.append(Formater.DATE_FORMAT.format(new Date(endDate)));
+					b.append(Formater.getFullDateFormater(ScheduledOpList.this).format(new Date(endDate)));
 				} else {
 					b.append(ScheduledOpList.this
 							.getString(R.string.no_end_date));
@@ -73,7 +73,7 @@ public class ScheduledOpList extends ListActivity {
 				return true;
 			} else if (colName.equals(mDateColName)) {
 				Date date = new Date(cursor.getLong(columnIndex));
-				((TextView) view).setText(Formater.DATE_FORMAT
+				((TextView) view).setText(Formater.getFullDateFormater(ScheduledOpList.this)
 						.format(date));
 				return true;
 			} else {
@@ -90,9 +90,7 @@ public class ScheduledOpList extends ListActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!Formater.isInit()) {
-			Formater.init(this);
-		}
+
 		setTitle(R.string.scheduled_ops);
 		setContentView(R.layout.scheduled_list);
 		registerForContextMenu(getListView());

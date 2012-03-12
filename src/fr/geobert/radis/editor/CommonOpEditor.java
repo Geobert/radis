@@ -70,10 +70,6 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!Formater.isInit()) {
-			Formater.init(this);
-		}
-
 		setView();
 		init(savedInstanceState);
 	}
@@ -98,7 +94,7 @@ public abstract class CommonOpEditor extends Activity {
 		mOpModeText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_mode);
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
 		mOpTagText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_tag);
-		mSumTextWatcher = new CorrectCommaWatcher(Formater.SUM_FORMAT.getDecimalFormatSymbols()
+		mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater().getDecimalFormatSymbols()
 				.getDecimalSeparator(), mOpSumText);
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
@@ -123,11 +119,11 @@ public abstract class CommonOpEditor extends Activity {
 
 	private void invertSign() throws ParseException {
 		mSumTextWatcher.setAutoNegate(false);
-		Double sum = Formater.SUM_FORMAT.parse(mOpSumText.getText().toString()).doubleValue();
+		Double sum = Formater.getSumFormater().parse(mOpSumText.getText().toString()).doubleValue();
 		if (sum != null) {
 			sum = -sum;
 		}
-		mOpSumText.setText(Formater.SUM_FORMAT.format(sum));
+		mOpSumText.setText(Formater.getSumFormater().format(sum));
 	}
 
 	protected boolean isFormValid(StringBuilder errMsg) {
@@ -149,7 +145,7 @@ public abstract class CommonOpEditor extends Activity {
 			res = false;
 		} else {
 			try {
-				Formater.SUM_FORMAT.parse(str).doubleValue();
+				Formater.getSumFormater().parse(str).doubleValue();
 			} catch (ParseException e) {
 				if (errMsg.length() > 0) {
 					errMsg.append("\n");

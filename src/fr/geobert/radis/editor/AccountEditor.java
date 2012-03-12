@@ -40,16 +40,13 @@ public class AccountEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!Formater.isInit()) {
-			Formater.init(this);
-		}
 
 		setContentView(R.layout.account_creation);
 		setTitle(R.string.account_edit);
 		mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
 		mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
 		mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
-		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(Formater.SUM_FORMAT
+		mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(Formater.getSumFormater()
 				.getDecimalFormatSymbols().getDecimalSeparator(), mAccountStartSumText));
 		mAccountStartSumText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
 			@Override
@@ -167,7 +164,7 @@ public class AccountEditor extends Activity {
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_NAME)));
 			mAccountDescText.setText(account.getString(account
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_DESC)));
-			mAccountStartSumText.setText(Formater.SUM_FORMAT.format(account.getLong(account
+			mAccountStartSumText.setText(Formater.getSumFormater().format(account.getLong(account
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_START_SUM)) / 100.0d));
 			String currencyStr = account.getString(account
 					.getColumnIndexOrThrow(CommonDbAdapter.KEY_ACCOUNT_CURRENCY));
@@ -246,7 +243,7 @@ public class AccountEditor extends Activity {
 		String name = mAccountNameText.getText().toString().trim();
 		String desc = mAccountDescText.getText().toString().trim();
 		try {
-			long startSum = Math.round(Formater.SUM_FORMAT.parse(
+			long startSum = Math.round(Formater.getSumFormater().parse(
 					mAccountStartSumText.getText().toString().trim()).doubleValue() * 100);
 			String currency = null;
 			if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {

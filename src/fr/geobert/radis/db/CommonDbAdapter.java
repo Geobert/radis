@@ -933,7 +933,7 @@ public class CommonDbAdapter {
 		case 2: {
 			GregorianCalendar projDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(projDate);
-			projDate.setTime(Formater.DATE_FORMAT.parse(projectionDate));
+			projDate.setTime(Formater.getFullDateFormater(mCtx).parse(projectionDate));
 			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
 			Cursor op = fetchOpEarlierThan(projDate.getTimeInMillis(), 0,
 					accountId);
@@ -956,9 +956,10 @@ public class CommonDbAdapter {
 		values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 	}
 
-	public boolean deleteAccount(long rowId) {
+	public boolean deleteAccount(long accountId) {
+		deleteScheduledOpOfAccount(accountId);
 		return mDb.delete(DATABASE_ACCOUNT_TABLE, KEY_ACCOUNT_ROWID + "="
-				+ rowId, null) > 0;
+				+ accountId, null) > 0;
 	}
 
 	public Cursor fetchAllAccounts() {
@@ -1009,7 +1010,7 @@ public class CommonDbAdapter {
 				break;
 			case 2:
 				try {
-					Date projDate = Formater.DATE_FORMAT.parse(c.getString(9));
+					Date projDate = Formater.getFullDateFormater(mCtx).parse(c.getString(9));
 					projDate.setHours(0);
 					projDate.setMinutes(0);
 					projDate.setSeconds(0);
@@ -1474,6 +1475,11 @@ public class CommonDbAdapter {
 				+ rowId, null) > 0;
 	}
 
+	public boolean deleteScheduledOpOfAccount(final long accountId) {
+		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ACCOUNT_ID + "="
+				+ accountId, null) > 0;
+	}
+	
 	public boolean deleteScheduledOp(final long schOpId) {
 		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ROWID + "="
 				+ schOpId, null) > 0;

@@ -320,7 +320,7 @@ public class OperationList extends ListActivity implements
 							.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
 					Log.d("Radis",
 							"earliestOpDate : "
-									+ Formater.DATE_FORMAT
+									+ Formater.getFullDateFormater(OperationList.this)
 											.format(earliestOpDate));
 					c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1,
 							mAccountId);
@@ -332,7 +332,7 @@ public class OperationList extends ListActivity implements
 						c.close();
 						Log.d("Radis",
 								"opDate : "
-										+ Formater.DATE_FORMAT
+										+ Formater.getFullDateFormater(OperationList.this)
 												.format(opDate.getTimeInMillis()));
 						Cursor result = mDbHelper.fetchOpOfMonth(opDate, earliestOpDate,
 								mAccountId);
@@ -435,9 +435,7 @@ public class OperationList extends ListActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		if (!Formater.isInit()) {
-			Formater.init(this);
-		}
+		
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.operation_list);
 		registerForContextMenu(getListView());
@@ -1022,9 +1020,9 @@ public class OperationList extends ListActivity implements
 			t.setVisibility(View.VISIBLE);
 			t.setText(String.format(
 					format,
-					Formater.DATE_FORMAT.format(account.getLong(account
+					Formater.getFullDateFormater(this).format(account.getLong(account
 							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
-					Formater.SUM_FORMAT.format(account.getLong(account
+					Formater.getSumFormater().format(account.getLong(account
 							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
 		} else {
 			t.setVisibility(View.INVISIBLE);
@@ -1041,10 +1039,10 @@ public class OperationList extends ListActivity implements
 			selectOpAndAdjustOffset(getListView(), position);
 			long sum = accountCurSum + computeSumFromCursor(data);
 			t.setText(String.format(getString(R.string.sum_at_selection),
-					Formater.SUM_FORMAT.format(sum / 100.0d)));
+					Formater.getSumFormater().format(sum / 100.0d)));
 		} else {
 			t.setText(String.format(getString(R.string.sum_at_selection),
-					Formater.SUM_FORMAT.format((accountCurSum / 100.0d))));
+					Formater.getSumFormater().format((accountCurSum / 100.0d))));
 		}
 	}
 

@@ -51,13 +51,14 @@
     <string name="third_parties">Third party</string>
     <string name="get_more_op">Previous month…</string>
     <string name="delete_confirmation">Really delete?</string>
+    <string name="account_delete_confirmation">Delete account will also delete all scheduled transaction attached to it. \nReally delete?</string>
     <string name="yes">Yes</string>
     <string name="advanced">Advanced actions</string>
     <string name="backup_db">Backup database</string>
     <string name="restore_db">Restore database</string>
     <string name="restore_confirm">Restore will override current data! This can\'t be
 		undone.</string>
-    <string name="backup_confirm">ackup will override last backup if it exists!</string>
+    <string name="backup_confirm">Backup will override last backup if it exists!</string>
     <string name="to_continue">Continue</string>
     <string name="backup_success">Backup successed!</string>
     <string name="backup_failed">Backup failed.</string>

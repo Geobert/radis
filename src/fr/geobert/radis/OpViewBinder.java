@@ -40,12 +40,12 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 				textView.setTextColor(mRes.getColor(R.color.text_color));
 				i.setImageResource(R.drawable.arrow_down16);
 			}
-			String txt = Formater.SUM_FORMAT.format(sum / 100.0d);
+			String txt = Formater.getSumFormater().format(sum / 100.0d);
 			textView.setText(txt);
 			return true;
 		} else if (colName.equals(mDateColName)) {
 			Date date = new Date(cursor.getLong(columnIndex));
-			((TextView) view).setText(Formater.SHORT_DATE_FORMAT
+			((TextView) view).setText(Formater.getShortDateFormater(null)
 					.format(date));
 			return true;
 		}

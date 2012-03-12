@@ -106,11 +106,11 @@ public class Operation implements Parcelable {
 	}
 
 	public String getDateStr() {
-		return Formater.DATE_FORMAT.format(mDate.getTime());
+		return Formater.getFullDateFormater(null).format(mDate.getTime());
 	}
 
 	public String getShortDateStr() {
-		return Formater.SHORT_DATE_FORMAT.format(mDate.getTime());
+		return Formater.getShortDateFormater(null).format(mDate.getTime());
 	}
 
 	public long getDate() {
@@ -135,14 +135,14 @@ public class Operation implements Parcelable {
 	}
 
 	public String getSumStr() {
-		return Formater.SUM_FORMAT.format(mSum / 100.0d);
+		return Formater.getSumFormater().format(mSum / 100.0d);
 	}
 
 	public void setSumStr(String sumStr) {
 		sumStr = sumStr.replace('+', ' ').trim();
 		double d;
 		try {
-			d = Formater.SUM_FORMAT.parse(sumStr).doubleValue();
+			d = Formater.getSumFormater().parse(sumStr).doubleValue();
 		} catch (ParseException e) {
 			d = 0d;
 		}
@@ -150,7 +150,7 @@ public class Operation implements Parcelable {
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {
-		mDate.setTime(Formater.DATE_FORMAT.parse(dateStr));
+		mDate.setTime(Formater.getFullDateFormater(null).parse(dateStr));
 
 	}
 

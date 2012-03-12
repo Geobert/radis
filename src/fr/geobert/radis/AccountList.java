@@ -94,9 +94,6 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		if (!Formater.isInit()) {
-			Formater.init(this);
-		}
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
@@ -290,7 +287,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				} else {
 					textView.setTextColor(res.getColor(R.color.positiveSum));
 				}
-				String txt = Formater.SUM_FORMAT.format(sum / 100.0d);
+				String txt = Formater.getSumFormater().format(sum / 100.0d);
 				try {
 					textView.setText(txt
 							+ " "
@@ -326,7 +323,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				if (dateLong > 0) {
 					textView.setText(String.format(
 							getString(R.string.balance_at),
-							Formater.DATE_FORMAT.format(new Date(dateLong))));
+							Formater.getFullDateFormater(AccountList.this).format(new Date(dateLong))));
 				} else {
 					textView.setText("");
 				}
@@ -403,7 +400,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 							deleteAccount(mAccountToDelete);
 							mAccountToDelete = 0;
 						}
-					});
+					}, R.string.account_delete_confirmation);
 		default:
 			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
 		}
