@@ -3,6 +3,7 @@ package fr.geobert.radis;
 import java.util.Date;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.view.View;
@@ -17,12 +18,14 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 	private CharSequence mSumColName;
 	protected CharSequence mDateColName;
 	private int mArrowIconId;
+	private Context mCtx;
 
 	public OpViewBinder(Activity context, CharSequence sumColName, CharSequence dateColName, int arrowIconId) {
 		mRes = context.getResources();
 		mSumColName = sumColName;
 		mDateColName = dateColName;
 		mArrowIconId = arrowIconId;
+		mCtx = context;
 	}
 
 	@Override
@@ -45,7 +48,7 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 			return true;
 		} else if (colName.equals(mDateColName)) {
 			Date date = new Date(cursor.getLong(columnIndex));
-			((TextView) view).setText(Formater.getShortDateFormater(null)
+			((TextView) view).setText(Formater.getShortDateFormater(mCtx)
 					.format(date));
 			return true;
 		}
