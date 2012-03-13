@@ -1,44 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="fr.geobert.radis" xmlns:android="http://schemas.android.com/apk/res/android" android:versionName="0.6.14" android:versionCode="28">
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
-	<uses-permission android:name="android.permission.INTERNET"></uses-permission>
-	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
-	<uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fr.geobert.radis"
+    android:versionCode="28"
+    android:versionName="0.6.15b" >
 
-	<application android:label="@string/app_name" android:icon="@drawable/radis"
-		android:name="Radis" android:debuggable="false">
-		<activity android:label="@string/app_name" android:name="AccountList"
-			android:launchMode="singleTop">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
-			</intent-filter>
-		</activity>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.INTERNET" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" >
+    </uses-permission>
+    <uses-permission android:name="android.permission.WAKE_LOCK" >
+    </uses-permission>
 
-		<activity android:launchMode="singleTop"
-			android:windowSoftInputMode="stateVisible|adjustResize" android:name=".editor.AccountEditor"></activity>
-		<activity android:name="OperationList" android:label="test op list label"
-			android:launchMode="singleTop"></activity>
-		<activity android:label="@string/op_edition"
-			android:launchMode="singleTop" android:name=".editor.OperationEditor"></activity>
-		<activity android:name="org.acra.CrashReportDialog"
-			android:theme="@android:style/Theme.Dialog" android:launchMode="singleInstance"
-			android:excludeFromRecents="true" android:finishOnTaskLaunch="true" />
-		<activity android:name="ScheduledOpList" android:launchMode="singleTop"></activity>
-		<activity android:launchMode="singleTop"
-			android:name=".editor.ScheduledOperationEditor"></activity>
-		<receiver android:name=".service.InstallRadisServiceReceiver">
-			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED" />
-				<action android:name="fr.geobert.radis.STARTED" />
-			</intent-filter>
-		</receiver>
-		<service android:name=".service.RadisService">
-		</service>
-		<receiver android:name=".service.OnAlarmReceiver">
-		</receiver>
-		<activity android:launchMode="singleTop" android:name="RadisConfiguration"></activity>
-	</application>
-	<uses-sdk android:minSdkVersion="7" />
+    <uses-sdk android:minSdkVersion="7" />
 
-</manifest> 
+    <application
+        android:name="Radis"
+        android:debuggable="false"
+        android:icon="@drawable/radis"
+        android:label="@string/app_name" >
+        <activity
+            android:name="AccountList"
+            android:label="@string/app_name"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".editor.AccountEditor"
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="stateVisible|adjustResize" >
+        </activity>
+        <activity
+            android:name="OperationList"
+            android:launchMode="singleTop" android:theme="@android:style/Theme.Black.NoTitleBar">
+        </activity>
+        <activity
+            android:name=".editor.OperationEditor"
+            android:label="@string/op_edition"
+            android:launchMode="singleTop" >
+        </activity>
+        <activity
+            android:name="org.acra.CrashReportDialog"
+            android:excludeFromRecents="true"
+            android:finishOnTaskLaunch="true"
+            android:launchMode="singleInstance"
+            android:theme="@android:style/Theme.Dialog" />
+        <activity
+            android:name="ScheduledOpList"
+            android:launchMode="singleTop" android:theme="@android:style/Theme.Black.NoTitleBar">
+        </activity>
+        <activity
+            android:name=".editor.ScheduledOperationEditor"
+            android:launchMode="singleTop" >
+        </activity>
+
+        <receiver android:name=".service.InstallRadisServiceReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="fr.geobert.radis.STARTED" />
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".service.RadisService" >
+        </service>
+
+        <receiver android:name=".service.OnAlarmReceiver" >
+        </receiver>
+
+        <activity
+            android:name="RadisConfiguration"
+            android:launchMode="singleTop" >
+        </activity>
+    </application>
+
+</manifest>

@@ -20,9 +20,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
@@ -33,6 +39,10 @@ public class ScheduledOpList extends ListActivity {
 	private CommonDbAdapter mDbHelper;
 
 	private AdapterContextMenuInfo mOpToDelete;
+
+	private Spinner mAccountSpinner;
+
+	private long mCurrentAccount;
 
 	// activities ids
 	private static final int ACTIVITY_SCH_OP_CREATE = 0;
@@ -64,7 +74,8 @@ public class ScheduledOpList extends ListActivity {
 						periodicityUnit, periodicity));
 				b.append(" - ");
 				if (endDate > 0) {
-					b.append(Formater.getFullDateFormater(ScheduledOpList.this).format(new Date(endDate)));
+					b.append(Formater.getFullDateFormater(ScheduledOpList.this)
+							.format(new Date(endDate)));
 				} else {
 					b.append(ScheduledOpList.this
 							.getString(R.string.no_end_date));
@@ -73,8 +84,8 @@ public class ScheduledOpList extends ListActivity {
 				return true;
 			} else if (colName.equals(mDateColName)) {
 				Date date = new Date(cursor.getLong(columnIndex));
-				((TextView) view).setText(Formater.getFullDateFormater(ScheduledOpList.this)
-						.format(date));
+				((TextView) view).setText(Formater.getFullDateFormater(
+						ScheduledOpList.this).format(date));
 				return true;
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
@@ -118,10 +129,23 @@ public class ScheduledOpList extends ListActivity {
 			}
 		};
 		getListView().setOnTouchListener(gestureListener);
+
+		ImageButton btn = (ImageButton) findViewById(R.id.add_sch_op);
+		btn.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				startCreateScheduledOp();
+			}
+		});
+
+		mAccountSpinner = (Spinner) findViewById(R.id.account_spinner);
+		mCurrentAccount = getIntent().getLongExtra("accountId", 0);
 	}
 
 	private void fillData() {
-		Cursor c = mDbHelper.fetchAllScheduledOps();
+		Cursor c = mCurrentAccount == 0 ? mDbHelper.fetchAllScheduledOps()
+				: mDbHelper.fetchScheduledOpsOfAccount(mCurrentAccount);
 		startManagingCursor(c);
 		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
@@ -137,6 +161,49 @@ public class ScheduledOpList extends ListActivity {
 				R.layout.scheduled_row, c, from, to);
 		operations.setViewBinder(new InnerViewBinder());
 		setListAdapter(operations);
+	}
+
+	private void populateAccountSpinner() {
+		Cursor c = mDbHelper.fetchAllAccounts();
+		startManagingCursor(c);
+		if (c != null && c.isFirst()) {
+			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+					android.R.layout.simple_spinner_item);
+			adapter.add(new Account(0, getString(R.string.all_accounts)));
+			do {
+				adapter.add(new Account(c));
+			} while (c.moveToNext());
+
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			mAccountSpinner.setAdapter(adapter);
+			if (mCurrentAccount != 0) {
+				int pos = -1;
+				boolean found = false;
+				do {
+					pos = pos + 1;
+					found = adapter.getItemId(pos) == mCurrentAccount;
+				} while (!found && pos < adapter.getCount());
+				if (found) {
+					mAccountSpinner.setSelection(pos);
+				}
+			}
+		}
+		mAccountSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view,
+					int pos, long id) {
+				Account a = (Account) parent.getItemAtPosition(pos);
+				mCurrentAccount = a.mAccountId;
+				fillData();
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+
+			}
+		});
 	}
 
 	@Override
@@ -162,6 +229,7 @@ public class ScheduledOpList extends ListActivity {
 	protected void onResume() {
 		super.onResume();
 		initDbHelper();
+		populateAccountSpinner();
 		fillData();
 	}
 
@@ -251,7 +319,6 @@ public class ScheduledOpList extends ListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.scheduled_op_list_menu, menu);
 		inflater.inflate(R.menu.common_menu, menu);
 		return true;
 	}
@@ -266,14 +333,8 @@ public class ScheduledOpList extends ListActivity {
 
 	@Override
 	public boolean onMenuItemSelected(int featureId, MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.create_scheduled_operation:
-			startCreateScheduledOp();
+		if (Tools.onDefaultMenuSelected(this, featureId, item)) {
 			return true;
-		default:
-			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
-				return true;
-			}
 		}
 		return super.onMenuItemSelected(featureId, item);
 	}

@@ -933,7 +933,8 @@ public class CommonDbAdapter {
 		case 2: {
 			GregorianCalendar projDate = new GregorianCalendar();
 			Tools.clearTimeOfCalendar(projDate);
-			projDate.setTime(Formater.getFullDateFormater(mCtx).parse(projectionDate));
+			projDate.setTime(Formater.getFullDateFormater(mCtx).parse(
+					projectionDate));
 			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
 			Cursor op = fetchOpEarlierThan(projDate.getTimeInMillis(), 0,
 					accountId);
@@ -1010,7 +1011,8 @@ public class CommonDbAdapter {
 				break;
 			case 2:
 				try {
-					Date projDate = Formater.getFullDateFormater(mCtx).parse(c.getString(9));
+					Date projDate = Formater.getFullDateFormater(mCtx).parse(
+							c.getString(9));
 					projDate.setHours(0);
 					projDate.setMinutes(0);
 					projDate.setSeconds(0);
@@ -1075,7 +1077,7 @@ public class CommonDbAdapter {
 		return mDb.update(DATABASE_ACCOUNT_TABLE, args, KEY_ACCOUNT_ROWID + "="
 				+ accountId, null) > 0;
 	}
-	
+
 	public boolean updateAccount(long accountId, String name, String desc,
 			long start_sum, String currency,
 			ProjectionDateController projectionController)
@@ -1320,8 +1322,8 @@ public class CommonDbAdapter {
 						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis()
 						+ " AND ops." + KEY_OP_DATE + " >= "
 						+ startDate.getTimeInMillis() + " AND ops."
-						+ KEY_OP_DATE + " < " + limitDate,
-				null, null, null, OP_ORDERING, null);
+						+ KEY_OP_DATE + " < " + limitDate, null, null, null,
+				OP_ORDERING, null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -1412,6 +1414,17 @@ public class CommonDbAdapter {
 		return c;
 	}
 
+	public Cursor fetchScheduledOpsOfAccount(final long accountId) {
+		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
+				SCHEDULED_OP_COLS_QUERY, "sch." + KEY_SCHEDULED_ACCOUNT_ID
+						+ " = " + accountId, null, null, null,
+				SCHEDULED_OP_ORDERING);
+		if (null != c) {
+			c.moveToFirst();
+		}
+		return c;
+	}
+
 	public Cursor fetchOneScheduledOp(long rowId) {
 		Cursor c = mDb.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
 				SCHEDULED_OP_COLS_QUERY, "sch." + KEY_OP_ROWID + " = " + rowId,
@@ -1476,10 +1489,10 @@ public class CommonDbAdapter {
 	}
 
 	public boolean deleteScheduledOpOfAccount(final long accountId) {
-		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ACCOUNT_ID + "="
-				+ accountId, null) > 0;
+		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ACCOUNT_ID
+				+ "=" + accountId, null) > 0;
 	}
-	
+
 	public boolean deleteScheduledOp(final long schOpId) {
 		return mDb.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ROWID + "="
 				+ schOpId, null) > 0;

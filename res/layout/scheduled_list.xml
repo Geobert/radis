@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent" android:background="@android:color/black"
-	android:layout_height="fill_parent">
-	<ListView android:id="@+id/android:list" style="@style/OpListView" />
-	<TextView android:id="@+id/android:empty"
-		android:layout_width="fill_parent" android:layout_height="fill_parent" android:layout_weight="1"
-		android:text="@string/no_operation" android:textSize="25px"
-		android:gravity="center" />
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageButton
+            android:id="@+id/add_sch_op"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:gravity="left|center_vertical"
+            android:src="@android:drawable/ic_input_add" />
+
+        <Spinner
+            android:id="@+id/account_spinner"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/android:list"
+        style="@style/OpListView" />
+
+    <TextView
+        android:id="@+id/android:empty"
+        android:layout_width="fill_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/no_operation"
+        android:textSize="20dp" />
+
 </LinearLayout>

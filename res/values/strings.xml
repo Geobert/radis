@@ -167,4 +167,5 @@
     <string name="transfert">Transfert</string>
 	<string name="long_date_format">MM/dd/yy</string>
 	<string name="short_date_format">MM/dd</string>
+	<string name="all_accounts">All accounts</string>
 </resources>
