@@ -125,16 +125,16 @@
     <string name="del_all_occurrences">All</string>
     <string name="cancel_delete_occurrences">This</string>
     <string name="cancel_sch_deletion">None</string>
-    <string name="prefs_insertion_date_text">cheduled transaction insertion day of month: %s</string>
+    <string name="prefs_insertion_date_text">Scheduled transaction insertion day of month: %s</string>
     <string name="prefs_insertion_date_title">Enter day of month</string>
     <string name="prefs_insertion_date_label">Insertion date</string>
     <string name="preferences">Preferences</string>
-    <string name="ask_update_occurences">o you want to update all occurrences?\nIf not,
+    <string name="ask_update_occurences">Do you want to update all occurrences?\nIf not,
 		existing occurences will be disconnected from this scheduling.</string>
     <string name="no">No</string>
     <string name="update">Update</string>
     <string name="disconnect">Disconnect</string>
-    <string name="ask_update_scheduling">his transaction is from a scheduled one. Do you
+    <string name="ask_update_scheduling">This transaction is from a scheduled one. Do you
 		want to update the scheduled transaction and all its occurences? If
 		not, current transaction will be disconnected from the scheduled one.</string>
     <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
@@ -145,11 +145,11 @@
     <string name="quickadd_account">Target account for quick add</string>
     <string name="quickadd_account_desc">arget account for homescreen quick add: %s</string>
     <string name="quickadd_target">Add transaction to: %s</string>
-    <string name="quickadd_target_to_configure">o to preferences to choose default account</string>
+    <string name="quickadd_target_to_configure">Do to preferences to choose default account</string>
     <string name="quickadd_target_no_account">Create account to enable</string>
     <string name="projection_date">Projection date</string>
     <string name="projection_day_of_month">Day of Month</string>
-    <string name="projection_full_date">jj/MM/yyyy</string>
+    <string name="projection_full_date">dd/MM/yyyy</string>
     <string name="projection_date_mode">Projection mode</string>
 
     <string-array name="projection_modes">
@@ -168,4 +168,7 @@
 	<string name="long_date_format">MM/dd/yy</string>
 	<string name="short_date_format">MM/dd</string>
 	<string name="all_accounts">All accounts</string>
+	<string name="delete_recurring_op">Would you like to delete only this transaction, all transactions in the series or this and all future transactions in the series? (Press back button to cancel)</string>
+	<string name="del_all_following">Future</string>
+	<string name="del_only_current">Current</string>
 </resources>

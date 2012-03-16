@@ -116,8 +116,8 @@
 	<string name="periodicity_must_be_num">La périodicité doit être un chiffre ou un nombre</string>
 	<string name="ask_delete_occurrences">Voulez-vous supprimer cette échéance ainsi que
 		toutes ses occurrences ?</string>
-	<string name="del_all_occurrences">Tout</string>
-	<string name="cancel_delete_occurrences">Échéance</string>
+	<string name="del_all_occurrences">Toutes</string>
+	<string name="cancel_delete_occurrences">L\'échéance</string>
 	<string name="cancel_sch_deletion">Rien</string>
 	<string name="prefs_insertion_date_text">L\'insertion des échéances se fera le %s du mois</string>
 	<string name="prefs_insertion_date_title">Entrez le jour du mois</string>
@@ -173,4 +173,7 @@
 	<string name="long_date_format">dd/MM/yy</string>
 	<string name="short_date_format">dd/MM</string>
 	<string name="all_accounts">Tous les comptes</string>
+	<string name="delete_recurring_op">Voulez vous supprimer cette opération, toutes les opérations de la série ou cette opération ainsi que les suivantes ? (Pressez le bouton retour pour annuler)</string>
+	<string name="del_all_following">Suivantes</string>
+	<string name="del_only_current">Courante</string>
 </resources>

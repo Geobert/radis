@@ -5,6 +5,7 @@ import java.util.GregorianCalendar;
 
 import org.acra.ErrorReporter;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
 import android.content.Context;
@@ -62,6 +63,7 @@ public class OperationList extends ListActivity implements
 
 	private static final int DIALOG_DELETE = 0;
 	private static final int DIALOG_PROJECTION = 1;
+	private static final int DIALOG_DELETE_OCCURENCE = 2;
 
 	private CommonDbAdapter mDbHelper;
 	private Long mAccountId;
@@ -318,10 +320,9 @@ public class OperationList extends ListActivity implements
 				try {
 					long earliestOpDate = c.getLong(c
 							.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-					Log.d("Radis",
-							"earliestOpDate : "
-									+ Formater.getFullDateFormater(OperationList.this)
-											.format(earliestOpDate));
+					Log.d("Radis", "earliestOpDate : "
+							+ Formater.getFullDateFormater(OperationList.this)
+									.format(earliestOpDate));
 					c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1,
 							mAccountId);
 					startManagingCursor(c);
@@ -332,10 +333,11 @@ public class OperationList extends ListActivity implements
 						c.close();
 						Log.d("Radis",
 								"opDate : "
-										+ Formater.getFullDateFormater(OperationList.this)
-												.format(opDate.getTimeInMillis()));
-						Cursor result = mDbHelper.fetchOpOfMonth(opDate, earliestOpDate,
-								mAccountId);
+										+ Formater.getFullDateFormater(
+												OperationList.this).format(
+												opDate.getTimeInMillis()));
+						Cursor result = mDbHelper.fetchOpOfMonth(opDate,
+								earliestOpDate, mAccountId);
 						startManagingCursor(result);
 						mHasResult = fillMatrixCursor(mAccumulator, result);
 						mLops = mAccumulator;
@@ -435,7 +437,7 @@ public class OperationList extends ListActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.operation_list);
 		registerForContextMenu(getListView());
@@ -544,9 +546,19 @@ public class OperationList extends ListActivity implements
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
 		switch (item.getItemId()) {
-		case DELETE_OP_ID:
-			showDialog(DIALOG_DELETE);
+		case DELETE_OP_ID: {
+			Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
+			startManagingCursor(c);
+			if (!c.isBeforeFirst()
+					&& !c.isAfterLast()
+					&& c.getLong(c
+							.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
+				showDialog(DIALOG_DELETE_OCCURENCE);
+			} else {
+				showDialog(DIALOG_DELETE);
+			}
 			mOpToDelete = info;
+		}
 			return true;
 		case EDIT_OP_ID:
 			startOperationEdit(info.id);
@@ -554,12 +566,13 @@ public class OperationList extends ListActivity implements
 		case CONVERT_OP_ID:
 			startScheduledOpEditor(info.id, true);
 			return true;
-		case EDIT_SCH_OP_ID:
+		case EDIT_SCH_OP_ID: {
 			Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
 			startManagingCursor(c);
 			startScheduledOpEditor(c.getLong(c
 					.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)),
 					false);
+		}
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -669,7 +682,8 @@ public class OperationList extends ListActivity implements
 						.getColumnIndex(CommonDbAdapter.KEY_OP_DATE)));
 				GregorianCalendar currentMonth = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(currentMonth);
-				currentMonth.set(Calendar.DAY_OF_MONTH, currentMonth.getActualMinimum(Calendar.DAY_OF_MONTH));
+				currentMonth.set(Calendar.DAY_OF_MONTH,
+						currentMonth.getActualMinimum(Calendar.DAY_OF_MONTH));
 				Cursor c = mDbHelper.fetchOpBetweenDate(currentMonth, latest,
 						mAccountId);
 				startManagingCursor(c);
@@ -712,11 +726,58 @@ public class OperationList extends ListActivity implements
 			if (info.position < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
-			updateSumsAfterOpEdit(sum, 0L, 0);
 			fillData();
+			updateSumsAfterOpEdit(sum, 0L, 0);
 		} else {
 			updateSumsDisplay(true);
 			// fillData() is called inside updateSumsDisplay
+		}
+	}
+
+	private void deleteOpAndFollowing(AdapterContextMenuInfo info) {
+		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
+		startManagingCursor(c);
+		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+		updateLastSelectionIdxFromTop();
+		final long schOpId = c.getLong(c
+				.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID));
+		final long date = c.getLong(c
+				.getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
+		int nbDeleted = mDbHelper.deleteAllFutureOccurrences(mAccountId,
+				schOpId, date);
+		if (nbDeleted > 0) {
+			if (info.position < mLastSelectedPosition) {
+				mLastSelectedPosition--;
+			}
+			fillData();
+			updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0);
+		} else {
+			updateSumsDisplay(true);
+			// fillData() is called inside updateSumsDisplay
+		}
+	}
+
+	private void deleteAllOccurences(AdapterContextMenuInfo info) {
+		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
+		startManagingCursor(c);
+		final long sum = c
+				.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+		updateLastSelectionIdxFromTop();
+		final long schOpId = c.getLong(c
+				.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID));
+		if (mDbHelper.deleteScheduledOp(schOpId)) {
+			final int nbDeleted = mDbHelper.deleteAllOccurrences(mAccountId,
+					schOpId);
+			if (nbDeleted > 0) {
+				if (info.position < mLastSelectedPosition) {
+					mLastSelectedPosition--;
+				}
+				fillData();
+				updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0);
+			} else {
+				updateSumsDisplay(true);
+				// fillData() is called inside updateSumsDisplay
+			}
 		}
 	}
 
@@ -933,6 +994,38 @@ public class OperationList extends ListActivity implements
 		return super.onKeyLongPress(keyCode, event);
 	}
 
+	private Dialog createOccurenceDeleteDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setMessage(R.string.delete_recurring_op)
+				.setCancelable(true)
+				.setPositiveButton(R.string.del_only_current,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								deleteOp(mOpToDelete);
+								mOpToDelete = null;
+							}
+						})
+				.setNeutralButton(R.string.del_all_following,
+						new DialogInterface.OnClickListener() {
+
+							@Override
+							public void onClick(DialogInterface dialog,
+									int which) {
+								deleteOpAndFollowing(mOpToDelete);
+							}
+						})
+				.setNegativeButton(R.string.del_all_occurrences,
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								deleteAllOccurences(mOpToDelete);
+							}
+						});
+		return builder.create();
+	}
+
 	@Override
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
@@ -944,6 +1037,8 @@ public class OperationList extends ListActivity implements
 							mOpToDelete = null;
 						}
 					});
+		case DIALOG_DELETE_OCCURENCE:
+			return createOccurenceDeleteDialog();
 		case DIALOG_PROJECTION:
 			return ProjectionDateController.getDialog(this, mDbHelper);
 		default:
@@ -1020,10 +1115,12 @@ public class OperationList extends ListActivity implements
 			t.setVisibility(View.VISIBLE);
 			t.setText(String.format(
 					format,
-					Formater.getFullDateFormater(this).format(account.getLong(account
-							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
-					Formater.getSumFormater().format(account.getLong(account
-							.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
+					Formater.getFullDateFormater(this)
+							.format(account.getLong(account
+									.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE))),
+					Formater.getSumFormater()
+							.format(account.getLong(account
+									.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) / 100.0d)));
 		} else {
 			t.setVisibility(View.INVISIBLE);
 		}
@@ -1047,7 +1144,7 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void updateSumsAndSelection() {
-		long curSum = getAccountCurSum();
+		final long curSum = getAccountCurSum();
 		Cursor c = mLastOps;
 		c.moveToFirst();
 		updateFutureSumDisplay();

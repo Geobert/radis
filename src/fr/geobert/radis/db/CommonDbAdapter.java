@@ -1097,7 +1097,7 @@ public class CommonDbAdapter {
 
 	public void updateProjection(long accountId, long sumToAdd, long opDate) {
 		ContentValues args = new ContentValues();
-		if (mProjectionMode == 0 && opDate > mProjectionDate || opDate == 0) {
+		if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
 			if (opDate == 0) {
 				Cursor op = fetchLastOp(accountId);
 				if (null != op) {
@@ -1502,6 +1502,13 @@ public class CommonDbAdapter {
 		return mDb.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ACCOUNT_ID + "="
 				+ accountId + " AND " + KEY_OP_SCHEDULED_ID + "=" + schOpId,
 				null);
+	}
+
+	public int deleteAllFutureOccurrences(final long accountId,
+			final long schOpId, final long date) {
+		return mDb.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ACCOUNT_ID + "="
+				+ accountId + " AND " + KEY_OP_SCHEDULED_ID + "=" + schOpId
+				+ " AND " + KEY_OP_DATE + ">=" + date, null);
 	}
 
 	public int updateAllOccurrences(final long accountId, final long schOpId,

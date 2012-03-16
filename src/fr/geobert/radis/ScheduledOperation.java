@@ -132,7 +132,7 @@ public class ScheduledOperation extends Operation {
 		setEndMonth(in.readInt());
 		setEndYear(in.readInt());
 	}
-	
+
 	public static final Parcelable.Creator<ScheduledOperation> CREATOR = new Parcelable.Creator<ScheduledOperation>() {
 		public ScheduledOperation createFromParcel(Parcel in) {
 			return new ScheduledOperation(in);
@@ -208,4 +208,5 @@ public class ScheduledOperation extends Operation {
 			break;
 		}
 	}
+
 }
