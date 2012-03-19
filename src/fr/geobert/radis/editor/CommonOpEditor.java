@@ -55,7 +55,6 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
 	}
 
 	protected abstract void populateFields();

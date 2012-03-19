@@ -171,4 +171,8 @@
 	<string name="delete_recurring_op">Would you like to delete only this transaction, all transactions in the series or this and all future transactions in the series? (Press back button to cancel)</string>
 	<string name="del_all_following">Future</string>
 	<string name="del_only_current">Current</string>
+	<string name="hide_account_quick_add">Hide quick add 1</string>
+	<string name="hide_account_quick_add_details">Hide the quick add on the accounts\' list</string>
+	<string name="hide_ops_quick_add">Hide quick add 2</string>
+	<string name="hide_ops_quick_add_details">Hide the quick add on the transactions\' list</string>
 </resources>

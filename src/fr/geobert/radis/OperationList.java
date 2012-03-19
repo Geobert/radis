@@ -44,6 +44,7 @@ import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.editor.OperationEditor;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
+import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.QuickAddController;
@@ -379,8 +380,6 @@ public class OperationList extends ListActivity implements
 
 	protected void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this);
-		assert null != mDbHelper;
-		mDbHelper.open();
 		mCurAccount = mDbHelper.fetchAccount(mAccountId);
 		startManagingCursor(mCurAccount);
 		if (mCurAccount.moveToFirst()) {
@@ -468,6 +467,15 @@ public class OperationList extends ListActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
+		boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(
+				RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
+		int visibility = View.VISIBLE;
+		if (hideQuickAdd) {
+			visibility = View.GONE;
+		}
+		
+		mQuickAddController.setVisibility(visibility);
+		
 		initDbHelper();
 		initViewBehavior();
 		if (!receiverIsRegistered) {

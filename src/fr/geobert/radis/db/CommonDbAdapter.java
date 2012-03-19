@@ -336,6 +336,7 @@ public class CommonDbAdapter {
 
 	private void init(Context ctx) {
 		this.mCtx = ctx;
+		this.open();
 	}
 
 	public static CommonDbAdapter getInstance(Context ctx) {
@@ -733,17 +734,13 @@ public class CommonDbAdapter {
 					if (c.moveToFirst()) {
 						lastSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
 						curSum = lastSum;
-						int del = db.delete(DATABASE_OPERATIONS_TABLE,
-								KEY_OP_ROWID + ">600", null);
-						// Log.d("Radis", "before loop del :" + del);
+						db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID
+								+ ">600", null);
 						do {
 							lastSum = curSum;
-							int nbDel = db.delete(DATABASE_OPERATIONS_TABLE,
-									KEY_OP_ROWID + "=(SELECT max(_id) FROM "
-											+ DATABASE_OPERATIONS_TABLE + ")",
-									null);
-							// Log.d("Radis", "rowId = " +
-							// c.getLong(c.getColumnIndex(KEY_OP_ROWID)));
+							db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID
+									+ "=(SELECT max(_id) FROM "
+									+ DATABASE_OPERATIONS_TABLE + ")", null);
 							c.close();
 							c = db.query(DATABASE_OPERATIONS_TABLE, null,
 									KEY_OP_ROWID + "=(SELECT max(_id) FROM "
@@ -760,9 +757,6 @@ public class CommonDbAdapter {
 							} else {
 								curSum = 0;
 							}
-							// Log.d("Radis", "lastSum = " + lastSum +
-							// ", curSum = " + curSum
-							// + ", nbDel = " + nbDel );
 						} while (curSum == lastSum);
 					} else {
 						c.close();

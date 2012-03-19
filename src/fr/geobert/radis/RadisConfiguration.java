@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -18,6 +19,8 @@ public class RadisConfiguration extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
 	public final static String KEY_INSERTION_DATE = "insertion_date";
 	public final static String KEY_DEFAULT_ACCOUNT = "quickadd_account";
+	public final static String KEY_HIDE_ACCOUNT_QUICK_ADD = "hide_account_quick_add";
+	public final static String KEY_HIDE_OPS_QUICK_ADD = "hide_ops_quick_add";
 	public final static String DEFAULT_INSERTION_DATE = "25";
 
 	private ListPreference mAccountsChoice;
@@ -52,7 +55,6 @@ public class RadisConfiguration extends PreferenceActivity implements
 
 	private void initAccountChoices() {
 		CommonDbAdapter dbHelper = CommonDbAdapter.getInstance(this);
-		dbHelper.open();
 		Cursor accounts = dbHelper.fetchAllAccounts();
 		ArrayList<CharSequence> entries = new ArrayList<CharSequence>();
 		ArrayList<CharSequence> values = new ArrayList<CharSequence>();
@@ -134,6 +136,9 @@ public class RadisConfiguration extends PreferenceActivity implements
 		} else if (p instanceof ListPreference) {
 			ListPreference l = (ListPreference) p;
 			value = l.getValue();
+		} else if (p instanceof CheckBoxPreference) {
+			CheckBoxPreference c = (CheckBoxPreference)p;
+			value = Boolean.toString(c.isChecked());
 		}
 
 		getPrefs().put(key, value);

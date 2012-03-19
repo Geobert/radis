@@ -224,7 +224,6 @@ public class AccountEditor extends Activity {
 	protected void onResume() {
 		super.onResume();
 		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
 		mProjectionController.setDbHelper(mDbHelper);
 		if (!mOnRestore) {
 			populateFields();

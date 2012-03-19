@@ -31,8 +31,6 @@ public class RadisService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		try {
 			mDbHelper = CommonDbAdapter.getInstance(getApplicationContext());
-			assert null != mDbHelper;
-			mDbHelper.open();
 			processScheduledOps();
 			// mDbHelper.close();
 		} finally {

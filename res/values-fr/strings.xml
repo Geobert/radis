@@ -176,4 +176,8 @@
 	<string name="delete_recurring_op">Voulez vous supprimer cette opération, toutes les opérations de la série ou cette opération ainsi que les suivantes ? (Pressez le bouton retour pour annuler)</string>
 	<string name="del_all_following">Suivantes</string>
 	<string name="del_only_current">Courante</string>
+	<string name="hide_account_quick_add">Masquer l\'ajout rapide 1</string>
+	<string name="hide_ops_quick_add">Masquer l\'ajout rapide 2</string>
+	<string name="hide_account_quick_add_details">Masquer l\'ajout rapide de la liste des comptes</string>
+	<string name="hide_ops_quick_add_details">Masquer l\'ajout rapide de la liste des opérations</string>
 </resources>

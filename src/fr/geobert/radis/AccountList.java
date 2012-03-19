@@ -29,6 +29,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -87,7 +88,6 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 
 	private void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
 		mQuickAddController.setDbHelper(mDbHelper);
 	}
 
@@ -155,10 +155,10 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 			}
 		};
 		getListView().setOnTouchListener(gestureListener);
-
+		
 		mQuickAddController = new QuickAddController(this, this);
 		mQuickAddText = (TextView) findViewById(R.id.quickadd_target_text);
-
+		
 		if (mFirstStart) {
 			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
 			i.setAction(Tools.INTENT_RADIS_STARTED);
@@ -322,8 +322,9 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				long dateLong = cursor.getLong(cursor.getColumnIndex(colName));
 				if (dateLong > 0) {
 					textView.setText(String.format(
-							getString(R.string.balance_at),
-							Formater.getFullDateFormater(AccountList.this).format(new Date(dateLong))));
+							getString(R.string.balance_at), Formater
+									.getFullDateFormater(AccountList.this)
+									.format(new Date(dateLong))));
 				} else {
 					textView.setText("");
 				}
@@ -416,9 +417,19 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	@Override
 	protected void onResume() {
 		super.onResume();
+		boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(
+				RadisConfiguration.KEY_HIDE_ACCOUNT_QUICK_ADD);
+
+		int visibility = View.VISIBLE;
+		if (hideQuickAdd) {
+			visibility = View.GONE;
+		}
+		mQuickAddController.initViewBehavior();
+		mQuickAddText.setVisibility(visibility);
+		mQuickAddController.setVisibility(visibility);
 		initDbHelper();
 		fillData();
-		mQuickAddController.initViewBehavior();
+
 		updateTargetTextView();
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 	}

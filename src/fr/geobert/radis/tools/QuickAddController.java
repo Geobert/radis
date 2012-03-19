@@ -129,4 +129,8 @@ public class QuickAddController {
 		}
 		but.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0);
 	}
+
+	public void setVisibility(int visibility) {
+		mActivity.findViewById(R.id.quick_add_layout).setVisibility(visibility);
+	}
 }
