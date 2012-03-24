@@ -313,7 +313,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 									cursor.getString(cursor
 											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)));
 					ErrorReporter.getInstance().putCustomData(
-							"defaultCurrency", currency.getSymbol());
+							"defaultCurrency", currency.getCurrencyCode());
 					ErrorReporter.getInstance().handleSilentException(e);
 				}
 				return true;
