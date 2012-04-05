@@ -165,24 +165,33 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				}));
 	}
 
+	
+	private void onOpNotFound() {
+		if (mOpIdSource > 0) {
+			Bundle extras = getIntent().getExtras();
+			final long accountId = extras.getLong(Tools.EXTRAS_ACCOUNT_ID);
+			Cursor op = mDbHelper.fetchOneOp(mOpIdSource, accountId);
+			mCurrentSchOp = new ScheduledOperation(op, accountId);
+			mOriginalSchOp = new ScheduledOperation(op, accountId);
+			op.close();
+		} else {
+			mCurrentSchOp = new ScheduledOperation();
+		}
+	}
+	
 	@Override
 	protected void fetchOrCreateCurrentOp() {
 		if (mRowId > 0) {
 			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
 			startManagingCursor(opCursor);
-			mCurrentSchOp = new ScheduledOperation(opCursor);
-			mOriginalSchOp = new ScheduledOperation(opCursor);
-		} else {
-			if (mOpIdSource > 0) {
-				Bundle extras = getIntent().getExtras();
-				final long accountId = extras.getLong(Tools.EXTRAS_ACCOUNT_ID);
-				Cursor op = mDbHelper.fetchOneOp(mOpIdSource, accountId);
-				mCurrentSchOp = new ScheduledOperation(op, accountId);
-				mOriginalSchOp = new ScheduledOperation(op, accountId);
-				op.close();
+			if (opCursor.getCount() > 0) {
+				mCurrentSchOp = new ScheduledOperation(opCursor);
+				mOriginalSchOp = new ScheduledOperation(opCursor);
 			} else {
-				mCurrentSchOp = new ScheduledOperation();
+				onOpNotFound();
 			}
+		} else {
+			onOpNotFound();
 		}
 	}
 
