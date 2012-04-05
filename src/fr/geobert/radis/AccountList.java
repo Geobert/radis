@@ -306,15 +306,6 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 									cursor.getLong(cursor
 											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)),
 									currency.getCurrencyCode());
-					ErrorReporter
-							.getInstance()
-							.putCustomData(
-									"erroneousCurrency",
-									cursor.getString(cursor
-											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)));
-					ErrorReporter.getInstance().putCustomData(
-							"defaultCurrency", currency.getCurrencyCode());
-					ErrorReporter.getInstance().handleSilentException(e);
 				}
 				return true;
 			} else if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE)) {
