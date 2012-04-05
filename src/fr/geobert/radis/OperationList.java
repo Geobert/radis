@@ -350,6 +350,15 @@ public class OperationList extends ListActivity implements
 					ErrorReporter.getInstance().putCustomData(
 							"mLops.getCount()",
 							Integer.toBinaryString(c.getCount()));
+					ErrorReporter.getInstance().putCustomData(
+							"c.isBeforeFirst()",
+							String.valueOf(c.isBeforeFirst()));
+					ErrorReporter.getInstance().putCustomData(
+							"c.isAfterLast()",
+							String.valueOf(c.isAfterLast()));
+					ErrorReporter.getInstance().putCustomData(
+							"moveToLast",
+							String.valueOf(moveToLast));
 					ErrorReporter.getInstance().handleSilentException(e);
 
 				}
@@ -473,9 +482,9 @@ public class OperationList extends ListActivity implements
 		if (hideQuickAdd) {
 			visibility = View.GONE;
 		}
-		
+
 		mQuickAddController.setVisibility(visibility);
-		
+
 		initDbHelper();
 		initViewBehavior();
 		if (!receiverIsRegistered) {
