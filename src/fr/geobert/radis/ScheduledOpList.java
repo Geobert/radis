@@ -7,6 +7,7 @@ import org.acra.ErrorReporter;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -36,6 +37,7 @@ import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOpList extends ListActivity {
+	public static final String CURRENT_ACCOUNT = "accountId";
 	private CommonDbAdapter mDbHelper;
 
 	private AdapterContextMenuInfo mOpToDelete;
@@ -92,6 +94,12 @@ public class ScheduledOpList extends ListActivity {
 			}
 		}
 	}
+	
+	public static void callMe(Context ctx, final long currentAccountId) {
+		Intent i = new Intent(ctx, ScheduledOpList.class);
+		i.putExtra(CURRENT_ACCOUNT, currentAccountId);
+		ctx.startActivity(i);
+	}
 
 	private void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this);
@@ -140,7 +148,7 @@ public class ScheduledOpList extends ListActivity {
 		});
 
 		mAccountSpinner = (Spinner) findViewById(R.id.account_spinner);
-		mCurrentAccount = getIntent().getLongExtra("accountId", 0);
+		mCurrentAccount = getIntent().getLongExtra(CURRENT_ACCOUNT, 0);
 	}
 
 	private void fillData() {
@@ -342,6 +350,7 @@ public class ScheduledOpList extends ListActivity {
 	private void startCreateScheduledOp() {
 		Intent i = new Intent(this, ScheduledOperationEditor.class);
 		i.putExtra(Tools.EXTRAS_OP_ID, -1l);
+		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, mCurrentAccount);
 		startActivityForResult(i, ACTIVITY_SCH_OP_CREATE);
 	}
 

@@ -554,8 +554,7 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void startScheduledOpsList() {
-		Intent i = new Intent(this, ScheduledOpList.class);
-		startActivity(i);
+		ScheduledOpList.callMe(this, mAccountId);
 	}
 
 	@Override

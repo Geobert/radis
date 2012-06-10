@@ -215,8 +215,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	}
 
 	private void startScheduledOpsList() {
-		Intent i = new Intent(this, ScheduledOpList.class);
-		startActivity(i);
+		ScheduledOpList.callMe(this, 0);
 	}
 
 	private void startAccountEdit(long id) {
