@@ -415,10 +415,11 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		if (hideQuickAdd) {
 			visibility = View.GONE;
 		}
+		initDbHelper();
 		mQuickAddController.initViewBehavior();
 		mQuickAddText.setVisibility(visibility);
 		mQuickAddController.setVisibility(visibility);
-		initDbHelper();
+
 		fillData();
 
 		updateTargetTextView();
