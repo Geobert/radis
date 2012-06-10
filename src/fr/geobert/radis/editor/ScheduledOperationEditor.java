@@ -319,7 +319,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			startInsertionServiceAndExit();
 		} else {
 			if (!op.equals(mOriginalSchOp)) {
-				mDbHelper.updateScheduledOp(mRowId, op, false);
 				showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
 			} else { // nothing to update
 				Intent res = new Intent();
@@ -341,31 +340,21 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 								@Override
 								public void onClick(DialogInterface dialog,
 										int which) {
-									if (mCurrentSchOp
-											.periodicityEquals(mOriginalSchOp)) {
-										ScheduledOperation.updateAllOccurences(
-												mDbHelper, mCurrentSchOp,
-												mPreviousSum, mRowId);
-									} else {
-										ScheduledOperation.deleteAllOccurences(
-												mDbHelper, mRowId);
-									}
-									startInsertionServiceAndExit();
+									onUpdateAllOccurenceClicked();
 								}
 							})
 					.setNeutralButton(R.string.disconnect,
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
-									mDbHelper.disconnectAllOccurrences(
-											mCurrentSchOp.mAccountId, mRowId);
-									startInsertionServiceAndExit();
+									onDisconnectFromOccurences();
 								}
 							})
 					.setNegativeButton(R.string.cancel,
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
+									
 									dialog.cancel();
 								}
 							});
@@ -374,6 +363,27 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			return super.onCreateDialog(id);
 		}
 
+	}
+	
+	protected void onDisconnectFromOccurences() {
+		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
+		mDbHelper.disconnectAllOccurrences(
+				mCurrentSchOp.mAccountId, mRowId);
+		startInsertionServiceAndExit();
+	}
+
+	private void onUpdateAllOccurenceClicked() {
+		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
+		if (mCurrentSchOp
+				.periodicityEquals(mOriginalSchOp)) {
+			ScheduledOperation.updateAllOccurences(
+					mDbHelper, mCurrentSchOp,
+					mPreviousSum, mRowId);
+		} else {
+			ScheduledOperation.deleteAllOccurences(
+					mDbHelper, mRowId);
+		}
+		startInsertionServiceAndExit();
 	}
 
 	@Override
