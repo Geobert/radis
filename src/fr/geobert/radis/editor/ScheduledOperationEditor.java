@@ -165,7 +165,6 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				}));
 	}
 
-	
 	private void onOpNotFound() {
 		if (mOpIdSource > 0) {
 			Bundle extras = getIntent().getExtras();
@@ -178,7 +177,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			mCurrentSchOp = new ScheduledOperation();
 		}
 	}
-	
+
 	@Override
 	protected void fetchOrCreateCurrentOp() {
 		if (mRowId > 0) {
@@ -269,15 +268,15 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mAccountSpinner.setAdapter(adapter);
 			if (mCurrentSchOp.mAccountId != 0 || mAccountId != 0) {
-				int pos = -1;
-				boolean found = false;
-				do {
-					pos = pos + 1;
+				int pos = 0;
+				while (pos < adapter.getCount()) {
 					long id = adapter.getItemId(pos);
-					found = id == mCurrentSchOp.mAccountId || id == mAccountId;
-				} while (!found && pos < adapter.getCount());
-				if (found) {
-					mAccountSpinner.setSelection(pos);
+					if (id == mCurrentSchOp.mAccountId || id == mAccountId) {
+						mAccountSpinner.setSelection(pos);
+						break;
+					} else {
+						pos++;
+					}
 				}
 			}
 		}
@@ -355,7 +354,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int id) {
-									
+
 									dialog.cancel();
 								}
 							});
@@ -365,24 +364,20 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		}
 
 	}
-	
+
 	protected void onDisconnectFromOccurences() {
 		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
-		mDbHelper.disconnectAllOccurrences(
-				mCurrentSchOp.mAccountId, mRowId);
+		mDbHelper.disconnectAllOccurrences(mCurrentSchOp.mAccountId, mRowId);
 		startInsertionServiceAndExit();
 	}
 
 	private void onUpdateAllOccurenceClicked() {
 		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
-		if (mCurrentSchOp
-				.periodicityEquals(mOriginalSchOp)) {
-			ScheduledOperation.updateAllOccurences(
-					mDbHelper, mCurrentSchOp,
+		if (mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
+			ScheduledOperation.updateAllOccurences(mDbHelper, mCurrentSchOp,
 					mPreviousSum, mRowId);
 		} else {
-			ScheduledOperation.deleteAllOccurences(
-					mDbHelper, mRowId);
+			ScheduledOperation.deleteAllOccurences(mDbHelper, mRowId);
 		}
 		startInsertionServiceAndExit();
 	}

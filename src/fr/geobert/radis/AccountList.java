@@ -56,9 +56,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	private long mAccountToDelete = 0;
 	private Button mScheduledListBtn;
 	private Button mAddAccountBtn;
-	public static AccountList ACTIVITY;
-	public static PendingIntent RESTART_INTENT;
-
+	
 	private boolean mFirstStart = true;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
@@ -89,6 +87,12 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	private void initDbHelper() {
 		mDbHelper = CommonDbAdapter.getInstance(this);
 		mQuickAddController.setDbHelper(mDbHelper);
+	}
+	
+	public static void callMe(Context ctx) {
+		Intent intent = new Intent(ctx, AccountList.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		ctx.startActivity(intent);
 	}
 
 	/** Called when the activity is first created. */
@@ -123,9 +127,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		setTitle(getString(R.string.app_name) + " " + versionName + " - "
 				+ getString(R.string.accounts_list));
 		registerForContextMenu(getListView());
-		ACTIVITY = this;
-		RESTART_INTENT = PendingIntent.getActivity(this.getBaseContext(), 0,
-				new Intent(getIntent()), getIntent().getFlags());
+		
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 

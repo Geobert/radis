@@ -185,14 +185,15 @@ public class ScheduledOpList extends ListActivity {
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mAccountSpinner.setAdapter(adapter);
 			if (mCurrentAccount != 0) {
-				int pos = -1;
-				boolean found = false;
-				do {
-					pos = pos + 1;
-					found = adapter.getItemId(pos) == mCurrentAccount;
-				} while (!found && pos < adapter.getCount());
-				if (found) {
-					mAccountSpinner.setSelection(pos);
+				int pos = 0;
+				while (pos < adapter.getCount()) {
+					long id = adapter.getItemId(pos);
+					if (id == mCurrentAccount) {
+						mAccountSpinner.setSelection(pos);
+						break;
+					} else {
+						pos++;
+					}
 				}
 			}
 		}
@@ -218,12 +219,15 @@ public class ScheduledOpList extends ListActivity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
 		if (resultCode == RESULT_OK) {
+			if (mDbHelper == null) {
+				initDbHelper();
+			}
 			try {
 				fillData();
 			} catch (Exception e) {
 				ErrorReporter.getInstance().handleException(e);
 				Tools.popError(ScheduledOpList.this, e.getMessage(),
-						Tools.createRestartClickListener());
+						Tools.createRestartClickListener(this));
 			}
 		}
 	}

@@ -74,17 +74,16 @@ public class RadisConfiguration extends PreferenceActivity implements
 
 	private void updateLabel(String key) {
 		String summary = null;
-		String value = null;
 		
 		if (KEY_INSERTION_DATE.equals(key)) {
-			value = getPrefs().getString(key, DEFAULT_INSERTION_DATE);
+			String value = getPrefs().getString(key, DEFAULT_INSERTION_DATE);
 			String s = getString(R.string.prefs_insertion_date_text);
 			summary = String.format(s, value);
 		} else if (KEY_DEFAULT_ACCOUNT.equals(key)) {
 			ListPreference l = (ListPreference) findPreference(key);
 			CharSequence s = l.getEntry();
 			if (null != s) {
-				value = s.toString();
+				String value = s.toString();
 				summary = getString(R.string.quickadd_account_desc, value);
 			}
 		}

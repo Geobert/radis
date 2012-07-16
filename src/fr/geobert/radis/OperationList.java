@@ -74,7 +74,7 @@ public class OperationList extends ListActivity implements
 	private AsyncTask<Void, Void, Long> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
-	private AdapterContextMenuInfo mOpToDelete = null;
+	private long mOpToDelete = -1;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
 	private QuickAddController mQuickAddController;
@@ -573,7 +573,7 @@ public class OperationList extends ListActivity implements
 			} else {
 				showDialog(DIALOG_DELETE);
 			}
-			mOpToDelete = info;
+			mOpToDelete = info.id;
 		}
 			return true;
 		case EDIT_OP_ID:
@@ -732,14 +732,13 @@ public class OperationList extends ListActivity implements
 		startActivityForResult(i, ACTIVITY_OP_CREATE);
 	}
 
-	private void deleteOp(AdapterContextMenuInfo info) {
-		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
+	private void deleteOp(long opToDelId) {
+		Cursor c = mDbHelper.fetchOneOp(opToDelId, mAccountId);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-		Log.d("Radis", "deleteOp sum " + sum);
 		updateLastSelectionIdxFromTop();
-		if (mDbHelper.deleteOp(info.id, mAccountId)) {
-			if (info.position < mLastSelectedPosition) {
+		if (mDbHelper.deleteOp(opToDelId, mAccountId)) {
+			if (c.getPosition() < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
 			fillData();
@@ -750,8 +749,8 @@ public class OperationList extends ListActivity implements
 		}
 	}
 
-	private void deleteOpAndFollowing(AdapterContextMenuInfo info) {
-		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
+	private void deleteOpAndFollowing(long opToDelId) {
+		Cursor c = mDbHelper.fetchOneOp(opToDelId, mAccountId);
 		startManagingCursor(c);
 		long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
 		updateLastSelectionIdxFromTop();
@@ -762,7 +761,7 @@ public class OperationList extends ListActivity implements
 		int nbDeleted = mDbHelper.deleteAllFutureOccurrences(mAccountId,
 				schOpId, date);
 		if (nbDeleted > 0) {
-			if (info.position < mLastSelectedPosition) {
+			if (c.getPosition() < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
 			fillData();
@@ -773,8 +772,8 @@ public class OperationList extends ListActivity implements
 		}
 	}
 
-	private void deleteAllOccurences(AdapterContextMenuInfo info) {
-		Cursor c = mDbHelper.fetchOneOp(info.id, mAccountId);
+	private void deleteAllOccurences(long opToDelId) {
+		Cursor c = mDbHelper.fetchOneOp(opToDelId, mAccountId);
 		startManagingCursor(c);
 		final long sum = c
 				.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
@@ -785,7 +784,7 @@ public class OperationList extends ListActivity implements
 			final int nbDeleted = mDbHelper.deleteAllOccurrences(mAccountId,
 					schOpId);
 			if (nbDeleted > 0) {
-				if (info.position < mLastSelectedPosition) {
+				if (c.getPosition() < mLastSelectedPosition) {
 					mLastSelectedPosition--;
 				}
 				fillData();
@@ -1021,7 +1020,6 @@ public class OperationList extends ListActivity implements
 							public void onClick(DialogInterface dialog,
 									int which) {
 								deleteOp(mOpToDelete);
-								mOpToDelete = null;
 							}
 						})
 				.setNeutralButton(R.string.del_all_following,
@@ -1050,7 +1048,6 @@ public class OperationList extends ListActivity implements
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							deleteOp(mOpToDelete);
-							mOpToDelete = null;
 						}
 					});
 		case DIALOG_DELETE_OCCURENCE:

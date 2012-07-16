@@ -60,10 +60,10 @@ public class Tools {
 
 	}
 
-	public static DialogInterface.OnClickListener createRestartClickListener() {
+	public static DialogInterface.OnClickListener createRestartClickListener(final Context ctx) {
 		return new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
-				Tools.restartApp();
+				Tools.restartApp(ctx);
 			}
 		};
 	}
@@ -157,7 +157,7 @@ public class Tools {
 		return builder.create();
 	}
 
-	private static Dialog createFailAndRestartDialog(Activity ctx, int id) {
+	private static Dialog createFailAndRestartDialog(final Activity ctx, int id) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
 		StringBuilder msg = new StringBuilder();
 		msg.append(ctx.getString(id)).append('\n')
@@ -167,7 +167,7 @@ public class Tools {
 				.setPositiveButton(R.string.ok,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								Tools.restartApp();
+								Tools.restartApp(ctx);
 							}
 						});
 		return builder.create();
@@ -182,7 +182,7 @@ public class Tools {
 			final int failureTextId) {
 		return new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				Activity ctx = mActivity;
+				final Activity ctx = mActivity;
 				if (action.run()) {
 					StringBuilder msg = new StringBuilder();
 					msg.append(ctx.getString(successTextId)).append('\n')
@@ -191,7 +191,7 @@ public class Tools {
 					t.show();
 					new Handler().postDelayed(new Runnable() {
 						public void run() {
-							Tools.restartApp();
+							Tools.restartApp(ctx);
 						}
 					}, 2000);
 				} else {
@@ -258,14 +258,10 @@ public class Tools {
 	}
 
 	// ------------------------------------------------------
-	// DEBUGÂ TOOLS
+	// DEBUG TOOLS
 	// ------------------------------------------------------
-	public static void restartApp() {
-		AlarmManager mgr = (AlarmManager) AccountList.ACTIVITY
-				.getSystemService(Context.ALARM_SERVICE);
-		mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 1000,
-				AccountList.RESTART_INTENT);
-		System.exit(2);
+	public static void restartApp(Context ctx) {
+		AccountList.callMe(ctx);
 	}
 
 	public static boolean onKeyLongPress(int keyCode, KeyEvent event,
@@ -294,10 +290,10 @@ public class Tools {
 				switch (item) {
 				case 0:
 					mDb.trashDatabase();
-					Tools.restartApp();
+					Tools.restartApp(context);
 					break;
 				case 1:
-					Tools.restartApp();
+					Tools.restartApp(context);
 					break;
 				case 2:
 					Intent i = new Intent(context,
