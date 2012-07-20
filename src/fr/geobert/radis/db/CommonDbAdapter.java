@@ -34,7 +34,7 @@ import fr.geobert.radis.tools.Tools;
 public class CommonDbAdapter {
 	private static final String TAG = "CommonDbAdapter";
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 11;
+	protected static final int DATABASE_VERSION = 12;
 
 	public static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String DATABASE_MODES_TABLE = "modes";
@@ -113,6 +113,7 @@ public class CommonDbAdapter {
 	public static final String KEY_OP_ACCOUNT_ID = "account_id";
 	public static final String KEY_OP_ROWID = "_id";
 	public static final String KEY_OP_NOTES = "notes";
+	public static final String KEY_OP_TRANSFERT_ACC_ID = "transfert_acc_id";
 
 	public static final String KEY_SCHEDULED_END_DATE = "end_date";
 	public static final String KEY_SCHEDULED_PERIODICITY = "periodicity";
@@ -129,7 +130,8 @@ public class CommonDbAdapter {
 			+ " integer not null, " + KEY_SCHEDULED_END_DATE + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY_UNIT + " integer not null, "
-			+ KEY_OP_NOTES + " text, FOREIGN KEY (" + KEY_OP_THIRD_PARTY
+			+ KEY_OP_NOTES + " text, " + KEY_OP_TRANSFERT_ACC_ID
+			+ " integer not null, FOREIGN KEY (" + KEY_OP_THIRD_PARTY
 			+ ") REFERENCES " + DATABASE_THIRD_PARTIES_TABLE + "("
 			+ KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG
 			+ ") REFERENCES " + DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID
@@ -142,8 +144,9 @@ public class CommonDbAdapter {
 			+ " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
 			+ " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
 			+ KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, "
-			+ KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID
-			+ " integer, FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES "
+			+ KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID + " integer, "
+			+ KEY_OP_TRANSFERT_ACC_ID + " integer not null, FOREIGN KEY ("
+			+ KEY_OP_THIRD_PARTY + ") REFERENCES "
 			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
 			+ "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES "
 			+ DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID + "), FOREIGN KEY ("
@@ -238,6 +241,8 @@ public class CommonDbAdapter {
 	protected static final String ADD_PROJECTION_MODE_DATE = "ALTER TABLE "
 			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
 			+ KEY_ACCOUNT_PROJECTION_DATE + " string";
+	protected static final String ADD_TRANSFERT_ID_COLUNM = "ALTER TABLE %s ADD COLUMN "
+			+ KEY_OP_TRANSFERT_ACC_ID + " integer not null DEFAULT 0";
 
 	private LinkedHashMap<String, Long> mModesMap;
 	private LinkedHashMap<String, Long> mTagsMap;
@@ -269,10 +274,11 @@ public class CommonDbAdapter {
 			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
 			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
 			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES,
-			"ops." + KEY_OP_SCHEDULED_ID };
+			"ops." + KEY_OP_SCHEDULED_ID, "ops." + KEY_OP_TRANSFERT_ACC_ID };
 
 	private static final String RESTRICT_TO_ACCOUNT = "ops."
-			+ KEY_OP_ACCOUNT_ID + " = %d";
+			+ KEY_OP_ACCOUNT_ID + " = %d OR " + KEY_OP_TRANSFERT_ACC_ID
+			+ " = %d";
 
 	private static final String SCHEDULED_OP_ORDERING = "sch." + KEY_OP_DATE
 			+ " desc, sch." + KEY_SCHEDULED_ROWID + " desc";
@@ -724,44 +730,8 @@ public class CommonDbAdapter {
 				}
 			}
 			case 11: {
-				Cursor c = db.query(DATABASE_OPERATIONS_TABLE, null,
-						KEY_OP_ROWID + "=(SELECT max(_id) FROM "
-								+ DATABASE_OPERATIONS_TABLE + ")", null, null,
-						null, null);
-				if (c != null) {
-					long lastSum;
-					long curSum;
-					if (c.moveToFirst()) {
-						lastSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
-						curSum = lastSum;
-						db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID
-								+ ">600", null);
-						do {
-							lastSum = curSum;
-							db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ROWID
-									+ "=(SELECT max(_id) FROM "
-									+ DATABASE_OPERATIONS_TABLE + ")", null);
-							c.close();
-							c = db.query(DATABASE_OPERATIONS_TABLE, null,
-									KEY_OP_ROWID + "=(SELECT max(_id) FROM "
-											+ DATABASE_OPERATIONS_TABLE + ")",
-									null, null, null, null);
-							if (null != c) {
-								if (c.moveToFirst()) {
-									curSum = c.getLong(c
-											.getColumnIndex(KEY_OP_SUM));
-								} else {
-									c.close();
-									curSum = 0;
-								}
-							} else {
-								curSum = 0;
-							}
-						} while (curSum == lastSum);
-					} else {
-						c.close();
-					}
-				}
+				db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM, DATABASE_OPERATIONS_TABLE));
+				db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM, DATABASE_SCHEDULED_TABLE));
 			}
 			default:
 				Cursor c = db.query(DATABASE_ACCOUNT_TABLE,
@@ -1207,6 +1177,7 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
+		initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
 		op.mRowId = mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 		if (op.mRowId > -1) {
 			return checkNeedUpdateProjection(op, accountId);
@@ -1241,23 +1212,23 @@ public class CommonDbAdapter {
 
 	public Cursor fetchNLastOps(int nbOps, final long accountId) {
 		return mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
-				null, OP_ORDERING, Integer.toString(nbOps));
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId), null,
+				null, null, OP_ORDERING, Integer.toString(nbOps));
 	}
 
 	public Cursor fetchLastOp(final long accountId) {
 		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
-						+ KEY_OP_DATE + " = (SELECT max(ops." + KEY_OP_DATE
-						+ ") FROM " + DATABASE_OPERATIONS_TABLE + ") ", null,
-				null, null, OP_ORDERING, null);
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId)
+						+ " AND ops." + KEY_OP_DATE + " = (SELECT max(ops."
+						+ KEY_OP_DATE + ") FROM " + DATABASE_OPERATIONS_TABLE
+						+ ") ", null, null, null, OP_ORDERING, null);
 		return c;
 	}
 
 	public Cursor fetchAllOps(final long accountId) {
 		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId), null, null,
-				null, OP_ORDERING, null);
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId), null,
+				null, null, OP_ORDERING, null);
 		if (null != c) {
 			c.moveToFirst();
 		}
@@ -1266,9 +1237,9 @@ public class CommonDbAdapter {
 
 	public Cursor fetchOneOp(final long rowId, final long accountId) {
 		Cursor c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
-						+ KEY_OP_ROWID + " = " + rowId, null, null, null, null,
-				null);
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId)
+						+ " AND ops." + KEY_OP_ROWID + " = " + rowId, null,
+				null, null, null, null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -1279,9 +1250,9 @@ public class CommonDbAdapter {
 		Cursor c = null;
 		String limit = nbOps == 0 ? null : Integer.toString(nbOps);
 		c = mDb.query(DATABASE_OP_TABLE_JOINTURE, OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
-						+ KEY_OP_DATE + " < " + date, null, null, null,
-				OP_ORDERING, limit);
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId)
+						+ " AND ops." + KEY_OP_DATE + " < " + date, null, null,
+				null, OP_ORDERING, limit);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -1312,10 +1283,10 @@ public class CommonDbAdapter {
 		c = mDb.query(
 				DATABASE_OP_TABLE_JOINTURE,
 				OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
-						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis()
-						+ " AND ops." + KEY_OP_DATE + " >= "
-						+ startDate.getTimeInMillis() + " AND ops."
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId)
+						+ " AND ops." + KEY_OP_DATE + " <= "
+						+ endDate.getTimeInMillis() + " AND ops." + KEY_OP_DATE
+						+ " >= " + startDate.getTimeInMillis() + " AND ops."
 						+ KEY_OP_DATE + " < " + limitDate, null, null, null,
 				OP_ORDERING, null);
 		if (c != null) {
@@ -1341,11 +1312,11 @@ public class CommonDbAdapter {
 		c = mDb.query(
 				DATABASE_OP_TABLE_JOINTURE,
 				OP_COLS_QUERY,
-				String.format(RESTRICT_TO_ACCOUNT, accountId) + " AND ops."
-						+ KEY_OP_DATE + " <= " + endDate.getTimeInMillis()
-						+ " AND ops." + KEY_OP_DATE + " >= "
-						+ startDate.getTimeInMillis(), null, null, null,
-				OP_ORDERING, null);
+				String.format(RESTRICT_TO_ACCOUNT, accountId, accountId)
+						+ " AND ops." + KEY_OP_DATE + " <= "
+						+ endDate.getTimeInMillis() + " AND ops." + KEY_OP_DATE
+						+ " >= " + startDate.getTimeInMillis(), null, null,
+				null, OP_ORDERING, null);
 		if (c != null) {
 			c.moveToFirst();
 		}
@@ -1370,6 +1341,7 @@ public class CommonDbAdapter {
 
 		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_NOTES, op.mNotes);
+		args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
 		if (!updateOccurrences) {
 			args.put(KEY_OP_DATE, op.getDate());
 			args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
@@ -1450,6 +1422,7 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 		initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
 		initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+		initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
 		return mDb.insert(DATABASE_SCHEDULED_TABLE, null, initialValues);
 	}
 
@@ -1471,6 +1444,7 @@ public class CommonDbAdapter {
 
 		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_NOTES, op.mNotes);
+		args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
 		if (!isUpdatedFromOccurence) { // update from schedule editor
 			args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 			args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);

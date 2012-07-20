@@ -5,11 +5,8 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 
-import org.acra.ErrorReporter;
-
 import android.app.Dialog;
 import android.app.ListActivity;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -29,7 +26,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
@@ -228,8 +224,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	}
 
 	private void startTransfertEdit() {
-		Intent i = new Intent(this, TransfertEditor.class);
-		startActivity(i);
+		
 	}
 
 	@Override

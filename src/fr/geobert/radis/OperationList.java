@@ -273,7 +273,8 @@ public class OperationList extends ListActivity implements
 					CommonDbAdapter.KEY_TAG_NAME,
 					CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_OP_SUM,
 					CommonDbAdapter.KEY_OP_DATE, CommonDbAdapter.KEY_OP_NOTES,
-					CommonDbAdapter.KEY_OP_SCHEDULED_ID });
+					CommonDbAdapter.KEY_OP_SCHEDULED_ID,
+					CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID });
 		}
 
 		@Override
@@ -354,10 +355,8 @@ public class OperationList extends ListActivity implements
 							"c.isBeforeFirst()",
 							String.valueOf(c.isBeforeFirst()));
 					ErrorReporter.getInstance().putCustomData(
-							"c.isAfterLast()",
-							String.valueOf(c.isAfterLast()));
-					ErrorReporter.getInstance().putCustomData(
-							"moveToLast",
+							"c.isAfterLast()", String.valueOf(c.isAfterLast()));
+					ErrorReporter.getInstance().putCustomData("moveToLast",
 							String.valueOf(moveToLast));
 					ErrorReporter.getInstance().handleSilentException(e);
 
@@ -655,7 +654,7 @@ public class OperationList extends ListActivity implements
 		if (!c.isClosed() && c.moveToFirst() && c.isFirst()) {
 			do {
 				Object[] values = {
-						new Long(c.getLong(c
+						Long.valueOf(c.getLong(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_ROWID))),
 						c.getString(c
 								.getColumnIndex(CommonDbAdapter.KEY_THIRD_PARTY_NAME)),
@@ -663,15 +662,16 @@ public class OperationList extends ListActivity implements
 								.getColumnIndex(CommonDbAdapter.KEY_TAG_NAME)),
 						c.getString(c
 								.getColumnIndex(CommonDbAdapter.KEY_MODE_NAME)),
-						new Long(c.getLong(c
+						Long.valueOf(c.getLong(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_SUM))),
-						new Long(c.getLong(c
+						Long.valueOf(c.getLong(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_DATE))),
 						c.getString(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_NOTES)),
-						new Long(
-								c.getLong(c
-										.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))) };
+						Long.valueOf(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))),
+						Long.valueOf(c.getLong(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID))) };
 				m.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -687,7 +687,8 @@ public class OperationList extends ListActivity implements
 				CommonDbAdapter.KEY_TAG_NAME, CommonDbAdapter.KEY_MODE_NAME,
 				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_OP_NOTES,
-				CommonDbAdapter.KEY_OP_SCHEDULED_ID });
+				CommonDbAdapter.KEY_OP_SCHEDULED_ID,
+				CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID });
 		startManagingCursor(mLastOps);
 		Cursor lastOp = mDbHelper.fetchLastOp(mAccountId);
 		GregorianCalendar latest = new GregorianCalendar();

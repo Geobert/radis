@@ -18,7 +18,7 @@
     <application
         android:name="Radis"
         android:icon="@drawable/radis"
-        android:label="@string/app_name" >
+        android:label="@string/app_name" android:debuggable="true">
         <activity
             android:name="AccountList"
             android:label="@string/app_name"

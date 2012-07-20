@@ -9,8 +9,8 @@
         android:id="@+id/edit_op_date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="5px"
-        android:paddingTop="5px" />
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" />
 
     <LinearLayout style="@style/EditorHorizontalLinearLayout" >
 
@@ -64,10 +64,33 @@
             style="@style/EditorBaseButton.ListButton" />
     </LinearLayout>
 
+  <!--   <LinearLayout style="@style/EditorHorizontalLinearLayout" >
+
+        <Spinner
+            android:id="@+id/trans_src_account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:text="@string/rarr"
+            android:textSize="20dp" />
+
+        <Spinner
+            android:id="@+id/trans_dst_account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+    </LinearLayout> -->
+
     <EditText
         android:id="@+id/edit_op_notes"
         style="@style/DescEditText"
-        android:lines="2"
-        android:hint="@string/notes" />
+        android:hint="@string/notes"
+        android:lines="2" />
 
 </LinearLayout>

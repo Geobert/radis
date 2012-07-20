@@ -9,21 +9,11 @@ import android.os.Bundle;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
-import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.Tools;
 
 public class OperationEditor extends CommonOpEditor {
-	protected Long mAccountId;
 	protected Operation mOriginalOp;
 	protected static final int ASK_UPDATE_SCHEDULED_DIALOG_ID = 10;
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		Bundle extras = getIntent().getExtras();
-		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
-				: null;
-		super.onCreate(savedInstanceState);
-	}
 
 	@Override
 	protected void setView() {

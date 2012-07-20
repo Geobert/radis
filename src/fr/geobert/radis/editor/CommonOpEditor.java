@@ -1,6 +1,5 @@
 package fr.geobert.radis.editor;
 
-import java.io.Serializable;
 import java.text.ParseException;
 import java.util.HashMap;
 
@@ -8,12 +7,18 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.PopupWindow;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+import fr.geobert.radis.Account;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
@@ -41,6 +46,8 @@ public abstract class CommonOpEditor extends Activity {
 	protected AutoCompleteTextView mOpModeText;
 	protected AutoCompleteTextView mOpTagText;
 	protected DatePicker mDatePicker;
+	protected Spinner mSrcAccount;
+	protected Spinner mDstAccount;
 	protected EditText mNotesText;
 	protected long mRowId;
 
@@ -49,6 +56,8 @@ public abstract class CommonOpEditor extends Activity {
 	protected boolean mOnRestore = false;
 	public String mCurrentInfoTable;
 	protected long mPreviousSum = 0L;
+
+	protected Long mAccountId;
 
 	// abstract methods
 	protected abstract void setView();
@@ -69,33 +78,26 @@ public abstract class CommonOpEditor extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		Bundle extras = getIntent().getExtras();
+		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
+				: null;
 		setView();
 		init(savedInstanceState);
 	}
 
 	protected void init(Bundle savedInstanceState) {
 		Bundle extras = getIntent().getExtras();
-//		if (savedInstanceState == null) {
-//			mRowId = 0;
-//		} else {
-//			Serializable s = savedInstanceState.getSerializable(Tools.EXTRAS_OP_ID);
-//			if (s == null) {
-//				mRowId = 0;
-//			} else {
-//				mRowId = ((Long) s).longValue();
-//			}
-//		}
-//		if (mRowId <= 0) {
-			mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
-//		}
+		mRowId = extras != null ? extras.getLong(Tools.EXTRAS_OP_ID) : 0;
 
 		mOpThirdPartyText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_third_party);
 		mOpModeText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_mode);
 		mOpSumText = (EditText) findViewById(R.id.edit_op_sum);
 		mOpTagText = (MyAutoCompleteTextView) findViewById(R.id.edit_op_tag);
-		mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater().getDecimalFormatSymbols()
-				.getDecimalSeparator(), mOpSumText);
+		mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
+				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
+//		mSrcAccount = (Spinner) findViewById(R.id.trans_src_account);
+//		mDstAccount = (Spinner) findViewById(R.id.trans_dst_account);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 		mInfoManagersMap = new HashMap<String, InfoManager>();
 
@@ -106,19 +108,58 @@ public abstract class CommonOpEditor extends Activity {
 	}
 
 	protected void initViewAdapters() {
-		mOpThirdPartyText
-				.setAdapter(new InfoAdapter(this, mDbHelper,
-						CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-						CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+		mOpThirdPartyText.setAdapter(new InfoAdapter(this, mDbHelper,
+				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
 		mOpModeText.setAdapter(new InfoAdapter(this, mDbHelper,
-				CommonDbAdapter.DATABASE_MODES_TABLE, CommonDbAdapter.KEY_MODE_NAME));
-		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper, CommonDbAdapter.DATABASE_TAGS_TABLE,
+				CommonDbAdapter.DATABASE_MODES_TABLE,
+				CommonDbAdapter.KEY_MODE_NAME));
+		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
+				CommonDbAdapter.DATABASE_TAGS_TABLE,
 				CommonDbAdapter.KEY_TAG_NAME));
+		
+		//populateTransfertSpinner();
+	}
+	
+	private void populateTransfertSpinner() {
+		Cursor c = mDbHelper.fetchAllAccounts();
+		startManagingCursor(c);
+		if (c != null && c.isFirst()) {
+			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+					android.R.layout.simple_spinner_item);
+			ArrayAdapter<Account> adapter2 = new ArrayAdapter<Account>(this,
+					android.R.layout.simple_spinner_item);
+			adapter.add(new Account(0, getString(R.string.no_transfert)));
+			adapter2.add(new Account(0, getString(R.string.no_transfert)));
+			do {
+				adapter.add(new Account(c));
+				adapter2.add(new Account(c));
+			} while (c.moveToNext());
+
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			mSrcAccount.setAdapter(adapter);
+			mDstAccount.setAdapter(adapter2);
+			
+			if (mAccountId != 0) {
+				int pos = 0;
+				while (pos < adapter.getCount()) {
+					long id = adapter.getItemId(pos);
+					if (id == mAccountId) {
+						mSrcAccount.setSelection(pos);
+						break;
+					} else {
+						pos++;
+					}
+				}
+			}
+		}
 	}
 
 	private void invertSign() throws ParseException {
 		mSumTextWatcher.setAutoNegate(false);
-		Double sum = Formater.getSumFormater().parse(mOpSumText.getText().toString()).doubleValue();
+		Double sum = Formater.getSumFormater()
+				.parse(mOpSumText.getText().toString()).doubleValue();
 		if (sum != null) {
 			sum = -sum;
 		}
@@ -156,8 +197,8 @@ public abstract class CommonOpEditor extends Activity {
 		return res;
 	}
 
-	private InfoManager createInfoManagerIfNeeded(String table, String colName, String title,
-			int editId, int deletiId) {
+	private InfoManager createInfoManagerIfNeeded(String table, String colName,
+			String title, int editId, int deletiId) {
 		InfoManager i = mInfoManagersMap.get(table);
 		if (null == i) {
 			i = new InfoManager(this, title, table, colName, editId, deletiId);
@@ -170,37 +211,46 @@ public abstract class CommonOpEditor extends Activity {
 	protected Dialog onCreateDialog(int id) {
 		switch (id) {
 		case THIRD_PARTIES_DIALOG_ID:
-			return createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-					CommonDbAdapter.KEY_THIRD_PARTY_NAME, getString(R.string.third_parties),
-					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID).getListDialog();
+			return createInfoManagerIfNeeded(
+					CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+					CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+					getString(R.string.third_parties),
+					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID)
+					.getListDialog();
 		case TAGS_DIALOG_ID:
-			return createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_TAGS_TABLE,
-					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
-					DELETE_TAG_DIALOG_ID).getListDialog();
+			return createInfoManagerIfNeeded(
+					CommonDbAdapter.DATABASE_TAGS_TABLE,
+					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
+					EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID).getListDialog();
 		case MODES_DIALOG_ID:
-			return createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_MODES_TABLE,
-					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
-					DELETE_MODE_DIALOG_ID).getListDialog();
+			return createInfoManagerIfNeeded(
+					CommonDbAdapter.DATABASE_MODES_TABLE,
+					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes),
+					EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID).getListDialog();
 		case EDIT_THIRD_PARTY_DIALOG_ID: {
-			InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-					CommonDbAdapter.KEY_THIRD_PARTY_NAME, getString(R.string.third_parties),
+			InfoManager i = createInfoManagerIfNeeded(
+					CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+					CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+					getString(R.string.third_parties),
 					EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID);
 			Dialog d = i.getEditDialog();
 			i.initEditDialog(d);
 			return d;
 		}
 		case EDIT_TAG_DIALOG_ID: {
-			InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_TAGS_TABLE,
-					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags), EDIT_TAG_DIALOG_ID,
-					DELETE_TAG_DIALOG_ID);
+			InfoManager i = createInfoManagerIfNeeded(
+					CommonDbAdapter.DATABASE_TAGS_TABLE,
+					CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
+					EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID);
 			Dialog d = i.getEditDialog();
 			i.initEditDialog(d);
 			return d;
 		}
 		case EDIT_MODE_DIALOG_ID: {
-			InfoManager i = createInfoManagerIfNeeded(CommonDbAdapter.DATABASE_MODES_TABLE,
-					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes), EDIT_MODE_DIALOG_ID,
-					DELETE_MODE_DIALOG_ID);
+			InfoManager i = createInfoManagerIfNeeded(
+					CommonDbAdapter.DATABASE_MODES_TABLE,
+					CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes),
+					EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID);
 			Dialog d = i.getEditDialog();
 			i.initEditDialog(d);
 			return d;
@@ -212,7 +262,8 @@ public abstract class CommonOpEditor extends Activity {
 							InfoManager i = createInfoManagerIfNeeded(
 									CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
 									CommonDbAdapter.KEY_THIRD_PARTY_NAME,
-									getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID,
+									getString(R.string.third_parties),
+									EDIT_THIRD_PARTY_DIALOG_ID,
 									DELETE_THIRD_PARTY_DIALOG_ID);
 							i.deleteInfo();
 						}
@@ -223,7 +274,8 @@ public abstract class CommonOpEditor extends Activity {
 						public void onClick(DialogInterface dialog, int id) {
 							InfoManager i = createInfoManagerIfNeeded(
 									CommonDbAdapter.DATABASE_TAGS_TABLE,
-									CommonDbAdapter.KEY_TAG_NAME, getString(R.string.tags),
+									CommonDbAdapter.KEY_TAG_NAME,
+									getString(R.string.tags),
 									EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID);
 							i.deleteInfo();
 						}
@@ -234,7 +286,8 @@ public abstract class CommonOpEditor extends Activity {
 						public void onClick(DialogInterface dialog, int id) {
 							InfoManager i = createInfoManagerIfNeeded(
 									CommonDbAdapter.DATABASE_MODES_TABLE,
-									CommonDbAdapter.KEY_MODE_NAME, getString(R.string.modes),
+									CommonDbAdapter.KEY_MODE_NAME,
+									getString(R.string.modes),
 									EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID);
 							i.deleteInfo();
 						}
@@ -253,16 +306,16 @@ public abstract class CommonOpEditor extends Activity {
 			mInfoManagersMap.get(mCurrentInfoTable).initEditDialog(dialog);
 			break;
 		case THIRD_PARTIES_DIALOG_ID:
-			mInfoManagersMap.get(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE).onPrepareDialog(
-					(AlertDialog) dialog);
+			mInfoManagersMap.get(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE)
+					.onPrepareDialog((AlertDialog) dialog);
 			break;
 		case TAGS_DIALOG_ID:
-			mInfoManagersMap.get(CommonDbAdapter.DATABASE_TAGS_TABLE).onPrepareDialog(
-					(AlertDialog) dialog);
+			mInfoManagersMap.get(CommonDbAdapter.DATABASE_TAGS_TABLE)
+					.onPrepareDialog((AlertDialog) dialog);
 			break;
 		case MODES_DIALOG_ID:
-			mInfoManagersMap.get(CommonDbAdapter.DATABASE_MODES_TABLE).onPrepareDialog(
-					(AlertDialog) dialog);
+			mInfoManagersMap.get(CommonDbAdapter.DATABASE_MODES_TABLE)
+					.onPrepareDialog((AlertDialog) dialog);
 			break;
 		}
 	}
@@ -313,52 +366,58 @@ public abstract class CommonOpEditor extends Activity {
 					}
 				});
 
-		findViewById(R.id.edit_op_tags_list).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showDialog(TAGS_DIALOG_ID);
-			}
-		});
+		findViewById(R.id.edit_op_tags_list).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						showDialog(TAGS_DIALOG_ID);
+					}
+				});
 
-		findViewById(R.id.edit_op_modes_list).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				showDialog(MODES_DIALOG_ID);
-			}
-		});
+		findViewById(R.id.edit_op_modes_list).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						showDialog(MODES_DIALOG_ID);
+					}
+				});
 
-		findViewById(R.id.edit_op_sign).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				try {
-					invertSign();
-				} catch (ParseException e) {
-					// nothing to do
-				}
-			}
-		});
+		findViewById(R.id.edit_op_sign).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						try {
+							invertSign();
+						} catch (ParseException e) {
+							// nothing to do
+						}
+					}
+				});
 
-		findViewById(R.id.cancel_op).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				setResult(RESULT_CANCELED);
-				finish();
-			}
-		});
+		findViewById(R.id.cancel_op).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						setResult(RESULT_CANCELED);
+						finish();
+					}
+				});
 
-		findViewById(R.id.confirm_op).setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				StringBuilder errMsg = new StringBuilder();
+		findViewById(R.id.confirm_op).setOnClickListener(
+				new View.OnClickListener() {
+					@Override
+					public void onClick(View view) {
+						StringBuilder errMsg = new StringBuilder();
 
-				if (isFormValid(errMsg)) {
-					fillOperationWithInputs(mCurrentOp);
-					saveOpAndExit();
-				} else {
-					Tools.popError(CommonOpEditor.this, errMsg.toString(), null);
-				}
-			}
-		});
+						if (isFormValid(errMsg)) {
+							fillOperationWithInputs(mCurrentOp);
+							saveOpAndExit();
+						} else {
+							Tools.popError(CommonOpEditor.this,
+									errMsg.toString(), null);
+						}
+					}
+				});
 	}
 
 	@Override

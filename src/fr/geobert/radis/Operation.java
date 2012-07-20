@@ -21,6 +21,10 @@ public class Operation implements Parcelable {
 	public long mScheduledId;
 	public long mRowId;
 
+	// if these value are != 0, it is a transfert operation between 2 accounts
+	// mTransferAccountId is the other account
+	public long mTransferAccountId;
+
 	public Operation(Operation op) {
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getDate());
@@ -31,6 +35,7 @@ public class Operation implements Parcelable {
 		mNotes = op.mNotes;
 		mSum = op.mSum;
 		mScheduledId = op.mScheduledId;
+		mTransferAccountId = op.mTransferAccountId;
 	}
 
 	public Operation(Cursor op) {
@@ -62,6 +67,11 @@ public class Operation implements Parcelable {
 		} else {
 			mScheduledId = 0;
 		}
+		final int transIdx = op
+				.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID);
+		if (transIdx >= 0) {
+			mTransferAccountId = op.getLong(transIdx);
+		}
 	}
 
 	public Operation() {
@@ -73,6 +83,7 @@ public class Operation implements Parcelable {
 		mTag = "";
 		mNotes = "";
 		mScheduledId = 0;
+		mTransferAccountId = 0;
 	}
 
 	public Operation(Parcel parcel) {
@@ -170,18 +181,19 @@ public class Operation implements Parcelable {
 		dest.writeString(mNotes);
 		dest.writeLong(mSum);
 		dest.writeLong(mScheduledId);
+		dest.writeLong(mTransferAccountId);
 	}
 
 	protected void readFromParcel(Parcel in) {
 		setDay(in.readInt());
 		setMonth(in.readInt());
 		setYear(in.readInt());
-		
+
 		mThirdParty = in.readString();
 		if (null == mThirdParty) {
 			mThirdParty = "";
 		}
-			
+
 		mTag = in.readString();
 		if (null == mTag) {
 			mTag = "";
@@ -195,6 +207,7 @@ public class Operation implements Parcelable {
 
 		mSum = in.readLong();
 		mScheduledId = in.readLong();
+		mTransferAccountId = in.readLong();
 	}
 
 	public static final Parcelable.Creator<Operation> CREATOR = new Parcelable.Creator<Operation>() {
@@ -220,6 +233,7 @@ public class Operation implements Parcelable {
 		}
 		return mThirdParty.equals(op.mThirdParty) && mTag.equals(op.mTag)
 				&& mMode.equals(op.mMode) && mNotes.equals(op.mNotes)
-				&& mSum == op.mSum && mScheduledId == op.mScheduledId;
+				&& mSum == op.mSum && mScheduledId == op.mScheduledId
+				&& mTransferAccountId == op.mTransferAccountId;
 	}
 }

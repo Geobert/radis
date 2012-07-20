@@ -175,4 +175,7 @@
 	<string name="hide_account_quick_add_details">Hide the quick add on the accounts\' list</string>
 	<string name="hide_ops_quick_add">Hide quick add 2</string>
 	<string name="hide_ops_quick_add_details">Hide the quick add on the transactions\' list</string>
+	
+	<string name="rarr">→</string>
+	<string name="no_transfert">Aucun transfert</string>
 </resources>

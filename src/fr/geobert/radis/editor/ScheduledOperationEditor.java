@@ -50,17 +50,8 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private ScheduledOperation mOriginalSchOp;
 	private long mOpIdSource;
 	private ScrollView mFlipperScroll;
-	protected Long mAccountId;
 
 	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
-
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		Bundle extras = getIntent().getExtras();
-		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
-				: null;
-		super.onCreate(savedInstanceState);
-	}
 
 	@Override
 	protected void setView() {
