@@ -165,10 +165,6 @@
 	</string-array>
 	<string name="custom_currency_hint">Entrez un code de devise ISO 4217</string>
 	<string name="bad_format_for_currency">La devise doit être au format ISO 4217 (regardez sur wikipedia si vous le connaissez pas le code de votre devise)</string>
-	<string name="transfert_from">Transfert depuis le compte</string>
-	<string name="transfert_to">Vers le compte</string>
-	<string name="transfert_between">Effectuer un transfert</string>
-	<string name="transfert">Transfert</string>
 	<string name="error_on_write_prefs">Erreur lors de l\'écriture des préférences</string>
 	<string name="long_date_format">dd/MM/yy</string>
 	<string name="short_date_format">dd/MM</string>
@@ -180,4 +176,9 @@
 	<string name="hide_ops_quick_add">Masquer l\'ajout rapide 2</string>
 	<string name="hide_account_quick_add_details">Masquer l\'ajout rapide de la liste des comptes</string>
 	<string name="hide_ops_quick_add_details">Masquer l\'ajout rapide de la liste des opérations</string>
+	
+	<string name="no_transfert">Aucun transfert</string>
+	<string name="invalid_transfert">Le transfert n\'est pas bien paramétré</string>
+	<string name="transfert">Transfert entre comptes</string>
+	<string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
 </resources>

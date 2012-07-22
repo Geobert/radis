@@ -106,6 +106,7 @@ public class RadisService extends IntentService {
 				final long opRowId = c.getLong(c.getColumnIndex("_id"));
 				ScheduledOperation op = new ScheduledOperation(c);
 				final Long accountId = Long.valueOf(op.mAccountId);
+				final Long transId = Long.valueOf(op.mTransferAccountId);
 				long sum = 0;
 				boolean needUpdate = false;
 				Cursor accountCursor = mDbHelper.fetchAccount(accountId);
@@ -155,6 +156,15 @@ public class RadisService extends IntentService {
 					}
 					sumsPerAccount.put(accountId, curSum + sum);
 					keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
+					// the sch op is a transfert, update the dst account sum with -sum
+					if (transId > 0) {
+						curSum = sumsPerAccount.get(transId);
+						if (curSum == null) {
+							curSum = Long.valueOf(0);
+						}
+						sumsPerAccount.put(transId, curSum - sum);
+						keepGreatestDate(greatestDatePerAccount, transId, op.getDate());
+					}
 				}
 			} while (c.moveToNext());
 			boolean needUpdate = false;

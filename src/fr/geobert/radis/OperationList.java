@@ -66,6 +66,12 @@ public class OperationList extends ListActivity implements
 	private static final int DIALOG_PROJECTION = 1;
 	private static final int DIALOG_DELETE_OCCURENCE = 2;
 
+	public static final String OLD_SUM = "oldSum";
+	public static final String SUM = "sum";
+	public static final String OP_DATE = "opDate";
+	public static final String NEW_ROWID = "newRowId";
+	public static final String TRANSFERT_ID = "transfertId";
+
 	private CommonDbAdapter mDbHelper;
 	private Long mAccountId;
 	private Cursor mCurAccount;
@@ -117,12 +123,11 @@ public class OperationList extends ListActivity implements
 
 		public InnerViewBinder(Cursor c) {
 			super(OperationList.this, CommonDbAdapter.KEY_OP_SUM,
-					CommonDbAdapter.KEY_OP_DATE, R.id.op_icon);
+					CommonDbAdapter.KEY_OP_DATE, R.id.op_icon, mAccountId);
 			initCache(c);
 		}
 
 		public void initCache(Cursor cursor) {
-			Log.d("Radis", "initCache");
 			mCellStates = cursor == null ? null : new int[cursor.getCount()];
 		}
 
@@ -155,7 +160,7 @@ public class OperationList extends ListActivity implements
 						.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID)) > 0) {
 					i.setVisibility(View.VISIBLE);
 				} else {
-					i.setVisibility(View.INVISIBLE);
+					i.setVisibility(View.GONE);
 				}
 
 				boolean needSeparator = false;
@@ -198,13 +203,23 @@ public class OperationList extends ListActivity implements
 					separator.setVisibility(View.GONE);
 				}
 				return true;
+			}  else if (colName.equals(CommonDbAdapter.KEY_THIRD_PARTY_NAME)) {
+				TextView textView = ((TextView) view);
+				final long transfertId = cursor.getLong(cursor
+						.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
+				if (transfertId > 0 && transfertId == mAccountId) {
+					textView.setText(cursor.getString(cursor
+							.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME)));
+					return true;
+				} else {
+					return false;
+				}
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
 			}
 		}
 
 		public void increaseCache(MatrixCursor c) {
-			Log.d("Radis", "increaseCache");
 			int[] tmp = mCellStates;
 			initCache(c);
 			for (int i = 0; i < tmp.length; ++i) {
@@ -274,7 +289,8 @@ public class OperationList extends ListActivity implements
 					CommonDbAdapter.KEY_MODE_NAME, CommonDbAdapter.KEY_OP_SUM,
 					CommonDbAdapter.KEY_OP_DATE, CommonDbAdapter.KEY_OP_NOTES,
 					CommonDbAdapter.KEY_OP_SCHEDULED_ID,
-					CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID });
+					CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID,
+					CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME });
 		}
 
 		@Override
@@ -594,7 +610,7 @@ public class OperationList extends ListActivity implements
 	}
 
 	private void afterAddOp(Intent data) {
-		long newRowId = data.getLongExtra("newRowId", -1);
+		long newRowId = data.getLongExtra(NEW_ROWID, -1);
 		Log.d("Radis", "afterAddOp newRowId: " + newRowId);
 		if (newRowId > -1) {
 			ListAdapter adap = getListAdapter();
@@ -622,8 +638,8 @@ public class OperationList extends ListActivity implements
 		}
 		if (data.getBooleanExtra("sumUpdateNeeded", false)) {
 			Bundle extras = data.getExtras();
-			updateSumsAfterOpEdit(extras.getLong("oldSum"),
-					extras.getLong("sum"), extras.getLong("opDate"));
+			updateSumsAfterOpEdit(extras.getLong(OLD_SUM), extras.getLong(SUM),
+					extras.getLong(OP_DATE), extras.getLong(TRANSFERT_ID));
 		}
 	}
 
@@ -671,7 +687,9 @@ public class OperationList extends ListActivity implements
 						Long.valueOf(c.getLong(c
 								.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID))),
 						Long.valueOf(c.getLong(c
-								.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID))) };
+								.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID))),
+						c.getString(c
+								.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME)) };
 				m.addRow(values);
 			} while (c.moveToNext());
 			return true;
@@ -688,7 +706,8 @@ public class OperationList extends ListActivity implements
 				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_OP_DATE,
 				CommonDbAdapter.KEY_OP_NOTES,
 				CommonDbAdapter.KEY_OP_SCHEDULED_ID,
-				CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID });
+				CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID,
+				CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME });
 		startManagingCursor(mLastOps);
 		Cursor lastOp = mDbHelper.fetchLastOp(mAccountId);
 		GregorianCalendar latest = new GregorianCalendar();
@@ -743,7 +762,7 @@ public class OperationList extends ListActivity implements
 				mLastSelectedPosition--;
 			}
 			fillData();
-			updateSumsAfterOpEdit(sum, 0L, 0);
+			updateSumsAfterOpEdit(sum, 0L, 0, 0);
 		} else {
 			updateSumsDisplay(true);
 			// fillData() is called inside updateSumsDisplay
@@ -766,7 +785,7 @@ public class OperationList extends ListActivity implements
 				mLastSelectedPosition--;
 			}
 			fillData();
-			updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0);
+			updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0, 0);
 		} else {
 			updateSumsDisplay(true);
 			// fillData() is called inside updateSumsDisplay
@@ -789,7 +808,7 @@ public class OperationList extends ListActivity implements
 					mLastSelectedPosition--;
 				}
 				fillData();
-				updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0);
+				updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0, 0);
 			} else {
 				updateSumsDisplay(true);
 				// fillData() is called inside updateSumsDisplay
@@ -818,6 +837,8 @@ public class OperationList extends ListActivity implements
 		long sum = 0L;
 		final int dateIdx = op.getColumnIndex(CommonDbAdapter.KEY_OP_DATE);
 		final int opSumIdx = op.getColumnIndex(CommonDbAdapter.KEY_OP_SUM);
+		final int transIdx = op
+				.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID);
 		long opDate = op.getLong(dateIdx);
 		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
 			if (opDate <= mProjectionDate) {
@@ -833,7 +854,9 @@ public class OperationList extends ListActivity implements
 					// + " / projDate : " + Tools.getDateStr(mProjectionDate));
 					while (hasPrev && opDate <= mProjectionDate) {
 						long s = op.getLong(opSumIdx);
-						// Log.d("Radis", "computeSumFromCursor add " + s);
+						if (op.getLong(transIdx) == mAccountId) {
+							s = -s;
+						}
 						sum = sum + s;
 						hasPrev = op.moveToPrevious();
 						if (hasPrev) {
@@ -855,7 +878,9 @@ public class OperationList extends ListActivity implements
 					// + " / projDate : " + Tools.getDateStr(mProjectionDate));
 					while (hasNext && opDate > mProjectionDate) {
 						long s = op.getLong(opSumIdx);
-						// Log.d("Radis", "computeSumFromCursor add " + s);
+						if (op.getLong(transIdx) == mAccountId) {
+							s = -s;
+						}
 						sum = sum + s;
 						hasNext = op.moveToNext();
 						if (hasNext) {
@@ -1111,10 +1136,14 @@ public class OperationList extends ListActivity implements
 	}
 
 	// update db projection sum and display
-	private void updateSumsAfterOpEdit(long oldSum, long sum, long date) {
+	private void updateSumsAfterOpEdit(long oldSum, long sum, long date,
+			long transfertId) {
 		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : "
 				+ sum);
 		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
+		if (transfertId > 0) {
+			mDbHelper.updateProjection(transfertId, -(-oldSum + sum), date);
+		}
 		updateSumsAndSelection();
 	}
 

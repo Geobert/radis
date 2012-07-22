@@ -23,14 +23,13 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ScrollView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.ViewFlipper;
+import fr.geobert.radis.Account;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.ViewSwipeDetector;
-import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.Tools;
 
@@ -249,20 +248,19 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		Cursor c = mDbHelper.fetchAllAccounts();
 		startManagingCursor(c);
 		if (c != null && c.isFirst()) {
-			String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
-					CommonDbAdapter.KEY_ACCOUNT_ROWID,
-					CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
-
-			int[] to = new int[] { android.R.id.text1 };
-			SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
-					android.R.layout.simple_spinner_item, c, from, to);
+			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+					android.R.layout.simple_spinner_item);
+			adapter.add(new Account(0, getString(R.string.no_transfert)));
+			do {
+				adapter.add(new Account(c));
+			} while (c.moveToNext());
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mAccountSpinner.setAdapter(adapter);
-			if (mCurrentSchOp.mAccountId != 0 || mAccountId != 0) {
+			if (mCurrentSchOp.mAccountId != 0 || mCurAccountId != 0) {
 				int pos = 0;
 				while (pos < adapter.getCount()) {
 					long id = adapter.getItemId(pos);
-					if (id == mCurrentSchOp.mAccountId || id == mAccountId) {
+					if (id == mCurrentSchOp.mAccountId || id == mCurAccountId) {
 						mAccountSpinner.setSelection(pos);
 						break;
 					} else {
@@ -270,6 +268,21 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					}
 				}
 			}
+			final boolean isTransfert = mIsTransfertCheck.isChecked();
+			mAccountSpinner.setEnabled(!isTransfert);
+			if (isTransfert) {
+				mAccountSpinner.setSelection(mSrcAccount
+						.getSelectedItemPosition());
+			}
+		}
+	}
+
+	@Override
+	protected void onTransfertCheckedChanged(boolean arg1) {
+		super.onTransfertCheckedChanged(arg1);
+		mAccountSpinner.setEnabled(!arg1);
+		if (arg1) {
+			mAccountSpinner.setSelection(mSrcAccount.getSelectedItemPosition());
 		}
 	}
 
@@ -298,7 +311,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 									// schedule
 				if ((op.getDate() != mOriginalSchOp.getDate())) {
 					// change the date of the source transaction
-					mDbHelper.updateOp(mOpIdSource, op, mAccountId);
+					mDbHelper.updateOp(mOpIdSource, op, op.mAccountId);
 				}
 				// do not insert another occurrence with same date
 				ScheduledOperation.addPeriodicityToDate(op);
@@ -377,7 +390,10 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	protected void fillOperationWithInputs(Operation operation) {
 		super.fillOperationWithInputs(operation);
 		ScheduledOperation op = (ScheduledOperation) operation;
-		op.mAccountId = mAccountSpinner.getSelectedItemId();
+		if (!mIsTransfertCheck.isChecked()) {
+			Account a = (Account) mAccountSpinner.getSelectedItem();
+			op.mAccountId = a.mAccountId;
+		}
 		final boolean isCustom = mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner
 				.getAdapter().getCount() - 1);
 		if (!isCustom) {
@@ -435,6 +451,16 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 						errMsg.append("\n");
 					}
 					errMsg.append(getString(R.string.periodicity_must_be_greater_0));
+					res = false;
+				}
+			}
+			if (!mIsTransfertCheck.isChecked()) {
+				Account a = (Account) mAccountSpinner.getSelectedItem();
+				if (a.mAccountId == 0) {
+					if (errMsg.length() > 0) {
+						errMsg.append("\n");
+					}
+					errMsg.append(getString(R.string.sch_no_choosen_account));
 					res = false;
 				}
 			}

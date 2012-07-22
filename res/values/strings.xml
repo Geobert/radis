@@ -26,7 +26,7 @@
 
     <string name="custom_currency_hint">Enter ISO 4217 currency code</string>
     <string name="edit">Edit</string>
-    <string name="ok">Ok</string>
+    <string name="ok">@android:string/ok</string>
     <string name="third_party">Third party</string>
     <string name="sum">Amount</string>
     <string name="tag">Category</string>
@@ -161,10 +161,6 @@
     <string name="bad_format_for_date">Date is not valid</string>
     <string name="recompute_account_sums">Recompute account</string>
     <string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your currency code)</string>
-    <string name="transfert_from">Transfert from account</string>
-    <string name="transfert_to">To account</string>
-    <string name="transfert_between">Make a transfert</string>
-    <string name="transfert">Transfert</string>
 	<string name="long_date_format">MM/dd/yy</string>
 	<string name="short_date_format">MM/dd</string>
 	<string name="all_accounts">All accounts</string>
@@ -177,5 +173,8 @@
 	<string name="hide_ops_quick_add_details">Hide the quick add on the transactions\' list</string>
 	
 	<string name="rarr">→</string>
-	<string name="no_transfert">Aucun transfert</string>
+	<string name="no_transfert">No transfert</string>
+	<string name="invalid_transfert">Transfert is not well configured</string>
+	<string name="transfert">Transfert between account</string>
+	<string name="sch_no_choosen_account">Please choose an account on planification page</string>
 </resources>

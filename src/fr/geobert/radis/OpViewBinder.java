@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.Formater;
 
 public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -19,13 +20,16 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 	protected CharSequence mDateColName;
 	private int mArrowIconId;
 	private Context mCtx;
+	private long mCurAccountId;
 
-	public OpViewBinder(Activity context, CharSequence sumColName, CharSequence dateColName, int arrowIconId) {
+	public OpViewBinder(Activity context, CharSequence sumColName,
+			CharSequence dateColName, int arrowIconId, long curAccountId) {
 		mRes = context.getResources();
 		mSumColName = sumColName;
 		mDateColName = dateColName;
 		mArrowIconId = arrowIconId;
 		mCtx = context;
+		mCurAccountId = curAccountId;
 	}
 
 	@Override
@@ -36,6 +40,19 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 			ImageView i = (ImageView) ((LinearLayout) view.getParent()
 					.getParent()).findViewById(mArrowIconId);
 			long sum = cursor.getLong(columnIndex);
+			ImageView transImg = (ImageView) ((LinearLayout) view.getParent()
+					.getParent()).findViewById(R.id.op_trans_icon);
+			final long transfertId = cursor.getLong(cursor
+					.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
+			if (transfertId > 0) {
+				transImg.setVisibility(View.VISIBLE);
+				if (mCurAccountId == transfertId) {
+					sum = -sum;
+				}
+			} else {
+				transImg.setVisibility(View.GONE);
+			}
+
 			if (sum >= 0.0) {
 				textView.setTextColor(mRes.getColor(R.color.positiveSum));
 				i.setImageResource(R.drawable.arrow_up16);

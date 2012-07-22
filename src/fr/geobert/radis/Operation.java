@@ -20,10 +20,12 @@ public class Operation implements Parcelable {
 	public long mSum;
 	public long mScheduledId;
 	public long mRowId;
+	public String mTransSrcAccName;
 
 	// if these value are != 0, it is a transfert operation between 2 accounts
 	// mTransferAccountId is the other account
 	public long mTransferAccountId;
+	public long mAccountId;
 
 	public Operation(Operation op) {
 		mDate = new GregorianCalendar();
@@ -36,6 +38,8 @@ public class Operation implements Parcelable {
 		mSum = op.mSum;
 		mScheduledId = op.mScheduledId;
 		mTransferAccountId = op.mTransferAccountId;
+		mTransSrcAccName = op.mTransSrcAccName;
+		mAccountId = op.mAccountId;
 	}
 
 	public Operation(Cursor op) {
@@ -71,6 +75,13 @@ public class Operation implements Parcelable {
 				.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID);
 		if (transIdx >= 0) {
 			mTransferAccountId = op.getLong(transIdx);
+			mTransSrcAccName = op.getString(op
+					.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME));
+		}
+
+		final int accIdx = op.getColumnIndex(CommonDbAdapter.KEY_OP_ACCOUNT_ID);
+		if (accIdx >= 0) {
+			mAccountId = op.getLong(accIdx);
 		}
 	}
 
@@ -84,6 +95,7 @@ public class Operation implements Parcelable {
 		mNotes = "";
 		mScheduledId = 0;
 		mTransferAccountId = 0;
+		mAccountId = 0;
 	}
 
 	public Operation(Parcel parcel) {

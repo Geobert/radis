@@ -23,7 +23,6 @@ public class ScheduledOperation extends Operation {
 	public int mPeriodicity;
 	public int mPeriodicityUnit;
 	public GregorianCalendar mEndDate;
-	public long mAccountId;
 
 	public ScheduledOperation(Operation op, final long accountId) {
 		super(op);

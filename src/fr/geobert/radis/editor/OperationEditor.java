@@ -7,9 +7,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import fr.geobert.radis.Operation;
+import fr.geobert.radis.OperationList;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
-import fr.geobert.radis.tools.Tools;
 
 public class OperationEditor extends CommonOpEditor {
 	protected Operation mOriginalOp;
@@ -23,12 +23,13 @@ public class OperationEditor extends CommonOpEditor {
 	@Override
 	protected void fetchOrCreateCurrentOp() {
 		if (mRowId > 0) {
-			Cursor opCursor = mDbHelper.fetchOneOp(mRowId, mAccountId);
+			Cursor opCursor = mDbHelper.fetchOneOp(mRowId, mCurAccountId);
 			startManagingCursor(opCursor);
 			mCurrentOp = new Operation(opCursor);
 			mOriginalOp = new Operation(opCursor);
 		} else {
 			mCurrentOp = new Operation();
+			mCurrentOp.mAccountId = mCurAccountId;
 		}
 	}
 
@@ -41,10 +42,12 @@ public class OperationEditor extends CommonOpEditor {
 	private void setResAndExit(boolean sumUpdateIsNeeded) {
 		Intent res = new Intent();
 		if (sumUpdateIsNeeded) {
-			res.putExtra("sum", mCurrentOp.mSum);
-			res.putExtra("oldSum", mPreviousSum);
-			res.putExtra("opDate", mCurrentOp.getDate());
-			res.putExtra("newRowId", mCurrentOp.mRowId);
+			res.putExtra(OperationList.SUM, mCurrentOp.mSum);
+			res.putExtra(OperationList.OLD_SUM, mPreviousSum);
+			res.putExtra(OperationList.OP_DATE, mCurrentOp.getDate());
+			res.putExtra(OperationList.NEW_ROWID, mCurrentOp.mRowId);
+			res.putExtra(OperationList.TRANSFERT_ID,
+					mCurrentOp.mTransferAccountId);
 		}
 		res.putExtra("sumUpdateNeeded", sumUpdateIsNeeded);
 		setResult(RESULT_OK, res);
@@ -55,7 +58,7 @@ public class OperationEditor extends CommonOpEditor {
 	protected void saveOpAndExit() {
 		Operation op = mCurrentOp;
 		if (mRowId <= 0) {
-			setResAndExit(mDbHelper.createOp(op, mAccountId));
+			setResAndExit(mDbHelper.createOp(op, op.mAccountId));
 		} else {
 			if (op.equals(mOriginalOp)) {
 				setResAndExit(false);
@@ -63,7 +66,7 @@ public class OperationEditor extends CommonOpEditor {
 				if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
 					showDialog(ASK_UPDATE_SCHEDULED_DIALOG_ID);
 				} else {
-					setResAndExit(mDbHelper.updateOp(mRowId, op, mAccountId));
+					setResAndExit(mDbHelper.updateOp(mRowId, op, op.mAccountId));
 				}
 			}
 		}
@@ -82,7 +85,7 @@ public class OperationEditor extends CommonOpEditor {
 								public void onClick(DialogInterface dialog,
 										int which) {
 									final ScheduledOperation op = new ScheduledOperation(
-											mCurrentOp, mAccountId);
+											mCurrentOp, mCurrentOp.mAccountId);
 									mDbHelper.updateScheduledOp(
 											mCurrentOp.mScheduledId, op, true);
 									ScheduledOperation.updateAllOccurences(
@@ -98,7 +101,8 @@ public class OperationEditor extends CommonOpEditor {
 									mCurrentOp.mScheduledId = 0;
 									OperationEditor.this
 											.setResAndExit(mDbHelper.updateOp(
-													mRowId, mCurrentOp, mAccountId));
+													mRowId, mCurrentOp,
+													mCurrentOp.mAccountId));
 								}
 							})
 					.setNegativeButton(R.string.cancel,

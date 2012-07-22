@@ -4,7 +4,7 @@
 	android:layout_height="fill_parent">
 	<ListView android:id="@+id/android:list" android:layout_width="fill_parent"
 		android:layout_height="fill_parent" android:divider="#4b4b4b"
-		android:layout_weight="1" android:dividerHeight="1px" />
+		android:layout_weight="1" android:dividerHeight="1dp" />
 
 	<ViewStub
             android:id="@android:id/empty"
@@ -15,7 +15,7 @@
             android:layout="@layout/empty_account_list" />
 	<LinearLayout android:orientation="vertical"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:gravity="bottom" android:paddingTop="5px"
+		android:gravity="bottom" android:paddingTop="5dp"
 		android:layout_margin="0dip" android:layout_weight="0">
 		<LinearLayout android:orientation="horizontal"
 			android:layout_width="fill_parent" android:layout_height="wrap_content"
@@ -23,12 +23,12 @@
 			android:layout_margin="0dip" android:layout_weight="0">
 			<Button android:id="@+id/startAccountEditorBtn"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:text="@string/create" android:drawableLeft="@android:drawable/ic_menu_add"
+				android:text="@string/create" android:drawableLeft="@drawable/ic_menu_add"
 				android:gravity="left|center_vertical" android:drawablePadding="5dip"
 				android:layout_weight="1" />
 			<Button android:id="@+id/startScheduledListBtn"
 				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:text="@string/scheduled_ops" android:drawableLeft="@drawable/clock72"
+				android:text="@string/scheduled_ops" android:drawableLeft="@drawable/clock48"
 				android:gravity="left|center_vertical" android:drawablePadding="5dip"
 				android:layout_weight="1" />
 		</LinearLayout>

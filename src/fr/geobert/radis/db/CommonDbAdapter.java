@@ -114,6 +114,7 @@ public class CommonDbAdapter {
 	public static final String KEY_OP_ROWID = "_id";
 	public static final String KEY_OP_NOTES = "notes";
 	public static final String KEY_OP_TRANSFERT_ACC_ID = "transfert_acc_id";
+	public static final String KEY_OP_TRANSFERT_ACC_NAME = "transfert_acc_src_name";
 
 	public static final String KEY_SCHEDULED_END_DATE = "end_date";
 	public static final String KEY_SCHEDULED_PERIODICITY = "periodicity";
@@ -130,13 +131,14 @@ public class CommonDbAdapter {
 			+ " integer not null, " + KEY_SCHEDULED_END_DATE + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY + " integer, "
 			+ KEY_SCHEDULED_PERIODICITY_UNIT + " integer not null, "
-			+ KEY_OP_NOTES + " text, " + KEY_OP_TRANSFERT_ACC_ID
-			+ " integer not null, FOREIGN KEY (" + KEY_OP_THIRD_PARTY
-			+ ") REFERENCES " + DATABASE_THIRD_PARTIES_TABLE + "("
-			+ KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG
-			+ ") REFERENCES " + DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID
-			+ "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES "
-			+ DATABASE_MODES_TABLE + "(" + KEY_MODE_ROWID + "));";
+			+ KEY_OP_NOTES + " text, " + KEY_OP_TRANSFERT_ACC_NAME + " text, "
+			+ KEY_OP_TRANSFERT_ACC_ID + " integer not null, FOREIGN KEY ("
+			+ KEY_OP_THIRD_PARTY + ") REFERENCES "
+			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
+			+ "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES "
+			+ DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID + "), FOREIGN KEY ("
+			+ KEY_OP_MODE + ") REFERENCES " + DATABASE_MODES_TABLE + "("
+			+ KEY_MODE_ROWID + "));";
 
 	protected static final String DATABASE_OP_CREATE = "create table "
 			+ DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID
@@ -145,15 +147,15 @@ public class CommonDbAdapter {
 			+ " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
 			+ KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, "
 			+ KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID + " integer, "
-			+ KEY_OP_TRANSFERT_ACC_ID + " integer not null, FOREIGN KEY ("
-			+ KEY_OP_THIRD_PARTY + ") REFERENCES "
-			+ DATABASE_THIRD_PARTIES_TABLE + "(" + KEY_THIRD_PARTY_ROWID
-			+ "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES "
-			+ DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID + "), FOREIGN KEY ("
-			+ KEY_OP_MODE + ") REFERENCES " + DATABASE_MODES_TABLE + "("
-			+ KEY_MODE_ROWID + "), FOREIGN KEY (" + KEY_OP_SCHEDULED_ID
-			+ ") REFERENCES " + DATABASE_SCHEDULED_TABLE + "("
-			+ KEY_SCHEDULED_ROWID + "));";
+			+ KEY_OP_TRANSFERT_ACC_NAME + " text, " + KEY_OP_TRANSFERT_ACC_ID
+			+ " integer not null, FOREIGN KEY (" + KEY_OP_THIRD_PARTY
+			+ ") REFERENCES " + DATABASE_THIRD_PARTIES_TABLE + "("
+			+ KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG
+			+ ") REFERENCES " + DATABASE_TAGS_TABLE + "(" + KEY_TAG_ROWID
+			+ "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES "
+			+ DATABASE_MODES_TABLE + "(" + KEY_MODE_ROWID + "), FOREIGN KEY ("
+			+ KEY_OP_SCHEDULED_ID + ") REFERENCES " + DATABASE_SCHEDULED_TABLE
+			+ "(" + KEY_SCHEDULED_ROWID + "));";
 
 	public static final String KEY_PREFS_ROWID = "_id";
 	public static final String KEY_PREFS_NAME = "pref_name";
@@ -244,6 +246,9 @@ public class CommonDbAdapter {
 	protected static final String ADD_TRANSFERT_ID_COLUNM = "ALTER TABLE %s ADD COLUMN "
 			+ KEY_OP_TRANSFERT_ACC_ID + " integer not null DEFAULT 0";
 
+	protected static final String ADD_TRANSFERT_NAME_COLUNM = "ALTER TABLE %s ADD COLUMN "
+			+ KEY_OP_TRANSFERT_ACC_NAME + " text";
+
 	private LinkedHashMap<String, Long> mModesMap;
 	private LinkedHashMap<String, Long> mTagsMap;
 	private LinkedHashMap<String, Long> mThirdPartiesMap;
@@ -274,11 +279,12 @@ public class CommonDbAdapter {
 			"tp." + KEY_THIRD_PARTY_NAME, "tag." + KEY_TAG_NAME,
 			"mode." + KEY_MODE_NAME, "ops." + KEY_OP_SUM, "ops." + KEY_OP_DATE,
 			"ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES,
-			"ops." + KEY_OP_SCHEDULED_ID, "ops." + KEY_OP_TRANSFERT_ACC_ID };
+			"ops." + KEY_OP_SCHEDULED_ID, "ops." + KEY_OP_TRANSFERT_ACC_ID,
+			"ops." + KEY_OP_TRANSFERT_ACC_NAME };
 
-	private static final String RESTRICT_TO_ACCOUNT = "ops."
-			+ KEY_OP_ACCOUNT_ID + " = %d OR " + KEY_OP_TRANSFERT_ACC_ID
-			+ " = %d";
+	private static final String RESTRICT_TO_ACCOUNT = "(ops."
+			+ KEY_OP_ACCOUNT_ID + " = %d OR ops." + KEY_OP_TRANSFERT_ACC_ID
+			+ " = %d)";
 
 	private static final String SCHEDULED_OP_ORDERING = "sch." + KEY_OP_DATE
 			+ " desc, sch." + KEY_SCHEDULED_ROWID + " desc";
@@ -314,7 +320,9 @@ public class CommonDbAdapter {
 			"sch." + KEY_SCHEDULED_ACCOUNT_ID, "acc." + KEY_ACCOUNT_NAME,
 			"sch." + KEY_OP_NOTES, "sch." + KEY_SCHEDULED_END_DATE,
 			"sch." + KEY_SCHEDULED_PERIODICITY,
-			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT };
+			"sch." + KEY_SCHEDULED_PERIODICITY_UNIT,
+			"sch." + KEY_OP_TRANSFERT_ACC_ID,
+			"sch." + KEY_OP_TRANSFERT_ACC_NAME };
 
 	@SuppressWarnings("serial")
 	private static final HashMap<String, String> mColNameNormName = new HashMap<String, String>() {
@@ -730,8 +738,14 @@ public class CommonDbAdapter {
 				}
 			}
 			case 11: {
-				db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM, DATABASE_OPERATIONS_TABLE));
-				db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM, DATABASE_SCHEDULED_TABLE));
+				db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM,
+						DATABASE_OPERATIONS_TABLE));
+				db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM,
+						DATABASE_SCHEDULED_TABLE));
+				db.execSQL(String.format(ADD_TRANSFERT_NAME_COLUNM,
+						DATABASE_OPERATIONS_TABLE));
+				db.execSQL(String.format(ADD_TRANSFERT_NAME_COLUNM,
+						DATABASE_SCHEDULED_TABLE));
 			}
 			default:
 				Cursor c = db.query(DATABASE_ACCOUNT_TABLE,
@@ -831,12 +845,15 @@ public class CommonDbAdapter {
 		return mDb.insert(DATABASE_ACCOUNT_TABLE, null, initialValues);
 	}
 
-	private long computeSumFromCursor(Cursor c) {
+	private long computeSumFromCursor(Cursor c, long curAccount) {
 		long sum = 0L;
 		if (c.moveToFirst()) {
 			do {
 				long s = c
 						.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
+				if (c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID)) == curAccount) {
+					s = -s;
+				}
 				sum = sum + s;
 			} while (c.moveToNext());
 		}
@@ -864,7 +881,7 @@ public class CommonDbAdapter {
 								"setCurrentSumAndDate allOps moved to first");
 						date = allOps.getLong(allOps
 								.getColumnIndex(KEY_OP_DATE));
-						opSum = computeSumFromCursor(allOps);
+						opSum = computeSumFromCursor(allOps, accountId);
 					}
 					allOps.close();
 				}
@@ -887,7 +904,7 @@ public class CommonDbAdapter {
 														// query
 			if (null != op) {
 				if (op.moveToFirst()) {
-					opSum = computeSumFromCursor(op);
+					opSum = computeSumFromCursor(op, accountId);
 				}
 				op.close();
 			}
@@ -906,7 +923,7 @@ public class CommonDbAdapter {
 			// query
 			if (null != op) {
 				if (op.moveToFirst()) {
-					opSum = computeSumFromCursor(op);
+					opSum = computeSumFromCursor(op, accountId);
 				}
 				op.close();
 			}
@@ -1158,7 +1175,7 @@ public class CommonDbAdapter {
 	}
 
 	// return boolean saying if we need an update of OP_SUM
-	public boolean createOp(Operation op, final long accountId) {
+	public boolean createOp(final Operation op, final long accountId) {
 		ContentValues initialValues = new ContentValues();
 		String key = op.mThirdParty;
 		putKeyId(key, DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME,
@@ -1178,6 +1195,7 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_OP_NOTES, op.mNotes);
 		initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
 		initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
+		initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
 		op.mRowId = mDb.insert(DATABASE_OPERATIONS_TABLE, null, initialValues);
 		if (op.mRowId > -1) {
 			return checkNeedUpdateProjection(op, accountId);
@@ -1342,6 +1360,7 @@ public class CommonDbAdapter {
 		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_NOTES, op.mNotes);
 		args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
+		args.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
 		if (!updateOccurrences) {
 			args.put(KEY_OP_DATE, op.getDate());
 			args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
@@ -1423,6 +1442,7 @@ public class CommonDbAdapter {
 		initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
 		initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
 		initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
+		initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
 		return mDb.insert(DATABASE_SCHEDULED_TABLE, null, initialValues);
 	}
 
@@ -1445,6 +1465,7 @@ public class CommonDbAdapter {
 		args.put(KEY_OP_SUM, op.mSum);
 		args.put(KEY_OP_NOTES, op.mNotes);
 		args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
+		args.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
 		if (!isUpdatedFromOccurence) { // update from schedule editor
 			args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
 			args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
@@ -1641,14 +1662,15 @@ public class CommonDbAdapter {
 				File backupDB = new File(sd, backupDBPath);
 
 				if (currentDB.exists()) {
-					FileChannel src = new FileInputStream(currentDB)
-							.getChannel();
-					FileChannel dst = new FileOutputStream(backupDB)
-							.getChannel();
-
+					FileInputStream srcFIS = new FileInputStream(currentDB);
+					FileOutputStream dstFOS = new FileOutputStream(backupDB);
+					FileChannel src = srcFIS.getChannel();
+					FileChannel dst = dstFOS.getChannel();
 					dst.transferFrom(src, 0, src.size());
 					src.close();
 					dst.close();
+					srcFIS.close();
+					dstFOS.close();
 				}
 				return true;
 			}
@@ -1668,12 +1690,16 @@ public class CommonDbAdapter {
 			File backupDB = new File(sd, backupDBPath);
 
 			if (backupDB.exists()) {
-				FileChannel dst = new FileOutputStream(currentDB).getChannel();
-				FileChannel src = new FileInputStream(backupDB).getChannel();
+				FileInputStream dstFIS = new FileInputStream(currentDB);
+				FileOutputStream srcFOS = new FileOutputStream(backupDB);
+				FileChannel dst = dstFIS.getChannel();
+				FileChannel src = srcFOS.getChannel();
 
 				dst.transferFrom(src, 0, src.size());
 				src.close();
 				dst.close();
+				srcFOS.close();
+				dstFIS.close();
 				return true;
 			}
 		} catch (Exception e) {

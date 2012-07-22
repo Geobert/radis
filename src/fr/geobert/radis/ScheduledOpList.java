@@ -61,7 +61,7 @@ public class ScheduledOpList extends ListActivity {
 
 		public InnerViewBinder() {
 			super(ScheduledOpList.this, CommonDbAdapter.KEY_OP_SUM,
-					CommonDbAdapter.KEY_OP_DATE, R.id.scheduled_icon);
+					CommonDbAdapter.KEY_OP_DATE, R.id.scheduled_icon, -1);
 		}
 
 		@Override

@@ -11,13 +11,18 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.PopupWindow;
-import android.widget.SimpleCursorAdapter;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.SpinnerAdapter;
 import fr.geobert.radis.Account;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
@@ -57,7 +62,10 @@ public abstract class CommonOpEditor extends Activity {
 	public String mCurrentInfoTable;
 	protected long mPreviousSum = 0L;
 
-	protected Long mAccountId;
+	protected Long mCurAccountId;
+	private LinearLayout mThirdPartyCont;
+	private LinearLayout mTransfertCont;
+	protected CheckBox mIsTransfertCheck;
 
 	// abstract methods
 	protected abstract void setView();
@@ -79,8 +87,8 @@ public abstract class CommonOpEditor extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		Bundle extras = getIntent().getExtras();
-		mAccountId = extras != null ? extras.getLong(Tools.EXTRAS_ACCOUNT_ID)
-				: null;
+		mCurAccountId = extras != null ? extras
+				.getLong(Tools.EXTRAS_ACCOUNT_ID) : null;
 		setView();
 		init(savedInstanceState);
 	}
@@ -96,8 +104,10 @@ public abstract class CommonOpEditor extends Activity {
 		mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
 				.getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
 		mDatePicker = (DatePicker) findViewById(R.id.edit_op_date);
-//		mSrcAccount = (Spinner) findViewById(R.id.trans_src_account);
-//		mDstAccount = (Spinner) findViewById(R.id.trans_dst_account);
+		mSrcAccount = (Spinner) findViewById(R.id.trans_src_account);
+		mDstAccount = (Spinner) findViewById(R.id.trans_dst_account);
+		mTransfertCont = (LinearLayout) findViewById(R.id.transfert_cont);
+		mThirdPartyCont = (LinearLayout) findViewById(R.id.third_party_cont);
 		mNotesText = (EditText) findViewById(R.id.edit_op_notes);
 		mInfoManagersMap = new HashMap<String, InfoManager>();
 
@@ -105,6 +115,35 @@ public abstract class CommonOpEditor extends Activity {
 		mOpSumText.setNextFocusDownId(R.id.edit_op_tag);
 		mOpTagText.setNextFocusDownId(R.id.edit_op_mode);
 		mOpModeText.setNextFocusDownId(R.id.edit_op_notes);
+
+		mIsTransfertCheck = (CheckBox) findViewById(R.id.is_transfert);
+		mIsTransfertCheck
+				.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+					@Override
+					public void onCheckedChanged(CompoundButton arg0,
+							boolean arg1) {
+						onTransfertCheckedChanged(arg1);
+					}
+				});
+		mTransfertCont.setVisibility(View.GONE);
+	}
+
+	protected void onTransfertCheckedChanged(boolean arg1) {
+		Animation in = AnimationUtils.loadAnimation(this,
+				android.R.anim.fade_in);
+		Animation out = AnimationUtils.makeOutAnimation(this, true);
+		if (arg1 == true) {
+			mTransfertCont.startAnimation(in);
+			mThirdPartyCont.startAnimation(out);
+			mTransfertCont.setVisibility(View.VISIBLE);
+			mThirdPartyCont.setVisibility(View.GONE);
+		} else {
+			mTransfertCont.startAnimation(out);
+			mThirdPartyCont.startAnimation(in);
+			mTransfertCont.setVisibility(View.GONE);
+			mThirdPartyCont.setVisibility(View.VISIBLE);
+		}
 	}
 
 	protected void initViewAdapters() {
@@ -117,10 +156,8 @@ public abstract class CommonOpEditor extends Activity {
 		mOpTagText.setAdapter(new InfoAdapter(this, mDbHelper,
 				CommonDbAdapter.DATABASE_TAGS_TABLE,
 				CommonDbAdapter.KEY_TAG_NAME));
-		
-		//populateTransfertSpinner();
 	}
-	
+
 	private void populateTransfertSpinner() {
 		Cursor c = mDbHelper.fetchAllAccounts();
 		startManagingCursor(c);
@@ -140,18 +177,16 @@ public abstract class CommonOpEditor extends Activity {
 			adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mSrcAccount.setAdapter(adapter);
 			mDstAccount.setAdapter(adapter2);
-			
-			if (mAccountId != 0) {
-				int pos = 0;
-				while (pos < adapter.getCount()) {
-					long id = adapter.getItemId(pos);
-					if (id == mAccountId) {
-						mSrcAccount.setSelection(pos);
-						break;
-					} else {
-						pos++;
-					}
-				}
+		}
+		
+		final boolean isTransfert = mCurrentOp.mTransferAccountId > 0;
+		mIsTransfertCheck.setChecked(isTransfert);
+		if (isTransfert) {
+			initAccountSpinner(mSrcAccount, mCurrentOp.mAccountId);
+			initAccountSpinner(mDstAccount, mCurrentOp.mTransferAccountId);
+		} else {
+			if (mCurAccountId != 0) {
+				initAccountSpinner(mSrcAccount, mCurAccountId);
 			}
 		}
 	}
@@ -168,13 +203,25 @@ public abstract class CommonOpEditor extends Activity {
 
 	protected boolean isFormValid(StringBuilder errMsg) {
 		boolean res = true;
-		String str = mOpThirdPartyText.getText().toString().trim();
-		if (str.length() == 0) {
-			if (errMsg.length() > 0) {
-				errMsg.append("\n");
+		String str;
+		if (mIsTransfertCheck.isChecked()) {
+			final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
+			final Account dstAccount = (Account) mDstAccount.getSelectedItem();
+			if (srcAccount.mAccountId == 0
+					|| dstAccount.mAccountId == 0
+					|| (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 && srcAccount.mAccountId == dstAccount.mAccountId)) {
+				errMsg.append(getString(R.string.invalid_transfert));
+				res = false;
 			}
-			errMsg.append(getString(R.string.empty_third_party));
-			res = false;
+		} else {
+			str = mOpThirdPartyText.getText().toString().trim();
+			if (str.length() == 0) {
+				if (errMsg.length() > 0) {
+					errMsg.append("\n");
+				}
+				errMsg.append(getString(R.string.empty_third_party));
+				res = false;
+			}
 		}
 		str = mOpSumText.getText().toString().replace('+', ' ').trim();
 		if (str.length() == 0) {
@@ -194,6 +241,7 @@ public abstract class CommonOpEditor extends Activity {
 				res = false;
 			}
 		}
+
 		return res;
 	}
 
@@ -340,6 +388,20 @@ public abstract class CommonOpEditor extends Activity {
 		// mDbHelper.close();
 	}
 
+	private void initAccountSpinner(Spinner spin, long accountId) {
+		int pos = 0;
+		SpinnerAdapter adapter = spin.getAdapter();
+		while (pos < adapter.getCount()) {
+			long id = adapter.getItemId(pos);
+			if (id == accountId) {
+				spin.setSelection(pos);
+				break;
+			} else {
+				pos++;
+			}
+		}
+	}
+	
 	protected void populateCommonFields(Operation op) {
 		Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
 		Tools.setTextWithoutComplete(mOpModeText, op.mMode);
@@ -354,6 +416,7 @@ public abstract class CommonOpEditor extends Activity {
 		} else {
 			mOpSumText.setText(mCurrentOp.getSumStr());
 		}
+		populateTransfertSpinner();
 	}
 
 	protected void initListeners() {
@@ -429,7 +492,6 @@ public abstract class CommonOpEditor extends Activity {
 	}
 
 	protected void fillOperationWithInputs(Operation op) {
-		op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
 		op.mMode = mOpModeText.getText().toString().trim();
 		op.mTag = mOpTagText.getText().toString().trim();
 		op.setSumStr(mOpSumText.getText().toString());
@@ -440,6 +502,23 @@ public abstract class CommonOpEditor extends Activity {
 		op.setDay(dp.getDayOfMonth());
 		op.setMonth(dp.getMonth());
 		op.setYear(dp.getYear());
+
+		if (mIsTransfertCheck.isChecked()) {
+			final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
+			final Account dstAccount = (Account) mDstAccount.getSelectedItem();
+			if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0
+					&& srcAccount.mAccountId != dstAccount.mAccountId) {
+				// a valid transfert has been setup
+				op.mTransferAccountId = dstAccount.mAccountId;
+				op.mAccountId = srcAccount.mAccountId;
+				op.mThirdParty = dstAccount.mName.trim();
+				op.mTransSrcAccName = srcAccount.mName;
+			} else {
+				op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
+			}
+		} else {
+			op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
+		}
 	}
 
 	@Override

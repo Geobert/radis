@@ -14,6 +14,48 @@
 
     <LinearLayout style="@style/EditorHorizontalLinearLayout" >
 
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:text="@string/transfert" />
+
+        <CheckBox
+            android:id="@+id/is_transfert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="3dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/transfert_cont"
+        style="@style/EditorHorizontalLinearLayout" >
+
+        <Spinner
+            android:id="@+id/trans_src_account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="0dp"
+            android:text="@string/rarr"
+            android:textSize="20dp" />
+
+        <Spinner
+            android:id="@+id/trans_dst_account"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/third_party_cont"
+        style="@style/EditorHorizontalLinearLayout" >
+
         <fr.geobert.radis.tools.MyAutoCompleteTextView
             android:id="@+id/edit_op_third_party"
             style="@style/EditorEditText"
@@ -63,29 +105,6 @@
             android:id="@+id/edit_op_modes_list"
             style="@style/EditorBaseButton.ListButton" />
     </LinearLayout>
-
-  <!--   <LinearLayout style="@style/EditorHorizontalLinearLayout" >
-
-        <Spinner
-            android:id="@+id/trans_src_account"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="0dp"
-            android:text="@string/rarr"
-            android:textSize="20dp" />
-
-        <Spinner
-            android:id="@+id/trans_dst_account"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-
-    </LinearLayout> -->
 
     <EditText
         android:id="@+id/edit_op_notes"
