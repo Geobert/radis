@@ -177,4 +177,5 @@
 	<string name="invalid_transfert">Transfert is not well configured</string>
 	<string name="transfert">Transfert between account</string>
 	<string name="sch_no_choosen_account">Please choose an account on planification page</string>
+	<string name="choose_account">Choose an account</string>
 </resources>

@@ -250,14 +250,14 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		if (c != null && c.isFirst()) {
 			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
 					android.R.layout.simple_spinner_item);
-			adapter.add(new Account(0, getString(R.string.no_transfert)));
+			adapter.add(new Account(0, getString(R.string.choose_account)));
 			do {
 				adapter.add(new Account(c));
 			} while (c.moveToNext());
 			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			mAccountSpinner.setAdapter(adapter);
 			if (mCurrentSchOp.mAccountId != 0 || mCurAccountId != 0) {
-				int pos = 0;
+				int pos = 1;
 				while (pos < adapter.getCount()) {
 					long id = adapter.getItemId(pos);
 					if (id == mCurrentSchOp.mAccountId || id == mCurAccountId) {

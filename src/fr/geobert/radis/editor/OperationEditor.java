@@ -41,15 +41,22 @@ public class OperationEditor extends CommonOpEditor {
 
 	private void setResAndExit(boolean sumUpdateIsNeeded) {
 		Intent res = new Intent();
+		res.putExtra(OperationList.SUM, mCurrentOp.mSum);
+		res.putExtra(OperationList.OLD_SUM, mPreviousSum);
+
 		if (sumUpdateIsNeeded) {
-			res.putExtra(OperationList.SUM, mCurrentOp.mSum);
-			res.putExtra(OperationList.OLD_SUM, mPreviousSum);
 			res.putExtra(OperationList.OP_DATE, mCurrentOp.getDate());
 			res.putExtra(OperationList.NEW_ROWID, mCurrentOp.mRowId);
 			res.putExtra(OperationList.TRANSFERT_ID,
 					mCurrentOp.mTransferAccountId);
 		}
-		res.putExtra("sumUpdateNeeded", sumUpdateIsNeeded);
+		res.putExtra(OperationList.UPDATE_SUM_NEEDED, sumUpdateIsNeeded);
+		// cas où on edit en supprimant transfert -> maj somme du dstAccount
+		if (mOriginalOp != null
+				&& (mOriginalOp.mTransferAccountId != mCurrentOp.mTransferAccountId)) {
+			res.putExtra(OperationList.OLD_TRANSFERT_ID,
+					mOriginalOp.mTransferAccountId);
+		}
 		setResult(RESULT_OK, res);
 		finish();
 	}

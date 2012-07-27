@@ -181,4 +181,5 @@
 	<string name="invalid_transfert">Le transfert n\'est pas bien paramétré</string>
 	<string name="transfert">Transfert entre comptes</string>
 	<string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
+	<string name="choose_account">Sélectionnez un compte</string>
 </resources>

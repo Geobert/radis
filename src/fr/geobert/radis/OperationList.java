@@ -71,6 +71,8 @@ public class OperationList extends ListActivity implements
 	public static final String OP_DATE = "opDate";
 	public static final String NEW_ROWID = "newRowId";
 	public static final String TRANSFERT_ID = "transfertId";
+	public static final String UPDATE_SUM_NEEDED = "sumUpdateNeeded";
+	public static final String OLD_TRANSFERT_ID = "oldTransfertId";
 
 	private CommonDbAdapter mDbHelper;
 	private Long mAccountId;
@@ -203,10 +205,11 @@ public class OperationList extends ListActivity implements
 					separator.setVisibility(View.GONE);
 				}
 				return true;
-			}  else if (colName.equals(CommonDbAdapter.KEY_THIRD_PARTY_NAME)) {
+			} else if (colName.equals(CommonDbAdapter.KEY_THIRD_PARTY_NAME)) {
 				TextView textView = ((TextView) view);
-				final long transfertId = cursor.getLong(cursor
-						.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
+				final long transfertId = cursor
+						.getLong(cursor
+								.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
 				if (transfertId > 0 && transfertId == mAccountId) {
 					textView.setText(cursor.getString(cursor
 							.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME)));
@@ -636,10 +639,22 @@ public class OperationList extends ListActivity implements
 		if (mLastSelectedPosition >= mLastOps.getCount()) {
 			mLastSelectedPosition = mLastOps.getCount() - 1;
 		}
-		if (data.getBooleanExtra("sumUpdateNeeded", false)) {
-			Bundle extras = data.getExtras();
-			updateSumsAfterOpEdit(extras.getLong(OLD_SUM), extras.getLong(SUM),
-					extras.getLong(OP_DATE), extras.getLong(TRANSFERT_ID));
+
+		final long oldSum = data.getLongExtra(OLD_SUM, 0);
+		final long sum = data.getLongExtra(SUM, 0);
+		final long date = data.getLongExtra(OP_DATE, 0);
+		final long transId = data.getLongExtra(TRANSFERT_ID, 0);
+		final long oldTransId = data.getLongExtra(OLD_TRANSFERT_ID, 0);
+		final long sumToAdd = -oldSum + sum;
+
+		if (data.getBooleanExtra(UPDATE_SUM_NEEDED, false)) {
+			updateSumsAfterOpEdit(sumToAdd, date, mAccountId);
+		}
+		if (transId > 0) {
+			mDbHelper.updateProjection(transId, -sumToAdd, date);
+		}
+		if (oldTransId > 0) {
+			mDbHelper.consolidateSums(oldTransId);
 		}
 	}
 
@@ -762,7 +777,7 @@ public class OperationList extends ListActivity implements
 				mLastSelectedPosition--;
 			}
 			fillData();
-			updateSumsAfterOpEdit(sum, 0L, 0, 0);
+			updateSumsAfterOpEdit(-sum, 0, mAccountId);
 		} else {
 			updateSumsDisplay(true);
 			// fillData() is called inside updateSumsDisplay
@@ -785,7 +800,7 @@ public class OperationList extends ListActivity implements
 				mLastSelectedPosition--;
 			}
 			fillData();
-			updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0, 0);
+			updateSumsAfterOpEdit(-(sum * nbDeleted), 0, mAccountId);
 		} else {
 			updateSumsDisplay(true);
 			// fillData() is called inside updateSumsDisplay
@@ -808,7 +823,7 @@ public class OperationList extends ListActivity implements
 					mLastSelectedPosition--;
 				}
 				fillData();
-				updateSumsAfterOpEdit(sum * nbDeleted, 0L, 0, 0);
+				updateSumsAfterOpEdit(-(sum * nbDeleted), 0, mAccountId);
 			} else {
 				updateSumsDisplay(true);
 				// fillData() is called inside updateSumsDisplay
@@ -1136,14 +1151,8 @@ public class OperationList extends ListActivity implements
 	}
 
 	// update db projection sum and display
-	private void updateSumsAfterOpEdit(long oldSum, long sum, long date,
-			long transfertId) {
-		Log.d("Radis", "updateSumsAfterOpEdit oldSum : " + oldSum + " / sum : "
-				+ sum);
-		mDbHelper.updateProjection(mAccountId, -oldSum + sum, date);
-		if (transfertId > 0) {
-			mDbHelper.updateProjection(transfertId, -(-oldSum + sum), date);
-		}
+	private void updateSumsAfterOpEdit(long sumToAdd, long date, long accountId) {
+		mDbHelper.updateProjection(accountId, sumToAdd, date);
 		updateSumsAndSelection();
 	}
 

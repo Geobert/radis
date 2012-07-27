@@ -517,6 +517,8 @@ public abstract class CommonOpEditor extends Activity {
 				op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
 			}
 		} else {
+			op.mTransferAccountId = 0;
+			op.mTransSrcAccName = "";
 			op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
 		}
 	}
