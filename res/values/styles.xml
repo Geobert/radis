@@ -10,8 +10,11 @@
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:gravity">center</item>
 	</style>
-	<style name="EditorBaseButton.ListButton">
-		<item name="android:drawableLeft">@drawable/more36</item>
+	<style name="EditorImageButton">
+	    <item name="android:layout_weight">0</item>
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:gravity">center</item>
 	</style>
 	<style name="EditorEditText" parent="@android:style/Widget.EditText">
 		<item name="android:layout_width">fill_parent</item>
@@ -119,12 +122,12 @@
 		<item name="android:gravity">center_vertical</item>
 		<item name="android:paddingTop">5px</item>
 	</style>
-		<style name="QuickAddBaseButton" parent="@android:style/Widget.Button">
+		<style name="QuickAddBaseButton" parent="@android:style/Widget.ImageButton">
 		<item name="android:layout_weight">0</item>
 		<item name="android:layout_width">wrap_content</item>
 		<item name="android:layout_height">fill_parent</item>
 		<item name="android:gravity">center</item>
-		<item name="android:drawableLeft">@drawable/btn_check_buttonless_on</item>
+		<item name="android:src">@drawable/btn_check_buttonless_on</item>
 	</style>
 	<style name="QuickAddEditText" parent="@android:style/Widget.EditText">
 		<item name="android:layout_width">fill_parent</item>

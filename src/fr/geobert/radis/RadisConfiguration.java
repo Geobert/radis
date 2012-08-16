@@ -12,12 +12,14 @@ import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
-import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.tools.DBPrefsManager;
 
 public class RadisConfiguration extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
 	public final static String KEY_INSERTION_DATE = "insertion_date";
+	public final static String KEY_LAST_INSERTION_DATE = "LAST_INSERT_DATE";
 	public final static String KEY_DEFAULT_ACCOUNT = "quickadd_account";
 	public final static String KEY_HIDE_ACCOUNT_QUICK_ADD = "hide_account_quick_add";
 	public final static String KEY_HIDE_OPS_QUICK_ADD = "hide_ops_quick_add";
@@ -30,7 +32,8 @@ public class RadisConfiguration extends PreferenceActivity implements
 	}
 
 	private SharedPreferences getSharedPreferences() {
-		return super.getSharedPreferences(DBPrefsManager.SHARED_PREF_NAME, MODE_PRIVATE);
+		return super.getSharedPreferences(DBPrefsManager.SHARED_PREF_NAME,
+				MODE_PRIVATE);
 	}
 
 	public SharedPreferences getSharedPreferences(String name, int mode) {
@@ -54,27 +57,30 @@ public class RadisConfiguration extends PreferenceActivity implements
 	}
 
 	private void initAccountChoices() {
-		CommonDbAdapter dbHelper = CommonDbAdapter.getInstance(this);
-		Cursor accounts = dbHelper.fetchAllAccounts();
+		Cursor accounts = getContentResolver().query(
+				DbContentProvider.ACCOUNT_URI, AccountTable.ACCOUNT_COLS, null,
+				null, null);
 		ArrayList<CharSequence> entries = new ArrayList<CharSequence>();
 		ArrayList<CharSequence> values = new ArrayList<CharSequence>();
-		if (accounts.isFirst()) {
+		if (accounts.moveToFirst()) {
 			do {
 				entries.add(accounts.getString(accounts
-						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_NAME)));
+						.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)));
 				values.add(String.valueOf(accounts.getLong(accounts
-						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID))));
+						.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID))));
 
 			} while (accounts.moveToNext());
 		}
-		mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries.size()]));
-		mAccountsChoice.setEntryValues(values.toArray(new CharSequence[entries.size()]));
+		mAccountsChoice.setEntries(entries.toArray(new CharSequence[entries
+				.size()]));
+		mAccountsChoice.setEntryValues(values.toArray(new CharSequence[entries
+				.size()]));
 		accounts.close();
 	}
 
 	private void updateLabel(String key) {
 		String summary = null;
-		
+
 		if (KEY_INSERTION_DATE.equals(key)) {
 			String value = getPrefs().getString(key, DEFAULT_INSERTION_DATE);
 			String s = getString(R.string.prefs_insertion_date_text);
@@ -102,7 +108,8 @@ public class RadisConfiguration extends PreferenceActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		String value = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE);
+		String value = getPrefs().getString(KEY_INSERTION_DATE,
+				DEFAULT_INSERTION_DATE);
 		EditTextPreference ep = (EditTextPreference) findPreference(KEY_INSERTION_DATE);
 		ep.getEditText().setText(value);
 
@@ -127,7 +134,8 @@ public class RadisConfiguration extends PreferenceActivity implements
 	}
 
 	@Override
-	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
 		String value = "";
 		Preference p = findPreference(key);
 		if (p instanceof EditTextPreference) {
@@ -136,7 +144,7 @@ public class RadisConfiguration extends PreferenceActivity implements
 			ListPreference l = (ListPreference) p;
 			value = l.getValue();
 		} else if (p instanceof CheckBoxPreference) {
-			CheckBoxPreference c = (CheckBoxPreference)p;
+			CheckBoxPreference c = (CheckBoxPreference) p;
 			value = Boolean.toString(c.isChecked());
 		}
 

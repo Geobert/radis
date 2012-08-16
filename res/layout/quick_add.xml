@@ -7,5 +7,5 @@
 		android:dropDownAnchor="@id/quick_add_layout" />
 	<EditText android:id="@+id/quickadd_amount" style="@style/QuickAddEditText.Sum"
 		android:hint="@string/sum" />
-	<Button android:id="@+id/quickadd_validate" style="@style/QuickAddBaseButton" />
+	<ImageButton android:id="@+id/quickadd_validate" style="@style/QuickAddBaseButton" />
 </LinearLayout>

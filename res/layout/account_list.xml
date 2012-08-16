@@ -1,52 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
-	<ListView android:id="@+id/android:list" android:layout_width="fill_parent"
-		android:layout_height="fill_parent" android:divider="#4b4b4b"
-		android:layout_weight="1" android:dividerHeight="1dp" />
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
-	<ViewStub
-            android:id="@android:id/empty"
+    <ListView
+        android:id="@+id/android:list"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/controls_cont"
+        android:divider="#4b4b4b"
+        android:dividerHeight="1dp" />
+
+    <ViewStub
+        android:id="@android:id/empty"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:layout="@layout/empty_account_list"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/controls_cont"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="0dip"
+        android:gravity="bottom"
+        android:orientation="vertical"
+        android:paddingTop="5dp" >
+
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:layout="@layout/empty_account_list" />
-	<LinearLayout android:orientation="vertical"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		android:gravity="bottom" android:paddingTop="5dp"
-		android:layout_margin="0dip" android:layout_weight="0">
-		<LinearLayout android:orientation="horizontal"
-			android:layout_width="fill_parent" android:layout_height="wrap_content"
-			android:gravity="center_horizontal" android:paddingTop="5dip" android:paddingBottom="0dip"
-			android:layout_margin="0dip" android:layout_weight="0">
-			<Button android:id="@+id/startAccountEditorBtn"
-				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:text="@string/create" android:drawableLeft="@drawable/ic_menu_add"
-				android:gravity="left|center_vertical" android:drawablePadding="5dip"
-				android:layout_weight="1" />
-			<Button android:id="@+id/startScheduledListBtn"
-				android:layout_width="fill_parent" android:layout_height="wrap_content"
-				android:text="@string/scheduled_ops" android:drawableLeft="@drawable/clock48"
-				android:gravity="left|center_vertical" android:drawablePadding="5dip"
-				android:layout_weight="1" />
-		</LinearLayout>
-<!-- 		<LinearLayout android:orientation="horizontal" -->
-<!-- 			android:layout_width="fill_parent" android:layout_height="wrap_content" -->
-<!-- 			android:gravity="center_horizontal" android:paddingTop="0dip" android:paddingBottom="5dip" -->
-<!-- 			android:layout_margin="0dip" android:layout_weight="0"> -->
-<!-- 			<Button android:id="@+id/startTransfertEditorBtn"  -->
-<!-- 				android:layout_width="fill_parent" android:layout_height="wrap_content" -->
-<!-- 				android:text="@string/transfert" android:drawableLeft="@android:drawable/ic_menu_add" -->
-<!-- 				android:gravity="left|center_vertical" android:drawablePadding="5dip" -->
-<!-- 				android:layout_weight="1" /> -->
-		    
-<!-- 		</LinearLayout> -->
-		<TextView android:id="@+id/quickadd_target_text"
-			android:background="@drawable/line_gradient"
-			android:paddingLeft="5dip" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
-		<include layout="@layout/quick_add" />
-	</LinearLayout>
-</LinearLayout>
+            android:layout_margin="0dip"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal"
+            android:paddingBottom="0dip"
+            android:paddingTop="5dip" >
+
+            <Button
+                android:id="@+id/startAccountEditorBtn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_menu_add"
+                android:drawablePadding="5dip"
+                android:gravity="left|center_vertical"
+                android:text="@string/create" />
+
+            <Button
+                android:id="@+id/startScheduledListBtn"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/clock48"
+                android:drawablePadding="5dip"
+                android:gravity="left|center_vertical"
+                android:text="@string/scheduled_ops" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/quickadd_target_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/line_gradient"
+            android:paddingLeft="5dip" />
+
+        <include layout="@layout/quick_add" />
+    </LinearLayout>
+
+</RelativeLayout>

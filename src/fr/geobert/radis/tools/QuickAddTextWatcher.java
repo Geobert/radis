@@ -3,16 +3,16 @@ package fr.geobert.radis.tools;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 public class QuickAddTextWatcher implements TextWatcher {
 	private AutoCompleteTextView mThirdParty;
 	private EditText mAmount;
-	private Button mQuickAdd;
+	private ImageButton mQuickAdd;
 
 	public QuickAddTextWatcher(AutoCompleteTextView thirdParty,
-			EditText amount, Button quickAdd) {
+			EditText amount, ImageButton quickAdd) {
 		mThirdParty = thirdParty;
 		mAmount = amount;
 		mQuickAdd = quickAdd;

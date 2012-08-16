@@ -4,7 +4,6 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -25,9 +24,7 @@ import fr.geobert.radis.AccountList;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
-import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
-import fr.geobert.radis.service.RadisService;
 
 public class Tools {
 	// these are here because database force to use "_id" to be able to use
@@ -125,7 +122,7 @@ public class Tools {
 		return false;
 	}
 
-	private static CommonDbAdapter mDb;
+//	private static CommonDbAdapter mDb;
 	private static Activity mActivity;
 
 	public static Dialog getAdvancedDialog(Activity ctx, int id,
@@ -201,52 +198,51 @@ public class Tools {
 		};
 	}
 
-	public static Dialog onDefaultCreateDialog(final Activity ctx, int id,
-			CommonDbAdapter db) {
-		mDb = db;
-		mActivity = ctx;
-		switch (id) {
-		case Tools.DEBUG_DIALOG:
-			return Tools.getDebugDialog(ctx, db);
-		case R.id.restore:
-			return Tools.getAdvancedDialog(
-					ctx,
-					id,
-					createRestoreOrBackupClickListener(
-							new BooleanResultNoParamFct() {
-								@Override
-								public boolean run() {
-									return mDb.restoreDatabase();
-								}
-							}, R.string.restore_success,
-							R.string.restore_failed));
-		case R.id.backup:
-			return Tools
-					.getAdvancedDialog(
-							ctx,
-							id,
-							createRestoreOrBackupClickListener(
-									new BooleanResultNoParamFct() {
-										@Override
-										public boolean run() {
-											return mDb.backupDatabase();
-										}
-									}, R.string.backup_success,
-									R.string.backup_failed));
-		case R.string.backup_failed:
-		case R.string.restore_failed:
-			return createFailAndRestartDialog(ctx, id);
-		case R.id.process_scheduling:
-			return Tools.getAdvancedDialog(ctx, id,
-					new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							RadisService.acquireStaticLock(ctx);
-							ctx.startService(new Intent(ctx, RadisService.class));
-						}
-
-					});
-		}
+	public static Dialog onDefaultCreateDialog(final Activity ctx, int id) {
+//		mDb = db;
+//		mActivity = ctx;
+//		switch (id) {
+//		case Tools.DEBUG_DIALOG:
+//			return Tools.getDebugDialog(ctx, db);
+//		case R.id.restore:
+//			return Tools.getAdvancedDialog(
+//					ctx,
+//					id,
+//					createRestoreOrBackupClickListener(
+//							new BooleanResultNoParamFct() {
+//								@Override
+//								public boolean run() {
+//									return mDb.restoreDatabase();
+//								}
+//							}, R.string.restore_success,
+//							R.string.restore_failed));
+//		case R.id.backup:
+//			return Tools
+//					.getAdvancedDialog(
+//							ctx,
+//							id,
+//							createRestoreOrBackupClickListener(
+//									new BooleanResultNoParamFct() {
+//										@Override
+//										public boolean run() {
+//											return mDb.backupDatabase();
+//										}
+//									}, R.string.backup_success,
+//									R.string.backup_failed));
+//		case R.string.backup_failed:
+//		case R.string.restore_failed:
+//			return createFailAndRestartDialog(ctx, id);
+//		case R.id.process_scheduling:
+//			return Tools.getAdvancedDialog(ctx, id,
+//					new DialogInterface.OnClickListener() {
+//						@Override
+//						public void onClick(DialogInterface dialog, int which) {
+//							RadisService.acquireStaticLock(ctx);
+//							ctx.startService(new Intent(ctx, RadisService.class));
+//						}
+//
+//					});
+//		}
 		return null;
 	}
 
@@ -258,7 +254,7 @@ public class Tools {
 	}
 
 	// ------------------------------------------------------
-	// DEBUG TOOLS
+	// DEBUGï¿½TOOLS
 	// ------------------------------------------------------
 	public static void restartApp(Context ctx) {
 		AccountList.callMe(ctx);
@@ -273,11 +269,10 @@ public class Tools {
 		return false;
 	}
 
-	public static Dialog getDebugDialog(final Context context,
-			CommonDbAdapter dB) {
+	public static Dialog getDebugDialog(final Context context) {
 		final CharSequence[] items = { "Trash DB", "Restart",
 				"Install RadisService", "Trash Prefs"};
-		mDb = dB;
+		//mDb = dB;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setNegativeButton("Cancel",
 				new DialogInterface.OnClickListener() {
@@ -289,7 +284,7 @@ public class Tools {
 			public void onClick(DialogInterface dialog, int item) {
 				switch (item) {
 				case 0:
-					mDb.trashDatabase();
+			//		mDb.trashDatabase();
 					Tools.restartApp(context);
 					break;
 				case 1:

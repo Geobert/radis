@@ -31,14 +31,14 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
-import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationTable;
+import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOpList extends ListActivity {
 	public static final String CURRENT_ACCOUNT = "accountId";
-	private CommonDbAdapter mDbHelper;
 
 	private AdapterContextMenuInfo mOpToDelete;
 
@@ -60,14 +60,15 @@ public class ScheduledOpList extends ListActivity {
 	private class InnerViewBinder extends OpViewBinder {
 
 		public InnerViewBinder() {
-			super(ScheduledOpList.this, CommonDbAdapter.KEY_OP_SUM,
-					CommonDbAdapter.KEY_OP_DATE, R.id.scheduled_icon, -1);
+			super(ScheduledOpList.this, OperationTable.KEY_OP_SUM,
+					OperationTable.KEY_OP_DATE, R.id.scheduled_icon, -1);
 		}
 
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
-			if (colName.equals(CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT)) {
+			if (colName
+					.equals(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY_UNIT)) {
 				StringBuilder b = new StringBuilder();
 				int periodicityUnit = cursor.getInt(columnIndex);
 				int periodicity = cursor.getInt(columnIndex - 1);
@@ -76,8 +77,8 @@ public class ScheduledOpList extends ListActivity {
 						periodicityUnit, periodicity));
 				b.append(" - ");
 				if (endDate > 0) {
-					b.append(Formater.getFullDateFormater(ScheduledOpList.this)
-							.format(new Date(endDate)));
+					b.append(Formater.getFullDateFormater().format(
+							new Date(endDate)));
 				} else {
 					b.append(ScheduledOpList.this
 							.getString(R.string.no_end_date));
@@ -86,24 +87,19 @@ public class ScheduledOpList extends ListActivity {
 				return true;
 			} else if (colName.equals(mDateColName)) {
 				Date date = new Date(cursor.getLong(columnIndex));
-				((TextView) view).setText(Formater.getFullDateFormater(
-						ScheduledOpList.this).format(date));
+				((TextView) view).setText(Formater.getFullDateFormater()
+						.format(date));
 				return true;
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
 			}
 		}
 	}
-	
+
 	public static void callMe(Context ctx, final long currentAccountId) {
 		Intent i = new Intent(ctx, ScheduledOpList.class);
 		i.putExtra(CURRENT_ACCOUNT, currentAccountId);
 		ctx.startActivity(i);
-	}
-
-	private void initDbHelper() {
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mDbHelper.open();
 	}
 
 	@Override
@@ -114,7 +110,7 @@ public class ScheduledOpList extends ListActivity {
 		setContentView(R.layout.scheduled_list);
 		registerForContextMenu(getListView());
 
-		final GestureDetector gestureDetector = new GestureDetector(
+		final GestureDetector gestureDetector = new GestureDetector(this,
 				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
 					@Override
 					public void run() {
@@ -152,84 +148,84 @@ public class ScheduledOpList extends ListActivity {
 	}
 
 	private void fillData() {
-		Cursor c = mCurrentAccount == 0 ? mDbHelper.fetchAllScheduledOps()
-				: mDbHelper.fetchScheduledOpsOfAccount(mCurrentAccount);
-		startManagingCursor(c);
-		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
-				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
-				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_ACCOUNT_NAME,
-				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT,
-				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY,
-				CommonDbAdapter.KEY_SCHEDULED_END_DATE, };
-
-		int[] to = new int[] { R.id.scheduled_date, R.id.scheduled_third_party,
-				R.id.scheduled_sum, R.id.scheduled_account,
-				R.id.scheduled_infos };
-		SimpleCursorAdapter operations = new SimpleCursorAdapter(this,
-				R.layout.scheduled_row, c, from, to);
-		operations.setViewBinder(new InnerViewBinder());
-		setListAdapter(operations);
+//		Cursor c = mCurrentAccount == 0 ? mDbHelper.fetchAllScheduledOps()
+//				: mDbHelper.fetchScheduledOpsOfAccount(mCurrentAccount);
+//		startManagingCursor(c);
+//		String[] from = new String[] { CommonDbAdapter.KEY_OP_DATE,
+//				CommonDbAdapter.KEY_THIRD_PARTY_NAME,
+//				CommonDbAdapter.KEY_OP_SUM, CommonDbAdapter.KEY_ACCOUNT_NAME,
+//				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY_UNIT,
+//				CommonDbAdapter.KEY_SCHEDULED_PERIODICITY,
+//				CommonDbAdapter.KEY_SCHEDULED_END_DATE, };
+//
+//		int[] to = new int[] { R.id.scheduled_date, R.id.scheduled_third_party,
+//				R.id.scheduled_sum, R.id.scheduled_account,
+//				R.id.scheduled_infos };
+//		SimpleCursorAdapter operations = new SimpleCursorAdapter(this,
+//				R.layout.scheduled_row, c, from, to);
+//		operations.setViewBinder(new InnerViewBinder());
+//		setListAdapter(operations);
 	}
 
 	private void populateAccountSpinner() {
-		Cursor c = mDbHelper.fetchAllAccounts();
-		startManagingCursor(c);
-		if (c != null && c.isFirst()) {
-			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
-					android.R.layout.simple_spinner_item);
-			adapter.add(new Account(0, getString(R.string.all_accounts)));
-			do {
-				adapter.add(new Account(c));
-			} while (c.moveToNext());
-
-			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			mAccountSpinner.setAdapter(adapter);
-			if (mCurrentAccount != 0) {
-				int pos = 0;
-				while (pos < adapter.getCount()) {
-					long id = adapter.getItemId(pos);
-					if (id == mCurrentAccount) {
-						mAccountSpinner.setSelection(pos);
-						break;
-					} else {
-						pos++;
-					}
-				}
-			}
-		}
-		mAccountSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> parent, View view,
-					int pos, long id) {
-				Account a = (Account) parent.getItemAtPosition(pos);
-				mCurrentAccount = a.mAccountId;
-				fillData();
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
-
-			}
-		});
+//		Cursor c = mDbHelper.fetchAllAccounts();
+//		startManagingCursor(c);
+//		if (c != null && c.isFirst()) {
+//			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+//					android.R.layout.simple_spinner_item);
+//			adapter.add(new Account(0, getString(R.string.all_accounts)));
+//			do {
+//				adapter.add(new Account(c));
+//			} while (c.moveToNext());
+//
+//			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//			mAccountSpinner.setAdapter(adapter);
+//			if (mCurrentAccount != 0) {
+//				int pos = 0;
+//				while (pos < adapter.getCount()) {
+//					long id = adapter.getItemId(pos);
+//					if (id == mCurrentAccount) {
+//						mAccountSpinner.setSelection(pos);
+//						break;
+//					} else {
+//						pos++;
+//					}
+//				}
+//			}
+//		}
+//		mAccountSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+//
+//			@Override
+//			public void onItemSelected(AdapterView<?> parent, View view,
+//					int pos, long id) {
+//				Account a = (Account) parent.getItemAtPosition(pos);
+//				mCurrentAccount = a.mAccountId;
+//				fillData();
+//			}
+//
+//			@Override
+//			public void onNothingSelected(AdapterView<?> arg0) {
+//				// TODO Auto-generated method stub
+//
+//			}
+//		});
 	}
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		super.onActivityResult(requestCode, resultCode, data);
-		if (resultCode == RESULT_OK) {
-			if (mDbHelper == null) {
-				initDbHelper();
-			}
-			try {
-				fillData();
-			} catch (Exception e) {
-				ErrorReporter.getInstance().handleException(e);
-				Tools.popError(ScheduledOpList.this, e.getMessage(),
-						Tools.createRestartClickListener(this));
-			}
-		}
+//		super.onActivityResult(requestCode, resultCode, data);
+//		if (resultCode == RESULT_OK) {
+//			if (mDbHelper == null) {
+//				initDbHelper();
+//			}
+//			try {
+//				fillData();
+//			} catch (Exception e) {
+//				ErrorReporter.getInstance().handleException(e);
+//				Tools.popError(ScheduledOpList.this, e.getMessage(),
+//						Tools.createRestartClickListener(this));
+//			}
+//		}
 	}
 
 	@Override
@@ -240,7 +236,6 @@ public class ScheduledOpList extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		initDbHelper();
 		populateAccountSpinner();
 		fillData();
 	}
@@ -250,15 +245,15 @@ public class ScheduledOpList extends ListActivity {
 		startEditScheduledOperation(id);
 	}
 
-	@Override
-	protected Dialog onCreateDialog(int id) {
-		switch (id) {
-		case DIALOG_DELETE:
-			return askDeleteOccurrences();
-		default:
-			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
-		}
-	}
+//	@Override
+//	protected Dialog onCreateDialog(int id) {
+//		switch (id) {
+//		case DIALOG_DELETE:
+//			return askDeleteOccurrences();
+//		default:
+//			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
+//		}
+//	}
 
 	private AlertDialog askDeleteOccurrences() {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -286,13 +281,21 @@ public class ScheduledOpList extends ListActivity {
 	}
 
 	private void deleteSchOp(final boolean delAllOccurrences) {
-		AdapterContextMenuInfo op = mOpToDelete;
-		if (delAllOccurrences) {
-			ScheduledOperation.deleteAllOccurences(mDbHelper, op.id);
-		}
-		mDbHelper.deleteScheduledOp(op.id);
-		fillData();
-		mOpToDelete = null;
+//		AdapterContextMenuInfo op = mOpToDelete;
+//		Cursor cursorOp = mDbHelper.fetchOneScheduledOp(op.id);
+//		startManagingCursor(cursorOp);
+//		final long transId = cursorOp.getLong(cursorOp
+//				.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
+//		if (delAllOccurrences) {
+//			ScheduledOperation.deleteAllOccurences(mDbHelper, op.id);
+//		}
+//		if (mDbHelper.deleteScheduledOp(op.id)) {
+//			fillData();
+//			if (transId > 0) {
+//				mDbHelper.consolidateSums(transId);
+//			}
+//		}
+//		mOpToDelete = null;
 	}
 
 	@Override

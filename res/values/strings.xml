@@ -161,7 +161,6 @@
     <string name="bad_format_for_date">Date is not valid</string>
     <string name="recompute_account_sums">Recompute account</string>
     <string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your currency code)</string>
-	<string name="long_date_format">MM/dd/yy</string>
 	<string name="short_date_format">MM/dd</string>
 	<string name="all_accounts">All accounts</string>
 	<string name="delete_recurring_op">Would you like to delete only this transaction, all transactions in the series or this and all future transactions in the series? (Press back button to cancel)</string>
@@ -178,4 +177,5 @@
 	<string name="transfert">Transfert between account</string>
 	<string name="sch_no_choosen_account">Please choose an account on planification page</string>
 	<string name="choose_account">Choose an account</string>
+	<string name="defined_by_transfert">Defined by transfert</string>
 </resources>

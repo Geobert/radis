@@ -15,13 +15,13 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import fr.geobert.radis.R;
-import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.DbHelper;
 
 public class ProjectionDateController {
 	private Spinner mProjectionMode;
 	public EditText mProjectionDate;
 	private Activity mActivity;
-	private CommonDbAdapter mDbHelper;
 	private long mAccountId;
 	private int mOrigProjMode;
 	private String mOrigProjDate;
@@ -88,21 +88,17 @@ public class ProjectionDateController {
 		mProjectionDate.setHint(hint);
 	}
 
-	public void setDbHelper(CommonDbAdapter dbHelper) {
-		mDbHelper = dbHelper;
-	}
-
 	public void populateFields(Cursor account) {
 		mAccountId = account.getLong(account
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID));
+				.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID));
 		int pos = account.getInt(account
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_PROJECTION_MODE));
+				.getColumnIndex(AccountTable.KEY_ACCOUNT_PROJECTION_MODE));
 		mCurPos = pos;
 		setHint(pos);
 		mOrigProjMode = pos;
 		mProjectionMode.setSelection(pos);
 		mOrigProjDate = account.getString(account
-				.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_PROJECTION_DATE));
+				.getColumnIndex(AccountTable.KEY_ACCOUNT_PROJECTION_DATE));
 		mProjectionDate.setEnabled(pos > 0);
 		mProjectionDate.setText(mOrigProjDate);
 	}
@@ -122,7 +118,7 @@ public class ProjectionDateController {
 	}
 
 	public static AlertDialog getDialog(Activity activity,
-			CommonDbAdapter dbHelper) {
+			DbHelper dbHelper) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		LayoutInflater inflater = (LayoutInflater) activity.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.projection_date_dialog, null);
@@ -140,8 +136,6 @@ public class ProjectionDateController {
 		builder.setView(layout);
 		AlertDialog dialog = builder.create();
 		mInstance = new ProjectionDateController(layout, activity);
-		mInstance.setDbHelper(dbHelper);
-
 		return dialog;
 	}
 
@@ -151,7 +145,7 @@ public class ProjectionDateController {
 
 	protected void saveProjectionDate() {
 		try {
-			mDbHelper.updateAccountProjectionDate(mAccountId, mInstance);
+			AccountTable.updateAccountProjectionDate(mActivity, mAccountId, mInstance);
 			if (mActivity instanceof UpdateDisplayInterface) {
 				((UpdateDisplayInterface) mActivity).updateDisplay(null);
 			}

@@ -166,7 +166,6 @@
 	<string name="custom_currency_hint">Entrez un code de devise ISO 4217</string>
 	<string name="bad_format_for_currency">La devise doit être au format ISO 4217 (regardez sur wikipedia si vous le connaissez pas le code de votre devise)</string>
 	<string name="error_on_write_prefs">Erreur lors de l\'écriture des préférences</string>
-	<string name="long_date_format">dd/MM/yy</string>
 	<string name="short_date_format">dd/MM</string>
 	<string name="all_accounts">Tous les comptes</string>
 	<string name="delete_recurring_op">Voulez vous supprimer cette opération, toutes les opérations de la série ou cette opération ainsi que les suivantes ? (Pressez le bouton retour pour annuler)</string>
@@ -182,4 +181,5 @@
 	<string name="transfert">Transfert entre comptes</string>
 	<string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
 	<string name="choose_account">Sélectionnez un compte</string>
+	<string name="defined_by_transfert">Défini par le transfert</string>
 </resources>

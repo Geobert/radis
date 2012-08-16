@@ -16,7 +16,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import fr.geobert.radis.R;
-import fr.geobert.radis.db.CommonDbAdapter;
 import fr.geobert.radis.tools.Tools;
 
 public class InfoManager {
@@ -28,7 +27,7 @@ public class InfoManager {
 	private Button mEditBut;
 	private int mSelectedInfo = -1;
 	private Cursor mCursor;
-	private CommonDbAdapter mDbHelper;
+//	private CommonDbAdapter mDbHelper;
 	private Bundle mInfo;
 	private EditText mEditorText;
 	private Button mOkBut;
@@ -40,16 +39,16 @@ public class InfoManager {
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
 		{
-			put(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-					R.id.edit_op_third_party);
-			put(CommonDbAdapter.DATABASE_TAGS_TABLE, R.id.edit_op_tag);
-			put(CommonDbAdapter.DATABASE_MODES_TABLE, R.id.edit_op_mode);
+//			put(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
+//					R.id.edit_op_third_party);
+//			put(CommonDbAdapter.DATABASE_TAGS_TABLE, R.id.edit_op_tag);
+//			put(CommonDbAdapter.DATABASE_MODES_TABLE, R.id.edit_op_mode);
 		}
 	};
 
 	InfoManager(CommonOpEditor context, String title, String table,
 			String colName, int editId, int deleteId) {
-		mDbHelper = CommonDbAdapter.getInstance(context);
+//		mDbHelper = CommonDbAdapter.getInstance(context);
 		mContext = context;
 		mInfo = new Bundle();
 		mInfo.putString("title", title);
@@ -81,7 +80,8 @@ public class InfoManager {
 
 		builder.setView(layout);
 		mBuilder = builder;
-		Cursor c = mDbHelper.fetchMatchingInfo(table, colName, null);
+//		Cursor c = mDbHelper.fetchMatchingInfo(table, colName, null);
+		Cursor c = null;
 		fillData(c, colName);
 
 		mCursor = c;
@@ -150,8 +150,8 @@ public class InfoManager {
 
 	public void deleteInfo() {
 		mCursor.moveToPosition(mSelectedInfo);
-		mDbHelper.deleteInfo(mInfo.getString("table"),
-				mCursor.getLong(mCursor.getColumnIndex("_id")));
+//		mDbHelper.deleteInfo(mInfo.getString("table"),
+//				mCursor.getLong(mCursor.getColumnIndex("_id")));
 	}
 
 	private void onAddClicked() {
@@ -225,17 +225,17 @@ public class InfoManager {
 		String value = t.getText().toString().trim();
 		long rowId = mInfo.getLong("rowId");
 		if (rowId != 0) { // update
-			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value,
-					mOldValue);
+//			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value,
+//					mOldValue);
 		} else { // create
-			long id = mDbHelper.getKeyIdIfExists(value,
-					mInfo.getString("table"));
-			if (id > 0) { // already existing value, update
-				Tools.popError(mContext,
-						mContext.getString(R.string.item_exists), null);
-			} else {
-				mDbHelper.createInfo(mInfo.getString("table"), value);
-			}
+//			long id = mDbHelper.getKeyIdIfExists(value,
+//					mInfo.getString("table"));
+//			if (id > 0) { // already existing value, update
+//				Tools.popError(mContext,
+//						mContext.getString(R.string.item_exists), null);
+//			} else {
+//				mDbHelper.createInfo(mInfo.getString("table"), value);
+//			}
 		}
 		mCursor.requery();
 	}

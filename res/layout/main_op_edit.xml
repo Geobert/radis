@@ -9,8 +9,9 @@
         android:id="@+id/edit_op_date"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp" />
+        android:calendarViewShown="false"
+        android:paddingBottom="0dp"
+        android:paddingTop="0dp" />
 
     <LinearLayout style="@style/EditorHorizontalLinearLayout" >
 
@@ -62,9 +63,10 @@
             android:completionThreshold="1"
             android:hint="@string/third_party" />
 
-        <Button
+        <ImageButton
             android:id="@+id/edit_op_third_parties_list"
-            style="@style/EditorBaseButton.ListButton" />
+            style="@style/EditorImageButton"
+            android:src="@drawable/more36" />
     </LinearLayout>
 
     <LinearLayout style="@style/EditorHorizontalLinearLayout" >
@@ -74,10 +76,10 @@
             style="@style/EditorEditText.Sum"
             android:hint="@string/sum" />
 
-        <Button
+        <ImageButton
             android:id="@+id/edit_op_sign"
-            style="@style/EditorBaseButton"
-            android:drawableLeft="@drawable/plus_moins" />
+            style="@style/EditorImageButton"
+            android:src="@drawable/plus_moins" />
     </LinearLayout>
 
     <LinearLayout style="@style/EditorHorizontalLinearLayout" >
@@ -88,9 +90,10 @@
             android:completionThreshold="1"
             android:hint="@string/tag" />
 
-        <Button
+        <ImageButton
             android:id="@+id/edit_op_tags_list"
-            style="@style/EditorBaseButton.ListButton" />
+            style="@style/EditorImageButton"
+            android:src="@drawable/more36" />
     </LinearLayout>
 
     <LinearLayout style="@style/EditorHorizontalLinearLayout" >
@@ -101,9 +104,10 @@
             android:completionThreshold="1"
             android:hint="@string/mode" />
 
-        <Button
+        <ImageButton
             android:id="@+id/edit_op_modes_list"
-            style="@style/EditorBaseButton.ListButton" />
+            android:src="@drawable/more36"
+            style="@style/EditorImageButton" />
     </LinearLayout>
 
     <EditText

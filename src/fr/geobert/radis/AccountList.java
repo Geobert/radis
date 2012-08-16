@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.app.Dialog;
-import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,6 +14,10 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -24,12 +27,13 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.editor.AccountEditor;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
@@ -39,7 +43,8 @@ import fr.geobert.radis.tools.QuickAddController;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class AccountList extends ListActivity implements UpdateDisplayInterface {
+public class AccountList extends FragmentActivity implements
+		UpdateDisplayInterface, LoaderCallbacks<Cursor> {
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
 
@@ -47,44 +52,43 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	private static final int ACTIVITY_ACCOUNT_EDIT = 1;
 
 	private static final int DIALOG_DELETE = 0;
+	private static final int GET_ACCOUNTS = 200;
 
-	private CommonDbAdapter mDbHelper;
 	private long mAccountToDelete = 0;
 	private Button mScheduledListBtn;
 	private Button mAddAccountBtn;
-	
+
 	private boolean mFirstStart = true;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
-	private Cursor mAccountsCursor;
 	private SimpleCursorAdapter mAccountsAdapter;
 	private QuickAddController mQuickAddController;
 	private TextView mQuickAddText;
 	private InnerViewBinder mViewBinder;
+	private ListView mListView;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
-		SimpleAccountCursorAdapter(Context context, int layout, Cursor c,
-				String[] from, int[] to) {
-			super(context, layout, c, from, to);
+		SimpleAccountCursorAdapter(Context context, int layout, String[] from,
+				int[] to) {
+			super(context, layout, null, from, to,
+					SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 		}
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
 			super.bindView(view, context, cursor);
 			try {
-				mDbHelper.updateAccountProjectionDate(cursor.getLong(cursor
-						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)));
+				AccountTable
+						.updateAccountProjectionDate(
+								AccountList.this,
+								cursor.getLong(cursor
+										.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)));
 			} catch (ParseException e) {
 				// nothing
 			}
 		}
 	}
 
-	private void initDbHelper() {
-		mDbHelper = CommonDbAdapter.getInstance(this);
-		mQuickAddController.setDbHelper(mDbHelper);
-	}
-	
 	public static void callMe(Context ctx) {
 		Intent intent = new Intent(ctx, AccountList.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -97,7 +101,9 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.account_list);
+		mListView = (ListView) findViewById(android.R.id.list);
 		mAccountsAdapter = null;
+		mListView.setEmptyView(findViewById(android.R.id.empty));
 		mScheduledListBtn = (Button) findViewById(R.id.startScheduledListBtn);
 		mScheduledListBtn.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -122,13 +128,13 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 
 		setTitle(getString(R.string.app_name) + " " + versionName + " - "
 				+ getString(R.string.accounts_list));
-		registerForContextMenu(getListView());
-		
+		registerForContextMenu(mListView);
+
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 
-		final GestureDetector gestureDetector = new GestureDetector(
-				new ListViewSwipeDetector(getListView(), new ListSwipeAction() {
+		final GestureDetector gestureDetector = new GestureDetector(this,
+				new ListViewSwipeDetector(mListView, new ListSwipeAction() {
 					@Override
 					public void run() {
 						if (mRowId > 0) {
@@ -152,11 +158,20 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 				return false;
 			}
 		};
-		getListView().setOnTouchListener(gestureListener);
-		
+		mListView.setOnTouchListener(gestureListener);
+
 		mQuickAddController = new QuickAddController(this, this);
 		mQuickAddText = (TextView) findViewById(R.id.quickadd_target_text);
-		
+
+		mListView.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1,
+					int position, long id) {
+				openOperationsList(position, id);
+			}
+		});
+
 		if (mFirstStart) {
 			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
 			i.setAction(Tools.INTENT_RADIS_STARTED);
@@ -223,10 +238,6 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		AccountList.this.overridePendingTransition(R.anim.enter_from_left, 0);
 	}
 
-	private void startTransfertEdit() {
-		
-	}
-
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
@@ -244,14 +255,12 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	}
 
 	private void deleteAccount(long id) {
-		mDbHelper.deleteAccount(id);
-		mAccountsCursor.requery();
-		mScheduledListBtn.setEnabled(getListAdapter().getCount() > 0);
+		AccountTable.deleteAccount(this, id);
+		mScheduledListBtn.setEnabled(mListView.getAdapter().getCount() > 0);
 		if (null != mViewBinder && id == mViewBinder.accountId) {
 			DBPrefsManager.getInstance(this).clearAccountRelated();
 			mViewBinder.accountId = 0;
 		}
-		updateTargetTextView();
 	}
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -266,16 +275,16 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
 
-			if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_NAME)) {
+			if (colName.equals(AccountTable.KEY_ACCOUNT_NAME)) {
 				if (cursor.getLong(cursor
-						.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)) == accountId) {
+						.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)) == accountId) {
 					mQuickAddText
 							.setText(AccountList.this.getString(
 									R.string.quickadd_target,
 									cursor.getString(cursor
-											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_NAME))));
+											.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME))));
 				}
-			} else if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM)) {
+			} else if (colName.equals(AccountTable.KEY_ACCOUNT_CUR_SUM)) {
 				TextView textView = ((TextView) view);
 				long sum = cursor.getLong(columnIndex);
 				if (sum < 0) {
@@ -290,28 +299,26 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 							+ Currency
 									.getInstance(
 											cursor.getString(cursor
-													.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_CURRENCY)))
+													.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY)))
 									.getSymbol());
 				} catch (IllegalArgumentException e) {
 					// TODO : clean this code after resolving issue 130
 					Currency currency = Currency.getInstance(Locale
 							.getDefault());
 					textView.setText(currency.getSymbol());
-					mDbHelper
-							.updateAccountCurrency(
-									cursor.getLong(cursor
-											.getColumnIndex(CommonDbAdapter.KEY_ACCOUNT_ROWID)),
-									currency.getCurrencyCode());
+					AccountTable.updateAccountCurrency(AccountList.this, cursor.getLong(cursor
+							.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)),
+							currency.getCurrencyCode());
 				}
 				return true;
-			} else if (colName.equals(CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE)) {
+			} else if (colName.equals(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE)) {
 				TextView textView = ((TextView) view);
 				long dateLong = cursor.getLong(cursor.getColumnIndex(colName));
 				if (dateLong > 0) {
 					textView.setText(String.format(
-							getString(R.string.balance_at), Formater
-									.getFullDateFormater(AccountList.this)
-									.format(new Date(dateLong))));
+							getString(R.string.balance_at),
+							Formater.getFullDateFormater().format(
+									new Date(dateLong))));
 				} else {
 					textView.setText("");
 				}
@@ -322,34 +329,28 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	}
 
 	private void fillData() {
-		mAccountsCursor = mDbHelper.fetchAllAccounts();
-		startManagingCursor(mAccountsCursor);
 		// Create an array to specify the fields we want to display in the list
-		String[] from = new String[] { CommonDbAdapter.KEY_ACCOUNT_NAME,
-				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM,
-				CommonDbAdapter.KEY_ACCOUNT_CUR_SUM_DATE,
-				CommonDbAdapter.KEY_ACCOUNT_CURRENCY };
+		String[] from = new String[] { AccountTable.KEY_ACCOUNT_NAME,
+				AccountTable.KEY_ACCOUNT_CUR_SUM,
+				AccountTable.KEY_ACCOUNT_CUR_SUM_DATE,
+				AccountTable.KEY_ACCOUNT_CURRENCY };
 
 		// and an array of the fields we want to bind those fields to (in this
 		// case just text1)
 		int[] to = new int[] { R.id.account_name, R.id.account_sum,
 				R.id.account_balance_at };
 
-		// Now create a simple cursor adapter and set it to display
-		if (null == mAccountsAdapter) {
+		if (mAccountsAdapter == null) {
+			getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+
+			// Now create a simple cursor adapter and set it to display
 			mAccountsAdapter = new SimpleAccountCursorAdapter(this,
-					R.layout.account_row, mAccountsCursor, from, to);
+					R.layout.account_row, from, to);
 			mViewBinder = new InnerViewBinder(DBPrefsManager.getInstance(this)
 					.getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0));
 			mAccountsAdapter.setViewBinder(mViewBinder);
-			setListAdapter(mAccountsAdapter);
-		} else {
-			mAccountsAdapter.changeCursor(mAccountsCursor);
-			mViewBinder.accountId = DBPrefsManager.getInstance(this).getLong(
-					RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0);
+			mListView.setAdapter(mAccountsAdapter);
 		}
-
-		mScheduledListBtn.setEnabled(mAccountsAdapter.getCount() > 0);
 	}
 
 	private void createAccount() {
@@ -362,12 +363,6 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 		Intent i = new Intent(this, OperationList.class);
 		i.putExtra(Tools.EXTRAS_ACCOUNT_ID, accountId);
 		startActivity(i);
-	}
-
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
-		super.onListItemClick(l, v, position, id);
-		openOperationsList(position, id);
 	}
 
 	@Override
@@ -390,7 +385,7 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 						}
 					}, R.string.account_delete_confirmation);
 		default:
-			return Tools.onDefaultCreateDialog(this, id, mDbHelper);
+			return Tools.onDefaultCreateDialog(this, id);
 		}
 	}
 
@@ -398,32 +393,37 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 	protected void onPause() {
 		super.onPause();
 		unregisterReceiver(mOnInsertionReceiver);
-		// mDbHelper.close();
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(
-				RadisConfiguration.KEY_HIDE_ACCOUNT_QUICK_ADD);
+		DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
 
+			@Override
+			public void run() {
+				onPrefsInit();
+			}
+		});
+
+		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
+	}
+
+	protected void onPrefsInit() {
+		boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(
+				RadisConfiguration.KEY_HIDE_ACCOUNT_QUICK_ADD, false);
 		int visibility = View.VISIBLE;
 		if (hideQuickAdd) {
 			visibility = View.GONE;
 		}
-		initDbHelper();
 		mQuickAddController.initViewBehavior();
 		mQuickAddText.setVisibility(visibility);
 		mQuickAddController.setVisibility(visibility);
-
 		fillData();
-
-		updateTargetTextView();
-		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 	}
 
-	private void updateTargetTextView() {
-		if (mAccountsCursor.getCount() > 0) {
+	private void updateTargetTextView(Cursor accountsCursor) {
+		if (accountsCursor.getCount() > 0) {
 			long accountId = DBPrefsManager.getInstance(this).getLong(
 					RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0);
 			mQuickAddController.setAccount(accountId);
@@ -438,7 +438,52 @@ public class AccountList extends ListActivity implements UpdateDisplayInterface 
 
 	@Override
 	public void updateDisplay(Intent intent) {
-		mAccountsCursor.requery();
-		mScheduledListBtn.setEnabled(getListAdapter().getCount() > 0);
+		getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+		mScheduledListBtn.setEnabled(mListView.getAdapter().getCount() > 0);
+	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		return AccountTable.getAllAccountsLoader(this);
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+		switch (loader.getId()) {
+		case GET_ACCOUNTS:
+			Cursor old = mAccountsAdapter.swapCursor(data);
+			if (old != null) {
+				old.close();
+			}
+			// if there are no results
+			if (data.getCount() == 0) {
+				// let the user know
+				mListView.setEmptyView(findViewById(android.R.id.empty));
+			} else {
+				// otherwise clear it, so it won't flash in between cursor loads
+				mListView.setEmptyView(null);
+			}
+			mScheduledListBtn.setEnabled(mAccountsAdapter.getCount() > 0);
+			updateTargetTextView(data);
+			break;
+
+		default:
+			break;
+		}
+
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> loader) {
+		switch (loader.getId()) {
+		case GET_ACCOUNTS:
+			Cursor old = mAccountsAdapter.swapCursor(null);
+			if (old != null) {
+				old.close();
+			}
+			break;
+		default:
+			break;
+		}
 	}
 }

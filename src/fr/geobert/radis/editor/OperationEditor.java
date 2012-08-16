@@ -23,10 +23,10 @@ public class OperationEditor extends CommonOpEditor {
 	@Override
 	protected void fetchOrCreateCurrentOp() {
 		if (mRowId > 0) {
-			Cursor opCursor = mDbHelper.fetchOneOp(mRowId, mCurAccountId);
-			startManagingCursor(opCursor);
-			mCurrentOp = new Operation(opCursor);
-			mOriginalOp = new Operation(opCursor);
+//			Cursor opCursor = mDbHelper.fetchOneOp(mRowId, mCurAccountId);
+//			startManagingCursor(opCursor);
+//			mCurrentOp = new Operation(opCursor);
+//			mOriginalOp = new Operation(opCursor);
 		} else {
 			mCurrentOp = new Operation();
 			mCurrentOp.mAccountId = mCurAccountId;
@@ -65,7 +65,7 @@ public class OperationEditor extends CommonOpEditor {
 	protected void saveOpAndExit() {
 		Operation op = mCurrentOp;
 		if (mRowId <= 0) {
-			setResAndExit(mDbHelper.createOp(op, op.mAccountId));
+//			setResAndExit(mDbHelper.createOp(op, op.mAccountId));
 		} else {
 			if (op.equals(mOriginalOp)) {
 				setResAndExit(false);
@@ -73,7 +73,7 @@ public class OperationEditor extends CommonOpEditor {
 				if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
 					showDialog(ASK_UPDATE_SCHEDULED_DIALOG_ID);
 				} else {
-					setResAndExit(mDbHelper.updateOp(mRowId, op, op.mAccountId));
+//					setResAndExit(mDbHelper.updateOp(mRowId, op, op.mAccountId));
 				}
 			}
 		}
@@ -93,11 +93,11 @@ public class OperationEditor extends CommonOpEditor {
 										int which) {
 									final ScheduledOperation op = new ScheduledOperation(
 											mCurrentOp, mCurrentOp.mAccountId);
-									mDbHelper.updateScheduledOp(
-											mCurrentOp.mScheduledId, op, true);
-									ScheduledOperation.updateAllOccurences(
-											mDbHelper, op, mPreviousSum,
-											mCurrentOp.mScheduledId);
+//									mDbHelper.updateScheduledOp(
+//											mCurrentOp.mScheduledId, op, true);
+//									ScheduledOperation.updateAllOccurences(
+//											mDbHelper, op, mPreviousSum,
+//											mCurrentOp.mScheduledId);
 									OperationEditor.this.setResAndExit(false);
 								}
 							})
@@ -106,10 +106,10 @@ public class OperationEditor extends CommonOpEditor {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									mCurrentOp.mScheduledId = 0;
-									OperationEditor.this
-											.setResAndExit(mDbHelper.updateOp(
-													mRowId, mCurrentOp,
-													mCurrentOp.mAccountId));
+//									OperationEditor.this
+//											.setResAndExit(mDbHelper.updateOp(
+//													mRowId, mCurrentOp,
+//													mCurrentOp.mAccountId));
 								}
 							})
 					.setNegativeButton(R.string.cancel,

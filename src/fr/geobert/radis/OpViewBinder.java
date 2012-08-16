@@ -7,11 +7,11 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.view.View;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
 
 public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -43,7 +43,7 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 			ImageView transImg = (ImageView) ((LinearLayout) view.getParent()
 					.getParent()).findViewById(R.id.op_trans_icon);
 			final long transfertId = cursor.getLong(cursor
-					.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
+					.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
 			if (transfertId > 0) {
 				transImg.setVisibility(View.VISIBLE);
 				if (mCurAccountId == transfertId) {

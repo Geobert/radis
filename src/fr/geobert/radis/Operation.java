@@ -7,7 +7,8 @@ import java.util.GregorianCalendar;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
-import fr.geobert.radis.db.CommonDbAdapter;
+import fr.geobert.radis.db.InfoTables;
+import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
@@ -44,42 +45,42 @@ public class Operation implements Parcelable {
 
 	public Operation(Cursor op) {
 		mThirdParty = op.getString(op
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+				.getColumnIndexOrThrow(InfoTables.KEY_THIRD_PARTY_NAME));
 		if (null == mThirdParty) {
 			mThirdParty = "";
 		}
 		mMode = op.getString(op
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_MODE_NAME));
+				.getColumnIndexOrThrow(InfoTables.KEY_MODE_NAME));
 		if (null == mMode) {
 			mMode = "";
 		}
 		mTag = op.getString(op
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_TAG_NAME));
+				.getColumnIndexOrThrow(InfoTables.KEY_TAG_NAME));
 		if (null == mTag) {
 			mTag = "";
 		}
-		mSum = op.getLong(op.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_SUM));
+		mSum = op.getLong(op.getColumnIndexOrThrow(OperationTable.KEY_OP_SUM));
 		mDate = new GregorianCalendar();
 		mDate.setTimeInMillis(op.getLong(op
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_DATE)));
+				.getColumnIndexOrThrow(OperationTable.KEY_OP_DATE)));
 		Tools.clearTimeOfCalendar(mDate);
 		mNotes = op.getString(op
-				.getColumnIndexOrThrow(CommonDbAdapter.KEY_OP_NOTES));
-		final int idx = op.getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID);
+				.getColumnIndexOrThrow(OperationTable.KEY_OP_NOTES));
+		final int idx = op.getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID);
 		if (idx >= 0) {
 			mScheduledId = op.getLong(idx);
 		} else {
 			mScheduledId = 0;
 		}
 		final int transIdx = op
-				.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID);
+				.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID);
 		if (transIdx >= 0) {
 			mTransferAccountId = op.getLong(transIdx);
 			mTransSrcAccName = op.getString(op
-					.getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_NAME));
+					.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_NAME));
 		}
 
-		final int accIdx = op.getColumnIndex(CommonDbAdapter.KEY_OP_ACCOUNT_ID);
+		final int accIdx = op.getColumnIndex(OperationTable.KEY_OP_ACCOUNT_ID);
 		if (accIdx >= 0) {
 			mAccountId = op.getLong(accIdx);
 		}
@@ -129,7 +130,7 @@ public class Operation implements Parcelable {
 	}
 
 	public String getDateStr() {
-		return Formater.getFullDateFormater(null).format(mDate.getTime());
+		return Formater.getFullDateFormater().format(mDate.getTime());
 	}
 
 	public String getShortDateStr() {
@@ -173,7 +174,7 @@ public class Operation implements Parcelable {
 	}
 
 	public void setDateStr(String dateStr) throws ParseException {
-		mDate.setTime(Formater.getFullDateFormater(null).parse(dateStr));
+		mDate.setTime(Formater.getFullDateFormater().parse(dateStr));
 
 	}
 

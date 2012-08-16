@@ -1,5 +1,6 @@
 package fr.geobert.radis.tools;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 
@@ -7,13 +8,13 @@ import android.content.Context;
 import fr.geobert.radis.R;
 
 public class Formater {
-	private static SimpleDateFormat DATE_FORMAT = null;
+	private static DateFormat DATE_FORMAT = null;
 	private static SimpleDateFormat SHORT_DATE_FORMAT = null;
 	private static DecimalFormat SUM_FORMAT = null;
 	
-	public static SimpleDateFormat getFullDateFormater(final Context c) {
+	public static DateFormat getFullDateFormater() {
 		if (Formater.DATE_FORMAT == null) {
-			Formater.DATE_FORMAT = new SimpleDateFormat(c.getResources().getString(R.string.long_date_format));
+			Formater.DATE_FORMAT = DateFormat.getDateInstance(DateFormat.SHORT);
 		}
 		return Formater.DATE_FORMAT;
 	}

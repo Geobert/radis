@@ -156,32 +156,32 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	private void onOpNotFound() {
-		if (mOpIdSource > 0) {
-			Bundle extras = getIntent().getExtras();
-			final long accountId = extras.getLong(Tools.EXTRAS_ACCOUNT_ID);
-			Cursor op = mDbHelper.fetchOneOp(mOpIdSource, accountId);
-			mCurrentSchOp = new ScheduledOperation(op, accountId);
-			mOriginalSchOp = new ScheduledOperation(op, accountId);
-			op.close();
-		} else {
-			mCurrentSchOp = new ScheduledOperation();
-		}
+//		if (mOpIdSource > 0) {
+//			Bundle extras = getIntent().getExtras();
+//			final long accountId = extras.getLong(Tools.EXTRAS_ACCOUNT_ID);
+//			Cursor op = mDbHelper.fetchOneOp(mOpIdSource, accountId);
+//			mCurrentSchOp = new ScheduledOperation(op, accountId);
+//			mOriginalSchOp = new ScheduledOperation(op, accountId);
+//			op.close();
+//		} else {
+//			mCurrentSchOp = new ScheduledOperation();
+//		}
 	}
 
 	@Override
 	protected void fetchOrCreateCurrentOp() {
-		if (mRowId > 0) {
-			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
-			startManagingCursor(opCursor);
-			if (opCursor.getCount() > 0) {
-				mCurrentSchOp = new ScheduledOperation(opCursor);
-				mOriginalSchOp = new ScheduledOperation(opCursor);
-			} else {
-				onOpNotFound();
-			}
-		} else {
-			onOpNotFound();
-		}
+//		if (mRowId > 0) {
+//			Cursor opCursor = mDbHelper.fetchOneScheduledOp(mRowId);
+//			startManagingCursor(opCursor);
+//			if (opCursor.getCount() > 0) {
+//				mCurrentSchOp = new ScheduledOperation(opCursor);
+//				mOriginalSchOp = new ScheduledOperation(opCursor);
+//			} else {
+//				onOpNotFound();
+//			}
+//		} else {
+//			onOpNotFound();
+//		}
 	}
 
 	@Override
@@ -245,44 +245,50 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	private void populateAccountSpinner() {
-		Cursor c = mDbHelper.fetchAllAccounts();
-		startManagingCursor(c);
-		if (c != null && c.isFirst()) {
-			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
-					android.R.layout.simple_spinner_item);
-			adapter.add(new Account(0, getString(R.string.choose_account)));
-			do {
-				adapter.add(new Account(c));
-			} while (c.moveToNext());
-			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			mAccountSpinner.setAdapter(adapter);
-			if (mCurrentSchOp.mAccountId != 0 || mCurAccountId != 0) {
-				int pos = 1;
-				while (pos < adapter.getCount()) {
-					long id = adapter.getItemId(pos);
-					if (id == mCurrentSchOp.mAccountId || id == mCurAccountId) {
-						mAccountSpinner.setSelection(pos);
-						break;
-					} else {
-						pos++;
-					}
-				}
-			}
-			final boolean isTransfert = mIsTransfertCheck.isChecked();
-			mAccountSpinner.setEnabled(!isTransfert);
-			if (isTransfert) {
-				mAccountSpinner.setSelection(mSrcAccount
-						.getSelectedItemPosition());
-			}
-		}
+//		Cursor c = mDbHelper.fetchAllAccounts();
+//		startManagingCursor(c);
+//		if (c != null && c.isFirst()) {
+//			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+//					android.R.layout.simple_spinner_item);
+//			adapter.add(new Account(0, getString(R.string.choose_account)));
+//			do {
+//				adapter.add(new Account(c));
+//			} while (c.moveToNext());
+//			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//			mAccountSpinner.setAdapter(adapter);
+//			if (mCurrentSchOp.mAccountId != 0 || mCurAccountId != 0) {
+//				int pos = 1;
+//				while (pos < adapter.getCount()) {
+//					long id = adapter.getItemId(pos);
+//					if (id == mCurrentSchOp.mAccountId || id == mCurAccountId) {
+//						mAccountSpinner.setSelection(pos);
+//						break;
+//					} else {
+//						pos++;
+//					}
+//				}
+//			}
+//			final boolean isTransfert = mIsTransfertCheck.isChecked();
+//			mAccountSpinner.setEnabled(!isTransfert);
+//			if (isTransfert) {
+//				mAccountSpinner.setSelection(mSrcAccount
+//						.getSelectedItemPosition());
+//			}
+//		}
 	}
 
 	@Override
 	protected void onTransfertCheckedChanged(boolean arg1) {
 		super.onTransfertCheckedChanged(arg1);
 		mAccountSpinner.setEnabled(!arg1);
-		if (arg1) {
-			mAccountSpinner.setSelection(mSrcAccount.getSelectedItemPosition());
+		Account acc0 = (Account) mAccountSpinner.getItemAtPosition(0);
+		if (acc0 != null) {
+			if (arg1) {
+				acc0.mName = getString(R.string.defined_by_transfert);
+				mAccountSpinner.setSelection(0);
+			} else {
+				acc0.mName = getString(R.string.choose_account);
+			}
 		}
 	}
 
@@ -305,31 +311,32 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void saveOpAndExit() {
-		ScheduledOperation op = mCurrentSchOp;
-		if (mRowId <= 0) {
-			if (mOpIdSource > 0) { // is converting a transaction into a
-									// schedule
-				if ((op.getDate() != mOriginalSchOp.getDate())) {
-					// change the date of the source transaction
-					mDbHelper.updateOp(mOpIdSource, op, op.mAccountId);
-				}
-				// do not insert another occurrence with same date
-				ScheduledOperation.addPeriodicityToDate(op);
-			}
-			long id = mDbHelper.createScheduledOp(op);
-			if (id > 0) {
-				mRowId = id;
-			}
-			startInsertionServiceAndExit();
-		} else {
-			if (!op.equals(mOriginalSchOp)) {
-				showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
-			} else { // nothing to update
-				Intent res = new Intent();
-				setResult(RESULT_OK, res);
-				finish();
-			}
-		}
+//		ScheduledOperation op = mCurrentSchOp;
+//		if (mRowId <= 0) {
+//			if (mOpIdSource > 0) { // is converting a transaction into a
+//									// schedule
+//				if ((op.getDate() != mOriginalSchOp.getDate())) {
+//					// change the date of the source transaction
+//					mDbHelper.updateOp(mOpIdSource, op, op.mAccountId);
+//				}
+//				// do not insert another occurrence with same date
+//				ScheduledOperation.addPeriodicityToDate(op);
+//			}
+//			long id = mDbHelper.createScheduledOp(op);
+//			Log.d("SCHEDULED_OP_EDITOR", "created sch op id : " + id);
+//			if (id > 0) {
+//				mRowId = id;
+//			}
+//			startInsertionServiceAndExit();
+//		} else {
+//			if (!op.equals(mOriginalSchOp)) {
+//				showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
+//			} else { // nothing to update
+//				Intent res = new Intent();
+//				setResult(RESULT_OK, res);
+//				finish();
+//			}
+//		}
 	}
 
 	@Override
@@ -370,20 +377,20 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	protected void onDisconnectFromOccurences() {
-		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
-		mDbHelper.disconnectAllOccurrences(mCurrentSchOp.mAccountId, mRowId);
-		startInsertionServiceAndExit();
+//		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
+//		mDbHelper.disconnectAllOccurrences(mCurrentSchOp.mAccountId, mRowId);
+//		startInsertionServiceAndExit();
 	}
 
 	private void onUpdateAllOccurenceClicked() {
-		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
-		if (mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
-			ScheduledOperation.updateAllOccurences(mDbHelper, mCurrentSchOp,
-					mPreviousSum, mRowId);
-		} else {
-			ScheduledOperation.deleteAllOccurences(mDbHelper, mRowId);
-		}
-		startInsertionServiceAndExit();
+//		mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
+//		if (mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
+//			ScheduledOperation.updateAllOccurences(mDbHelper, mCurrentSchOp,
+//					mPreviousSum, mRowId);
+//		} else {
+//			ScheduledOperation.deleteAllOccurences(mDbHelper, mRowId);
+//		}
+//		startInsertionServiceAndExit();
 	}
 
 	@Override
