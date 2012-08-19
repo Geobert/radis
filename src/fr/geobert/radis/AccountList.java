@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.ContextMenu;
@@ -69,6 +70,7 @@ public class AccountList extends FragmentActivity implements
 	private InnerViewBinder mViewBinder;
 	private ListView mListView;
 	private ProgressDialog mProgress;
+	private CursorLoader mLoader;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
 		SimpleAccountCursorAdapter(Context context, int layout, String[] from,
@@ -447,7 +449,11 @@ public class AccountList extends FragmentActivity implements
 	@Override
 	public void updateDisplay(Intent intent) {
 		mProgress.show();
-		getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+		if (mLoader == null) {
+			getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+		} else {
+			getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
+		}
 		if (mListView.getAdapter() != null) {
 			mScheduledListBtn.setEnabled(mListView.getAdapter().getCount() > 0);
 		}
@@ -455,18 +461,18 @@ public class AccountList extends FragmentActivity implements
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		return AccountTable.getAllAccountsLoader(this);
+		mLoader = AccountTable.getAllAccountsLoader(this);
+		return mLoader;
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		switch (loader.getId()) {
 		case GET_ACCOUNTS:
-			mProgress.dismiss();
-			Cursor old = mAccountsAdapter.swapCursor(data);
-			if (old != null) {
-				old.close();
+			if (mProgress != null) {
+				mProgress.dismiss();
 			}
+			mAccountsAdapter.changeCursor(data);
 			// if there are no results
 			if (data.getCount() == 0) {
 				// let the user know

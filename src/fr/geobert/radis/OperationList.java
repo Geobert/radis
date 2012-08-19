@@ -669,11 +669,11 @@ public class OperationList extends FragmentActivity implements
 		final long transId = data.getLongExtra(TRANSFERT_ID, 0);
 		final long oldTransId = data.getLongExtra(OLD_TRANSFERT_ID, 0);
 		final long sumToAdd = -oldSum + sum;
-
-		mOnRestore = true;
-		getSupportLoaderManager().restartLoader(GET_OPS, null, this);
 		
 		if (data.getBooleanExtra(UPDATE_SUM_NEEDED, false)) {
+			mOnRestore = true;
+			mProgress.show();
+			getSupportLoaderManager().restartLoader(GET_OPS, null, this);
 			updateSumsAfterOpEdit(sumToAdd, date, mAccountId);
 		}
 		if (transId > 0) {
@@ -951,7 +951,6 @@ public class OperationList extends FragmentActivity implements
 					: (int) (Tools.SCREEN_HEIGHT * 0.3);
 		}
 		l.setSelectionFromTop(position, posFromTop);
-		mOnRestore = false;
 		Log.d("Radis",
 				"selectOpAndAdjustOffset setting mLastSelectedPosition: "
 						+ position);
@@ -1232,6 +1231,7 @@ public class OperationList extends FragmentActivity implements
 				old.close();
 			}
 			updateSumsAndSelection();
+			mOnRestore = false;
 			break;
 		case GET_ACCOUNT:
 			if (mCurAccount != null) {
