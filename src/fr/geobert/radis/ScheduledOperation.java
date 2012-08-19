@@ -4,10 +4,13 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
+import android.content.Context;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Tools;
 
@@ -40,14 +43,16 @@ public class ScheduledOperation extends Operation {
 
 	public ScheduledOperation(Cursor op) {
 		super(op);
-		mAccountId = op.getLong(op
-				.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
+		mAccountId = op
+				.getLong(op
+						.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
 		mEndDate = new GregorianCalendar();
 		mEndDate.setTimeInMillis(op.getLong(op
 				.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_END_DATE)));
 		Tools.clearTimeOfCalendar(mEndDate);
-		mPeriodicity = op.getInt(op
-				.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY));
+		mPeriodicity = op
+				.getInt(op
+						.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY));
 		mPeriodicityUnit = op
 				.getInt(op
 						.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY_UNIT));
@@ -163,23 +168,22 @@ public class ScheduledOperation extends Operation {
 				&& mPeriodicityUnit == schOp.mPeriodicityUnit;
 	}
 
-	public static void deleteAllOccurences(
-			final long schOpId) {
-//		Cursor schOp = dbHelper.fetchOneScheduledOp(schOpId);
-//		final long accountId = schOp.getLong(schOp
-//				.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
-//		dbHelper.deleteAllOccurrences(accountId, schOpId);
-//		dbHelper.consolidateSums(accountId, null);
-//		if (null != schOp) {
-//			schOp.close();
-//		}
+	public static void deleteAllOccurences(final long schOpId) {
+		// Cursor schOp = dbHelper.fetchOneScheduledOp(schOpId);
+		// final long accountId = schOp.getLong(schOp
+		// .getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
+		// dbHelper.deleteAllOccurrences(accountId, schOpId);
+		// dbHelper.consolidateSums(accountId, null);
+		// if (null != schOp) {
+		// schOp.close();
+		// }
 	}
 
-	public static void updateAllOccurences(
+	public static void updateAllOccurences(Context ctx,
 			final ScheduledOperation op, final long prevSum, final long rowId) {
-		// final long accountId = op.mAccountId;
-		// dbHelper.updateAllOccurrences(accountId, rowId, op);
-		// dbHelper.consolidateSums(accountId, null);
+		final long accountId = op.mAccountId;
+		OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
+		AccountTable.consolidateSums(ctx, accountId);
 	}
 
 	static public void addPeriodicityToDate(ScheduledOperation op) {

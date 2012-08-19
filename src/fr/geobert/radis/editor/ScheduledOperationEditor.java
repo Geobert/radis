@@ -10,6 +10,7 @@ import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.os.Bundle;
+import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
@@ -51,6 +52,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	private ScrollView mFlipperScroll;
 
 	protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
+	private static final int GET_SCH_OP = 620;
 
 	@Override
 	protected void setView() {
@@ -516,6 +518,29 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		mFlipperScroll.fullScroll(ScrollView.FOCUS_UP);
 		InputMethodManager mgr = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		mgr.hideSoftInputFromWindow(mOpSumText.getWindowToken(), 0);
+	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
+		Loader<Cursor> l = super.onCreateLoader(arg0, arg1);
+		if (l == null) {
+			// TODO
+		}
+		return l;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
+		super.onLoadFinished(arg0, arg1);
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> arg0) {
+		super.onLoaderReset(arg0);
+		// TODO Auto-generated method stub
+		
 	}
 
 }

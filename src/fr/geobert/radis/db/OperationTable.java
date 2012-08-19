@@ -226,7 +226,7 @@ public class OperationTable {
 	}
 
 	// return boolean saying if we need an update of OP_SUM
-	static boolean createOp(Context ctx, final Operation op,
+	public static boolean createOp(Context ctx, final Operation op,
 			final long accountId) {
 		ContentValues initialValues = new ContentValues();
 		String key = op.mThirdParty;
@@ -289,7 +289,8 @@ public class OperationTable {
 		return c;
 	}
 
-	public static Cursor fetchOneOp(Context ctx, final long rowId, final long accountId) {
+	public static Cursor fetchOneOp(Context ctx, final long rowId,
+			final long accountId) {
 		Cursor c = ctx.getContentResolver().query(
 				DbContentProvider.OPERATION_JOINED_URI,
 				OP_COLS_QUERY,
@@ -389,7 +390,7 @@ public class OperationTable {
 	}
 
 	// return if need to update OP_SUM
-	static boolean updateOp(Context ctx, final long rowId, final Operation op,
+	public static boolean updateOp(Context ctx, final long rowId, final Operation op,
 			final long accountId) {
 		ContentValues args = createContentValuesFromOp(ctx, op, false);
 		if (ctx.getContentResolver().update(
@@ -408,21 +409,27 @@ public class OperationTable {
 				null, null);
 	}
 
-	static int deleteAllOccurrences(SQLiteDatabase db, final long accountId,
+	public static int deleteAllOccurrences(Context ctx, final long accountId,
 			final long schOpId) {
-		return db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ACCOUNT_ID + "="
-				+ accountId + " AND " + KEY_OP_SCHEDULED_ID + "=" + schOpId,
-				null);
+		return ctx.getContentResolver()
+				.delete(DbContentProvider.OPERATION_URI,
+						KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID
+								+ "=?",
+						new String[] { Long.toString(accountId),
+								Long.toString(schOpId) });
 	}
 
-	static int deleteAllFutureOccurrences(SQLiteDatabase db,
+	public static int deleteAllFutureOccurrences(Context ctx,
 			final long accountId, final long schOpId, final long date) {
-		return db.delete(DATABASE_OPERATIONS_TABLE, KEY_OP_ACCOUNT_ID + "="
-				+ accountId + " AND " + KEY_OP_SCHEDULED_ID + "=" + schOpId
-				+ " AND " + KEY_OP_DATE + ">=" + date, null);
+		return ctx.getContentResolver().delete(
+				DbContentProvider.OPERATION_URI,
+				KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND "
+						+ KEY_OP_DATE + ">=?",
+				new String[] { Long.toString(accountId),
+						Long.toString(schOpId), Long.toString(date) });
 	}
 
-	static int updateAllOccurrences(Context ctx, final long accountId,
+	public static int updateAllOccurrences(Context ctx, final long accountId,
 			final long schOpId, final Operation op) {
 		ContentValues args = createContentValuesFromOp(ctx, op, true);
 		return ctx.getContentResolver()

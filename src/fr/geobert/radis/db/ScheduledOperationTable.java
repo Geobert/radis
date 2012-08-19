@@ -160,7 +160,7 @@ public class ScheduledOperationTable {
 		return Long.parseLong(res.getLastPathSegment());
 	}
 
-	static boolean updateScheduledOp(Context ctx, long rowId,
+	public static boolean updateScheduledOp(Context ctx, long rowId,
 			ScheduledOperation op, final boolean isUpdatedFromOccurence) {
 		ContentValues args = new ContentValues();
 
@@ -196,9 +196,10 @@ public class ScheduledOperationTable {
 				new String[] { Long.toString(accountId) }) > 0;
 	}
 
-	static boolean deleteScheduledOp(SQLiteDatabase db, final long schOpId) {
-		return db.delete(DATABASE_SCHEDULED_TABLE, KEY_SCHEDULED_ROWID + "="
-				+ schOpId, null) > 0;
+	public static boolean deleteScheduledOp(Context ctx, final long schOpId) {
+		return ctx.getContentResolver().delete(
+				Uri.parse(DbContentProvider.SCHEDULED_OP_URI + "/" + schOpId),
+				null, null) > 0;
 	}
 
 	// UPGRADE FUNCTIONS

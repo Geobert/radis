@@ -178,4 +178,6 @@
 	<string name="sch_no_choosen_account">Please choose an account on planification page</string>
 	<string name="choose_account">Choose an account</string>
 	<string name="defined_by_transfert">Defined by transfert</string>
+	
+	<string name="loading">Loading…</string>
 </resources>

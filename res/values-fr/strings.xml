@@ -182,4 +182,6 @@
 	<string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
 	<string name="choose_account">Sélectionnez un compte</string>
 	<string name="defined_by_transfert">Défini par le transfert</string>
+	
+	<string name="loading">Chargement…</string>
 </resources>

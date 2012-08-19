@@ -5,15 +5,23 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.OperationList;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.db.DbContentProvider;
+import fr.geobert.radis.db.OperationTable;
+import fr.geobert.radis.db.ScheduledOperationTable;
 
 public class OperationEditor extends CommonOpEditor {
 	protected Operation mOriginalOp;
 	protected static final int ASK_UPDATE_SCHEDULED_DIALOG_ID = 10;
+
+	private static final int GET_OP = 610;
 
 	@Override
 	protected void setView() {
@@ -23,20 +31,17 @@ public class OperationEditor extends CommonOpEditor {
 	@Override
 	protected void fetchOrCreateCurrentOp() {
 		if (mRowId > 0) {
-//			Cursor opCursor = mDbHelper.fetchOneOp(mRowId, mCurAccountId);
-//			startManagingCursor(opCursor);
-//			mCurrentOp = new Operation(opCursor);
-//			mOriginalOp = new Operation(opCursor);
+			fetchOp(GET_OP);
 		} else {
 			mCurrentOp = new Operation();
 			mCurrentOp.mAccountId = mCurAccountId;
+			populateFields();
 		}
 	}
 
 	@Override
 	protected void populateFields() {
-		Operation op = mCurrentOp;
-		populateCommonFields(op);
+		populateCommonFields(mCurrentOp);
 	}
 
 	private void setResAndExit(boolean sumUpdateIsNeeded) {
@@ -65,7 +70,7 @@ public class OperationEditor extends CommonOpEditor {
 	protected void saveOpAndExit() {
 		Operation op = mCurrentOp;
 		if (mRowId <= 0) {
-//			setResAndExit(mDbHelper.createOp(op, op.mAccountId));
+			setResAndExit(OperationTable.createOp(this, op, op.mAccountId));
 		} else {
 			if (op.equals(mOriginalOp)) {
 				setResAndExit(false);
@@ -73,7 +78,8 @@ public class OperationEditor extends CommonOpEditor {
 				if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
 					showDialog(ASK_UPDATE_SCHEDULED_DIALOG_ID);
 				} else {
-//					setResAndExit(mDbHelper.updateOp(mRowId, op, op.mAccountId));
+					setResAndExit(OperationTable.updateOp(this, mRowId, op,
+							op.mAccountId));
 				}
 			}
 		}
@@ -93,11 +99,13 @@ public class OperationEditor extends CommonOpEditor {
 										int which) {
 									final ScheduledOperation op = new ScheduledOperation(
 											mCurrentOp, mCurrentOp.mAccountId);
-//									mDbHelper.updateScheduledOp(
-//											mCurrentOp.mScheduledId, op, true);
-//									ScheduledOperation.updateAllOccurences(
-//											mDbHelper, op, mPreviousSum,
-//											mCurrentOp.mScheduledId);
+									ScheduledOperationTable.updateScheduledOp(
+											OperationEditor.this,
+											mCurrentOp.mScheduledId, op, true);
+									ScheduledOperation.updateAllOccurences(
+											OperationEditor.this, op,
+											mPreviousSum,
+											mCurrentOp.mScheduledId);
 									OperationEditor.this.setResAndExit(false);
 								}
 							})
@@ -106,10 +114,10 @@ public class OperationEditor extends CommonOpEditor {
 								public void onClick(DialogInterface dialog,
 										int id) {
 									mCurrentOp.mScheduledId = 0;
-//									OperationEditor.this
-//											.setResAndExit(mDbHelper.updateOp(
-//													mRowId, mCurrentOp,
-//													mCurrentOp.mAccountId));
+									OperationEditor.this.setResAndExit(OperationTable
+											.updateOp(OperationEditor.this,
+													mRowId, mCurrentOp,
+													mCurrentOp.mAccountId));
 								}
 							})
 					.setNegativeButton(R.string.cancel,
@@ -135,5 +143,47 @@ public class OperationEditor extends CommonOpEditor {
 	protected void onRestoreInstanceState(Bundle savedInstanceState) {
 		mOriginalOp = savedInstanceState.getParcelable("originalOp");
 		super.onRestoreInstanceState(savedInstanceState);
+	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle arg1) {
+		Loader<Cursor> l = super.onCreateLoader(id, arg1);
+		if (l == null) {
+			switch (id) {
+			case GET_OP:
+				l = new CursorLoader(this,
+						Uri.parse(DbContentProvider.OPERATION_JOINED_URI + "/"
+								+ mRowId), OperationTable.OP_COLS_QUERY, null,
+						null, null);
+				break;
+
+			default:
+				break;
+			}
+		}
+		return l;
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+		super.onLoadFinished(loader, data);
+		switch (loader.getId()) {
+		case GET_OP:
+			data.moveToFirst();
+			mCurrentOp = new Operation(data);
+			mOriginalOp = new Operation(data);
+			populateFields();
+			break;
+		default:
+			break;
+		}
+
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> arg0) {
+		super.onLoaderReset(arg0);
+		// TODO Auto-generated method stub
+
 	}
 }

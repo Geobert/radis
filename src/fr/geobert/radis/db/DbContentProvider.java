@@ -164,13 +164,17 @@ public class DbContentProvider extends ContentProvider {
 		switch (uriType) {
 		case ACCOUNT_ID:
 		case OPERATION_ID:
-		case OPERATION_JOINED_ID:
 		case SCHEDULED_OP_ID:
-		case SCHEDULED_JOINED_OP_ID:
 		case THIRD_PARTY_ID:
 		case MODES_ID:
 		case TAGS_ID:
 			queryBuilder.appendWhere("_id=" + uri.getLastPathSegment());
+			break;
+		case OPERATION_JOINED_ID:
+			queryBuilder.appendWhere("ops._id=" + uri.getLastPathSegment());
+			break;
+		case SCHEDULED_JOINED_OP_ID:
+			queryBuilder.appendWhere("sch._id=" + uri.getLastPathSegment());
 			break;
 		default:
 			break;
@@ -208,7 +212,7 @@ public class DbContentProvider extends ContentProvider {
 		}
 
 		if (id != null) {
-			if (selection.trim().length() == 0) {
+			if (selection == null || selection.trim().length() == 0) {
 				rowsDeleted = db.delete(table, "_id=?", new String[] { id });
 			} else {
 				if (selectionArgs != null) {

@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.editor.AccountEditor;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
@@ -66,6 +68,7 @@ public class AccountList extends FragmentActivity implements
 	private TextView mQuickAddText;
 	private InnerViewBinder mViewBinder;
 	private ListView mListView;
+	private ProgressDialog mProgress;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
 		SimpleAccountCursorAdapter(Context context, int layout, String[] from,
@@ -100,6 +103,8 @@ public class AccountList extends FragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
+		mProgress = ProgressDialog.show(this, "", getString(R.string.loading));
+		InfoTables.fillCaches(this);
 		setContentView(R.layout.account_list);
 		mListView = (ListView) findViewById(android.R.id.list);
 		mAccountsAdapter = null;
@@ -306,9 +311,12 @@ public class AccountList extends FragmentActivity implements
 					Currency currency = Currency.getInstance(Locale
 							.getDefault());
 					textView.setText(currency.getSymbol());
-					AccountTable.updateAccountCurrency(AccountList.this, cursor.getLong(cursor
-							.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)),
-							currency.getCurrencyCode());
+					AccountTable
+							.updateAccountCurrency(
+									AccountList.this,
+									cursor.getLong(cursor
+											.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)),
+									currency.getCurrencyCode());
 				}
 				return true;
 			} else if (colName.equals(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE)) {
@@ -341,7 +349,7 @@ public class AccountList extends FragmentActivity implements
 				R.id.account_balance_at };
 
 		if (mAccountsAdapter == null) {
-			getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+			updateDisplay(null);
 
 			// Now create a simple cursor adapter and set it to display
 			mAccountsAdapter = new SimpleAccountCursorAdapter(this,
@@ -438,8 +446,11 @@ public class AccountList extends FragmentActivity implements
 
 	@Override
 	public void updateDisplay(Intent intent) {
+		mProgress.show();
 		getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
-		mScheduledListBtn.setEnabled(mListView.getAdapter().getCount() > 0);
+		if (mListView.getAdapter() != null) {
+			mScheduledListBtn.setEnabled(mListView.getAdapter().getCount() > 0);
+		}
 	}
 
 	@Override
@@ -451,6 +462,7 @@ public class AccountList extends FragmentActivity implements
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		switch (loader.getId()) {
 		case GET_ACCOUNTS:
+			mProgress.dismiss();
 			Cursor old = mAccountsAdapter.swapCursor(data);
 			if (old != null) {
 				old.close();

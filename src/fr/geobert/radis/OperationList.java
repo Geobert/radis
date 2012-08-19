@@ -5,6 +5,7 @@ import java.util.GregorianCalendar;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -47,6 +49,7 @@ import android.widget.Toast;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
+import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.editor.OperationEditor;
 import fr.geobert.radis.editor.ScheduledOperationEditor;
 import fr.geobert.radis.service.OnInsertionReceiver;
@@ -89,19 +92,19 @@ public class OperationList extends FragmentActivity implements
 	private AsyncTask<Void, Void, Long> mUpdateSumTask;
 	private Integer mLastSelectedPosition = null;
 	private boolean mOnRestore = false;
-	private long mOpToDelete = -1;
 	private OnInsertionReceiver mOnInsertionReceiver;
 	private IntentFilter mOnInsertionIntentFilter;
 	private QuickAddController mQuickAddController;
 	private Button mProjectionBtn;
 	private long mProjectionDate;
-	private int mNbGetMoreOps;
 	private int mLastSelectionFromTop; // last pos from top of ListView
-	private boolean receiverIsRegistered;
+	private boolean mReceiverIsRegistered;
 	private SelectedCursorAdapter mOpListCursorAdapter;
 	private ListView mListView;
+	private AdapterContextMenuInfo mCurrentSelectedOp;
 	private GregorianCalendar startOpDate; // start date of ops to get
 	private GregorianCalendar endOpDate; // end date of ops to get
+	private ProgressDialog mProgress;
 
 	private static class OpRowHolder {
 		public TextView separator;
@@ -431,17 +434,14 @@ public class OperationList extends FragmentActivity implements
 		getSupportLoaderManager().restartLoader(GET_OPS, null, this);
 	}
 
-	protected void initDbHelper() {
-		// mQuickAddController.setDbHelper(mDbHelper);
-	}
-
 	private void initReferences() {
 		mQuickAddController = new QuickAddController(this, this);
 		mQuickAddController.setAccount(mAccountId);
-		receiverIsRegistered = false;
+		mReceiverIsRegistered = false;
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
 		mProjectionBtn = (Button) findViewById(R.id.future_sum);
+		mProjectionBtn.setVisibility(View.INVISIBLE);
 	}
 
 	private void initViewBehavior() {
@@ -508,7 +508,6 @@ public class OperationList extends FragmentActivity implements
 			}
 		});
 
-		mNbGetMoreOps = 0;
 		mLastSelectedPosition = null;
 		mLastSelectionFromTop = 0;
 
@@ -535,16 +534,12 @@ public class OperationList extends FragmentActivity implements
 	protected void onResume() {
 		super.onResume();
 		initQuickAdd();
-		initDbHelper();
 		initViewBehavior();
-		if (!receiverIsRegistered) {
-			receiverIsRegistered = true;
+		if (!mReceiverIsRegistered) {
+			mReceiverIsRegistered = true;
 			registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 		}
 
-		if (mNbGetMoreOps > 0) {
-			getMoreOps(true);
-		}
 		mQuickAddController.setAutoNegate(true);
 	}
 
@@ -592,7 +587,7 @@ public class OperationList extends FragmentActivity implements
 			return true;
 		case R.id.recompute_account:
 			AccountTable.consolidateSums(this, mAccountId);
-			updateSumsDisplay(true);
+			updateSumsDisplay();
 			return true;
 		default:
 			if (Tools.onDefaultMenuSelected(this, featureId, item)) {
@@ -608,11 +603,11 @@ public class OperationList extends FragmentActivity implements
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
+		mCurrentSelectedOp = (AdapterContextMenuInfo) item.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_OP_ID: {
-			Cursor c = (Cursor) mListView.getItemAtPosition(info.position);
+			Cursor c = (Cursor) mListView
+					.getItemAtPosition(mCurrentSelectedOp.position);
 			if (!c.isBeforeFirst()
 					&& !c.isAfterLast()
 					&& c.getLong(c
@@ -621,20 +616,19 @@ public class OperationList extends FragmentActivity implements
 			} else {
 				showDialog(DIALOG_DELETE);
 			}
-			mOpToDelete = info.id;
 		}
 			return true;
 		case EDIT_OP_ID:
-			startOperationEdit(info.id);
+			startOperationEdit(mCurrentSelectedOp.id);
 			return true;
 		case CONVERT_OP_ID:
-			startScheduledOpEditor(info.id, true);
+			startScheduledOpEditor(mCurrentSelectedOp.id, true);
 			return true;
 		case EDIT_SCH_OP_ID: {
-			Cursor c = (Cursor) mListView.getItemAtPosition(info.position);
+			Cursor c = (Cursor) mListView
+					.getItemAtPosition(mCurrentSelectedOp.position);
 			startScheduledOpEditor(c.getLong(c
-					.getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID)),
-					false);
+					.getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID)), false);
 		}
 			return true;
 		}
@@ -676,6 +670,9 @@ public class OperationList extends FragmentActivity implements
 		final long oldTransId = data.getLongExtra(OLD_TRANSFERT_ID, 0);
 		final long sumToAdd = -oldSum + sum;
 
+		mOnRestore = true;
+		getSupportLoaderManager().restartLoader(GET_OPS, null, this);
+		
 		if (data.getBooleanExtra(UPDATE_SUM_NEEDED, false)) {
 			updateSumsAfterOpEdit(sumToAdd, date, mAccountId);
 		}
@@ -699,7 +696,7 @@ public class OperationList extends FragmentActivity implements
 		if (requestCode == ACTIVITY_OP_CREATE
 				|| requestCode == ACTIVITY_OP_EDIT) {
 			if (resultCode == RESULT_OK) {
-				updateSumsDisplay(requestCode == ACTIVITY_OP_CREATE);
+				updateSumsDisplay();//requestCode == ACTIVITY_OP_CREATE);
 				afterAddOp(data);
 			}
 		} else if (requestCode == CREATE_SCH_OP) {
@@ -738,15 +735,17 @@ public class OperationList extends FragmentActivity implements
 
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
 				R.id.op_infos };
-
+		
+		mProgress = ProgressDialog.show(this, "", getString(R.string.loading));
 		if (mOpListCursorAdapter == null) {
 			mOpListCursorAdapter = new SelectedCursorAdapter(this,
 					R.layout.operation_row, from, to);
 			mListView.setAdapter(mOpListCursorAdapter);
-		}
-		startLoadingAnim();
-		getSupportLoaderManager().initLoader(GET_OPS, null, this);
-		getSupportLoaderManager().initLoader(GET_ACCOUNT, null, this);
+			getSupportLoaderManager().initLoader(GET_OPS, null, this);
+			getSupportLoaderManager().initLoader(GET_ACCOUNT, null, this);
+		} else {
+			getSupportLoaderManager().restartLoader(GET_OPS, null, this);
+		}		
 	}
 
 	private void startCreateOp() {
@@ -756,83 +755,83 @@ public class OperationList extends FragmentActivity implements
 		startActivityForResult(i, ACTIVITY_OP_CREATE);
 	}
 
-	private void deleteOp(long opToDelId) {
-		// Cursor c = mDbHelper.fetchOneOp(opToDelId, mAccountId);
-		// startManagingCursor(c);
-		// long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-		// final long transId = c.getLong(c
-		// .getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
-		// updateLastSelectionIdxFromTop();
-		// if (mDbHelper.deleteOp(opToDelId, mAccountId)) {
-		// if (c.getPosition() < mLastSelectedPosition) {
-		// mLastSelectedPosition--;
-		// }
-		// fillData();
-		// updateSumsAfterOpEdit(-sum, 0, mAccountId);
-		// if (transId > 0) {
-		// mDbHelper.consolidateSums(transId);
-		// }
-		// } else {
-		// updateSumsDisplay(true);
-		// // fillData() is called inside updateSumsDisplay
-		// }
+	private void deleteOp(long pos) {
+		Cursor c = (Cursor) mListView
+				.getItemAtPosition(mCurrentSelectedOp.position);
+		long sum = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_SUM));
+		final long transId = c.getLong(c
+				.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+		updateLastSelectionIdxFromTop();
+
+		if (OperationTable.deleteOp(this,
+				c.getLong(c.getColumnIndex(OperationTable.KEY_OP_ROWID)),
+				mAccountId)) {
+			if (c.getPosition() < mLastSelectedPosition) {
+				mLastSelectedPosition--;
+			}
+			updateSumsAfterOpEdit(-sum, 0, mAccountId);
+			if (transId > 0) {
+				AccountTable.consolidateSums(this, transId);
+			}
+		} else {
+			updateSumsDisplay();
+		}
 	}
 
-	private void deleteOpAndFollowing(long opToDelId) {
-		// Cursor c = mDbHelper.fetchOneOp(opToDelId, mAccountId);
-		// startManagingCursor(c);
-		// long sum = c.getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-		// final long transId = c.getLong(c
-		// .getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
-		// updateLastSelectionIdxFromTop();
-		// final long schOpId = c.getLong(c
-		// .getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID));
-		// final long date = c.getLong(c
-		// .getColumnIndex(CommonDbAdapter.KEY_OP_DATE));
-		// int nbDeleted = mDbHelper.deleteAllFutureOccurrences(mAccountId,
-		// schOpId, date);
-		// if (nbDeleted > 0) {
-		// if (c.getPosition() < mLastSelectedPosition) {
-		// mLastSelectedPosition--;
-		// }
-		// fillData();
-		// updateSumsAfterOpEdit(-(sum * nbDeleted), 0, mAccountId);
-		// if (transId > 0) {
-		// mDbHelper.consolidateSums(transId);
-		// }
-		// } else {
-		// updateSumsDisplay(true);
-		// // fillData() is called inside updateSumsDisplay
-		// }
+	private void deleteOpAndFollowing(long pos) {
+		Cursor c = (Cursor) mListView
+				.getItemAtPosition(mCurrentSelectedOp.position);
+		long sum = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_SUM));
+		final long transId = c.getLong(c
+				.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+		updateLastSelectionIdxFromTop();
+
+		final long schOpId = c.getLong(c
+				.getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID));
+		final long date = c.getLong(c
+				.getColumnIndex(OperationTable.KEY_OP_DATE));
+		int nbDeleted = OperationTable.deleteAllFutureOccurrences(this,
+				mAccountId, schOpId, date);
+		if (nbDeleted > 0) {
+			if (c.getPosition() < mLastSelectedPosition) {
+				mLastSelectedPosition--;
+			}
+			getSupportLoaderManager().restartLoader(GET_OPS, null, this);
+			updateSumsAfterOpEdit(-(sum * nbDeleted), 0, mAccountId);
+			if (transId > 0) {
+				AccountTable.consolidateSums(this, transId);
+			}
+		} else {
+			updateSumsDisplay();
+		}
 	}
 
-	private void deleteAllOccurences(long opToDelId) {
-		// Cursor c = mDbHelper.fetchOneOp(opToDelId, mAccountId);
-		// startManagingCursor(c);
-		// final long sum = c
-		// .getLong(c.getColumnIndex(CommonDbAdapter.KEY_OP_SUM));
-		// final long transId = c.getLong(c
-		// .getColumnIndex(CommonDbAdapter.KEY_OP_TRANSFERT_ACC_ID));
-		// updateLastSelectionIdxFromTop();
-		// final long schOpId = c.getLong(c
-		// .getColumnIndex(CommonDbAdapter.KEY_OP_SCHEDULED_ID));
-		// if (mDbHelper.deleteScheduledOp(schOpId)) {
-		// final int nbDeleted = mDbHelper.deleteAllOccurrences(mAccountId,
-		// schOpId);
-		// if (nbDeleted > 0) {
-		// if (c.getPosition() < mLastSelectedPosition) {
-		// mLastSelectedPosition--;
-		// }
-		// fillData();
-		// updateSumsAfterOpEdit(-(sum * nbDeleted), 0, mAccountId);
-		// if (transId > 0) {
-		// mDbHelper.consolidateSums(transId);
-		// }
-		// } else {
-		// updateSumsDisplay(true);
-		// // fillData() is called inside updateSumsDisplay
-		// }
-		// }
+	private void deleteAllOccurences(long pos) {
+		Cursor c = (Cursor) mListView
+				.getItemAtPosition(mCurrentSelectedOp.position);
+		long sum = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_SUM));
+		final long transId = c.getLong(c
+				.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+		updateLastSelectionIdxFromTop();
+
+		final long schOpId = c.getLong(c
+				.getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID));
+		if (ScheduledOperationTable.deleteScheduledOp(this, schOpId)) {
+			final int nbDeleted = OperationTable.deleteAllOccurrences(this,
+					mAccountId, schOpId);
+			if (nbDeleted > 0) {
+				if (c.getPosition() < mLastSelectedPosition) {
+					mLastSelectedPosition--;
+				}
+				getSupportLoaderManager().restartLoader(GET_OPS, null, this);
+				updateSumsAfterOpEdit(-(sum * nbDeleted), 0, mAccountId);
+				if (transId > 0) {
+					AccountTable.consolidateSums(this, transId);
+				}
+			} else {
+				updateSumsDisplay();
+			}
+		}
 	}
 
 	private long getAccountCurSum() {
@@ -996,8 +995,8 @@ public class OperationList extends FragmentActivity implements
 
 	@Override
 	protected void onPause() {
-		if (receiverIsRegistered) {
-			receiverIsRegistered = false;
+		if (mReceiverIsRegistered) {
+			mReceiverIsRegistered = false;
 			unregisterReceiver(mOnInsertionReceiver);
 		}
 		if (null != mUpdateSumTask) {
@@ -1011,7 +1010,6 @@ public class OperationList extends FragmentActivity implements
 		super.onSaveInstanceState(outState);
 		mQuickAddController.onSaveInstanceState(outState);
 		outState.putLong("accountId", mAccountId);
-		outState.putInt("mNbGetMoreOps", mNbGetMoreOps);
 		updateLastSelectionIdxFromTop();
 		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
 	}
@@ -1024,9 +1022,7 @@ public class OperationList extends FragmentActivity implements
 		mQuickAddController.onRestoreInstanceState(state);
 		mAccountId = state.getLong("accountId");
 		mOnRestore = true;
-		mNbGetMoreOps = state.getInt("mNbGetMoreOps");
 		mLastSelectionFromTop = state.getInt("mLastSelectionFromTop");
-		initDbHelper();
 	}
 
 	@Override
@@ -1047,7 +1043,7 @@ public class OperationList extends FragmentActivity implements
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								deleteOp(mOpToDelete);
+								deleteOp(mCurrentSelectedOp.position);
 							}
 						})
 				.setNeutralButton(R.string.del_all_following,
@@ -1056,13 +1052,13 @@ public class OperationList extends FragmentActivity implements
 							@Override
 							public void onClick(DialogInterface dialog,
 									int which) {
-								deleteOpAndFollowing(mOpToDelete);
+								deleteOpAndFollowing(mCurrentSelectedOp.position);
 							}
 						})
 				.setNegativeButton(R.string.del_all_occurrences,
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
-								deleteAllOccurences(mOpToDelete);
+								deleteAllOccurences(mCurrentSelectedOp.position);
 							}
 						});
 		return builder.create();
@@ -1075,13 +1071,13 @@ public class OperationList extends FragmentActivity implements
 			return Tools.createDeleteConfirmationDialog(this,
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
-							deleteOp(mOpToDelete);
+							deleteOp(mCurrentSelectedOp.position);
 						}
 					});
 		case DIALOG_DELETE_OCCURENCE:
 			return createOccurenceDeleteDialog();
 		case DIALOG_PROJECTION:
-			// return ProjectionDateController.getDialog(this, mDbHelper);
+			return ProjectionDateController.getDialog(this);
 		default:
 			return Tools.onDefaultCreateDialog(this, id);
 		}
@@ -1116,29 +1112,26 @@ public class OperationList extends FragmentActivity implements
 					.getSerializableExtra("accountIds");
 			for (int i = 0; i < accountIds.length; ++i) {
 				if (((Long) accountIds[i]).equals(mAccountId)) {
-					updateSumsDisplay(true);
+					updateSumsDisplay();
 					break;
 				}
 			}
 		} else {
-			updateSumsDisplay(true);
+			updateSumsDisplay();
 		}
 	}
 
-	private void updateSumsDisplay(boolean restoreOps) {
-		// mProjectionDate = mCurAccount.getLong(mCurAccount
-		// .getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE));
-		// fillData();
-		// if (restoreOps && mNbGetMoreOps > 0) {
-		// getMoreOps(true);
-		// }
-		updateSumsAndSelection();
+	private void updateSumsDisplay() {
+		LoaderManager lm = getSupportLoaderManager();
+		lm.destroyLoader(GET_ACCOUNT);
+		lm.initLoader(GET_ACCOUNT, null, this);
+		//lm.restartLoader(GET_OPS, null, this);
 	}
 
 	// update db projection sum and display
 	private void updateSumsAfterOpEdit(long sumToAdd, long date, long accountId) {
-		// mDbHelper.updateProjection(accountId, sumToAdd, date);
-		// updateSumsAndSelection();
+		AccountTable.updateProjection(this, accountId, sumToAdd, date);
+		updateSumsDisplay();
 	}
 
 	// update projection's sum
@@ -1221,6 +1214,9 @@ public class OperationList extends FragmentActivity implements
 		switch (loader.getId()) {
 		case GET_OPS:
 			Cursor old = mOpListCursorAdapter.swapCursor(data);
+			if (mProgress != null && mProgress.isShowing()) {
+				mProgress.dismiss();
+			}
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (old != null) {
@@ -1232,7 +1228,7 @@ public class OperationList extends FragmentActivity implements
 						((InnerViewBinder) getListAdapter().getViewBinder())
 								.increaseCache(data);
 					}
-				}
+				}				
 				old.close();
 			}
 			updateSumsAndSelection();
@@ -1262,6 +1258,11 @@ public class OperationList extends FragmentActivity implements
 				old.close();
 			}
 			break;
+		case GET_ACCOUNT:
+			if (null != mCurAccount) {
+				mCurAccount.close();
+			}
+			mCurAccount = null;
 		default:
 			break;
 		}

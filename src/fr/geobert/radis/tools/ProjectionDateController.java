@@ -117,8 +117,7 @@ public class ProjectionDateController {
 						.getText().toString()));
 	}
 
-	public static AlertDialog getDialog(Activity activity,
-			DbHelper dbHelper) {
+	public static AlertDialog getDialog(Activity activity) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 		LayoutInflater inflater = (LayoutInflater) activity.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.projection_date_dialog, null);

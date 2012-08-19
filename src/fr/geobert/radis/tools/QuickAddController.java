@@ -7,8 +7,13 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
+import fr.geobert.radis.db.DbContentProvider;
+import fr.geobert.radis.db.InfoTables;
+import fr.geobert.radis.db.OperationTable;
+import fr.geobert.radis.service.RadisService;
 
 public class QuickAddController {
 	private MyAutoCompleteTextView mQuickAddThirdParty;
@@ -31,9 +36,9 @@ public class QuickAddController {
 		mQuickAddButton = (ImageButton) activity
 				.findViewById(R.id.quickadd_validate);
 		mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount);
-		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
-				.getDecimalFormatSymbols().getDecimalSeparator(),
-				mQuickAddAmount).setAutoNegate(true);
+		mCorrectCommaWatcher = new CorrectCommaWatcher(Formater
+				.getSumFormater().getDecimalFormatSymbols()
+				.getDecimalSeparator(), mQuickAddAmount).setAutoNegate(true);
 
 		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
 				mQuickAddAmount, mQuickAddButton);
@@ -45,9 +50,9 @@ public class QuickAddController {
 	}
 
 	public void initViewBehavior() {
-//		mQuickAddThirdParty.setAdapter(new InfoAdapter(mActivity, mDbHelper,
-//				CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-//				CommonDbAdapter.KEY_THIRD_PARTY_NAME));
+		mQuickAddThirdParty.setAdapter(new InfoAdapter(mActivity,
+				DbContentProvider.THIRD_PARTY_URI,
+				InfoTables.KEY_THIRD_PARTY_NAME));
 
 		mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher);
 
@@ -73,11 +78,11 @@ public class QuickAddController {
 		op.mThirdParty = mQuickAddThirdParty.getText().toString();
 		op.setSumStr(mQuickAddAmount.getText().toString());
 		assert (mAccountId != 0);
-//		if (mDbHelper.createOp(op, mAccountId)) {
-//			RadisService.updateAccountSum(op.mSum, mAccountId, op.getDate(),
-//					mDbHelper);
-//			mProtocol.updateDisplay(null);
-//		}
+		if (OperationTable.createOp(mActivity, op, mAccountId)) {
+			RadisService.updateAccountSum(op.mSum, mAccountId, op.getDate(),
+					mActivity);
+			mProtocol.updateDisplay(null);
+		}
 		mQuickAddAmount.setText("");
 		mQuickAddThirdParty.setText("");
 		InputMethodManager mgr = (InputMethodManager) mActivity

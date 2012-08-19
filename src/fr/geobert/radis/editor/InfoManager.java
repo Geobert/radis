@@ -7,18 +7,26 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import fr.geobert.radis.R;
+import fr.geobert.radis.db.DbContentProvider;
+import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.Tools;
 
-public class InfoManager {
+public class InfoManager implements LoaderCallbacks<Cursor> {
 	private CommonOpEditor mContext = null;
 	private AlertDialog.Builder mBuilder = null;
 	private AlertDialog mListDialog = null;
@@ -27,7 +35,6 @@ public class InfoManager {
 	private Button mEditBut;
 	private int mSelectedInfo = -1;
 	private Cursor mCursor;
-//	private CommonDbAdapter mDbHelper;
 	private Bundle mInfo;
 	private EditText mEditorText;
 	private Button mOkBut;
@@ -35,31 +42,58 @@ public class InfoManager {
 	private int mEditId;
 	private int mDeleteId;
 	private String mOldValue;
+	private SimpleCursorAdapter mAdapter;
+
+	private static final int GET_MATCHING_INFO = 800;
 
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
 		{
-//			put(CommonDbAdapter.DATABASE_THIRD_PARTIES_TABLE,
-//					R.id.edit_op_third_party);
-//			put(CommonDbAdapter.DATABASE_TAGS_TABLE, R.id.edit_op_tag);
-//			put(CommonDbAdapter.DATABASE_MODES_TABLE, R.id.edit_op_mode);
+			put(DbContentProvider.THIRD_PARTY_URI.toString(),
+					R.id.edit_op_third_party);
+			put(DbContentProvider.TAGS_URI.toString(), R.id.edit_op_tag);
+			put(DbContentProvider.MODES_URI.toString(), R.id.edit_op_mode);
 		}
 	};
 
-	InfoManager(CommonOpEditor context, String title, String table,
+	InfoManager(CommonOpEditor context, String title, Uri table,
 			String colName, int editId, int deleteId) {
-//		mDbHelper = CommonDbAdapter.getInstance(context);
 		mContext = context;
+
+		mAdapter = new SimpleCursorAdapter(context,
+				android.R.layout.simple_list_item_single_choice, null,
+				new String[] { colName }, new int[] { android.R.id.text1 },
+				SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER) {
+			@Override
+		    public View getView(int position, View convertView, ViewGroup parent) {
+		        TextView textView = (TextView) super.getView(position, convertView, parent);
+		        textView.setTextColor(mContext.getResources().getColor(android.R.color.black));
+		        return textView;
+		    }
+
+		};
 		mInfo = new Bundle();
 		mInfo.putString("title", title);
-		mInfo.putString("table", table);
+		mInfo.putParcelable("table", table);
 		mInfo.putString("colName", colName);
 		mEditId = editId;
 		mDeleteId = deleteId;
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		builder.setSingleChoiceItems(mAdapter, -1,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						mSelectedInfo = item;
+						refreshToolbarStatus((AlertDialog) dialog);
+					}
+				});
 		builder.setTitle(title);
 		LayoutInflater inflater = (LayoutInflater) context.getLayoutInflater();
 		View layout = inflater.inflate(R.layout.info_list, null);
+		builder.setView(layout);
+		mBuilder = builder;
+		context.getSupportLoaderManager().initLoader(GET_MATCHING_INFO, mInfo,
+				this);
+
 		builder.setPositiveButton(context.getString(R.string.ok),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
@@ -76,15 +110,8 @@ public class InfoManager {
 		mDelBut = (Button) layout.findViewById(R.id.del_info);
 		mEditBut = (Button) layout.findViewById(R.id.edit_info);
 		mInfoText = (AutoCompleteTextView) context
-				.findViewById(EDITTEXT_OF_INFO.get(table));
+				.findViewById(EDITTEXT_OF_INFO.get(table.toString()));
 
-		builder.setView(layout);
-		mBuilder = builder;
-//		Cursor c = mDbHelper.fetchMatchingInfo(table, colName, null);
-		Cursor c = null;
-		fillData(c, colName);
-
-		mCursor = c;
 		mDelBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View view) {
@@ -115,15 +142,15 @@ public class InfoManager {
 		}
 	}
 
-	public void fillData(Cursor c, String colName) {
-		mBuilder.setSingleChoiceItems(c, -1, colName,
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int item) {
-						mSelectedInfo = item;
-						refreshToolbarStatus((AlertDialog) dialog);
-					}
-				});
-	}
+//	public void fillData(Cursor c, String colName) {
+//		mBuilder.setSingleChoiceItems(c, -1, colName,
+//				new DialogInterface.OnClickListener() {
+//					public void onClick(DialogInterface dialog, int item) {
+//						mSelectedInfo = item;
+//						refreshToolbarStatus((AlertDialog) dialog);
+//					}
+//				});
+//	}
 
 	public AlertDialog getListDialog() {
 		mListDialog = mBuilder.create();
@@ -144,21 +171,21 @@ public class InfoManager {
 	}
 
 	private void onDeleteClicked() {
-		mContext.mCurrentInfoTable = mInfo.getString("table");
+		mContext.mCurrentInfoTable = (Uri) mInfo.getParcelable("table");
 		mContext.showDialog(mDeleteId);
 	}
 
 	public void deleteInfo() {
 		mCursor.moveToPosition(mSelectedInfo);
-//		mDbHelper.deleteInfo(mInfo.getString("table"),
-//				mCursor.getLong(mCursor.getColumnIndex("_id")));
+		InfoTables.deleteInfo(mContext, (Uri) mInfo.getParcelable("table"),
+				mCursor.getLong(mCursor.getColumnIndex("_id")));
 	}
 
 	private void onAddClicked() {
 		Bundle info = mInfo;
 		info.remove("value");
 		info.remove("rowId");
-		mContext.mCurrentInfoTable = info.getString("table");
+		mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
 		mContext.showDialog(mEditId);
 	}
 
@@ -169,7 +196,7 @@ public class InfoManager {
 		info.putString("value", mCursor.getString(mCursor.getColumnIndex(mInfo
 				.getString("colName"))));
 		info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
-		mContext.mCurrentInfoTable = info.getString("table");
+		mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
 		mContext.showDialog(mEditId);
 	}
 
@@ -225,18 +252,45 @@ public class InfoManager {
 		String value = t.getText().toString().trim();
 		long rowId = mInfo.getLong("rowId");
 		if (rowId != 0) { // update
-//			mDbHelper.updateInfo(mInfo.getString("table"), rowId, value,
-//					mOldValue);
+			InfoTables.updateInfo(mContext, (Uri) mInfo.getParcelable("table"),
+					rowId, value, mOldValue);
 		} else { // create
-//			long id = mDbHelper.getKeyIdIfExists(value,
-//					mInfo.getString("table"));
-//			if (id > 0) { // already existing value, update
-//				Tools.popError(mContext,
-//						mContext.getString(R.string.item_exists), null);
-//			} else {
-//				mDbHelper.createInfo(mInfo.getString("table"), value);
-//			}
+			long id = InfoTables.getKeyIdIfExists(value,
+					(Uri) mInfo.getParcelable("table"));
+			if (id > 0) { // already existing value, update
+				Tools.popError(mContext,
+						mContext.getString(R.string.item_exists), null);
+			} else {
+				InfoTables.createInfo(mContext,
+						(Uri) mInfo.getParcelable("table"), value);
+			}
 		}
-		mCursor.requery();
+		refresh();
+	}
+
+	private void refresh() {
+		mContext.getSupportLoaderManager().restartLoader(GET_MATCHING_INFO,
+				mInfo, this);
+	}
+
+	@Override
+	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+		return InfoTables.getMatchingInfoLoader(mContext,
+				(Uri) args.getParcelable("table"), args.getString("colName"),
+				null);
+	}
+
+	@Override
+	public void onLoadFinished(Loader<Cursor> arg0, Cursor data) {
+		mAdapter.changeCursor(data);
+		mCursor = data;
+	}
+
+	@Override
+	public void onLoaderReset(Loader<Cursor> arg0) {
+		if (mCursor != null) {
+			mCursor.close();
+			mCursor = null;
+		}
 	}
 }

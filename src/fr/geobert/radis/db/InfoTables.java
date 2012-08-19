@@ -4,14 +4,18 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import fr.geobert.radis.tools.AsciiUtils;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import fr.geobert.radis.tools.AsciiUtils;
 
 // this class manage simple info tables which are _id / name schema
 public class InfoTables {
@@ -71,16 +75,76 @@ public class InfoTables {
 	@SuppressWarnings("serial")
 	private static final HashMap<String, String> mInfoColMap = new HashMap<String, String>() {
 		{
-			put(DATABASE_THIRD_PARTIES_TABLE, KEY_THIRD_PARTY_NAME);
-			put(DATABASE_TAGS_TABLE, KEY_TAG_NAME);
-			put(DATABASE_MODES_TABLE, KEY_MODE_NAME);
+			put(DbContentProvider.THIRD_PARTY_URI.toString(),
+					KEY_THIRD_PARTY_NAME);
+			put(DbContentProvider.TAGS_URI.toString(), KEY_TAG_NAME);
+			put(DbContentProvider.MODES_URI.toString(), KEY_MODE_NAME);
 		}
 	};
+
+	private static final int GET_TP = 700;
+	private static final int GET_MODES = 710;
+	private static final int GET_TAGS = 720;
 
 	private static LinkedHashMap<String, Long> mThirdPartiesMap;
 	private static LinkedHashMap<String, Long> mTagsMap;
 	private static LinkedHashMap<String, Long> mModesMap;
 	private static HashMap<String, Cursor> mInfoCursorMap = new HashMap<String, Cursor>();
+
+	private static class InfoCacheFiller implements LoaderCallbacks<Cursor> {
+		private Context mCtx;
+
+		public InfoCacheFiller(Context ctx) {
+			mCtx = ctx;
+		}
+
+		@Override
+		public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+			Uri u = null;
+			String[] cols = null;
+			switch (id) {
+			case GET_TP:
+				cols = new String[] { KEY_THIRD_PARTY_ROWID,
+						KEY_THIRD_PARTY_NORMALIZED_NAME };
+				u = DbContentProvider.THIRD_PARTY_URI;
+				break;
+			case GET_MODES:
+				cols = new String[] { KEY_MODE_ROWID, KEY_MODE_NORMALIZED_NAME };
+				u = DbContentProvider.MODES_URI;
+				break;
+			case GET_TAGS:
+				cols = new String[] { KEY_TAG_ROWID, KEY_TAG_NORMALIZED_NAME };
+				u = DbContentProvider.TAGS_URI;
+				break;
+			default:
+				break;
+			}
+			return new CursorLoader(mCtx, u, cols, null, null, null);
+		}
+
+		@Override
+		public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+			switch (loader.getId()) {
+			case GET_TP:
+				fillCache(data, mThirdPartiesMap);
+				break;
+			case GET_MODES:
+				fillCache(data, mModesMap);
+				break;
+			case GET_TAGS:
+				fillCache(data, mTagsMap);
+				break;
+			default:
+				break;
+			}
+		}
+
+		@Override
+		public void onLoaderReset(Loader<Cursor> arg0) {
+
+		}
+
+	}
 
 	static void onCreate(SQLiteDatabase db) {
 		db.execSQL(DATABASE_THIRD_PARTIES_CREATE);
@@ -98,9 +162,7 @@ public class InfoTables {
 		}
 	}
 
-	private static void fillCache(SQLiteDatabase db, String table,
-			String[] cols, Map<String, Long> map) {
-		Cursor c = db.query(table, cols, null, null, null, null, null);
+	private static void fillCache(Cursor c, Map<String, Long> map) {
 		if (c.moveToFirst()) {
 			do {
 				String key = c.getString(1).toLowerCase();
@@ -108,21 +170,18 @@ public class InfoTables {
 				map.put(key, value);
 			} while (c.moveToNext());
 		}
-		c.close();
 	}
 
-	static void fillCaches(SQLiteDatabase db) {
+	public static void fillCaches(FragmentActivity ctx) {
 		mModesMap = new LinkedHashMap<String, Long>();
 		mTagsMap = new LinkedHashMap<String, Long>();
 		mThirdPartiesMap = new LinkedHashMap<String, Long>();
 
-		fillCache(db, DATABASE_MODES_TABLE, new String[] { KEY_MODE_ROWID,
-				KEY_MODE_NORMALIZED_NAME }, mModesMap);
-		fillCache(db, DATABASE_TAGS_TABLE, new String[] { KEY_TAG_ROWID,
-				KEY_TAG_NORMALIZED_NAME }, mTagsMap);
-		fillCache(db, DATABASE_THIRD_PARTIES_TABLE, new String[] {
-				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NORMALIZED_NAME },
-				mThirdPartiesMap);
+		InfoCacheFiller cbk = new InfoCacheFiller(ctx);
+
+		ctx.getSupportLoaderManager().initLoader(GET_TP, null, cbk);
+		ctx.getSupportLoaderManager().initLoader(GET_MODES, null, cbk);
+		ctx.getSupportLoaderManager().initLoader(GET_TAGS, null, cbk);
 	}
 
 	static long getKeyIdOrCreateFromThirdParties(Context ctx, String key) {
@@ -167,39 +226,52 @@ public class InfoTables {
 		}
 	}
 
-	static long getKeyIdIfExistsFromThirdParties(SQLiteDatabase db, String key) {
+	public static long getKeyIdIfExists(String key, Uri table) {
+		long res = -1;
+		if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
+			res = getKeyIdIfExistsFromThirdParties(key);
+		} else if (table.equals(DbContentProvider.TAGS_URI)) {
+			res = getKeyIdIfExistsFromTags(key);
+		} else if (table.equals(DbContentProvider.MODES_URI)) {
+			res = getKeyIdIfExistsFromModes(key);
+		}
+		return res;
+	}
+
+	static long getKeyIdIfExistsFromThirdParties(String key) {
 		Long res = null;
 		res = mThirdPartiesMap.get(key.toLowerCase());
 		return res == null ? -1 : res.longValue();
 	}
 
-	static long getKeyIdIfExistsFromTags(SQLiteDatabase db, String key) {
+	static long getKeyIdIfExistsFromTags(String key) {
 		Long res = null;
 		res = mTagsMap.get(key.toLowerCase());
 		return res == null ? -1 : res.longValue();
 	}
 
-	static long getKeyIdIfExistsFromModes(SQLiteDatabase db, String key) {
+	static long getKeyIdIfExistsFromModes(String key) {
 		Long res = null;
 		res = mModesMap.get(key.toLowerCase());
 		return res == null ? -1 : res.longValue();
 	}
 
-	static boolean updateInfo(SQLiteDatabase db, String table, long rowId,
+	public static boolean updateInfo(Context ctx, Uri table, long rowId,
 			String value, String oldValue) {
 		ContentValues args = new ContentValues();
-		args.put(mInfoColMap.get(table), value);
+		args.put(mInfoColMap.get(table.toString()), value);
 		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils
 				.convertNonAscii(value).trim().toLowerCase());
-		int res = db.update(table, args, "_id =" + rowId, null);
+		int res = ctx.getContentResolver().update(
+				Uri.parse(table + "/" + rowId), args, null, null);
 
 		// update cache
 		Map<String, Long> m = null;
-		if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+		if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
 			m = mThirdPartiesMap;
-		} else if (table.equals(DATABASE_TAGS_TABLE)) {
+		} else if (table.equals(DbContentProvider.TAGS_URI)) {
 			m = mTagsMap;
-		} else if (table.equals(DATABASE_MODES_TABLE)) {
+		} else if (table.equals(DbContentProvider.MODES_URI)) {
 			m = mModesMap;
 		}
 		m.remove(oldValue);
@@ -207,12 +279,14 @@ public class InfoTables {
 		return res > 0;
 	}
 
-	static long createInfo(SQLiteDatabase db, String table, String value) {
+	public static long createInfo(Context ctx, Uri table, String value) {
 		ContentValues args = new ContentValues();
-		args.put(mInfoColMap.get(table), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils
+		String k = table.toString();
+		args.put(mInfoColMap.get(k), value);
+		args.put(mColNameNormName.get(mInfoColMap.get(k)), AsciiUtils
 				.convertNonAscii(value).trim().toLowerCase());
-		long res = db.insert(table, null, args);
+		Uri r = ctx.getContentResolver().insert(table, args);
+		long res = Long.parseLong(r.getLastPathSegment());
 		if (res > 0) { // update cache
 			Map<String, Long> m = null;
 			if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
@@ -227,12 +301,13 @@ public class InfoTables {
 		return res;
 	}
 
-	public boolean deleteInfo(SQLiteDatabase db, String table, long rowId) {
-		boolean res = db.delete(table, "_id =" + rowId, null) > 0;
+	public static boolean deleteInfo(Context ctx, Uri table, long rowId) {
+		boolean res = ctx.getContentResolver().delete(
+				Uri.parse(table + "/" + rowId), null, null) > 0;
 		return res;
 	}
 
-	public Cursor fetchMatchingInfo(SQLiteDatabase db, String table,
+	public static Cursor fetchMatchingInfo(Context ctx, Uri table,
 			String colName, String constraint) {
 		String where;
 		String[] params;
@@ -243,13 +318,31 @@ public class InfoTables {
 			where = null;
 			params = null;
 		}
-		Cursor c = db.query(table, new String[] { "_id", colName }, where,
-				params, null, null, colName + " asc");
+		Cursor c = ctx.getContentResolver().query(table,
+				new String[] { "_id", colName }, where, params,
+				colName + " asc");
 		if (null != c) {
 			c.moveToFirst();
 		}
-		mInfoCursorMap.put(table, c);
+		mInfoCursorMap.put(table.toString(), c);
 		return c;
+	}
+
+	public static CursorLoader getMatchingInfoLoader(Context ctx, Uri table,
+			String colName, String constraint) {
+		String where;
+		String[] params;
+		if (null != constraint) {
+			where = mColNameNormName.get(colName) + " LIKE ?";
+			params = new String[] { constraint.trim() + "%" };
+		} else {
+			where = null;
+			params = null;
+		}
+		CursorLoader loader = new CursorLoader(ctx, table, new String[] {
+				"_id", colName }, where, params, colName + " asc");
+		// mInfoCursorMap.put(table.toString(), c);
+		return loader;
 	}
 
 	static void putKeyIdInThirdParties(Context ctx, String key,
