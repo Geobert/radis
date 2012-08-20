@@ -179,6 +179,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 		mCursor.moveToPosition(mSelectedInfo);
 		InfoTables.deleteInfo(mContext, (Uri) mInfo.getParcelable("table"),
 				mCursor.getLong(mCursor.getColumnIndex("_id")));
+		refresh();
 	}
 
 	private void onAddClicked() {

@@ -260,7 +260,7 @@ public class InfoTables {
 			String value, String oldValue) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table.toString()), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table)), AsciiUtils
+		args.put(mColNameNormName.get(mInfoColMap.get(table.toString())), AsciiUtils
 				.convertNonAscii(value).trim().toLowerCase());
 		int res = ctx.getContentResolver().update(
 				Uri.parse(table + "/" + rowId), args, null, null);

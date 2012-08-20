@@ -39,7 +39,7 @@ public class ScheduledOperationTable {
 			+ InfoTables.DATABASE_MODES_TABLE + "(" + InfoTables.KEY_MODE_ROWID
 			+ "));";
 
-	private static final String SCHEDULED_OP_ORDERING = "sch."
+	public static final String SCHEDULED_OP_ORDERING = "sch."
 			+ OperationTable.KEY_OP_DATE + " desc, sch." + KEY_SCHEDULED_ROWID
 			+ " desc";
 
@@ -69,7 +69,7 @@ public class ScheduledOperationTable {
 			+ " = acc."
 			+ AccountTable.KEY_ACCOUNT_ROWID;
 
-	static final String[] SCHEDULED_OP_COLS_QUERY = {
+	public static final String[] SCHEDULED_OP_COLS_QUERY = {
 			"sch." + KEY_SCHEDULED_ROWID,
 			"tp." + InfoTables.KEY_THIRD_PARTY_NAME,
 			"tag." + InfoTables.KEY_TAG_NAME,

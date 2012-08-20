@@ -362,7 +362,7 @@ public abstract class CommonOpEditor extends FragmentActivity implements
 		case EDIT_THIRD_PARTY_DIALOG_ID:
 		case EDIT_TAG_DIALOG_ID:
 		case EDIT_MODE_DIALOG_ID:
-			mInfoManagersMap.get(mCurrentInfoTable).initEditDialog(dialog);
+			mInfoManagersMap.get(mCurrentInfoTable.toString()).initEditDialog(dialog);
 			break;
 		case THIRD_PARTIES_DIALOG_ID:
 			mInfoManagersMap.get(DbContentProvider.THIRD_PARTY_URI.toString())
