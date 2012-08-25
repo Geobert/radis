@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,7 +14,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -46,7 +44,7 @@ import fr.geobert.radis.tools.QuickAddController;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class AccountList extends FragmentActivity implements
+public class AccountList extends BaseActivity implements
 		UpdateDisplayInterface, LoaderCallbacks<Cursor> {
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
@@ -69,8 +67,9 @@ public class AccountList extends FragmentActivity implements
 	private TextView mQuickAddText;
 	private InnerViewBinder mViewBinder;
 	private ListView mListView;
-	private ProgressDialog mProgress;
 	private CursorLoader mLoader;
+	
+	public static Cursor allAccounts;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
 		SimpleAccountCursorAdapter(Context context, int layout, String[] from,
@@ -97,7 +96,7 @@ public class AccountList extends FragmentActivity implements
 	public static void callMe(Context ctx) {
 		Intent intent = new Intent(ctx, AccountList.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		ctx.startActivity(intent);
+		ctx.startActivity(intent);		
 	}
 
 	/** Called when the activity is first created. */
@@ -105,7 +104,7 @@ public class AccountList extends FragmentActivity implements
 	public void onCreate(Bundle savedInstanceState) {
 		Tools.checkDebugMode(this);
 		super.onCreate(savedInstanceState);
-		mProgress = ProgressDialog.show(this, "", getString(R.string.loading));
+		showProgress();
 		InfoTables.fillCaches(this);
 		setContentView(R.layout.account_list);
 		mListView = (ListView) findViewById(android.R.id.list);
@@ -448,7 +447,7 @@ public class AccountList extends FragmentActivity implements
 
 	@Override
 	public void updateDisplay(Intent intent) {
-		mProgress.show();
+		showProgress();
 		if (mLoader == null) {
 			getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
 		} else {
@@ -469,9 +468,8 @@ public class AccountList extends FragmentActivity implements
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		switch (loader.getId()) {
 		case GET_ACCOUNTS:
-			if (mProgress != null) {
-				mProgress.dismiss();
-			}
+			allAccounts = data;
+			hideProgress();
 			mAccountsAdapter.changeCursor(data);
 			// if there are no results
 			if (data.getCount() == 0) {

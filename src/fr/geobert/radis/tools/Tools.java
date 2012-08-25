@@ -24,7 +24,9 @@ import fr.geobert.radis.AccountList;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
+import fr.geobert.radis.service.RadisService;
 
 public class Tools {
 	// these are here because database force to use "_id" to be able to use
@@ -122,7 +124,6 @@ public class Tools {
 		return false;
 	}
 
-//	private static CommonDbAdapter mDb;
 	private static Activity mActivity;
 
 	public static Dialog getAdvancedDialog(Activity ctx, int id,
@@ -199,50 +200,49 @@ public class Tools {
 	}
 
 	public static Dialog onDefaultCreateDialog(final Activity ctx, int id) {
-//		mDb = db;
-//		mActivity = ctx;
-//		switch (id) {
-//		case Tools.DEBUG_DIALOG:
-//			return Tools.getDebugDialog(ctx, db);
-//		case R.id.restore:
-//			return Tools.getAdvancedDialog(
-//					ctx,
-//					id,
-//					createRestoreOrBackupClickListener(
-//							new BooleanResultNoParamFct() {
-//								@Override
-//								public boolean run() {
-//									return mDb.restoreDatabase();
-//								}
-//							}, R.string.restore_success,
-//							R.string.restore_failed));
-//		case R.id.backup:
-//			return Tools
-//					.getAdvancedDialog(
-//							ctx,
-//							id,
-//							createRestoreOrBackupClickListener(
-//									new BooleanResultNoParamFct() {
-//										@Override
-//										public boolean run() {
-//											return mDb.backupDatabase();
-//										}
-//									}, R.string.backup_success,
-//									R.string.backup_failed));
-//		case R.string.backup_failed:
-//		case R.string.restore_failed:
-//			return createFailAndRestartDialog(ctx, id);
-//		case R.id.process_scheduling:
-//			return Tools.getAdvancedDialog(ctx, id,
-//					new DialogInterface.OnClickListener() {
-//						@Override
-//						public void onClick(DialogInterface dialog, int which) {
-//							RadisService.acquireStaticLock(ctx);
-//							ctx.startService(new Intent(ctx, RadisService.class));
-//						}
-//
-//					});
-//		}
+		mActivity = ctx;
+		switch (id) {
+		case Tools.DEBUG_DIALOG:
+			return Tools.getDebugDialog(ctx);
+		case R.id.restore:
+			return Tools.getAdvancedDialog(
+					ctx,
+					id,
+					createRestoreOrBackupClickListener(
+							new BooleanResultNoParamFct() {
+								@Override
+								public boolean run() {
+									return DbHelper.restoreDatabase(ctx);
+								}
+							}, R.string.restore_success,
+							R.string.restore_failed));
+		case R.id.backup:
+			return Tools
+					.getAdvancedDialog(
+							ctx,
+							id,
+							createRestoreOrBackupClickListener(
+									new BooleanResultNoParamFct() {
+										@Override
+										public boolean run() {
+											return DbHelper.backupDatabase();
+										}
+									}, R.string.backup_success,
+									R.string.backup_failed));
+		case R.string.backup_failed:
+		case R.string.restore_failed:
+			return createFailAndRestartDialog(ctx, id);
+		case R.id.process_scheduling:
+			return Tools.getAdvancedDialog(ctx, id,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							RadisService.acquireStaticLock(ctx);
+							ctx.startService(new Intent(ctx, RadisService.class));
+						}
+
+					});
+		}
 		return null;
 	}
 
@@ -328,5 +328,4 @@ public class Tools {
 				+ String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/"
 				+ cal.get(Calendar.YEAR);
 	}
-
 }

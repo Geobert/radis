@@ -9,14 +9,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
+import android.util.Log;
 
 public class DbHelper extends SQLiteOpenHelper {
-	private static final String TAG = "DbHelper";
 	protected static final String DATABASE_NAME = "radisDb";
 	protected static final int DATABASE_VERSION = 12;
 
 	private Context mCtx;
-	
+
 	public DbHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 		mCtx = context;
@@ -24,11 +24,13 @@ public class DbHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
+		Log.d("Radis", "onCreate DbHelper");
 		AccountTable.onCreate(db);
 		OperationTable.onCreate(db);
 		InfoTables.onCreate(db);
 		OperationTable.createMeta(db);
 		PreferenceTable.onCreate(db);
+		ScheduledOperationTable.onCreate(db);
 	}
 
 	@Override
@@ -61,13 +63,12 @@ public class DbHelper extends SQLiteOpenHelper {
 		
 	}
 	
-	public void trashDatabase() {
-		close();
-		mCtx.deleteDatabase(DATABASE_NAME);
+	public static void trashDatabase(Context ctx) {
+		Log.d("Radis", "trashDatabase DbHelper");
+		ctx.deleteDatabase(DATABASE_NAME);
 	}
 
-	public boolean backupDatabase() {
-		close();
+	public static boolean backupDatabase() {
 		try {
 			File sd = Environment.getExternalStorageDirectory();
 			File data = Environment.getDataDirectory();
@@ -99,13 +100,12 @@ public class DbHelper extends SQLiteOpenHelper {
 		return false;
 	}
 
-	public boolean restoreDatabase() {
-		close();
+	public static boolean restoreDatabase(Context ctx) {
 		try {
 			File sd = Environment.getExternalStorageDirectory();
 
 			String backupDBPath = "/radis/radisDb";
-			File currentDB = mCtx.getDatabasePath(DATABASE_NAME);
+			File currentDB = ctx.getDatabasePath(DATABASE_NAME);
 			File backupDB = new File(sd, backupDBPath);
 
 			if (backupDB.exists()) {

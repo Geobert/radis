@@ -12,8 +12,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -29,10 +27,11 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import fr.geobert.radis.Account;
+import fr.geobert.radis.AccountList;
+import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
-import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
@@ -40,7 +39,7 @@ import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.Tools;
 
-public abstract class CommonOpEditor extends FragmentActivity implements
+public abstract class CommonOpEditor extends BaseActivity implements
 		LoaderCallbacks<Cursor> {
 	protected static final int THIRD_PARTIES_DIALOG_ID = 1;
 	protected static final int TAGS_DIALOG_ID = 2;
@@ -51,8 +50,6 @@ public abstract class CommonOpEditor extends FragmentActivity implements
 	protected static final int DELETE_THIRD_PARTY_DIALOG_ID = 7;
 	protected static final int DELETE_TAG_DIALOG_ID = 8;
 	protected static final int DELETE_MODE_DIALOG_ID = 9;
-
-	protected static final int GET_ALL_ACCOUNTS = 600;
 
 	protected Operation mCurrentOp;
 	protected AutoCompleteTextView mOpThirdPartyText;
@@ -76,8 +73,6 @@ public abstract class CommonOpEditor extends FragmentActivity implements
 	private LinearLayout mTransfertCont;
 	protected CheckBox mIsTransfertCheck;
 
-	protected ProgressDialog mProgressDialog;
-
 	// abstract methods
 	protected abstract void setView();
 
@@ -86,12 +81,7 @@ public abstract class CommonOpEditor extends FragmentActivity implements
 	protected abstract void fetchOrCreateCurrentOp();
 
 	protected void fetchOp(int loaderId) {
-		if (mProgressDialog == null) {
-			mProgressDialog = ProgressDialog.show(this, "",
-					getString(R.string.loading));
-		} else {
-			mProgressDialog.show();
-		}
+		showProgress();
 		getSupportLoaderManager().initLoader(loaderId, null, this);
 	}
 
@@ -419,7 +409,8 @@ public abstract class CommonOpEditor extends FragmentActivity implements
 		} else {
 			mOpSumText.setText(mCurrentOp.getSumStr());
 		}
-		getSupportLoaderManager().initLoader(GET_ALL_ACCOUNTS, null, this);
+//		getSupportLoaderManager().initLoader(GET_ALL_ACCOUNTS, null, this);
+		populateTransfertSpinner(AccountList.allAccounts);
 	}
 
 	protected void initListeners() {
@@ -550,42 +541,5 @@ public abstract class CommonOpEditor extends FragmentActivity implements
 		mCurrentInfoTable = (Uri)savedInstanceState.getParcelable("mCurrentInfoTable");
 		populateFields();
 		mPreviousSum = savedInstanceState.getLong("previousSum");
-	}
-
-	@Override
-	public Loader<Cursor> onCreateLoader(int id, Bundle arg1) {
-		CursorLoader loader = null;
-		switch (id) {
-		case GET_ALL_ACCOUNTS:
-			loader = new CursorLoader(this, DbContentProvider.ACCOUNT_URI,
-					AccountTable.ACCOUNT_COLS, null, null, null);
-			break;
-
-		default:
-			break;
-		}
-
-		return loader;
-	}
-
-	@Override
-	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		if (mProgressDialog != null) {
-			mProgressDialog.dismiss();
-		}
-		switch (loader.getId()) {
-		case GET_ALL_ACCOUNTS:
-			populateTransfertSpinner(data);
-			break;
-		default:
-			break;
-		}
-
-	}
-
-	@Override
-	public void onLoaderReset(Loader<Cursor> arg0) {
-		// TODO Auto-generated method stub
-
 	}
 }

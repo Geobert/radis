@@ -29,14 +29,15 @@ import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.ViewFlipper;
 import fr.geobert.radis.Account;
+import fr.geobert.radis.AccountList;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.ViewSwipeDetector;
 import fr.geobert.radis.db.DbContentProvider;
+import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.service.RadisService;
-import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOperationEditor extends CommonOpEditor {
 	private ViewFlipper mViewFlipper;
@@ -168,6 +169,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 					getIntent().getExtras(), this);
 		} else {
 			mCurrentSchOp = new ScheduledOperation();
+			populateFields();
 		}
 	}
 
@@ -187,9 +189,9 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		populateCommonFields(op);
 		mCustomPeriodicityVal.setText(mCurrentSchOp.mPeriodicity == 0 ? ""
 				: Integer.toString(mCurrentSchOp.mPeriodicity));
-		populateAccountSpinner();
 		poputatePeriodicitySpinner();
 		populateCustomPeriodicitySpinner();
+		populateAccountSpinner(AccountList.allAccounts);
 		if (mCurrentSchOp.getEndDate() > 0) {
 			mEndDateCheck.setChecked(true);
 			mEndDatePicker.setEnabled(true);
@@ -240,37 +242,35 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		}
 	}
 
-	private void populateAccountSpinner() {
-		// Cursor c = mDbHelper.fetchAllAccounts();
-		// startManagingCursor(c);
-		// if (c != null && c.isFirst()) {
-		// ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
-		// android.R.layout.simple_spinner_item);
-		// adapter.add(new Account(0, getString(R.string.choose_account)));
-		// do {
-		// adapter.add(new Account(c));
-		// } while (c.moveToNext());
-		// adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		// mAccountSpinner.setAdapter(adapter);
-		// if (mCurrentSchOp.mAccountId != 0 || mCurAccountId != 0) {
-		// int pos = 1;
-		// while (pos < adapter.getCount()) {
-		// long id = adapter.getItemId(pos);
-		// if (id == mCurrentSchOp.mAccountId || id == mCurAccountId) {
-		// mAccountSpinner.setSelection(pos);
-		// break;
-		// } else {
-		// pos++;
-		// }
-		// }
-		// }
-		// final boolean isTransfert = mIsTransfertCheck.isChecked();
-		// mAccountSpinner.setEnabled(!isTransfert);
-		// if (isTransfert) {
-		// mAccountSpinner.setSelection(mSrcAccount
-		// .getSelectedItemPosition());
-		// }
-		// }
+	private void populateAccountSpinner(Cursor c) {
+		if (c.moveToFirst()) {
+			ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+					android.R.layout.simple_spinner_item);
+			adapter.add(new Account(0, getString(R.string.choose_account)));
+			do {
+				adapter.add(new Account(c));
+			} while (c.moveToNext());
+			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			mAccountSpinner.setAdapter(adapter);
+			if (mCurrentSchOp.mAccountId != 0 || mCurAccountId != 0) {
+				int pos = 1;
+				while (pos < adapter.getCount()) {
+					long id = adapter.getItemId(pos);
+					if (id == mCurrentSchOp.mAccountId || id == mCurAccountId) {
+						mAccountSpinner.setSelection(pos);
+						break;
+					} else {
+						pos++;
+					}
+				}
+			}
+			final boolean isTransfert = mIsTransfertCheck.isChecked();
+			mAccountSpinner.setEnabled(!isTransfert);
+			if (isTransfert) {
+				mAccountSpinner.setSelection(mSrcAccount
+						.getSelectedItemPosition());
+			}
+		}
 	}
 
 	@Override
@@ -307,32 +307,33 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	protected void saveOpAndExit() {
-		// ScheduledOperation op = mCurrentSchOp;
-		// if (mRowId <= 0) {
-		// if (mOpIdSource > 0) { // is converting a transaction into a
-		// // schedule
-		// if ((op.getDate() != mOriginalSchOp.getDate())) {
-		// // change the date of the source transaction
-		// mDbHelper.updateOp(mOpIdSource, op, op.mAccountId);
-		// }
-		// // do not insert another occurrence with same date
-		// ScheduledOperation.addPeriodicityToDate(op);
-		// }
-		// long id = mDbHelper.createScheduledOp(op);
-		// Log.d("SCHEDULED_OP_EDITOR", "created sch op id : " + id);
-		// if (id > 0) {
-		// mRowId = id;
-		// }
-		// startInsertionServiceAndExit();
-		// } else {
-		// if (!op.equals(mOriginalSchOp)) {
-		// showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
-		// } else { // nothing to update
-		// Intent res = new Intent();
-		// setResult(RESULT_OK, res);
-		// finish();
-		// }
-		// }
+		ScheduledOperation op = mCurrentSchOp;
+		if (mRowId <= 0) {
+			if (mOpIdSource > 0) { // is converting a transaction into a
+				// schedule
+				if ((op.getDate() != mOriginalSchOp.getDate())) {
+					// change the date of the source transaction
+					OperationTable.updateOp(this, mOpIdSource, op,
+							op.mAccountId);
+				}
+				// do not insert another occurrence with same date
+				ScheduledOperation.addPeriodicityToDate(op);
+			}
+			long id = ScheduledOperationTable.createScheduledOp(this, op);
+			Log.d("SCHEDULED_OP_EDITOR", "created sch op id : " + id);
+			if (id > 0) {
+				mRowId = id;
+			}
+			startInsertionServiceAndExit();
+		} else {
+			if (!op.equals(mOriginalSchOp)) {
+				showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
+			} else { // nothing to update
+				Intent res = new Intent();
+				setResult(RESULT_OK, res);
+				finish();
+			}
+		}
 	}
 
 	@Override
@@ -373,20 +374,20 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	protected void onDisconnectFromOccurences() {
-		// mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
-		// mDbHelper.disconnectAllOccurrences(mCurrentSchOp.mAccountId, mRowId);
-		// startInsertionServiceAndExit();
+		 ScheduledOperationTable.updateScheduledOp(this, mRowId, mCurrentSchOp, false);
+		 OperationTable.disconnectAllOccurrences(this, mCurrentSchOp.mAccountId, mRowId);
+		 startInsertionServiceAndExit();
 	}
 
 	private void onUpdateAllOccurenceClicked() {
-		// mDbHelper.updateScheduledOp(mRowId, mCurrentSchOp, false);
-		// if (mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
-		// ScheduledOperation.updateAllOccurences(mDbHelper, mCurrentSchOp,
-		// mPreviousSum, mRowId);
-		// } else {
-		// ScheduledOperation.deleteAllOccurences(mDbHelper, mRowId);
-		// }
-		// startInsertionServiceAndExit();
+		ScheduledOperationTable.updateScheduledOp(this, mRowId, mCurrentSchOp, false);
+		if (mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
+			ScheduledOperationTable.updateAllOccurences(this, mCurrentSchOp,
+					mPreviousSum, mRowId);
+		} else {
+			ScheduledOperationTable.deleteAllOccurences(this, mRowId);
+		}
+		startInsertionServiceAndExit();
 	}
 
 	@Override
@@ -516,22 +517,23 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-		Loader<Cursor> l = super.onCreateLoader(id, args);
+//		Loader<Cursor> l = super.onCreateLoader(id, args);
+		CursorLoader l = null;
 		if (l == null) {
 			switch (id) {
 			case GET_SCH_OP:
 				l = new CursorLoader(this,
-						Uri.parse(DbContentProvider.SCHEDULED_JOINED_OP_URI + "/"
-								+ mRowId),
+						Uri.parse(DbContentProvider.SCHEDULED_JOINED_OP_URI
+								+ "/" + mRowId),
 						ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, null,
-						null, null);				
+						null, null);
 				break;
 			case GET_SCH_OP_SRC:
 				l = new CursorLoader(this,
 						Uri.parse(DbContentProvider.OPERATION_JOINED_URI + "/"
 								+ mOpIdSource),
 						ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, null,
-						null, null);				
+						null, null);
 
 			default:
 				break;
@@ -542,21 +544,25 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		super.onLoadFinished(loader, data);
+//		super.onLoadFinished(loader, data);
 		switch (loader.getId()) {
 		case GET_SCH_OP:
-			if (data.getCount() > 0) {
+			if (data.getCount() > 0 && data.moveToFirst()) {
 				mCurrentSchOp = new ScheduledOperation(data);
 				mOriginalSchOp = new ScheduledOperation(data);
 			} else {
 				onOpNotFound();
 			}
-
+			populateFields();
 			break;
-		case GET_SCH_OP_SRC:			
+		case GET_SCH_OP_SRC:
 			mCurrentSchOp = new ScheduledOperation(data, mCurAccountId);
 			mOriginalSchOp = new ScheduledOperation(data, mCurAccountId);
+			populateFields();
 			break;
+//		case GET_ALL_ACCOUNTS:
+//			populateAccountSpinner(data);
+//			break;
 		default:
 			break;
 		}
@@ -564,7 +570,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> arg0) {
-		super.onLoaderReset(arg0);
+//		super.onLoaderReset(arg0);
 		// TODO Auto-generated method stub
 
 	}

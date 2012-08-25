@@ -100,10 +100,10 @@ public class ScheduledOperationTable {
 		}
 	}
 
-	public Cursor fetchAllScheduledOps(SQLiteDatabase db) {
-		Cursor c = db.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
-				SCHEDULED_OP_COLS_QUERY, null, null, null, null,
-				SCHEDULED_OP_ORDERING);
+	public static Cursor fetchAllScheduledOps(Context ctx) {
+		Cursor c = ctx.getContentResolver().query(
+				DbContentProvider.SCHEDULED_JOINED_OP_URI,
+				SCHEDULED_OP_COLS_QUERY, null, null, SCHEDULED_OP_ORDERING);
 		if (null != c) {
 			c.moveToFirst();
 		}
@@ -122,17 +122,36 @@ public class ScheduledOperationTable {
 		return c;
 	}
 
-	static Cursor fetchOneScheduledOp(SQLiteDatabase db, long rowId) {
-		Cursor c = db.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
-				SCHEDULED_OP_COLS_QUERY, "sch." + OperationTable.KEY_OP_ROWID
-						+ " = " + rowId, null, null, null, null, null);
+	public static void updateAllOccurences(Context ctx,
+			final ScheduledOperation op, final long prevSum, final long rowId) {
+		final long accountId = op.mAccountId;
+		OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
+		AccountTable.consolidateSums(ctx, accountId);
+	}
+
+	public static void deleteAllOccurences(Context ctx, final long schOpId) {
+		Cursor schOp = fetchOneScheduledOp(ctx, schOpId);
+		final long accountId = schOp
+				.getLong(schOp
+						.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
+		OperationTable.deleteAllOccurrences(ctx, accountId, schOpId);
+		AccountTable.consolidateSums(ctx, accountId);
+		if (null != schOp) {
+			schOp.close();
+		}
+	}
+
+	public static Cursor fetchOneScheduledOp(Context ctx, long rowId) {
+		Cursor c = ctx.getContentResolver().query(
+				Uri.parse(DbContentProvider.SCHEDULED_JOINED_OP_URI + "/"
+						+ rowId), SCHEDULED_OP_COLS_QUERY, null, null, null);
 		if (c != null) {
 			c.moveToFirst();
 		}
 		return c;
 	}
 
-	static long createScheduledOp(Context ctx, ScheduledOperation op) {
+	public static long createScheduledOp(Context ctx, ScheduledOperation op) {
 		ContentValues initialValues = new ContentValues();
 		String key = op.mThirdParty;
 		InfoTables.putKeyIdInThirdParties(ctx, key, initialValues);

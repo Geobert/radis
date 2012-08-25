@@ -289,11 +289,11 @@ public class InfoTables {
 		long res = Long.parseLong(r.getLastPathSegment());
 		if (res > 0) { // update cache
 			Map<String, Long> m = null;
-			if (table.equals(DATABASE_THIRD_PARTIES_TABLE)) {
+			if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
 				m = mThirdPartiesMap;
-			} else if (table.equals(DATABASE_TAGS_TABLE)) {
+			} else if (table.equals(DbContentProvider.TAGS_URI)) {
 				m = mTagsMap;
-			} else if (table.equals(DATABASE_MODES_TABLE)) {
+			} else if (table.equals(DbContentProvider.MODES_URI)) {
 				m = mModesMap;
 			}
 			m.put(AsciiUtils.convertNonAscii(value).trim().toLowerCase(), res);

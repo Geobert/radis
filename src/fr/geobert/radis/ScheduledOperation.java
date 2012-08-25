@@ -4,13 +4,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
-import fr.geobert.radis.db.AccountTable;
-import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Tools;
 
@@ -166,24 +163,6 @@ public class ScheduledOperation extends Operation {
 	public boolean periodicityEquals(ScheduledOperation schOp) {
 		return mPeriodicity == schOp.mPeriodicity
 				&& mPeriodicityUnit == schOp.mPeriodicityUnit;
-	}
-
-	public static void deleteAllOccurences(final long schOpId) {
-		// Cursor schOp = dbHelper.fetchOneScheduledOp(schOpId);
-		// final long accountId = schOp.getLong(schOp
-		// .getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
-		// dbHelper.deleteAllOccurrences(accountId, schOpId);
-		// dbHelper.consolidateSums(accountId, null);
-		// if (null != schOp) {
-		// schOp.close();
-		// }
-	}
-
-	public static void updateAllOccurences(Context ctx,
-			final ScheduledOperation op, final long prevSum, final long rowId) {
-		final long accountId = op.mAccountId;
-		OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
-		AccountTable.consolidateSums(ctx, accountId);
 	}
 
 	static public void addPeriodicityToDate(ScheduledOperation op) {

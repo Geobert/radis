@@ -6,6 +6,7 @@ import java.util.List;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,7 +15,7 @@ import android.net.Uri;
 import android.util.Log;
 
 public class DbContentProvider extends ContentProvider {
-	private DbHelper mDbHelper;
+	private static DbHelper mDbHelper = null;
 
 	private static final int ACCOUNT = 10;
 	private static final int OPERATION = 20;
@@ -104,9 +105,16 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public synchronized boolean onCreate() {
+	public boolean onCreate() {
+		Log.d("Radis", "onCreate DbContentProvider");
 		mDbHelper = new DbHelper(getContext());
 		return false;
+	}
+	
+	public static void deleteDatabase(Context ctx) {
+		Log.d("Radis", "deleteDatabase from ContentProvider");
+		mDbHelper.close();
+		ctx.deleteDatabase(DbHelper.DATABASE_NAME);
 	}
 
 	private String switchToTable(Uri uri) {
@@ -151,12 +159,12 @@ public class DbContentProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
-		Log.d("DbContentProvider", "switchToTable : " + table);
+//		Log.d("DbContentProvider", "switchToTable : " + table);
 		return table;
 	}
 
 	@Override
-	public synchronized Cursor query(Uri uri, String[] projection,
+	public Cursor query(Uri uri, String[] projection,
 			String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
@@ -179,8 +187,9 @@ public class DbContentProvider extends ContentProvider {
 		default:
 			break;
 		}
-
-		queryBuilder.setTables(switchToTable(uri));
+		String table = switchToTable(uri);
+		queryBuilder.setTables(table);
+		Log.d("Radis", "query " + table);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		Cursor cursor = queryBuilder.query(db, projection, selection,
 				selectionArgs, null, null, sortOrder);
@@ -189,7 +198,7 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public synchronized int delete(Uri uri, String selection,
+	public int delete(Uri uri, String selection,
 			String[] selectionArgs) {
 		int uriType = sURIMatcher.match(uri);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -213,6 +222,7 @@ public class DbContentProvider extends ContentProvider {
 
 		if (id != null) {
 			if (selection == null || selection.trim().length() == 0) {
+				Log.d("Radis", "delete 1 " + table);
 				rowsDeleted = db.delete(table, "_id=?", new String[] { id });
 			} else {
 				if (selectionArgs != null) {
@@ -224,6 +234,7 @@ public class DbContentProvider extends ContentProvider {
 				} else {
 					selectionArgs = new String[] { id };
 				}
+				Log.d("Radis", "delete 2 " + table);
 				rowsDeleted = db.delete(table, "_id=? and " + selection,
 						selectionArgs);
 			}
@@ -234,12 +245,12 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public synchronized String getType(Uri arg0) {
+	public String getType(Uri arg0) {
 		return null;
 	}
 
 	@Override
-	public synchronized Uri insert(Uri uri, ContentValues values) {
+	public Uri insert(Uri uri, ContentValues values) {
 		int uriType = sURIMatcher.match(uri);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		long id = 0;
@@ -276,8 +287,9 @@ public class DbContentProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
-
+		Log.d("Radis", "do insert in " + table);
 		id = db.insert(table, null, values);
+		Log.d("Radis", "insert id : " + id);
 		if (id > 0) {
 			getContext().getContentResolver().notifyChange(uri, null);
 		}
@@ -285,7 +297,7 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public synchronized int update(Uri uri, ContentValues values,
+	public int update(Uri uri, ContentValues values,
 			String selection, String[] selectionArgs) {
 		int uriType = sURIMatcher.match(uri);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -321,10 +333,12 @@ public class DbContentProvider extends ContentProvider {
 				} else {
 					selectionArgs = new String[] { id };
 				}
+				Log.d("Radis", "update " + table);
 				rowsUpdated = db.update(table, values,
 						"_id=? and " + selection, selectionArgs);
 			}
 		} else {
+			Log.d("Radis", "update 2 " + table);
 			rowsUpdated = db.update(table, values, selection, selectionArgs);
 		}
 		return rowsUpdated;

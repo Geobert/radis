@@ -225,7 +225,7 @@ public class AccountTable {
 		values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 	}
 
-	static Cursor fetchAccount(Context ctx, final long accountId) {
+	public static Cursor fetchAccount(Context ctx, final long accountId) {
 		return ctx.getContentResolver().query(
 				Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
 				ACCOUNT_FULL_COLS, null, null, null);
@@ -437,7 +437,7 @@ public class AccountTable {
 		long opSum = 0;
 		switch (projectionMode) {
 		case 0: {
-			Log.d("Radis", "setCurrentSumAndDate mAccountId = " + accountId);
+			Log.d("Radis", "raw setCurrentSumAndDate mAccountId = " + accountId);
 			if (accountId > 0) {
 				Cursor allOps = db.query(
 						OperationTable.DATABASE_OP_TABLE_JOINTURE,
@@ -447,11 +447,11 @@ public class AccountTable {
 								Long.toString(accountId) }, null, null,
 						OperationTable.OP_ORDERING, null);
 				if (null != allOps) {
-					Log.d("Radis", "setCurrentSumAndDate allOps not null : "
+					Log.d("Radis", "raw setCurrentSumAndDate allOps not null : "
 							+ allOps.getCount());
 					if (allOps.moveToFirst()) {
 						Log.d("Radis",
-								"setCurrentSumAndDate allOps moved to first");
+								"raw setCurrentSumAndDate allOps moved to first");
 						date = allOps.getLong(allOps
 								.getColumnIndex(OperationTable.KEY_OP_DATE));
 						opSum = OperationTable.computeSumFromCursor(allOps,

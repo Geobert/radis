@@ -128,7 +128,7 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
 
 	private void deletePref(String key) {
 		mCurrentCtx.getContentResolver().delete(DbContentProvider.PREFS_URI,
-				PreferenceTable.KEY_PREFS_NAME + "=?", new String[] { key } );
+				PreferenceTable.KEY_PREFS_NAME + "=?", new String[] { key });
 	}
 
 	public void clearAccountRelated() {
@@ -137,15 +137,19 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
 		editor.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
 		editor.commit();
 		deletePref(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
-		mCache.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+		if (mCache != null) {
+			mCache.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+		}
 	}
 
 	public void resetAll() {
 		clearAccountRelated();
 		deletePref(RadisConfiguration.KEY_INSERTION_DATE);
 		deletePref(RadisConfiguration.KEY_LAST_INSERTION_DATE);
-		mCache.remove(RadisConfiguration.KEY_INSERTION_DATE);
-		mCache.remove(RadisConfiguration.KEY_LAST_INSERTION_DATE);
+		if (mCache != null) {
+			mCache.remove(RadisConfiguration.KEY_INSERTION_DATE);
+			mCache.remove(RadisConfiguration.KEY_LAST_INSERTION_DATE);
+		}
 		Editor editor = mCurrentCtx.getSharedPreferences(SHARED_PREF_NAME,
 				PreferenceActivity.MODE_PRIVATE).edit();
 		editor.clear();

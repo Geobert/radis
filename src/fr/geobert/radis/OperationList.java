@@ -5,16 +5,13 @@ import java.util.GregorianCalendar;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
-import android.database.MatrixCursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -60,7 +57,7 @@ import fr.geobert.radis.tools.QuickAddController;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class OperationList extends FragmentActivity implements
+public class OperationList extends BaseActivity implements
 		UpdateDisplayInterface, LoaderCallbacks<Cursor> {
 	private static final int DELETE_OP_ID = Menu.FIRST + 1;
 	private static final int EDIT_OP_ID = Menu.FIRST + 2;
@@ -104,7 +101,6 @@ public class OperationList extends FragmentActivity implements
 	private AdapterContextMenuInfo mCurrentSelectedOp;
 	private GregorianCalendar startOpDate; // start date of ops to get
 	private GregorianCalendar endOpDate; // end date of ops to get
-	private ProgressDialog mProgress;
 
 	private static class OpRowHolder {
 		public TextView separator;
@@ -672,7 +668,7 @@ public class OperationList extends FragmentActivity implements
 		
 		if (data.getBooleanExtra(UPDATE_SUM_NEEDED, false)) {
 			mOnRestore = true;
-			mProgress.show();
+			showProgress();
 			getSupportLoaderManager().restartLoader(GET_OPS, null, this);
 			updateSumsAfterOpEdit(sumToAdd, date, mAccountId);
 		}
@@ -736,7 +732,7 @@ public class OperationList extends FragmentActivity implements
 		int[] to = new int[] { R.id.op_date, R.id.op_third_party, R.id.op_sum,
 				R.id.op_infos };
 		
-		mProgress = ProgressDialog.show(this, "", getString(R.string.loading));
+		showProgress();
 		if (mOpListCursorAdapter == null) {
 			mOpListCursorAdapter = new SelectedCursorAdapter(this,
 					R.layout.operation_row, from, to);
@@ -1213,9 +1209,7 @@ public class OperationList extends FragmentActivity implements
 		switch (loader.getId()) {
 		case GET_OPS:
 			Cursor old = mOpListCursorAdapter.swapCursor(data);
-			if (mProgress != null && mProgress.isShowing()) {
-				mProgress.dismiss();
-			}
+			hideProgress();
 			mLoadingIcon.clearAnimation();
 			mLoadingIcon.setVisibility(View.INVISIBLE);
 			if (old != null) {

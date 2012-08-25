@@ -390,8 +390,8 @@ public class OperationTable {
 	}
 
 	// return if need to update OP_SUM
-	public static boolean updateOp(Context ctx, final long rowId, final Operation op,
-			final long accountId) {
+	public static boolean updateOp(Context ctx, final long rowId,
+			final Operation op, final long accountId) {
 		ContentValues args = createContentValuesFromOp(ctx, op, false);
 		if (ctx.getContentResolver().update(
 				Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), args,
@@ -441,13 +441,17 @@ public class OperationTable {
 								Long.toString(schOpId) });
 	}
 
-	static int disconnectAllOccurrences(SQLiteDatabase db,
-			final long accountId, final long schOpId) {
+	public static int disconnectAllOccurrences(Context ctx, final long accountId,
+			final long schOpId) {
 		ContentValues args = new ContentValues();
 		args.put(KEY_OP_SCHEDULED_ID, 0);
-		return db.update(DATABASE_OPERATIONS_TABLE, args, KEY_OP_ACCOUNT_ID
-				+ "=" + accountId + " AND " + KEY_OP_SCHEDULED_ID + "="
-				+ schOpId, null);
+		return ctx.getContentResolver()
+				.update(DbContentProvider.OPERATION_URI,
+						args,
+						KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID
+								+ "=?",
+						new String[] { Long.toString(accountId),
+								Long.toString(schOpId) });
 	}
 
 	// UPGRADE FUNCTIONS

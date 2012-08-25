@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import fr.geobert.radis.Operation;
@@ -102,7 +103,7 @@ public class OperationEditor extends CommonOpEditor {
 									ScheduledOperationTable.updateScheduledOp(
 											OperationEditor.this,
 											mCurrentOp.mScheduledId, op, true);
-									ScheduledOperation.updateAllOccurences(
+									ScheduledOperationTable.updateAllOccurences(
 											OperationEditor.this, op,
 											mPreviousSum,
 											mCurrentOp.mScheduledId);
@@ -147,7 +148,7 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle arg1) {
-		Loader<Cursor> l = super.onCreateLoader(id, arg1);
+		CursorLoader l = null;
 		if (l == null) {
 			switch (id) {
 			case GET_OP:
@@ -166,7 +167,6 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		super.onLoadFinished(loader, data);
 		switch (loader.getId()) {
 		case GET_OP:
 			data.moveToFirst();
@@ -182,7 +182,6 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> arg0) {
-		super.onLoaderReset(arg0);
 		// TODO Auto-generated method stub
 
 	}
