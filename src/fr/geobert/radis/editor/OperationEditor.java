@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import fr.geobert.radis.Operation;
@@ -167,6 +166,7 @@ public class OperationEditor extends CommonOpEditor {
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+		hideProgress();
 		switch (loader.getId()) {
 		case GET_OP:
 			data.moveToFirst();

@@ -15,6 +15,7 @@ import android.net.Uri;
 import android.util.Log;
 
 public class DbContentProvider extends ContentProvider {
+	private static final String TAG = "DbContentProvider";
 	private static DbHelper mDbHelper = null;
 
 	private static final int ACCOUNT = 10;
@@ -106,15 +107,16 @@ public class DbContentProvider extends ContentProvider {
 
 	@Override
 	public boolean onCreate() {
-		Log.d("Radis", "onCreate DbContentProvider");
+		Log.d(TAG, "onCreate DbContentProvider in context : " + getContext().getClass().toString());
 		mDbHelper = new DbHelper(getContext());
 		return false;
 	}
 	
-	public static void deleteDatabase(Context ctx) {
-		Log.d("Radis", "deleteDatabase from ContentProvider");
+	public void deleteDatabase(Context ctx) {
+		Log.d(TAG, "deleteDatabase from ContentProvider");
 		mDbHelper.close();
 		ctx.deleteDatabase(DbHelper.DATABASE_NAME);
+		mDbHelper = new DbHelper(ctx);
 	}
 
 	private String switchToTable(Uri uri) {
@@ -164,7 +166,7 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public Cursor query(Uri uri, String[] projection,
+	public synchronized Cursor query(Uri uri, String[] projection,
 			String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
@@ -189,7 +191,7 @@ public class DbContentProvider extends ContentProvider {
 		}
 		String table = switchToTable(uri);
 		queryBuilder.setTables(table);
-		Log.d("Radis", "query " + table);
+		Log.d(TAG, "query " + table);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		Cursor cursor = queryBuilder.query(db, projection, selection,
 				selectionArgs, null, null, sortOrder);
@@ -198,7 +200,7 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int delete(Uri uri, String selection,
+	public synchronized int delete(Uri uri, String selection,
 			String[] selectionArgs) {
 		int uriType = sURIMatcher.match(uri);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -222,7 +224,7 @@ public class DbContentProvider extends ContentProvider {
 
 		if (id != null) {
 			if (selection == null || selection.trim().length() == 0) {
-				Log.d("Radis", "delete 1 " + table);
+				Log.d(TAG, "delete 1 " + table);
 				rowsDeleted = db.delete(table, "_id=?", new String[] { id });
 			} else {
 				if (selectionArgs != null) {
@@ -234,7 +236,7 @@ public class DbContentProvider extends ContentProvider {
 				} else {
 					selectionArgs = new String[] { id };
 				}
-				Log.d("Radis", "delete 2 " + table);
+				Log.d(TAG, "delete 2 " + table);
 				rowsDeleted = db.delete(table, "_id=? and " + selection,
 						selectionArgs);
 			}
@@ -250,7 +252,7 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public Uri insert(Uri uri, ContentValues values) {
+	public synchronized Uri insert(Uri uri, ContentValues values) {
 		int uriType = sURIMatcher.match(uri);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
 		long id = 0;
@@ -287,9 +289,9 @@ public class DbContentProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
-		Log.d("Radis", "do insert in " + table);
+		Log.d(TAG, "do insert in " + table);
 		id = db.insert(table, null, values);
-		Log.d("Radis", "insert id : " + id);
+		Log.d(TAG, "insert id : " + id);
 		if (id > 0) {
 			getContext().getContentResolver().notifyChange(uri, null);
 		}
@@ -297,7 +299,7 @@ public class DbContentProvider extends ContentProvider {
 	}
 
 	@Override
-	public int update(Uri uri, ContentValues values,
+	public synchronized int update(Uri uri, ContentValues values,
 			String selection, String[] selectionArgs) {
 		int uriType = sURIMatcher.match(uri);
 		SQLiteDatabase db = mDbHelper.getWritableDatabase();
@@ -333,12 +335,12 @@ public class DbContentProvider extends ContentProvider {
 				} else {
 					selectionArgs = new String[] { id };
 				}
-				Log.d("Radis", "update " + table);
+				Log.d(TAG, "update " + table);
 				rowsUpdated = db.update(table, values,
 						"_id=? and " + selection, selectionArgs);
 			}
 		} else {
-			Log.d("Radis", "update 2 " + table);
+			Log.d(TAG, "update 2 " + table);
 			rowsUpdated = db.update(table, values, selection, selectionArgs);
 		}
 		return rowsUpdated;

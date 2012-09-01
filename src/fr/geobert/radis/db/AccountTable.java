@@ -20,6 +20,7 @@ import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
 
 public class AccountTable {
+	private final static String TAG = "AccountTable";
 	static final String DATABASE_ACCOUNT_TABLE = "accounts";
 	public static final String KEY_ACCOUNT_NAME = "account_name";
 	public static final String KEY_ACCOUNT_DESC = "account_desc";
@@ -156,15 +157,14 @@ public class AccountTable {
 		long opSum = 0;
 		switch (projectionMode) {
 		case 0: {
-			Log.d("Radis", "setCurrentSumAndDate mAccountId = " + accountId);
+			Log.d(TAG, "setCurrentSumAndDate mAccountId = " + accountId);
 			if (accountId > 0) {
 				Cursor allOps = OperationTable.fetchAllOps(ctx, accountId);
 				if (null != allOps) {
-					Log.d("Radis", "setCurrentSumAndDate allOps not null : "
+					Log.d(TAG, "setCurrentSumAndDate allOps not null : "
 							+ allOps.getCount());
 					if (allOps.moveToFirst()) {
-						Log.d("Radis",
-								"setCurrentSumAndDate allOps moved to first");
+						Log.d(TAG, "setCurrentSumAndDate allOps moved to first");
 						date = allOps.getLong(allOps
 								.getColumnIndex(OperationTable.KEY_OP_DATE));
 						opSum = OperationTable.computeSumFromCursor(allOps,
@@ -262,7 +262,7 @@ public class AccountTable {
 		boolean res = (opDate <= projDate)
 				|| ((mProjectionMode == 0) && (opDate >= projDate))
 				|| (projDate == 0);
-		// Log.d("Radis", "checkNeedUpdateProjection : " + res);
+		// Log.d(TAG, "checkNeedUpdateProjection : " + res);
 		return res;
 	}
 
@@ -392,8 +392,8 @@ public class AccountTable {
 				args, null, null) > 0;
 	}
 
-	public static void updateProjection(Context ctx, long accountId, long sumToAdd,
-			long opDate) {
+	public static void updateProjection(Context ctx, long accountId,
+			long sumToAdd, long opDate) {
 		ContentValues args = new ContentValues();
 		if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
 			if (opDate == 0) {
@@ -415,8 +415,26 @@ public class AccountTable {
 					.getColumnIndex(KEY_ACCOUNT_OP_SUM));
 			long startSum = accountCursor.getLong(accountCursor
 					.getColumnIndex(KEY_ACCOUNT_START_SUM));
+
 			args.put(KEY_ACCOUNT_OP_SUM, opSum + sumToAdd);
-			args.put(KEY_ACCOUNT_CUR_SUM, startSum + opSum + sumToAdd);
+
+			long date = 0;
+			Long tmp = args.getAsLong(KEY_ACCOUNT_CUR_SUM_DATE);
+			if (tmp != null) {
+				date = tmp.longValue();
+			}
+			if (date == 0) {
+				date = accountCursor.getLong(accountCursor
+						.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
+			}
+			Log.d(TAG, "updateProjection date "
+					+ Formater.getFullDateFormater().format(date) + "/opDate "
+					+ Formater.getFullDateFormater().format(opDate));
+			if (date == 0 || opDate == 0 || opDate <= date) {
+				long curSum = accountCursor.getLong(accountCursor
+						.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+				args.put(KEY_ACCOUNT_CUR_SUM, curSum + sumToAdd);
+			}
 			if (ctx.getContentResolver().update(
 					Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
 					args, null, null) > 0) {
@@ -437,7 +455,7 @@ public class AccountTable {
 		long opSum = 0;
 		switch (projectionMode) {
 		case 0: {
-			Log.d("Radis", "raw setCurrentSumAndDate mAccountId = " + accountId);
+			Log.d(TAG, "raw setCurrentSumAndDate mAccountId = " + accountId);
 			if (accountId > 0) {
 				Cursor allOps = db.query(
 						OperationTable.DATABASE_OP_TABLE_JOINTURE,
@@ -447,10 +465,10 @@ public class AccountTable {
 								Long.toString(accountId) }, null, null,
 						OperationTable.OP_ORDERING, null);
 				if (null != allOps) {
-					Log.d("Radis", "raw setCurrentSumAndDate allOps not null : "
+					Log.d(TAG, "raw setCurrentSumAndDate allOps not null : "
 							+ allOps.getCount());
 					if (allOps.moveToFirst()) {
-						Log.d("Radis",
+						Log.d(TAG,
 								"raw setCurrentSumAndDate allOps moved to first");
 						date = allOps.getLong(allOps
 								.getColumnIndex(OperationTable.KEY_OP_DATE));

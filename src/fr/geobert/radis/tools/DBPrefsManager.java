@@ -34,6 +34,18 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
 			cbk.run();
 		}
 	}
+	
+	public void fillCache(Context ctx) {
+		if (mCache == null) {
+			Cursor data = ctx.getContentResolver().query(DbContentProvider.PREFS_URI, PreferenceTable.PREFS_COLS, null, null, null);
+			mCache = new HashMap<String, String>();
+			if (data.moveToFirst()) {
+				do {
+					mCache.put(data.getString(0), data.getString(1));
+				} while (data.moveToNext());
+			}
+		}
+	}
 
 	public static DBPrefsManager getInstance(Context ctx) {
 		if (null == mInstance) {

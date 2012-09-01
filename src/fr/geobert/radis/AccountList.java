@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import android.app.Dialog;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -34,6 +36,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.editor.AccountEditor;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
@@ -46,6 +49,8 @@ import fr.geobert.radis.tools.UpdateDisplayInterface;
 
 public class AccountList extends BaseActivity implements
 		UpdateDisplayInterface, LoaderCallbacks<Cursor> {
+	private static final String TAG = "AccountList";
+	public static final String INTENT_UPDATE_ACC_LIST = "fr.geobert.radis.UPDATE_ACC_LIST";
 	private static final int DELETE_ACCOUNT_ID = Menu.FIRST + 1;
 	private static final int EDIT_ACCOUNT_ID = Menu.FIRST + 2;
 
@@ -68,8 +73,10 @@ public class AccountList extends BaseActivity implements
 	private InnerViewBinder mViewBinder;
 	private ListView mListView;
 	private CursorLoader mLoader;
+	private OnInsertionReceiver mOnUpdateNeedReceiver;
 	
 	public static Cursor allAccounts;
+	public static boolean ROBOTIUM_MODE = false;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
 		SimpleAccountCursorAdapter(Context context, int layout, String[] from,
@@ -99,10 +106,22 @@ public class AccountList extends BaseActivity implements
 		ctx.startActivity(intent);		
 	}
 
+	public static void refreshDisplay(Context ctx) {
+		Intent i = new Intent(AccountList.INTENT_UPDATE_ACC_LIST);
+		ctx.sendOrderedBroadcast(i, null);
+	}
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Tools.checkDebugMode(this);
+		if (ROBOTIUM_MODE) {
+			DBPrefsManager.getInstance(this).resetAll();
+			ContentProviderClient client = getContentResolver().acquireContentProviderClient("fr.geobert.radis.db");
+			DbContentProvider provider = (DbContentProvider) client.getLocalContentProvider();
+			provider.deleteDatabase(this);
+			client.release();
+		}
 		super.onCreate(savedInstanceState);
 		showProgress();
 		InfoTables.fillCaches(this);
@@ -137,8 +156,10 @@ public class AccountList extends BaseActivity implements
 		registerForContextMenu(mListView);
 
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
+//		mOnUpdateNeedReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
-
+		registerReceiver(mOnInsertionReceiver, new IntentFilter(INTENT_UPDATE_ACC_LIST));
+		
 		final GestureDetector gestureDetector = new GestureDetector(this,
 				new ListViewSwipeDetector(mListView, new ListSwipeAction() {
 					@Override
@@ -401,9 +422,17 @@ public class AccountList extends BaseActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-		unregisterReceiver(mOnInsertionReceiver);
+//		Log.d(TAG, "unregisterReceiver");
+//		unregisterReceiver(mOnInsertionReceiver);
 	}
 
+	@Override
+	protected void onDestroy() {
+		Log.d(TAG, "unregisterReceiver");
+		unregisterReceiver(mOnInsertionReceiver);
+		super.onDestroy();
+	}
+	
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -414,7 +443,7 @@ public class AccountList extends BaseActivity implements
 				onPrefsInit();
 			}
 		});
-
+		Log.d(TAG, "registerReceiver");
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
 	}
 
@@ -447,6 +476,7 @@ public class AccountList extends BaseActivity implements
 
 	@Override
 	public void updateDisplay(Intent intent) {
+		Log.d(TAG, "updateDisplay(Intent intent)");
 		showProgress();
 		if (mLoader == null) {
 			getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);

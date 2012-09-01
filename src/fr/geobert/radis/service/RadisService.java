@@ -22,16 +22,18 @@ import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
 
 public class RadisService extends IntentService {
+	private static final String TAG = "RadisService";
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
 	private static PowerManager.WakeLock lockStatic = null;
 
 	public RadisService() {
-		super("RadisService");
+		super(TAG);
 	}
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		try {
+			DBPrefsManager.getInstance(this).fillCache(this);
 			processScheduledOps();
 		} finally {
 			getLock(this).release();
@@ -63,7 +65,7 @@ public class RadisService extends IntentService {
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		final long todayInMillis = today.getTimeInMillis();
-		Log.d("RadisService", "today : "
+		Log.d(TAG, "today : "
 				+ Formater.getFullDateFormater().format(today.getTime()));
 
 		GregorianCalendar currentMonth = new GregorianCalendar();
@@ -71,7 +73,7 @@ public class RadisService extends IntentService {
 		Tools.clearTimeOfCalendar(currentMonth);
 		currentMonth.set(Calendar.DAY_OF_MONTH,
 				currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
-		Log.d("RadisService",
+		Log.d(TAG,
 				"currentMonth : " + formater.format(currentMonth.getTime()));
 
 		GregorianCalendar insertionDate = new GregorianCalendar();
@@ -82,17 +84,17 @@ public class RadisService extends IntentService {
 				.intValue();
 		final int maxDayOfCurMonth = today
 				.getActualMaximum(Calendar.DAY_OF_MONTH);
-		Log.d("RadisService", "maxDayOfCurMonth : " + maxDayOfCurMonth);
-		Log.d("RadisService", "insertionDayOfMonth : " + insertionDayOfMonth);
+		Log.d(TAG, "maxDayOfCurMonth : " + maxDayOfCurMonth);
+		Log.d(TAG, "insertionDayOfMonth : " + insertionDayOfMonth);
 		// manage February if insertionDayOfMonth is 29, 30 or 31
 		insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
 				: insertionDayOfMonth;
-		Log.d("RadisService", "final insertionDayOfMonth : "
+		Log.d(TAG, "final insertionDayOfMonth : "
 				+ insertionDayOfMonth);
 
 		insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
 		Tools.clearTimeOfCalendar(insertionDate);
-		Log.d("RadisService", "insertionDate : "
+		Log.d(TAG, "insertionDate : "
 				+ Formater.getFullDateFormater()
 						.format(insertionDate.getTime()));
 
@@ -101,18 +103,18 @@ public class RadisService extends IntentService {
 		GregorianCalendar limitInsertionDate = new GregorianCalendar();
 		limitInsertionDate.setTimeInMillis(insertionDateInMillis);
 		limitInsertionDate.add(Calendar.MONTH, 1);
-		Log.d("RadisService",
+		Log.d(TAG,
 				"limitInsertionDate : "
 						+ Formater.getFullDateFormater().format(
 								limitInsertionDate.getTime()));
 
 		final long lastInsertDate = DBPrefsManager.getInstance(this).getLong(
 				RadisConfiguration.KEY_LAST_INSERTION_DATE, 0);
-		Log.d("RadisService", "lastInsertDate : "
+		Log.d(TAG, "lastInsertDate : "
 				+ Formater.getFullDateFormater().format(lastInsertDate));
 		if (lastInsertDate > insertionDateInMillis) {
 			insertionDate.add(Calendar.MONTH, 1);
-			Log.d("RadisService",
+			Log.d(TAG,
 					"modified insertionDate : "
 							+ Formater.getFullDateFormater().format(
 									insertionDate.getTime()));
@@ -120,7 +122,7 @@ public class RadisService extends IntentService {
 		}
 		limitInsertionDate.set(Calendar.DAY_OF_MONTH,
 				limitInsertionDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-		Log.d("RadisService",
+		Log.d(TAG,
 				"final limitInsertionDate : "
 						+ Formater.getFullDateFormater().format(
 								limitInsertionDate.getTime()));
@@ -131,7 +133,7 @@ public class RadisService extends IntentService {
 		return res;
 	}
 
-	private void processScheduledOps() {
+	private synchronized void processScheduledOps() {
 		Cursor c = ScheduledOperationTable.fetchAllScheduledOps(this);
 		if (c.isFirst()) {
 			DateFormat formater = Formater.getFullDateFormater(); // used in
@@ -161,7 +163,7 @@ public class RadisService extends IntentService {
 				}
 
 				// insert all scheduled of the past until current month
-				Log.d("RadisService",
+				Log.d(TAG,
 						"insert all scheduled of the past until current month");
 				int i = 0; // for logging purpose
 				while (op.getDate() <= p.currentMonth && !op.isObsolete()) {
@@ -172,7 +174,7 @@ public class RadisService extends IntentService {
 						needUpdate = true;
 					}
 				}
-				Log.d("RadisService", "inserted " + i
+				Log.d(TAG, "inserted " + i
 						+ " past scheduled op until current month");
 				i = 0;
 				if (p.today >= p.insertionDate) {
@@ -180,10 +182,10 @@ public class RadisService extends IntentService {
 							&& !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId,
 								op.getDate());
-						Log.d("RadisService",
+						Log.d(TAG,
 								"op month before : " + op.getMonth());
 						long opSum = insertSchOp(op, opRowId);
-						Log.d("RadisService",
+						Log.d(TAG,
 								"op month after : " + op.getMonth());
 						i++;
 						if (opSum != 0) {
@@ -191,7 +193,7 @@ public class RadisService extends IntentService {
 							needUpdate = true;
 						}
 					}
-					Log.d("RadisService", "inserted " + i
+					Log.d(TAG, "inserted " + i
 							+ " ops current month scheduled op");
 				}
 				ScheduledOperationTable.updateScheduledOp(this, opRowId, op,
@@ -226,12 +228,14 @@ public class RadisService extends IntentService {
 						.longValue(), greatestDatePerAccount.get(e.getKey()),
 						this);
 			}
+			Log.d(TAG, "DOES NEED UPDATE : " + (needUpdate ? "YES" : "NO"));
 			if (needUpdate) {
 				Intent i = new Intent(Tools.INTENT_OP_INSERTED);
 				i.putExtra("accountIds", accountIds);
+				Log.d(TAG, "sendOrderedBroadcast" + i.toString());
 				sendOrderedBroadcast(i, null);
 			}
-			Log.d("RadisService", "save LAST_INSERT_DATE is todayInMillis: "
+			Log.d(TAG, "save LAST_INSERT_DATE is todayInMillis: "
 					+ Formater.getFullDateFormater().format(p.today));
 			DBPrefsManager.getInstance(this).put(
 					RadisConfiguration.KEY_LAST_INSERTION_DATE, p.today);
@@ -251,9 +255,9 @@ public class RadisService extends IntentService {
 		final long accountId = op.mAccountId;
 		op.mScheduledId = opRowId;
 		boolean needUpdate = OperationTable.createOp(this, op, accountId);
-		Log.d("RadisService", "before addPeriodicity : " + op.getDateStr());
+		Log.d(TAG, "before addPeriodicity : " + op.getDateStr());
 		ScheduledOperation.addPeriodicityToDate(op);
-		Log.d("RadisService", "after addPeriodicity : " + op.getDateStr());
+		Log.d(TAG, "after addPeriodicity : " + op.getDateStr());
 		return needUpdate ? op.mSum : 0;
 	}
 

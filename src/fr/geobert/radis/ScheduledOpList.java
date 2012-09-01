@@ -344,10 +344,10 @@ public class ScheduledOpList extends BaseActivity implements
 			} else {
 				getSupportLoaderManager().initLoader(req, null, this);
 			}
-
 			if (transId > 0) {
 				AccountTable.consolidateSums(this, transId);
 			}
+			AccountList.refreshDisplay(this);
 		}
 		mOpToDelete = null;
 	}

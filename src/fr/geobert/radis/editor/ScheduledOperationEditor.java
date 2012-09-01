@@ -294,6 +294,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	}
 
 	private void startInsertionServiceAndExit() {
+		Log.d("Radis", "startInsertionServiceAndExit");
 		RadisService.acquireStaticLock(this);
 		this.startService(new Intent(this, RadisService.class));
 		Intent res = new Intent();
@@ -545,6 +546,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 //		super.onLoadFinished(loader, data);
+		hideProgress();
 		switch (loader.getId()) {
 		case GET_SCH_OP:
 			if (data.getCount() > 0 && data.moveToFirst()) {
