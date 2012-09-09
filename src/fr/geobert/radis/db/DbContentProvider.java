@@ -117,6 +117,7 @@ public class DbContentProvider extends ContentProvider {
 		mDbHelper.close();
 		ctx.deleteDatabase(DbHelper.DATABASE_NAME);
 		mDbHelper = new DbHelper(ctx);
+		InfoTables.clearCache();
 	}
 
 	private String switchToTable(Uri uri) {

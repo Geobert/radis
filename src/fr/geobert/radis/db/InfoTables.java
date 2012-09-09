@@ -173,15 +173,42 @@ public class InfoTables {
 	}
 
 	public static void fillCaches(FragmentActivity ctx) {
-		mModesMap = new LinkedHashMap<String, Long>();
-		mTagsMap = new LinkedHashMap<String, Long>();
-		mThirdPartiesMap = new LinkedHashMap<String, Long>();
+		if (mModesMap == null) {
+			mModesMap = new LinkedHashMap<String, Long>();
+			mTagsMap = new LinkedHashMap<String, Long>();
+			mThirdPartiesMap = new LinkedHashMap<String, Long>();
 
-		InfoCacheFiller cbk = new InfoCacheFiller(ctx);
+			InfoCacheFiller cbk = new InfoCacheFiller(ctx);
 
-		ctx.getSupportLoaderManager().initLoader(GET_TP, null, cbk);
-		ctx.getSupportLoaderManager().initLoader(GET_MODES, null, cbk);
-		ctx.getSupportLoaderManager().initLoader(GET_TAGS, null, cbk);
+			ctx.getSupportLoaderManager().initLoader(GET_TP, null, cbk);
+			ctx.getSupportLoaderManager().initLoader(GET_MODES, null, cbk);
+			ctx.getSupportLoaderManager().initLoader(GET_TAGS, null, cbk);
+		}
+	}
+
+	public static void fillCachesSync(Context ctx) {
+		if (mModesMap == null) {
+			mModesMap = new LinkedHashMap<String, Long>();
+			mTagsMap = new LinkedHashMap<String, Long>();
+			mThirdPartiesMap = new LinkedHashMap<String, Long>();
+			Uri u = null;
+			String[] cols = null;
+				cols = new String[] { KEY_THIRD_PARTY_ROWID,
+						KEY_THIRD_PARTY_NORMALIZED_NAME };
+				u = DbContentProvider.THIRD_PARTY_URI;
+				Cursor data = ctx.getContentResolver().query(u, cols, null, null, null);
+				fillCache(data, mThirdPartiesMap);
+				
+				cols = new String[] { KEY_MODE_ROWID, KEY_MODE_NORMALIZED_NAME };
+				u = DbContentProvider.MODES_URI;
+				data = ctx.getContentResolver().query(u, cols, null, null, null);
+				fillCache(data, mModesMap);
+
+				cols = new String[] { KEY_TAG_ROWID, KEY_TAG_NORMALIZED_NAME };
+				u = DbContentProvider.TAGS_URI;
+				data = ctx.getContentResolver().query(u, cols, null, null, null);
+				fillCache(data, mTagsMap);
+		}
 	}
 
 	static long getKeyIdOrCreateFromThirdParties(Context ctx, String key) {
@@ -260,8 +287,8 @@ public class InfoTables {
 			String value, String oldValue) {
 		ContentValues args = new ContentValues();
 		args.put(mInfoColMap.get(table.toString()), value);
-		args.put(mColNameNormName.get(mInfoColMap.get(table.toString())), AsciiUtils
-				.convertNonAscii(value).trim().toLowerCase());
+		args.put(mColNameNormName.get(mInfoColMap.get(table.toString())),
+				AsciiUtils.convertNonAscii(value).trim().toLowerCase());
 		int res = ctx.getContentResolver().update(
 				Uri.parse(table + "/" + rowId), args, null, null);
 
@@ -375,6 +402,12 @@ public class InfoTables {
 		}
 	}
 
+	public static void clearCache() {
+		mThirdPartiesMap = null;
+		mModesMap = null;
+		mTagsMap = null;
+	}
+
 	// UPGRADE FUNCTIONS
 	private static void upgradeFromV8(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
@@ -447,4 +480,5 @@ public class InfoTables {
 		db.execSQL(ADD_NORMALIZED_TAG);
 		db.execSQL(ADD_NORMALIZED_MODE);
 	}
+
 }

@@ -15,6 +15,7 @@ import fr.geobert.radis.tools.Tools;
 
 public class OperationTable {
 	static final String DATABASE_OPERATIONS_TABLE = "operations";
+	private static final String TAG = "OperationTable";
 	public static final String KEY_OP_DATE = "date";
 	public static final String KEY_OP_THIRD_PARTY = "third_party";
 	public static final String KEY_OP_TAG = "tag";
@@ -249,9 +250,9 @@ public class OperationTable {
 				DbContentProvider.OPERATION_URI, initialValues);
 		op.mRowId = Long.parseLong(res.getLastPathSegment());
 		if (op.mRowId > -1) {
-			return AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
+			return true;
 		}
-		Log.e("Radis", "error in creating op");
+		Log.e(TAG, "error in creating op");
 		return false;
 	}
 
@@ -262,7 +263,7 @@ public class OperationTable {
 		if (ctx.getContentResolver().delete(
 				Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null,
 				null) > 0) {
-			return AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
+			return true;//AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
 		}
 		return false;
 	}
@@ -396,7 +397,7 @@ public class OperationTable {
 		if (ctx.getContentResolver().update(
 				Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), args,
 				null, null) > 0) {
-			return AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
+			return true; //AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
 		}
 		return false;
 	}

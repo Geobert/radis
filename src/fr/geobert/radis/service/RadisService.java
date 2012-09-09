@@ -15,6 +15,7 @@ import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.DBPrefsManager;
@@ -34,6 +35,7 @@ public class RadisService extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		try {
 			DBPrefsManager.getInstance(this).fillCache(this);
+			InfoTables.fillCachesSync(this);
 			processScheduledOps();
 		} finally {
 			getLock(this).release();
@@ -65,16 +67,17 @@ public class RadisService extends IntentService {
 		GregorianCalendar today = new GregorianCalendar();
 		Tools.clearTimeOfCalendar(today);
 		final long todayInMillis = today.getTimeInMillis();
-		Log.d(TAG, "today : "
-				+ Formater.getFullDateFormater().format(today.getTime()));
+		Log.d(TAG,
+				"today : "
+						+ Formater.getFullDateFormater()
+								.format(today.getTime()));
 
 		GregorianCalendar currentMonth = new GregorianCalendar();
 		currentMonth.setTimeInMillis(todayInMillis);
 		Tools.clearTimeOfCalendar(currentMonth);
 		currentMonth.set(Calendar.DAY_OF_MONTH,
 				currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH));
-		Log.d(TAG,
-				"currentMonth : " + formater.format(currentMonth.getTime()));
+		Log.d(TAG, "currentMonth : " + formater.format(currentMonth.getTime()));
 
 		GregorianCalendar insertionDate = new GregorianCalendar();
 		int insertionDayOfMonth = DBPrefsManager
@@ -89,14 +92,14 @@ public class RadisService extends IntentService {
 		// manage February if insertionDayOfMonth is 29, 30 or 31
 		insertionDayOfMonth = insertionDayOfMonth > maxDayOfCurMonth ? maxDayOfCurMonth
 				: insertionDayOfMonth;
-		Log.d(TAG, "final insertionDayOfMonth : "
-				+ insertionDayOfMonth);
+		Log.d(TAG, "final insertionDayOfMonth : " + insertionDayOfMonth);
 
 		insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
 		Tools.clearTimeOfCalendar(insertionDate);
-		Log.d(TAG, "insertionDate : "
-				+ Formater.getFullDateFormater()
-						.format(insertionDate.getTime()));
+		Log.d(TAG,
+				"insertionDate : "
+						+ Formater.getFullDateFormater().format(
+								insertionDate.getTime()));
 
 		long insertionDateInMillis = insertionDate.getTimeInMillis();
 
@@ -110,8 +113,9 @@ public class RadisService extends IntentService {
 
 		final long lastInsertDate = DBPrefsManager.getInstance(this).getLong(
 				RadisConfiguration.KEY_LAST_INSERTION_DATE, 0);
-		Log.d(TAG, "lastInsertDate : "
-				+ Formater.getFullDateFormater().format(lastInsertDate));
+		Log.d(TAG,
+				"lastInsertDate : "
+						+ Formater.getFullDateFormater().format(lastInsertDate));
 		if (lastInsertDate > insertionDateInMillis) {
 			insertionDate.add(Calendar.MONTH, 1);
 			Log.d(TAG,
@@ -150,7 +154,8 @@ public class RadisService extends IntentService {
 				final Long transId = Long.valueOf(op.mTransferAccountId);
 				long sum = 0;
 				boolean needUpdate = false;
-				Cursor accountCursor = AccountTable.fetchAccount(this, accountId);
+				Cursor accountCursor = AccountTable.fetchAccount(this,
+						accountId);
 				if (null != accountCursor) {
 					if (!accountCursor.moveToFirst()) {
 						c.moveToNext();
@@ -160,8 +165,8 @@ public class RadisService extends IntentService {
 				} else {
 					c.moveToNext();
 					continue;
-				}
-
+				}				
+				
 				// insert all scheduled of the past until current month
 				Log.d(TAG,
 						"insert all scheduled of the past until current month");
@@ -182,11 +187,9 @@ public class RadisService extends IntentService {
 							&& !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId,
 								op.getDate());
-						Log.d(TAG,
-								"op month before : " + op.getMonth());
+						Log.d(TAG, "op month before : " + op.getMonth());
 						long opSum = insertSchOp(op, opRowId);
-						Log.d(TAG,
-								"op month after : " + op.getMonth());
+						Log.d(TAG, "op month after : " + op.getMonth());
 						i++;
 						if (opSum != 0) {
 							sum = sum + opSum;
@@ -239,9 +242,6 @@ public class RadisService extends IntentService {
 					+ Formater.getFullDateFormater().format(p.today));
 			DBPrefsManager.getInstance(this).put(
 					RadisConfiguration.KEY_LAST_INSERTION_DATE, p.today);
-			// if (lastInsertDate == 0) {
-			// processScheduledOps();
-			// }
 		}
 		c.close();
 	}

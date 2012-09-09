@@ -3,10 +3,13 @@ package fr.geobert.radis.tools;
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
+import android.widget.TextView.OnEditorActionListener;
 import fr.geobert.radis.InfoAdapter;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
@@ -71,6 +74,26 @@ public class QuickAddController {
 
 		mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
 		mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
+		mQuickAddAmount.setOnEditorActionListener(new OnEditorActionListener() {
+			@Override
+			public boolean onEditorAction(TextView v, int actionId,
+					KeyEvent event) {
+				try {
+					if (mQuickAddButton.isEnabled()) {
+						quickAddOp();
+					} else {
+						Tools.popError(
+								mActivity,
+								mActivity
+										.getString(R.string.quickadd_fields_not_filled),
+								null);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				return true;
+			}
+		});
 	}
 
 	private void quickAddOp() throws Exception {
@@ -95,6 +118,9 @@ public class QuickAddController {
 
 	public void clearFocus() {
 		mQuickAddThirdParty.clearFocus();
+		InputMethodManager imm = (InputMethodManager) mActivity
+				.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(mQuickAddThirdParty.getWindowToken(), 0);
 	}
 
 	public void setAutoNegate(boolean autoNeg) {

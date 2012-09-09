@@ -133,10 +133,12 @@
 		<item name="android:layout_width">fill_parent</item>
 		<item name="android:layout_height">wrap_content</item>
 		<item name="android:layout_weight">1</item>
+		<item name="android:lines">1</item>
 		<item name="android:gravity">center_vertical</item>
 	</style>
 	<style name="QuickAddEditText.Sum">
 		<item name="android:digits">@string/allowed_sum_digits</item>
 		<item name="android:inputType">number|numberSigned|numberDecimal</item>
+		<item name="android:imeOptions">actionDone</item>
 	</style>
 </resources>

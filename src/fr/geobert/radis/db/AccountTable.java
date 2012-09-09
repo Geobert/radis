@@ -262,13 +262,25 @@ public class AccountTable {
 		boolean res = (opDate <= projDate)
 				|| ((mProjectionMode == 0) && (opDate >= projDate))
 				|| (projDate == 0);
-		// Log.d(TAG, "checkNeedUpdateProjection : " + res);
+		Log.d(TAG,
+				"checkNeedUpdateProjection : "
+						+ res
+						+ "/mProjectionDate : "
+						+ Formater.getFullDateFormater().format(
+								new Date(mProjectionDate))
+						+ "/opdate = "
+						+ Formater.getFullDateFormater().format(
+								new Date(opDate)) + "/projMode = "
+						+ mProjectionMode);
 		return res;
 	}
 
 	public static void initProjectionDate(Cursor c) {
+		Log.d(TAG, "initProjectionDate cursor : " + c);
 		if (c != null && c.moveToFirst()) {
-			mProjectionMode = c.getInt(8);
+			mProjectionMode = c.getInt(c
+					.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE));
+			Log.d(TAG, "initProjectionDate mode : " + mProjectionMode);
 			switch (mProjectionMode) {
 			case 0:
 				mProjectionDate = c.getLong(c
@@ -278,7 +290,7 @@ public class AccountTable {
 				GregorianCalendar projDate = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(projDate);
 				projDate.set(Calendar.DAY_OF_MONTH,
-						Integer.parseInt(c.getString(9)));
+						Integer.parseInt(c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))));
 				GregorianCalendar today = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(today);
 				if (projDate.compareTo(today) <= 0) {
@@ -290,7 +302,7 @@ public class AccountTable {
 			case 2:
 				try {
 					Date projDate = Formater.getFullDateFormater().parse(
-							c.getString(9));
+							c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
 					GregorianCalendar cal = new GregorianCalendar();
 					cal.setTime(projDate);
 					cal.set(Calendar.HOUR, 0);
@@ -395,6 +407,8 @@ public class AccountTable {
 	public static void updateProjection(Context ctx, long accountId,
 			long sumToAdd, long opDate) {
 		ContentValues args = new ContentValues();
+		Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode
+				+ " / opDate " + opDate);
 		if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
 			if (opDate == 0) {
 				Cursor op = OperationTable.fetchLastOp(ctx, accountId);

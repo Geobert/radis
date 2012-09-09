@@ -144,6 +144,7 @@
 	<string name="quickadd_target_to_configure">Allez dans les préférences pour choisir le compte
 	</string>
 	<string name="quickadd_target_no_account">Créer un compte pour activer</string>
+	<string name="quickadd_fields_not_filled">Remplir les champs correctement pour ajouter une opération</string>
 	<string name="projection_date">Date de projection</string>
 	<string name="projection_day_of_month">Jour du mois</string>
 	<string name="projection_full_date">jj/MM/yyyy</string>

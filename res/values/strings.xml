@@ -147,6 +147,7 @@
     <string name="quickadd_target">Add transaction to: %s</string>
     <string name="quickadd_target_to_configure">Do to preferences to choose default account</string>
     <string name="quickadd_target_no_account">Create account to enable</string>
+    <string name="quickadd_fields_not_filled">Fill correctly all the quick add fields</string>
     <string name="projection_date">Projection date</string>
     <string name="projection_day_of_month">Day of Month</string>
     <string name="projection_full_date">dd/MM/yyyy</string>

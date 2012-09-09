@@ -13,6 +13,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector;
@@ -44,6 +45,7 @@ import fr.geobert.radis.tools.Tools;
 public class ScheduledOpList extends BaseActivity implements
 		LoaderCallbacks<Cursor> {
 	public static final String CURRENT_ACCOUNT = "accountId";
+	private static final String TAG = "ScheduleOpList";
 
 	private AdapterContextMenuInfo mOpToDelete;
 
@@ -347,8 +349,14 @@ public class ScheduledOpList extends BaseActivity implements
 			if (transId > 0) {
 				AccountTable.consolidateSums(this, transId);
 			}
-			AccountList.refreshDisplay(this);
 		}
+		Log.d(TAG, "REFRESH AFTER DEL SCH OP");
+		AccountList.refreshDisplay(this);
+		OperationList
+				.refreshDisplay(
+						this,
+						cursorOp.getLong(cursorOp
+								.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID)));
 		mOpToDelete = null;
 	}
 

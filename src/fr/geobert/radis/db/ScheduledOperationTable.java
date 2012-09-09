@@ -210,7 +210,7 @@ public class ScheduledOperationTable {
 
 	static boolean deleteScheduledOpOfAccount(Context ctx, final long accountId) {
 		return ctx.getContentResolver().delete(
-				DbContentProvider.SCHEDULED_JOINED_OP_URI,
+				DbContentProvider.SCHEDULED_OP_URI,
 				KEY_SCHEDULED_ACCOUNT_ID + "=?",
 				new String[] { Long.toString(accountId) }) > 0;
 	}

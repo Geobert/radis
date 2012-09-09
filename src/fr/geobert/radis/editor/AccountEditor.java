@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import fr.geobert.radis.AccountList;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
@@ -279,6 +280,7 @@ public class AccountEditor extends FragmentActivity implements
 				AccountTable.updateAccount(this, mRowId, name, desc, startSum,
 						currency, mProjectionController);
 			}
+			AccountList.refreshDisplay(this);
 		} catch (ParseException e) {
 			e.printStackTrace();
 		}

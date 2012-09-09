@@ -74,7 +74,7 @@ public class AccountList extends BaseActivity implements
 	private ListView mListView;
 	private CursorLoader mLoader;
 	private OnInsertionReceiver mOnUpdateNeedReceiver;
-	
+
 	public static Cursor allAccounts;
 	public static boolean ROBOTIUM_MODE = false;
 
@@ -103,22 +103,24 @@ public class AccountList extends BaseActivity implements
 	public static void callMe(Context ctx) {
 		Intent intent = new Intent(ctx, AccountList.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		ctx.startActivity(intent);		
+		ctx.startActivity(intent);
 	}
 
 	public static void refreshDisplay(Context ctx) {
 		Intent i = new Intent(AccountList.INTENT_UPDATE_ACC_LIST);
 		ctx.sendOrderedBroadcast(i, null);
 	}
-	
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Tools.checkDebugMode(this);
 		if (ROBOTIUM_MODE) {
 			DBPrefsManager.getInstance(this).resetAll();
-			ContentProviderClient client = getContentResolver().acquireContentProviderClient("fr.geobert.radis.db");
-			DbContentProvider provider = (DbContentProvider) client.getLocalContentProvider();
+			ContentProviderClient client = getContentResolver()
+					.acquireContentProviderClient("fr.geobert.radis.db");
+			DbContentProvider provider = (DbContentProvider) client
+					.getLocalContentProvider();
 			provider.deleteDatabase(this);
 			client.release();
 		}
@@ -156,10 +158,11 @@ public class AccountList extends BaseActivity implements
 		registerForContextMenu(mListView);
 
 		mOnInsertionReceiver = new OnInsertionReceiver(this);
-//		mOnUpdateNeedReceiver = new OnInsertionReceiver(this);
+		// mOnUpdateNeedReceiver = new OnInsertionReceiver(this);
 		mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
-		registerReceiver(mOnInsertionReceiver, new IntentFilter(INTENT_UPDATE_ACC_LIST));
-		
+		registerReceiver(mOnInsertionReceiver, new IntentFilter(
+				INTENT_UPDATE_ACC_LIST));
+
 		final GestureDetector gestureDetector = new GestureDetector(this,
 				new ListViewSwipeDetector(mListView, new ListSwipeAction() {
 					@Override
@@ -205,12 +208,6 @@ public class AccountList extends BaseActivity implements
 			sendBroadcast(i);
 			mFirstStart = false;
 		}
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		mQuickAddController.clearFocus();
 	}
 
 	@Override
@@ -283,11 +280,7 @@ public class AccountList extends BaseActivity implements
 
 	private void deleteAccount(long id) {
 		AccountTable.deleteAccount(this, id);
-		mScheduledListBtn.setEnabled(mListView.getAdapter().getCount() > 0);
-		if (null != mViewBinder && id == mViewBinder.accountId) {
-			DBPrefsManager.getInstance(this).clearAccountRelated();
-			mViewBinder.accountId = 0;
-		}
+		getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
 	}
 
 	private class InnerViewBinder implements SimpleCursorAdapter.ViewBinder {
@@ -411,7 +404,6 @@ public class AccountList extends BaseActivity implements
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int id) {
 							deleteAccount(mAccountToDelete);
-							mAccountToDelete = 0;
 						}
 					}, R.string.account_delete_confirmation);
 		default:
@@ -422,8 +414,8 @@ public class AccountList extends BaseActivity implements
 	@Override
 	protected void onPause() {
 		super.onPause();
-//		Log.d(TAG, "unregisterReceiver");
-//		unregisterReceiver(mOnInsertionReceiver);
+		// Log.d(TAG, "unregisterReceiver");
+		// unregisterReceiver(mOnInsertionReceiver);
 	}
 
 	@Override
@@ -432,7 +424,7 @@ public class AccountList extends BaseActivity implements
 		unregisterReceiver(mOnInsertionReceiver);
 		super.onDestroy();
 	}
-	
+
 	@Override
 	protected void onResume() {
 		super.onResume();
@@ -445,6 +437,18 @@ public class AccountList extends BaseActivity implements
 		});
 		Log.d(TAG, "registerReceiver");
 		registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
+		if (allAccounts != null) {
+			if (mViewBinder == null) {
+				mViewBinder = new InnerViewBinder(DBPrefsManager.getInstance(
+						this)
+						.getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0));
+			} else {
+				mViewBinder.accountId = DBPrefsManager.getInstance(this)
+						.getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0);
+			}
+			updateTargetTextView(allAccounts);
+		}
+		mQuickAddController.clearFocus();
 	}
 
 	protected void onPrefsInit() {
@@ -464,9 +468,27 @@ public class AccountList extends BaseActivity implements
 		if (accountsCursor.getCount() > 0) {
 			long accountId = DBPrefsManager.getInstance(this).getLong(
 					RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0);
+			Log.d(TAG, "updateTargetTextView, accountId = " + accountId);
 			mQuickAddController.setAccount(accountId);
 			if (accountId == 0) {
 				mQuickAddText.setText(R.string.quickadd_target_to_configure);
+			} else {
+				if (accountsCursor.moveToFirst()) {
+					do {
+						long curAccId = accountsCursor
+								.getLong(accountsCursor
+										.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID));
+						Log.d(TAG, "currAccId = " + curAccId);
+						if (accountId == curAccId) {
+							mQuickAddText
+									.setText(getString(
+											R.string.quickadd_target,
+											accountsCursor.getString(accountsCursor
+													.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME))));
+							break;
+						}
+					} while (accountsCursor.moveToNext());
+				}
 			}
 		} else {
 			mQuickAddText.setText(R.string.quickadd_target_no_account);
@@ -499,18 +521,28 @@ public class AccountList extends BaseActivity implements
 		switch (loader.getId()) {
 		case GET_ACCOUNTS:
 			allAccounts = data;
+//			// if there are no results
+//			if (data.getCount() == 0) {
+//			    // let the user know
+//			    mListView.setEmptyView(findViewById(android.R.id.empty));
+//			} else {
+//			    // otherwise clear it, so it won't flash in between cursor loads
+//			    mListView.setEmptyView(null);
+//			}
+
 			hideProgress();
 			mAccountsAdapter.changeCursor(data);
-			// if there are no results
-			if (data.getCount() == 0) {
-				// let the user know
-				mListView.setEmptyView(findViewById(android.R.id.empty));
-			} else {
-				// otherwise clear it, so it won't flash in between cursor loads
-				mListView.setEmptyView(null);
-			}
 			mScheduledListBtn.setEnabled(mAccountsAdapter.getCount() > 0);
+			Log.d(TAG, "onLoadFinished, mAccountToDelete = " + mAccountToDelete
+					+ "/mViewBinder.accountId : " + mViewBinder.accountId);
+			if (null != mViewBinder && mAccountToDelete != 0
+					&& mAccountToDelete == mViewBinder.accountId) {
+				Log.d(TAG, "clear prefs account related");
+				DBPrefsManager.getInstance(this).clearAccountRelated();
+				mViewBinder.accountId = 0;
+			}
 			updateTargetTextView(data);
+			mAccountToDelete = 0;
 			break;
 
 		default:

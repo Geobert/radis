@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import fr.geobert.radis.Operation;
 import fr.geobert.radis.OperationList;
 import fr.geobert.radis.R;
@@ -18,8 +19,10 @@ import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 
 public class OperationEditor extends CommonOpEditor {
+	private static final String TAG = "OperationEditor";
 	protected Operation mOriginalOp;
 	protected static final int ASK_UPDATE_SCHEDULED_DIALOG_ID = 10;
+	
 
 	private static final int GET_OP = 610;
 
@@ -45,6 +48,7 @@ public class OperationEditor extends CommonOpEditor {
 	}
 
 	private void setResAndExit(boolean sumUpdateIsNeeded) {
+		Log.d(TAG, "setResAndExit, sumUpdateIsNeeded : " + (sumUpdateIsNeeded ? "YES" : "NO"));
 		Intent res = new Intent();
 		res.putExtra(OperationList.SUM, mCurrentOp.mSum);
 		res.putExtra(OperationList.OLD_SUM, mPreviousSum);
@@ -69,6 +73,7 @@ public class OperationEditor extends CommonOpEditor {
 	@Override
 	protected void saveOpAndExit() {
 		Operation op = mCurrentOp;
+		Log.d(TAG, "saveOpAndExit, mRowId : " + mRowId);
 		if (mRowId <= 0) {
 			setResAndExit(OperationTable.createOp(this, op, op.mAccountId));
 		} else {
