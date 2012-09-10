@@ -73,7 +73,7 @@ public class AccountList extends BaseActivity implements
 	private InnerViewBinder mViewBinder;
 	private ListView mListView;
 	private CursorLoader mLoader;
-	private OnInsertionReceiver mOnUpdateNeedReceiver;
+//	private OnInsertionReceiver mOnUpdateNeedReceiver;
 
 	public static Cursor allAccounts;
 	public static boolean ROBOTIUM_MODE = false;
@@ -420,15 +420,9 @@ public class AccountList extends BaseActivity implements
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
-		// Log.d(TAG, "unregisterReceiver");
-		// unregisterReceiver(mOnInsertionReceiver);
-	}
-
-	@Override
 	protected void onDestroy() {
 		Log.d(TAG, "unregisterReceiver");
+		allAccounts = null;
 		unregisterReceiver(mOnInsertionReceiver);
 		super.onDestroy();
 	}
@@ -506,7 +500,7 @@ public class AccountList extends BaseActivity implements
 
 	@Override
 	public void updateDisplay(Intent intent) {
-		Log.d(TAG, "updateDisplay(Intent intent)");
+		Log.d(TAG, "updateDisplay(Intent intent) mLoader : " + mLoader);
 		showProgress();
 		if (mLoader == null) {
 			getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
