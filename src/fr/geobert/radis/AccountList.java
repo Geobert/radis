@@ -106,6 +106,14 @@ public class AccountList extends BaseActivity implements
 		ctx.startActivity(intent);
 	}
 
+	public static void restart(Context ctx) {
+		DbContentProvider.reinit(ctx);
+		Intent intent = new Intent(ctx, AccountList.class);
+		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		refreshDisplay(ctx);
+		ctx.startActivity(intent);
+	}
+	
 	public static void refreshDisplay(Context ctx) {
 		Intent i = new Intent(AccountList.INTENT_UPDATE_ACC_LIST);
 		ctx.sendOrderedBroadcast(i, null);

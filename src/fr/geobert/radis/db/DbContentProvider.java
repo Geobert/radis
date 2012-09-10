@@ -112,6 +112,16 @@ public class DbContentProvider extends ContentProvider {
 		return false;
 	}
 	
+	public static void reinit(Context ctx) {
+		mDbHelper = new DbHelper(ctx);
+	}
+	
+	public static void close() {
+		if (mDbHelper != null) {
+			mDbHelper.close();
+		}
+	}
+	
 	public void deleteDatabase(Context ctx) {
 		Log.d(TAG, "deleteDatabase from ContentProvider");
 		mDbHelper.close();

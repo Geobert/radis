@@ -257,7 +257,7 @@ public class Tools {
 	// DEBUG�TOOLS
 	// ------------------------------------------------------
 	public static void restartApp(Context ctx) {
-		AccountList.callMe(ctx);
+		AccountList.restart(ctx);
 	}
 
 	public static boolean onKeyLongPress(int keyCode, KeyEvent event,

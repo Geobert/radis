@@ -109,16 +109,17 @@ public class DbHelper extends SQLiteOpenHelper {
 			File backupDB = new File(sd, backupDBPath);
 
 			if (backupDB.exists()) {
-				FileInputStream dstFIS = new FileInputStream(currentDB);
-				FileOutputStream srcFOS = new FileOutputStream(backupDB);
-				FileChannel dst = dstFIS.getChannel();
-				FileChannel src = srcFOS.getChannel();
+				DbContentProvider.close();
+				FileInputStream srcFIS = new FileInputStream(backupDB);
+				FileOutputStream dstFOS = new FileOutputStream(currentDB);
+				FileChannel dst = dstFOS.getChannel();
+				FileChannel src = srcFIS.getChannel();
 
 				dst.transferFrom(src, 0, src.size());
 				src.close();
 				dst.close();
-				srcFOS.close();
-				dstFIS.close();
+				srcFIS.close();
+				dstFOS.close();
 				return true;
 			}
 		} catch (Exception e) {
