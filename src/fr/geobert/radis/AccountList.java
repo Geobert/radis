@@ -73,7 +73,7 @@ public class AccountList extends BaseActivity implements
 	private InnerViewBinder mViewBinder;
 	private ListView mListView;
 	private CursorLoader mLoader;
-//	private OnInsertionReceiver mOnUpdateNeedReceiver;
+	// private OnInsertionReceiver mOnUpdateNeedReceiver;
 
 	public static Cursor allAccounts;
 	public static boolean ROBOTIUM_MODE = false;
@@ -113,7 +113,7 @@ public class AccountList extends BaseActivity implements
 		refreshDisplay(ctx);
 		ctx.startActivity(intent);
 	}
-	
+
 	public static void refreshDisplay(Context ctx) {
 		Intent i = new Intent(AccountList.INTENT_UPDATE_ACC_LIST);
 		ctx.sendOrderedBroadcast(i, null);
@@ -450,7 +450,6 @@ public class AccountList extends BaseActivity implements
 			}
 			updateTargetTextView(allAccounts);
 		}
-		mQuickAddController.clearFocus();
 	}
 
 	protected void onPrefsInit() {
@@ -523,14 +522,14 @@ public class AccountList extends BaseActivity implements
 		switch (loader.getId()) {
 		case GET_ACCOUNTS:
 			allAccounts = data;
-//			// if there are no results
-//			if (data.getCount() == 0) {
-//			    // let the user know
-//			    mListView.setEmptyView(findViewById(android.R.id.empty));
-//			} else {
-//			    // otherwise clear it, so it won't flash in between cursor loads
-//			    mListView.setEmptyView(null);
-//			}
+			// // if there are no results
+			// if (data.getCount() == 0) {
+			// // let the user know
+			// mListView.setEmptyView(findViewById(android.R.id.empty));
+			// } else {
+			// // otherwise clear it, so it won't flash in between cursor loads
+			// mListView.setEmptyView(null);
+			// }
 
 			hideProgress();
 			mAccountsAdapter.changeCursor(data);
@@ -545,6 +544,9 @@ public class AccountList extends BaseActivity implements
 			}
 			updateTargetTextView(data);
 			mAccountToDelete = 0;
+			if (mQuickAddController.isVisible()) {
+				mQuickAddController.clearFocus();
+			}
 			break;
 
 		default:

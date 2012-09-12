@@ -122,6 +122,10 @@ public class QuickAddController {
 				.getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromWindow(mQuickAddThirdParty.getWindowToken(), 0);
 	}
+	
+	public void getFocus() {
+		mQuickAddThirdParty.requestFocus();
+	}
 
 	public void setAutoNegate(boolean autoNeg) {
 		mCorrectCommaWatcher.setAutoNegate(autoNeg);
@@ -155,5 +159,9 @@ public class QuickAddController {
 
 	public void setVisibility(int visibility) {
 		mActivity.findViewById(R.id.quick_add_layout).setVisibility(visibility);
+	}
+	
+	public boolean isVisible() {
+		return mActivity.findViewById(R.id.quick_add_layout).getVisibility() == View.VISIBLE;
 	}
 }

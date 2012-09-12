@@ -1,5 +1,7 @@
 package fr.geobert.radis;
 
+import fr.geobert.radis.db.InfoTables;
+import fr.geobert.radis.tools.DBPrefsManager;
 import android.app.ProgressDialog;
 import android.support.v4.app.FragmentActivity;
 
@@ -18,5 +20,12 @@ public class BaseActivity extends FragmentActivity {
 		if (mProgress != null && mProgress.isShowing()) {
 			mProgress.dismiss();
 		}
+	}
+	
+	@Override
+	protected void onResume() {
+		super.onResume();
+		DBPrefsManager.getInstance(this).fillCache(this);
+		InfoTables.fillCachesSync(this);
 	}
 }
