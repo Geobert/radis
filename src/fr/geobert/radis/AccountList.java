@@ -75,7 +75,7 @@ public class AccountList extends BaseActivity implements
 	private CursorLoader mLoader;
 	// private OnInsertionReceiver mOnUpdateNeedReceiver;
 
-	public static Cursor allAccounts;
+	private static Cursor allAccounts;
 	public static boolean ROBOTIUM_MODE = false;
 
 	private class SimpleAccountCursorAdapter extends SimpleCursorAdapter {
@@ -117,6 +117,15 @@ public class AccountList extends BaseActivity implements
 	public static void refreshDisplay(Context ctx) {
 		Intent i = new Intent(AccountList.INTENT_UPDATE_ACC_LIST);
 		ctx.sendOrderedBroadcast(i, null);
+	}
+
+	public static Cursor getAllAccounts(Context ctx) {
+		if (allAccounts == null) {
+			allAccounts = ctx.getContentResolver().query(
+					DbContentProvider.ACCOUNT_URI, AccountTable.ACCOUNT_COLS,
+					null, null, null);
+		}
+		return allAccounts;
 	}
 
 	/** Called when the activity is first created. */

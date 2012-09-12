@@ -191,7 +191,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				: Integer.toString(mCurrentSchOp.mPeriodicity));
 		poputatePeriodicitySpinner();
 		populateCustomPeriodicitySpinner();
-		populateAccountSpinner(AccountList.allAccounts);
+		populateAccountSpinner(AccountList.getAllAccounts(this));
 		if (mCurrentSchOp.getEndDate() > 0) {
 			mEndDateCheck.setChecked(true);
 			mEndDatePicker.setEnabled(true);

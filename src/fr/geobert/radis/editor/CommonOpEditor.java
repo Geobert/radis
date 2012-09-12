@@ -410,7 +410,7 @@ public abstract class CommonOpEditor extends BaseActivity implements
 			mOpSumText.setText(mCurrentOp.getSumStr());
 		}
 //		getSupportLoaderManager().initLoader(GET_ALL_ACCOUNTS, null, this);
-		populateTransfertSpinner(AccountList.allAccounts);
+		populateTransfertSpinner(AccountList.getAllAccounts(this));
 	}
 
 	protected void initListeners() {

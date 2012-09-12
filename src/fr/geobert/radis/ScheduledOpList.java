@@ -282,7 +282,7 @@ public class ScheduledOpList extends BaseActivity implements
 	@Override
 	protected void onResume() {
 		super.onResume();
-		populateAccountSpinner(AccountList.allAccounts);
+		populateAccountSpinner(AccountList.getAllAccounts(this));
 		if (mCurrentAccount == 0) {
 			fetchAllSchOps();
 		} else {
