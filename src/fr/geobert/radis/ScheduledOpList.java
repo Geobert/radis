@@ -30,6 +30,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -77,9 +79,13 @@ public class ScheduledOpList extends BaseActivity implements
 
 		public InnerViewBinder() {
 			super(ScheduledOpList.this, OperationTable.KEY_OP_SUM,
-					OperationTable.KEY_OP_DATE, R.id.scheduled_icon, -1);
+					OperationTable.KEY_OP_DATE, R.id.scheduled_icon, mCurrentAccount);
 		}
 
+		public void setCurAccount(long accountId) {
+			mCurAccountId = accountId;
+		}
+		
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
@@ -106,6 +112,29 @@ public class ScheduledOpList extends BaseActivity implements
 				((TextView) view).setText(Formater.getFullDateFormater()
 						.format(date));
 				return true;
+			} else if (colName.equals(InfoTables.KEY_THIRD_PARTY_NAME)) {
+				if (mCurrentAccount != 0
+						&& mCurrentAccount == cursor
+								.getLong(cursor
+										.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID))) {
+					((TextView) view)
+							.setText(cursor.getString(cursor
+									.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_NAME)));
+					return true;
+				} else {
+					return super.setViewValue(view, cursor, columnIndex);
+				}
+			} else if (colName.equals(AccountTable.KEY_ACCOUNT_NAME)) {
+				if (mCurrentAccount != 0
+						&& mCurrentAccount == cursor
+								.getLong(cursor
+										.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID))) {
+					((TextView) view).setText(cursor.getString(cursor
+							.getColumnIndex(InfoTables.KEY_THIRD_PARTY_NAME)));
+					return true;
+				} else {
+					return super.setViewValue(view, cursor, columnIndex);
+				}
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);
 			}
@@ -244,6 +273,7 @@ public class ScheduledOpList extends BaseActivity implements
 					int pos, long id) {
 				Account a = (Account) parent.getItemAtPosition(pos);
 				mCurrentAccount = a.mAccountId;
+				((InnerViewBinder)mAdapter.getViewBinder()).setCurAccount(mCurrentAccount);
 				if (mCurrentAccount != 0) {
 					fetchSchOpsOfAccount();
 				}
@@ -443,8 +473,10 @@ public class ScheduledOpList extends BaseActivity implements
 					DbContentProvider.SCHEDULED_JOINED_OP_URI,
 					ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, "sch."
 							+ ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID
-							+ " = ?",
-					new String[] { Long.toString(mCurrentAccount) },
+							+ " = ? OR sch."
+							+ OperationTable.KEY_OP_TRANSFERT_ACC_ID + " = ?",
+					new String[] { Long.toString(mCurrentAccount),
+							Long.toString(mCurrentAccount) },
 					ScheduledOperationTable.SCHEDULED_OP_ORDERING);
 			break;
 		default:

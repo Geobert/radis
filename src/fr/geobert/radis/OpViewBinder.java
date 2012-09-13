@@ -20,7 +20,7 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 	protected CharSequence mDateColName;
 	private int mArrowIconId;
 	private Context mCtx;
-	private long mCurAccountId;
+	protected long mCurAccountId;
 
 	public OpViewBinder(Activity context, CharSequence sumColName,
 			CharSequence dateColName, int arrowIconId, long curAccountId) {
@@ -46,7 +46,7 @@ public class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
 					.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
 			if (transfertId > 0) {
 				transImg.setVisibility(View.VISIBLE);
-				if (mCurAccountId == transfertId) {
+				if (mCurAccountId != 0 && mCurAccountId == transfertId) {
 					sum = -sum;
 				}
 			} else {
