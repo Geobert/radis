@@ -60,6 +60,7 @@ public class ScheduledOpList extends BaseActivity implements
 	private SimpleCursorAdapter mAdapter;
 
 	private CursorLoader mLoader;
+	private TextView mTotalLbl;
 
 	// activities ids
 	private static final int ACTIVITY_SCH_OP_CREATE = 0;
@@ -79,13 +80,14 @@ public class ScheduledOpList extends BaseActivity implements
 
 		public InnerViewBinder() {
 			super(ScheduledOpList.this, OperationTable.KEY_OP_SUM,
-					OperationTable.KEY_OP_DATE, R.id.scheduled_icon, mCurrentAccount);
+					OperationTable.KEY_OP_DATE, R.id.scheduled_icon,
+					mCurrentAccount);
 		}
 
 		public void setCurAccount(long accountId) {
 			mCurAccountId = accountId;
 		}
-		
+
 		@Override
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			String colName = cursor.getColumnName(columnIndex);
@@ -155,7 +157,7 @@ public class ScheduledOpList extends BaseActivity implements
 		setContentView(R.layout.scheduled_list);
 		mListView = (ListView) findViewById(android.R.id.list);
 		registerForContextMenu(mListView);
-
+		mTotalLbl = (TextView) findViewById(R.id.sch_op_sum_total);
 		final GestureDetector gestureDetector = new GestureDetector(this,
 				new ListViewSwipeDetector(mListView, new ListSwipeAction() {
 					@Override
@@ -273,9 +275,12 @@ public class ScheduledOpList extends BaseActivity implements
 					int pos, long id) {
 				Account a = (Account) parent.getItemAtPosition(pos);
 				mCurrentAccount = a.mAccountId;
-				((InnerViewBinder)mAdapter.getViewBinder()).setCurAccount(mCurrentAccount);
+				((InnerViewBinder) mAdapter.getViewBinder())
+						.setCurAccount(mCurrentAccount);
 				if (mCurrentAccount != 0) {
 					fetchSchOpsOfAccount();
+				} else {
+					fetchAllSchOps();
 				}
 			}
 
@@ -489,6 +494,37 @@ public class ScheduledOpList extends BaseActivity implements
 	public void onLoadFinished(Loader<Cursor> arg0, Cursor data) {
 		hideProgress();
 		mAdapter.changeCursor(data);
+		if (mCurrentAccount != 0) {
+			computeTotal(data);
+			mTotalLbl.setVisibility(View.VISIBLE);
+		} else {
+			mTotalLbl.setVisibility(View.GONE);
+		}
+	}
+
+	private void computeTotal(Cursor data) {
+		long credit = 0;
+		long debit = 0;
+		if (data != null && data.getCount() > 0 && data.moveToFirst()) {
+			do {
+				long s = data.getLong(data
+						.getColumnIndex(OperationTable.KEY_OP_SUM));
+				final long transId = data.getLong(data
+						.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+				if (transId == mCurrentAccount) {
+					s = -s;
+				}
+				if (s >= 0) {
+					credit += s;
+				} else {
+					debit += s;
+				}
+			} while (data.moveToNext());
+		}
+		mTotalLbl.setText(String.format(getString(R.string.sched_op_total_sum),
+				Formater.getSumFormater().format(credit / 100.0d), Formater
+						.getSumFormater().format(debit / 100.0d), Formater
+						.getSumFormater().format((credit + debit) / 100.0d)));
 	}
 
 	@Override
