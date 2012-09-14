@@ -14,8 +14,7 @@
     </uses-permission>
 
     <uses-sdk
-        android:minSdkVersion="7"
-        android:targetSdkVersion="16" />
+        android:minSdkVersion="7" android:targetSdkVersion="10"/>
 
     <application
         android:name="Radis"
