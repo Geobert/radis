@@ -965,16 +965,19 @@ public class OperationList extends BaseActivity implements
 		SelectedCursorAdapter adapter = getListAdapter();
 		adapter.setSelectedPosition(position);
 
-		// check if the selected pos is visible on screen
-		int posFromTop;
-		if ((position >= firstIdx) && (position < lastIdx)) {
-			posFromTop = mOnRestore ? mLastSelectionFromTop
-					: ((relativePos - 1) * offset) + firstOffset + relativePos;
-		} else {
-			posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
-					: (int) (Tools.SCREEN_HEIGHT * 0.3);
+		if (mOnRestore) {
+			// check if the selected pos is visible on screen
+			int posFromTop;
+			if ((position >= firstIdx) && (position < lastIdx)) {
+				posFromTop = mOnRestore ? mLastSelectionFromTop
+						: ((relativePos - 1) * offset) + firstOffset
+								+ relativePos;
+			} else {
+				posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
+						: (int) (Tools.SCREEN_HEIGHT * 0.3);
+			}
+			l.setSelectionFromTop(position, posFromTop);
 		}
-		l.setSelectionFromTop(position, posFromTop);
 		Log.d(TAG, "selectOpAndAdjustOffset setting mLastSelectedPosition: "
 				+ position);
 		mLastSelectedPosition = Integer.valueOf(position);
@@ -1160,8 +1163,7 @@ public class OperationList extends BaseActivity implements
 			mOnRestore = true;
 			showProgress();
 			updateSumsDisplay();
-			getSupportLoaderManager().restartLoader(GET_OPS, null,
-					this);
+			getSupportLoaderManager().restartLoader(GET_OPS, null, this);
 		}
 	}
 
@@ -1263,13 +1265,13 @@ public class OperationList extends BaseActivity implements
 		case GET_OPS:
 			Log.d(TAG, "onLoadFinished GET OPS");
 			// if there are no results
-//			if (data.getCount() == 0) {
-//				// let the user know
-//				mListView.setEmptyView(findViewById(android.R.id.empty));
-//			} else {
-//				// otherwise clear it, so it won't flash in between cursor loads
-//				mListView.setEmptyView(null);
-//			}
+			// if (data.getCount() == 0) {
+			// // let the user know
+			// mListView.setEmptyView(findViewById(android.R.id.empty));
+			// } else {
+			// // otherwise clear it, so it won't flash in between cursor loads
+			// mListView.setEmptyView(null);
+			// }
 			Cursor old = mOpListCursorAdapter.swapCursor(data);
 			hideProgress();
 			mLoadingIcon.clearAnimation();
