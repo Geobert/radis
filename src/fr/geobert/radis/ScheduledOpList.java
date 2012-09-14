@@ -496,9 +496,8 @@ public class ScheduledOpList extends BaseActivity implements
 		mAdapter.changeCursor(data);
 		if (mCurrentAccount != 0) {
 			computeTotal(data);
-			mTotalLbl.setVisibility(View.VISIBLE);
 		} else {
-			mTotalLbl.setVisibility(View.GONE);
+			mTotalLbl.setText(R.string.sched_op_total_choose_account);
 		}
 	}
 

@@ -185,4 +185,6 @@
 	<string name="defined_by_transfert">Défini par le transfert</string>
 	
 	<string name="loading">Chargement…</string>
+	<string name="sched_op_total_sum">Total crédit : %1$s — Total débit : %2$"s\nBalance : %3$s</string>
+	<string name="sched_op_total_choose_account">Choisir un compte pour avoir son total des échéances</string>
 </resources>

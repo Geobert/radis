@@ -181,4 +181,6 @@
 	<string name="defined_by_transfert">Defined by transfert</string>
 	
 	<string name="loading">Loading…</string>
+	<string name="sched_op_total_sum">Total credit : %1$s — Total debit : %2$"s\nBalance : %3$s</string>
+	<string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
 </resources>

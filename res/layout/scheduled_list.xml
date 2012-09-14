@@ -19,7 +19,7 @@
 
         <Spinner
             android:id="@+id/account_spinner"
-            android:layout_width="fill_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
     </LinearLayout>
@@ -36,5 +36,12 @@
         android:gravity="center"
         android:text="@string/no_operation"
         android:textSize="20dp" />
+
+    <TextView
+        android:id="@+id/sch_op_sum_total"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:textSize="11dp" />
 
 </LinearLayout>
