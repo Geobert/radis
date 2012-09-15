@@ -111,7 +111,7 @@ public class OperationEditor extends CommonOpEditor {
 											OperationEditor.this, op,
 											mPreviousSum,
 											mCurrentOp.mScheduledId);
-									OperationEditor.this.setResAndExit(false);
+									OperationEditor.this.setResAndExit(true);
 								}
 							})
 					.setNeutralButton(R.string.disconnect,
