@@ -227,7 +227,22 @@ public class OperationList extends BaseActivity implements
 							.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_NAME)));
 					return true;
 				} else {
-					return false;
+					String name = cursor.getString(cursor
+							.getColumnIndex(colName));
+					if (name != null) {
+						textView.setText(name);
+						return true;
+					} else {
+						name = cursor
+								.getString(cursor
+										.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_NAME));
+						if (name != null) {
+							textView.setText(name);
+							return true;
+						} else {
+							return false;
+						}
+					}
 				}
 			} else {
 				return super.setViewValue(view, cursor, columnIndex);

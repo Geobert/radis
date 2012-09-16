@@ -13,7 +13,7 @@ import android.util.Log;
 
 public class DbHelper extends SQLiteOpenHelper {
 	protected static final String DATABASE_NAME = "radisDb";
-	protected static final int DATABASE_VERSION = 12;
+	protected static final int DATABASE_VERSION = 13;
 
 	private Context mCtx;
 
@@ -57,6 +57,10 @@ public class DbHelper extends SQLiteOpenHelper {
 		case 11:
 			OperationTable.onUpgrade(db, oldVersion, newVersion);
 			ScheduledOperationTable.onUpgrade(db, oldVersion, newVersion);
+		case 12:
+			ScheduledOperationTable.onUpgrade(db, oldVersion, newVersion);
+			AccountTable.onUpgrade(db, oldVersion, newVersion);
+			break;
 		default:
 			AccountTable.onUpgrade(db, oldVersion, newVersion);
 		} 

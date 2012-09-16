@@ -105,7 +105,7 @@ public class OperationTable {
 			+ KEY_OP_TAG
 			+ " = old."
 			+ InfoTables.KEY_TAG_ROWID + "; END";
-
+	
 	protected static final String ADD_NOTES_COLUNM = "ALTER TABLE "
 			+ DATABASE_OPERATIONS_TABLE + " ADD COLUMN op_notes text";
 

@@ -74,6 +74,80 @@ public class AccountTable {
 	protected static final String ADD_PROJECTION_MODE_DATE = "ALTER TABLE "
 			+ DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
 			+ KEY_ACCOUNT_PROJECTION_DATE + " string";
+
+	protected static final String TRIGGER_ON_DELETE_ACCOUNT = "CREATE TRIGGER on_delete_account AFTER DELETE ON "
+			+ DATABASE_ACCOUNT_TABLE
+			+ " BEGIN "
+			+ " UPDATE "
+			+ OperationTable.DATABASE_OPERATIONS_TABLE // if op is a transfert
+			// and was in deleted
+			// account, convert to
+			// an op in destination
+			// account
+			+ " SET "
+			+ OperationTable.KEY_OP_ACCOUNT_ID
+			+ " = "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ ", "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ " = 0, "
+			+ OperationTable.KEY_OP_THIRD_PARTY
+			+ " = null, "
+			+ OperationTable.KEY_OP_SUM
+			+ " = -"
+			+ OperationTable.KEY_OP_SUM
+			+ " WHERE "
+			+ OperationTable.KEY_OP_ACCOUNT_ID
+			+ " = old."
+			+ AccountTable.KEY_ACCOUNT_ROWID
+			+ " AND "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ " != 0;"
+			+ " UPDATE "
+			+ OperationTable.DATABASE_OPERATIONS_TABLE // if deleted account is
+														// in a tranfert,
+														// operation is not a
+														// transfert anymore
+			+ " SET "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ " = 0, "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_NAME
+			+ " = null WHERE "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ " = old."
+			+ AccountTable.KEY_ACCOUNT_ROWID
+			+ "; DELETE FROM "
+			+ OperationTable.DATABASE_OPERATIONS_TABLE // if op is not a
+														// transfert and was in
+														// deleted account,
+														// delete it
+			+ " WHERE "
+			+ OperationTable.KEY_OP_ACCOUNT_ID
+			+ " = old."
+			+ AccountTable.KEY_ACCOUNT_ROWID
+			+ " AND "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ " = 0;"
+			+ " DELETE FROM "
+			+ ScheduledOperationTable.DATABASE_SCHEDULED_TABLE // delete sch op
+																// if deleted
+																// account was
+																// involved,
+																// trigger in
+																// sch op table
+																// manage to
+																// decorralate
+																// existing op
+			+ " WHERE "
+			+ ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID
+			+ " = old."
+			+ AccountTable.KEY_ACCOUNT_ROWID
+			+ " OR "
+			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
+			+ " = old."
+			+ AccountTable.KEY_ACCOUNT_ROWID
+			+ "; END";
+
 	private static int mProjectionMode;
 	private static long mProjectionDate;
 
@@ -89,6 +163,8 @@ public class AccountTable {
 			upgradeFromV6(db, oldVersion, newVersion);
 		case 9:
 			upgradeFromV9(db, oldVersion, newVersion);
+		case 12:
+			upgradeFromV12(db, oldVersion, newVersion);
 		default:
 			upgradeDefault(db, oldVersion, newVersion);
 		}
@@ -113,7 +189,7 @@ public class AccountTable {
 	}
 
 	public static boolean deleteAccount(Context ctx, final long accountId) {
-		ScheduledOperationTable.deleteScheduledOpOfAccount(ctx, accountId);
+		// ScheduledOperationTable.deleteScheduledOpOfAccount(ctx, accountId);
 		return ctx.getContentResolver().delete(
 				Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
 				null, null) > 0;
@@ -289,8 +365,9 @@ public class AccountTable {
 			case 1: {
 				GregorianCalendar projDate = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(projDate);
-				projDate.set(Calendar.DAY_OF_MONTH,
-						Integer.parseInt(c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))));
+				projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(c
+						.getString(c
+								.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))));
 				GregorianCalendar today = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(today);
 				if (projDate.compareTo(today) <= 0) {
@@ -301,8 +378,10 @@ public class AccountTable {
 				break;
 			case 2:
 				try {
-					Date projDate = Formater.getFullDateFormater().parse(
-							c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+					Date projDate = Formater
+							.getFullDateFormater()
+							.parse(c.getString(c
+									.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
 					GregorianCalendar cal = new GregorianCalendar();
 					cal.setTime(projDate);
 					cal.set(Calendar.HOUR, 0);
@@ -668,6 +747,11 @@ public class AccountTable {
 			c.close();
 			db.execSQL("DROP TABLE accounts_old;");
 		}
+	}
+
+	private static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
+			int newVersion) {
+		db.execSQL(TRIGGER_ON_DELETE_ACCOUNT);
 	}
 
 }

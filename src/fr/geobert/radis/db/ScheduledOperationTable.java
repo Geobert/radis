@@ -85,6 +85,18 @@ public class ScheduledOperationTable {
 			"sch." + OperationTable.KEY_OP_TRANSFERT_ACC_ID,
 			"sch." + OperationTable.KEY_OP_TRANSFERT_ACC_NAME };
 
+	protected static final String TRIGGER_ON_DELETE_SCHED_CREATE = "CREATE TRIGGER on_delete_sch_op AFTER DELETE ON "
+			+ DATABASE_SCHEDULED_TABLE
+			+ " BEGIN UPDATE "
+			+ OperationTable.DATABASE_OPERATIONS_TABLE
+			+ " SET "
+			+ OperationTable.KEY_OP_SCHEDULED_ID
+			+ " = 0 WHERE "
+			+ OperationTable.KEY_OP_SCHEDULED_ID
+			+ " = old."
+			+ ScheduledOperationTable.KEY_SCHEDULED_ROWID
+			+ "; END";
+
 	static void onCreate(SQLiteDatabase db) {
 		db.execSQL(DATABASE_SCHEDULED_CREATE);
 	}
@@ -97,6 +109,8 @@ public class ScheduledOperationTable {
 			upgradeFromV6(db, oldVersion, newVersion);
 		case 11:
 			upgradeFromV11(db, oldVersion, newVersion);
+		case 12:
+			upgradeFromV12(db, oldVersion, newVersion);
 		}
 	}
 
@@ -222,6 +236,12 @@ public class ScheduledOperationTable {
 	}
 
 	// UPGRADE FUNCTIONS
+
+	private static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
+			int newVersion) {
+		db.execSQL(TRIGGER_ON_DELETE_SCHED_CREATE);
+	}
+	
 	private static void upgradeFromV11(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(String.format(OperationTable.ADD_TRANSFERT_ID_COLUNM,
