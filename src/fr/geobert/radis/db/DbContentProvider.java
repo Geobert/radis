@@ -336,6 +336,7 @@ public class DbContentProvider extends ContentProvider {
 			if (selection == null || selection.trim().length() == 0) {
 				rowsUpdated = db.update(table, values, "_id=?",
 						new String[] { id });
+				Log.d(TAG, "update (0) " + table + " nb : " + rowsUpdated + " values : " + values);
 			} else {
 				if (selectionArgs != null) {
 					List<String> args = new ArrayList<String>(
@@ -346,13 +347,13 @@ public class DbContentProvider extends ContentProvider {
 				} else {
 					selectionArgs = new String[] { id };
 				}
-				Log.d(TAG, "update " + table);
 				rowsUpdated = db.update(table, values,
 						"_id=? and " + selection, selectionArgs);
+				Log.d(TAG, "update (1) " + table + " nb : " + rowsUpdated);
 			}
 		} else {
-			Log.d(TAG, "update 2 " + table);
 			rowsUpdated = db.update(table, values, selection, selectionArgs);
+			Log.d(TAG, "update (2) " + table + " nb : " + rowsUpdated);
 		}
 		return rowsUpdated;
 	}

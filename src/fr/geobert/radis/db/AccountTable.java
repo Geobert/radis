@@ -195,7 +195,8 @@ public class AccountTable {
 				null, null) > 0;
 	}
 
-	public static void consolidateSums(Context ctx, final long accountId) {
+	public static int consolidateSums(Context ctx, final long accountId) {
+		int res = 0;
 		if (0 != accountId) {
 			ContentValues values = new ContentValues();
 			Cursor account = fetchAccount(ctx, accountId);
@@ -213,7 +214,7 @@ public class AccountTable {
 								account.getString(account
 										.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
 
-						ctx.getContentResolver().update(
+						res = ctx.getContentResolver().update(
 								Uri.parse(DbContentProvider.ACCOUNT_URI + "/"
 										+ accountId), values, null, null);
 					} catch (ParseException e) {
@@ -223,6 +224,7 @@ public class AccountTable {
 				account.close();
 			}
 		}
+		return res;
 	}
 
 	private static void setCurrentSumAndDate(Context ctx, long accountId,
@@ -240,11 +242,11 @@ public class AccountTable {
 					Log.d(TAG, "setCurrentSumAndDate allOps not null : "
 							+ allOps.getCount());
 					if (allOps.moveToFirst()) {
-						Log.d(TAG, "setCurrentSumAndDate allOps moved to first");
 						date = allOps.getLong(allOps
 								.getColumnIndex(OperationTable.KEY_OP_DATE));
 						opSum = OperationTable.computeSumFromCursor(allOps,
 								accountId);
+						Log.d(TAG, "setCurrentSumAndDate allOps moved to first opSum = " + opSum);
 					}
 					allOps.close();
 				}
@@ -296,6 +298,7 @@ public class AccountTable {
 		default:
 			break;
 		}
+		Log.d(TAG, "setCurrentSumAndDate opSum = " + opSum + "/ startSum = " + start_sum + "/ sum : " + (start_sum + opSum));
 		values.put(KEY_ACCOUNT_OP_SUM, opSum);
 		values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum);
 		values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);

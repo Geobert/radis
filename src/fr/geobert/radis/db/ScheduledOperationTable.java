@@ -5,9 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.util.Log;
 import fr.geobert.radis.ScheduledOperation;
 
 public class ScheduledOperationTable {
+	private static final String TAG = "ScheduledOperationTable";
 	static final String DATABASE_SCHEDULED_TABLE = "scheduled_ops";
 	public static final String KEY_SCHEDULED_END_DATE = "end_date";
 	public static final String KEY_SCHEDULED_PERIODICITY = "periodicity";
@@ -138,9 +140,10 @@ public class ScheduledOperationTable {
 
 	public static void updateAllOccurences(Context ctx,
 			final ScheduledOperation op, final long prevSum, final long rowId) {
+		Log.d(TAG, "updateAllOccurences");
 		final long accountId = op.mAccountId;
 		OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
-		AccountTable.consolidateSums(ctx, accountId);
+//		AccountTable.consolidateSums(ctx, accountId);
 	}
 
 	public static void deleteAllOccurences(Context ctx, final long schOpId) {
@@ -195,6 +198,7 @@ public class ScheduledOperationTable {
 
 	public static boolean updateScheduledOp(Context ctx, long rowId,
 			ScheduledOperation op, final boolean isUpdatedFromOccurence) {
+		Log.d(TAG, "updateScheduledOp");
 		ContentValues args = new ContentValues();
 
 		String key = op.mThirdParty;

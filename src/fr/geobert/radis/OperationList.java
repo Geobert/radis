@@ -86,6 +86,7 @@ public class OperationList extends BaseActivity implements
 	private static final int GET_OPS = 500;
 	private static final int GET_ACCOUNT = 510;
 
+	private boolean mAdjustListScroll = false;
 	private Long mAccountId;
 	private Cursor mCurAccount;
 	private ImageView mLoadingIcon;
@@ -310,132 +311,6 @@ public class OperationList extends BaseActivity implements
 		}
 	}
 
-	// private class GetMoreOps extends AsyncTask<Long, Void, Void> {
-	// private boolean mHasResult = false;
-	// private boolean mIsRestoring;
-	// private int mEffectiveRetrieval;
-	// private MatrixCursor mAccumulator;
-	// private Cursor mLops;
-	//
-	// public GetMoreOps(final boolean isRestoring) {
-	// mIsRestoring = isRestoring;
-	// mEffectiveRetrieval = 0;
-	// mAccumulator = new MatrixCursor(new String[] {
-	// OperationTable.KEY_OP_ROWID,
-	// InfoTables.KEY_THIRD_PARTY_NAME,
-	// InfoTables.KEY_TAG_NAME,
-	// InfoTables.KEY_MODE_NAME, OperationTable.KEY_OP_SUM,
-	// OperationTable.KEY_OP_DATE, OperationTable.KEY_OP_NOTES,
-	// OperationTable.KEY_OP_SCHEDULED_ID,
-	// OperationTable.KEY_OP_TRANSFERT_ACC_ID,
-	// OperationTable.KEY_OP_TRANSFERT_ACC_NAME });
-	// }
-	//
-	// @Override
-	// protected void onPostExecute(Void result) {
-	// fillMatrixCursor(mLastOps, mAccumulator);
-	// ((InnerViewBinder) ((SelectedCursorAdapter) mListView.getAdapter())
-	// .getViewBinder()).increaseCache(mLastOps);
-	// ((SelectedCursorAdapter) mListView.getAdapter()).notifyDataSetChanged();
-	// mAccumulator.close();
-	// mLoadingIcon.clearAnimation();
-	// mLoadingIcon.setVisibility(View.INVISIBLE);
-	// if (!mHasResult) {
-	// if (!mIsRestoring) {
-	// Toast.makeText(OperationList.this, R.string.no_more_ops,
-	// Toast.LENGTH_LONG).show();
-	// } else {
-	// OperationList.this.mNbGetMoreOps = this.mEffectiveRetrieval;
-	// }
-	// } else {
-	// if (mIsRestoring) {
-	// updateSumsAndSelection();
-	// } else {
-	// OperationList.this.mNbGetMoreOps++;
-	// }
-	// }
-	// Log.d(TAG,
-	// "post getMoreOps mLastOps.getCount() : "
-	// + mLastOps.getCount());
-	// }
-	//
-	// @Override
-	// protected void onPreExecute() {
-	// mLoadingIcon.setVisibility(View.VISIBLE);
-	// mLoadingIcon.startAnimation(AnimationUtils.loadAnimation(
-	// OperationList.this, R.anim.rotation));
-	// mLops = mLastOps;
-	// }
-	//
-	// private void getOps() {
-	// Cursor c = mLops;
-	// boolean moveToLast = c.moveToLast();
-	// if (!moveToLast || c.isBeforeFirst() || c.isAfterLast()) {
-	// mNbGetMoreOps = 0;
-	// } else {
-	// try {
-	// long earliestOpDate = c.getLong(c
-	// .getColumnIndex(OperationTable.KEY_OP_DATE));
-	// Log.d(TAG, "earliestOpDate : "
-	// + Formater.getFullDateFormater()
-	// .format(earliestOpDate));
-	// // c = mDbHelper.fetchOpEarlierThan(earliestOpDate, 1,
-	// // mAccountId);
-	// startManagingCursor(c);
-	// if (c.moveToFirst() && c.isFirst()) {
-	// GregorianCalendar opDate = new GregorianCalendar();
-	// opDate.setTimeInMillis(c.getLong(c
-	// .getColumnIndex(OperationTable.KEY_OP_DATE)));
-	// c.close();
-	// Log.d(TAG,
-	// "opDate : "
-	// + Formater.getFullDateFormater(
-	// ).format(
-	// opDate.getTimeInMillis()));
-	// // Cursor result = mDbHelper.fetchOpOfMonth(opDate,
-	// // earliestOpDate, mAccountId);
-	// // startManagingCursor(result);
-	// // mHasResult = fillMatrixCursor(mAccumulator, result);
-	// // mLops = mAccumulator;
-	// } else {
-	// mHasResult = false;
-	// }
-	// } catch (CursorIndexOutOfBoundsException e) {
-	// mNbGetMoreOps = 0;
-	// ErrorReporter.getInstance().putCustomData(
-	// "mLops.getCount()",
-	// Integer.toBinaryString(c.getCount()));
-	// ErrorReporter.getInstance().putCustomData(
-	// "c.isBeforeFirst()",
-	// String.valueOf(c.isBeforeFirst()));
-	// ErrorReporter.getInstance().putCustomData(
-	// "c.isAfterLast()", String.valueOf(c.isAfterLast()));
-	// ErrorReporter.getInstance().putCustomData("moveToLast",
-	// String.valueOf(moveToLast));
-	// ErrorReporter.getInstance().handleSilentException(e);
-	//
-	// }
-	// }
-	// }
-	//
-	// @Override
-	// protected Void doInBackground(Long... params) {
-	// if (mIsRestoring) {
-	// int i = mNbGetMoreOps;
-	// while (i > 0) {
-	// getOps();
-	// if (mHasResult) {
-	// mEffectiveRetrieval++;
-	// }
-	// --i;
-	// }
-	// } else {
-	// getOps();
-	// }
-	// return null;
-	// }
-	// }
-
 	public static void refreshDisplay(Context ctx, long accountId) {
 		Intent i = new Intent(OperationList.INTENT_UPDATE_OP_LIST);
 		i.putExtra("accountIds", new Long[] { Long.valueOf(accountId) });
@@ -503,6 +378,7 @@ public class OperationList extends BaseActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		mAdjustListScroll = true;
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.operation_list);
 
@@ -656,6 +532,7 @@ public class OperationList extends BaseActivity implements
 	private void afterAddOp(Intent data) {
 		long newRowId = data.getLongExtra(NEW_ROWID, -1);
 		Log.d(TAG, "afterAddOp newRowId: " + newRowId);
+		mAdjustListScroll = true;
 		final int listCount = mListView.getCount();
 		if (null == mLastSelectedPosition) {
 			Log.d(TAG, "mLastSelectedPosition INIT");
@@ -693,7 +570,6 @@ public class OperationList extends BaseActivity implements
 			mOnRestore = true;
 			showProgress();
 			initDateRange();
-			// getSupportLoaderManager().restartLoader(GET_OPS, null, this);
 			updateSumsAfterOpEdit(sumToAdd, date, mAccountId);
 		}
 		if (transId > 0) {
@@ -801,6 +677,12 @@ public class OperationList extends BaseActivity implements
 			if (c.getPosition() < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
+			Cursor lastOp = OperationTable.fetchLastOp(this, mAccountId);
+			if (lastOp != null && lastOp.moveToFirst() && date >= lastOp.getLong(lastOp
+				.getColumnIndex(OperationTable.KEY_OP_DATE))) {
+				mLastSelectedPosition = null;
+			}
+
 			updateSumsAfterOpEdit(-sum, date, mAccountId);
 			if (transId > 0) {
 				AccountTable.consolidateSums(this, transId);
@@ -824,9 +706,15 @@ public class OperationList extends BaseActivity implements
 				.getColumnIndex(OperationTable.KEY_OP_DATE));
 		int nbDeleted = OperationTable.deleteAllFutureOccurrences(this,
 				mAccountId, schOpId, date);
+		Log.d(TAG, "deleteOpAndFollowing, nbDeleted : " + nbDeleted + " / pos " + c.getPosition() + "/ last pos " + mLastSelectedPosition);
 		if (nbDeleted > 0) {
 			if (c.getPosition() < mLastSelectedPosition) {
 				mLastSelectedPosition--;
+			}
+			Cursor lastOp = OperationTable.fetchLastOp(this, mAccountId);
+			if (lastOp != null && lastOp.moveToFirst() && date >= lastOp.getLong(lastOp
+				.getColumnIndex(OperationTable.KEY_OP_DATE))) {
+				mLastSelectedPosition = null;
 			}
 			updateSumsAfterOpEdit(-(sum * nbDeleted), date, mAccountId);
 			if (transId > 0) {
@@ -857,6 +745,12 @@ public class OperationList extends BaseActivity implements
 				if (c.getPosition() < mLastSelectedPosition) {
 					mLastSelectedPosition--;
 				}
+				Cursor lastOp = OperationTable.fetchLastOp(this, mAccountId);
+				if (lastOp != null && lastOp.moveToFirst() && date >= lastOp.getLong(lastOp
+					.getColumnIndex(OperationTable.KEY_OP_DATE))) {
+					mLastSelectedPosition = null;
+				}
+
 				updateSumsAfterOpEdit(-(sum * nbDeleted), date, mAccountId);
 				if (transId > 0) {
 					AccountTable.consolidateSums(this, transId);
@@ -873,6 +767,13 @@ public class OperationList extends BaseActivity implements
 	}
 
 	private long computeSumFromCursor(Cursor op) {
+//		Log.d(TAG,
+//				"computeSumFromCursor : "
+//						+ op.getString(op
+//								.getColumnIndex(InfoTables.KEY_THIRD_PARTY_NAME))
+//						+ " / id : "
+//						+ op.getLong(op
+//								.getColumnIndex(OperationTable.KEY_OP_ROWID)));
 		long sum = 0L;
 		final int dateIdx = op.getColumnIndex(OperationTable.KEY_OP_DATE);
 		final int opSumIdx = op.getColumnIndex(OperationTable.KEY_OP_SUM);
@@ -976,11 +877,12 @@ public class OperationList extends BaseActivity implements
 			// firstIdx = remove the separator height
 		}
 
-		int relativePos = position - firstIdx;
-		SelectedCursorAdapter adapter = getListAdapter();
-		adapter.setSelectedPosition(position);
+		if (mAdjustListScroll) {
+			mAdjustListScroll = false;
+			int relativePos = position - firstIdx;
+			SelectedCursorAdapter adapter = getListAdapter();
+			adapter.setSelectedPosition(position);
 
-		if (mOnRestore) {
 			// check if the selected pos is visible on screen
 			int posFromTop;
 			if ((position >= firstIdx) && (position < lastIdx)) {
@@ -1022,11 +924,11 @@ public class OperationList extends BaseActivity implements
 	}
 
 	protected void onListItemClick(int position, long id) {
-		Log.d(TAG, "onListItemClick ");
+		Log.d(TAG, "onListItemClick : " + position + "/ id : " + id);
 		if (id != -1) {
-			SelectedCursorAdapter adapter = getListAdapter();
-			adapter.setSelectedPosition(position);
-			Cursor data = (Cursor) mListView.getItemAtPosition(position);
+			mOpListCursorAdapter.setSelectedPosition(position);
+			Cursor data = (Cursor) mOpListCursorAdapter.getItem(position);
+			mAdjustListScroll = true;
 			updateSumAtSelectedOpDisplay(data, getAccountCurSum());
 		} else { // get more ops is clicked
 			getMoreOps(false);
@@ -1059,6 +961,7 @@ public class OperationList extends BaseActivity implements
 		outState.putLong("accountId", mAccountId);
 		updateLastSelectionIdxFromTop();
 		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
+		outState.putBoolean("mAdjustListScroll", mAdjustListScroll);
 	}
 
 	@Override
@@ -1070,6 +973,7 @@ public class OperationList extends BaseActivity implements
 		mAccountId = state.getLong("accountId");
 		mOnRestore = true;
 		mLastSelectionFromTop = state.getInt("mLastSelectionFromTop");
+		mAdjustListScroll = state.getBoolean("mAdjustListScroll");
 	}
 
 	@Override
@@ -1145,6 +1049,7 @@ public class OperationList extends BaseActivity implements
 		if (v != null) {
 			mLastSelectionFromTop = v.getTop();
 		}
+		mAdjustListScroll = true;
 	}
 
 	// used by UpdateDisplayInterface
