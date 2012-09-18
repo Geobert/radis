@@ -34,6 +34,7 @@ import fr.geobert.radis.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.ScheduledOperation;
 import fr.geobert.radis.ViewSwipeDetector;
+import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
@@ -385,6 +386,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 		if (mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
 			ScheduledOperationTable.updateAllOccurences(this, mCurrentSchOp,
 					mPreviousSum, mRowId);
+			AccountTable.consolidateSums(this, mCurrentOp.mAccountId);
 		} else {
 			ScheduledOperationTable.deleteAllOccurences(this, mRowId);
 		}
