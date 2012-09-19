@@ -155,20 +155,23 @@ public class AccountTable {
 		db.execSQL(DATABASE_ACCOUNT_CREATE);
 	}
 
-	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		switch (oldVersion) {
-		case 4:
-			db.execSQL(ADD_CUR_DATE_COLUNM);
-		case 6:
-			upgradeFromV6(db, oldVersion, newVersion);
-		case 9:
-			upgradeFromV9(db, oldVersion, newVersion);
-		case 12:
-			upgradeFromV12(db, oldVersion, newVersion);
-		default:
-			upgradeDefault(db, oldVersion, newVersion);
-		}
-	}
+//	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//		switch (oldVersion) {
+//		case 4:
+//			db.execSQL(ADD_CUR_DATE_COLUNM);
+//			break;
+//		case 6:
+//			upgradeFromV6(db, oldVersion, newVersion);
+//			break;
+//		case 9:
+//			upgradeFromV9(db, oldVersion, newVersion);
+//			break;
+//		case 12:
+//			upgradeFromV12(db, oldVersion, newVersion);
+//		default:
+//			upgradeDefault(db, oldVersion, newVersion);
+//		}
+//	}
 
 	public static long createAccount(Context ctx, String name, String desc,
 			long start_sum, String currency, int projectionMode,
@@ -671,7 +674,7 @@ public class AccountTable {
 		}
 	}
 
-	private static void upgradeDefault(SQLiteDatabase db, int oldVersion,
+	static void upgradeDefault(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		Cursor c = db.query(DATABASE_ACCOUNT_TABLE,
 				new String[] { KEY_ACCOUNT_ROWID }, null, null, null, null,
@@ -686,7 +689,7 @@ public class AccountTable {
 		}
 	}
 
-	private static void upgradeFromV9(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV9(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(ADD_PROJECTION_MODE_COLUNM);
 		db.execSQL(ADD_PROJECTION_MODE_DATE);
@@ -703,7 +706,7 @@ public class AccountTable {
 		}
 	}
 
-	private static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL("DROP TRIGGER on_delete_third_party");
 		db.execSQL("DROP TRIGGER on_delete_mode");
@@ -752,9 +755,12 @@ public class AccountTable {
 		}
 	}
 
-	private static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(TRIGGER_ON_DELETE_ACCOUNT);
 	}
 
+	static void upgradeFromV4(SQLiteDatabase db, int oldVersion, int newVersion) {
+		db.execSQL(ADD_CUR_DATE_COLUNM);
+	}
 }

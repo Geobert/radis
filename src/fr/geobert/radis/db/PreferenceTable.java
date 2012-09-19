@@ -24,13 +24,13 @@ public class PreferenceTable {
 		db.execSQL(DATABASE_PREFS_CREATE);
 	}
 
-	static void onUpgrade(Context ctx, SQLiteDatabase db, int oldVersion,
-			int newVersion) {
-		switch (oldVersion) {
-		case 10:
-			upgradeFromV10(ctx, db, oldVersion, newVersion);
-		}
-	}
+//	static void onUpgrade(Context ctx, SQLiteDatabase db, int oldVersion,
+//			int newVersion) {
+//		switch (oldVersion) {
+//		case 10:
+//			upgradeFromV10(ctx, db, oldVersion, newVersion);
+//		}
+//	}
 
 	static void setPref(SQLiteDatabase db, final String key, final String value) {
 		ContentValues values = new ContentValues();
@@ -82,7 +82,7 @@ public class PreferenceTable {
 
 	// UPGRADE
 
-	private static void upgradeFromV10(Context ctx, SQLiteDatabase db,
+	static void upgradeFromV10(Context ctx, SQLiteDatabase db,
 			int oldVersion, int newVersion) {
 		db.execSQL(DATABASE_PREFS_CREATE);
 		PrefsManager prefs = PrefsManager.getInstance(ctx);

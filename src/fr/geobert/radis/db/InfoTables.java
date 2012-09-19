@@ -152,15 +152,17 @@ public class InfoTables {
 		db.execSQL(DATABASE_MODES_CREATE);
 	}
 
-	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		switch (oldVersion) {
-		case 7:
-			upgradeFromV7(db, oldVersion, newVersion);
-		case 8:
-			upgradeFromV8(db, oldVersion, newVersion);
-		default:
-		}
-	}
+//	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//		switch (oldVersion) {
+//		case 7:
+//			upgradeFromV7(db, oldVersion, newVersion);
+//			break;
+//		case 8:
+//			upgradeFromV8(db, oldVersion, newVersion);
+//			break;
+//		default:
+//		}
+//	}
 
 	private static void fillCache(Cursor c, Map<String, Long> map) {
 		if (c.moveToFirst()) {
@@ -409,7 +411,7 @@ public class InfoTables {
 	}
 
 	// UPGRADE FUNCTIONS
-	private static void upgradeFromV8(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV8(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		Cursor c = db.query(DATABASE_THIRD_PARTIES_TABLE, new String[] {
 				KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME }, null, null,
@@ -474,7 +476,7 @@ public class InfoTables {
 		}
 	}
 
-	private static void upgradeFromV7(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV7(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(ADD_NORMALIZED_THIRD_PARTY);
 		db.execSQL(ADD_NORMALIZED_TAG);

@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="fr.geobert.radis"
     android:versionCode="30"
-    android:versionName="0.7a" >
+    android:versionName="0.7b1" >
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" >
     </uses-permission>

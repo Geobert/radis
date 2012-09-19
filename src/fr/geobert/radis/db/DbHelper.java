@@ -37,34 +37,37 @@ public class DbHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		switch (oldVersion) {
 		case 1:
+			OperationTable.upgradeFromV1(db, oldVersion, newVersion);
 		case 2:
+			OperationTable.upgradeFromV2(db, oldVersion, newVersion);
 		case 3:
+			OperationTable.upgradeFromV3(db, oldVersion, newVersion);
 		case 4:
+			AccountTable.upgradeFromV4(db, oldVersion, newVersion);
 		case 5:
-			ScheduledOperationTable.onUpgrade(db, oldVersion, newVersion);
-			OperationTable.onUpgrade(db, oldVersion, newVersion);
+			ScheduledOperationTable.upgradeFromV5(db, oldVersion, newVersion);
+			OperationTable.upgradeFromV5(db, oldVersion, newVersion);
 		case 6:
-			AccountTable.onUpgrade(db, oldVersion, newVersion);
-			ScheduledOperationTable.onUpgrade(db, oldVersion, newVersion);
-			OperationTable.onUpgrade(db, oldVersion, newVersion);
+			AccountTable.upgradeFromV6(db, oldVersion, newVersion);
+			ScheduledOperationTable.upgradeFromV6(db, oldVersion, newVersion);
+			OperationTable.upgradeFromV6(db, oldVersion, newVersion);
 		case 7:
+			InfoTables.upgradeFromV7(db, oldVersion, newVersion);
 		case 8:
-			InfoTables.onUpgrade(db, oldVersion, newVersion);
+			InfoTables.upgradeFromV8(db, oldVersion, newVersion);
 		case 9:
-			AccountTable.onUpgrade(db, oldVersion, newVersion);
+			AccountTable.upgradeFromV9(db, oldVersion, newVersion);
 		case 10:
-			PreferenceTable.onUpgrade(mCtx, db, oldVersion, newVersion);
+			PreferenceTable.upgradeFromV10(mCtx, db, oldVersion, newVersion);
 		case 11:
-			OperationTable.onUpgrade(db, oldVersion, newVersion);
-			ScheduledOperationTable.onUpgrade(db, oldVersion, newVersion);
+			OperationTable.upgradeFromV11(db, oldVersion, newVersion);
+			ScheduledOperationTable.upgradeFromV11(db, oldVersion, newVersion);
 		case 12:
-			ScheduledOperationTable.onUpgrade(db, oldVersion, newVersion);
-			AccountTable.onUpgrade(db, oldVersion, newVersion);
-			break;
+			ScheduledOperationTable.upgradeFromV12(db, oldVersion, newVersion);
+			AccountTable.upgradeFromV12(db, oldVersion, newVersion);
 		default:
-			AccountTable.onUpgrade(db, oldVersion, newVersion);
+			AccountTable.upgradeDefault(db, oldVersion, newVersion);
 		} 
-		
 	}
 	
 	public static void trashDatabase(Context ctx) {

@@ -241,12 +241,14 @@ public class ScheduledOperationTable {
 
 	// UPGRADE FUNCTIONS
 
-	private static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(TRIGGER_ON_DELETE_SCHED_CREATE);
 	}
 	
-	private static void upgradeFromV11(SQLiteDatabase db, int oldVersion,
+	
+	
+	static void upgradeFromV11(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(String.format(OperationTable.ADD_TRANSFERT_ID_COLUNM,
 				DATABASE_SCHEDULED_TABLE));
@@ -254,7 +256,7 @@ public class ScheduledOperationTable {
 				DATABASE_SCHEDULED_TABLE));
 	}
 
-	private static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL("ALTER TABLE scheduled_ops RENAME TO scheduled_ops_old;");
 		db.execSQL(DATABASE_SCHEDULED_CREATE);
@@ -308,5 +310,9 @@ public class ScheduledOperationTable {
 			c.close();
 		}
 		db.execSQL("DROP TABLE scheduled_ops_old;");
+	}
+	
+	static void upgradeFromV5(SQLiteDatabase db, int oldVersion, int newVersion) {
+		db.execSQL(DATABASE_SCHEDULED_CREATE);
 	}
 }

@@ -105,7 +105,7 @@ public class OperationTable {
 			+ KEY_OP_TAG
 			+ " = old."
 			+ InfoTables.KEY_TAG_ROWID + "; END";
-	
+
 	protected static final String ADD_NOTES_COLUNM = "ALTER TABLE "
 			+ DATABASE_OPERATIONS_TABLE + " ADD COLUMN op_notes text";
 
@@ -161,25 +161,32 @@ public class OperationTable {
 		db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 	}
 
-	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		switch (oldVersion) {
-		case 1:
-			OperationTable.upgradeFromV1(db, oldVersion, newVersion);
-		case 2:
-			db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
-			db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
-		case 3:
-			db.execSQL(ADD_NOTES_COLUNM);
-		case 5:
-			upgradeFromV5(db, oldVersion, newVersion);
-		case 6:
-			upgradeFromV6(db, oldVersion, newVersion);
-		case 9:
-			upgradeFromV9(db, oldVersion, newVersion);
-		case 11:
-			upgradeFromV11(db, oldVersion, newVersion);
-		}
-	}
+//	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+//		switch (oldVersion) {
+//		case 1:
+//			OperationTable.upgradeFromV1(db, oldVersion, newVersion);
+//			break;
+//		case 2:
+//			db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
+//			db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+//			break;
+//		case 3:
+//			db.execSQL(ADD_NOTES_COLUNM);
+//			break;
+//		case 5:
+//			upgradeFromV5(db, oldVersion, newVersion);
+//			break;
+//		case 6:
+//			upgradeFromV6(db, oldVersion, newVersion);
+//			break;
+//		case 9:
+//			upgradeFromV9(db, oldVersion, newVersion);
+//			break;
+//		case 11:
+//			upgradeFromV11(db, oldVersion, newVersion);
+//			break;
+//		}
+//	}
 
 	public static Cursor fetchAllOps(Context ctx, final long accountId) {
 		Cursor c = ctx.getContentResolver().query(
@@ -263,7 +270,8 @@ public class OperationTable {
 		if (ctx.getContentResolver().delete(
 				Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null,
 				null) > 0) {
-			return true;//AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
+			return true;// AccountTable.checkNeedUpdateProjection(ctx, op,
+						// accountId);
 		}
 		return false;
 	}
@@ -397,7 +405,8 @@ public class OperationTable {
 		if (ctx.getContentResolver().update(
 				Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), args,
 				null, null) > 0) {
-			return true; //AccountTable.checkNeedUpdateProjection(ctx, op, accountId);
+			return true; // AccountTable.checkNeedUpdateProjection(ctx, op,
+							// accountId);
 		}
 		return false;
 	}
@@ -442,8 +451,8 @@ public class OperationTable {
 								Long.toString(schOpId) });
 	}
 
-	public static int disconnectAllOccurrences(Context ctx, final long accountId,
-			final long schOpId) {
+	public static int disconnectAllOccurrences(Context ctx,
+			final long accountId, final long schOpId) {
 		ContentValues args = new ContentValues();
 		args.put(KEY_OP_SCHEDULED_ID, 0);
 		return ctx.getContentResolver()
@@ -456,7 +465,7 @@ public class OperationTable {
 	}
 
 	// UPGRADE FUNCTIONS
-	private static void upgradeFromV11(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV11(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM,
 				DATABASE_OPERATIONS_TABLE));
@@ -465,7 +474,7 @@ public class OperationTable {
 
 	}
 
-	private static void upgradeFromV9(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV9(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		Cursor c = db.query(DATABASE_OPERATIONS_TABLE, new String[] {
 				KEY_OP_ROWID, KEY_OP_DATE }, null, null, null, null, null);
@@ -487,8 +496,16 @@ public class OperationTable {
 		}
 	}
 
-	private static void upgradeFromV1(SQLiteDatabase db, int oldVersion,
-			int newVersion) {
+	static void upgradeFromV2(SQLiteDatabase db, int oldVersion, int newVersion) {
+		db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
+		db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
+	}
+
+	static void upgradeFromV3(SQLiteDatabase db, int oldVersion, int newVersion) {
+		db.execSQL(ADD_NOTES_COLUNM);
+	}
+
+	static void upgradeFromV1(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL(DATABASE_OP_CREATE);
 		Cursor allAccounts = db.query(AccountTable.DATABASE_ACCOUNT_TABLE,
 				new String[] {}, null, null, null, null, null);
@@ -525,7 +542,7 @@ public class OperationTable {
 		}
 	}
 
-	private static void upgradeFromV5(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV5(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL("DROP TRIGGER on_delete_third_party");
 		db.execSQL("DROP TRIGGER on_delete_mode");
@@ -555,7 +572,7 @@ public class OperationTable {
 		db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
 	}
 
-	private static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
+	static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
 			int newVersion) {
 		db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
 		db.execSQL(DATABASE_OP_CREATE);
