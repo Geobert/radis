@@ -211,10 +211,14 @@ public abstract class CommonOpEditor extends BaseActivity implements
 		if (mIsTransfertCheck.isChecked()) {
 			final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
 			final Account dstAccount = (Account) mDstAccount.getSelectedItem();
-			if (srcAccount.mAccountId == 0
-					|| dstAccount.mAccountId == 0
-					|| (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 && srcAccount.mAccountId == dstAccount.mAccountId)) {
-				errMsg.append(getString(R.string.invalid_transfert));
+			if (srcAccount.mAccountId == 0) {
+				errMsg.append(getString(R.string.err_transfert_no_src));
+				res = false;
+			} else if (dstAccount.mAccountId == 0) {
+				errMsg.append(getString(R.string.err_transfert_no_dst));
+				res = false;
+			} else  if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 && srcAccount.mAccountId == dstAccount.mAccountId) {
+				errMsg.append(getString(R.string.err_transfert_same_acc));
 				res = false;
 			}
 		} else {

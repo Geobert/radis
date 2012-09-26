@@ -174,7 +174,10 @@
 	
 	<string name="rarr">→</string>
 	<string name="no_transfert">No transfert</string>
-	<string name="invalid_transfert">Transfert is not well configured</string>
+	<string name="err_transfert_no_src">Transfert has no source</string>
+	<string name="err_transfert_no_dst">Transfert has no destination</string>
+	<string name="err_transfert_same_acc">Transfert\'s source and destination cannot be equals</string>
+
 	<string name="transfert">Transfert between account</string>
 	<string name="sch_no_choosen_account">Please choose an account on planification page</string>
 	<string name="choose_account">Choose an account</string>
