@@ -101,6 +101,15 @@ public class RadisService extends IntentService {
 						+ Formater.getFullDateFormater().format(
 								insertionDate.getTime()));
 
+		if (today.compareTo(insertionDate) > 0) {
+			insertionDate.add(Calendar.MONTH, 1);
+			Log.d(TAG,
+					"adjusted insertionDate : "
+							+ Formater.getFullDateFormater().format(
+									insertionDate.getTime()));
+		}
+		
+		
 		long insertionDateInMillis = insertionDate.getTimeInMillis();
 
 		GregorianCalendar limitInsertionDate = new GregorianCalendar();
@@ -165,8 +174,8 @@ public class RadisService extends IntentService {
 				} else {
 					c.moveToNext();
 					continue;
-				}				
-				
+				}
+
 				// insert all scheduled of the past until current month
 				Log.d(TAG,
 						"insert all scheduled of the past until current month");
@@ -187,6 +196,10 @@ public class RadisService extends IntentService {
 							&& !op.isObsolete()) {
 						keepGreatestDate(greatestDatePerAccount, accountId,
 								op.getDate());
+						if (transId > 0) {
+							keepGreatestDate(greatestDatePerAccount, transId,
+									op.getDate());
+						}
 						Log.d(TAG, "op month before : " + op.getMonth());
 						long opSum = insertSchOp(op, opRowId);
 						Log.d(TAG, "op month after : " + op.getMonth());
@@ -207,8 +220,8 @@ public class RadisService extends IntentService {
 						curSum = Long.valueOf(0);
 					}
 					sumsPerAccount.put(accountId, curSum + sum);
-					keepGreatestDate(greatestDatePerAccount, accountId,
-							op.getDate());
+					 keepGreatestDate(greatestDatePerAccount, accountId,
+					 op.getDate());
 					// the sch op is a transfert, update the dst account sum
 					// with -sum
 					if (transId > 0) {
@@ -227,11 +240,12 @@ public class RadisService extends IntentService {
 					new Long[sumsPerAccount.size()]);
 			for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
 				needUpdate = true;
+				
 				updateAccountSum(e.getValue().longValue(), e.getKey()
 						.longValue(), greatestDatePerAccount.get(e.getKey()),
 						this);
 			}
-			Log.d(TAG, "DOES NEED UPDATE : " + (needUpdate ? "YES" : "NO"));
+			Log.d(TAG, "DOES NEED UPDATE : " + needUpdate);
 			if (needUpdate) {
 				Intent i = new Intent(Tools.INTENT_OP_INSERTED);
 				i.putExtra("accountIds", accountIds);

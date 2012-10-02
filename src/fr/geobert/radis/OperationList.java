@@ -619,10 +619,15 @@ public class OperationList extends BaseActivity implements
 			if (lastOp.moveToFirst()) {
 				long date = lastOp.getLong(lastOp
 						.getColumnIndex(OperationTable.KEY_OP_DATE));
+				Log.d(TAG, "initDateRange, date of lastOp : " + Formater.getFullDateFormater().format(new Date(date)));
+				Log.d(TAG, "initDateRange, endOpDate : " + Formater.getFullDateFormater().format(new Date(endOpDate.getTimeInMillis())));
 				if (date > endOpDate.getTimeInMillis()) {
+					Log.d(TAG, "initDateRange, change endDate");
 					endOpDate.setTimeInMillis(date);
 				}
+				Log.d(TAG, "initDateRange, startOpDate : " + Formater.getFullDateFormater().format(new Date(startOpDate.getTimeInMillis())));
 				if (date < startOpDate.getTimeInMillis()) {
+					Log.d(TAG, "initDateRange, change startDate");
 					startOpDate.setTimeInMillis(date);
 				}
 			}

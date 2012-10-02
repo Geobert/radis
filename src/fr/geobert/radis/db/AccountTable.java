@@ -145,8 +145,7 @@ public class AccountTable {
 			+ " OR "
 			+ OperationTable.KEY_OP_TRANSFERT_ACC_ID
 			+ " = old."
-			+ AccountTable.KEY_ACCOUNT_ROWID
-			+ "; END";
+			+ AccountTable.KEY_ACCOUNT_ROWID + "; END";
 
 	private static int mProjectionMode;
 	private static long mProjectionDate;
@@ -155,23 +154,24 @@ public class AccountTable {
 		db.execSQL(DATABASE_ACCOUNT_CREATE);
 	}
 
-//	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//		switch (oldVersion) {
-//		case 4:
-//			db.execSQL(ADD_CUR_DATE_COLUNM);
-//			break;
-//		case 6:
-//			upgradeFromV6(db, oldVersion, newVersion);
-//			break;
-//		case 9:
-//			upgradeFromV9(db, oldVersion, newVersion);
-//			break;
-//		case 12:
-//			upgradeFromV12(db, oldVersion, newVersion);
-//		default:
-//			upgradeDefault(db, oldVersion, newVersion);
-//		}
-//	}
+	// static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+	// {
+	// switch (oldVersion) {
+	// case 4:
+	// db.execSQL(ADD_CUR_DATE_COLUNM);
+	// break;
+	// case 6:
+	// upgradeFromV6(db, oldVersion, newVersion);
+	// break;
+	// case 9:
+	// upgradeFromV9(db, oldVersion, newVersion);
+	// break;
+	// case 12:
+	// upgradeFromV12(db, oldVersion, newVersion);
+	// default:
+	// upgradeDefault(db, oldVersion, newVersion);
+	// }
+	// }
 
 	public static long createAccount(Context ctx, String name, String desc,
 			long start_sum, String currency, int projectionMode,
@@ -236,9 +236,10 @@ public class AccountTable {
 			throws ParseException {
 		long date = 0;
 		long opSum = 0;
+		Log.d(TAG, "setCurrentSumAndDate mAccountId = " + accountId
+				+ "/ projectionMode : " + projectionMode);
 		switch (projectionMode) {
 		case 0: {
-			Log.d(TAG, "setCurrentSumAndDate mAccountId = " + accountId);
 			if (accountId > 0) {
 				Cursor allOps = OperationTable.fetchAllOps(ctx, accountId);
 				if (null != allOps) {
@@ -249,7 +250,9 @@ public class AccountTable {
 								.getColumnIndex(OperationTable.KEY_OP_DATE));
 						opSum = OperationTable.computeSumFromCursor(allOps,
 								accountId);
-						Log.d(TAG, "setCurrentSumAndDate allOps moved to first opSum = " + opSum);
+						Log.d(TAG,
+								"setCurrentSumAndDate allOps moved to first opSum = "
+										+ opSum);
 					}
 					allOps.close();
 				}
@@ -301,9 +304,12 @@ public class AccountTable {
 		default:
 			break;
 		}
-		Log.d(TAG, "setCurrentSumAndDate opSum = " + opSum + "/ startSum = " + start_sum + "/ sum : " + (start_sum + opSum));
+		Log.d(TAG, "setCurrentSumAndDate opSum = " + opSum + "/ startSum = "
+				+ start_sum + "/ sum : " + (start_sum + opSum));
 		values.put(KEY_ACCOUNT_OP_SUM, opSum);
 		values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum);
+		Log.d(TAG, "setCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : "
+				+ Formater.getFullDateFormater().format(new Date(date)));
 		values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 	}
 
@@ -411,25 +417,30 @@ public class AccountTable {
 		if (projectionController.hasChanged()) {
 			updateAccountProjectionDate(ctx, accountId,
 					projectionController.getMode(),
-					projectionController.getDate());
+					projectionController.getDate(), true);
+
 		}
 		return true;
 	}
 
 	private static boolean updateAccountProjectionDate(Context ctx,
-			long accountId, final int projMode, final String projDate)
-			throws ParseException {
+			long accountId, final int projMode, final String projDate,
+			boolean updateSumAndDate) throws ParseException {
 		Cursor account = fetchAccount(ctx, accountId);
 		if (account.moveToFirst()) {
 			ContentValues args = new ContentValues();
 			long start_sum = account.getLong(account
 					.getColumnIndex(KEY_ACCOUNT_START_SUM));
 			account.close();
+			Log.d(TAG,
+					"updateAccountProjectionDate, KEY_ACCOUNT_PROJECTION_DATE : "
+							+ projDate);
 			args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode);
 			args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate);
-
-			setCurrentSumAndDate(ctx, accountId, args, start_sum, projMode,
-					projDate);
+			if (updateSumAndDate) {
+				setCurrentSumAndDate(ctx, accountId, args, start_sum, projMode,
+						projDate);
+			}
 			return ctx.getContentResolver().update(
 					Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
 					args, null, null) > 0;
@@ -451,7 +462,7 @@ public class AccountTable {
 							c.getInt(c
 									.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
 							c.getString(c
-									.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+									.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), false);
 				}
 				c.close();
 			}
@@ -499,12 +510,23 @@ public class AccountTable {
 				Cursor op = OperationTable.fetchLastOp(ctx, accountId);
 				if (null != op) {
 					if (op.moveToFirst()) {
+						Log.d(TAG,
+								"updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 0 : "
+										+ Formater
+												.getFullDateFormater()
+												.format(new Date(
+														op.getLong(op
+																.getColumnIndex(OperationTable.KEY_OP_DATE)))));
 						args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op
 								.getColumnIndex(OperationTable.KEY_OP_DATE)));
 					}
 					op.close();
 				}
 			} else {
+				Log.d(TAG,
+						"updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 1 : "
+								+ Formater.getFullDateFormater().format(
+										new Date(opDate)));
 				args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
 			}
 		}
@@ -552,9 +574,10 @@ public class AccountTable {
 			throws ParseException {
 		long date = 0;
 		long opSum = 0;
+		Log.d(TAG, "raw setCurrentSumAndDate mAccountId = " + accountId
+				+ "/ mode : " + projectionMode);
 		switch (projectionMode) {
 		case 0: {
-			Log.d(TAG, "raw setCurrentSumAndDate mAccountId = " + accountId);
 			if (accountId > 0) {
 				Cursor allOps = db.query(
 						OperationTable.DATABASE_OP_TABLE_JOINTURE,
@@ -640,6 +663,8 @@ public class AccountTable {
 		}
 		values.put(KEY_ACCOUNT_OP_SUM, opSum);
 		values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum);
+		Log.d(TAG, "rawSetCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : "
+				+ Formater.getFullDateFormater().format(new Date(date)));
 		values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
 	}
 
@@ -674,8 +699,7 @@ public class AccountTable {
 		}
 	}
 
-	static void upgradeDefault(SQLiteDatabase db, int oldVersion,
-			int newVersion) {
+	static void upgradeDefault(SQLiteDatabase db, int oldVersion, int newVersion) {
 		Cursor c = db.query(DATABASE_ACCOUNT_TABLE,
 				new String[] { KEY_ACCOUNT_ROWID }, null, null, null, null,
 				null);
@@ -689,8 +713,7 @@ public class AccountTable {
 		}
 	}
 
-	static void upgradeFromV9(SQLiteDatabase db, int oldVersion,
-			int newVersion) {
+	static void upgradeFromV9(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL(ADD_PROJECTION_MODE_COLUNM);
 		db.execSQL(ADD_PROJECTION_MODE_DATE);
 		Cursor c = db.query(DATABASE_ACCOUNT_TABLE, new String[] {}, null,
@@ -706,8 +729,7 @@ public class AccountTable {
 		}
 	}
 
-	static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
-			int newVersion) {
+	static void upgradeFromV6(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL("DROP TRIGGER on_delete_third_party");
 		db.execSQL("DROP TRIGGER on_delete_mode");
 		db.execSQL("DROP TRIGGER on_delete_tag");
@@ -755,8 +777,7 @@ public class AccountTable {
 		}
 	}
 
-	static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
-			int newVersion) {
+	static void upgradeFromV12(SQLiteDatabase db, int oldVersion, int newVersion) {
 		db.execSQL(TRIGGER_ON_DELETE_ACCOUNT);
 	}
 

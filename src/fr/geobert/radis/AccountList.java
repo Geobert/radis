@@ -41,6 +41,7 @@ import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.editor.AccountEditor;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
+import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.QuickAddController;
@@ -132,6 +133,7 @@ public class AccountList extends BaseActivity implements
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Tools.checkDebugMode(this);
+		
 		if (ROBOTIUM_MODE) {
 			DBPrefsManager.getInstance(this).resetAll();
 			ContentProviderClient client = getContentResolver()
@@ -141,6 +143,7 @@ public class AccountList extends BaseActivity implements
 			provider.deleteDatabase(this);
 			client.release();
 		}
+		
 		super.onCreate(savedInstanceState);
 		showProgress();
 		InfoTables.fillCaches(this);
@@ -223,6 +226,8 @@ public class AccountList extends BaseActivity implements
 			Intent i = new Intent(this, InstallRadisServiceReceiver.class);
 			i.setAction(Tools.INTENT_RADIS_STARTED);
 			sendBroadcast(i);
+			RadisService.acquireStaticLock(this);
+			this.startService(new Intent(this, RadisService.class));
 			mFirstStart = false;
 		}
 	}
