@@ -16,7 +16,6 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.AccountTable;
-import fr.geobert.radis.db.DbHelper;
 
 public class ProjectionDateController {
 	private Spinner mProjectionMode;
