@@ -44,7 +44,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 	private String mOldValue;
 	private SimpleCursorAdapter mAdapter;
 
-	private static final int GET_MATCHING_INFO = 800;
+	private int GET_MATCHING_INFO_ID;
 
 	@SuppressWarnings("serial")
 	private static final HashMap<String, Integer> EDITTEXT_OF_INFO = new HashMap<String, Integer>() {
@@ -59,17 +59,19 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 	InfoManager(CommonOpEditor context, String title, Uri table,
 			String colName, int editId, int deleteId) {
 		mContext = context;
-
+		GET_MATCHING_INFO_ID = EDITTEXT_OF_INFO.get(table.toString());
 		mAdapter = new SimpleCursorAdapter(context,
 				android.R.layout.simple_list_item_single_choice, null,
 				new String[] { colName }, new int[] { android.R.id.text1 },
 				SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER) {
 			@Override
-		    public View getView(int position, View convertView, ViewGroup parent) {
-		        TextView textView = (TextView) super.getView(position, convertView, parent);
-		        textView.setTextColor(mContext.getResources().getColor(android.R.color.black));
-		        return textView;
-		    }
+			public View getView(int position, View convertView, ViewGroup parent) {
+				TextView textView = (TextView) super.getView(position,
+						convertView, parent);
+				textView.setTextColor(mContext.getResources().getColor(
+						android.R.color.black));
+				return textView;
+			}
 
 		};
 		mInfo = new Bundle();
@@ -91,7 +93,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 		View layout = inflater.inflate(R.layout.info_list, null);
 		builder.setView(layout);
 		mBuilder = builder;
-		context.getSupportLoaderManager().initLoader(GET_MATCHING_INFO, mInfo,
+		context.getSupportLoaderManager().initLoader(GET_MATCHING_INFO_ID, mInfo,
 				this);
 
 		builder.setPositiveButton(context.getString(R.string.ok),
@@ -102,6 +104,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 				}).setNegativeButton(context.getString(R.string.cancel),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
+						mContext.getSupportLoaderManager().destroyLoader(GET_MATCHING_INFO_ID);
 						dialog.cancel();
 					}
 				});
@@ -142,15 +145,15 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 		}
 	}
 
-//	public void fillData(Cursor c, String colName) {
-//		mBuilder.setSingleChoiceItems(c, -1, colName,
-//				new DialogInterface.OnClickListener() {
-//					public void onClick(DialogInterface dialog, int item) {
-//						mSelectedInfo = item;
-//						refreshToolbarStatus((AlertDialog) dialog);
-//					}
-//				});
-//	}
+	// public void fillData(Cursor c, String colName) {
+	// mBuilder.setSingleChoiceItems(c, -1, colName,
+	// new DialogInterface.OnClickListener() {
+	// public void onClick(DialogInterface dialog, int item) {
+	// mSelectedInfo = item;
+	// refreshToolbarStatus((AlertDialog) dialog);
+	// }
+	// });
+	// }
 
 	public AlertDialog getListDialog() {
 		mListDialog = mBuilder.create();
@@ -270,7 +273,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 	}
 
 	private void refresh() {
-		mContext.getSupportLoaderManager().restartLoader(GET_MATCHING_INFO,
+		mContext.getSupportLoaderManager().restartLoader(GET_MATCHING_INFO_ID,
 				mInfo, this);
 	}
 
