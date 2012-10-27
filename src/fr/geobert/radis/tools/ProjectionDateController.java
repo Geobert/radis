@@ -88,18 +88,19 @@ public class ProjectionDateController {
 	}
 
 	public void populateFields(Cursor account) {
-		mAccountId = account.getLong(account
-				.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID));
-		int pos = account.getInt(account
-				.getColumnIndex(AccountTable.KEY_ACCOUNT_PROJECTION_MODE));
-		mCurPos = pos;
-		setHint(pos);
-		mOrigProjMode = pos;
-		mProjectionMode.setSelection(pos);
-		mOrigProjDate = account.getString(account
-				.getColumnIndex(AccountTable.KEY_ACCOUNT_PROJECTION_DATE));
-		mProjectionDate.setEnabled(pos > 0);
-		mProjectionDate.setText(mOrigProjDate);
+		if (account != null) {
+			mAccountId = account.getLong(account
+					.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID));
+			mCurPos = account.getInt(account
+					.getColumnIndex(AccountTable.KEY_ACCOUNT_PROJECTION_MODE));
+			mOrigProjDate = account.getString(account
+					.getColumnIndex(AccountTable.KEY_ACCOUNT_PROJECTION_DATE));
+			setHint(mCurPos);
+			mOrigProjMode = mCurPos;
+			mProjectionMode.setSelection(mCurPos);
+			mProjectionDate.setEnabled(mCurPos > 0);
+			mProjectionDate.setText(mOrigProjDate);
+		}
 	}
 
 	public int getMode() {
@@ -125,12 +126,13 @@ public class ProjectionDateController {
 					public void onClick(DialogInterface dialog, int id) {
 						mInstance.saveProjectionDate();
 					}
-				}).setNegativeButton(activity.getString(R.string.cancel),
-				new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						dialog.cancel();
-					}
-				}).setTitle(R.string.projection_date);
+				})
+				.setNegativeButton(activity.getString(R.string.cancel),
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						}).setTitle(R.string.projection_date);
 		builder.setView(layout);
 		AlertDialog dialog = builder.create();
 		mInstance = new ProjectionDateController(layout, activity);
@@ -143,7 +145,8 @@ public class ProjectionDateController {
 
 	protected void saveProjectionDate() {
 		try {
-			AccountTable.updateAccountProjectionDate(mActivity, mAccountId, mInstance);
+			AccountTable.updateAccountProjectionDate(mActivity, mAccountId,
+					mInstance);
 			if (mActivity instanceof UpdateDisplayInterface) {
 				((UpdateDisplayInterface) mActivity).updateDisplay(null);
 			}
@@ -165,12 +168,20 @@ public class ProjectionDateController {
 				.toString());
 		outState.putInt("origProjMode", mOrigProjMode);
 		outState.putString("origProjDate", mOrigProjDate);
+		outState.putInt("pos", mCurPos);
+		outState.putLong("accountId", mAccountId);
 	}
-
+	
 	public void onRestoreInstanceState(Bundle state) {
 		mProjectionMode.setSelection(state.getInt("projectionMode"));
 		mProjectionDate.setText(state.getString("projectionDate"));
 		mOrigProjDate = state.getString("origProjDate");
 		mOrigProjMode = state.getInt("origProjMode");
+		mCurPos = state.getInt("pos");
+		mAccountId = state.getLong("accountId");
+		setHint(mCurPos);
+		mProjectionMode.setSelection(mCurPos);
+		mProjectionDate.setEnabled(mCurPos > 0);
+		mProjectionDate.setText(mOrigProjDate);
 	}
 }

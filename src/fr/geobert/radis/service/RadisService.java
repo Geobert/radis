@@ -164,11 +164,13 @@ public class RadisService extends IntentService {
 				long sum = 0;
 				boolean needUpdate = false;
 				Cursor accountCursor = AccountTable.fetchAccount(this,
-						accountId);
+						accountId);				
 				if (null != accountCursor) {
 					if (!accountCursor.moveToFirst()) {
 						c.moveToNext();
 						continue;
+					} else {
+						AccountTable.initProjectionDate(accountCursor);
 					}
 					accountCursor.close();
 				} else {

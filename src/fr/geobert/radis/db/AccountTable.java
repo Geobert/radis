@@ -147,7 +147,7 @@ public class AccountTable {
 			+ " = old."
 			+ AccountTable.KEY_ACCOUNT_ROWID + "; END";
 
-	private static int mProjectionMode;
+	private static int mProjectionMode = -1;
 	private static long mProjectionDate;
 
 	static void onCreate(SQLiteDatabase db) {
