@@ -382,7 +382,7 @@ public class AccountTable {
 				GregorianCalendar today = new GregorianCalendar();
 				Tools.clearTimeOfCalendar(today);
 				if (projDate.compareTo(today) <= 0) {
-					projDate.roll(Calendar.MONTH, 1);
+					projDate.add(Calendar.MONTH, 1);
 				}
 				mProjectionDate = projDate.getTimeInMillis();
 			}
@@ -606,11 +606,11 @@ public class AccountTable {
 			Tools.clearTimeOfCalendar(projDate);
 			if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
 					.parseInt(projectionDate)) {
-				projDate.roll(Calendar.MONTH, 1);
+				projDate.add(Calendar.MONTH, 1);
 			}
 			projDate.set(Calendar.DAY_OF_MONTH,
 					Integer.parseInt(projectionDate));
-			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
+			projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
 			Cursor op = db.query(
 					OperationTable.DATABASE_OP_TABLE_JOINTURE,
 					OperationTable.OP_COLS_QUERY,
@@ -620,7 +620,7 @@ public class AccountTable {
 							Long.toString(accountId),
 							Long.toString(projDate.getTimeInMillis()) }, null,
 					null, OperationTable.OP_ORDERING);
-			projDate.roll(Calendar.DAY_OF_MONTH, -1); // restore date after
+			projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
 														// query
 			if (null != op) {
 				if (op.moveToFirst()) {
@@ -636,7 +636,7 @@ public class AccountTable {
 			Tools.clearTimeOfCalendar(projDate);
 			projDate.setTime(Formater.getFullDateFormater().parse(
 					projectionDate));
-			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
+			projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
 			Cursor op = db.query(
 					OperationTable.DATABASE_OP_TABLE_JOINTURE,
 					OperationTable.OP_COLS_QUERY,
@@ -646,7 +646,7 @@ public class AccountTable {
 							Long.toString(accountId),
 							Long.toString(projDate.getTimeInMillis()) }, null,
 					null, OperationTable.OP_ORDERING);
-			projDate.roll(Calendar.DAY_OF_MONTH, -1); // restore date after
+			projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
 			// query
 			if (null != op) {
 				if (op.moveToFirst()) {
