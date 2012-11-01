@@ -264,14 +264,14 @@ public class AccountTable {
 			Tools.clearTimeOfCalendar(projDate);
 			if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
 					.parseInt(projectionDate)) {
-				projDate.roll(Calendar.MONTH, 1);
+				projDate.add(Calendar.MONTH, 1);
 			}
 			projDate.set(Calendar.DAY_OF_MONTH,
 					Integer.parseInt(projectionDate));
-			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
+			projDate.add(Calendar.DAY_OF_MONTH, 1); // for query
 			Cursor op = OperationTable.fetchOpEarlierThan(ctx,
 					projDate.getTimeInMillis(), 0, accountId);
-			projDate.roll(Calendar.DAY_OF_MONTH, -1); // restore date after
+			projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
 														// query
 			if (null != op) {
 				if (op.moveToFirst()) {
@@ -287,11 +287,10 @@ public class AccountTable {
 			Tools.clearTimeOfCalendar(projDate);
 			projDate.setTime(Formater.getFullDateFormater().parse(
 					projectionDate));
-			projDate.roll(Calendar.DAY_OF_MONTH, 1); // roll for query
+			projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
 			Cursor op = OperationTable.fetchOpEarlierThan(ctx,
 					projDate.getTimeInMillis(), 0, accountId);
-			projDate.roll(Calendar.DAY_OF_MONTH, -1); // restore date after
-			// query
+			projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
 			if (null != op) {
 				if (op.moveToFirst()) {
 					opSum = OperationTable.computeSumFromCursor(op, accountId);
@@ -462,7 +461,7 @@ public class AccountTable {
 							c.getInt(c
 									.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
 							c.getString(c
-									.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), false);
+									.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), true);
 				}
 				c.close();
 			}

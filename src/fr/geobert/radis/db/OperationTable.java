@@ -203,10 +203,12 @@ public class OperationTable {
 
 	static long computeSumFromCursor(Cursor c, long curAccount) {
 		long sum = 0L;
+		final int sumIdx = c.getColumnIndex(KEY_OP_SUM);
+		final int transIdx = c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID);
 		if (c.moveToFirst()) {
 			do {
-				long s = c.getLong(c.getColumnIndex(KEY_OP_SUM));
-				if (c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID)) == curAccount) {
+				long s = c.getLong(sumIdx);
+				if (c.getLong(transIdx) == curAccount) {
 					s = -s;
 				}
 				sum = sum + s;
@@ -217,6 +219,7 @@ public class OperationTable {
 
 	static Cursor fetchOpEarlierThan(Context ctx, long date, int nbOps,
 			final long accountId) {
+		Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date));
 		Cursor c = null;
 		String limit = nbOps == 0 ? null : Integer.toString(nbOps);
 		c = ctx.getContentResolver().query(

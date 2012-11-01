@@ -788,7 +788,7 @@ public class OperationList extends BaseActivity implements
 		Log.d(TAG,
 				"computeSumFromCursor mProjectionDate : "
 						+ Formater.getFullDateFormater().format(
-								new Date(mProjectionDate)));
+								new Date(mProjectionDate)) + "/opDate : " + Tools.getDateStr(opDate));
 		if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
 			if (opDate <= mProjectionDate || mProjectionDate == 0) {
 				boolean hasPrev = op.moveToPrevious();
@@ -805,9 +805,11 @@ public class OperationList extends BaseActivity implements
 					while (hasPrev && opDate <= mProjectionDate) {
 						long s = op.getLong(opSumIdx);
 						if (op.getLong(transIdx) == mAccountId) {
+							Log.d(TAG, "computeSumFromCursor invert sum");
 							s = -s;
 						}
 						sum = sum + s;
+						Log.d(TAG, "cur sum : " + sum + "/date : " + Tools.getDateStr(opDate));
 						hasPrev = op.moveToPrevious();
 						if (hasPrev) {
 							opDate = op.getLong(dateIdx);

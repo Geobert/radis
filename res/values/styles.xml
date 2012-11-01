@@ -24,7 +24,7 @@
 	</style>
 	<style name="EditorEditText.Date">
 	    <item name="android:digits">@string/date_chars</item>
-	    <item name="android:inputType">number|numberSigned|numberDecimal</item>
+	    <!-- <item name="android:inputType">date</item>-->
 	</style>
 	<style name="EditorBaseButton.DateButton">
 		<item name="android:layout_width">fill_parent</item>
