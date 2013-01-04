@@ -965,6 +965,7 @@ public class OperationList extends BaseActivity implements
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		mQuickAddController.onSaveInstanceState(outState);
+		outState.putSerializable("mLastSelectedPosition", mLastSelectedPosition);
 		outState.putLong("accountId", mAccountId);
 		updateLastSelectionIdxFromTop();
 		outState.putInt("mLastSelectionFromTop", mLastSelectionFromTop);
@@ -973,7 +974,7 @@ public class OperationList extends BaseActivity implements
 
 	@Override
 	protected void onRestoreInstanceState(Bundle state) {
-		mLastSelectedPosition = (Integer) getLastNonConfigurationInstance();
+		mLastSelectedPosition = (Integer) state.getSerializable("mLastSelectedPosition");
 		Log.d(TAG, "onRestoreInstanceState setting mLastSelectedPosition: "
 				+ mLastSelectedPosition);
 		mQuickAddController.onRestoreInstanceState(state);
