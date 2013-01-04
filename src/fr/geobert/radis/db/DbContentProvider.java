@@ -132,6 +132,7 @@ public class DbContentProvider extends ContentProvider {
 
 	private String switchToTable(Uri uri) {
 		int uriType = sURIMatcher.match(uri);
+//		Log.d(TAG, "begin switch to table : " + uri + "/#" + uriType);
 		String table = null;
 		switch (uriType) {
 		case ACCOUNT:
@@ -172,7 +173,7 @@ public class DbContentProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unknown URI: " + uri);
 		}
-//		Log.d("DbContentProvider", "switchToTable : " + table);
+//		Log.d(TAG, "switchToTable : " + table);
 		return table;
 	}
 
@@ -180,7 +181,7 @@ public class DbContentProvider extends ContentProvider {
 	public synchronized Cursor query(Uri uri, String[] projection,
 			String selection, String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-
+//		Log.d(TAG, "query selection " + selection);
 		int uriType = sURIMatcher.match(uri);
 		switch (uriType) {
 		case ACCOUNT_ID:

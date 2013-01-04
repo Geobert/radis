@@ -535,7 +535,7 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 				l = new CursorLoader(this,
 						Uri.parse(DbContentProvider.OPERATION_JOINED_URI + "/"
 								+ mOpIdSource),
-						ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, null,
+						OperationTable.OP_COLS_QUERY, null,
 						null, null);
 
 			default:
@@ -560,8 +560,12 @@ public class ScheduledOperationEditor extends CommonOpEditor {
 			populateFields();
 			break;
 		case GET_SCH_OP_SRC:
-			mCurrentSchOp = new ScheduledOperation(data, mCurAccountId);
-			mOriginalSchOp = new ScheduledOperation(data, mCurAccountId);
+			if (data.getCount() > 0 && data.moveToFirst()) {
+				mCurrentSchOp = new ScheduledOperation(data, mCurAccountId);
+				mOriginalSchOp = new ScheduledOperation(data, mCurAccountId);
+			} else {
+				onOpNotFound();
+			}
 			populateFields();
 			break;
 //		case GET_ALL_ACCOUNTS:
