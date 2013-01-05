@@ -6,12 +6,14 @@ import android.content.Intent;
 
 public class OnAlarmReceiver extends BroadcastReceiver {
 
-	@Override
-	public void onReceive(Context context, Intent intent) {
-		
-		RadisService.acquireStaticLock(context);
+	private Object startServiceLock;
 
-		context.startService(new Intent(context, RadisService.class));
+	@Override
+	public void onReceive(Context context, Intent intent) {		
+		synchronized (startServiceLock) {
+			RadisService.acquireStaticLock(context);
+			context.startService(new Intent(context, RadisService.class));			
+		}
 	}
 
 }
