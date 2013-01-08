@@ -386,8 +386,6 @@ public class AccountList extends BaseActivity implements
 				R.id.account_balance_at };
 
 		if (mAccountsAdapter == null) {
-			updateDisplay(null);
-
 			// Now create a simple cursor adapter and set it to display
 			mAccountsAdapter = new SimpleAccountCursorAdapter(this,
 					R.layout.account_row, from, to);
@@ -395,6 +393,7 @@ public class AccountList extends BaseActivity implements
 					.getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT, 0));
 			mAccountsAdapter.setViewBinder(mViewBinder);
 			mListView.setAdapter(mAccountsAdapter);
+			updateDisplay(null);
 		}
 	}
 
