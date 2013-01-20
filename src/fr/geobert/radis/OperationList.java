@@ -679,7 +679,7 @@ public class OperationList extends BaseActivity implements
 		if (OperationTable.deleteOp(this,
 				c.getLong(c.getColumnIndex(OperationTable.KEY_OP_ROWID)),
 				mAccountId)) {
-			if (c.getPosition() < mLastSelectedPosition) {
+			if (mCurrentSelectedOp.position < mLastSelectedPosition) {
 				mLastSelectedPosition--;
 			}
 			Cursor lastOp = OperationTable.fetchLastOp(this, mAccountId);
