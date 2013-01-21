@@ -6,7 +6,7 @@ import android.content.Intent;
 
 public class OnAlarmReceiver extends BroadcastReceiver {
 
-	private Object startServiceLock;
+	private Object startServiceLock = new Object();
 
 	@Override
 	public void onReceive(Context context, Intent intent) {		
