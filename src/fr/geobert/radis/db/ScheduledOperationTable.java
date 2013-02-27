@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.util.Log;
-import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.data.ScheduledOperation;
 
 public class ScheduledOperationTable {
 	private static final String TAG = "ScheduledOperationTable";

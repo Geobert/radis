@@ -1,4 +1,4 @@
-package fr.geobert.radis;
+package fr.geobert.radis.tools;
 
 import java.util.ArrayList;
 

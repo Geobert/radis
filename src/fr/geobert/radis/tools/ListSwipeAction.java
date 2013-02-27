@@ -1,10 +1,10 @@
-package fr.geobert.radis;
+package fr.geobert.radis.tools;
 
 public abstract class ListSwipeAction implements Runnable {
 	public int mPosition;
 	public long mRowId;
 	
-	ListSwipeAction() {
+	public ListSwipeAction() {
 		
 	}
 }

@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent" android:background="@android:color/black"
-	android:layout_height="fill_parent">
-	<LinearLayout style="@style/SumsLayout">
-		<TextView android:id="@+id/date_sum" 
-			style="@style/SumsTextView" />
-		<Button android:id="@+id/future_sum" style="@style/SumsHeaderButton"  
-			android:gravity="right"/>
-	</LinearLayout>
-	<ListView android:id="@+id/android:list" style="@style/OpListView" />
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent">
+    <!--<LinearLayout style="@style/SumsLayout">-->
+    <!--<TextView android:id="@+id/date_sum"-->
+    <!--style="@style/SumsTextView" />-->
+    <!--<Button android:id="@+id/future_sum" style="@style/SumsHeaderButton"-->
+    <!--android:gravity="right"/>-->
+    <!--</LinearLayout>-->
+    <ListView
+            android:id="@android:id/list"
+            style="@style/OpListView"/>
 
-	<ViewStub
+    <ViewStub
             android:id="@android:id/empty"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_weight="1"
-            android:layout="@layout/empty_op_list" />
-	<include layout="@layout/quick_add"/>
+            android:layout="@layout/empty_op_list"/>
+
+    <include layout="@layout/quick_add"/>
 </LinearLayout>

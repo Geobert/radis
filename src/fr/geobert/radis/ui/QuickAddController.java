@@ -1,4 +1,4 @@
-package fr.geobert.radis.tools;
+package fr.geobert.radis.ui;
 
 import android.app.Activity;
 import android.content.Context;
@@ -10,13 +10,14 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
-import fr.geobert.radis.InfoAdapter;
-import fr.geobert.radis.Operation;
+import fr.geobert.radis.tools.InfoAdapter;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.service.RadisService;
+import fr.geobert.radis.tools.*;
 
 public class QuickAddController {
 	private MyAutoCompleteTextView mQuickAddThirdParty;
@@ -45,6 +46,8 @@ public class QuickAddController {
 
 		mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
 				mQuickAddAmount, mQuickAddButton);
+
+        QuickAddController.setQuickAddButEnabled(mQuickAddButton, false);
 	}
 
 	public void setAccount(long accountId) {
@@ -148,14 +151,14 @@ public class QuickAddController {
 
 	public static void setQuickAddButEnabled(ImageButton but, boolean b) {
 		but.setEnabled(b);
-		int drawable;
-		if (b) {
-			drawable = R.drawable.btn_check_buttonless_on;
-		} else {
-			drawable = R.drawable.btn_check_buttonless_off;
-		}
-		but.setImageResource(drawable);
-	}
+//		int drawable;
+//		if (b) {
+//			drawable = R.drawable.btn_check_buttonless_on;
+//		} else {
+//			drawable = R.drawable.btn_check_buttonless_off;
+//		}
+//		but.setImageResource(drawable);
+    }
 
 	public void setVisibility(int visibility) {
 		mActivity.findViewById(R.id.quick_add_layout).setVisibility(visibility);

@@ -1,4 +1,4 @@
-package fr.geobert.radis;
+package fr.geobert.radis.data;
 
 import java.text.ParseException;
 import java.util.Calendar;

@@ -5,6 +5,7 @@ import android.text.TextWatcher;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import fr.geobert.radis.ui.QuickAddController;
 
 public class QuickAddTextWatcher implements TextWatcher {
 	private AutoCompleteTextView mThirdParty;
@@ -23,9 +24,9 @@ public class QuickAddTextWatcher implements TextWatcher {
 		EditText amount = mAmount;
 		QuickAddController
 				.setQuickAddButEnabled(
-						mQuickAdd,
-						((mThirdParty.length() != 0) && (amount.length() != 0) && !(amount
-								.length() == 1 && amount.getText().charAt(0) == '-')));
+                        mQuickAdd,
+                        ((mThirdParty.length() != 0) && (amount.length() != 0) && !(amount
+                                .length() == 1 && amount.getText().charAt(0) == '-')));
 	}
 
 	@Override

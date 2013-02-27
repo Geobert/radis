@@ -1,4 +1,4 @@
-package fr.geobert.radis;
+package fr.geobert.radis.data;
 
 import android.database.Cursor;
 import fr.geobert.radis.db.AccountTable;

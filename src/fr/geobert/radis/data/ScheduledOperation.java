@@ -1,4 +1,4 @@
-package fr.geobert.radis;
+package fr.geobert.radis.data;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;
+import fr.geobert.radis.R;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Tools;
 

@@ -1,75 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/op_line"
-    android:orientation="vertical"
-    android:padding="0px" >
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:background="@drawable/op_line"
+              android:orientation="vertical"
+              android:padding="0px">
 
     <TextView
-        android:id="@+id/separator"
-        style="?android:attr/listSeparatorTextViewStyle"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:textColor="@android:color/white" />
+            android:id="@+id/separator"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"/>
 
-    <LinearLayout style="@style/OpLine" >
+    <TextView
+            android:id="@+id/today_amount"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_width="fill_parent"
+            android:visibility="gone"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/white"/>
 
-        <TextView
-            android:id="@+id/op_date"
-            style="@style/OpRowTextView"
-            android:minWidth="40sp"
-            android:text="24/12" />
-
-        <TextView
-            android:id="@+id/op_third_party"
-            style="@style/OpRowTextView"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:text="toto" />
+    <LinearLayout style="@style/OpLine">
 
         <TextView
-            android:id="@+id/op_sum"
-            style="@style/OpRowTextView.Sums"
-            android:text="200,00" />
+                android:id="@+id/op_date"
+                style="@style/OpRowTextView"
+                android:minWidth="40sp"
+                android:text="24/12"/>
+
+        <TextView
+                android:id="@+id/op_third_party"
+                style="@style/OpRowTextView"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:text="toto"/>
+
+        <TextView
+                android:id="@+id/op_sum"
+                style="@style/OpRowTextView.Sums"
+                android:text="200,00"/>
     </LinearLayout>
 
     <LinearLayout
-        style="@style/OpLine"
-        android:gravity="right" >
+            style="@style/OpLine"
+            android:gravity="right">
 
         <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_weight="1"
-            android:gravity="center_vertical|left"
-            android:orientation="horizontal"
-            android:paddingLeft="5dp" >
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical|left"
+                android:orientation="horizontal"
+                android:paddingLeft="5dp">
 
             <ImageView
-                android:id="@+id/op_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/arrow_down16" />
+                    android:id="@+id/op_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/arrow_down16"/>
 
             <ImageView
-                android:id="@+id/op_sch_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/clock16" />
-            
+                    android:id="@+id/op_sch_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/sched_22"/>
+
             <ImageView
-                android:id="@+id/op_trans_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/transfer_left_right16" />
+                    android:id="@+id/op_trans_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/transfer_left_right16"/>
         </LinearLayout>
 
         <TextView
-            android:id="@+id/op_infos"
-            style="@style/OpRowTextView.Infos"
-            android:layout_weight="0"
-            android:text="Courses / Carte Bleu" />
+                android:id="@+id/op_infos"
+                style="@style/OpRowTextView.Infos"
+                android:layout_weight="0"
+                android:text="Courses / Carte Bleu"/>
     </LinearLayout>
 
 </LinearLayout>

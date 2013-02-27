@@ -14,7 +14,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
-import fr.geobert.radis.Operation;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;

@@ -13,7 +13,7 @@ import android.database.Cursor;
 import android.os.PowerManager;
 import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
-import fr.geobert.radis.ScheduledOperation;
+import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
@@ -26,6 +26,11 @@ public class RadisService extends IntentService {
 	private static final String TAG = "RadisService";
 	public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
 	private static PowerManager.WakeLock lockStatic = null;
+
+    public static void callMe(Context context) {
+        RadisService.acquireStaticLock(context);
+        context.startService(new Intent(context, RadisService.class));
+    }
 
 	public RadisService() {
 		super(TAG);

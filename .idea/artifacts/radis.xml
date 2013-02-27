@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="apk" name="radis">
+    <output-path>$PROJECT_DIR$/classes/artifacts/radis</output-path>
+    <properties id="android-properties">
+      <options>
+        <option name="includeSystemProGuardCfgFile" value="true" />
+        <option name="keyAlias" value="geobert" />
+        <option name="keyPassword" value="YmJiYmJi" />
+        <option name="keyStorePassword" value="YmJiYmJi" />
+        <option name="keyStoreUrl" value="file://$PROJECT_DIR$/../../geobert_key" />
+        <option name="proGuardCfgFileUrl" value="file://$PROJECT_DIR$/proguard.cfg" />
+        <option name="runProGuard" value="true" />
+        <option name="signingMode" value="RELEASE_SIGNED" />
+      </options>
+    </properties>
+    <root id="archive" name="radis.apk">
+      <element id="android-final-package" facet="radis/android/Android" />
+    </root>
+  </artifact>
+</component>

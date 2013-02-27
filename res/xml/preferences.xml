@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-	android:title="@string/preferences">
-	<fr.geobert.radis.tools.ValidatedEditTextPreference android:dialogTitle="@string/prefs_insertion_date_title"
-		android:positiveButtonText="@string/ok" android:negativeButtonText="@string/cancel"
-		android:title="@string/prefs_insertion_date_label" android:key="insertion_date"
-		android:summary="@string/prefs_insertion_date_text" android:inputType="number"
-		android:persistent="true"></fr.geobert.radis.tools.ValidatedEditTextPreference>
-	<ListPreference android:key="quickadd_account"
-		android:title="@string/quickadd_account"></ListPreference>
-	<CheckBoxPreference android:key="hide_account_quick_add" android:title="@string/hide_account_quick_add" android:summary="@string/hide_account_quick_add_details" />
-	<CheckBoxPreference android:key="hide_ops_quick_add" android:title="@string/hide_ops_quick_add" android:summary="@string/hide_ops_quick_add_details" />
+                  android:title="@string/preferences">
+    <fr.geobert.radis.tools.ValidatedEditTextPreference
+            android:dialogTitle="@string/prefs_insertion_date_title"
+            android:positiveButtonText="@string/ok"
+            android:negativeButtonText="@string/cancel"
+            android:title="@string/prefs_insertion_date_label"
+            android:key="insertion_date"
+            android:summary="@string/prefs_insertion_date_text"
+            android:inputType="number"
+            android:persistent="true"/>
+    <ListPreference
+            android:key="quickadd_account"
+            android:title="@string/quickadd_account"/>
+    <CheckBoxPreference
+            android:key="hide_account_quick_add"
+            android:title="@string/hide_account_quick_add"
+            android:summary="@string/hide_account_quick_add_details"/>
+    <CheckBoxPreference
+            android:key="hide_ops_quick_add"
+            android:title="@string/hide_ops_quick_add"
+            android:summary="@string/hide_ops_quick_add_details"/>
 </PreferenceScreen>

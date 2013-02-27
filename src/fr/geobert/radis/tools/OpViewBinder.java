@@ -1,4 +1,4 @@
-package fr.geobert.radis;
+package fr.geobert.radis.tools;
 
 import java.util.Date;
 
@@ -11,6 +11,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import fr.geobert.radis.R;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
 

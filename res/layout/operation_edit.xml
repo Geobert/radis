@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout android:padding="5dp" android:layout_width="fill_parent"
-	xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_height="wrap_content" android:orientation="vertical">
-	<ScrollView android:layout_width="fill_parent"
-		android:layout_height="0dip" android:layout_weight="1"
-		android:fillViewport="true">
-		<include layout="@layout/main_op_edit"/>
-	</ScrollView>
-	<LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton">
-		<Button android:id="@+id/confirm_op" android:text="@string/ok"
-			android:layout_weight="1" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
-		<Button android:id="@+id/cancel_op" android:text="@string/cancel"
-			android:layout_weight="1" android:layout_width="fill_parent"
-			android:layout_height="wrap_content" />
-	</LinearLayout>
-</LinearLayout>
+<ScrollView
+        android:layout_width="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+    <fragment
+            android:name="fr.geobert.radis.ui.editor.OperationEditFragment"
+            android:id="@+id/main_edit_pane"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"/>
+</ScrollView>

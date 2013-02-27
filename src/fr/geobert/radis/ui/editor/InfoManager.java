@@ -1,4 +1,4 @@
-package fr.geobert.radis.editor;
+package fr.geobert.radis.ui.editor;
 
 import java.util.HashMap;
 

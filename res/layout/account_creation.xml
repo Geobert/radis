@@ -1,90 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="5px" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:fillViewport="true">
 
-    <ScrollView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_weight="1"
-        android:fillViewport="true" >
-
-        <LinearLayout
+    <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="5px" >
+            android:padding="5dp">
 
-            <!--
-                 <TextView android:text="@string/name" style="@style/EditorTextView" 
-				/>
-            -->
-
-            <EditText
+        <EditText
                 android:id="@+id/edit_account_name"
                 style="@style/EditorEditText"
-                android:hint="@string/name" />
+                android:hint="@string/name"/>
 
-            <EditText
+        <EditText
                 android:id="@+id/edit_account_start_sum"
                 style="@style/EditorEditText.Sum"
-                android:hint="@string/start_sum" />
+                android:hint="@string/start_sum"/>
 
-            <TextView
+        <TextView
                 style="@style/EditorTextView"
-                android:text="@string/currency" />
+                android:text="@string/currency"/>
 
-            <Spinner
+        <Spinner
                 android:id="@+id/currency_spinner"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:drawSelectorOnTop="true"
-                android:prompt="@string/account_prompt" >
-            </Spinner>
+                android:prompt="@string/account_prompt">
+        </Spinner>
 
-            <EditText
+        <EditText
                 android:id="@+id/custom_currency"
                 style="@style/EditorEditText"
                 android:maxLength="3"
                 android:layout_marginBottom="5dip"
-                android:hint="@string/custom_currency_hint" />
+                android:hint="@string/custom_currency_hint"/>
 
-            <TextView
+        <TextView
                 style="@style/EditorTextView"
-                android:text="@string/projection_date" />
+                android:text="@string/projection_date"/>
 
-            <Spinner
+        <Spinner
                 android:id="@+id/projection_date_spinner"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:drawSelectorOnTop="true"
-                android:prompt="@string/projection_date_mode" />
+                android:prompt="@string/projection_date_mode"/>
 
-            <EditText
+        <EditText
                 android:id="@+id/projection_date_value"
                 style="@style/EditorEditText.Date"
-                android:layout_marginBottom="5dip" />
+                android:layout_marginBottom="5dip"/>
 
-            <EditText
+        <EditText
                 android:id="@+id/edit_account_desc"
                 style="@style/DescEditText"
-                android:hint="@string/description" />
-        </LinearLayout>
-    </ScrollView>
-
-    <LinearLayout style="@style/EditorHorizontalLinearLayout.FormButton" >
-
-        <Button
-            android:id="@+id/confirm_creation"
-            style="@style/FormButton"
-            android:text="@string/ok" />
-
-        <Button
-            android:id="@+id/cancel_creation"
-            style="@style/FormButton"
-            android:text="@string/cancel" />
+                android:hint="@string/description"/>
     </LinearLayout>
-
-</LinearLayout>
+</ScrollView>
