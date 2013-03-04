@@ -171,6 +171,11 @@
         <item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>
         <item name="android:actionBarStyle">@style/MyActionBarStyle</item>
         <item name="actionBarStyle">@style/MyActionBarStyle</item>
+        <item name="android:imageButtonStyle">@style/RadisButton</item>
+    </style>
+
+    <style name="RadisButton" parent="@android:style/Widget.ImageButton">
+        <item name="android:background">@drawable/radistheme_btn_default</item>
     </style>
 
     <style name="OverFlow" parent="@style/Widget.Sherlock.ActionButton.Overflow">

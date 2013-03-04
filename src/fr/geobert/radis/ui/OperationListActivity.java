@@ -1,13 +1,11 @@
 package fr.geobert.radis.ui;
 
 import android.app.Activity;
-import android.content.ContentProviderClient;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -362,6 +360,24 @@ public class OperationListActivity extends BaseActivity implements
         public ImageView scheduledImg;
         public StringBuilder tagBuilder = new StringBuilder();
     }    // used in InnerViewBinder
+
+    protected static class DeleteOpConfirmationDialog extends DialogFragment {
+        public static DeleteOpConfirmationDialog newInstance() {
+            DeleteOpConfirmationDialog frag = new DeleteOpConfirmationDialog();
+
+            return frag;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    // TODO deleteOp(mCurrentSelectedOp.position);
+                }
+            });
+        }
+    }
 
     private class SimpleAccountViewBinder implements SimpleCursorAdapter.ViewBinder {
         private int ACCOUNT_NAME_COL = -1;

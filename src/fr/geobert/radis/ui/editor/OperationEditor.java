@@ -1,9 +1,12 @@
 package fr.geobert.radis.ui.editor;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
@@ -13,14 +16,15 @@ import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
+import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.OperationTable;
+import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Tools;
 
 public class OperationEditor extends CommonOpEditor {
     public static final long NO_OPERATION = 0;
     public static final int OPERATION_EDITOR = 2000;
-    protected static final int ASK_UPDATE_SCHEDULED_DIALOG_ID = 10;
     private static final String TAG = "OperationEditor";
     private static final int GET_OP = 610;
     protected Operation mOriginalOp;
@@ -90,7 +94,7 @@ public class OperationEditor extends CommonOpEditor {
                 setResAndExit();
             } else {
                 if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
-                    showDialog(ASK_UPDATE_SCHEDULED_DIALOG_ID);
+                    UpdateScsheduledOp.newInstance(mCurrentOp, mPreviousSum, mRowId).show(getSupportFragmentManager(), "dialog");
                 } else {
                     OperationTable.updateOp(this, mRowId, op, op.mAccountId);
                     setResAndExit();
@@ -124,54 +128,6 @@ public class OperationEditor extends CommonOpEditor {
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    //    @Override
-//    protected Dialog onCreateDialog(int id) {
-//        switch (id) {
-//            case ASK_UPDATE_SCHEDULED_DIALOG_ID:
-//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//                builder.setMessage(R.string.ask_update_scheduling)
-//                        .setCancelable(false)
-//                        .setPositiveButton(R.string.update,
-//                                new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(DialogInterface dialog,
-//                                                        int which) {
-//                                        final ScheduledOperation op = new ScheduledOperation(
-//                                                mCurrentOp, mCurrentOp.mAccountId);
-//                                        ScheduledOperationTable.updateScheduledOp(
-//                                                OperationEditor.this,
-//                                                mCurrentOp.mScheduledId, op, true);
-//                                        ScheduledOperationTable.updateAllOccurences(
-//                                                OperationEditor.this, op,
-//                                                mPreviousSum,
-//                                                mCurrentOp.mScheduledId);
-//                                        OperationEditor.this.setResAndExit(true);
-//                                    }
-//                                })
-//                        .setNeutralButton(R.string.disconnect,
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog,
-//                                                        int id) {
-//                                        mCurrentOp.mScheduledId = 0;
-//                                        OperationEditor.this.setResAndExit(OperationTable
-//                                                .updateOp(OperationEditor.this,
-//                                                        mRowId, mCurrentOp,
-//                                                        mCurrentOp.mAccountId));
-//                                    }
-//                                })
-//                        .setNegativeButton(R.string.cancel,
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog,
-//                                                        int id) {
-//                                        dialog.cancel();
-//                                    }
-//                                });
-//                return builder.create();
-//            default:
-//                return super.onCreateDialog(id);
-//        }
-//    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -225,4 +181,66 @@ public class OperationEditor extends CommonOpEditor {
         // TODO Auto-generated method stub
 
     }
+
+    protected static class UpdateScsheduledOp extends DialogFragment {
+        public static UpdateScsheduledOp newInstance(Operation currentOp, long previousSum, long rowId) {
+            UpdateScsheduledOp frag = new UpdateScsheduledOp();
+            Bundle args = new Bundle();
+            args.putLong("previousSum", previousSum);
+            args.putLong("rowId", rowId);
+            args.putParcelable("currentOp", currentOp);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            final OperationEditor act = (OperationEditor) getActivity();
+            Bundle args = getArguments();
+            final Operation currentOp = args.getParcelable("currentOp");
+            final long previousSum = args.getLong("previousSum");
+            final long rowId = args.getLong("rowId");
+            AlertDialog.Builder builder = new AlertDialog.Builder(act);
+            builder.setMessage(R.string.ask_update_scheduling)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.update,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                                    int which) {
+                                    final ScheduledOperation op = new ScheduledOperation(
+                                            currentOp, currentOp.mAccountId);
+                                    ScheduledOperationTable.updateScheduledOp(
+                                            act,
+                                            currentOp.mScheduledId, op, true);
+                                    ScheduledOperationTable.updateAllOccurences(
+                                            getActivity(), op,
+                                            previousSum,
+                                            currentOp.mScheduledId);
+                                    act.setResAndExit();
+                                }
+                            })
+                    .setNeutralButton(R.string.disconnect,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int id) {
+                                    currentOp.mScheduledId = 0;
+                                    OperationTable
+                                            .updateOp(act,
+                                                    rowId, currentOp,
+                                                    currentOp.mAccountId);
+                                    act.setResAndExit();
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            builder.create();
+        }
+    }
 }
+

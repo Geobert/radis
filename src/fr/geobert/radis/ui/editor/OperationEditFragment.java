@@ -1,7 +1,7 @@
 package fr.geobert.radis.ui.editor;
 
 import android.database.Cursor;
-import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +19,6 @@ import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.*;
 
 import java.text.ParseException;
-import java.util.HashMap;
 
 public class OperationEditFragment extends SherlockFragment {
     private MyAutoCompleteTextView mOpThirdPartyText;
@@ -33,7 +32,6 @@ public class OperationEditFragment extends SherlockFragment {
     private LinearLayout mTransfertCont;
     private LinearLayout mThirdPartyCont;
     private EditText mNotesText;
-    private HashMap<String, InfoManager> mInfoManagersMap;
     private CheckBox mIsTransfertCheck;
     private CommonOpEditor mActivity;
     private OnTransfertCheckedChangeListener mTransfertCheckedListener = null;
@@ -64,7 +62,6 @@ public class OperationEditFragment extends SherlockFragment {
         mTransfertCont = (LinearLayout) mActivity.findViewById(R.id.transfert_cont);
         mThirdPartyCont = (LinearLayout) mActivity.findViewById(R.id.third_party_cont);
         mNotesText = (EditText) mActivity.findViewById(R.id.edit_op_notes);
-        mInfoManagersMap = new HashMap<String, InfoManager>();
 
         mOpThirdPartyText.setNextFocusDownId(R.id.edit_op_sum);
         mOpSumText.setNextFocusDownId(R.id.edit_op_tag);
@@ -83,18 +80,30 @@ public class OperationEditFragment extends SherlockFragment {
                 });
         mTransfertCont.setVisibility(View.GONE);
         mThirdPartyCont.post(new Runnable() {
+            private void adjustImageButton(ImageButton btn) {
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
+                params.bottomMargin = 3;
+                params.height = mThirdPartyCont.getMeasuredHeight();
+                btn.setLayoutParams(params);
+            }
+
             @Override
             public void run() {
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mThirdPartyCont.getLayoutParams();
                 params.height = mThirdPartyCont.getMeasuredHeight();
                 mTransfertCont.setLayoutParams(params);
+                if (Build.VERSION.SDK_INT < 11) {
+                    ImageButton btn = (ImageButton) mActivity.findViewById(R.id.edit_op_third_parties_list);
+                    adjustImageButton(btn);
+                    btn = (ImageButton) mActivity.findViewById(R.id.edit_op_tags_list);
+                    adjustImageButton(btn);
+                    btn = (ImageButton) mActivity.findViewById(R.id.edit_op_modes_list);
+                    adjustImageButton(btn);
+                    btn = (ImageButton) mActivity.findViewById(R.id.edit_op_sign);
+                    adjustImageButton(btn);
+                }
             }
         });
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();    //To change body of overridden methods use File | Settings | File Templates.
     }
 
     @Override
@@ -114,6 +123,7 @@ public class OperationEditFragment extends SherlockFragment {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        InfoManagerDialog.createThirdPartiesListDialog(mActivity).show(getFragmentManager(), "thirdPartiesDialog");
                         //showDialog(THIRD_PARTIES_DIALOG_ID);
                     }
                 });
@@ -122,6 +132,7 @@ public class OperationEditFragment extends SherlockFragment {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        InfoManagerDialog.createTagsListDialog(mActivity).show(getFragmentManager(), "tagsDialog");
                         // showDialog(TAGS_DIALOG_ID);
                     }
                 });
@@ -130,6 +141,7 @@ public class OperationEditFragment extends SherlockFragment {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        InfoManagerDialog.createModesListDialog(mActivity).show(getFragmentManager(), "modesDialog");
                         // showDialog(MODES_DIALOG_ID);
                     }
                 });
@@ -304,16 +316,6 @@ public class OperationEditFragment extends SherlockFragment {
         }
 
         return res;
-    }
-
-    private InfoManager createInfoManagerIfNeeded(Uri table, String colName,
-                                                  String title, int editId, int deletiId) {
-        InfoManager i = mInfoManagersMap.get(table.toString());
-        if (null == i) {
-            i = new InfoManager(mActivity, title, table, colName, editId, deletiId);
-            mInfoManagersMap.put(table.toString(), i);
-        }
-        return i;
     }
 
     protected void fillOperationWithInputs(Operation op) {
