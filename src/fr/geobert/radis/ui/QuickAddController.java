@@ -68,13 +68,6 @@ public class QuickAddController {
 
     public static void setQuickAddButEnabled(ImageButton but, boolean b) {
         but.setEnabled(b);
-//		int drawable;
-//		if (b) {
-//			drawable = R.drawable.btn_check_buttonless_on;
-//		} else {
-//			drawable = R.drawable.btn_check_buttonless_off;
-//		}
-//		but.setImageResource(drawable);
     }
 
     public void setAccount(long accountId) {

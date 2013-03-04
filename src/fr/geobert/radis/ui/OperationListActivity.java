@@ -25,6 +25,7 @@ import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
+import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
@@ -59,7 +60,7 @@ public class OperationListActivity extends BaseActivity implements
     private int greenColor;
     private Integer mLastSelectedPosition = null;
     private boolean mOnRestore = false;
-    private QuickAddController mQuickAddController;
+    private QuickAddController mQuickAddController = null;
     private long mProjectionDate;
     private boolean mReceiverIsRegistered;
     private OperationsCursorAdapter mOpListCursorAdapter;
@@ -100,11 +101,40 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        if (mQuickAddController != null) {
+            mQuickAddController.setAutoNegate(true);
+            mQuickAddController.clearFocus();
+        }
+    }
+
+    private void initQuickAdd() {
+        mQuickAddController = new QuickAddController(this, this);
+        mQuickAddController.setAccount(mAccountId);
+        mQuickAddController.initViewBehavior();
+        mQuickAddController.setAutoNegate(true);
         mQuickAddController.clearFocus();
+        boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(
+                RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
+        int visibility = View.VISIBLE;
+        if (hideQuickAdd) {
+            visibility = View.GONE;
+        }
+        mQuickAddController.setVisibility(visibility);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mQuickAddController.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mQuickAddController.onRestoreInstanceState(savedInstanceState);
     }
 
     private void initOperationList() {
-        mQuickAddController = new QuickAddController(this, this);
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setEmptyView(findViewById(android.R.id.empty));
 
@@ -220,6 +250,9 @@ public class OperationListActivity extends BaseActivity implements
         if (allAccounts != null && allAccounts.getCount() > 0) {
             // get the ops
             getOperationsList();
+            if (mQuickAddController == null) {
+                initQuickAdd();
+            }
         } else {
             // no account, open create account
             AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
@@ -287,7 +320,7 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     public void updateDisplay(Intent intent) {
         updateAccountList();
-        updateOperationList();
+        //updateOperationList();
     }
 
     private void updateOperationList() {
