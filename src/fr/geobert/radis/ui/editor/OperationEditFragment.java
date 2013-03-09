@@ -37,11 +37,6 @@ public class OperationEditFragment extends SherlockFragment {
     private OnTransfertCheckedChangeListener mTransfertCheckedListener = null;
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.main_op_edit, container, false);
     }

@@ -1,47 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:background="@android:color/black"
-    android:orientation="vertical" >
-
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-
-        <ImageButton
-            android:id="@+id/add_sch_op"
-            android:layout_width="47dp"
-            android:layout_height="46.5dp"
-            android:layout_marginTop="1dp"
-            android:gravity="left|center_vertical"
-            android:src="@android:drawable/ic_input_add" />
-
-        <Spinner
-            android:id="@+id/account_spinner"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-    </LinearLayout>
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="@android:color/black"
+              android:orientation="vertical">
 
     <ListView
-        android:id="@+id/android:list"
-        style="@style/OpListView" />
+            android:id="@android:id/list"
+            style="@style/OpListView"/>
 
     <TextView
-        android:id="@+id/android:empty"
-        android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="@string/no_operation"
-        android:textSize="20dp" />
+            android:id="@android:id/empty"
+            android:layout_width="fill_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/no_operation_sch"
+            android:textSize="20dp"/>
 
     <TextView
-        android:id="@+id/sch_op_sum_total"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        android:textSize="11dp" />
+            android:id="@+id/sch_op_sum_total"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textSize="11dp"/>
 
 </LinearLayout>

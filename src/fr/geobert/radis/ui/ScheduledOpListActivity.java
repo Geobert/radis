@@ -1,7 +1,6 @@
 package fr.geobert.radis.ui;
 
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,21 +11,20 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
-import android.view.*;
-import android.view.ContextMenu.ContextMenuInfo;
-import android.view.View.OnClickListener;
-import android.widget.*;
+import android.view.Menu;
+import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ListView;
+import android.widget.TextView;
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
-import fr.geobert.radis.data.Account;
+import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.*;
-import fr.geobert.radis.tools.*;
-import fr.geobert.radis.ui.editor.AccountEditor;
-import fr.geobert.radis.ui.editor.CommonOpEditor;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.OpViewBinder;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.Date;
@@ -35,9 +33,6 @@ public class ScheduledOpListActivity extends BaseActivity implements
         LoaderCallbacks<Cursor> {
     public static final String CURRENT_ACCOUNT = "accountId";
     private static final String TAG = "ScheduleOpList";
-    // activities ids
-    private static final int ACTIVITY_SCH_OP_CREATE = 0;
-    private static final int ACTIVITY_SCH_OP_EDIT = 1;
     // context menu ids
     private static final int DELETE_OP_ID = Menu.FIRST + 1;
     private static final int EDIT_OP_ID = Menu.FIRST + 2;
@@ -46,12 +41,14 @@ public class ScheduledOpListActivity extends BaseActivity implements
     private static final int GET_ALL_SCH_OPS = 900;
     private static final int GET_SCH_OPS_OF_ACCOUNT = 910;
     private AdapterContextMenuInfo mOpToDelete;
-    private Spinner mAccountSpinner;
+    //    private Spinner mAccountSpinner;
     private long mCurrentAccount;
     private ListView mListView;
     private SimpleCursorAdapter mAdapter;
     private CursorLoader mLoader;
     private TextView mTotalLbl;
+    private SimpleCursorAdapter mAccountAdapter;
+    private boolean isResuming = false;
 
     public static void callMe(Context ctx, final long currentAccountId) {
         Intent i = new Intent(ctx, ScheduledOpListActivity.class);
@@ -62,47 +59,17 @@ public class ScheduledOpListActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setIcon(R.drawable.sched_48);
+        actionbar.setDisplayShowTitleEnabled(false);
 
-        setTitle(R.string.scheduled_ops);
         setContentView(R.layout.scheduled_list);
+
         mListView = (ListView) findViewById(android.R.id.list);
-        registerForContextMenu(mListView);
+//        registerForContextMenu(mListView);
         mTotalLbl = (TextView) findViewById(R.id.sch_op_sum_total);
-        final GestureDetector gestureDetector = new GestureDetector(this,
-                new ListViewSwipeDetector(mListView, new ListSwipeAction() {
-                    @Override
-                    public void run() {
-                        ScheduledOpListActivity.this.finish();
-                    }
-                }, new ListSwipeAction() {
-                    @Override
-                    public void run() {
-                        if (mRowId > 0) {
-                            startEditScheduledOperation(mRowId);
-                        }
-                    }
-                }
-                ));
-        View.OnTouchListener gestureListener = new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                if (gestureDetector.onTouchEvent(event)) {
-                    return true;
-                }
-                return false;
-            }
-        };
-        mListView.setOnTouchListener(gestureListener);
-
-        ImageButton btn = (ImageButton) findViewById(R.id.add_sch_op);
-        btn.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                startCreateScheduledOp();
-            }
-        });
-
-        mAccountSpinner = (Spinner) findViewById(R.id.account_spinner);
         mCurrentAccount = getIntent().getLongExtra(CURRENT_ACCOUNT, 0);
         mListView.setEmptyView(findViewById(android.R.id.empty));
         String[] from = new String[]{OperationTable.KEY_OP_DATE,
@@ -124,25 +91,19 @@ public class ScheduledOpListActivity extends BaseActivity implements
                 android.support.v4.widget.SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         mAdapter.setViewBinder(new InnerViewBinder());
         mListView.setAdapter(mAdapter);
-        mListView.setOnItemClickListener(new OnItemClickListener() {
 
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-                                    long id) {
-                startEditScheduledOperation(id);
-            }
-        });
+        populateAccountSpinner();
     }
 
-    private void fetchAllSchOps() {
-        showProgress();
-        if (mLoader == null) {
-            getSupportLoaderManager().initLoader(GET_ALL_SCH_OPS, null, this);
-        } else {
-            getSupportLoaderManager()
-                    .restartLoader(GET_ALL_SCH_OPS, null, this);
-        }
-    }
+//    private void fetchAllSchOps() {
+//        showProgress();
+//        if (mLoader == null) {
+//            getSupportLoaderManager().initLoader(GET_ALL_SCH_OPS, null, this);
+//        } else {
+//            getSupportLoaderManager()
+//                    .restartLoader(GET_ALL_SCH_OPS, null, this);
+//        }
+//    }
 
     private void fetchSchOpsOfAccount() {
         showProgress();
@@ -155,52 +116,51 @@ public class ScheduledOpListActivity extends BaseActivity implements
         }
     }
 
-    private void populateAccountSpinner(Cursor c) {
+    private void populateAccountSpinner() {
+        Cursor c = AccountManager.getInstance().getAllAccountsCursor();
         if (c != null && c.moveToFirst()) {
-            ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
-                    android.R.layout.simple_spinner_item);
-            adapter.add(new Account(0, getString(R.string.all_accounts)));
-            do {
-                adapter.add(new Account(c));
-            } while (c.moveToNext());
+            mAccountAdapter = new SimpleCursorAdapter(this, R.layout.sch_account_row, c,
+                    new String[]{AccountTable.KEY_ACCOUNT_NAME},
+                    new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+//            ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(this,
+//                    R.layout.sch_account_row, android.R.id.text1);
+//            adapter.add(new Account(0, getString(R.string.all_accounts)));
+//            do {
+//                adapter.add(new Account(c));
+//            } while (c.moveToNext());
 
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            mAccountSpinner.setAdapter(adapter);
+            //mAccountAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
             if (mCurrentAccount != 0) {
                 int pos = 0;
-                while (pos < adapter.getCount()) {
-                    long id = adapter.getItemId(pos);
+                while (pos < mAccountAdapter.getCount()) {
+                    long id = mAccountAdapter.getItemId(pos);
                     if (id == mCurrentAccount) {
-                        mAccountSpinner.setSelection(pos);
+                        getSupportActionBar().setSelectedNavigationItem(pos);
                         break;
                     } else {
                         pos++;
                     }
                 }
             }
-        }
-        mAccountSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
 
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view,
-                                       int pos, long id) {
-                Account a = (Account) parent.getItemAtPosition(pos);
-                mCurrentAccount = a.mAccountId;
-                ((InnerViewBinder) mAdapter.getViewBinder())
-                        .setCurAccount(mCurrentAccount);
-                if (mCurrentAccount != 0) {
-                    fetchSchOpsOfAccount();
-                } else {
-                    fetchAllSchOps();
+            getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
+                @Override
+                public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                    if (!isResuming) {
+                        mCurrentAccount = itemId;
+                        ((InnerViewBinder) mAdapter.getViewBinder())
+                                .setCurAccount(mCurrentAccount);
+//                        if (mCurrentAccount != 0) {
+                        fetchSchOpsOfAccount();
+//                        } else {
+//                            fetchAllSchOps();
+//                        }
+                    }
+                    return true;
                 }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-                // TODO Auto-generated method stub
-
-            }
-        });
+            });
+        }
     }
 
     @Override
@@ -228,23 +188,24 @@ public class ScheduledOpListActivity extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
+        isResuming = true;
 //        populateAccountSpinner(AccountList.getAllAccounts(this));
-        if (mCurrentAccount == 0) {
-            fetchAllSchOps();
-        } else {
-            fetchSchOpsOfAccount();
-        }
+//        if (mCurrentAccount == 0) {
+//            fetchAllSchOps();
+//        } else {
+        fetchSchOpsOfAccount();
+//        }
     }
 
-    @Override
-    protected Dialog onCreateDialog(int id) {
-        switch (id) {
-            case DIALOG_DELETE:
-                return askDeleteOccurrences();
-            default:
-                return Tools.onDefaultCreateDialog(this, id);
-        }
-    }
+//    @Override
+//    protected Dialog onCreateDialog(int id) {
+//        switch (id) {
+//            case DIALOG_DELETE:
+//                return askDeleteOccurrences();
+//            default:
+//                return Tools.onDefaultCreateDialog(this, id);
+//        }
+//    }
 
     private AlertDialog askDeleteOccurrences() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -301,68 +262,70 @@ public class ScheduledOpListActivity extends BaseActivity implements
         mOpToDelete = null;
     }
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenuInfo menuInfo) {
-        if (((AdapterContextMenuInfo) menuInfo).id != -1) {
-            super.onCreateContextMenu(menu, v, menuInfo);
-            menu.add(0, EDIT_OP_ID, 0, R.string.edit);
-            menu.add(0, DELETE_OP_ID, 0, R.string.delete);
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-                .getMenuInfo();
-        switch (item.getItemId()) {
-            case DELETE_OP_ID:
-                showDialog(DIALOG_DELETE);
-                mOpToDelete = info;
-                return true;
-            case EDIT_OP_ID:
-                startEditScheduledOperation(info.id);
-                return true;
-        }
-        return super.onContextItemSelected(item);
-    }
-
-    private void startEditScheduledOperation(long id) {
-        Intent i = new Intent(this, ScheduledOperationEditor.class);
-        i.putExtra(CommonOpEditor.PARAM_OP_ID, id);
-        startActivityForResult(i, ACTIVITY_SCH_OP_EDIT);
-    }
-
 //    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        super.onCreateOptionsMenu(menu);
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.common_menu, menu);
-//        return true;
+//    public void onCreateContextMenu(ContextMenu menu, View v,
+//                                    ContextMenuInfo menuInfo) {
+//        if (((AdapterContextMenuInfo) menuInfo).id != -1) {
+//            super.onCreateContextMenu(menu, v, menuInfo);
+//            menu.add(0, EDIT_OP_ID, 0, R.string.edit);
+//            menu.add(0, DELETE_OP_ID, 0, R.string.delete);
+//        }
 //    }
 
+//    @Override
+//    public boolean onContextItemSelected(MenuItem item) {
+//        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+//                .getMenuInfo();
+//        switch (item.getItemId()) {
+//            case DELETE_OP_ID:
+//                showDialog(DIALOG_DELETE);
+//                mOpToDelete = info;
+//                return true;
+//            case EDIT_OP_ID:
+//                startEditScheduledOperation(info.id);
+//                return true;
+//        }
+//        return super.onContextItemSelected(item);
+//    }
+
+
     @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        if (Tools.onKeyLongPress(keyCode, event, this)) {
-            return true;
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+            case R.id.create_operation:
+                ScheduledOperationEditor.callMeForResult(this, 0, mCurrentAccount,
+                        ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE);
+                return true;
         }
-        return super.onKeyLongPress(keyCode, event);
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(com.actionbarsherlock.view.Menu menu) {
+        com.actionbarsherlock.view.MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.scheduled_list_menu, menu);
+        inflater.inflate(R.menu.common_menu, menu);
+        return true;
     }
 
 //    @Override
+//    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+//        if (Tools.onKeyLongPress(keyCode, event, this)) {
+//            return true;
+//        }
+//        return super.onKeyLongPress(keyCode, event);
+//    }
+
+    //    @Override
 //    public boolean onMenuItemSelected(int featureId, MenuItem item) {
 //        if (Tools.onDefaultMenuSelected(this, featureId, item)) {
 //            return true;
 //        }
 //        return super.onMenuItemSelected(featureId, item);
 //    }
-
-    private void startCreateScheduledOp() {
-        Intent i = new Intent(this, ScheduledOperationEditor.class);
-        i.putExtra(CommonOpEditor.PARAM_OP_ID, -1l);
-        i.putExtra(AccountEditor.PARAM_ACCOUNT_ID, mCurrentAccount);
-        startActivityForResult(i, ACTIVITY_SCH_OP_CREATE);
-    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -427,8 +390,7 @@ public class ScheduledOpListActivity extends BaseActivity implements
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> arg0) {
-        // TODO Auto-generated method stub
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
 
     }
 

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:icon="@drawable/plus_48"
+            android:title="@string/new_op"
+            android:id="@+id/create_operation"
+            android:showAsAction="ifRoom"/>
+
+</menu>

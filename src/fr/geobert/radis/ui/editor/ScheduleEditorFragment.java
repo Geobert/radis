@@ -2,18 +2,20 @@ package fr.geobert.radis.ui.editor;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.*;
 import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
+import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
+import fr.geobert.radis.db.AccountTable;
 
 public class ScheduleEditorFragment extends SherlockFragment implements OnTransfertCheckedChangeListener {
     ScheduledOperation mCurrentSchOp;
-    //    private GestureOverlayView mGestureOverlay;
-//    private GestureLibrary mGesturelib = null;
     private DatePicker mEndDatePicker;
     private Spinner mAccountSpinner;
     private Spinner mPeriodicitySpinner;
@@ -21,16 +23,22 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
     private Spinner mCustomPeriodicityUnit;
     private View mCustomPeriodicityCont;
     private CheckBox mEndDateCheck;
-    private ScrollView mFlipperScroll;
-    private ScheduledOperationEditor mActivity;
+    private ScheduledOperationEditor mActivity = null;
     private OpEditFragmentAccessor mOpEditFragment;
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.scheduling_edit, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         mActivity = (ScheduledOperationEditor) getSherlockActivity();
-        mOpEditFragment = (OpEditFragmentAccessor) mActivity;
+        mOpEditFragment = mActivity;
         initViewReferences();
         initViewBehavior();
+        populateFields();
     }
 
     private void initViewReferences() {
@@ -41,7 +49,6 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
         mCustomPeriodicityUnit = (Spinner) mActivity.findViewById(R.id.custom_periodicity_choice);
         mEndDatePicker = (DatePicker) mActivity.findViewById(R.id.edit_end_date);
         mEndDateCheck = (CheckBox) mActivity.findViewById(R.id.end_date_check);
-        mFlipperScroll = (ScrollView) mActivity.findViewById(R.id.flipper_scrollview);
     }
 
     void populateFields() {
@@ -51,7 +58,7 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
                 : Integer.toString(mCurrentSchOp.mPeriodicity));
         poputatePeriodicitySpinner();
         populateCustomPeriodicitySpinner();
-//		populateAccountSpinner(AccountList.getAllAccounts(this));
+        populateAccountSpinner(AccountManager.getInstance().getAllAccountsCursor());
         if (mCurrentSchOp.getEndDate() > 0) {
             mEndDateCheck.setChecked(true);
             mEndDatePicker.setEnabled(true);
@@ -147,12 +154,9 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
 
     private void populateAccountSpinner(Cursor c) {
         if (c.moveToFirst()) {
-            ArrayAdapter<Account> adapter = new ArrayAdapter<Account>(mActivity,
-                    android.R.layout.simple_spinner_item);
-            adapter.add(new Account(0, getString(R.string.choose_account)));
-            do {
-                adapter.add(new Account(c));
-            } while (c.moveToNext());
+            SimpleCursorAdapter adapter = new SimpleCursorAdapter(mActivity,
+                    android.R.layout.simple_spinner_item, c, new String[]{AccountTable.KEY_ACCOUNT_NAME},
+                    new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mAccountSpinner.setAdapter(adapter);
             if (mCurrentSchOp.mAccountId != 0 || mActivity.mCurAccountId != 0) {

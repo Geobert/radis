@@ -53,6 +53,7 @@
         </activity>
         <activity
                 android:name=".ui.editor.ScheduledOperationEditor"
+                android:label="@string/sch_edition"
                 android:launchMode="singleTop">
         </activity>
 

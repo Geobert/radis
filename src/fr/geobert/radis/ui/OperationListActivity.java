@@ -381,6 +381,9 @@ public class OperationListActivity extends BaseActivity implements
             case R.id.create_operation:
                 OperationEditor.callMeForResult(this, OperationEditor.NO_OPERATION, mAccountId);
                 return true;
+            case R.id.go_to_sch_op:
+                ScheduledOpListActivity.callMe(this, mAccountId);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }

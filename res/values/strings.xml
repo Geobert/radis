@@ -38,7 +38,9 @@
     <string name="sum_at">At %1$s = %2$s</string>
     <string name="allowed_sum_digits">0123456789+-.,</string>
     <string name="date_chars">0123456789/</string>
-    <string name="no_operation">o transaction. Press "menu" to create one.</string>
+    <string name="no_operation_sch">No transaction. Press the "plus" button at top to create one.</string>
+    <string name="no_operation">No transaction. Press the "plus" button at top or quick add at bottom to create one.
+    </string>
     <string name="new_op">New transaction</string>
     <string name="tp_account_name">Account %s</string>
     <string name="account_edit">Account edition</string>
@@ -119,7 +121,7 @@
     <string name="every_fem">Every</string>
     <string name="no_end_date">Forever</string>
     <string name="scheduling">Scheduling</string>
-    <string name="basics">Basics</string>
+    <string name="basics">Transaction</string>
     <string name="end_date">End date</string>
     <string name="scheduled_ops">Schedule</string>
     <string name="account">Account</string>
@@ -200,4 +202,5 @@
     <string name="loading">Loading…</string>
     <string name="sched_op_total_sum">Total credit : %1$s — Total debit : %2$"s\nBalance : %3$s</string>
     <string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
+    <string name="sch_edition">Scheduled transaction edition</string>
 </resources>
