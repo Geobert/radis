@@ -125,7 +125,9 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mQuickAddController.onSaveInstanceState(outState);
+        if (mQuickAddController != null) {
+            mQuickAddController.onSaveInstanceState(outState);
+        }
     }
 
     @Override

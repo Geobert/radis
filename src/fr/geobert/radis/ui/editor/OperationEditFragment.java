@@ -99,13 +99,17 @@ public class OperationEditFragment extends SherlockFragment {
                 }
             }
         });
+
+        initViewAdapters();
+        initListeners();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initViewAdapters();
-        initListeners();
+        if (mOpSumText.getText().toString().trim().length() == 0) {
+            mSumTextWatcher.setAutoNegate(true);
+        }
     }
 
     void setTransfertCheckedChangeListener(OnTransfertCheckedChangeListener listener) {

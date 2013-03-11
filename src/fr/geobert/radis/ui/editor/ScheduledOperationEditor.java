@@ -22,6 +22,7 @@ import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.service.RadisService;
+import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFragmentAccessor {
     // activities ids
@@ -126,7 +127,13 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     }
 
     private void onOkClicked() {
-        saveOpAndExit();
+        StringBuilder errMsg = new StringBuilder();
+        if (isFormValid(errMsg)) {
+            fillOperationWithInputs(mCurrentOp);
+            saveOpAndExit();
+        } else {
+            Tools.popError(this, errMsg.toString(), null);
+        }
     }
 
     private void onCancelClicked() {
@@ -148,7 +155,8 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             getSupportLoaderManager().initLoader(GET_SCH_OP_SRC,
                     getIntent().getExtras(), this);
         } else {
-            mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation();
+            mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(mCurAccountId);
+            mCurrentOp = mSchedEditTab.getFragment().mCurrentSchOp;
             //populateFields();
         }
     }
@@ -159,11 +167,13 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             fetchOp(GET_SCH_OP);
         } else {
             onOpNotFound();
+            populateFields();
         }
     }
 
     @Override
     protected void populateFields() {
+        mMainEditTab.getFragment().populateCommonFields(mCurrentOp);
         mSchedEditTab.getFragment().populateFields();
     }
 
@@ -289,14 +299,6 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     }
 
     @Override
-    protected void onResume() {
-//        if (!mOnBasics) {
-//            mViewFlipper.showNext();
-//        }
-        super.onResume();
-    }
-
-    @Override
     protected void fillOperationWithInputs(Operation operation) {
         mMainEditTab.getFragment().fillOperationWithInputs(operation);
         mSchedEditTab.getFragment().fillOperationWithInputs(operation);
@@ -304,7 +306,6 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-//		Loader<Cursor> l = super.onCreateLoader(id, args);
         CursorLoader l = null;
         if (l == null) {
             switch (id) {
@@ -331,7 +332,6 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-//		super.onLoadFinished(loader, data);
         hideProgress();
         switch (loader.getId()) {
             case GET_SCH_OP:
@@ -352,9 +352,6 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 }
                 populateFields();
                 break;
-//		case GET_ALL_ACCOUNTS:
-//			populateAccountSpinner(data);
-//			break;
             default:
                 break;
         }

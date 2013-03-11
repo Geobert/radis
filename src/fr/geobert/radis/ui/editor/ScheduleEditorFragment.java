@@ -2,10 +2,17 @@ package fr.geobert.radis.ui.editor;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.*;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.DatePicker;
+import android.widget.EditText;
+import android.widget.Spinner;
 import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
@@ -52,6 +59,9 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
     }
 
     void populateFields() {
+        if (mActivity == null) {
+            return;
+        }
         ScheduledOperation op = mCurrentSchOp;
         mActivity.mCurrentOp = op;
         mCustomPeriodicityVal.setText(mCurrentSchOp.mPeriodicity == 0 ? ""
@@ -180,6 +190,9 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
     }
 
     protected void fillOperationWithInputs(Operation operation) {
+        if (mActivity == null) {
+            return;
+        }
         ScheduledOperation op = (ScheduledOperation) operation;
         if (!mActivity.isTransfertChecked()) {
             Account a = (Account) mAccountSpinner.getSelectedItem();
@@ -212,6 +225,9 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
     boolean isFormValid(StringBuilder errMsg) {
         ScheduledOperation op = mCurrentSchOp;
         boolean res = true;
+        if (mPeriodicitySpinner == null) { //
+            return res;
+        }
         if (mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner
                 .getAdapter().getCount() - 1)) {
             try {

@@ -166,18 +166,9 @@ public class ScheduledOpListActivity extends BaseActivity implements
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        // if (resultCode == RESULT_OK) {
-        // switch (mLoader.getId()) {
-        // case GET_ALL_SCH_OPS:
-        // fetchAllSchOps();
-        // break;
-        // case GET_SCH_OPS_OF_ACCOUNT:
-        // fetchSchOpsOfAccount();
-        // break;
-        // default:
-        // break;
-        // }
-        // }
+//        if (resultCode == RESULT_OK) {
+//            fetchSchOpsOfAccount();
+//        }
     }
 
     @Override
@@ -242,7 +233,7 @@ public class ScheduledOpListActivity extends BaseActivity implements
             ScheduledOperationTable.deleteAllOccurences(this, op.id);
         }
         if (ScheduledOperationTable.deleteScheduledOp(this, op.id)) {
-            int req = -1;
+            int req;
             if (mCurrentAccount == 0) {
                 req = GET_ALL_SCH_OPS;
             } else {
