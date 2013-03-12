@@ -1,7 +1,11 @@
 package fr.geobert.radis.ui;
 
 import android.app.Activity;
-import android.content.*;
+import android.content.ContentProviderClient;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -34,7 +38,11 @@ import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.service.RadisService;
-import fr.geobert.radis.tools.*;
+import fr.geobert.radis.tools.DBPrefsManager;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.OpViewBinder;
+import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.UpdateDisplayInterface;
 import fr.geobert.radis.ui.editor.AccountEditor;
 import fr.geobert.radis.ui.editor.OperationEditor;
 
@@ -174,9 +182,19 @@ public class OperationListActivity extends BaseActivity implements
         getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                return false; // TODO
+                return onAccountChanged(itemId);
             }
         });
+    }
+
+    private boolean onAccountChanged(long itemId) {
+        if (mQuickAddController != null && itemId != mAccountId) {
+            AccountManager.getInstance().setCurrentAccountId(itemId);
+            getOperationsList();
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -251,8 +269,9 @@ public class OperationListActivity extends BaseActivity implements
         Cursor allAccounts = AccountManager.getInstance().getAllAccountsCursor();
         if (allAccounts != null && allAccounts.getCount() > 0) {
             // get the ops
-            getOperationsList();
+            //getOperationsList();
             if (mQuickAddController == null) {
+                mAccountId = AccountManager.getInstance().getCurrentAccountId(this);
                 initQuickAdd();
             }
         } else {
@@ -296,6 +315,7 @@ public class OperationListActivity extends BaseActivity implements
                 break;
             case OperationEditor.OPERATION_EDITOR:
                 if (resultCode == RESULT_OK) {
+                    updateAccountList();
                     updateOperationList();
                 }
                 break;

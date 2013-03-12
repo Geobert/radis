@@ -96,7 +96,7 @@ public class OperationEditor extends CommonOpEditor {
                 if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
                     UpdateScsheduledOp.newInstance(mCurrentOp, mPreviousSum, mRowId).show(getSupportFragmentManager(), "dialog");
                 } else {
-                    OperationTable.updateOp(this, mRowId, op, op.mAccountId);
+                    OperationTable.updateOp(this, mRowId, op, mPreviousSum);
                     setResAndExit();
                 }
             }

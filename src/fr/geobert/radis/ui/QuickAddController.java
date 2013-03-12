@@ -18,7 +18,13 @@ import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.service.RadisService;
-import fr.geobert.radis.tools.*;
+import fr.geobert.radis.tools.CorrectCommaWatcher;
+import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.InfoAdapter;
+import fr.geobert.radis.tools.MyAutoCompleteTextView;
+import fr.geobert.radis.tools.QuickAddTextWatcher;
+import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.UpdateDisplayInterface;
 
 public class QuickAddController {
     private MyAutoCompleteTextView mQuickAddThirdParty;
