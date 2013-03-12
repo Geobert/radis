@@ -2,7 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
-              android:background="@android:color/black"
               android:orientation="vertical">
 
     <ListView
@@ -16,7 +15,7 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/no_operation_sch"
-            android:textSize="20dp"/>
+            android:textSize="18dp"/>
 
     <TextView
             android:id="@+id/sch_op_sum_total"
