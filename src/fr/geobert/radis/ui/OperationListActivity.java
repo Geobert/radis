@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
@@ -39,6 +40,7 @@ import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
+import fr.geobert.radis.tools.ExpandAnimation;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.OpViewBinder;
 import fr.geobert.radis.tools.Tools;
@@ -66,7 +68,7 @@ public class OperationListActivity extends BaseActivity implements
     private SimpleCursorAdapter mAccountAdapter;
     private int redColor;
     private int greenColor;
-    private Integer mLastSelectedPosition = null;
+    private int mLastSelectedPosition = -1;
     private boolean mOnRestore = false;
     private QuickAddController mQuickAddController = null;
     private long mProjectionDate;
@@ -82,6 +84,7 @@ public class OperationListActivity extends BaseActivity implements
 
     private static GregorianCalendar date1 = new GregorianCalendar();
     private Long mAccountId = null;
+    private boolean mAdjustListScroll;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,8 +150,17 @@ public class OperationListActivity extends BaseActivity implements
     private void initOperationList() {
         mListView = (ListView) findViewById(android.R.id.list);
         mListView.setEmptyView(findViewById(android.R.id.empty));
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                selectOpAndAdjustOffset(i);
+                View toolbar = view.findViewById(R.id.actions_cont);
+                ExpandAnimation anim = new ExpandAnimation(toolbar, 500);
+                toolbar.startAnimation(anim);
 
-        mLastSelectedPosition = null;
+            }
+        });
+        mLastSelectedPosition = -1;
         mReceiverIsRegistered = false;
 
         mOnInsertionReceiver = new OnInsertionReceiver(this);
@@ -190,9 +202,14 @@ public class OperationListActivity extends BaseActivity implements
     private boolean onAccountChanged(long itemId) {
         if (mQuickAddController != null && itemId != mAccountId) {
             AccountManager.getInstance().setCurrentAccountId(itemId);
+            mQuickAddController.setAccount(itemId);
             getOperationsList();
             return true;
         } else {
+            if (mQuickAddController == null) {
+                getOperationsList();
+                initQuickAdd();
+            }
             return false;
         }
     }
@@ -267,14 +284,7 @@ public class OperationListActivity extends BaseActivity implements
 
     private void processAccountList() {
         Cursor allAccounts = AccountManager.getInstance().getAllAccountsCursor();
-        if (allAccounts != null && allAccounts.getCount() > 0) {
-            // get the ops
-            //getOperationsList();
-            if (mQuickAddController == null) {
-                mAccountId = AccountManager.getInstance().getCurrentAccountId(this);
-                initQuickAdd();
-            }
-        } else {
+        if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
             AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
         }
@@ -413,10 +423,58 @@ public class OperationListActivity extends BaseActivity implements
 
     private static GregorianCalendar date2 = new GregorianCalendar();
 
+    private void selectOpAndAdjustOffset(int position) {
+        ListView l = mListView;
+        // Get the top position from the first visible element
+        final int firstIdx = l.getFirstVisiblePosition();
+        final int lastIdx = l.getLastVisiblePosition();
+
+        int offset = 77;
+        int firstOffset = offset;
+        int count = l.getChildCount();
+        count = count == 0 ? 1 : count;
+        int relativeFirstIdx = firstIdx % count;
+        View firstView = l.getChildAt(relativeFirstIdx);
+        if (null != firstView) {
+            offset = firstView.getHeight();
+            firstOffset = firstView.getBottom() - (relativeFirstIdx * offset)
+                    - relativeFirstIdx;
+            // getBottom = px according to virtual ListView (not only what we
+            // see on
+            // screen), - (firstIdx * offset) = remove all the previous items
+            // height, -
+            // firstIdx = remove the separator height
+        }
+
+
+        int relativePos = position - firstIdx;
+        OperationsCursorAdapter adapter = (OperationsCursorAdapter) mListView.getAdapter();
+        adapter.setSelectedPosition(position);
+
+        // check if the selected pos is visible on screen
+//            int posFromTop;
+//            if ((position >= firstIdx) && (position < lastIdx)) {
+//                posFromTop = mOnRestore ? mLastSelectionFromTop
+//                        : ((relativePos - 1) * offset) + firstOffset
+//                        + relativePos;
+//            } else {
+//                posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
+//                        : (int) (Tools.SCREEN_HEIGHT * 0.3);
+//            }
+//            l.setSelectionFromTop(position, posFromTop);
+
+        Log.d(TAG, "selectOpAndAdjustOffset setting mLastSelectedPosition: "
+                + position);
+        mLastSelectedPosition = position;
+    }
+
     private static class OpRowHolder {
-        public TextView separator;
+        public View separator;
+        public TextView month;
         public ImageView scheduledImg;
         public StringBuilder tagBuilder = new StringBuilder();
+        public TextView sumAtSelection;
+        public View actionsCont;
     }    // used in InnerViewBinder
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
@@ -554,19 +612,19 @@ public class OperationListActivity extends BaseActivity implements
                 } else {
                     i.setVisibility(View.GONE);
                 }
-
-                boolean needSeparator = false;
+                boolean needInfos = false;
+                boolean needMonth = false;
                 final int position = cursor.getPosition();
                 assert (mCellStates != null);
                 date1.setTimeInMillis(cursor.getLong(cursor
                         .getColumnIndex(OperationTable.KEY_OP_DATE)));
                 switch (mCellStates[position]) {
                     case STATE_SECTIONED_CELL:
-                        needSeparator = true;
+                        needMonth = true;
                         break;
 
                     case STATE_REGULAR_CELL:
-                        needSeparator = false;
+                        needMonth = false;
                         break;
 
                     case STATE_UNKNOWN:
@@ -575,25 +633,46 @@ public class OperationListActivity extends BaseActivity implements
                         // ListView or if the group of the current cell is different
                         // from the previous itemview.
                         if (position == 0) {
-                            needSeparator = true;
+                            needMonth = true;
                         } else {
                             cursor.moveToPosition(position - 1);
                             date2.setTimeInMillis(cursor.getLong(cursor
                                     .getColumnIndex(OperationTable.KEY_OP_DATE)));
                             if (date1.get(GregorianCalendar.MONTH) != date2
                                     .get(GregorianCalendar.MONTH)) {
-                                needSeparator = true;
+                                needMonth = true;
                             }
                             cursor.moveToPosition(position);
                         }
                 }
-                TextView separator = h.separator;
-                if (needSeparator) {
-                    separator.setText(DateFormat.format("MMMM", date1));
-                    separator.setVisibility(View.VISIBLE);
+                TextView month = h.month;
+                if (needMonth) {
+                    month.setText(DateFormat.format("MMMM", date1));
+                    month.setVisibility(View.VISIBLE);
+                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
                 } else {
-                    separator.setVisibility(View.GONE);
+                    month.setVisibility(View.GONE);
                 }
+
+                needInfos = position == mLastSelectedPosition;
+                int visibility = needInfos ? View.VISIBLE : View.GONE;
+                h.sumAtSelection.setVisibility(visibility);
+                if (needInfos) {
+                    h.sumAtSelection.setText("111,43 €");
+                }
+
+                h.separator.setVisibility(needMonth || needInfos ? View.VISIBLE : View.GONE);
+
+//                if (needMonth) {
+//                    h.separator.setVisibility(View.VISIBLE);
+//                } else if (needInfos) {
+//                    ExpandAnimation anim = new ExpandAnimation(h.separator, 500);
+//                    h.separator.startAnimation(anim);
+//                } else {
+//                    h.separator.setVisibility(View.GONE);
+//                }
+
+
                 return true;
             } else if (colName.equals(InfoTables.KEY_THIRD_PARTY_NAME)) {
                 TextView textView = ((TextView) view);
@@ -637,6 +716,8 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private class OperationsCursorAdapter extends SimpleCursorAdapter {
+        private int oldPos = -1;
+
         OperationsCursorAdapter(Activity context, int layout, String[] from,
                                 int[] to, Cursor cursor) {
             super(context, layout, null, from, to,
@@ -662,9 +743,42 @@ public class OperationListActivity extends BaseActivity implements
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             View v = super.newView(context, cursor, parent);
             OpRowHolder h = new OpRowHolder();
-            h.separator = (TextView) v.findViewById(R.id.separator);
+            h.separator = v.findViewById(R.id.separator);
+            h.month = (TextView) v.findViewById(R.id.month);
             h.scheduledImg = (ImageView) v.findViewById(R.id.op_sch_icon);
+            h.sumAtSelection = (TextView) v.findViewById(R.id.today_amount);
+            h.actionsCont = v.findViewById(R.id.actions_cont);
             v.setTag(h);
+            return v;
+        }
+
+        public void setSelectedPosition(int pos) {
+            if (mLastSelectedPosition != -1) {
+                oldPos = mLastSelectedPosition;
+            }
+            mLastSelectedPosition = pos;
+
+            // inform the view of this change
+            notifyDataSetChanged();
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = super.getView(position, convertView, parent);
+            if (mLastSelectedPosition == position) {
+                v.setBackgroundResource(R.drawable.line_selected_gradient);
+            } else {
+                if (position == oldPos) {
+                    View toolbar = v.findViewById(R.id.actions_cont);
+                    View separator = v.findViewById(R.id.separator);
+                    ExpandAnimation anim = new ExpandAnimation(toolbar, 500);
+                    toolbar.startAnimation(anim);
+//                    anim = new ExpandAnimation(separator, 500);
+//                    separator.startAnimation(anim);
+                }
+                v.setBackgroundResource(R.drawable.op_line);
+            }
+
             return v;
         }
     }

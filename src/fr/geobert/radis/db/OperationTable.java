@@ -208,7 +208,7 @@ public class OperationTable {
     static Cursor fetchOpEarlierThan(Context ctx, long date, int nbOps,
                                      final long accountId) {
         Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date));
-        Cursor c = null;
+        Cursor c;
         String limit = nbOps == 0 ? null : Integer.toString(nbOps);
         c = ctx.getContentResolver().query(
                 DbContentProvider.OPERATION_JOINED_URI,
@@ -248,6 +248,7 @@ public class OperationTable {
                 DbContentProvider.OPERATION_URI, initialValues);
         op.mRowId = Long.parseLong(res.getLastPathSegment());
         if (op.mRowId > -1) {
+            AccountTable.updateProjection(ctx, accountId, op.mSum, op.getDate());
             return true;
         }
         Log.e(TAG, "error in creating op");
@@ -255,12 +256,13 @@ public class OperationTable {
     }
 
     public static boolean deleteOp(Context ctx, long rowId, final long accountId) {
-        Cursor c = fetchOneOp(ctx, rowId, accountId);
-        Operation op = new Operation(c);
-        c.close();
+//        Cursor c = fetchOneOp(ctx, rowId, accountId);
+//        Operation op = new Operation(c);
+//        c.close();
         if (ctx.getContentResolver().delete(
                 Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null,
                 null) > 0) {
+            // TODO : update account sum
             return true;// AccountTable.checkNeedUpdateProjection(ctx, op,
             // accountId);
         }
@@ -379,24 +381,24 @@ public class OperationTable {
 
     // return if need to update OP_SUM
     public static boolean updateOp(Context ctx, final long rowId,
-                                   final Operation op, final long accountId) {
+                                   final Operation op, final long oldSum) {
         ContentValues args = createContentValuesFromOp(ctx, op, false);
         if (ctx.getContentResolver().update(
                 Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), args,
                 null, null) > 0) {
-            return true; // AccountTable.checkNeedUpdateProjection(ctx, op,
-            // accountId);
+            AccountTable.updateProjection(ctx, op.mAccountId, -oldSum + op.mSum, op.getDate());
+            return true;
         }
         return false;
     }
 
-    public static void updateOp(Context ctx, final long opId, final long schOpId) {
-        ContentValues args = new ContentValues();
-        args.put(KEY_OP_SCHEDULED_ID, schOpId);
-        ctx.getContentResolver().update(
-                Uri.parse(DbContentProvider.OPERATION_URI + "/" + opId), args,
-                null, null);
-    }
+//    public static void updateOp(Context ctx, final long opId, final long schOpId) {
+//        ContentValues args = new ContentValues();
+//        args.put(KEY_OP_SCHEDULED_ID, schOpId);
+//        ctx.getContentResolver().update(
+//                Uri.parse(DbContentProvider.OPERATION_URI + "/" + opId), args,
+//                null, null);
+//    }
 
     public static int deleteAllOccurrences(Context ctx, final long accountId,
                                            final long schOpId) {

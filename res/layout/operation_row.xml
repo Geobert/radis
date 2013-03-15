@@ -6,20 +6,35 @@
               android:orientation="vertical"
               android:padding="0px">
 
-    <TextView
+    <LinearLayout
             android:id="@+id/separator"
-            style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"/>
-
-    <TextView
-            android:id="@+id/today_amount"
-            style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_width="fill_parent"
             android:visibility="gone"
-            android:layout_height="wrap_content"
-            android:textColor="@android:color/white"/>
+            android:layout_width="match_parent"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:id="@+id/month"
+                android:layout_width="fill_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textAllCaps="true"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"/>
+
+        <TextView
+                android:id="@+id/today_amount"
+                android:textStyle="bold"
+                android:layout_width="fill_parent"
+                android:visibility="gone"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:layout_marginRight="5dp"
+                android:textColor="@android:color/white"/>
+
+    </LinearLayout>
+
 
     <LinearLayout style="@style/OpLine">
 
@@ -58,26 +73,59 @@
                     android:id="@+id/op_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/arrow_down16"/>
+                    android:src="@drawable/arrow_down16"
+                    android:contentDescription=""/>
 
             <ImageView
                     android:id="@+id/op_sch_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/sched_22"/>
+                    android:src="@drawable/sched_22"
+                    android:contentDescription=""/>
 
             <ImageView
                     android:id="@+id/op_trans_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@drawable/transfer_left_right16"/>
+                    android:src="@drawable/transfer_left_right16"
+                    android:contentDescription=""/>
         </LinearLayout>
 
         <TextView
                 android:id="@+id/op_infos"
                 style="@style/OpRowTextView.Infos"
-                android:layout_weight="0"
-                android:text="Courses / Carte Bleu"/>
+                android:layout_weight="0"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/actions_cont"
+            android:layout_width="match_parent"
+            android:layout_marginBottom="-50dp"
+            android:visibility="gone"
+            android:gravity="right"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <ImageButton
+                android:src="@drawable/plus_48"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:layout_margin="10dp"
+                android:layout_width="wrap_content"/>
+
+        <ImageButton
+                android:src="@drawable/cancel_48"
+                android:layout_margin="10dp"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:layout_width="wrap_content"/>
+
+        <ImageButton
+                android:src="@drawable/ok_48"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@null"
+                android:layout_width="wrap_content"/>
     </LinearLayout>
 
 </LinearLayout>
