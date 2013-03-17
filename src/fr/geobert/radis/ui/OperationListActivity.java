@@ -41,6 +41,7 @@ import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.ExpandAnimation;
+import fr.geobert.radis.tools.ExpandUpAnimation;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.OpViewBinder;
 import fr.geobert.radis.tools.Tools;
@@ -160,6 +161,9 @@ public class OperationListActivity extends BaseActivity implements
 
             }
         });
+        mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
+        mListView.setSelector(android.R.color.transparent);
+
         mLastSelectedPosition = -1;
         mReceiverIsRegistered = false;
 
@@ -648,29 +652,23 @@ public class OperationListActivity extends BaseActivity implements
                 TextView month = h.month;
                 if (needMonth) {
                     month.setText(DateFormat.format("MMMM", date1));
-                    month.setVisibility(View.VISIBLE);
-                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
-                } else {
-                    month.setVisibility(View.GONE);
                 }
 
                 needInfos = position == mLastSelectedPosition;
-                int visibility = needInfos ? View.VISIBLE : View.GONE;
-                h.sumAtSelection.setVisibility(visibility);
                 if (needInfos) {
                     h.sumAtSelection.setText("111,43 €");
+                } else {
+                    h.sumAtSelection.setText("");
                 }
 
-                h.separator.setVisibility(needMonth || needInfos ? View.VISIBLE : View.GONE);
-
-//                if (needMonth) {
-//                    h.separator.setVisibility(View.VISIBLE);
-//                } else if (needInfos) {
-//                    ExpandAnimation anim = new ExpandAnimation(h.separator, 500);
-//                    h.separator.startAnimation(anim);
-//                } else {
-//                    h.separator.setVisibility(View.GONE);
-//                }
+                if (needMonth) {
+                    h.separator.setVisibility(View.VISIBLE);
+                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
+                } else if (needInfos) {
+                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
+                    ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
+                    h.separator.startAnimation(anim);
+                }
 
 
                 return true;
@@ -773,8 +771,8 @@ public class OperationListActivity extends BaseActivity implements
                     View separator = v.findViewById(R.id.separator);
                     ExpandAnimation anim = new ExpandAnimation(toolbar, 500);
                     toolbar.startAnimation(anim);
-//                    anim = new ExpandAnimation(separator, 500);
-//                    separator.startAnimation(anim);
+                    ExpandUpAnimation a = new ExpandUpAnimation(separator, 500);
+                    separator.startAnimation(a);
                 }
                 v.setBackgroundResource(R.drawable.op_line);
             }

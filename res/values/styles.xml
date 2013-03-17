@@ -78,6 +78,8 @@
         <item name="android:background">@android:color/transparent</item>
         <item name="android:divider">#4b4b4b</item>
         <item name="android:dividerHeight">1px</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:listSelector">@android:color/transparent</item>
     </style>
 
     <style name="SumsTextView" parent="@android:style/Widget.TextView">

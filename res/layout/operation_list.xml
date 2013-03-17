@@ -11,7 +11,9 @@
     <!--</LinearLayout>-->
     <ListView
             android:id="@android:id/list"
-            style="@style/OpListView"/>
+            style="@style/OpListView"
+            android:listSelector="@android:color/transparent"
+            android:cacheColorHint="@android:color/transparent"/>
 
     <ViewStub
             android:id="@android:id/empty"

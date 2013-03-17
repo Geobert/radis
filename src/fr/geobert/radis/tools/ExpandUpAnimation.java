@@ -1,8 +1,10 @@
 package fr.geobert.radis.tools;
 
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 
 /**
@@ -12,12 +14,20 @@ import android.widget.LinearLayout.LayoutParams;
  *
  * @author Udinic
  */
-public class ExpandAnimation extends Animation {
-    private View mAnimatedView;
+public class ExpandUpAnimation extends Animation {
+    private static Drawable mBg = null;
+    private LinearLayout mAnimatedView;
     private LayoutParams mViewLayoutParams;
     private int mMarginStart, mMarginEnd;
     private boolean mIsVisibleAfter = false;
     private boolean mWasEndedAlready = false;
+
+    private void setChildrenVisibility(final int visibility) {
+        for (int i = 0; i < mAnimatedView.getChildCount(); i++) {
+            View c = mAnimatedView.getChildAt(i);
+            c.setVisibility(visibility);
+        }
+    }
 
     /**
      * Initialize the animation
@@ -25,10 +35,11 @@ public class ExpandAnimation extends Animation {
      * @param view     The layout we want to animate
      * @param duration The duration of the animation, in ms
      */
-    public ExpandAnimation(View view, int duration) {
+    public ExpandUpAnimation(View view, int duration) {
 
         setDuration(duration);
-        mAnimatedView = view;
+        //setFillAfter(true);
+        mAnimatedView = (LinearLayout) view;
         mViewLayoutParams = (LayoutParams) view.getLayoutParams();
 
         // decide to show or hide the view
@@ -37,14 +48,19 @@ public class ExpandAnimation extends Animation {
         mMarginStart = mViewLayoutParams.bottomMargin;
         mMarginEnd = (mMarginStart == 0 ? (0 - view.getHeight()) : 0);
 
-        view.setVisibility(View.VISIBLE);
+        view.setVisibility(View.INVISIBLE);
+        if (mBg == null) {
+            mBg = view.getBackground();
+        }
+        view.setBackground(null);
+        setChildrenVisibility(View.INVISIBLE);
     }
 
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         super.applyTransformation(interpolatedTime, t);
         if (interpolatedTime < 1.0f) {
-
+            mAnimatedView.setVisibility(View.INVISIBLE);
             // Calculating the new bottom margin, and setting it
             mViewLayoutParams.bottomMargin = mMarginStart
                     + (int) ((mMarginEnd - mMarginStart) * interpolatedTime);
@@ -59,6 +75,10 @@ public class ExpandAnimation extends Animation {
 
             if (mIsVisibleAfter) {
                 mAnimatedView.setVisibility(View.GONE);
+            } else {
+                mAnimatedView.setVisibility(View.VISIBLE);
+                setChildrenVisibility(View.VISIBLE);
+                mAnimatedView.setBackground(mBg);
             }
             mWasEndedAlready = true;
         }

@@ -8,10 +8,11 @@
 
     <LinearLayout
             android:id="@+id/separator"
+            android:layout_marginBottom="-37dp"
             android:visibility="gone"
             android:layout_width="match_parent"
             style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_height="wrap_content">
+            android:layout_height="25dp">
 
         <TextView
                 android:id="@+id/month"
@@ -26,7 +27,6 @@
                 android:id="@+id/today_amount"
                 android:textStyle="bold"
                 android:layout_width="fill_parent"
-                android:visibility="gone"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:gravity="right"
