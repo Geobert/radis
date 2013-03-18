@@ -156,9 +156,8 @@ public class OperationListActivity extends BaseActivity implements
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 selectOpAndAdjustOffset(i);
                 View toolbar = view.findViewById(R.id.actions_cont);
-                ExpandAnimation anim = new ExpandAnimation(toolbar, 500);
-                toolbar.startAnimation(anim);
-
+                ExpandAnimation anim2 = new ExpandAnimation(toolbar, 500);
+                toolbar.startAnimation(anim2);
             }
         });
         mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
@@ -473,6 +472,7 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private static class OpRowHolder {
+        public boolean needMonth = false;
         public View separator;
         public TextView month;
         public ImageView scheduledImg;
@@ -649,6 +649,7 @@ public class OperationListActivity extends BaseActivity implements
                             cursor.moveToPosition(position);
                         }
                 }
+                h.needMonth = needMonth;
                 TextView month = h.month;
                 if (needMonth) {
                     month.setText(DateFormat.format("MMMM", date1));
@@ -767,12 +768,13 @@ public class OperationListActivity extends BaseActivity implements
                 v.setBackgroundResource(R.drawable.line_selected_gradient);
             } else {
                 if (position == oldPos) {
-                    View toolbar = v.findViewById(R.id.actions_cont);
-                    View separator = v.findViewById(R.id.separator);
-                    ExpandAnimation anim = new ExpandAnimation(toolbar, 500);
-                    toolbar.startAnimation(anim);
-                    ExpandUpAnimation a = new ExpandUpAnimation(separator, 500);
-                    separator.startAnimation(a);
+                    OpRowHolder h = (OpRowHolder) v.getTag();
+                    ExpandAnimation anim = new ExpandAnimation(h.actionsCont, 500);
+                    h.actionsCont.startAnimation(anim);
+                    if (!h.needMonth) {
+                        ExpandUpAnimation a = new ExpandUpAnimation(h.separator, 500);
+                        h.separator.startAnimation(a);
+                    }
                 }
                 v.setBackgroundResource(R.drawable.op_line);
             }
