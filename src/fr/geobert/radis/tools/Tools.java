@@ -10,10 +10,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -46,6 +49,15 @@ public class Tools {
             DEBUG_MODE = (flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         } catch (NameNotFoundException e1) {
             e1.printStackTrace();
+        }
+
+    }
+
+    public static void setViewBg(View v, Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= 16) {
+            v.setBackground(drawable);
+        } else {
+            v.setBackgroundDrawable(drawable);
         }
 
     }

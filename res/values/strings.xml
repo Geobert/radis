@@ -48,7 +48,7 @@
     <string name="account_creation">Account creation</string>
     <string name="op_edition">Transaction edition</string>
     <string name="future_sum_at">Future balance at %1$s = %2$s</string>
-    <string name="sum_at_selection">Balance at selection = %1$s</string>
+    <string name="sum_at_selection">Balance at selection</string>
     <string name="list_of">List of %s</string>
     <string name="tags">Tags</string>
     <string name="modes">Payment method</string>

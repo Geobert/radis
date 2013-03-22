@@ -70,6 +70,7 @@ public class OperationListActivity extends BaseActivity implements
     private int redColor;
     private int greenColor;
     private int mLastSelectedPosition = -1;
+    private boolean mJustClicked = false;
     private boolean mOnRestore = false;
     private QuickAddController mQuickAddController = null;
     private long mProjectionDate;
@@ -155,9 +156,7 @@ public class OperationListActivity extends BaseActivity implements
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 selectOpAndAdjustOffset(i);
-                View toolbar = view.findViewById(R.id.actions_cont);
-                ExpandAnimation anim2 = new ExpandAnimation(toolbar, 500);
-                toolbar.startAnimation(anim2);
+                mJustClicked = true;
             }
         });
         mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
@@ -471,16 +470,6 @@ public class OperationListActivity extends BaseActivity implements
         mLastSelectedPosition = position;
     }
 
-    private static class OpRowHolder {
-        public boolean needMonth = false;
-        public View separator;
-        public TextView month;
-        public ImageView scheduledImg;
-        public StringBuilder tagBuilder = new StringBuilder();
-        public TextView sumAtSelection;
-        public View actionsCont;
-    }    // used in InnerViewBinder
-
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
         public static DeleteOpConfirmationDialog newInstance() {
             DeleteOpConfirmationDialog frag = new DeleteOpConfirmationDialog();
@@ -558,22 +547,24 @@ public class OperationListActivity extends BaseActivity implements
 
     }
 
+    private static class OpRowHolder {
+        public View separator;
+        public TextView month;
+        public ImageView scheduledImg;
+        public StringBuilder tagBuilder = new StringBuilder();
+        public TextView sumAtSelection;
+        public View actionsCont;
+    }    // used in InnerViewBinder
+
+    protected int[] mCellStates = null;
+    protected static final int STATE_UNKNOWN = 0;
+    protected static final int STATE_MONTH_CELL = 1;
+    protected static final int STATE_REGULAR_CELL = 2;
+    protected static final int STATE_INFOS_CELL = 3;
+    protected static final int STATE_MONTH_INFOS_CELL = 4;
+
+
     private class InnerViewBinder extends OpViewBinder {
-        /**
-         * State of ListView item that has never been determined.
-         */
-        private static final int STATE_UNKNOWN = 0;
-        /**
-         * State of a ListView item that is sectioned. A sectioned item must
-         * display the separator.
-         */
-        private static final int STATE_SECTIONED_CELL = 1;
-        /**
-         * State of a ListView item that is not sectioned and therefore does not
-         * display the separator.
-         */
-        private static final int STATE_REGULAR_CELL = 2;
-        private int[] mCellStates = null;
 
         public InnerViewBinder(Activity activity, Cursor c) {
             super(activity, OperationTable.KEY_OP_SUM,
@@ -585,93 +576,100 @@ public class OperationListActivity extends BaseActivity implements
             mCellStates = cursor == null ? null : new int[cursor.getCount()];
         }
 
+        private void fillTag(TextView textView, StringBuilder b, final Cursor cursor, final int columnIndex) {
+            b.setLength(0);
+            String s = cursor.getString(columnIndex);
+            if (null != s) {
+                b.append(s);
+            } else {
+                b.append('−');
+            }
+            b.append(" / ");
+            s = cursor.getString(columnIndex + 1);
+            if (null != s) {
+                b.append(s);
+            } else {
+                b.append('−');
+            }
+            textView.setText(b.toString());
+        }
+
+        private void setSchedImg(Cursor cursor, ImageView i) {
+            if (cursor.getLong(cursor
+                    .getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID)) > 0) {
+                i.setVisibility(View.VISIBLE);
+            } else {
+                i.setVisibility(View.GONE);
+            }
+        }
+
         @Override
         public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
             String colName = cursor.getColumnName(columnIndex);
             if (colName.equals(InfoTables.KEY_TAG_NAME)) {
                 final OpRowHolder h = (OpRowHolder) ((View) view.getParent()
                         .getParent()).getTag();
-                TextView textView = ((TextView) view);
-                StringBuilder b = h.tagBuilder;
-                b.setLength(0);
-                String s = cursor.getString(columnIndex);
-                if (null != s) {
-                    b.append(s);
-                } else {
-                    b.append('−');
-                }
-                b.append(" / ");
-                s = cursor.getString(columnIndex + 1);
-                if (null != s) {
-                    b.append(s);
-                } else {
-                    b.append('−');
-                }
-                textView.setText(b.toString());
+                fillTag((TextView) view, h.tagBuilder, cursor, columnIndex);
+                setSchedImg(cursor, h.scheduledImg);
 
-                ImageView i = h.scheduledImg;
-                if (cursor.getLong(cursor
-                        .getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID)) > 0) {
-                    i.setVisibility(View.VISIBLE);
-                } else {
-                    i.setVisibility(View.GONE);
-                }
-                boolean needInfos = false;
                 boolean needMonth = false;
+                boolean needInfos = false;
                 final int position = cursor.getPosition();
                 assert (mCellStates != null);
                 date1.setTimeInMillis(cursor.getLong(cursor
                         .getColumnIndex(OperationTable.KEY_OP_DATE)));
-                switch (mCellStates[position]) {
-                    case STATE_SECTIONED_CELL:
-                        needMonth = true;
-                        break;
-
-                    case STATE_REGULAR_CELL:
-                        needMonth = false;
-                        break;
-
-                    case STATE_UNKNOWN:
-                    default:
-                        // A separator is needed if it's the first itemview of the
-                        // ListView or if the group of the current cell is different
-                        // from the previous itemview.
-                        if (position == 0) {
-                            needMonth = true;
-                        } else {
-                            cursor.moveToPosition(position - 1);
-                            date2.setTimeInMillis(cursor.getLong(cursor
-                                    .getColumnIndex(OperationTable.KEY_OP_DATE)));
-                            if (date1.get(GregorianCalendar.MONTH) != date2
-                                    .get(GregorianCalendar.MONTH)) {
-                                needMonth = true;
-                            }
-                            cursor.moveToPosition(position);
-                        }
-                }
-                h.needMonth = needMonth;
-                TextView month = h.month;
-                if (needMonth) {
-                    month.setText(DateFormat.format("MMMM", date1));
-                }
 
                 needInfos = position == mLastSelectedPosition;
+                if (position == 0) {
+                    needMonth = true;
+                } else {
+                    cursor.moveToPosition(position - 1);
+                    date2.setTimeInMillis(cursor.getLong(cursor
+                            .getColumnIndex(OperationTable.KEY_OP_DATE)));
+                    if (date1.get(GregorianCalendar.MONTH) != date2
+                            .get(GregorianCalendar.MONTH)) {
+                        needMonth = true;
+                    }
+                    cursor.moveToPosition(position);
+                }
+
+                if (needInfos && needMonth) {
+                    mCellStates[position] = STATE_MONTH_INFOS_CELL;
+                } else if (needInfos) {
+                    mCellStates[position] = STATE_INFOS_CELL;
+                } else if (needMonth) {
+                    mCellStates[position] = STATE_MONTH_CELL;
+                } else {
+                    mCellStates[position] = STATE_REGULAR_CELL;
+                }
+
+                if (needMonth) {
+                    h.month.setText(DateFormat.format("MMMM", date1));
+                } else {
+                    h.month.setText(getString(R.string.sum_at_selection));
+                }
+
                 if (needInfos) {
+                    // TODO : correct sum at selection
                     h.sumAtSelection.setText("111,43 €");
                 } else {
                     h.sumAtSelection.setText("");
                 }
 
-                if (needMonth) {
-                    h.separator.setVisibility(View.VISIBLE);
-                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
-                } else if (needInfos) {
-                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
-                    ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
-                    h.separator.startAnimation(anim);
-                }
-
-
+//                if (needMonth) {
+//                    // HACK to workaround a glitch at the end of animation
+//                    ExpandUpAnimation.mBg = h.separator.getBackground();
+//                    Tools.setViewBg(h.separator, null);
+//                    Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
+//                    // END HACK
+//                    h.separator.setVisibility(View.VISIBLE);
+//                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
+//                }
+//                else if (needInfos) {
+//                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
+//                    ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
+//                    h.separator.startAnimation(anim);
+//                }
                 return true;
             } else if (colName.equals(InfoTables.KEY_THIRD_PARTY_NAME)) {
                 TextView textView = ((TextView) view);
@@ -748,6 +746,11 @@ public class OperationListActivity extends BaseActivity implements
             h.sumAtSelection = (TextView) v.findViewById(R.id.today_amount);
             h.actionsCont = v.findViewById(R.id.actions_cont);
             v.setTag(h);
+            // HACK to workaround a glitch at the end of animation
+            ExpandUpAnimation.mBg = h.separator.getBackground();
+            Tools.setViewBg(h.separator, null);
+            Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
+            // END HACK
             return v;
         }
 
@@ -761,22 +764,90 @@ public class OperationListActivity extends BaseActivity implements
             notifyDataSetChanged();
         }
 
+
+        private void animateSeparator(OpRowHolder h) {
+            ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
+            ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
+            h.separator.startAnimation(anim);
+        }
+
+        private void animateToolbar(OpRowHolder h) {
+            ExpandAnimation anim = new ExpandAnimation(h.actionsCont, 500);
+            h.actionsCont.startAnimation(anim);
+        }
+
+        private void collapseSeparatorNoAnim(OpRowHolder h) {
+            ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -50;
+            h.separator.setVisibility(View.GONE);
+        }
+
+        private void collapseToolbarNoAnim(OpRowHolder h) {
+            ((LinearLayout.LayoutParams) h.actionsCont.getLayoutParams()).bottomMargin = -37;
+            h.actionsCont.setVisibility(View.GONE);
+        }
+
+        private void expandSeparatorNoAnim(OpRowHolder h) {
+            ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
+            h.separator.setVisibility(View.VISIBLE);
+        }
+
+        private void expandToolbarNoAnim(OpRowHolder h) {
+            ((LinearLayout.LayoutParams) h.actionsCont.getLayoutParams()).bottomMargin = 0;
+            h.actionsCont.setVisibility(View.VISIBLE);
+        }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View v = super.getView(position, convertView, parent);
+            final int state = mCellStates[position];
+            final OpRowHolder h = (OpRowHolder) v.getTag();
             if (mLastSelectedPosition == position) {
                 v.setBackgroundResource(R.drawable.line_selected_gradient);
+                if (state == STATE_MONTH_CELL) {
+                    expandSeparatorNoAnim(h);
+                } else if (state == STATE_INFOS_CELL) {
+                    if (mJustClicked) {
+                        mJustClicked = false;
+                        animateSeparator(h);
+                        animateToolbar(h);
+                        mListView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                final int firstIdx = mListView.getFirstVisiblePosition();
+                                final int lastIdx = mListView.getLastVisiblePosition();
+                                if (oldPos < firstIdx ||
+                                        oldPos > lastIdx) {
+                                    oldPos = -1;
+                                }
+                            }
+                        });
+                    } else {
+                        expandToolbarNoAnim(h);
+                        expandSeparatorNoAnim(h);
+                    }
+                } else if (state == STATE_MONTH_INFOS_CELL) {
+                    animateToolbar(h);
+                }
             } else {
-                if (position == oldPos) {
-                    OpRowHolder h = (OpRowHolder) v.getTag();
-                    ExpandAnimation anim = new ExpandAnimation(h.actionsCont, 500);
-                    h.actionsCont.startAnimation(anim);
-                    if (!h.needMonth) {
-                        ExpandUpAnimation a = new ExpandUpAnimation(h.separator, 500);
-                        h.separator.startAnimation(a);
+                v.setBackgroundResource(R.drawable.op_line);
+                if (state == STATE_MONTH_CELL) {
+                    expandSeparatorNoAnim(h);
+                    if (position == oldPos) {
+                        animateToolbar(h);
+                        oldPos = -1;
+                    } else {
+                        collapseToolbarNoAnim(h);
+                    }
+                } else if (state == STATE_REGULAR_CELL) {
+                    if (position == oldPos) {
+                        animateToolbar(h);
+                        animateSeparator(h);
+                        oldPos = -1;
+                    } else {
+                        collapseSeparatorNoAnim(h);
+                        collapseToolbarNoAnim(h);
                     }
                 }
-                v.setBackgroundResource(R.drawable.op_line);
             }
 
             return v;

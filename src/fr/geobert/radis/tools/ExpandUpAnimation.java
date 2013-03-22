@@ -15,7 +15,7 @@ import android.widget.LinearLayout.LayoutParams;
  * @author Udinic
  */
 public class ExpandUpAnimation extends Animation {
-    private static Drawable mBg = null;
+    public static Drawable mBg = null;
     private LinearLayout mAnimatedView;
     private LayoutParams mViewLayoutParams;
     private int mMarginStart, mMarginEnd;
@@ -46,13 +46,13 @@ public class ExpandUpAnimation extends Animation {
         mIsVisibleAfter = (view.getVisibility() == View.VISIBLE);
 
         mMarginStart = mViewLayoutParams.bottomMargin;
-        mMarginEnd = (mMarginStart == 0 ? (0 - view.getHeight()) : 0);
+        mMarginEnd = (mMarginStart == 0 ? 0 - view.getHeight() : 0);
 
         view.setVisibility(View.INVISIBLE);
         if (mBg == null) {
             mBg = view.getBackground();
         }
-        view.setBackground(null);
+        Tools.setViewBg(view, null);
         setChildrenVisibility(View.INVISIBLE);
     }
 
@@ -78,7 +78,7 @@ public class ExpandUpAnimation extends Animation {
             } else {
                 mAnimatedView.setVisibility(View.VISIBLE);
                 setChildrenVisibility(View.VISIBLE);
-                mAnimatedView.setBackground(mBg);
+                Tools.setViewBg(mAnimatedView, mBg);
             }
             mWasEndedAlready = true;
         }

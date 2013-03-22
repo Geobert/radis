@@ -11,24 +11,26 @@
             android:layout_marginBottom="-37dp"
             android:visibility="gone"
             android:layout_width="match_parent"
+            android:layout_margin="0dp"
             style="?android:attr/listSeparatorTextViewStyle"
             android:layout_height="25dp">
 
         <TextView
                 android:id="@+id/month"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"
+                android:layout_height="25dp"
                 android:textAllCaps="true"
+                android:layout_marginLeft="8dp"
                 android:textStyle="bold"
                 android:textColor="@android:color/white"/>
 
         <TextView
                 android:id="@+id/today_amount"
                 android:textStyle="bold"
-                android:layout_width="fill_parent"
+                android:layout_width="match_parent"
                 android:layout_weight="1"
-                android:layout_height="wrap_content"
+                android:layout_height="25dp"
                 android:gravity="right"
                 android:layout_marginRight="5dp"
                 android:textColor="@android:color/white"/>
