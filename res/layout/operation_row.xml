@@ -2,13 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
+              android:id="@+id/op_row"
               android:background="@drawable/op_line"
               android:orientation="vertical"
               android:padding="0px">
 
     <LinearLayout
             android:id="@+id/separator"
-            android:layout_marginBottom="-37dp"
+            android:layout_marginBottom="0dp"
             android:visibility="gone"
             android:layout_width="match_parent"
             android:layout_margin="0dp"

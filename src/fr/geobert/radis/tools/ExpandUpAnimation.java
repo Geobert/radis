@@ -16,16 +16,25 @@ import android.widget.LinearLayout.LayoutParams;
  */
 public class ExpandUpAnimation extends Animation {
     public static Drawable mBg = null;
+    private final int mHeightStart, mHeightEnd;
     private LinearLayout mAnimatedView;
     private LayoutParams mViewLayoutParams;
     private int mMarginStart, mMarginEnd;
     private boolean mIsVisibleAfter = false;
     private boolean mWasEndedAlready = false;
 
-    private void setChildrenVisibility(final int visibility) {
-        for (int i = 0; i < mAnimatedView.getChildCount(); i++) {
-            View c = mAnimatedView.getChildAt(i);
+    public static void setChildrenVisibility(final LinearLayout view, final int visibility) {
+        for (int i = 0; i < view.getChildCount(); i++) {
+            View c = view.getChildAt(i);
             c.setVisibility(visibility);
+        }
+    }
+
+    private void setTheVisibility() {
+        if (mIsVisibleAfter) {
+            mAnimatedView.setVisibility(View.GONE);
+        } else {
+            mAnimatedView.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -48,36 +57,42 @@ public class ExpandUpAnimation extends Animation {
         mMarginStart = mViewLayoutParams.bottomMargin;
         mMarginEnd = (mMarginStart == 0 ? 0 - view.getHeight() : 0);
 
-        view.setVisibility(View.INVISIBLE);
+        mHeightStart = mAnimatedView.getHeight();
+        mHeightEnd = (mHeightStart == 0 ? 37 : 0);
+
+        setTheVisibility();
         if (mBg == null) {
             mBg = view.getBackground();
         }
         Tools.setViewBg(view, null);
-        setChildrenVisibility(View.INVISIBLE);
+        ExpandUpAnimation.setChildrenVisibility(mAnimatedView, View.INVISIBLE);
     }
 
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         super.applyTransformation(interpolatedTime, t);
         if (interpolatedTime < 1.0f) {
-            mAnimatedView.setVisibility(View.INVISIBLE);
+            setTheVisibility();
             // Calculating the new bottom margin, and setting it
             mViewLayoutParams.bottomMargin = mMarginStart
                     + (int) ((mMarginEnd - mMarginStart) * interpolatedTime);
 
+//            mViewLayoutParams.height = mHeightStart
+//                    + (int) ((mHeightEnd - mHeightStart) * interpolatedTime);
             // Invalidating the layout, making us seeing the changes we made
             mAnimatedView.requestLayout();
 
             // Making sure we didn't run the ending before (it happens!)
         } else if (!mWasEndedAlready) {
             mViewLayoutParams.bottomMargin = mMarginEnd;
+//            mViewLayoutParams.height = mHeightEnd;
             mAnimatedView.requestLayout();
 
             if (mIsVisibleAfter) {
                 mAnimatedView.setVisibility(View.GONE);
             } else {
                 mAnimatedView.setVisibility(View.VISIBLE);
-                setChildrenVisibility(View.VISIBLE);
+                ExpandUpAnimation.setChildrenVisibility(mAnimatedView, View.VISIBLE);
                 Tools.setViewBg(mAnimatedView, mBg);
             }
             mWasEndedAlready = true;

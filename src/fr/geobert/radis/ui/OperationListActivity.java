@@ -19,6 +19,7 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -80,13 +81,13 @@ public class OperationListActivity extends BaseActivity implements
     private AdapterView.AdapterContextMenuInfo mCurrentSelectedOp;
     private GregorianCalendar startOpDate; // start date of ops to get
 
-
     private GregorianCalendar endOpDate; // end date of ops to get
 
 
     private static GregorianCalendar date1 = new GregorianCalendar();
     private Long mAccountId = null;
     private boolean mAdjustListScroll;
+    private OperationListActivity.OnScrollLoader mScrollLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +160,8 @@ public class OperationListActivity extends BaseActivity implements
                 mJustClicked = true;
             }
         });
+        mScrollLoader = new OnScrollLoader();
+        mListView.setOnScrollListener(mScrollLoader);
         mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
         mListView.setSelector(android.R.color.transparent);
 
@@ -280,6 +283,7 @@ public class OperationListActivity extends BaseActivity implements
                 }
 //                updateSumsAndSelection();
                 mQuickAddController.clearFocus();
+
                 break;
         }
     }
@@ -426,45 +430,9 @@ public class OperationListActivity extends BaseActivity implements
     private static GregorianCalendar date2 = new GregorianCalendar();
 
     private void selectOpAndAdjustOffset(int position) {
-        ListView l = mListView;
-        // Get the top position from the first visible element
-        final int firstIdx = l.getFirstVisiblePosition();
-        final int lastIdx = l.getLastVisiblePosition();
-
-        int offset = 77;
-        int firstOffset = offset;
-        int count = l.getChildCount();
-        count = count == 0 ? 1 : count;
-        int relativeFirstIdx = firstIdx % count;
-        View firstView = l.getChildAt(relativeFirstIdx);
-        if (null != firstView) {
-            offset = firstView.getHeight();
-            firstOffset = firstView.getBottom() - (relativeFirstIdx * offset)
-                    - relativeFirstIdx;
-            // getBottom = px according to virtual ListView (not only what we
-            // see on
-            // screen), - (firstIdx * offset) = remove all the previous items
-            // height, -
-            // firstIdx = remove the separator height
-        }
-
-
-        int relativePos = position - firstIdx;
         OperationsCursorAdapter adapter = (OperationsCursorAdapter) mListView.getAdapter();
         adapter.setSelectedPosition(position);
-
-        // check if the selected pos is visible on screen
-//            int posFromTop;
-//            if ((position >= firstIdx) && (position < lastIdx)) {
-//                posFromTop = mOnRestore ? mLastSelectionFromTop
-//                        : ((relativePos - 1) * offset) + firstOffset
-//                        + relativePos;
-//            } else {
-//                posFromTop = mLastSelectionFromTop != 0 ? mLastSelectionFromTop
-//                        : (int) (Tools.SCREEN_HEIGHT * 0.3);
-//            }
-//            l.setSelectionFromTop(position, posFromTop);
-
+        mListView.smoothScrollToPosition(position + 2);
         Log.d(TAG, "selectOpAndAdjustOffset setting mLastSelectedPosition: "
                 + position);
         mLastSelectedPosition = position;
@@ -548,12 +516,13 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private static class OpRowHolder {
-        public View separator;
+        public LinearLayout separator;
         public TextView month;
         public ImageView scheduledImg;
         public StringBuilder tagBuilder = new StringBuilder();
         public TextView sumAtSelection;
         public View actionsCont;
+        public TextView opName;
     }    // used in InnerViewBinder
 
     protected int[] mCellStates = null;
@@ -613,13 +582,11 @@ public class OperationListActivity extends BaseActivity implements
                 setSchedImg(cursor, h.scheduledImg);
 
                 boolean needMonth = false;
-                boolean needInfos = false;
                 final int position = cursor.getPosition();
+                boolean needInfos = position == mLastSelectedPosition;
                 assert (mCellStates != null);
                 date1.setTimeInMillis(cursor.getLong(cursor
                         .getColumnIndex(OperationTable.KEY_OP_DATE)));
-
-                needInfos = position == mLastSelectedPosition;
                 if (position == 0) {
                     needMonth = true;
                 } else {
@@ -656,23 +623,12 @@ public class OperationListActivity extends BaseActivity implements
                     h.sumAtSelection.setText("");
                 }
 
-//                if (needMonth) {
-//                    // HACK to workaround a glitch at the end of animation
-//                    ExpandUpAnimation.mBg = h.separator.getBackground();
-//                    Tools.setViewBg(h.separator, null);
-//                    Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
-//                    // END HACK
-//                    h.separator.setVisibility(View.VISIBLE);
-//                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
-//                }
-//                else if (needInfos) {
-//                    ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
-//                    ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
-//                    h.separator.startAnimation(anim);
-//                }
                 return true;
             } else if (colName.equals(InfoTables.KEY_THIRD_PARTY_NAME)) {
+                final OpRowHolder h = (OpRowHolder) ((View) view.getParent()
+                        .getParent()).getTag();
                 TextView textView = ((TextView) view);
+                h.opName = textView;
                 final long transfertId = cursor
                         .getLong(cursor
                                 .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
@@ -706,9 +662,7 @@ public class OperationListActivity extends BaseActivity implements
         public void increaseCache(Cursor c) {
             int[] tmp = mCellStates;
             initCache(c);
-            for (int i = 0; i < tmp.length; ++i) {
-                mCellStates[i] = tmp[i];
-            }
+            System.arraycopy(tmp, 0, mCellStates, 0, tmp.length);
         }
     }
 
@@ -740,7 +694,7 @@ public class OperationListActivity extends BaseActivity implements
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             View v = super.newView(context, cursor, parent);
             OpRowHolder h = new OpRowHolder();
-            h.separator = v.findViewById(R.id.separator);
+            h.separator = (LinearLayout) v.findViewById(R.id.separator);
             h.month = (TextView) v.findViewById(R.id.month);
             h.scheduledImg = (ImageView) v.findViewById(R.id.op_sch_icon);
             h.sumAtSelection = (TextView) v.findViewById(R.id.today_amount);
@@ -764,34 +718,41 @@ public class OperationListActivity extends BaseActivity implements
             notifyDataSetChanged();
         }
 
-
         private void animateSeparator(OpRowHolder h) {
+            h.separator.clearAnimation();
             ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
             ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
             h.separator.startAnimation(anim);
         }
 
         private void animateToolbar(OpRowHolder h) {
+            h.actionsCont.clearAnimation();
             ExpandAnimation anim = new ExpandAnimation(h.actionsCont, 500);
             h.actionsCont.startAnimation(anim);
         }
 
         private void collapseSeparatorNoAnim(OpRowHolder h) {
+            h.separator.clearAnimation();
             ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -50;
             h.separator.setVisibility(View.GONE);
         }
 
         private void collapseToolbarNoAnim(OpRowHolder h) {
+            h.actionsCont.clearAnimation();
             ((LinearLayout.LayoutParams) h.actionsCont.getLayoutParams()).bottomMargin = -37;
             h.actionsCont.setVisibility(View.GONE);
         }
 
         private void expandSeparatorNoAnim(OpRowHolder h) {
+            h.separator.clearAnimation();
             ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
             h.separator.setVisibility(View.VISIBLE);
+            ExpandUpAnimation.setChildrenVisibility(h.separator, View.VISIBLE);
+            Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
         }
 
         private void expandToolbarNoAnim(OpRowHolder h) {
+            h.actionsCont.clearAnimation();
             ((LinearLayout.LayoutParams) h.actionsCont.getLayoutParams()).bottomMargin = 0;
             h.actionsCont.setVisibility(View.VISIBLE);
         }
@@ -803,6 +764,7 @@ public class OperationListActivity extends BaseActivity implements
             final OpRowHolder h = (OpRowHolder) v.getTag();
             if (mLastSelectedPosition == position) {
                 v.setBackgroundResource(R.drawable.line_selected_gradient);
+                Log.d("getView", "cell " + h.opName.getText() + " state : " + state + " pos : " + position + " just clicked : " + mJustClicked);
                 if (state == STATE_MONTH_CELL) {
                     expandSeparatorNoAnim(h);
                 } else if (state == STATE_INFOS_CELL) {
@@ -815,8 +777,7 @@ public class OperationListActivity extends BaseActivity implements
                             public void run() {
                                 final int firstIdx = mListView.getFirstVisiblePosition();
                                 final int lastIdx = mListView.getLastVisiblePosition();
-                                if (oldPos < firstIdx ||
-                                        oldPos > lastIdx) {
+                                if (oldPos < firstIdx || oldPos > lastIdx) {
                                     oldPos = -1;
                                 }
                             }
@@ -826,6 +787,7 @@ public class OperationListActivity extends BaseActivity implements
                         expandSeparatorNoAnim(h);
                     }
                 } else if (state == STATE_MONTH_INFOS_CELL) {
+                    expandSeparatorNoAnim(h);
                     animateToolbar(h);
                 }
             } else {
@@ -849,8 +811,27 @@ public class OperationListActivity extends BaseActivity implements
                     }
                 }
             }
-
             return v;
+        }
+    }
+
+    protected class OnScrollLoader implements AbsListView.OnScrollListener {
+        private int lastTotalCount = -1;
+
+        @Override
+        public void onScrollStateChanged(AbsListView absListView, int i) {
+            // nothing to do
+        }
+
+        @Override
+        public void onScroll(AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
+            boolean loadMore = firstVisible + visibleCount >= totalCount - 2;
+
+            if (loadMore && startOpDate != null && lastTotalCount != totalCount) {
+                lastTotalCount = totalCount;
+                startOpDate.add(Calendar.MONTH, -1);
+                getOperationsList();
+            }
         }
     }
 }
