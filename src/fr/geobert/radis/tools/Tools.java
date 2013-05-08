@@ -243,6 +243,12 @@ public class Tools {
         return null;
     }
 
+    public static GregorianCalendar createClearedCalendar() {
+        GregorianCalendar cal = new GregorianCalendar();
+        clearTimeOfCalendar(cal);
+        return cal;
+    }
+
     public static void clearTimeOfCalendar(Calendar c) {
         c.set(Calendar.HOUR_OF_DAY, 0);
         c.set(Calendar.MINUTE, 0);

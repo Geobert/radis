@@ -55,13 +55,14 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-public class OperationListActivity extends BaseActivity implements
-        UpdateDisplayInterface, LoaderCallbacks<Cursor> {
+public class OperationListActivity extends BaseActivity implements UpdateDisplayInterface, LoaderCallbacks<Cursor> {
+    // robotium test set this to true to activate database cleaning on launch
+    public static boolean ROBOTIUM_MODE = false;
+
     public static final String INTENT_UPDATE_OP_LIST = "fr.geobert.radis.UPDATE_OP_LIST";
     private static final String TAG = "OperationListActivity";
     private static final int GET_ACCOUNTS = 200;
     private static final int GET_OPS = 300;
-    public static boolean ROBOTIUM_MODE = false;
     private boolean mFirstStart = true;
     private OnInsertionReceiver mOnInsertionReceiver;
     private IntentFilter mOnInsertionIntentFilter;
@@ -72,22 +73,13 @@ public class OperationListActivity extends BaseActivity implements
     private int greenColor;
     private int mLastSelectedPosition = -1;
     private boolean mJustClicked = false;
-    private boolean mOnRestore = false;
     private QuickAddController mQuickAddController = null;
-    private long mProjectionDate;
-    private boolean mReceiverIsRegistered;
     private OperationsCursorAdapter mOpListCursorAdapter;
     private ListView mListView;
-    private AdapterView.AdapterContextMenuInfo mCurrentSelectedOp;
     private GregorianCalendar startOpDate; // start date of ops to get
-
-    private GregorianCalendar endOpDate; // end date of ops to get
-
-
-    private static GregorianCalendar date1 = new GregorianCalendar();
     private Long mAccountId = null;
-    private boolean mAdjustListScroll;
     private OperationListActivity.OnScrollLoader mScrollLoader;
+    private long mProjectionDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +91,7 @@ public class OperationListActivity extends BaseActivity implements
         actionbar.setDisplayShowTitleEnabled(false);
 
         initAccountStuff();
+
         setContentView(R.layout.operation_list);
         initOperationList();
 
@@ -166,7 +159,6 @@ public class OperationListActivity extends BaseActivity implements
         mListView.setSelector(android.R.color.transparent);
 
         mLastSelectedPosition = -1;
-        mReceiverIsRegistered = false;
 
         mOnInsertionReceiver = new OnInsertionReceiver(this);
         mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
@@ -283,7 +275,6 @@ public class OperationListActivity extends BaseActivity implements
                 }
 //                updateSumsAndSelection();
                 mQuickAddController.clearFocus();
-
                 break;
         }
     }
@@ -427,14 +418,62 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
-    private static GregorianCalendar date2 = new GregorianCalendar();
+    private long computeSumFromCursor(Cursor op) {
+        long sum = 0L;
+        final int dateIdx = op.getColumnIndex(OperationTable.KEY_OP_DATE);
+        final int opSumIdx = op.getColumnIndex(OperationTable.KEY_OP_SUM);
+        final int transIdx = op.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID);
+        long opDate = op.getLong(dateIdx);
+        Log.d(TAG,
+                "computeSumFromCursor mProjectionDate : "
+                        + Formater.getFullDateFormater().format(
+                        new Date(mProjectionDate)) + "  opDate : " + Tools.getDateStr(opDate));
+        if (null != op && !op.isBeforeFirst() && !op.isAfterLast()) {
+            boolean canContinue;
+            if (opDate <= mProjectionDate || mProjectionDate == 0) {
+                canContinue = op.moveToPrevious();
+                if (canContinue) {
+                    opDate = op.getLong(dateIdx);
+                    while (canContinue && (opDate <= mProjectionDate || mProjectionDate == 0)) {
+                        long s = op.getLong(opSumIdx);
+                        if (op.getLong(transIdx) == mAccountId) {
+                            s = -s;
+                        }
+                        sum = sum + s;
+                        canContinue = op.moveToPrevious();
+                        if (canContinue) {
+                            opDate = op.getLong(dateIdx);
+                        }
+                    }
+                    sum = -sum;
+                }
+            } else {
+                sum = op.getLong(opSumIdx);
+                canContinue = op.moveToNext();
+                if (canContinue) {
+                    opDate = op.getLong(dateIdx);
+                    while (canContinue && opDate > mProjectionDate) {
+                        long s = op.getLong(opSumIdx);
+                        if (op.getLong(transIdx) == mAccountId) {
+                            s = -s;
+                        }
+                        sum = sum + s;
+                        canContinue = op.moveToNext();
+                        if (canContinue) {
+                            opDate = op.getLong(dateIdx);
+                        }
+                    }
+                }
+            }
+        }
+        Log.d(TAG, "computeSumFromCursor after sum = " + sum);
+        return sum;
+    }
 
     private void selectOpAndAdjustOffset(int position) {
-        OperationsCursorAdapter adapter = (OperationsCursorAdapter) mListView.getAdapter();
+        OperationsCursorAdapter adapter = mOpListCursorAdapter;
         adapter.setSelectedPosition(position);
-        mListView.smoothScrollToPosition(position + 2);
-        Log.d(TAG, "selectOpAndAdjustOffset setting mLastSelectedPosition: "
-                + position);
+        mListView.smoothScrollToPosition(position + 2); // scroll in order to see fully expanded op row
         mLastSelectedPosition = position;
     }
 
@@ -456,6 +495,7 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
+    // for accounts list
     private class SimpleAccountViewBinder implements SimpleCursorAdapter.ViewBinder {
         private int ACCOUNT_NAME_COL = -1;
         private int ACCOUNT_CUR_SUM;
@@ -473,6 +513,7 @@ public class OperationListActivity extends BaseActivity implements
                 ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE);
                 ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY);
             }
+
             boolean res;
             if (i == ACCOUNT_NAME_COL) {
                 TextView textView = (TextView) view;
@@ -496,6 +537,7 @@ public class OperationListActivity extends BaseActivity implements
             } else if (i == ACCOUNT_CUR_SUM_DATE) {
                 TextView textView = (TextView) view;
                 long dateLong = cursor.getLong(i);
+                mProjectionDate = dateLong;
                 StringBuilder stringBuilder = new StringBuilder();
                 if (dateLong > 0) {
                     stringBuilder.append(String.format(
@@ -515,6 +557,8 @@ public class OperationListActivity extends BaseActivity implements
 
     }
 
+    // used in InnerViewBinder
+    // filled in OperationCursorAdapter
     private static class OpRowHolder {
         public LinearLayout separator;
         public TextView month;
@@ -523,7 +567,7 @@ public class OperationListActivity extends BaseActivity implements
         public TextView sumAtSelection;
         public View actionsCont;
         public TextView opName;
-    }    // used in InnerViewBinder
+    }
 
     protected int[] mCellStates = null;
     protected static final int STATE_UNKNOWN = 0;
@@ -532,8 +576,10 @@ public class OperationListActivity extends BaseActivity implements
     protected static final int STATE_INFOS_CELL = 3;
     protected static final int STATE_MONTH_INFOS_CELL = 4;
 
-
+    // class responsible for filling each operation row
     private class InnerViewBinder extends OpViewBinder {
+        private GregorianCalendar date1 = new GregorianCalendar();
+        private GregorianCalendar date2 = new GregorianCalendar();
 
         public InnerViewBinder(Activity activity, Cursor c) {
             super(activity, OperationTable.KEY_OP_SUM,
@@ -617,8 +663,10 @@ public class OperationListActivity extends BaseActivity implements
                 }
 
                 if (needInfos) {
-                    // TODO : correct sum at selection
-                    h.sumAtSelection.setText("111,43 €");
+                    h.sumAtSelection.setText(
+                            Formater.getSumFormater().format(
+                                    AccountManager.getInstance().getCurrentAccountSum() +
+                                            computeSumFromCursor(cursor) / 100.0d));
                 } else {
                     h.sumAtSelection.setText("");
                 }
@@ -666,28 +714,28 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
+    // class responsible for creating operation rows and expantion/collapse animation
     private class OperationsCursorAdapter extends SimpleCursorAdapter {
         private int oldPos = -1;
+        private InnerViewBinder innerViewBinder;
 
-        OperationsCursorAdapter(Activity context, int layout, String[] from,
-                                int[] to, Cursor cursor) {
-            super(context, layout, null, from, to,
-                    CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-            InnerViewBinder viewBinder = new InnerViewBinder(context, cursor);
-            setViewBinder(viewBinder);
+        OperationsCursorAdapter(Activity context, int layout, String[] from, int[] to, Cursor cursor) {
+            super(context, layout, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+            innerViewBinder = new InnerViewBinder(context, cursor);
+            setViewBinder(innerViewBinder);
         }
 
         @Override
         public Cursor swapCursor(Cursor c) {
             Cursor old = super.swapCursor(c);
-            ((InnerViewBinder) getViewBinder()).initCache(c);
+            innerViewBinder.initCache(c);
             return old;
         }
 
         @Override
         public void changeCursor(Cursor c) {
             super.changeCursor(c);
-            ((InnerViewBinder) getViewBinder()).initCache(c);
+            innerViewBinder.initCache(c);
         }
 
         @Override
@@ -764,7 +812,6 @@ public class OperationListActivity extends BaseActivity implements
             final OpRowHolder h = (OpRowHolder) v.getTag();
             if (mLastSelectedPosition == position) {
                 v.setBackgroundResource(R.drawable.line_selected_gradient);
-                Log.d("getView", "cell " + h.opName.getText() + " state : " + state + " pos : " + position + " just clicked : " + mJustClicked);
                 if (state == STATE_MONTH_CELL) {
                     expandSeparatorNoAnim(h);
                 } else if (state == STATE_INFOS_CELL) {
@@ -788,7 +835,12 @@ public class OperationListActivity extends BaseActivity implements
                     }
                 } else if (state == STATE_MONTH_INFOS_CELL) {
                     expandSeparatorNoAnim(h);
-                    animateToolbar(h);
+                    if (mJustClicked) {
+                        mJustClicked = false;
+                        animateToolbar(h);
+                    } else {
+                        expandToolbarNoAnim(h);
+                    }
                 }
             } else {
                 v.setBackgroundResource(R.drawable.op_line);
@@ -815,6 +867,7 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
+    // Load more operations while scrolling
     protected class OnScrollLoader implements AbsListView.OnScrollListener {
         private int lastTotalCount = -1;
 

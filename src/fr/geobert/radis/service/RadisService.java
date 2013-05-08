@@ -69,8 +69,7 @@ public class RadisService extends IntentService {
     private TimeParams computeTimeParameters() {
         DateFormat formater = Formater.getFullDateFormater(); // used in Log.d
         TimeParams res = new TimeParams();
-        GregorianCalendar today = new GregorianCalendar();
-        Tools.clearTimeOfCalendar(today);
+        GregorianCalendar today = Tools.createClearedCalendar();
         final long todayInMillis = today.getTimeInMillis();
         Log.d(TAG,
                 "today : "

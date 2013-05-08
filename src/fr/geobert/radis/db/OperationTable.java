@@ -189,7 +189,7 @@ public class OperationTable {
         return c;
     }
 
-    static long computeSumFromCursor(Cursor c, long curAccount) {
+    public static long computeSumFromCursor(Cursor c, long curAccount) {
         long sum = 0L;
         final int sumIdx = c.getColumnIndex(KEY_OP_SUM);
         final int transIdx = c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID);
@@ -308,10 +308,8 @@ public class OperationTable {
     static Cursor fetchOpOfMonth(Context ctx, final GregorianCalendar date,
                                  final long limitDate, final long accountId) {
         Cursor c = null;
-        GregorianCalendar startDate = new GregorianCalendar();
-        GregorianCalendar endDate = new GregorianCalendar();
-        Tools.clearTimeOfCalendar(startDate);
-        Tools.clearTimeOfCalendar(endDate);
+        GregorianCalendar startDate = Tools.createClearedCalendar();
+        GregorianCalendar endDate = Tools.createClearedCalendar();
 
         startDate.set(Calendar.DAY_OF_MONTH, 1);
         endDate.set(Calendar.DAY_OF_MONTH, 1);

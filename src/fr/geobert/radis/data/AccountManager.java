@@ -12,6 +12,7 @@ public class AccountManager {
     private Cursor mAllAccountsCursor;
     private SimpleCursorAdapter mSimpleCursorAdapter;
     private Long mCurAccountId = null;
+    protected long mCurSum;
 
     private AccountManager() {
 
@@ -37,6 +38,9 @@ public class AccountManager {
         if (cursor != null) {
             cursor.moveToFirst();
         }
+        if (mCurAccountId != null) {
+            setCurrentAccountSum();
+        }
     }
 
     public void setSimpleCursorAdapter(SimpleCursorAdapter adapter) {
@@ -61,7 +65,23 @@ public class AccountManager {
         return mCurAccountId;
     }
 
+    private void setCurrentAccountSum() {
+        final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
+        do {
+            if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
+                mCurSum = mAllAccountsCursor.getLong(curSumIdx);
+                break;
+            }
+        } while (mAllAccountsCursor.moveToNext());
+        mAllAccountsCursor.moveToFirst();
+    }
+
     public void setCurrentAccountId(Long currentAccountId) {
-        this.mCurAccountId = currentAccountId;
+        mCurAccountId = currentAccountId;
+        setCurrentAccountSum();
+    }
+
+    public long getCurrentAccountSum() {
+        return mCurSum;
     }
 }
