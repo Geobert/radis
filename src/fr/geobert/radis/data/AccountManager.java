@@ -13,6 +13,7 @@ public class AccountManager {
     private SimpleCursorAdapter mSimpleCursorAdapter;
     private Long mCurAccountId = null;
     protected long mCurSum;
+    private int mCurAccountPos = -1;
 
     private AccountManager() {
 
@@ -55,7 +56,7 @@ public class AccountManager {
         if (mCurAccountId != null) {
             return mCurAccountId;
         } else if (getDefaultAccountId(context) != null) {
-            setCurrentAccountId(getCurrentAccountId(context));
+            setCurrentAccountId(getDefaultAccountId(context));
         } else if (mAllAccountsCursor != null && mAllAccountsCursor.getCount() > 0) {
             setCurrentAccountId(mAllAccountsCursor.getLong(
                     mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)));
@@ -65,20 +66,30 @@ public class AccountManager {
         return mCurAccountId;
     }
 
-    private void setCurrentAccountSum() {
+    public int getCurrentAccountPosition(Context ctx) {
+        if (mCurAccountPos == -1) {
+            getCurrentAccountId(ctx);
+        }
+        return mCurAccountPos;
+    }
+
+    private int setCurrentAccountSum() {
         final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
+        int pos = 0;
         do {
             if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
                 mCurSum = mAllAccountsCursor.getLong(curSumIdx);
                 break;
             }
+            pos++;
         } while (mAllAccountsCursor.moveToNext());
         mAllAccountsCursor.moveToFirst();
+        return pos;
     }
 
     public void setCurrentAccountId(Long currentAccountId) {
         mCurAccountId = currentAccountId;
-        setCurrentAccountSum();
+        mCurAccountPos = setCurrentAccountSum();
     }
 
     public long getCurrentAccountSum() {

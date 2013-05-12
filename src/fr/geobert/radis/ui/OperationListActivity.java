@@ -287,10 +287,16 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
     }
 
     private void processAccountList() {
-        Cursor allAccounts = AccountManager.getInstance().getAllAccountsCursor();
+        AccountManager accMan = AccountManager.getInstance();
+        Cursor allAccounts = accMan.getAllAccountsCursor();
         if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
             AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
+        } else {
+            mAccountId = accMan.getCurrentAccountId(this);
+            if (mAccountId != null) {
+                getSupportActionBar().setSelectedNavigationItem(accMan.getCurrentAccountPosition(this));
+            }
         }
     }
 
@@ -424,7 +430,7 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
                 DeleteAccountConfirmationDialog.newInstance(mAccountId).show(getSupportFragmentManager(), "delAccount");
                 return true;
             default:
-                return super.onOptionsItemSelected(item);
+                return Tools.onDefaultOptionItemSelected(this, item);
         }
     }
 

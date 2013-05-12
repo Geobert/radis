@@ -15,11 +15,11 @@ import android.os.Build;
 import android.os.Handler;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
+import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.DbHelper;
@@ -105,6 +105,25 @@ public class Tools {
                             }
                         });
         return builder.create();
+    }
+
+    public static boolean onDefaultOptionItemSelected(Activity ctx, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.restore:
+                ctx.showDialog(R.id.restore);
+                return true;
+            case R.id.backup:
+                ctx.showDialog(R.id.backup);
+                return true;
+            case R.id.go_to_preferences:
+                Intent i = new Intent(ctx, RadisConfiguration.class);
+                ctx.startActivity(i);
+                return true;
+            case R.id.process_scheduling:
+                ctx.showDialog(R.id.process_scheduling);
+                return true;
+        }
+        return false;
     }
 
     public static boolean onDefaultMenuSelected(Activity ctx, int featureId,
