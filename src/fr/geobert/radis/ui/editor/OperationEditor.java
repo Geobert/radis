@@ -195,6 +195,7 @@ public class OperationEditor extends CommonOpEditor {
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
             final OperationEditor act = (OperationEditor) getActivity();
             Bundle args = getArguments();
             final Operation currentOp = args.getParcelable("currentOp");

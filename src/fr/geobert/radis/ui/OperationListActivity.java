@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -60,6 +61,7 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
     public static boolean ROBOTIUM_MODE = false;
 
     public static final String INTENT_UPDATE_OP_LIST = "fr.geobert.radis.UPDATE_OP_LIST";
+    public static final String INTENT_UPDATE_ACC_LIST = "fr.geobert.radis.UPDATE_ACC_LIST";
     private static final String TAG = "OperationListActivity";
     private static final int GET_ACCOUNTS = 200;
     private static final int GET_OPS = 300;
@@ -80,6 +82,11 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
     private Long mAccountId = null;
     private OperationListActivity.OnScrollLoader mScrollLoader;
     private long mProjectionDate;
+
+    public static void refreshAccountList(final Context ctx) {
+        Intent intent = new Intent(INTENT_UPDATE_ACC_LIST);
+        ctx.sendBroadcast(intent);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -163,8 +170,8 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
         mOnInsertionReceiver = new OnInsertionReceiver(this);
         mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
         registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
-//        registerReceiver(mOnInsertionReceiver, new IntentFilter(
-//                OperationListActivity.INTENT_UPDATE_ACC_LIST));
+        registerReceiver(mOnInsertionReceiver, new IntentFilter(
+                OperationListActivity.INTENT_UPDATE_ACC_LIST));
         registerReceiver(mOnInsertionReceiver, new IntentFilter(
                 INTENT_UPDATE_OP_LIST));
     }
@@ -413,6 +420,9 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
             case R.id.go_to_sch_op:
                 ScheduledOpListActivity.callMe(this, mAccountId);
                 return true;
+            case R.id.delete_account:
+                DeleteAccountConfirmationDialog.newInstance(mAccountId).show(getSupportFragmentManager(), "delAccount");
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -478,20 +488,55 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
-        public static DeleteOpConfirmationDialog newInstance() {
-            DeleteOpConfirmationDialog frag = new DeleteOpConfirmationDialog();
+        private long accountId;
+        private long operationId;
 
+        public static DeleteOpConfirmationDialog newInstance(final long accountId, final long opId) {
+            DeleteOpConfirmationDialog frag = new DeleteOpConfirmationDialog();
+            Bundle args = new Bundle();
+            args.putLong("accountId", accountId);
+            args.putLong("opId", opId);
+            frag.setArguments(args);
             return frag;
         }
 
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            Bundle args = getArguments();
+            this.accountId = args.getLong("accountId");
+            this.operationId = args.getLong("opId");
+            return Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    // TODO deleteOp(mCurrentSelectedOp.position);
+                    OperationTable.deleteOp(getActivity(), operationId, accountId);
                 }
             });
+        }
+    }
+
+    protected static class DeleteAccountConfirmationDialog extends DialogFragment {
+        private long accountId;
+
+        public static DeleteAccountConfirmationDialog newInstance(final long accountId) {
+            DeleteAccountConfirmationDialog frag = new DeleteAccountConfirmationDialog();
+            Bundle args = new Bundle();
+            args.putLong("accountId", accountId);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Bundle args = getArguments();
+            this.accountId = args.getLong("accountId");
+            return Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    AccountTable.deleteAccount(getActivity(), accountId);
+                    OperationListActivity.refreshAccountList(getActivity());
+                }
+            }, R.string.account_delete_confirmation);
         }
     }
 

@@ -5,7 +5,6 @@
     <string name="no_account">No account. Press "menu" to create one.</string>
     <string name="create_account">Create account</string>
     <string name="name">Name</string>
-    <string name="account_creation">Account creation</string>
     <string name="description">Description</string>
     <string name="start_sum">Start amount</string>
     <string name="create">Create</string>
@@ -203,4 +202,5 @@
     <string name="sched_op_total_sum">Total credit : %1$s — Total debit : %2$"s\nBalance : %3$s</string>
     <string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
     <string name="sch_edition">Scheduled transaction edition</string>
+    <string name="delete_account">Delete account</string>
 </resources>

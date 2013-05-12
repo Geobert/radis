@@ -20,4 +20,8 @@
             android:id="@+id/go_to_edit_account"
             android:title="@string/account_edit"
             android:showAsAction="never"/>
+    <item
+            android:id="@+id/delete_account"
+            android:title="@string/delete_account"
+            android:showAsAction="never"/>
 </menu>
