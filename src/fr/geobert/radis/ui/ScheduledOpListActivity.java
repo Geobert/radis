@@ -22,7 +22,11 @@ import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.ScheduledOperation;
-import fr.geobert.radis.db.*;
+import fr.geobert.radis.db.AccountTable;
+import fr.geobert.radis.db.DbContentProvider;
+import fr.geobert.radis.db.InfoTables;
+import fr.geobert.radis.db.OperationTable;
+import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.OpViewBinder;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
@@ -106,7 +110,7 @@ public class ScheduledOpListActivity extends BaseActivity implements
 //    }
 
     private void fetchSchOpsOfAccount() {
-        showProgress();
+//        showProgress();
         if (mLoader == null) {
             getSupportLoaderManager().initLoader(GET_SCH_OPS_OF_ACCOUNT, null,
                     this);

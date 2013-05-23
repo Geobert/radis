@@ -39,16 +39,15 @@ public abstract class CommonOpEditor extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Bundle extras = getIntent().getExtras();
 
+        final Bundle extras = getIntent().getExtras();
         mCurAccountId = extras != null ? extras
                 .getLong(AccountEditor.PARAM_ACCOUNT_ID) : null;
-        init(savedInstanceState);
+        init(extras);
         setView();
     }
 
-    protected void init(Bundle savedInstanceState) {
-        Bundle extras = getIntent().getExtras();
+    protected void init(final Bundle extras) {
         mRowId = extras != null ? extras.getLong(PARAM_OP_ID) : 0;
     }
 

@@ -30,8 +30,8 @@ public class OperationEditor extends CommonOpEditor {
     protected Operation mOriginalOp;
     private OperationEditFragment mEditFragment;
 
-    public static void callMeForResult(BaseActivity context, long opId, long accountId) {
-        Intent intent = new Intent(context, OperationEditor.class);
+    public static void callMeForResult(final BaseActivity context, final long opId, final long accountId) {
+        final Intent intent = new Intent(context, OperationEditor.class);
         intent.putExtra(PARAM_OP_ID, opId);
         intent.putExtra(AccountEditor.PARAM_ACCOUNT_ID, accountId);
         context.startActivityForResult(intent, OPERATION_EDITOR);

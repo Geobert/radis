@@ -195,8 +195,8 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
         }
         ScheduledOperation op = (ScheduledOperation) operation;
         if (!mActivity.isTransfertChecked()) {
-            Account a = (Account) mAccountSpinner.getSelectedItem();
-            op.mAccountId = a.mAccountId;
+            Cursor c = (Cursor) mAccountSpinner.getSelectedItem();
+            op.mAccountId = c.getLong(0);
         }
         final boolean isCustom = mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner
                 .getAdapter().getCount() - 1);
@@ -216,7 +216,6 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
             op.setEndDay(dp.getDayOfMonth());
             op.setEndMonth(dp.getMonth());
             op.setEndYear(dp.getYear());
-
         } else {
             op.mEndDate.clear();
         }
@@ -260,8 +259,9 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
             }
         }
         if (!mActivity.isTransfertChecked()) {
-            Account a = (Account) mAccountSpinner.getSelectedItem();
-            if (a.mAccountId == 0) {
+            Cursor cursor = (Cursor) mAccountSpinner.getSelectedItem();
+            final long accountId = cursor.getLong(0);
+            if (accountId == 0) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n");
                 }

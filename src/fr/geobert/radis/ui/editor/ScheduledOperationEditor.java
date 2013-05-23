@@ -28,6 +28,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     // activities ids
     public static final int ACTIVITY_SCH_OP_CREATE = 0;
     public static final int ACTIVITY_SCH_OP_EDIT = 1;
+    public static final String PARAM_SRC_OP_TO_CONVERT = "sourceOpId";
 
     protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
     private static final int GET_SCH_OP = 620;
@@ -143,11 +144,11 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     // to be called after setContentView
     @Override
-    protected void init(Bundle savedInstanceState) {
-        super.init(savedInstanceState);
+    protected void init(final Bundle savedInstanceState) {
+        final Bundle extras = getIntent().getExtras();
+        super.init(extras);
 
-        Bundle extras = getIntent().getExtras();
-        mOpIdSource = extras.getLong("operationId");
+        mOpIdSource = extras.getLong(PARAM_SRC_OP_TO_CONVERT);
     }
 
     private void onOpNotFound() {

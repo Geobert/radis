@@ -77,21 +77,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/arrow_down16"
-                    android:contentDescription=""/>
+                    android:contentDescription="@string/new_op"/>
 
             <ImageView
                     android:id="@+id/op_sch_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/sched_22"
-                    android:contentDescription=""/>
+                    android:contentDescription="@string/scheduling"/>
 
             <ImageView
                     android:id="@+id/op_trans_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:src="@drawable/transfer_left_right16"
-                    android:contentDescription=""/>
+                    android:contentDescription="@string/transfert"/>
         </LinearLayout>
 
         <TextView
@@ -110,25 +110,29 @@
             android:orientation="horizontal">
 
         <ImageButton
-                android:src="@drawable/plus_48"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:layout_margin="10dp"
-                android:layout_width="wrap_content"/>
+                android:id="@+id/edit_op"
+                android:src="@drawable/edit_48"
+                android:layout_height="48dp"
+                android:background="@drawable/action_bg_selector"
+                android:layout_width="48dp"
+                android:contentDescription="@string/edit"/>
 
         <ImageButton
-                android:src="@drawable/cancel_48"
-                android:layout_margin="10dp"
-                android:layout_height="wrap_content"
-                android:background="@null"
-                android:layout_width="wrap_content"/>
+                android:id="@+id/variable_action"
+                android:src="@drawable/edit_sched_48"
+                android:layout_height="48dp"
+                android:background="@drawable/action_bg_selector"
+                android:layout_width="48dp"
+                android:contentDescription="variable"/>
 
         <ImageButton
-                android:src="@drawable/ok_48"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@null"
-                android:layout_width="wrap_content"/>
+                android:id="@+id/delete_op"
+                android:src="@drawable/trash_48"
+                android:layout_height="48dp"
+                android:background="@drawable/action_bg_selector"
+                android:layout_width="48dp"
+                android:contentDescription="@string/delete"/>
+
     </LinearLayout>
 
 </LinearLayout>

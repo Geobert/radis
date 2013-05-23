@@ -262,7 +262,9 @@ public class OperationTable {
         if (ctx.getContentResolver().delete(
                 Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null,
                 null) > 0) {
+
             // TODO : update account sum
+
             return true;// AccountTable.checkNeedUpdateProjection(ctx, op,
             // accountId);
         }

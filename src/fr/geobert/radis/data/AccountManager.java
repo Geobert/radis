@@ -89,7 +89,11 @@ public class AccountManager {
 
     public void setCurrentAccountId(Long currentAccountId) {
         mCurAccountId = currentAccountId;
-        mCurAccountPos = setCurrentAccountSum();
+        if (currentAccountId == null) {
+            mCurAccountPos = -1;
+        } else {
+            mCurAccountPos = setCurrentAccountSum();
+        }
     }
 
     public long getCurrentAccountSum() {

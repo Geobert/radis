@@ -1,7 +1,6 @@
 package fr.geobert.radis;
 
 import android.app.ProgressDialog;
-import android.util.Log;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.DBPrefsManager;
@@ -22,7 +21,6 @@ public class BaseActivity extends SherlockFragmentActivity {
 
     protected void hideProgress() {
         mProgressCount--;
-        Log.d(TAG, "hideProgress counter : " + mProgressCount);
         if (mProgress != null && mProgress.isShowing() && mProgressCount <= 0) {
             mProgressCount = 0;
             mProgress.dismiss();
