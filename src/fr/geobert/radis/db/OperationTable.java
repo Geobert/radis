@@ -256,17 +256,15 @@ public class OperationTable {
     }
 
     public static boolean deleteOp(Context ctx, long rowId, final long accountId) {
-//        Cursor c = fetchOneOp(ctx, rowId, accountId);
-//        Operation op = new Operation(c);
-//        c.close();
+        Cursor c = fetchOneOp(ctx, rowId, accountId);
+        final long opSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
+        final long opDate = c.getLong(c.getColumnIndex(KEY_OP_DATE));
+        c.close();
         if (ctx.getContentResolver().delete(
                 Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null,
                 null) > 0) {
-
-            // TODO : update account sum
-
-            return true;// AccountTable.checkNeedUpdateProjection(ctx, op,
-            // accountId);
+            AccountTable.updateProjection(ctx, accountId, -opSum, opDate);
+            return true;
         }
         return false;
     }

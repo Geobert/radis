@@ -535,9 +535,12 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     final OperationListActivity activity = (OperationListActivity) getActivity();
-                    OperationTable.deleteOp(activity, operationId, accountId);
-                    activity.updateOperationList();
-                    activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                    if (OperationTable.deleteOp(activity, operationId, accountId)) {
+                        activity.updateOperationList();
+                        activity.updateAccountList();
+                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                    }
+
                 }
             });
         }
