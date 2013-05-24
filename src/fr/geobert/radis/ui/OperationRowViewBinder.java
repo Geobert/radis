@@ -27,7 +27,6 @@ class OperationRowViewBinder extends OpViewBinder {
 
 
     int[] mCellStates = null;
-    static final int STATE_UNKNOWN = 0;
     static final int STATE_MONTH_CELL = 1;
     static final int STATE_REGULAR_CELL = 2;
     static final int STATE_INFOS_CELL = 3;
@@ -35,8 +34,6 @@ class OperationRowViewBinder extends OpViewBinder {
 
     public OperationRowViewBinder(IOperationList activity, Cursor c,
                                   CharSequence sumColName, CharSequence dateColName) {
-//        super((Activity) activity, OperationTable.KEY_OP_SUM,
-//                OperationTable.KEY_OP_DATE, R.id.op_icon, activity.getCurrentAccountId());
         super((Activity) activity, sumColName, dateColName, R.id.op_icon, activity.getCurrentAccountId());
         this.activity = activity;
         initCache(c);
@@ -87,13 +84,13 @@ class OperationRowViewBinder extends OpViewBinder {
     public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
         final String colName = cursor.getColumnName(columnIndex);
         if (colName.equals(InfoTables.KEY_TAG_NAME)) {
-            final OpRowHolder h = (OpRowHolder) ((View) view.getParent()
-                    .getParent()).getTag();
+            final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent()).getTag();
             fillTag((TextView) view, h.tagBuilder, cursor, columnIndex);
-            boolean isSched = setSchedImg(cursor, h.scheduledImg);
-            boolean needMonth = false;
+
+            final boolean isSched = setSchedImg(cursor, h.scheduledImg);
             final int position = cursor.getPosition();
-            boolean needInfos = position == activity.getLastSelectedPosition();
+            final boolean needInfos = position == activity.getLastSelectedPosition();
+            boolean needMonth = false;
             date1.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_DATE)));
             if (position == 0) {
                 needMonth = true;
@@ -130,7 +127,6 @@ class OperationRowViewBinder extends OpViewBinder {
                 final BaseActivity context = (BaseActivity) activity;
                 final long opId = cursor.getLong(0);
                 final long accountId = AccountManager.getInstance().getCurrentAccountId(context);
-                // TODO set click listeners on action btn
                 h.editBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -140,10 +136,11 @@ class OperationRowViewBinder extends OpViewBinder {
                 h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        OperationListActivity.DeleteOpConfirmationDialog.newInstance(accountId, opId).show(context.getSupportFragmentManager(),
+                        activity.getDeleteConfirmationDialog(accountId, opId).show(context.getSupportFragmentManager(),
                                 "deleteOpConfirm");
                     }
                 });
+
                 int drawable;
                 View.OnClickListener listener;
                 if (isSched) {
@@ -160,7 +157,7 @@ class OperationRowViewBinder extends OpViewBinder {
                     listener = new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-
+                            // TODO
                         }
                     };
                 }

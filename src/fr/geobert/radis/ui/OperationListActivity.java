@@ -484,6 +484,11 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
         return mListView;
     }
 
+    @Override
+    public DialogFragment getDeleteConfirmationDialog(long accountId, long opId) {
+        return DeleteOpConfirmationDialog.newInstance(accountId, opId);
+    }
+
     private void selectOpAndAdjustOffset(int position) {
         OperationsCursorAdapter adapter = mOpListCursorAdapter;
         adapter.setSelectedPosition(position);
