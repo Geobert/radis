@@ -1,5 +1,6 @@
 package fr.geobert.radis.ui;
 
+import android.annotation.TargetApi;
 import android.app.Dialog;
 import android.content.ContentProviderClient;
 import android.content.Context;
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -46,7 +48,8 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-public class OperationListActivity extends BaseActivity implements UpdateDisplayInterface, LoaderCallbacks<Cursor>, IOperationList {
+public class OperationListActivity extends BaseActivity implements
+        UpdateDisplayInterface, LoaderCallbacks<Cursor>, IOperationList {
     // robotium test set this to true to activate database cleaning on launch
     public static boolean ROBOTIUM_MODE = false;
 
@@ -63,8 +66,6 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
     private SimpleCursorAdapter mAccountAdapter;
     private int redColor;
     private int greenColor;
-    private int mLastSelectedPosition = -1;
-    private boolean mJustClicked = false;
     private QuickAddController mQuickAddController = null;
     private OperationsCursorAdapter mOpListCursorAdapter;
     private ListView mListView;
@@ -147,16 +148,12 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 selectOpAndAdjustOffset(i);
-                mJustClicked = true;
             }
         });
         mScrollLoader = new OnOperationScrollLoader(this);
         mListView.setOnScrollListener(mScrollLoader);
         mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
         mListView.setSelector(android.R.color.transparent);
-
-        mLastSelectedPosition = -1;
-
         mOnInsertionReceiver = new OnInsertionReceiver(this);
         mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
         registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
@@ -261,7 +258,10 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
 
                     int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum,
                             R.id.op_infos};
-                    mOpListCursorAdapter = new OperationsCursorAdapter(this, R.layout.operation_row, from, to, cursor);
+                    mOpListCursorAdapter =
+                            new OperationsCursorAdapter(this, R.layout.operation_row, from, to, cursor,
+                                    new OperationRowViewBinder(this, cursor,
+                                            OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE));
                     mListView.setAdapter(mOpListCursorAdapter);
                 }
                 Cursor old = mOpListCursorAdapter.swapCursor(cursor);
@@ -489,27 +489,17 @@ public class OperationListActivity extends BaseActivity implements UpdateDisplay
         return DeleteOpConfirmationDialog.newInstance(accountId, opId);
     }
 
+    @TargetApi(Build.VERSION_CODES.FROYO)
     private void selectOpAndAdjustOffset(int position) {
         OperationsCursorAdapter adapter = mOpListCursorAdapter;
         adapter.setSelectedPosition(position);
         mListView.smoothScrollToPosition(position + 2); // scroll in order to see fully expanded op row
-        mLastSelectedPosition = position;
     }
 
     @Override
     public void getMoreOperations(final GregorianCalendar startDate) {
         startOpDate = startDate;
         getOperationsList();
-    }
-
-    @Override
-    public int getLastSelectedPosition() {
-        return mLastSelectedPosition;
-    }
-
-    @Override
-    public void setLastSelectedPosition(int position) {
-        mLastSelectedPosition = position;
     }
 
     @Override

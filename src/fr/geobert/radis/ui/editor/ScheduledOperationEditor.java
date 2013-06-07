@@ -28,6 +28,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     // activities ids
     public static final int ACTIVITY_SCH_OP_CREATE = 0;
     public static final int ACTIVITY_SCH_OP_EDIT = 1;
+    public static final int ACTIVITY_SCH_OP_CONVERT = 2;
     public static final String PARAM_SRC_OP_TO_CONVERT = "sourceOpId";
 
     protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;
@@ -40,7 +41,11 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     public static void callMeForResult(Activity context, final long opId, final long mAccountId, final int mode) {
         Intent i = new Intent(context, ScheduledOperationEditor.class);
-        i.putExtra(CommonOpEditor.PARAM_OP_ID, opId);
+        if (mode == ACTIVITY_SCH_OP_CONVERT) {
+            i.putExtra(PARAM_SRC_OP_TO_CONVERT, opId);
+        } else {
+            i.putExtra(CommonOpEditor.PARAM_OP_ID, opId);
+        }
         i.putExtra(AccountEditor.PARAM_ACCOUNT_ID, mAccountId);
         context.startActivityForResult(i, mode);
     }
@@ -153,12 +158,11 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     private void onOpNotFound() {
         if (mOpIdSource > 0) {
-            getSupportLoaderManager().initLoader(GET_SCH_OP_SRC,
-                    getIntent().getExtras(), this);
+            getSupportLoaderManager().initLoader(GET_SCH_OP_SRC, getIntent().getExtras(), this);
         } else {
             mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(mCurAccountId);
             mCurrentOp = mSchedEditTab.getFragment().mCurrentSchOp;
-            //populateFields();
+            populateFields();
         }
     }
 
@@ -168,7 +172,6 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             fetchOp(GET_SCH_OP);
         } else {
             onOpNotFound();
-            populateFields();
         }
     }
 
@@ -199,8 +202,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 // schedule
                 if ((op.getDate() != mOriginalSchOp.getDate())) {
                     // change the date of the source transaction
-                    OperationTable.updateOp(this, mOpIdSource, op,
-                            op.mAccountId);
+                    OperationTable.updateOp(this, mOpIdSource, op, op.mAccountId);
                 }
                 // do not insert another occurrence with same date
                 ScheduledOperation.addPeriodicityToDate(op);
@@ -312,18 +314,14 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             switch (id) {
                 case GET_SCH_OP:
                     l = new CursorLoader(this,
-                            Uri.parse(DbContentProvider.SCHEDULED_JOINED_OP_URI
-                                    + "/" + mRowId),
-                            ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, null,
-                            null, null);
+                            Uri.parse(DbContentProvider.SCHEDULED_JOINED_OP_URI + "/" + mRowId),
+                            ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, null, null, null);
                     break;
                 case GET_SCH_OP_SRC:
                     l = new CursorLoader(this,
-                            Uri.parse(DbContentProvider.OPERATION_JOINED_URI + "/"
-                                    + mOpIdSource),
-                            OperationTable.OP_COLS_QUERY, null,
-                            null, null);
-
+                            Uri.parse(DbContentProvider.OPERATION_JOINED_URI + "/" + mOpIdSource),
+                            OperationTable.OP_COLS_QUERY, null, null, null);
+                    break;
                 default:
                     break;
             }
@@ -346,12 +344,13 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 break;
             case GET_SCH_OP_SRC:
                 if (data.getCount() > 0 && data.moveToFirst()) {
-                    mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(data, mCurAccountId);
+                    mCurrentOp = new ScheduledOperation(data, mCurAccountId);
+                    mSchedEditTab.getFragment().mCurrentSchOp = (ScheduledOperation) mCurrentOp;
                     mOriginalSchOp = new ScheduledOperation(data, mCurAccountId);
+                    populateFields();
                 } else {
                     onOpNotFound();
                 }
-                populateFields();
                 break;
             default:
                 break;
@@ -360,18 +359,15 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     @Override
     public void onLoaderReset(Loader<Cursor> arg0) {
-//		super.onLoaderReset(arg0);
-        // TODO Auto-generated method stub
-
     }
 
     @Override
     public boolean isTransfertChecked() {
-        return mMainEditTab.getFragment().isTransfertChecked();  //To change body of implemented methods use File | Settings | File Templates.
+        return mMainEditTab.getFragment().isTransfertChecked();
     }
 
     @Override
     public int getSrcAccountSpinnerIdx() {
-        return mMainEditTab.getFragment().getSrcAccountIdx();  //To change body of implemented methods use File | Settings | File Templates.
+        return mMainEditTab.getFragment().getSrcAccountIdx();
     }
 }

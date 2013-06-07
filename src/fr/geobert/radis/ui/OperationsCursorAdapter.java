@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import fr.geobert.radis.R;
-import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.ExpandAnimation;
 import fr.geobert.radis.tools.ExpandUpAnimation;
 import fr.geobert.radis.tools.Tools;
@@ -21,14 +20,14 @@ import fr.geobert.radis.tools.Tools;
 class OperationsCursorAdapter extends SimpleCursorAdapter {
     private final IOperationList opListActivity;
     private int oldPos = -1;
-    private OperationRowViewBinder mInnerViewBinder;
+    private OpViewBinder mInnerViewBinder;
     private boolean mJustClicked = false;
+    private int mLastSelectedPosition = -1;
 
-    OperationsCursorAdapter(IOperationList context, int layout, String[] from, int[] to, Cursor cursor) {
+    OperationsCursorAdapter(IOperationList context, int layout, String[] from, int[] to, Cursor cursor, OpViewBinder innerViewBinder) {
         super((Context) context, layout, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         this.opListActivity = context;
-        mInnerViewBinder =
-                new OperationRowViewBinder(context, cursor, OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE);
+        mInnerViewBinder = innerViewBinder;
         setViewBinder(mInnerViewBinder);
     }
 
@@ -57,6 +56,7 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
         h.deleteBtn = (ImageButton) h.actionsCont.findViewById(R.id.delete_op);
         h.editBtn = (ImageButton) h.actionsCont.findViewById(R.id.edit_op);
         h.varBtn = (ImageButton) h.actionsCont.findViewById(R.id.variable_action);
+        h.opName = (TextView) v.findViewById(R.id.op_third_party);
         v.setTag(h);
         // HACK to workaround a glitch at the end of animation
         ExpandUpAnimation.mBg = h.separator.getBackground();
@@ -67,10 +67,11 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     }
 
     public void setSelectedPosition(int pos) {
-        if (opListActivity.getLastSelectedPosition() != -1) {
-            oldPos = opListActivity.getLastSelectedPosition();
+        if (mLastSelectedPosition != -1) {
+            oldPos = mLastSelectedPosition;
         }
-        opListActivity.setLastSelectedPosition(pos);
+        mLastSelectedPosition = pos;
+        mInnerViewBinder.setSelectedPosition(pos);
         if (pos != -1) {
             this.mJustClicked = true;
         }
@@ -122,14 +123,16 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
         View v = super.getView(position, convertView, parent);
         final int state = mInnerViewBinder.mCellStates[position];
         final OpRowHolder h = (OpRowHolder) v.getTag();
-        if (opListActivity.getLastSelectedPosition() == position) {
+        if (mLastSelectedPosition == position) {
             v.setBackgroundResource(R.drawable.line_selected_gradient);
-            if (state == OperationRowViewBinder.STATE_MONTH_CELL) {
+            if (state == OpViewBinder.STATE_MONTH_CELL) {
                 expandSeparatorNoAnim(h);
-            } else if (state == OperationRowViewBinder.STATE_INFOS_CELL) {
+            } else if (state == OpViewBinder.STATE_INFOS_CELL) {
                 if (mJustClicked) {
                     mJustClicked = false;
-                    animateSeparator(h);
+                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+                        animateSeparator(h);
+                    }
                     animateToolbar(h);
                     final ListView listView = opListActivity.getListView();
                     listView.post(new Runnable() {
@@ -143,10 +146,12 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
                         }
                     });
                 } else {
-                    expandToolbarNoAnim(h);
+                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+                        expandToolbarNoAnim(h);
+                    }
                     expandSeparatorNoAnim(h);
                 }
-            } else if (state == OperationRowViewBinder.STATE_MONTH_INFOS_CELL) {
+            } else if (state == OpViewBinder.STATE_MONTH_INFOS_CELL) {
                 expandSeparatorNoAnim(h);
                 if (mJustClicked) {
                     mJustClicked = false;
@@ -157,7 +162,7 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
             }
         } else {
             v.setBackgroundResource(R.drawable.op_line);
-            if (state == OperationRowViewBinder.STATE_MONTH_CELL) {
+            if (state == OpViewBinder.STATE_MONTH_CELL) {
                 expandSeparatorNoAnim(h);
                 if (position == oldPos) {
                     animateToolbar(h);
@@ -165,13 +170,17 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
                 } else {
                     collapseToolbarNoAnim(h);
                 }
-            } else if (state == OperationRowViewBinder.STATE_REGULAR_CELL) {
+            } else if (state == OpViewBinder.STATE_REGULAR_CELL) {
                 if (position == oldPos) {
+                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+                        animateSeparator(h);
+                    }
                     animateToolbar(h);
-                    animateSeparator(h);
                     oldPos = -1;
                 } else {
-                    collapseSeparatorNoAnim(h);
+                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+                        collapseSeparatorNoAnim(h);
+                    }
                     collapseToolbarNoAnim(h);
                 }
             }
