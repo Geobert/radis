@@ -6,13 +6,12 @@ import android.view.View;
 import android.widget.TextView;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.ui.editor.OperationEditor;
+import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.Date;
 
@@ -40,17 +39,17 @@ class SchedOpRowViewBinder extends OpViewBinder {
         if (needInfos) {
             final BaseActivity context = (BaseActivity) activity;
             final long opId = cursor.getLong(0);
-            final long accountId = AccountManager.getInstance().getCurrentAccountId(context);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    OperationEditor.callMeForResult(context, opId, accountId);
+                    ScheduledOperationEditor.callMeForResult((Activity) mCtx, opId, mCurAccountId,
+                            ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                 }
             });
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    activity.getDeleteConfirmationDialog(accountId, opId).show(context.getSupportFragmentManager(),
+                    activity.getDeleteConfirmationDialog(mCurAccountId, opId).show(context.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });

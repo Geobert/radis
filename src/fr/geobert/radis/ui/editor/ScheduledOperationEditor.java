@@ -102,9 +102,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         mMainEditTab = new TabListener<OperationEditFragment>(this,
                 "transaction", OperationEditFragment.class);
-        ActionBar.Tab tab = actionBar.newTab().
-                setText(R.string.basics)
-                .setTabListener(mMainEditTab);
+        ActionBar.Tab tab = actionBar.newTab().setText(R.string.basics).setTabListener(mMainEditTab);
         actionBar.addTab(tab);
         mSchedEditTab = new TabListener<ScheduleEditorFragment>(this, "scheduling", ScheduleEditorFragment.class);
         tab = actionBar.newTab().setText(R.string.scheduling).setTabListener(mSchedEditTab);
@@ -152,17 +150,18 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     protected void init(final Bundle savedInstanceState) {
         final Bundle extras = getIntent().getExtras();
         super.init(extras);
-
         mOpIdSource = extras.getLong(PARAM_SRC_OP_TO_CONVERT);
     }
 
-    private void onOpNotFound() {
+    private boolean onOpNotFound() {
         if (mOpIdSource > 0) {
             getSupportLoaderManager().initLoader(GET_SCH_OP_SRC, getIntent().getExtras(), this);
+            return false;
         } else {
             mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(mCurAccountId);
             mCurrentOp = mSchedEditTab.getFragment().mCurrentSchOp;
             populateFields();
+            return true;
         }
     }
 
@@ -337,10 +336,13 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 if (data.getCount() > 0 && data.moveToFirst()) {
                     mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(data);
                     mOriginalSchOp = new ScheduledOperation(data);
+                    mCurrentOp = new ScheduledOperation(data);
+                    populateFields();
                 } else {
-                    onOpNotFound();
+                    if (!onOpNotFound()) {
+                        populateFields();
+                    }
                 }
-                populateFields();
                 break;
             case GET_SCH_OP_SRC:
                 if (data.getCount() > 0 && data.moveToFirst()) {
@@ -349,7 +351,9 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                     mOriginalSchOp = new ScheduledOperation(data, mCurAccountId);
                     populateFields();
                 } else {
-                    onOpNotFound();
+                    if (!onOpNotFound()) {
+                        populateFields();
+                    }
                 }
                 break;
             default:

@@ -271,4 +271,10 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
         }
         return res;
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        fillOperationWithInputs(mActivity.mCurrentOp);
+    }
 }

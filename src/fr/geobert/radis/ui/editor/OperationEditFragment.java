@@ -46,7 +46,8 @@ public class OperationEditFragment extends SherlockFragment {
     private EditText mNotesText;
     private CheckBox mIsTransfertCheck;
     private CommonOpEditor mActivity;
-    private OnTransfertCheckedChangeListener mTransfertCheckedListener = null;
+    private boolean mIsInit = false;
+    private LinearLayout mRootLayeut;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,6 +58,7 @@ public class OperationEditFragment extends SherlockFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mActivity = (CommonOpEditor) getSherlockActivity();
+        mRootLayeut = (LinearLayout) mActivity.findViewById(R.id.edit_op_root);
         mOpThirdPartyText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_third_party);
         mOpModeText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_mode);
         mOpSumText = (EditText) mActivity.findViewById(R.id.edit_op_sum);
@@ -76,16 +78,8 @@ public class OperationEditFragment extends SherlockFragment {
         mOpModeText.setNextFocusDownId(R.id.edit_op_notes);
 
         mIsTransfertCheck = (CheckBox) mActivity.findViewById(R.id.is_transfert);
-        mIsTransfertCheck
-                .setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-
-                    @Override
-                    public void onCheckedChanged(CompoundButton arg0,
-                                                 boolean arg1) {
-                        onTransfertCheckedChanged(arg1);
-                    }
-                });
-        mTransfertCont.setVisibility(View.GONE);
+//        mTransfertCont.setVisibility(View.GONE);
+//        mThirdPartyCont.setVisibility(View.VISIBLE);
         mThirdPartyCont.post(new Runnable() {
             private void adjustImageButton(ImageButton btn) {
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
@@ -112,8 +106,6 @@ public class OperationEditFragment extends SherlockFragment {
             }
         });
 
-        initViewAdapters();
-        initListeners();
     }
 
     @Override
@@ -122,10 +114,19 @@ public class OperationEditFragment extends SherlockFragment {
         if (mOpSumText.getText().toString().trim().length() == 0) {
             mSumTextWatcher.setAutoNegate(true);
         }
-    }
-
-    void setTransfertCheckedChangeListener(OnTransfertCheckedChangeListener listener) {
-        mTransfertCheckedListener = listener;
+        if (mActivity.mCurrentOp != null) {
+            populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
+        }
+        initViewAdapters();
+        initListeners();
+        mIsTransfertCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton arg0,
+                                         boolean arg1) {
+                onTransfertCheckedChanged(arg1);
+            }
+        });
+        configThirdPartyTransfertCont(mIsTransfertCheck.isChecked());
     }
 
     final protected void initListeners() {
@@ -185,9 +186,16 @@ public class OperationEditFragment extends SherlockFragment {
             mTransfertCont.setVisibility(View.GONE);
             mThirdPartyCont.setVisibility(View.VISIBLE);
         }
-        if (mTransfertCheckedListener != null) {
-            mTransfertCheckedListener.onTransfertCheckedChanged(isChecked);
-        }
+    }
+
+    private void configThirdPartyTransfertCont(final boolean isChecked) {
+        // HACK, ui bug where neither Transfert nor ThirdParty is draw
+        mTransfertCont.post(new Runnable() {
+            @Override
+            public void run() {
+                onTransfertCheckedChanged(isChecked);
+            }
+        });
     }
 
     boolean isTransfertChecked() {
@@ -269,6 +277,7 @@ public class OperationEditFragment extends SherlockFragment {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
         populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
+        this.mIsInit = true;
     }
 
     private void invertSign() throws ParseException {
@@ -359,5 +368,11 @@ public class OperationEditFragment extends SherlockFragment {
             op.mTransSrcAccName = "";
             op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        fillOperationWithInputs(mActivity.mCurrentOp);
     }
 }

@@ -80,10 +80,12 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     }
 
     private void animateSeparator(OpRowHolder h) {
-        h.separator.clearAnimation();
-        ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
-        ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
-        h.separator.startAnimation(anim);
+        if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+            h.separator.clearAnimation();
+            ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
+            ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
+            h.separator.startAnimation(anim);
+        }
     }
 
     private void animateToolbar(OpRowHolder h) {
@@ -93,9 +95,11 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     }
 
     private void collapseSeparatorNoAnim(OpRowHolder h) {
-        h.separator.clearAnimation();
-        ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -50;
-        h.separator.setVisibility(View.GONE);
+        if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+            h.separator.clearAnimation();
+            ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -50;
+            h.separator.setVisibility(View.GONE);
+        }
     }
 
     private void collapseToolbarNoAnim(OpRowHolder h) {
@@ -105,11 +109,13 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     }
 
     private void expandSeparatorNoAnim(OpRowHolder h) {
-        h.separator.clearAnimation();
-        ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
-        h.separator.setVisibility(View.VISIBLE);
-        ExpandUpAnimation.setChildrenVisibility(h.separator, View.VISIBLE);
-        Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
+        if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
+            h.separator.clearAnimation();
+            ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = 0;
+            h.separator.setVisibility(View.VISIBLE);
+            ExpandUpAnimation.setChildrenVisibility(h.separator, View.VISIBLE);
+            Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
+        }
     }
 
     private void expandToolbarNoAnim(OpRowHolder h) {
@@ -130,9 +136,8 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
             } else if (state == OpViewBinder.STATE_INFOS_CELL) {
                 if (mJustClicked) {
                     mJustClicked = false;
-                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
-                        animateSeparator(h);
-                    }
+
+                    animateSeparator(h);
                     animateToolbar(h);
                     final ListView listView = opListActivity.getListView();
                     listView.post(new Runnable() {
@@ -146,9 +151,7 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
                         }
                     });
                 } else {
-                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
-                        expandToolbarNoAnim(h);
-                    }
+                    expandToolbarNoAnim(h);
                     expandSeparatorNoAnim(h);
                 }
             } else if (state == OpViewBinder.STATE_MONTH_INFOS_CELL) {
@@ -172,15 +175,11 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
                 }
             } else if (state == OpViewBinder.STATE_REGULAR_CELL) {
                 if (position == oldPos) {
-                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
-                        animateSeparator(h);
-                    }
+                    animateSeparator(h);
                     animateToolbar(h);
                     oldPos = -1;
                 } else {
-                    if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
-                        collapseSeparatorNoAnim(h);
-                    }
+                    collapseSeparatorNoAnim(h);
                     collapseToolbarNoAnim(h);
                 }
             }
