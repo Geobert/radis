@@ -270,12 +270,13 @@ public class OperationEditFragment extends SherlockFragment {
         mActivity.mPreviousSum = op.mSum;
         mNotesText.setText(op.mNotes);
         Tools.setSumTextGravity(mOpSumText);
+        mSumTextWatcher.setAutoNegate(false);
         if (mActivity.mCurrentOp.mSum == 0.0) {
             mOpSumText.setText("");
-            mSumTextWatcher.setAutoNegate(true);
         } else {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
+        mSumTextWatcher.setAutoNegate(true);
         populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
         this.mIsInit = true;
     }

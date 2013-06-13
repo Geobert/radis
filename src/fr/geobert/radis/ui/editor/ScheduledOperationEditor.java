@@ -1,10 +1,14 @@
 package fr.geobert.radis.ui.editor;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.CursorLoader;
@@ -133,7 +137,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     private void onOkClicked() {
         StringBuilder errMsg = new StringBuilder();
         if (isFormValid(errMsg)) {
-            fillOperationWithInputs(mCurrentOp);
+            fillOperationWithInputs(mSchedEditTab.getFragment().mCurrentSchOp);
             saveOpAndExit();
         } else {
             Tools.popError(this, errMsg.toString(), null);
@@ -214,7 +218,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             startInsertionServiceAndExit();
         } else {
             if (!op.equals(mOriginalSchOp)) {
-                showDialog(ASK_UPDATE_OCCURENCES_DIALOG_ID);
+                UpdateOccurencesDialog.newInstance(this).show(getSupportFragmentManager(), "ask");
             } else { // nothing to update
                 Intent res = new Intent();
                 setResult(RESULT_OK, res);
@@ -223,42 +227,48 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
         }
     }
 
-//    @Override
-//    protected Dialog onCreateDialog(int id) {
-//        switch (id) {
-//            case ASK_UPDATE_OCCURENCES_DIALOG_ID:
-//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//                builder.setMessage(R.string.ask_update_occurences)
-//                        .setCancelable(false)
-//                        .setPositiveButton(R.string.update,
-//                                new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(DialogInterface dialog,
-//                                                        int which) {
-//                                        onUpdateAllOccurenceClicked();
-//                                    }
-//                                })
-//                        .setNeutralButton(R.string.disconnect,
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog,
-//                                                        int id) {
-//                                        onDisconnectFromOccurences();
-//                                    }
-//                                })
-//                        .setNegativeButton(R.string.cancel,
-//                                new DialogInterface.OnClickListener() {
-//                                    public void onClick(DialogInterface dialog,
-//                                                        int id) {
-//
-//                                        dialog.cancel();
-//                                    }
-//                                });
-//                return builder.create();
-//            default:
-//                return super.onCreateDialog(id);
-//        }
-//
-//    }
+    protected static class UpdateOccurencesDialog extends DialogFragment {
+        private ScheduledOperationEditor context;
+
+        public static UpdateOccurencesDialog newInstance(final ScheduledOperationEditor context) {
+            UpdateOccurencesDialog frag = new UpdateOccurencesDialog();
+            frag.context = context;
+//            Bundle args = new Bundle();
+//            args.putLong("accountId", accountId);
+//            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setMessage(R.string.ask_update_occurences)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.update,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                                    int which) {
+                                    context.onUpdateAllOccurenceClicked();
+                                }
+                            })
+                    .setNeutralButton(R.string.disconnect,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int id) {
+                                    context.onDisconnectFromOccurences();
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog,
+                                                    int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            return builder.create();
+        }
+    }
 
     protected void onDisconnectFromOccurences() {
         ScheduledOperationTable.updateScheduledOp(this, mRowId, mSchedEditTab.getFragment().mCurrentSchOp, false);
