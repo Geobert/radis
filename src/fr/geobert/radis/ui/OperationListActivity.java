@@ -109,6 +109,7 @@ public class OperationListActivity extends BaseActivity implements
         if (mQuickAddController != null) {
             mQuickAddController.setAutoNegate(true);
             mQuickAddController.clearFocus();
+            updateOperationList();
         }
     }
 

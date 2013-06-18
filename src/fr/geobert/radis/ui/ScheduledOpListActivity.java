@@ -2,6 +2,7 @@ package fr.geobert.radis.ui;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -158,41 +159,15 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
         fetchSchOpsOfAccount();
     }
 
-    private AlertDialog askDeleteOccurrences() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.ask_delete_occurrences)
-                .setCancelable(false)
-                .setPositiveButton(R.string.del_all_occurrences,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteSchOp(true);
-                            }
-                        })
-                .setNeutralButton(R.string.cancel_delete_occurrences,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteSchOp(false);
-                            }
-                        })
-                .setNegativeButton(R.string.cancel_sch_deletion,
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-        return builder.create();
-    }
-
-    private void deleteSchOp(final boolean delAllOccurrences) {
-        AdapterContextMenuInfo op = mOpToDelete;
+    private void deleteSchOp(final boolean delAllOccurrences, final long opId) {
         Cursor cursorOp = ScheduledOperationTable.fetchOneScheduledOp(this,
-                op.id);
+                opId);
         final long transId = cursorOp.getLong(cursorOp
                 .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
         if (delAllOccurrences) {
-            ScheduledOperationTable.deleteAllOccurences(this, op.id);
+            ScheduledOperationTable.deleteAllOccurences(this, opId);
         }
-        if (ScheduledOperationTable.deleteScheduledOp(this, op.id)) {
+        if (ScheduledOperationTable.deleteScheduledOp(this, opId)) {
             int req;
             if (mCurrentAccount == 0) {
                 req = GET_ALL_SCH_OPS;
@@ -348,6 +323,48 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
 
     @Override
     public DialogFragment getDeleteConfirmationDialog(long accountId, long opId) {
-        return null; // TODO
+        return DeleteOpConfirmationDialog.newInstance(opId);
+    }
+
+    protected static class DeleteOpConfirmationDialog extends DialogFragment {
+        private long operationId;
+
+        public static DeleteOpConfirmationDialog newInstance(final long opId) {
+            DeleteOpConfirmationDialog frag = new DeleteOpConfirmationDialog();
+            Bundle args = new Bundle();
+            args.putLong("opId", opId);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            final Bundle args = getArguments();
+            this.operationId = args.getLong("opId");
+            final ScheduledOpListActivity activity = (ScheduledOpListActivity) getActivity();
+            AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setMessage(R.string.ask_delete_occurrences)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.del_all_occurrences,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    activity.deleteSchOp(true, operationId);
+                                }
+                            })
+                    .setNeutralButton(R.string.cancel_delete_occurrences,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    activity.deleteSchOp(false, operationId);
+                                }
+                            })
+                    .setNegativeButton(R.string.cancel_sch_deletion,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            return builder.create();
+        }
     }
 }
