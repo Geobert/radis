@@ -134,11 +134,14 @@ public class OperationListActivity extends BaseActivity implements
         if (mQuickAddController != null) {
             mQuickAddController.onSaveInstanceState(outState);
         }
+        outState.putLong("mAccountId", mAccountId);
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        mAccountId = savedInstanceState.getLong("mAccountId");
+        initQuickAdd();
         mQuickAddController.onRestoreInstanceState(savedInstanceState);
     }
 
