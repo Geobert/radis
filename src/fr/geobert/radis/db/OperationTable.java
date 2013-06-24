@@ -521,8 +521,7 @@ public class OperationTable {
         }
     }
 
-    static void upgradeFromV5(SQLiteDatabase db, int oldVersion,
-                              int newVersion) {
+    static void upgradeFromV5(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TRIGGER on_delete_third_party");
         db.execSQL("DROP TRIGGER on_delete_mode");
         db.execSQL("DROP TRIGGER on_delete_tag");
@@ -551,8 +550,7 @@ public class OperationTable {
         db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
     }
 
-    static void upgradeFromV6(SQLiteDatabase db, int oldVersion,
-                              int newVersion) {
+    static void upgradeFromV6(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
         db.execSQL(DATABASE_OP_CREATE);
         Cursor c = db.query("operations_old", new String[]{KEY_OP_ROWID,

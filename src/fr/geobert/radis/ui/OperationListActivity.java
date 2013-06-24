@@ -352,7 +352,7 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     public void updateDisplay(Intent intent) {
         updateAccountList();
-        //updateOperationList();
+        updateOperationList();
     }
 
     private void updateOperationList() {
