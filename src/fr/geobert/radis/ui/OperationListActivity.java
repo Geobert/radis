@@ -292,6 +292,21 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
+
+    public static void restart(Context ctx) {
+//        DbContentProvider.reinit(ctx);
+        Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        ctx.startActivity(intent);
+    }
+
+//    public static void restart(OperationListActivity ctx) {
+//        ctx.getSupportLoaderManager().destroyLoader(GET_ACCOUNTS);
+//        ctx.getSupportLoaderManager().destroyLoader(GET_OPS);
+//        ctx.updateDisplay(null);
+//    }
+
     /**
      * get the operations of current account
      * should be called after getAccountList
@@ -346,6 +361,7 @@ public class OperationListActivity extends BaseActivity implements
                 if (old != null) {
                     old.close();
                 }
+                mOperationsLoader = null;
                 break;
             default:
                 break;

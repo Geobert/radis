@@ -33,4 +33,10 @@ public class BaseActivity extends SherlockFragmentActivity {
         DBPrefsManager.getInstance(this).fillCache(this);
         InfoTables.fillCachesSync(this);
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        InfoTables.clearCache();
+    }
 }

@@ -74,16 +74,18 @@ public class AccountManager {
     }
 
     private int setCurrentAccountSum() {
-        final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
         int pos = 0;
-        do {
-            if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
-                mCurSum = mAllAccountsCursor.getLong(curSumIdx);
-                break;
-            }
-            pos++;
-        } while (mAllAccountsCursor.moveToNext());
-        mAllAccountsCursor.moveToFirst();
+        if (mAllAccountsCursor != null) {
+            final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
+            do {
+                if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
+                    mCurSum = mAllAccountsCursor.getLong(curSumIdx);
+                    break;
+                }
+                pos++;
+            } while (mAllAccountsCursor.moveToNext());
+            mAllAccountsCursor.moveToFirst();
+        }
         return pos;
     }
 

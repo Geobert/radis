@@ -12,7 +12,10 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -25,6 +28,7 @@ import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
+import fr.geobert.radis.ui.OperationListActivity;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -82,7 +86,7 @@ public class Tools {
     public static void setTextWithoutComplete(AutoCompleteTextView v,
                                               String text) {
         InfoAdapter adapter = (InfoAdapter) v.getAdapter();
-        v.setAdapter((InfoAdapter) null);
+        v.setAdapter(null);
         v.setText(text);
         v.setAdapter(adapter);
     }
@@ -107,20 +111,22 @@ public class Tools {
         return builder.create();
     }
 
-    public static boolean onDefaultOptionItemSelected(Activity ctx, MenuItem item) {
+    public static boolean onDefaultOptionItemSelected(FragmentActivity ctx, MenuItem item) {
+        mActivity = ctx;
         switch (item.getItemId()) {
             case R.id.restore:
-                ctx.showDialog(R.id.restore);
+                AdvancedDialog.newInstance(R.id.restore).show(ctx.getSupportFragmentManager(), "restore");
                 return true;
             case R.id.backup:
-                ctx.showDialog(R.id.backup);
+                AdvancedDialog.newInstance(R.id.backup).show(ctx.getSupportFragmentManager(), "backup");
                 return true;
             case R.id.go_to_preferences:
                 Intent i = new Intent(ctx, RadisConfiguration.class);
                 ctx.startActivity(i);
                 return true;
             case R.id.process_scheduling:
-                ctx.showDialog(R.id.process_scheduling);
+                AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
+                        "process_scheduling");
                 return true;
         }
         return false;
@@ -144,6 +150,61 @@ public class Tools {
                 return true;
         }
         return false;
+    }
+
+    protected static class AdvancedDialog extends DialogFragment {
+        private int mId;
+
+        public static AdvancedDialog newInstance(final int id) {
+            AdvancedDialog frag = new AdvancedDialog();
+            Bundle args = new Bundle();
+            args.putInt("id", id);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Bundle args = getArguments();
+            this.mId = args.getInt("id");
+            DialogInterface.OnClickListener listener;
+            final Activity ctx = getActivity();
+            switch (mId) {
+                case R.id.backup:
+                    listener = createRestoreOrBackupClickListener(
+                            new BooleanResultNoParamFct() {
+                                @Override
+                                public boolean run() {
+                                    return DbHelper.backupDatabase();
+                                }
+                            }, R.string.backup_success,
+                            R.string.backup_failed);
+                    break;
+                case R.id.restore:
+                    listener = createRestoreOrBackupClickListener(
+                            new BooleanResultNoParamFct() {
+                                @Override
+                                public boolean run() {
+                                    return DbHelper.restoreDatabase(ctx);
+                                }
+                            }, R.string.restore_success,
+                            R.string.restore_failed);
+                    break;
+                case R.id.process_scheduling:
+                    listener = new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            RadisService.acquireStaticLock(ctx);
+                            ctx.startService(new Intent(ctx, RadisService.class));
+                        }
+
+                    };
+                    break;
+                default:
+                    listener = null;
+            }
+            return Tools.getAdvancedDialog(getActivity(), mId, listener);
+        }
     }
 
     public static Dialog getAdvancedDialog(Activity ctx, int id,
@@ -279,7 +340,7 @@ public class Tools {
     // DEBUG TOOLS
     // ------------------------------------------------------
     public static void restartApp(Context ctx) {
-        //AccountList.restart(ctx);
+        OperationListActivity.restart(ctx);
     }
 
     public static boolean onKeyLongPress(int keyCode, KeyEvent event,

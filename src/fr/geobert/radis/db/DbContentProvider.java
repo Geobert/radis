@@ -64,6 +64,7 @@ public class DbContentProvider extends ContentProvider {
     private static final int MODES_ID = 65;
     private static final UriMatcher sURIMatcher = new UriMatcher(
             UriMatcher.NO_MATCH);
+
     static {
         sURIMatcher.addURI(AUTHORITY, ACCOUNTS_PATH, ACCOUNT);
         sURIMatcher.addURI(AUTHORITY, OPERATIONS_PATH, OPERATION);
@@ -89,9 +90,11 @@ public class DbContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, TAGS_PATH + "/#", TAGS_ID);
         sURIMatcher.addURI(AUTHORITY, MODES_PATH + "/#", MODES_ID);
     }
+
     private static DbHelper mDbHelper = null;
 
     public static void reinit(Context ctx) {
+        close();
         mDbHelper = new DbHelper(ctx);
     }
 
