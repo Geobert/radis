@@ -178,7 +178,6 @@ public class OperationEditor extends CommonOpEditor {
 
     @Override
     public void onLoaderReset(Loader<Cursor> arg0) {
-        // TODO Auto-generated method stub
 
     }
 

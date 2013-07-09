@@ -196,10 +196,9 @@ public class DbContentProvider extends ContentProvider {
         }
         String table = switchToTable(uri);
         queryBuilder.setTables(table);
-        Log.d(TAG, "query " + table);
+//        Log.d(TAG, "query " + table);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        Cursor cursor = queryBuilder.query(db, projection, selection,
-                selectionArgs, null, null, sortOrder);
+        Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
         return cursor;
     }
@@ -229,21 +228,17 @@ public class DbContentProvider extends ContentProvider {
 
         if (id != null) {
             if (selection == null || selection.trim().length() == 0) {
-                Log.d(TAG, "delete 1 " + table);
                 rowsDeleted = db.delete(table, "_id=?", new String[]{id});
             } else {
                 if (selectionArgs != null) {
-                    List<String> args = new ArrayList<String>(
-                            selectionArgs.length + 1);
+                    List<String> args = new ArrayList<String>(selectionArgs.length + 1);
                     args.add(id);
                     Collections.addAll(args, selectionArgs);
                     selectionArgs = args.toArray(new String[args.size()]);
                 } else {
                     selectionArgs = new String[]{id};
                 }
-                Log.d(TAG, "delete 2 " + table);
-                rowsDeleted = db.delete(table, "_id=? and " + selection,
-                        selectionArgs);
+                rowsDeleted = db.delete(table, "_id=? and " + selection, selectionArgs);
             }
         } else {
             rowsDeleted = db.delete(table, selection, selectionArgs);
@@ -294,9 +289,9 @@ public class DbContentProvider extends ContentProvider {
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-        Log.d(TAG, "do insert in " + table);
+//        Log.d(TAG, "do insert in " + table);
         id = db.insert(table, null, values);
-        Log.d(TAG, "insert id : " + id);
+//        Log.d(TAG, "insert id : " + id);
         if (id > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
@@ -304,8 +299,7 @@ public class DbContentProvider extends ContentProvider {
     }
 
     @Override
-    public synchronized int update(Uri uri, ContentValues values,
-                                   String selection, String[] selectionArgs) {
+    public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int rowsUpdated = 0;
@@ -328,26 +322,23 @@ public class DbContentProvider extends ContentProvider {
 
         if (id != null) {
             if (selection == null || selection.trim().length() == 0) {
-                rowsUpdated = db.update(table, values, "_id=?",
-                        new String[]{id});
-                Log.d(TAG, "update (0) " + table + " nb : " + rowsUpdated + " values : " + values);
+                rowsUpdated = db.update(table, values, "_id=?", new String[]{id});
+//                Log.d(TAG, "update (0) " + table + " nb : " + rowsUpdated + " values : " + values);
             } else {
                 if (selectionArgs != null) {
-                    List<String> args = new ArrayList<String>(
-                            selectionArgs.length + 1);
+                    List<String> args = new ArrayList<String>(selectionArgs.length + 1);
                     args.add(id);
                     Collections.addAll(args, selectionArgs);
                     selectionArgs = args.toArray(new String[args.size()]);
                 } else {
                     selectionArgs = new String[]{id};
                 }
-                rowsUpdated = db.update(table, values,
-                        "_id=? and " + selection, selectionArgs);
-                Log.d(TAG, "update (1) " + table + " nb : " + rowsUpdated);
+                rowsUpdated = db.update(table, values, "_id=? and " + selection, selectionArgs);
+//                Log.d(TAG, "update (1) " + table + " nb : " + rowsUpdated);
             }
         } else {
             rowsUpdated = db.update(table, values, selection, selectionArgs);
-            Log.d(TAG, "update (2) " + table + " nb : " + rowsUpdated);
+//            Log.d(TAG, "update (2) " + table + " nb : " + rowsUpdated);
         }
         return rowsUpdated;
     }

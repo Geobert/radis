@@ -260,8 +260,7 @@ public class OperationListActivity extends BaseActivity implements
                             InfoTables.KEY_THIRD_PARTY_NAME, OperationTable.KEY_OP_SUM,
                             InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME};
 
-                    int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum,
-                            R.id.op_infos};
+                    int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
                     mOpListCursorAdapter =
                             new OperationsCursorAdapter(this, R.layout.operation_row, from, to, cursor,
                                     new OperationRowViewBinder(this, cursor,
@@ -352,19 +351,22 @@ public class OperationListActivity extends BaseActivity implements
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        switch (cursorLoader.getId()) {
-            case GET_ACCOUNTS:
-                AccountManager.getInstance().setAllAccountsCursor(null);
-                break;
-            case GET_OPS:
-                Cursor old = mOpListCursorAdapter.swapCursor(null);
-                if (old != null) {
-                    old.close();
-                }
-                mOperationsLoader = null;
-                break;
-            default:
-                break;
+        if (!this.isFinishing()) {
+            switch (cursorLoader.getId()) {
+                case GET_ACCOUNTS:
+                    AccountManager.getInstance().setAllAccountsCursor(null);
+                    break;
+                case GET_OPS:
+
+                    Cursor old = mOpListCursorAdapter.swapCursor(null);
+                    if (old != null) {
+                        old.close();
+                    }
+                    mOperationsLoader = null;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

@@ -233,19 +233,18 @@ public class OperationEditFragment extends SherlockFragment {
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mSrcAccount.setAdapter(adapter);
             mDstAccount.setAdapter(adapter2);
-        }
 
-        final boolean isTransfert = mActivity.mCurrentOp.mTransferAccountId > 0;
-        mIsTransfertCheck.setChecked(isTransfert);
-        if (isTransfert) {
-            initAccountSpinner(mSrcAccount, mActivity.mCurrentOp.mAccountId);
-            initAccountSpinner(mDstAccount, mActivity.mCurrentOp.mTransferAccountId);
-        } else {
-            if (mActivity.mCurAccountId != 0) {
-                initAccountSpinner(mSrcAccount, mActivity.mCurAccountId);
+            final boolean isTransfert = mActivity.mCurrentOp.mTransferAccountId > 0;
+            mIsTransfertCheck.setChecked(isTransfert);
+            if (isTransfert) {
+                initAccountSpinner(mSrcAccount, mActivity.mCurrentOp.mAccountId);
+                initAccountSpinner(mDstAccount, mActivity.mCurrentOp.mTransferAccountId);
+            } else {
+                if (mActivity.mCurAccountId != 0) {
+                    initAccountSpinner(mSrcAccount, mActivity.mCurAccountId);
+                }
             }
         }
-
     }
 
     private void initAccountSpinner(Spinner spin, long accountId) {

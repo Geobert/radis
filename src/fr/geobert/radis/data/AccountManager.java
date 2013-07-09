@@ -31,16 +31,15 @@ public class AccountManager {
         if (mSimpleCursorAdapter == null) {
             throw new IllegalStateException("Must call setSimpleCursorAdapter first");
         }
-        if (this.mAllAccountsCursor != null) {
+        if (this.mAllAccountsCursor != null && this.mAllAccountsCursor != cursor) {
             this.mAllAccountsCursor.close();
         }
-        this.mAllAccountsCursor = cursor;
-        this.mSimpleCursorAdapter.changeCursor(cursor);
-        if (cursor != null) {
-            cursor.moveToFirst();
-        }
-        if (mCurAccountId != null) {
-            setCurrentAccountSum();
+        if (cursor != null && cursor.moveToFirst()) {
+            this.mAllAccountsCursor = cursor;
+            this.mSimpleCursorAdapter.changeCursor(cursor);
+            if (mCurAccountId != null) {
+                setCurrentAccountSum();
+            }
         }
     }
 
