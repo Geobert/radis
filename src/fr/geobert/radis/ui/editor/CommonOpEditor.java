@@ -4,10 +4,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.view.KeyEvent;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.data.Operation;
-import fr.geobert.radis.tools.Tools;
 
 public abstract class CommonOpEditor extends BaseActivity implements
         LoaderCallbacks<Cursor> {
@@ -59,14 +57,6 @@ public abstract class CommonOpEditor extends BaseActivity implements
         } else {
             mOnRestore = false;
         }
-    }
-
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
-        if (Tools.onKeyLongPress(keyCode, event, this)) {
-            return true;
-        }
-        return super.onKeyLongPress(keyCode, event);
     }
 
     protected abstract void fillOperationWithInputs(Operation operation);

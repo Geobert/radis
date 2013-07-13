@@ -134,7 +134,9 @@ public class OperationListActivity extends BaseActivity implements
         if (mQuickAddController != null) {
             mQuickAddController.onSaveInstanceState(outState);
         }
-        outState.putLong("mAccountId", mAccountId);
+        if (mAccountId != null) {
+            outState.putLong("mAccountId", mAccountId);
+        }
     }
 
     @Override
@@ -293,7 +295,9 @@ public class OperationListActivity extends BaseActivity implements
 
 
     public static void restart(Context ctx) {
-//        DbContentProvider.reinit(ctx);
+        DbContentProvider.reinit(ctx);
+        AccountManager.getInstance().setAllAccountsCursor(null);
+        AccountManager.getInstance().setCurrentAccountId(null);
         Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -418,6 +422,9 @@ public class OperationListActivity extends BaseActivity implements
         MenuInflater inflater = getSupportMenuInflater();
         inflater.inflate(R.menu.operations_list_menu, menu);
         inflater.inflate(R.menu.common_menu, menu);
+        if (Tools.DEBUG_MODE) {
+            inflater.inflate(R.menu.debug_menu, menu);
+        }
         return true;
     }
 

@@ -40,6 +40,9 @@ public class AccountManager {
             if (mCurAccountId != null) {
                 setCurrentAccountSum();
             }
+        } else {
+            this.mAllAccountsCursor = null;
+            this.mSimpleCursorAdapter.changeCursor(null);
         }
     }
 

@@ -3,6 +3,7 @@ package fr.geobert.radis.tools;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,14 +19,15 @@ import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.actionbarsherlock.view.MenuItem;
+import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
@@ -45,7 +48,14 @@ public class Tools {
 
     public static void checkDebugMode(Activity ctx) {
         // See if we're a debug or a release build
-        SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
+        if (Build.VERSION.SDK_INT >= 13) {
+            Point p = new Point();
+            ctx.getWindowManager().getDefaultDisplay().getSize(p);
+            SCREEN_HEIGHT = p.y;
+        } else {
+            //noinspection deprecation
+            SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
+        }
         try {
             PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
                     ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS);
@@ -61,6 +71,7 @@ public class Tools {
         if (Build.VERSION.SDK_INT >= 16) {
             v.setBackground(drawable);
         } else {
+            //noinspection deprecation
             v.setBackgroundDrawable(drawable);
         }
 
@@ -79,7 +90,7 @@ public class Tools {
         AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
         alertDialog.setTitle("Erreur");
         alertDialog.setMessage(msg);
-        alertDialog.setButton("OK", onClick);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", onClick);
         alertDialog.show();
     }
 
@@ -128,27 +139,11 @@ public class Tools {
                 AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
                         "process_scheduling");
                 return true;
+            case R.id.debug:
+                Tools.showDebugDialog(ctx);
+                return true;
         }
-        return false;
-    }
 
-    public static boolean onDefaultMenuSelected(Activity ctx, int featureId,
-                                                MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.restore:
-                ctx.showDialog(R.id.restore);
-                return true;
-            case R.id.backup:
-                ctx.showDialog(R.id.backup);
-                return true;
-            case R.id.go_to_preferences:
-                Intent i = new Intent(ctx, RadisConfiguration.class);
-                ctx.startActivity(i);
-                return true;
-            case R.id.process_scheduling:
-                ctx.showDialog(R.id.process_scheduling);
-                return true;
-        }
         return false;
     }
 
@@ -236,6 +231,25 @@ public class Tools {
         return builder.create();
     }
 
+    protected static class ErrorDialog extends DialogFragment {
+        private int mId;
+
+        public static ErrorDialog newInstance(final int id) {
+            ErrorDialog frag = new ErrorDialog();
+            Bundle args = new Bundle();
+            args.putInt("id", id);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Bundle args = getArguments();
+            this.mId = args.getInt("id");
+            return Tools.createFailAndRestartDialog(getActivity(), mId);
+        }
+    }
+
     private static Dialog createFailAndRestartDialog(final Activity ctx, int id) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
         StringBuilder msg = new StringBuilder();
@@ -270,57 +284,10 @@ public class Tools {
                         }
                     }, 2000);
                 } else {
-                    ctx.showDialog(failureTextId);
+                    ErrorDialog.newInstance(failureTextId).show(((BaseActivity) ctx).getSupportFragmentManager(), "");
                 }
             }
         };
-    }
-
-    public static Dialog onDefaultCreateDialog(final Activity ctx, int id) {
-        mActivity = ctx;
-        switch (id) {
-            case Tools.DEBUG_DIALOG:
-                return Tools.getDebugDialog(ctx);
-            case R.id.restore:
-                return Tools.getAdvancedDialog(
-                        ctx,
-                        id,
-                        createRestoreOrBackupClickListener(
-                                new BooleanResultNoParamFct() {
-                                    @Override
-                                    public boolean run() {
-                                        return DbHelper.restoreDatabase(ctx);
-                                    }
-                                }, R.string.restore_success,
-                                R.string.restore_failed));
-            case R.id.backup:
-                return Tools
-                        .getAdvancedDialog(
-                                ctx,
-                                id,
-                                createRestoreOrBackupClickListener(
-                                        new BooleanResultNoParamFct() {
-                                            @Override
-                                            public boolean run() {
-                                                return DbHelper.backupDatabase();
-                                            }
-                                        }, R.string.backup_success,
-                                        R.string.backup_failed));
-            case R.string.backup_failed:
-            case R.string.restore_failed:
-                return createFailAndRestartDialog(ctx, id);
-            case R.id.process_scheduling:
-                return Tools.getAdvancedDialog(ctx, id,
-                        new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                RadisService.acquireStaticLock(ctx);
-                                ctx.startService(new Intent(ctx, RadisService.class));
-                            }
-
-                        });
-        }
-        return null;
     }
 
     public static GregorianCalendar createClearedCalendar() {
@@ -343,51 +310,59 @@ public class Tools {
         OperationListActivity.restart(ctx);
     }
 
-    public static boolean onKeyLongPress(int keyCode, KeyEvent event,
-                                         Activity curActivity) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && DEBUG_MODE) {
-            curActivity.showDialog(Tools.DEBUG_DIALOG);
-            return true;
-        }
-        return false;
+    public static void showDebugDialog(Context activity) {
+        DebugDialog.newInstance().show(((BaseActivity) activity).getSupportFragmentManager(), "debug");
     }
 
-    public static Dialog getDebugDialog(final Context context) {
-        final CharSequence[] items = {"Trash DB", "Restart",
-                "Install RadisService", "Trash Prefs"};
-        //mDb = dB;
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        builder.setItems(items, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int item) {
-                switch (item) {
-                    case 0:
-                        //		mDb.trashDatabase();
-                        Tools.restartApp(context);
-                        break;
-                    case 1:
-                        Tools.restartApp(context);
-                        break;
-                    case 2:
-                        Intent i = new Intent(context,
-                                InstallRadisServiceReceiver.class);
-                        i.setAction(Tools.INTENT_RADIS_STARTED);
-                        context.sendBroadcast(i);
-                        break;
-                    case 3:
-                        DBPrefsManager.getInstance(context).resetAll();
-                        break;
-                }
-            }
-        });
+    protected static class DebugDialog extends DialogFragment {
+        public static DebugDialog newInstance() {
+            DebugDialog frag = new DebugDialog();
+            return frag;
+        }
 
-        builder.setTitle("Debug menu");
-        return builder.create();
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Activity context = getActivity();
+            final CharSequence[] items = {"Trash DB", "Restart",
+                    "Install RadisService", "Trash Prefs"};
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setNegativeButton("Cancel",
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            builder.setItems(items, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int item) {
+                    switch (item) {
+                        case 0:
+                            ContentProviderClient client = context.getContentResolver()
+                                    .acquireContentProviderClient("fr.geobert.radis.db");
+                            DbContentProvider provider = (DbContentProvider) client
+                                    .getLocalContentProvider();
+                            provider.deleteDatabase(context);
+                            client.release();
+                            Tools.restartApp(context);
+                            break;
+                        case 1:
+                            Tools.restartApp(context);
+                            break;
+                        case 2:
+                            Intent i = new Intent(context,
+                                    InstallRadisServiceReceiver.class);
+                            i.setAction(Tools.INTENT_RADIS_STARTED);
+                            context.sendBroadcast(i);
+                            break;
+                        case 3:
+                            DBPrefsManager.getInstance(context).resetAll();
+                            break;
+                    }
+                }
+            });
+
+            builder.setTitle("Debug menu");
+            return builder.create();
+        }
     }
 
     public static void setSumTextGravity(EditText sumText) {

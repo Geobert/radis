@@ -203,4 +203,5 @@
     <string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
     <string name="sch_edition">Scheduled transaction edition</string>
     <string name="delete_account">Delete account</string>
+    <string name="debug">Debug</string>
 </resources>

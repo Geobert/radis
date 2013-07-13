@@ -208,4 +208,5 @@
     <string name="sched_op_total_choose_account">Choisir un compte pour avoir son total des échéances</string>
     <string name="sch_edition">Saisie d\'échéance</string>
     <string name="delete_account">Supprimer le compte</string>
+    <string name="debug">Debug</string>
 </resources>
