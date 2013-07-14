@@ -11,7 +11,7 @@ import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
-import org.acra.ErrorReporter;
+import org.acra.ACRA;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -350,7 +350,7 @@ public class AccountTable {
                         cal.set(Calendar.SECOND, 0);
                         mProjectionDate = cal.getTimeInMillis();
                     } catch (ParseException e) {
-                        ErrorReporter.getInstance().handleSilentException(e);
+                        ACRA.getErrorReporter().handleSilentException(e);
                         e.printStackTrace();
                     }
                     break;

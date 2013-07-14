@@ -296,6 +296,8 @@ public class OperationListActivity extends BaseActivity implements
 
     public static void restart(Context ctx) {
         DbContentProvider.reinit(ctx);
+        AccountManager acc = null;
+        acc.setCurrentAccountId(null);
         AccountManager.getInstance().setAllAccountsCursor(null);
         AccountManager.getInstance().setCurrentAccountId(null);
         Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
