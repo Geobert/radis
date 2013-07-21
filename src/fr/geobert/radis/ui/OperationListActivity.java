@@ -174,14 +174,11 @@ public class OperationListActivity extends BaseActivity implements
         redColor = resources.getColor(R.color.op_alert);
         greenColor = resources.getColor(R.color.positiveSum);
 
-        // Create an array to specify the fields we want to display in the list
         String[] from = new String[]{AccountTable.KEY_ACCOUNT_NAME,
                 AccountTable.KEY_ACCOUNT_CUR_SUM,
                 AccountTable.KEY_ACCOUNT_CUR_SUM_DATE,
                 AccountTable.KEY_ACCOUNT_CURRENCY};
 
-        // and an array of the fields we want to bind those fields to (in this
-        // case just text1)
         int[] to = new int[]{android.R.id.text1, R.id.account_sum, R.id.account_balance_at};
 
         mAccountAdapter = new SimpleCursorAdapter(this, R.layout.account_row, null, from, to,

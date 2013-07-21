@@ -17,7 +17,6 @@ import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
-import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.InfoAdapter;
@@ -131,8 +130,6 @@ public class QuickAddController {
         op.setSumStr(mQuickAddAmount.getText().toString());
         assert (mAccountId != 0);
         if (OperationTable.createOp(mActivity, op, mAccountId)) {
-            RadisService.updateAccountSum(op.mSum, mAccountId, op.getDate(),
-                    mActivity);
             mProtocol.updateDisplay(null);
         }
         mQuickAddAmount.setText("");
