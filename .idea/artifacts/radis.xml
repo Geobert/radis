@@ -7,7 +7,7 @@
         <option name="keyAlias" value="geobert" />
         <option name="keyPassword" value="YmJiYmJi" />
         <option name="keyStorePassword" value="YmJiYmJi" />
-        <option name="keyStoreUrl" value="file://$PROJECT_DIR$/../../geobert_key" />
+        <option name="keyStoreUrl" value="file://D:/geobert_key" />
         <option name="proGuardCfgFileUrl" value="file://$PROJECT_DIR$/proguard.cfg" />
         <option name="runProGuard" value="true" />
         <option name="signingMode" value="RELEASE_SIGNED" />

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../ActionBarSherlock/actionbarsherlock/actionbarsherlock.iml" filepath="$PROJECT_DIR$/../ActionBarSherlock/actionbarsherlock/actionbarsherlock.iml" />
+      <module fileurl="file://$PROJECT_DIR$/radis.iml" filepath="$PROJECT_DIR$/radis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../radis-robotium/radis-robotium.iml" filepath="$PROJECT_DIR$/../radis-robotium/radis-robotium.iml" />
+    </modules>
+  </component>
+</project>
+

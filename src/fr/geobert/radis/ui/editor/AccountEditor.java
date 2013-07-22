@@ -65,9 +65,7 @@ public class AccountEditor extends BaseActivity implements
 
         setContentView(R.layout.account_creation);
 
-        Long rowId = (null == savedInstanceState) ? null
-                : (Long) savedInstanceState
-                .getSerializable(PARAM_ACCOUNT_ID);
+        Long rowId = (null == savedInstanceState) ? null : (Long) savedInstanceState.getSerializable(PARAM_ACCOUNT_ID);
         if (null == rowId) {
             Bundle extras = getIntent().getExtras();
             rowId = ((null != extras) ? extras.getLong(PARAM_ACCOUNT_ID) : null);
@@ -87,17 +85,15 @@ public class AccountEditor extends BaseActivity implements
         mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
         mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
         mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
-                Formater.getSumFormater().getDecimalFormatSymbols()
-                        .getDecimalSeparator(), mAccountStartSumText));
-        mAccountStartSumText
-                .setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View v, boolean hasFocus) {
-                        if (hasFocus) {
-                            ((EditText) v).selectAll();
-                        }
-                    }
-                });
+                Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mAccountStartSumText));
+        mAccountStartSumText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    ((EditText) v).selectAll();
+                }
+            }
+        });
         mAccountCurrency = (Spinner) findViewById(R.id.currency_spinner);
         mCustomCurrency = (EditText) findViewById(R.id.custom_currency);
 
