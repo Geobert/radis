@@ -165,7 +165,7 @@ public class InfoTables {
     }
 
     public static void fillCaches(FragmentActivity ctx) {
-        if (mModesMap == null) {
+        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
             mModesMap = new LinkedHashMap<String, Long>();
             mTagsMap = new LinkedHashMap<String, Long>();
             mThirdPartiesMap = new LinkedHashMap<String, Long>();
@@ -179,7 +179,7 @@ public class InfoTables {
     }
 
     public static void fillCachesSync(Context ctx) {
-        if (mModesMap == null) {
+        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
             mModesMap = new LinkedHashMap<String, Long>();
             mTagsMap = new LinkedHashMap<String, Long>();
             mThirdPartiesMap = new LinkedHashMap<String, Long>();
@@ -226,6 +226,7 @@ public class InfoTables {
         if (key.length() == 0) {
             return -1;
         }
+        Log.d("InfoTables", "getKeyIdOrCreate map / key" + map + " / " + key);
         Long i = map.get(key);
         if (null != i) {
             return i.longValue();
