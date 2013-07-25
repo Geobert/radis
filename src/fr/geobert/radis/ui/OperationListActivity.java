@@ -460,8 +460,7 @@ public class OperationListActivity extends BaseActivity implements
             long opDate = op.getLong(dateIdx);
             Log.d(TAG,
                     "computeSumFromCursor mProjectionDate : "
-                            + Formater.getFullDateFormater().format(
-                            new Date(mProjectionDate)) + "  opDate : " + Tools.getDateStr(opDate));
+                            + Tools.getDateStr(mProjectionDate) + "  opDate : " + Tools.getDateStr(opDate));
             if (!op.isBeforeFirst() && !op.isAfterLast()) {
                 final int origPos = op.getPosition();
                 boolean canContinue;
@@ -639,7 +638,9 @@ public class OperationListActivity extends BaseActivity implements
             } else if (i == ACCOUNT_CUR_SUM_DATE) {
                 TextView textView = (TextView) view;
                 long dateLong = cursor.getLong(i);
-                mProjectionDate = dateLong;
+                if (mAccountId == cursor.getLong(0)) {
+                    mProjectionDate = dateLong;
+                }
                 StringBuilder stringBuilder = new StringBuilder();
                 if (dateLong > 0) {
                     stringBuilder.append(String.format(
