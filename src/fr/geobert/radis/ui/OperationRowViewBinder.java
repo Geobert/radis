@@ -46,21 +46,19 @@ class OperationRowViewBinder extends OpViewBinder {
         textView.setText(b.toString());
     }
 
-    private boolean setSchedImg(Cursor cursor, ImageView i) {
-        boolean res;
-        if (cursor.getLong(cursor
-                .getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID)) > 0) {
+    private long setSchedImg(Cursor cursor, ImageView i) {
+        long res = cursor.getLong(cursor
+                .getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID));
+        if (res > 0) {
             i.setVisibility(View.VISIBLE);
-            res = true;
         } else {
             i.setVisibility(View.GONE);
-            res = false;
         }
         return res;
     }
 
     private void configureCell(final Cursor cursor, OpRowHolder h) {
-        final boolean isSched = setSchedImg(cursor, h.scheduledImg);
+        final long schedId = setSchedImg(cursor, h.scheduledImg);
         final int position = cursor.getPosition();
         final boolean needInfos = position == selectedPosition;
         boolean needMonth = false;
@@ -116,12 +114,12 @@ class OperationRowViewBinder extends OpViewBinder {
 
             int drawable;
             View.OnClickListener listener;
-            if (isSched) {
+            if (schedId > 0) {
                 drawable = R.drawable.edit_sched_48;
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ScheduledOperationEditor.callMeForResult(context, opId, accountId,
+                        ScheduledOperationEditor.callMeForResult(context, schedId, accountId,
                                 ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                     }
                 };
