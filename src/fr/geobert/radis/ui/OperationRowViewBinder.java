@@ -8,6 +8,7 @@ import android.widget.TextView;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
@@ -61,13 +62,14 @@ class OperationRowViewBinder extends OpViewBinder {
         final long schedId = setSchedImg(cursor, h.scheduledImg);
         final int position = cursor.getPosition();
         final boolean needInfos = position == selectedPosition;
+        final int op_date_idx = cursor.getColumnIndex(OperationTable.KEY_OP_DATE);
         boolean needMonth = false;
-        date1.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_DATE)));
+        date1.setTimeInMillis(cursor.getLong(op_date_idx));
         if (position == 0) {
             needMonth = true;
         } else {
             cursor.moveToPosition(position - 1);
-            date2.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_DATE)));
+            date2.setTimeInMillis(cursor.getLong(op_date_idx));
             if (date1.get(GregorianCalendar.MONTH) != date2.get(GregorianCalendar.MONTH)) {
                 needMonth = true;
             }
@@ -96,18 +98,18 @@ class OperationRowViewBinder extends OpViewBinder {
                             activity.computeSumFromCursor(cursor)) / 100.0d));
 
             final BaseActivity context = (BaseActivity) activity;
-            final long opId = cursor.getLong(0);
             final long accountId = AccountManager.getInstance().getCurrentAccountId(context);
+            final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    OperationEditor.callMeForResult(context, opId, accountId);
+                    OperationEditor.callMeForResult(context, op.mRowId, accountId);
                 }
             });
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    activity.getDeleteConfirmationDialog(accountId, opId).show(context.getSupportFragmentManager(),
+                    activity.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });
@@ -128,7 +130,7 @@ class OperationRowViewBinder extends OpViewBinder {
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ScheduledOperationEditor.callMeForResult(context, opId, accountId,
+                        ScheduledOperationEditor.callMeForResult(context, op.mRowId, accountId,
                                 ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT);
                     }
                 };

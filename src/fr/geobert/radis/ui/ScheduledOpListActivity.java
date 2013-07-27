@@ -26,6 +26,7 @@ import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -322,8 +323,8 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     }
 
     @Override
-    public DialogFragment getDeleteConfirmationDialog(long accountId, long opId) {
-        return DeleteOpConfirmationDialog.newInstance(opId);
+    public DialogFragment getDeleteConfirmationDialog(final Operation op) {
+        return DeleteOpConfirmationDialog.newInstance(op.mRowId);
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {

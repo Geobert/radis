@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.TextView;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
@@ -38,18 +39,18 @@ class SchedOpRowViewBinder extends OpViewBinder {
         h.month.setText("");
         if (needInfos) {
             final BaseActivity context = (BaseActivity) activity;
-            final long opId = cursor.getLong(0);
+            final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ScheduledOperationEditor.callMeForResult((Activity) mCtx, opId, mCurAccountId,
+                    ScheduledOperationEditor.callMeForResult((Activity) mCtx, op.mRowId, mCurAccountId,
                             ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                 }
             });
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    activity.getDeleteConfirmationDialog(mCurAccountId, opId).show(context.getSupportFragmentManager(),
+                    activity.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });

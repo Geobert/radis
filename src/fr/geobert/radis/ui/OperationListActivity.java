@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentProviderClient;
 import android.content.Context;
@@ -29,6 +30,7 @@ import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -512,8 +514,13 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     @Override
-    public DialogFragment getDeleteConfirmationDialog(long accountId, long opId) {
-        return DeleteOpConfirmationDialog.newInstance(accountId, opId);
+    public DialogFragment getDeleteConfirmationDialog(final Operation operation) {
+        if (operation.mScheduledId > 0) {
+            return DeleteOccurenceConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId,
+                    operation.mScheduledId, operation.getDate());
+        } else {
+            return DeleteOpConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId);
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -565,6 +572,75 @@ public class OperationListActivity extends BaseActivity implements
 
                 }
             });
+        }
+    }
+
+    protected static class DeleteOccurenceConfirmationDialog extends DialogFragment {
+        public static DeleteOccurenceConfirmationDialog newInstance(final long accountId, final long opId,
+                                                                    final long schId, final long date) {
+            DeleteOccurenceConfirmationDialog frag = new DeleteOccurenceConfirmationDialog();
+            Bundle args = new Bundle();
+            args.putLong("accountId", accountId);
+            args.putLong("opId", opId);
+            args.putLong("schId", schId);
+            args.putLong("date", date);
+            frag.setArguments(args);
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            final Bundle args = getArguments();
+            final long accountId = args.getLong("accountId");
+            final long operationId = args.getLong("opId");
+            final long schId = args.getLong("schId");
+            final long date = args.getLong("date");
+            Log.d(TAG, "date of op to del : " + Tools.getDateStr(date));
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(R.string.delete_recurring_op)
+                    .setCancelable(true)
+                    .setPositiveButton(R.string.del_only_current,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    final OperationListActivity activity = (OperationListActivity) getActivity();
+                                    if (OperationTable.deleteOp(activity, operationId, accountId)) {
+                                        activity.updateOperationList();
+                                        activity.updateAccountList();
+                                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                    }
+                                }
+                            })
+                    .setNeutralButton(R.string.del_all_following,
+                            new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    final OperationListActivity activity = (OperationListActivity) getActivity();
+                                    int nbDel =
+                                            OperationTable.deleteAllFutureOccurrences(activity, accountId, schId, date);
+                                    Log.d(TAG, "nbDel : " + nbDel);
+                                    if (nbDel > 0) {
+                                        activity.updateOperationList();
+                                        activity.updateAccountList();
+                                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                        AccountTable.consolidateSums(activity, accountId);
+                                    }
+                                }
+                            })
+                    .setNegativeButton(R.string.del_all_occurrences,
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    final OperationListActivity activity = (OperationListActivity) getActivity();
+                                    if (OperationTable.deleteAllOccurrences(activity, accountId, schId) > 0) {
+                                        activity.updateOperationList();
+                                        activity.updateAccountList();
+                                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                    }
+                                }
+                            });
+            return builder.create();
         }
     }
 
