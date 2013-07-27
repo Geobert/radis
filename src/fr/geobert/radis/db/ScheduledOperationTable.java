@@ -144,7 +144,7 @@ public class ScheduledOperationTable {
         Log.d(TAG, "updateAllOccurences");
         final long accountId = op.mAccountId;
         OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
-//		AccountTable.consolidateSums(ctx, accountId);
+        AccountTable.consolidateSums(ctx, accountId);
     }
 
     public static void deleteAllOccurences(Context ctx, final long schOpId) {

@@ -240,7 +240,7 @@ public class RadisService extends IntentService {
     private long insertSchOp(ScheduledOperation op, final long opRowId) {
         final long accountId = op.mAccountId;
         op.mScheduledId = opRowId;
-        boolean needUpdate = OperationTable.createOp(this, op, accountId);
+        boolean needUpdate = OperationTable.createOp(this, op, accountId, false);
 //        Log.d(TAG, "before addPeriodicity : " + op.getDateStr());
         ScheduledOperation.addPeriodicityToDate(op);
 //        Log.d(TAG, "after addPeriodicity : " + op.getDateStr());

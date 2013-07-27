@@ -189,9 +189,7 @@
     </string>
     <string name="del_all_following">Suivantes</string>
     <string name="del_only_current">Courante</string>
-    <string name="hide_account_quick_add">Masquer l\'ajout rapide 1</string>
-    <string name="hide_ops_quick_add">Masquer l\'ajout rapide 2</string>
-    <string name="hide_account_quick_add_details">Masquer l\'ajout rapide de la liste des comptes</string>
+    <string name="hide_ops_quick_add">Masquer l\'ajout rapide</string>
     <string name="hide_ops_quick_add_details">Masquer l\'ajout rapide de la liste des opérations</string>
 
     <string name="no_transfert">Aucun transfert</string>

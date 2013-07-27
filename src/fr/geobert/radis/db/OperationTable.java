@@ -224,9 +224,14 @@ public class OperationTable {
         return c;
     }
 
-    // return boolean saying if we need an update of OP_SUM
     public static boolean createOp(Context ctx, final Operation op,
                                    final long accountId) {
+        return OperationTable.createOp(ctx, op, accountId, true);
+    }
+
+    // return boolean saying if we need an update of OP_SUM
+    public static boolean createOp(Context ctx, final Operation op,
+                                   final long accountId, final boolean withUpdate) {
         ContentValues initialValues = new ContentValues();
         String key = op.mThirdParty;
         InfoTables.putKeyIdInThirdParties(ctx, key, initialValues);
@@ -248,7 +253,9 @@ public class OperationTable {
                 DbContentProvider.OPERATION_URI, initialValues);
         op.mRowId = Long.parseLong(res.getLastPathSegment());
         if (op.mRowId > -1) {
-            AccountTable.updateProjection(ctx, accountId, op.mSum, op.getDate());
+            if (withUpdate) {
+                AccountTable.updateProjection(ctx, accountId, op.mSum, op.getDate());
+            }
             return true;
         }
         Log.e(TAG, "error in creating op");

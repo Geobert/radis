@@ -14,10 +14,6 @@
             android:key="quickadd_account"
             android:title="@string/quickadd_account"/>
     <CheckBoxPreference
-            android:key="hide_account_quick_add"
-            android:title="@string/hide_account_quick_add"
-            android:summary="@string/hide_account_quick_add_details"/>
-    <CheckBoxPreference
             android:key="hide_ops_quick_add"
             android:title="@string/hide_ops_quick_add"
             android:summary="@string/hide_ops_quick_add_details"/>
