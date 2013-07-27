@@ -637,6 +637,7 @@ public class OperationListActivity extends BaseActivity implements
                                         activity.updateOperationList();
                                         activity.updateAccountList();
                                         activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                        AccountTable.consolidateSums(activity, accountId);
                                     }
                                 }
                             });
