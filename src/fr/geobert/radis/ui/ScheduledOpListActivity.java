@@ -14,7 +14,6 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
@@ -165,10 +164,16 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 opId);
         final long transId = cursorOp.getLong(cursorOp
                 .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+        boolean needRefresh = false;
         if (delAllOccurrences) {
             ScheduledOperationTable.deleteAllOccurences(this, opId);
+            needRefresh = true;
+            OperationListActivity.refreshAccountList(this);
         }
         if (ScheduledOperationTable.deleteScheduledOp(this, opId)) {
+            needRefresh = true;
+        }
+        if (needRefresh) {
             int req;
             if (mCurrentAccount == 0) {
                 req = GET_ALL_SCH_OPS;
@@ -184,8 +189,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 AccountTable.consolidateSums(this, transId);
             }
         }
-        Log.d(TAG, "REFRESH AFTER DEL SCH OP");
-//        AccountList.refreshDisplay(this);
         mOpToDelete = null;
     }
 

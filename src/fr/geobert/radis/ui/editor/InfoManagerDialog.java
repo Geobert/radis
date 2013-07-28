@@ -24,7 +24,6 @@ public class InfoManagerDialog extends DialogFragment {
     public static final int DELETE_THIRD_PARTY_DIALOG_ID = 7;
     public static final int DELETE_TAG_DIALOG_ID = 8;
     public static final int DELETE_MODE_DIALOG_ID = 9;
-    private static HashMap<String, InfoManager> mInfoManagersMap = new HashMap<String, InfoManager>();
     private static HashMap<String, InfoManagerDialog> mInfoManagerDialogMap = new HashMap<String, InfoManagerDialog>();
     private InfoManager mInfoManager = null;
     private int mMode = -1;
@@ -180,16 +179,6 @@ public class InfoManagerDialog extends DialogFragment {
         return d;
     }
 
-    private InfoManager createInfoManagerIfNeeded(Uri table, String colName,
-                                                  String title, int editId, int deleteId) {
-        InfoManager i = mInfoManagersMap.get(table.toString());
-        if (null == i) {
-            i = new InfoManager(this, title, table, colName, editId, deleteId);
-            mInfoManagersMap.put(table.toString(), i);
-        }
-        return i;
-    }
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle args = getArguments();
@@ -200,8 +189,7 @@ public class InfoManagerDialog extends DialogFragment {
         final int deleteId = args.getInt("deleteId");
         final int mode = args.getInt("mode");
         mMode = mode;
-        mInfoManager = createInfoManagerIfNeeded(table, colName,
-                title, editId, deleteId);
+        mInfoManager = new InfoManager(this, title, table, colName, editId, deleteId);
         switch (mode) {
             case THIRD_PARTIES_DIALOG_ID:
             case TAGS_DIALOG_ID:
@@ -217,9 +205,7 @@ public class InfoManagerDialog extends DialogFragment {
                 return Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        InfoManager infoManager = createInfoManagerIfNeeded(
-                                table, colName, title, editId, deleteId);
-                        infoManager.deleteInfo();
+                        mInfoManager.deleteInfo();
                     }
                 });
             default:
