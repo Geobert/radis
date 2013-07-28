@@ -59,6 +59,12 @@ public abstract class CommonOpEditor extends BaseActivity implements
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        InfoManagerDialog.resetInfoManager();
+    }
+
     protected abstract void fillOperationWithInputs(Operation operation);
 
     @Override
