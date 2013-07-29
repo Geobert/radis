@@ -34,6 +34,7 @@ import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.ui.OperationListActivity;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class Tools {
@@ -376,15 +377,14 @@ public class Tools {
     }
 
     public static String getDateStr(long date) {
-        GregorianCalendar g = new GregorianCalendar();
-        g.setTimeInMillis(date);
-        return getDateStr(g);
+//        GregorianCalendar g = new GregorianCalendar();
+//        g.setTimeInMillis(date);
+//        return getDateStr(g);
+        return Formater.getFullDateFormater().format(new Date(date));
     }
 
     public static String getDateStr(Calendar cal) {
-        return String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)) + "/"
-                + String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/"
-                + cal.get(Calendar.YEAR);
+        return getDateStr(cal.getTimeInMillis());
     }
 
     private interface BooleanResultNoParamFct {

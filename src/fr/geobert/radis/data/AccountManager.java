@@ -81,6 +81,7 @@ public class AccountManager {
             final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
             do {
                 if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
+                    AccountTable.initProjectionDate(mAllAccountsCursor);
                     mCurSum = mAllAccountsCursor.getLong(curSumIdx);
                     break;
                 }

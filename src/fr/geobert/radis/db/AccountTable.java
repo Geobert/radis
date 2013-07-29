@@ -452,6 +452,7 @@ public class AccountTable {
     public static void updateProjection(Context ctx, long accountId,
                                         long sumToAdd, long opDate) {
         ContentValues args = new ContentValues();
+        assert (mProjectionMode != -1);
         Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode
                 + " / opDate " + opDate);
         if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {

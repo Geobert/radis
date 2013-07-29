@@ -532,7 +532,21 @@ public class OperationListActivity extends BaseActivity implements
 
     @Override
     public void getMoreOperations(final GregorianCalendar startDate) {
-        startOpDate = startDate;
+        if (startDate != null) {
+            startOpDate = startDate;
+        } else {
+            // no op found with cur month and month - 1, try if there is one
+            Cursor c = OperationTable.fetchLastOp(this, mAccountId);
+            if (c != null) {
+                if (c.moveToFirst()) {
+                    long date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE));
+                    Log.d(TAG, "last chance date : " + Tools.getDateStr(date));
+                    startOpDate = new GregorianCalendar();
+                    startOpDate.setTimeInMillis(date);
+                }
+                c.close();
+            }
+        }
         getOperationsList();
     }
 
