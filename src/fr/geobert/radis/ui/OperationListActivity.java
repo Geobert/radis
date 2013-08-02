@@ -75,6 +75,7 @@ public class OperationListActivity extends BaseActivity implements
     private Long mAccountId = null;
     private OnOperationScrollLoader mScrollLoader;
     private long mProjectionDate;
+    private int mLastSelectionPos = -1;
 
     public static void refreshAccountList(final Context ctx) {
         Intent intent = new Intent(INTENT_UPDATE_ACC_LIST);
@@ -155,7 +156,7 @@ public class OperationListActivity extends BaseActivity implements
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                selectOpAndAdjustOffset(i);
+                selectOpAndAdjustOffset(i, false);
             }
         });
         mScrollLoader = new OnOperationScrollLoader(this);
@@ -256,6 +257,7 @@ public class OperationListActivity extends BaseActivity implements
                 processAccountList();
                 break;
             case GET_OPS:
+                boolean refresh = false;
                 if (mOpListCursorAdapter == null) {
                     String[] from = new String[]{OperationTable.KEY_OP_DATE,
                             InfoTables.KEY_THIRD_PARTY_NAME, OperationTable.KEY_OP_SUM,
@@ -267,6 +269,7 @@ public class OperationListActivity extends BaseActivity implements
                                     new OperationRowViewBinder(this, cursor,
                                             OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE));
                     mListView.setAdapter(mOpListCursorAdapter);
+                    refresh = true;
                 }
                 Cursor old = mOpListCursorAdapter.swapCursor(cursor);
                 if (old != null) {
@@ -274,6 +277,9 @@ public class OperationListActivity extends BaseActivity implements
                     old.close();
                 }
                 mQuickAddController.clearFocus();
+                if (refresh) {
+                    refreshSelection();
+                }
                 break;
         }
     }
@@ -305,12 +311,6 @@ public class OperationListActivity extends BaseActivity implements
         ctx.startActivity(intent);
     }
 
-//    public static void restart(OperationListActivity ctx) {
-//        ctx.getSupportLoaderManager().destroyLoader(GET_ACCOUNTS);
-//        ctx.getSupportLoaderManager().destroyLoader(GET_OPS);
-//        ctx.updateDisplay(null);
-//    }
-
     /**
      * get the operations of current account
      * should be called after getAccountList
@@ -319,7 +319,6 @@ public class OperationListActivity extends BaseActivity implements
         mAccountId = AccountManager.getInstance().getCurrentAccountId(this);
         if (mAccountId != null) {
             //showProgress();
-
             if (mOperationsLoader == null) {
                 startOpDate = new GregorianCalendar();
                 mScrollLoader.setStartDate(startOpDate);
@@ -524,10 +523,22 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
-    private void selectOpAndAdjustOffset(int position) {
-        OperationsCursorAdapter adapter = mOpListCursorAdapter;
-        adapter.setSelectedPosition(position);
-        mListView.smoothScrollToPosition(position + 2); // scroll in order to see fully expanded op row
+    private void selectOpAndAdjustOffset(final int position, boolean delayScroll) {
+        if (position != mLastSelectionPos) {
+            mLastSelectionPos = position;
+            if (delayScroll) {
+                mListView.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mListView.smoothScrollToPosition(position + 3); // scroll in order to see fully expanded op row
+                    }
+                }, 300);
+            } else {
+                mListView.smoothScrollToPosition(position + 3); // scroll in order to see fully expanded op row
+            }
+            OperationsCursorAdapter adapter = mOpListCursorAdapter;
+            adapter.setSelectedPosition(position);
+        }
     }
 
     @Override
@@ -553,6 +564,38 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     public long getCurrentAccountId() {
         return mAccountId;
+    }
+
+    private void refreshSelection() {
+        if (mLastSelectionPos == -1) {
+            GregorianCalendar today = Tools.createClearedCalendar();
+            Cursor c = findLastOpBeforeDate(today);
+            if (c != null) {
+                int pos = c.getPosition();
+                selectOpAndAdjustOffset(pos, true);
+            }
+        } else {
+            selectOpAndAdjustOffset(mLastSelectionPos, true);
+        }
+    }
+
+    private OperationsCursorAdapter getListAdapter() {
+        return (OperationsCursorAdapter) mListView.getAdapter();
+    }
+
+    private Cursor findLastOpBeforeDate(GregorianCalendar date) {
+        Cursor ops = getListAdapter().getCursor();
+        if (ops.moveToFirst()) {
+            long dateLong = date.getTimeInMillis();
+            do {
+                long opDate = ops.getLong(ops
+                        .getColumnIndex(OperationTable.KEY_OP_DATE));
+                if (opDate <= dateLong) {
+                    break;
+                }
+            } while (ops.moveToNext());
+        }
+        return ops;
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
