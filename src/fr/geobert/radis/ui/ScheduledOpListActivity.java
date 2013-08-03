@@ -57,7 +57,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     private CursorLoader mLoader;
     private TextView mTotalLbl;
     private SimpleCursorAdapter mAccountAdapter;
-    private boolean isResuming = false;
 
     public static void callMe(Context ctx, final long currentAccountId) {
         Intent i = new Intent(ctx, ScheduledOpListActivity.class);
@@ -137,10 +136,8 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
             getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
                 @Override
                 public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                    if (!isResuming) {
-                        mCurrentAccount = itemId;
-                        fetchSchOpsOfAccount();
-                    }
+                    mCurrentAccount = itemId;
+                    fetchSchOpsOfAccount();
                     return true;
                 }
             });
@@ -155,7 +152,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     @Override
     protected void onResume() {
         super.onResume();
-        isResuming = true;
         fetchSchOpsOfAccount();
     }
 
