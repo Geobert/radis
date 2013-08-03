@@ -80,6 +80,8 @@ public class OperationEditor extends CommonOpEditor {
 
     private void setResAndExit() {
         Intent res = new Intent();
+        res.putExtra("opId", mRowId);
+        res.putExtra("opDate", mCurrentOp.getDate());
         setResult(RESULT_OK, res);
         finish();
     }
@@ -89,7 +91,7 @@ public class OperationEditor extends CommonOpEditor {
         Operation op = mCurrentOp;
         Log.d(TAG, "saveOpAndExit, mRowId : " + mRowId);
         if (mRowId <= 0) {
-            OperationTable.createOp(this, op, op.mAccountId);
+            mRowId = OperationTable.createOp(this, op, op.mAccountId);
             setResAndExit();
         } else {
             if (op.equals(mOriginalOp)) {

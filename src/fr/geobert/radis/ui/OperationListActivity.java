@@ -75,7 +75,9 @@ public class OperationListActivity extends BaseActivity implements
     private Long mAccountId = null;
     private OnOperationScrollLoader mScrollLoader;
     private long mProjectionDate;
+    private long mLastSelectionId = -1;
     private int mLastSelectionPos = -1;
+    private boolean needRefreshSelection = false;
 
     public static void refreshAccountList(final Context ctx) {
         Intent intent = new Intent(INTENT_UPDATE_ACC_LIST);
@@ -277,7 +279,8 @@ public class OperationListActivity extends BaseActivity implements
                     old.close();
                 }
                 mQuickAddController.clearFocus();
-                if (refresh) {
+                if (refresh || needRefreshSelection) {
+                    needRefreshSelection = false;
                     refreshSelection();
                 }
                 break;
@@ -346,6 +349,19 @@ public class OperationListActivity extends BaseActivity implements
                 break;
             case OperationEditor.OPERATION_EDITOR:
                 if (resultCode == RESULT_OK) {
+                    this.needRefreshSelection = true;
+                    this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId);
+                    long date = data.getLongExtra("opDate", 0);
+                    if (date > 0) {
+                        GregorianCalendar opDate = new GregorianCalendar();
+                        opDate.setTimeInMillis(date);
+                        opDate.set(Calendar.DAY_OF_MONTH, 1);
+                        GregorianCalendar today = Tools.createClearedCalendar();
+                        if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
+                            this.startOpDate = opDate;
+                        }
+                    }
+
                     updateAccountList();
                     updateOperationList();
                 }
@@ -526,14 +542,27 @@ public class OperationListActivity extends BaseActivity implements
     private void selectOpAndAdjustOffset(final int position, boolean delayScroll) {
         if (position != mLastSelectionPos) {
             mLastSelectionPos = position;
+            mLastSelectionId = getListAdapter().getItemId(position);
+
             if (delayScroll) {
                 mListView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        mListView.smoothScrollToPosition(position + 3); // scroll in order to see fully expanded op row
+                        mListView.setSelection(position);
+                        mListView.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (mListView.getFirstVisiblePosition() == position) {
+                                    mListView.smoothScrollToPosition(position - 3); // scroll in order to see fully expanded op row
+                                } else if (mListView.getLastVisiblePosition() == position) {
+                                    mListView.smoothScrollToPosition(position + 3); // scroll in order to see fully expanded op row
+                                }
+                            }
+                        });
                     }
-                }, 300);
+                }, 400);
             } else {
+                mListView.setSelection(position);
                 mListView.smoothScrollToPosition(position + 3); // scroll in order to see fully expanded op row
             }
             OperationsCursorAdapter adapter = mOpListCursorAdapter;
@@ -567,15 +596,14 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private void refreshSelection() {
-        if (mLastSelectionPos == -1) {
+        if (mLastSelectionId == -1) {
             GregorianCalendar today = Tools.createClearedCalendar();
             Cursor c = findLastOpBeforeDate(today);
             if (c != null) {
-                int pos = c.getPosition();
-                selectOpAndAdjustOffset(pos, true);
+                selectOpAndAdjustOffset(c.getPosition(), true);
             }
         } else {
-            selectOpAndAdjustOffset(mLastSelectionPos, true);
+            selectOpAndAdjustOffset(findOpPosition(mLastSelectionId), true);
         }
     }
 
@@ -588,14 +616,22 @@ public class OperationListActivity extends BaseActivity implements
         if (ops.moveToFirst()) {
             long dateLong = date.getTimeInMillis();
             do {
-                long opDate = ops.getLong(ops
-                        .getColumnIndex(OperationTable.KEY_OP_DATE));
+                long opDate = ops.getLong(ops.getColumnIndex(OperationTable.KEY_OP_DATE));
                 if (opDate <= dateLong) {
                     break;
                 }
             } while (ops.moveToNext());
         }
         return ops;
+    }
+
+    private int findOpPosition(final long id) {
+        for (int i = 0; i < getListAdapter().getCount(); i++) {
+            if (getListAdapter().getItemId(i) == id) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
