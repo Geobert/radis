@@ -361,7 +361,7 @@ public class OperationListActivity extends BaseActivity implements
                             this.startOpDate = opDate;
                         }
                     }
-
+                    AccountManager.getInstance().backupCurAccountId();
                     updateAccountList();
                     updateOperationList();
                 }

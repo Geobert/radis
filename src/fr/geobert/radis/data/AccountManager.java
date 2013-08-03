@@ -14,6 +14,7 @@ public class AccountManager {
     private Long mCurAccountId = null;
     protected long mCurSum;
     private int mCurAccountPos = -1;
+    private Long mCurAccountIdBackup = null;
 
     private AccountManager() {
 
@@ -55,7 +56,10 @@ public class AccountManager {
     }
 
     public Long getCurrentAccountId(Context context) {
-        if (mCurAccountId != null) {
+        if (mCurAccountIdBackup != null) {
+            setCurrentAccountId(mCurAccountIdBackup);
+            clearBackup();
+        } else if (mCurAccountId != null) {
             return mCurAccountId;
         } else if (getDefaultAccountId(context) != null) {
             setCurrentAccountId(getDefaultAccountId(context));
@@ -78,6 +82,7 @@ public class AccountManager {
     private int setCurrentAccountSum() {
         int pos = 0;
         if (mAllAccountsCursor != null) {
+            mAllAccountsCursor.moveToFirst();
             final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
             do {
                 if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
@@ -103,5 +108,13 @@ public class AccountManager {
 
     public long getCurrentAccountSum() {
         return mCurSum;
+    }
+
+    public void backupCurAccountId() {
+        this.mCurAccountIdBackup = mCurAccountId;
+    }
+
+    public void clearBackup() {
+        this.mCurAccountIdBackup = null;
     }
 }
