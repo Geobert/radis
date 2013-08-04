@@ -88,6 +88,7 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Tools.checkDebugMode(this);
         cleanDatabaseIfTestingMode();
 
 

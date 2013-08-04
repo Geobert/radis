@@ -11,7 +11,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -44,19 +43,19 @@ public class Tools {
     public static final int DEBUG_DIALOG = 9876;
     // debug mode stuff
     public static boolean DEBUG_MODE = true;
-    public static int SCREEN_HEIGHT;
+//    public static int SCREEN_HEIGHT;
     private static Activity mActivity;
 
     public static void checkDebugMode(Activity ctx) {
         // See if we're a debug or a release build
-        if (Build.VERSION.SDK_INT >= 13) {
-            Point p = new Point();
-            ctx.getWindowManager().getDefaultDisplay().getSize(p);
-            SCREEN_HEIGHT = p.y;
-        } else {
-            //noinspection deprecation
-            SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
-        }
+//        if (Build.VERSION.SDK_INT >= 13) {
+//            Point p = new Point();
+//            ctx.getWindowManager().getDefaultDisplay().getSize(p);
+//            SCREEN_HEIGHT = p.y;
+//        } else {
+//            //noinspection deprecation
+//            SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
+//        }
         try {
             PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
                     ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS);
