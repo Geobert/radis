@@ -40,6 +40,7 @@ import fr.geobert.radis.service.OnInsertionReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 import fr.geobert.radis.ui.editor.AccountEditor;
@@ -88,6 +89,7 @@ public class OperationListActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         cleanDatabaseIfTestingMode();
+
 
         ActionBar actionbar = getSupportActionBar();
         actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
@@ -255,6 +257,17 @@ public class OperationListActivity extends BaseActivity implements
 
         switch (cursorLoader.getId()) {
             case GET_ACCOUNTS:
+                PrefsManager prefs = PrefsManager.getInstance(this);
+                Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
+                if (needConsolidate) {
+                    prefs.put("consolidateDB", false);
+                    prefs.commit();
+                    if (cursor.moveToFirst()) {
+                        do {
+                            AccountTable.consolidateSums(this, cursor.getLong(0));
+                        } while (cursor.moveToNext());
+                    }
+                }
                 AccountManager.getInstance().setAllAccountsCursor(cursor);
                 processAccountList();
                 break;
@@ -277,6 +290,9 @@ public class OperationListActivity extends BaseActivity implements
                 if (old != null) {
                     ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).increaseCache(cursor);
                     old.close();
+                }
+                if (mQuickAddController == null) {
+                    initQuickAdd();
                 }
                 mQuickAddController.clearFocus();
                 if (refresh || needRefreshSelection) {
@@ -304,8 +320,6 @@ public class OperationListActivity extends BaseActivity implements
 
     public static void restart(Context ctx) {
         DbContentProvider.reinit(ctx);
-        AccountManager acc = null;
-        acc.setCurrentAccountId(null);
         AccountManager.getInstance().setAllAccountsCursor(null);
         AccountManager.getInstance().setCurrentAccountId(null);
         Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());

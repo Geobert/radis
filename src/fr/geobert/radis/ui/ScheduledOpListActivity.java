@@ -14,10 +14,8 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
@@ -40,15 +38,9 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     public static final String CURRENT_ACCOUNT = "accountId";
     private static final String TAG = "ScheduleOpList";
 
-    // context menu ids
-    private static final int DELETE_OP_ID = Menu.FIRST + 1;
-    private static final int EDIT_OP_ID = Menu.FIRST + 2;
-
     // dialog ids
-    private static final int DIALOG_DELETE = 0;
     private static final int GET_ALL_SCH_OPS = 900;
     private static final int GET_SCH_OPS_OF_ACCOUNT = 910;
-    private AdapterContextMenuInfo mOpToDelete;
 
     //    private Spinner mAccountSpinner;
     private long mCurrentAccount;
@@ -76,7 +68,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
         setContentView(R.layout.scheduled_list);
 
         mListView = (ListView) findViewById(android.R.id.list);
-//        registerForContextMenu(mListView);
         mTotalLbl = (TextView) findViewById(R.id.sch_op_sum_total);
         mCurrentAccount = getIntent().getLongExtra(CURRENT_ACCOUNT, 0);
         mListView.setEmptyView(findViewById(android.R.id.empty));
@@ -185,7 +176,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 AccountTable.consolidateSums(this, transId);
             }
         }
-        mOpToDelete = null;
     }
 
 //    @Override

@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
+import fr.geobert.radis.tools.PrefsManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -70,7 +71,7 @@ public class DbHelper extends SQLiteOpenHelper {
             case 14:
                 ScheduledOperationTable.upgradeFromV12(db, oldVersion, newVersion);
             default:
-                //AccountTable.upgradeDefault(db, oldVersion, newVersion);
+                AccountTable.upgradeDefault(db, oldVersion, newVersion);
         }
     }
 
@@ -131,6 +132,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 dst.close();
                 srcFIS.close();
                 dstFOS.close();
+                PrefsManager.getInstance(ctx).put("consolidateDB", true);
+                PrefsManager.getInstance(ctx).commit();
                 return true;
             }
         } catch (Exception e) {
