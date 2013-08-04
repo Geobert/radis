@@ -152,7 +152,8 @@ public class ScheduledOperationTable {
         final long accountId = schOp
                 .getLong(schOp
                         .getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
-        OperationTable.deleteAllOccurrences(ctx, accountId, schOpId);
+        final long transfertId = schOp.getLong(schOp.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+        OperationTable.deleteAllOccurrences(ctx, accountId, schOpId, transfertId);
         AccountTable.consolidateSums(ctx, accountId);
         if (null != schOp) {
             schOp.close();

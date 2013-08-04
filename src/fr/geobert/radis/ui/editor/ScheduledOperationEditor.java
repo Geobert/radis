@@ -205,7 +205,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 // schedule
                 if ((op.getDate() != mOriginalSchOp.getDate())) {
                     // change the date of the source transaction
-                    OperationTable.updateOp(this, mOpIdSource, op, op.mAccountId);
+                    OperationTable.updateOp(this, mOpIdSource, op, mOriginalSchOp);
                 }
                 // do not insert another occurrence with same date
                 ScheduledOperation.addPeriodicityToDate(op);

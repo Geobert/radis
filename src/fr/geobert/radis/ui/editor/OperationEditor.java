@@ -101,7 +101,7 @@ public class OperationEditor extends CommonOpEditor {
                     UpdateScheduledOp.newInstance(mCurrentOp, mPreviousSum, mRowId).show(getSupportFragmentManager(),
                             "dialog");
                 } else {
-                    OperationTable.updateOp(this, mRowId, op, mPreviousSum);
+                    OperationTable.updateOp(this, mRowId, op, mOriginalOp);
                     setResAndExit();
                 }
             }
@@ -230,10 +230,7 @@ public class OperationEditor extends CommonOpEditor {
                                 public void onClick(DialogInterface dialog,
                                                     int id) {
                                     currentOp.mScheduledId = 0;
-                                    OperationTable
-                                            .updateOp(act,
-                                                    rowId, currentOp,
-                                                    currentOp.mAccountId);
+                                    OperationTable.updateOp(act, rowId, currentOp, act.mOriginalOp);
                                     act.setResAndExit();
                                 }
                             })

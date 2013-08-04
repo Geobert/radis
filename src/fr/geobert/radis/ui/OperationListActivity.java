@@ -548,7 +548,7 @@ public class OperationListActivity extends BaseActivity implements
     public DialogFragment getDeleteConfirmationDialog(final Operation operation) {
         if (operation.mScheduledId > 0) {
             return DeleteOccurenceConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId,
-                    operation.mScheduledId, operation.getDate());
+                    operation.mScheduledId, operation.getDate(), operation.mTransferAccountId);
         } else {
             return DeleteOpConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId);
         }
@@ -687,13 +687,15 @@ public class OperationListActivity extends BaseActivity implements
 
     protected static class DeleteOccurenceConfirmationDialog extends DialogFragment {
         public static DeleteOccurenceConfirmationDialog newInstance(final long accountId, final long opId,
-                                                                    final long schId, final long date) {
+                                                                    final long schId, final long date,
+                                                                    final long transfertId) {
             DeleteOccurenceConfirmationDialog frag = new DeleteOccurenceConfirmationDialog();
             Bundle args = new Bundle();
             args.putLong("accountId", accountId);
             args.putLong("opId", opId);
             args.putLong("schId", schId);
             args.putLong("date", date);
+            args.putLong("transfertId", transfertId);
             frag.setArguments(args);
             return frag;
         }
@@ -706,6 +708,7 @@ public class OperationListActivity extends BaseActivity implements
             final long operationId = args.getLong("opId");
             final long schId = args.getLong("schId");
             final long date = args.getLong("date");
+            final long transfertId = args.getLong("transfertId");
             Log.d(TAG, "date of op to del : " + Tools.getDateStr(date));
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(R.string.delete_recurring_op)
@@ -729,13 +732,13 @@ public class OperationListActivity extends BaseActivity implements
                                 public void onClick(DialogInterface dialog, int which) {
                                     final OperationListActivity activity = (OperationListActivity) getActivity();
                                     int nbDel =
-                                            OperationTable.deleteAllFutureOccurrences(activity, accountId, schId, date);
+                                            OperationTable.deleteAllFutureOccurrences(activity, accountId, schId,
+                                                    date, transfertId);
                                     Log.d(TAG, "nbDel : " + nbDel);
                                     if (nbDel > 0) {
                                         activity.updateOperationList();
                                         activity.updateAccountList();
                                         activity.mOpListCursorAdapter.setSelectedPosition(-1);
-                                        AccountTable.consolidateSums(activity, accountId);
                                     }
                                 }
                             })
@@ -743,11 +746,10 @@ public class OperationListActivity extends BaseActivity implements
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     final OperationListActivity activity = (OperationListActivity) getActivity();
-                                    if (OperationTable.deleteAllOccurrences(activity, accountId, schId) > 0) {
+                                    if (OperationTable.deleteAllOccurrences(activity, accountId, schId, transfertId) > 0) {
                                         activity.updateOperationList();
                                         activity.updateAccountList();
                                         activity.mOpListCursorAdapter.setSelectedPosition(-1);
-                                        AccountTable.consolidateSums(activity, accountId);
                                     }
                                 }
                             });
