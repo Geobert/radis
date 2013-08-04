@@ -30,6 +30,7 @@ import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.GregorianCalendar;
@@ -215,8 +216,9 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 ScheduledOperationEditor.callMeForResult(this, 0, mCurrentAccount,
                         ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE);
                 return true;
+            default:
+                return Tools.onDefaultOptionItemSelected(this, item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
