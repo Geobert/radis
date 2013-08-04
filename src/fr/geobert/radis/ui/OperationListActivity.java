@@ -204,6 +204,7 @@ public class OperationListActivity extends BaseActivity implements
     private boolean onAccountChanged(long itemId) {
         if (mQuickAddController != null && itemId != mAccountId) {
             AccountManager.getInstance().setCurrentAccountId(itemId);
+            ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
             mQuickAddController.setAccount(itemId);
             getOperationsList();
             return true;

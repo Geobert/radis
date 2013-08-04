@@ -254,6 +254,9 @@ public class OperationTable {
         if (op.mRowId > -1) {
             if (withUpdate) {
                 AccountTable.updateProjection(ctx, accountId, op.mSum, op.getDate());
+                if (op.mTransferAccountId > 0) {
+                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, op.getDate());
+                }
             }
             return op.mRowId;
         }
