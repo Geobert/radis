@@ -589,6 +589,7 @@ public class OperationListActivity extends BaseActivity implements
     public void getMoreOperations(final GregorianCalendar startDate) {
         if (startDate != null) {
             startOpDate = startDate;
+            getOperationsList();
         } else {
             // no op found with cur month and month - 1, try if there is one
             Cursor c = OperationTable.fetchLastOp(this, mAccountId);
@@ -598,11 +599,11 @@ public class OperationListActivity extends BaseActivity implements
                     Log.d(TAG, "last chance date : " + Tools.getDateStr(date));
                     startOpDate = new GregorianCalendar();
                     startOpDate.setTimeInMillis(date);
+                    getOperationsList();
                 }
                 c.close();
             }
         }
-        getOperationsList();
     }
 
     @Override
