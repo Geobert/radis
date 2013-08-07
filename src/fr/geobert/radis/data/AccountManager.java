@@ -15,6 +15,7 @@ public class AccountManager {
     protected long mCurSum;
     private int mCurAccountPos = -1;
     private Long mCurAccountIdBackup = null;
+    public Long mCurDefaultAccount = null;
 
     private AccountManager() {
 
@@ -52,6 +53,9 @@ public class AccountManager {
     }
 
     public Long getDefaultAccountId(Context context) {
+        if (this.mCurDefaultAccount == null) {
+            this.mCurDefaultAccount = DBPrefsManager.getInstance(context).getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+        }
         return DBPrefsManager.getInstance(context).getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
     }
 

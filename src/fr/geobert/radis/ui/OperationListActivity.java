@@ -120,6 +120,14 @@ public class OperationListActivity extends BaseActivity implements
             setQuickAddVisibility();
             updateOperationList();
         }
+        AccountManager accMan = AccountManager.getInstance();
+        Long curDefaultAccId = accMan.mCurDefaultAccount;
+        if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(this)) {
+            accMan.mCurDefaultAccount = null;
+            accMan.setCurrentAccountId(null);
+            mLastSelectionId = -1;
+            updateDisplay(null);
+        }
     }
 
     private void initQuickAdd() {
