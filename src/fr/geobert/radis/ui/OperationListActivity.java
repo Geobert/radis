@@ -127,8 +127,7 @@ public class OperationListActivity extends BaseActivity implements
         mQuickAddController.initViewBehavior();
         mQuickAddController.setAutoNegate(true);
         mQuickAddController.clearFocus();
-        boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(
-                RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
+        boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
         int visibility = View.VISIBLE;
         if (hideQuickAdd) {
             visibility = View.GONE;
@@ -151,7 +150,12 @@ public class OperationListActivity extends BaseActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mAccountId = savedInstanceState.getLong("mAccountId");
-        initQuickAdd();
+        DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
+            @Override
+            public void run() {
+                initQuickAdd();
+            }
+        });
         mQuickAddController.onRestoreInstanceState(savedInstanceState);
     }
 
@@ -224,6 +228,13 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     protected void onPrefsInit() {
+        PrefsManager prefs = PrefsManager.getInstance(this);
+        Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
+        Log.d(TAG, "needConsolidate : " + needConsolidate);
+        if (needConsolidate) {
+            RadisService.acquireStaticLock(this);
+            this.startService(new Intent(this, RadisService.class));
+        }
         getAccountList();
     }
 
@@ -256,20 +267,8 @@ public class OperationListActivity extends BaseActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-
         switch (cursorLoader.getId()) {
             case GET_ACCOUNTS:
-                PrefsManager prefs = PrefsManager.getInstance(this);
-                Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
-                if (needConsolidate) {
-                    prefs.put("consolidateDB", false);
-                    prefs.commit();
-                    if (cursor.moveToFirst()) {
-                        do {
-                            AccountTable.consolidateSums(this, cursor.getLong(0));
-                        } while (cursor.moveToNext());
-                    }
-                }
                 AccountManager.getInstance().setAllAccountsCursor(cursor);
                 processAccountList();
                 break;

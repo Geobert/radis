@@ -207,7 +207,7 @@ public class OperationTable {
 
     static Cursor fetchOpEarlierThan(Context ctx, long date, int nbOps,
                                      final long accountId) {
-        Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date));
+        Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date) + " with limit : " + nbOps);
         Cursor c;
         String limit = nbOps == 0 ? null : Integer.toString(nbOps);
         c = ctx.getContentResolver().query(
