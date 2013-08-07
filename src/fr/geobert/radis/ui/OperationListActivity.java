@@ -117,6 +117,7 @@ public class OperationListActivity extends BaseActivity implements
         if (mQuickAddController != null) {
             mQuickAddController.setAutoNegate(true);
             mQuickAddController.clearFocus();
+            setQuickAddVisibility();
             updateOperationList();
         }
     }
@@ -127,12 +128,18 @@ public class OperationListActivity extends BaseActivity implements
         mQuickAddController.initViewBehavior();
         mQuickAddController.setAutoNegate(true);
         mQuickAddController.clearFocus();
-        boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
-        int visibility = View.VISIBLE;
-        if (hideQuickAdd) {
-            visibility = View.GONE;
+        setQuickAddVisibility();
+    }
+
+    private void setQuickAddVisibility() {
+        if (mQuickAddController != null) {
+            boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
+            int visibility = View.VISIBLE;
+            if (hideQuickAdd) {
+                visibility = View.GONE;
+            }
+            mQuickAddController.setVisibility(visibility);
         }
-        mQuickAddController.setVisibility(visibility);
     }
 
     @Override
