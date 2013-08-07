@@ -26,6 +26,8 @@ import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
@@ -43,7 +45,7 @@ public class Tools {
     public static final int DEBUG_DIALOG = 9876;
     // debug mode stuff
     public static boolean DEBUG_MODE = true;
-//    public static int SCREEN_HEIGHT;
+    //    public static int SCREEN_HEIGHT;
     private static Activity mActivity;
 
     public static void checkDebugMode(Activity ctx) {
@@ -139,6 +141,10 @@ public class Tools {
                 AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
                         "process_scheduling");
                 return true;
+            case R.id.recompute_account:
+                AccountTable.consolidateSums(ctx, AccountManager.getInstance().getCurrentAccountId(ctx));
+                OperationListActivity.refreshAccountList(ctx);
+                break;
             case R.id.debug:
                 Tools.showDebugDialog(ctx);
                 return true;
