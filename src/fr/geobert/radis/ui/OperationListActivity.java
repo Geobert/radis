@@ -165,13 +165,14 @@ public class OperationListActivity extends BaseActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mAccountId = savedInstanceState.getLong("mAccountId");
+        final Bundle sis = savedInstanceState;
         DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
             @Override
             public void run() {
                 initQuickAdd();
+                mQuickAddController.onRestoreInstanceState(sis);
             }
         });
-        mQuickAddController.onRestoreInstanceState(savedInstanceState);
     }
 
     private void initOperationList() {
