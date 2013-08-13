@@ -59,7 +59,7 @@ public class OperationListActivity extends BaseActivity implements
     public static final String INTENT_UPDATE_OP_LIST = "fr.geobert.radis.UPDATE_OP_LIST";
     public static final String INTENT_UPDATE_ACC_LIST = "fr.geobert.radis.UPDATE_ACC_LIST";
     private static final String TAG = "OperationListActivity";
-    private static final int GET_ACCOUNTS = 200;
+    public static final int GET_ACCOUNTS = 200;
     private static final int GET_OPS = 300;
     private boolean mFirstStart = true;
     private OnInsertionReceiver mOnInsertionReceiver;

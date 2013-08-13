@@ -11,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -395,4 +396,24 @@ public class Tools {
     private interface BooleanResultNoParamFct {
         boolean run();
     }
+
+    public static View.OnLongClickListener createTooltip(final int stringId) {
+        return new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Context ctx = v.getContext();
+                Toast t = Toast.makeText(ctx, ctx.getString(stringId), Toast.LENGTH_SHORT);
+                int[] screenPos = new int[2];
+                final Rect displayFrame = new Rect();
+                final int screenWidth = ctx.getResources().getDisplayMetrics().widthPixels;
+                v.getWindowVisibleDisplayFrame(displayFrame);
+                v.getLocationInWindow(screenPos);
+                t.setGravity(Gravity.RIGHT | Gravity.TOP, screenWidth - screenPos[0],
+                        screenPos[1] - v.getHeight() - v.getHeight() / 2);
+                t.show();
+                return true;
+            }
+        };
+    }
 }
+

@@ -147,6 +147,21 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
         fetchSchOpsOfAccount();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("mCurrentAccount", mCurrentAccount);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentAccount = savedInstanceState.getLong("mCurrentAccount");
+        if (mAccountAdapter == null || mAccountAdapter.isEmpty()) {
+            finish();
+        }
+    }
+
     private void deleteSchOp(final boolean delAllOccurrences, final long opId) {
         Cursor cursorOp = ScheduledOperationTable.fetchOneScheduledOp(this,
                 opId);
@@ -249,6 +264,8 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                                 Long.toString(mCurrentAccount)},
                         ScheduledOperationTable.SCHEDULED_OP_ORDERING);
                 break;
+            case OperationListActivity.GET_ACCOUNTS:
+                return AccountTable.getAllAccountsLoader(this);
             default:
                 break;
         }
@@ -256,10 +273,14 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> arg0, Cursor data) {
-        hideProgress();
-        mAdapter.changeCursor(data);
-        computeTotal(data);
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
+        if (cursorLoader.getId() == OperationListActivity.GET_ACCOUNTS) {
+            AccountManager.getInstance().setAllAccountsCursor(data);
+            fetchSchOpsOfAccount();
+        } else {
+            mAdapter.changeCursor(data);
+            computeTotal(data);
+        }
     }
 
     private void computeTotal(Cursor data) {

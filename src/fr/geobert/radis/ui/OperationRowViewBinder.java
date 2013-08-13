@@ -12,6 +12,7 @@ import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.ui.editor.OperationEditor;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
@@ -106,6 +107,7 @@ class OperationRowViewBinder extends OpViewBinder {
                     OperationEditor.callMeForResult(context, op.mRowId, accountId);
                 }
             });
+            h.editBtn.setOnLongClickListener(Tools.createTooltip(R.string.op_edition));
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -113,9 +115,11 @@ class OperationRowViewBinder extends OpViewBinder {
                             "deleteOpConfirm");
                 }
             });
+            h.deleteBtn.setOnLongClickListener(Tools.createTooltip(R.string.delete));
 
             int drawable;
             View.OnClickListener listener;
+            View.OnLongClickListener longClickListener;
             if (schedId > 0) {
                 drawable = R.drawable.edit_sched_48;
                 listener = new View.OnClickListener() {
@@ -125,6 +129,7 @@ class OperationRowViewBinder extends OpViewBinder {
                                 ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                     }
                 };
+                longClickListener = Tools.createTooltip(R.string.edit_scheduling);
             } else {
                 drawable = R.drawable.sched_48;
                 listener = new View.OnClickListener() {
@@ -134,9 +139,11 @@ class OperationRowViewBinder extends OpViewBinder {
                                 ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT);
                     }
                 };
+                longClickListener = Tools.createTooltip(R.string.convert_into_scheduling);
             }
             h.varBtn.setImageDrawable(context.getResources().getDrawable(drawable));
             h.varBtn.setOnClickListener(listener);
+            h.varBtn.setOnLongClickListener(longClickListener);
         } else {
             h.sumAtSelection.setText("");
             clearListeners(h);

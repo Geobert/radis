@@ -12,6 +12,7 @@ import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.Date;
@@ -47,6 +48,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
                             ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                 }
             });
+            h.editBtn.setOnLongClickListener(Tools.createTooltip(R.string.edit_scheduling));
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -54,6 +56,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
                             "deleteOpConfirm");
                 }
             });
+            h.deleteBtn.setOnLongClickListener(Tools.createTooltip(R.string.delete));
             h.varBtn.setVisibility(View.GONE);
         } else {
             clearListeners(h);
