@@ -171,6 +171,9 @@ public class OperationListActivity extends BaseActivity implements
             public void run() {
                 initQuickAdd();
                 mQuickAddController.onRestoreInstanceState(sis);
+                if (mAccountAdapter.isEmpty()) {
+                    updateDisplay(null);
+                }
             }
         });
     }
