@@ -89,7 +89,6 @@ public class OperationListActivity extends BaseActivity implements
         Tools.checkDebugMode(this);
         cleanDatabaseIfTestingMode();
 
-
         ActionBar actionbar = getSupportActionBar();
         actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionbar.setDisplayShowTitleEnabled(false);
