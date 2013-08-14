@@ -2,12 +2,19 @@ package fr.geobert.radis.data;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.DBPrefsManager;
 
-public class AccountManager {
+public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
+    private static final int GET_ACCOUNTS = 200;
+
     private static AccountManager ourInstance = new AccountManager();
     private Cursor mAllAccountsCursor;
     private SimpleCursorAdapter mSimpleCursorAdapter;
@@ -16,6 +23,9 @@ public class AccountManager {
     private int mCurAccountPos = -1;
     private Long mCurAccountIdBackup = null;
     public Long mCurDefaultAccount = null;
+    private Runnable mCallback;
+    private CursorLoader mAccountLoader;
+    private FragmentActivity mCtx;
 
     private AccountManager() {
 
@@ -30,22 +40,28 @@ public class AccountManager {
     }
 
     public void setAllAccountsCursor(Cursor cursor) throws IllegalStateException {
-        if (mSimpleCursorAdapter == null) {
-            throw new IllegalStateException("Must call setSimpleCursorAdapter first");
-        }
         if (this.mAllAccountsCursor != null && this.mAllAccountsCursor != cursor) {
             this.mAllAccountsCursor.close();
         }
+
         if (cursor != null && cursor.moveToFirst()) {
             this.mAllAccountsCursor = cursor;
-            this.mSimpleCursorAdapter.changeCursor(cursor);
+            if (mSimpleCursorAdapter != null) {
+                this.mSimpleCursorAdapter.changeCursor(cursor);
+            }
             if (mCurAccountId != null) {
                 setCurrentAccountSum();
             }
         } else {
             this.mAllAccountsCursor = null;
-            this.mSimpleCursorAdapter.changeCursor(null);
+            if (mSimpleCursorAdapter != null) {
+                this.mSimpleCursorAdapter.changeCursor(null);
+            }
         }
+    }
+
+    public SimpleCursorAdapter getSimpleCursorAdapter() {
+        return mSimpleCursorAdapter;
     }
 
     public void setSimpleCursorAdapter(SimpleCursorAdapter adapter) {
@@ -89,7 +105,7 @@ public class AccountManager {
             mAllAccountsCursor.moveToFirst();
             final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
             do {
-                if (mCurAccountId.longValue() == mAllAccountsCursor.getLong(0)) {
+                if (mCurAccountId == mAllAccountsCursor.getLong(0)) {
                     AccountTable.initProjectionDate(mAllAccountsCursor);
                     mCurSum = mAllAccountsCursor.getLong(curSumIdx);
                     break;
@@ -120,5 +136,36 @@ public class AccountManager {
 
     public void clearBackup() {
         this.mCurAccountIdBackup = null;
+    }
+
+    public void fetchAllAccounts(FragmentActivity activity, Runnable cbk) {
+        this.mCtx = activity;
+        this.mCallback = cbk;
+        if (mAccountLoader == null) {
+            mCtx.getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+        } else {
+            mCtx.getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
+        }
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        mAccountLoader = AccountTable.getAllAccountsLoader(mCtx);
+        return mAccountLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        if (cursorLoader.getId() == GET_ACCOUNTS) {
+            setAllAccountsCursor(cursor);
+            if (mCallback != null) {
+                mCallback.run();
+                mCallback = null;
+            }
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
     }
 }

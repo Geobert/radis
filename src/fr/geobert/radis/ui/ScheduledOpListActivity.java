@@ -14,6 +14,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -88,7 +89,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 selectOpAndAdjustOffset(i);
             }
         });
-        populateAccountSpinner();
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -144,7 +144,22 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     @Override
     protected void onResume() {
         super.onResume();
-        fetchSchOpsOfAccount();
+
+        AccountManager accountManager = AccountManager.getInstance();
+        if (mAccountAdapter == null || mAccountAdapter.isEmpty() || accountManager.getAllAccountsCursor() == null ||
+                accountManager.getAllAccountsCursor().isClosed()) {
+            accountManager.fetchAllAccounts(this, new Runnable() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "fetchAllAccounts callback");
+                    populateAccountSpinner();
+                    fetchSchOpsOfAccount();
+                }
+            });
+        } else {
+            populateAccountSpinner();
+            fetchSchOpsOfAccount();
+        }
     }
 
     @Override
@@ -157,9 +172,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentAccount = savedInstanceState.getLong("mCurrentAccount");
-        if (mAccountAdapter == null || mAccountAdapter.isEmpty()) {
-            finish();
-        }
     }
 
     private void deleteSchOp(final boolean delAllOccurrences, final long opId) {
@@ -264,8 +276,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                                 Long.toString(mCurrentAccount)},
                         ScheduledOperationTable.SCHEDULED_OP_ORDERING);
                 break;
-            case OperationListActivity.GET_ACCOUNTS:
-                return AccountTable.getAllAccountsLoader(this);
             default:
                 break;
         }
@@ -274,13 +284,8 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
-        if (cursorLoader.getId() == OperationListActivity.GET_ACCOUNTS) {
-            AccountManager.getInstance().setAllAccountsCursor(data);
-            fetchSchOpsOfAccount();
-        } else {
-            mAdapter.changeCursor(data);
-            computeTotal(data);
-        }
+        mAdapter.changeCursor(data);
+        computeTotal(data);
     }
 
     private void computeTotal(Cursor data) {

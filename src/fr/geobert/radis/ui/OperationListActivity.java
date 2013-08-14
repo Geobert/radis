@@ -59,12 +59,10 @@ public class OperationListActivity extends BaseActivity implements
     public static final String INTENT_UPDATE_OP_LIST = "fr.geobert.radis.UPDATE_OP_LIST";
     public static final String INTENT_UPDATE_ACC_LIST = "fr.geobert.radis.UPDATE_ACC_LIST";
     private static final String TAG = "OperationListActivity";
-    public static final int GET_ACCOUNTS = 200;
     private static final int GET_OPS = 300;
     private boolean mFirstStart = true;
     private OnInsertionReceiver mOnInsertionReceiver;
     private IntentFilter mOnInsertionIntentFilter;
-    private CursorLoader mAccountLoader;
     private CursorLoader mOperationsLoader;
     private SimpleCursorAdapter mAccountAdapter;
     private int redColor;
@@ -111,9 +109,7 @@ public class OperationListActivity extends BaseActivity implements
         installRadisTimer();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    private void doOnResume() {
         if (mQuickAddController != null) {
             mQuickAddController.setAutoNegate(true);
             mQuickAddController.clearFocus();
@@ -127,6 +123,22 @@ public class OperationListActivity extends BaseActivity implements
             accMan.setCurrentAccountId(null);
             mLastSelectionId = -1;
             updateDisplay(null);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        AccountManager accMan = AccountManager.getInstance();
+        if (accMan.getAllAccountsCursor() == null || accMan.getAllAccountsCursor().isClosed()) {
+            accMan.fetchAllAccounts(this, new Runnable() {
+                @Override
+                public void run() {
+                    doOnResume();
+                }
+            });
+        } else {
+            doOnResume();
         }
     }
 
@@ -171,7 +183,10 @@ public class OperationListActivity extends BaseActivity implements
             public void run() {
                 initQuickAdd();
                 mQuickAddController.onRestoreInstanceState(sis);
-                if (mAccountAdapter.isEmpty()) {
+                if (AccountManager.getInstance().getSimpleCursorAdapter() == null) {
+                    initAccountStuff();
+                }
+                if (mAccountAdapter == null || mAccountAdapter.isEmpty()) {
                     updateDisplay(null);
                 }
             }
@@ -259,21 +274,18 @@ public class OperationListActivity extends BaseActivity implements
 
     private void getAccountList() {
 //        showProgress();
-        if (mAccountLoader == null) {
-            getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
-        } else {
-            getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
-        }
+        AccountManager.getInstance().fetchAllAccounts(this, new Runnable() {
+            @Override
+            public void run() {
+                processAccountList();
+            }
+        });
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Loader<Cursor> res;
         switch (i) {
-            case GET_ACCOUNTS:
-                res = AccountTable.getAllAccountsLoader(this);
-                mAccountLoader = (CursorLoader) res;
-                break;
             case GET_OPS:
                 res = OperationTable.getOpsBetweenDateLoader(this, startOpDate, mAccountId);
                 mOperationsLoader = (CursorLoader) res;
@@ -287,10 +299,6 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         switch (cursorLoader.getId()) {
-            case GET_ACCOUNTS:
-                AccountManager.getInstance().setAllAccountsCursor(cursor);
-                processAccountList();
-                break;
             case GET_OPS:
                 boolean refresh = false;
                 if (mOpListCursorAdapter == null) {
@@ -407,11 +415,7 @@ public class OperationListActivity extends BaseActivity implements
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
         if (!this.isFinishing()) {
             switch (cursorLoader.getId()) {
-                case GET_ACCOUNTS:
-                    AccountManager.getInstance().setAllAccountsCursor(null);
-                    break;
                 case GET_OPS:
-
                     Cursor old = mOpListCursorAdapter.swapCursor(null);
                     if (old != null) {
                         old.close();
@@ -427,7 +431,6 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     public void updateDisplay(Intent intent) {
         updateAccountList();
-        updateOperationList();
     }
 
     private void updateOperationList() {
@@ -436,11 +439,13 @@ public class OperationListActivity extends BaseActivity implements
 
     private void updateAccountList() {
 //        showProgress();
-        if (mAccountLoader == null) {
-            getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
-        } else {
-            getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
-        }
+        AccountManager.getInstance().fetchAllAccounts(this, new Runnable() {
+            @Override
+            public void run() {
+                processAccountList();
+                updateOperationList();
+            }
+        });
     }
 
     private void cleanDatabaseIfTestingMode() {
