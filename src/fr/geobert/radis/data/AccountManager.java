@@ -12,10 +12,10 @@ import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.DBPrefsManager;
 
+import java.util.ArrayList;
+
 public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int GET_ACCOUNTS = 200;
-
-    private static AccountManager ourInstance = new AccountManager();
     private Cursor mAllAccountsCursor;
     private SimpleCursorAdapter mSimpleCursorAdapter;
     private Long mCurAccountId = null;
@@ -23,16 +23,12 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     private int mCurAccountPos = -1;
     private Long mCurAccountIdBackup = null;
     public Long mCurDefaultAccount = null;
-    private Runnable mCallback;
+    private ArrayList<Runnable> mCallbacks;
     private CursorLoader mAccountLoader;
     private FragmentActivity mCtx;
 
-    private AccountManager() {
-
-    }
-
-    public static AccountManager getInstance() {
-        return ourInstance;
+    public AccountManager() {
+        mCallbacks = new ArrayList<Runnable>();
     }
 
     public Cursor getAllAccountsCursor() {
@@ -138,13 +134,17 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
         this.mCurAccountIdBackup = null;
     }
 
-    public void fetchAllAccounts(FragmentActivity activity, Runnable cbk) {
+    public synchronized void fetchAllAccounts(FragmentActivity activity, final boolean force, Runnable cbk) {
         this.mCtx = activity;
-        this.mCallback = cbk;
-        if (mAccountLoader == null) {
-            mCtx.getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+        if (force || mAllAccountsCursor == null || mAllAccountsCursor.getCount() == 0 || mAllAccountsCursor.isClosed()) {
+            this.mCallbacks.add(cbk);
+            if (mAccountLoader == null) {
+                mCtx.getSupportLoaderManager().initLoader(GET_ACCOUNTS, null, this);
+            } else {
+                mCtx.getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
+            }
         } else {
-            mCtx.getSupportLoaderManager().restartLoader(GET_ACCOUNTS, null, this);
+            cbk.run();
         }
     }
 
@@ -158,10 +158,11 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
         if (cursorLoader.getId() == GET_ACCOUNTS) {
             setAllAccountsCursor(cursor);
-            if (mCallback != null) {
-                mCallback.run();
-                mCallback = null;
+            ArrayList<Runnable> cbks = new ArrayList<Runnable>(mCallbacks);
+            for (Runnable r : cbks) {
+                r.run();
             }
+            mCallbacks.clear();
         }
     }
 

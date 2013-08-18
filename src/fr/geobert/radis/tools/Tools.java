@@ -27,12 +27,12 @@ import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
+import fr.geobert.radis.ui.IOperationList;
 import fr.geobert.radis.ui.OperationListActivity;
 
 import java.util.Calendar;
@@ -143,7 +143,7 @@ public class Tools {
                         "process_scheduling");
                 return true;
             case R.id.recompute_account:
-                AccountTable.consolidateSums(ctx, AccountManager.getInstance().getCurrentAccountId(ctx));
+                AccountTable.consolidateSums(ctx, ((IOperationList) ctx).getAccountManager().getCurrentAccountId(ctx));
                 OperationListActivity.refreshAccountList(ctx);
                 break;
             case R.id.debug:

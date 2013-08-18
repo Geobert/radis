@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.util.Log;
 import fr.geobert.radis.data.ScheduledOperation;
@@ -243,9 +244,12 @@ public class ScheduledOperationTable {
 
     // UPGRADE FUNCTIONS
 
-    static void upgradeFromV12(SQLiteDatabase db, int oldVersion,
-                               int newVersion) {
-        db.execSQL(TRIGGER_ON_DELETE_SCHED_CREATE);
+    static void upgradeFromV12(SQLiteDatabase db, int oldVersion, int newVersion) {
+        try {
+            db.execSQL(TRIGGER_ON_DELETE_SCHED_CREATE);
+        } catch (SQLiteException e) {
+            // nothing to do
+        }
     }
 
 

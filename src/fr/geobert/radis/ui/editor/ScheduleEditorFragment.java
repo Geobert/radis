@@ -16,7 +16,6 @@ import android.widget.Spinner;
 import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
@@ -68,7 +67,7 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
                 : Integer.toString(mCurrentSchOp.mPeriodicity));
         poputatePeriodicitySpinner();
         populateCustomPeriodicitySpinner();
-        populateAccountSpinner(AccountManager.getInstance().getAllAccountsCursor());
+        populateAccountSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
         if (mCurrentSchOp.getEndDate() > 0) {
             mEndDateCheck.setChecked(true);
             mEndDatePicker.setEnabled(true);

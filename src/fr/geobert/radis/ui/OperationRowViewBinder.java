@@ -7,7 +7,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
@@ -95,11 +94,11 @@ class OperationRowViewBinder extends OpViewBinder {
 
         if (needInfos) {
             h.sumAtSelection.setText(
-                    Formater.getSumFormater().format((AccountManager.getInstance().getCurrentAccountSum() +
+                    Formater.getSumFormater().format((activity.getAccountManager().getCurrentAccountSum() +
                             activity.computeSumFromCursor(cursor)) / 100.0d));
 
             final BaseActivity context = (BaseActivity) activity;
-            final long accountId = AccountManager.getInstance().getCurrentAccountId(context);
+            final long accountId = activity.getAccountManager().getCurrentAccountId(context);
             final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override

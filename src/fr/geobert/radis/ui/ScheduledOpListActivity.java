@@ -14,7 +14,6 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -107,11 +106,12 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     }
 
     private void populateAccountSpinner() {
-        Cursor c = AccountManager.getInstance().getAllAccountsCursor();
+        Cursor c = mAccountManager.getAllAccountsCursor();
         if (c != null && c.moveToFirst()) {
             mAccountAdapter = new SimpleCursorAdapter(this, R.layout.sch_account_row, c,
                     new String[]{AccountTable.KEY_ACCOUNT_NAME},
                     new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+            mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
             if (mCurrentAccount != 0) {
                 int pos = 0;
                 while (pos < mAccountAdapter.getCount()) {
@@ -145,21 +145,13 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     protected void onResume() {
         super.onResume();
 
-        AccountManager accountManager = AccountManager.getInstance();
-        if (mAccountAdapter == null || mAccountAdapter.isEmpty() || accountManager.getAllAccountsCursor() == null ||
-                accountManager.getAllAccountsCursor().isClosed()) {
-            accountManager.fetchAllAccounts(this, new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "fetchAllAccounts callback");
-                    populateAccountSpinner();
-                    fetchSchOpsOfAccount();
-                }
-            });
-        } else {
-            populateAccountSpinner();
-            fetchSchOpsOfAccount();
-        }
+        mAccountManager.fetchAllAccounts(this, false, new Runnable() {
+            @Override
+            public void run() {
+                populateAccountSpinner();
+                fetchSchOpsOfAccount();
+            }
+        });
     }
 
     @Override
@@ -384,5 +376,11 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                             });
             return builder.create();
         }
+
+    }
+
+    @Override
+    public AccountManager getAccountManager() {
+        return mAccountManager;
     }
 }

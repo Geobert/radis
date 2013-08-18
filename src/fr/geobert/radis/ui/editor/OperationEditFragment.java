@@ -20,7 +20,6 @@ import android.widget.SpinnerAdapter;
 import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -112,7 +111,7 @@ public class OperationEditFragment extends SherlockFragment {
             mSumTextWatcher.setAutoNegate(true);
         }
         if (mActivity.mCurrentOp != null) {
-            populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
+            populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
         }
         initViewAdapters();
         initListeners();
@@ -270,7 +269,7 @@ public class OperationEditFragment extends SherlockFragment {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
         mSumTextWatcher.setAutoNegate(true);
-        populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
+        populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 
     private void invertSign() throws ParseException {
@@ -295,7 +294,8 @@ public class OperationEditFragment extends SherlockFragment {
             } else if (dstAccount.mAccountId == 0) {
                 errMsg.append(getString(R.string.err_transfert_no_dst));
                 res = false;
-            } else if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 && srcAccount.mAccountId == dstAccount.mAccountId) {
+            } else if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 &&
+                    srcAccount.mAccountId == dstAccount.mAccountId) {
                 errMsg.append(getString(R.string.err_transfert_same_acc));
                 res = false;
             }

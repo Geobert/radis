@@ -89,56 +89,53 @@ public class OperationListActivity extends BaseActivity implements
         Tools.checkDebugMode(this);
         cleanDatabaseIfTestingMode();
 
+        Resources resources = getResources();
+        redColor = resources.getColor(R.color.op_alert);
+        greenColor = resources.getColor(R.color.positiveSum);
+
         ActionBar actionbar = getSupportActionBar();
         actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         actionbar.setDisplayShowTitleEnabled(false);
 
-        initAccountStuff();
-
         setContentView(R.layout.operation_list);
-        initOperationList();
-
-        DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
-            @Override
-            public void run() {
-                onPrefsInit();
-            }
-        });
 
         installRadisTimer();
     }
 
     private void doOnResume() {
-        if (mQuickAddController != null) {
-            mQuickAddController.setAutoNegate(true);
-            mQuickAddController.clearFocus();
-            setQuickAddVisibility();
-            updateOperationList();
-        }
-        AccountManager accMan = AccountManager.getInstance();
+        AccountManager accMan = mAccountManager;
         Long curDefaultAccId = accMan.mCurDefaultAccount;
         if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(this)) {
             accMan.mCurDefaultAccount = null;
             accMan.setCurrentAccountId(null);
             mLastSelectionId = -1;
-            updateDisplay(null);
+        }
+        onFetchAllAccountCbk();
+        if (mQuickAddController != null) {
+            mQuickAddController.setAutoNegate(true);
+            mQuickAddController.clearFocus();
+            setQuickAddVisibility();
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        AccountManager accMan = AccountManager.getInstance();
-        if (accMan.getAllAccountsCursor() == null || accMan.getAllAccountsCursor().isClosed()) {
-            accMan.fetchAllAccounts(this, new Runnable() {
-                @Override
-                public void run() {
-                    doOnResume();
+        DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
+            @Override
+            public void run() {
+                consolidateDbIfNeeded();
+                if (mAccountAdapter == null) {
+                    initAccountStuff();
                 }
-            });
-        } else {
-            doOnResume();
-        }
+                mAccountManager.fetchAllAccounts(OperationListActivity.this, false, new Runnable() {
+                    @Override
+                    public void run() {
+                        doOnResume();
+                    }
+                });
+            }
+        });
     }
 
     private void initQuickAdd() {
@@ -182,7 +179,7 @@ public class OperationListActivity extends BaseActivity implements
             public void run() {
                 initQuickAdd();
                 mQuickAddController.onRestoreInstanceState(sis);
-                if (AccountManager.getInstance().getSimpleCursorAdapter() == null) {
+                if (mAccountManager.getSimpleCursorAdapter() == null) {
                     initAccountStuff();
                 }
                 if (mAccountAdapter == null || mAccountAdapter.isEmpty()) {
@@ -215,10 +212,6 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private void initAccountStuff() {
-        Resources resources = getResources();
-        redColor = resources.getColor(R.color.op_alert);
-        greenColor = resources.getColor(R.color.positiveSum);
-
         String[] from = new String[]{AccountTable.KEY_ACCOUNT_NAME,
                 AccountTable.KEY_ACCOUNT_CUR_SUM,
                 AccountTable.KEY_ACCOUNT_CUR_SUM_DATE,
@@ -229,7 +222,7 @@ public class OperationListActivity extends BaseActivity implements
         mAccountAdapter = new SimpleCursorAdapter(this, R.layout.account_row, null, from, to,
                 SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         mAccountAdapter.setViewBinder(new SimpleAccountViewBinder());
-        AccountManager.getInstance().setSimpleCursorAdapter(mAccountAdapter);
+        mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
         getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
@@ -240,7 +233,7 @@ public class OperationListActivity extends BaseActivity implements
 
     private boolean onAccountChanged(long itemId) {
         if (mQuickAddController != null && itemId != mAccountId) {
-            AccountManager.getInstance().setCurrentAccountId(itemId);
+            mAccountManager.setCurrentAccountId(itemId);
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
             mQuickAddController.setAccount(itemId);
             getOperationsList();
@@ -260,7 +253,7 @@ public class OperationListActivity extends BaseActivity implements
         unregisterReceiver(mOnInsertionReceiver);
     }
 
-    protected void onPrefsInit() {
+    protected void consolidateDbIfNeeded() {
         PrefsManager prefs = PrefsManager.getInstance(this);
         Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
         Log.d(TAG, "needConsolidate : " + needConsolidate);
@@ -268,17 +261,6 @@ public class OperationListActivity extends BaseActivity implements
             RadisService.acquireStaticLock(this);
             this.startService(new Intent(this, RadisService.class));
         }
-        getAccountList();
-    }
-
-    private void getAccountList() {
-//        showProgress();
-        AccountManager.getInstance().fetchAllAccounts(this, new Runnable() {
-            @Override
-            public void run() {
-                processAccountList();
-            }
-        });
     }
 
     @Override
@@ -331,7 +313,7 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private void processAccountList() {
-        AccountManager accMan = AccountManager.getInstance();
+        AccountManager accMan = mAccountManager;
         Cursor allAccounts = accMan.getAllAccountsCursor();
         if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
@@ -347,8 +329,6 @@ public class OperationListActivity extends BaseActivity implements
 
     public static void restart(Context ctx) {
         DbContentProvider.reinit(ctx);
-        AccountManager.getInstance().setAllAccountsCursor(null);
-        AccountManager.getInstance().setCurrentAccountId(null);
         Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -360,7 +340,7 @@ public class OperationListActivity extends BaseActivity implements
      * should be called after getAccountList
      */
     private void getOperationsList() {
-        mAccountId = AccountManager.getInstance().getCurrentAccountId(this);
+        mAccountId = mAccountManager.getCurrentAccountId(this);
         if (mAccountId != null) {
             //showProgress();
             if (mOperationsLoader == null) {
@@ -373,9 +353,6 @@ public class OperationListActivity extends BaseActivity implements
             } else {
                 getSupportLoaderManager().restartLoader(GET_OPS, null, this);
             }
-        } else {
-            // no account, open create account, should never happened
-            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
         }
     }
 
@@ -402,7 +379,7 @@ public class OperationListActivity extends BaseActivity implements
                             this.startOpDate = opDate;
                         }
                     }
-                    AccountManager.getInstance().backupCurAccountId();
+                    mAccountManager.backupCurAccountId();
                     updateAccountList();
                     updateOperationList();
                 }
@@ -437,14 +414,20 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private void updateAccountList() {
-//        showProgress();
-        AccountManager.getInstance().fetchAllAccounts(this, new Runnable() {
+        mAccountManager.fetchAllAccounts(this, true, new Runnable() {
             @Override
             public void run() {
-                processAccountList();
-                updateOperationList();
+                onFetchAllAccountCbk();
             }
         });
+    }
+
+    private void onFetchAllAccountCbk() {
+        if (mListView == null) {
+            initOperationList();
+        }
+        processAccountList();
+        updateOperationList();
     }
 
     private void cleanDatabaseIfTestingMode() {
@@ -800,7 +783,7 @@ public class OperationListActivity extends BaseActivity implements
                     if (AccountTable.deleteAccount(getActivity(), accountId)) {
                         OperationListActivity.refreshAccountList(getActivity());
                     } else {
-                        AccountManager.getInstance().setCurrentAccountId(null);
+                        ((OperationListActivity) getActivity()).mAccountManager.setCurrentAccountId(null);
                     }
                 }
             }, R.string.account_delete_confirmation);
@@ -869,6 +852,11 @@ public class OperationListActivity extends BaseActivity implements
             return res;
         }
 
+    }
+
+    @Override
+    public AccountManager getAccountManager() {
+        return mAccountManager;
     }
 }
 

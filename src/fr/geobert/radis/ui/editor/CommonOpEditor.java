@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import fr.geobert.radis.BaseActivity;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.Operation;
 
 public abstract class CommonOpEditor extends BaseActivity implements
@@ -38,7 +37,6 @@ public abstract class CommonOpEditor extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         final Bundle extras = getIntent().getExtras();
         mCurAccountId = extras != null ? extras
                 .getLong(AccountEditor.PARAM_ACCOUNT_ID) : null;
@@ -53,11 +51,17 @@ public abstract class CommonOpEditor extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mOnRestore) {
-            fetchOrCreateCurrentOp();
-        } else {
-            mOnRestore = false;
-        }
+        mAccountManager.fetchAllAccounts(this, false, new Runnable() {
+            @Override
+            public void run() {
+                if (!mOnRestore) {
+                    fetchOrCreateCurrentOp();
+                } else {
+                    populateFields();
+                    mOnRestore = false;
+                }
+            }
+        });
     }
 
     @Override
@@ -84,22 +88,13 @@ public abstract class CommonOpEditor extends BaseActivity implements
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        Cursor allAccount = AccountManager.getInstance().getAllAccountsCursor();
-        if (allAccount == null || allAccount.getCount() == 0) {
-            AccountManager.getInstance().fetchAllAccounts(this, new Runnable() {
-                @Override
-                public void run() {
-                    populateFields();
-                }
-            });
-        }
         mOnRestore = true;
         long rowId = savedInstanceState.getLong(PARAM_OP_ID);
         mRowId = rowId > 0 ? Long.valueOf(rowId) : 0;
         Operation op = savedInstanceState.getParcelable("currentOp");
         mCurrentOp = op;
         mCurrentInfoTable = (Uri) savedInstanceState.getParcelable("mCurrentInfoTable");
-        populateFields();
+//        populateFields();
         mPreviousSum = savedInstanceState.getLong("previousSum");
     }
 }
