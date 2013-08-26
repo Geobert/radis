@@ -1,3 +1,8 @@
+Version 0.8 - 28/08/2013
+- refonte totale de l'interface
+- nouvelle icône (par Kénil Quach)
+- nettoyage des doublons de tiers/catégories/mode de paiement
+
 Version 0.7.2 - 21/01/2013
 - crash fix dans la tâche de fond
 
