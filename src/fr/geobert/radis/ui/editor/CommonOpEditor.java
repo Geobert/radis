@@ -37,7 +37,6 @@ public abstract class CommonOpEditor extends BaseActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         final Bundle extras = getIntent().getExtras();
         mCurAccountId = extras != null ? extras
                 .getLong(AccountEditor.PARAM_ACCOUNT_ID) : null;
@@ -52,11 +51,23 @@ public abstract class CommonOpEditor extends BaseActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        if (!mOnRestore) {
-            fetchOrCreateCurrentOp();
-        } else {
-            mOnRestore = false;
-        }
+        mAccountManager.fetchAllAccounts(this, false, new Runnable() {
+            @Override
+            public void run() {
+                if (!mOnRestore) {
+                    fetchOrCreateCurrentOp();
+                } else {
+                    populateFields();
+                    mOnRestore = false;
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        InfoManagerDialog.resetInfoManager();
     }
 
     protected abstract void fillOperationWithInputs(Operation operation);
@@ -83,7 +94,7 @@ public abstract class CommonOpEditor extends BaseActivity implements
         Operation op = savedInstanceState.getParcelable("currentOp");
         mCurrentOp = op;
         mCurrentInfoTable = (Uri) savedInstanceState.getParcelable("mCurrentInfoTable");
-        populateFields();
+//        populateFields();
         mPreviousSum = savedInstanceState.getLong("previousSum");
     }
 }

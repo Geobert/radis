@@ -11,7 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,13 +27,16 @@ import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
+import fr.geobert.radis.ui.IOperationList;
 import fr.geobert.radis.ui.OperationListActivity;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class Tools {
@@ -43,19 +46,19 @@ public class Tools {
     public static final int DEBUG_DIALOG = 9876;
     // debug mode stuff
     public static boolean DEBUG_MODE = true;
-    public static int SCREEN_HEIGHT;
+    //    public static int SCREEN_HEIGHT;
     private static Activity mActivity;
 
     public static void checkDebugMode(Activity ctx) {
         // See if we're a debug or a release build
-        if (Build.VERSION.SDK_INT >= 13) {
-            Point p = new Point();
-            ctx.getWindowManager().getDefaultDisplay().getSize(p);
-            SCREEN_HEIGHT = p.y;
-        } else {
-            //noinspection deprecation
-            SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
-        }
+//        if (Build.VERSION.SDK_INT >= 13) {
+//            Point p = new Point();
+//            ctx.getWindowManager().getDefaultDisplay().getSize(p);
+//            SCREEN_HEIGHT = p.y;
+//        } else {
+//            //noinspection deprecation
+//            SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
+//        }
         try {
             PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
                     ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS);
@@ -139,6 +142,10 @@ public class Tools {
                 AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
                         "process_scheduling");
                 return true;
+            case R.id.recompute_account:
+                AccountTable.consolidateSums(ctx, ((IOperationList) ctx).getAccountManager().getCurrentAccountId(ctx));
+                OperationListActivity.refreshAccountList(ctx);
+                break;
             case R.id.debug:
                 Tools.showDebugDialog(ctx);
                 return true;
@@ -376,18 +383,37 @@ public class Tools {
     }
 
     public static String getDateStr(long date) {
-        GregorianCalendar g = new GregorianCalendar();
-        g.setTimeInMillis(date);
-        return getDateStr(g);
+//        GregorianCalendar g = new GregorianCalendar();
+//        g.setTimeInMillis(date);
+//        return getDateStr(g);
+        return Formater.getFullDateFormater().format(new Date(date));
     }
 
     public static String getDateStr(Calendar cal) {
-        return String.format("%02d", cal.get(Calendar.DAY_OF_MONTH)) + "/"
-                + String.format("%02d", cal.get(Calendar.MONTH) + 1) + "/"
-                + cal.get(Calendar.YEAR);
+        return getDateStr(cal.getTimeInMillis());
     }
 
     private interface BooleanResultNoParamFct {
         boolean run();
     }
+
+    public static View.OnLongClickListener createTooltip(final int stringId) {
+        return new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Context ctx = v.getContext();
+                Toast t = Toast.makeText(ctx, ctx.getString(stringId), Toast.LENGTH_SHORT);
+                int[] screenPos = new int[2];
+                final Rect displayFrame = new Rect();
+                final int screenWidth = ctx.getResources().getDisplayMetrics().widthPixels;
+                v.getWindowVisibleDisplayFrame(displayFrame);
+                v.getLocationInWindow(screenPos);
+                t.setGravity(Gravity.RIGHT | Gravity.TOP, screenWidth - screenPos[0],
+                        screenPos[1] - v.getHeight() - v.getHeight() / 2);
+                t.show();
+                return true;
+            }
+        };
+    }
 }
+

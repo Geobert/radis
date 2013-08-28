@@ -44,6 +44,7 @@ public class Operation implements Parcelable {
     }
 
     public Operation(Cursor op) {
+        mRowId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_ROWID));
         mThirdParty = op.getString(op
                 .getColumnIndexOrThrow(InfoTables.KEY_THIRD_PARTY_NAME));
         if (null == mThirdParty) {

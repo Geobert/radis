@@ -3,6 +3,8 @@ package fr.geobert.radis.ui;
 import android.database.Cursor;
 import android.support.v4.app.DialogFragment;
 import android.widget.ListView;
+import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.data.Operation;
 
 import java.util.GregorianCalendar;
 
@@ -15,5 +17,7 @@ public interface IOperationList {
 
     public ListView getListView();
 
-    public DialogFragment getDeleteConfirmationDialog(final long accountId, final long opId);
+    public DialogFragment getDeleteConfirmationDialog(final Operation op);
+
+    public AccountManager getAccountManager();
 }

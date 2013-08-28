@@ -16,7 +16,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.*;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -34,7 +38,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
             put(DbContentProvider.MODES_URI.toString(), R.id.edit_op_mode);
         }
     };
-    private final DialogFragment mDiagFragment;
+    private DialogFragment mDiagFragment;
     private CommonOpEditor mContext = null;
     private AlertDialog.Builder mBuilder = null;
     private AlertDialog mListDialog = null;

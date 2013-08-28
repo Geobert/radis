@@ -207,7 +207,7 @@ public class OperationTable {
 
     static Cursor fetchOpEarlierThan(Context ctx, long date, int nbOps,
                                      final long accountId) {
-        Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date));
+        Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date) + " with limit : " + nbOps);
         Cursor c;
         String limit = nbOps == 0 ? null : Integer.toString(nbOps);
         c = ctx.getContentResolver().query(
@@ -224,9 +224,13 @@ public class OperationTable {
         return c;
     }
 
-    // return boolean saying if we need an update of OP_SUM
-    public static boolean createOp(Context ctx, final Operation op,
-                                   final long accountId) {
+    public static long createOp(Context ctx, final Operation op,
+                                final long accountId) {
+        return OperationTable.createOp(ctx, op, accountId, true);
+    }
+
+    public static long createOp(Context ctx, final Operation op,
+                                final long accountId, final boolean withUpdate) {
         ContentValues initialValues = new ContentValues();
         String key = op.mThirdParty;
         InfoTables.putKeyIdInThirdParties(ctx, key, initialValues);
@@ -248,22 +252,29 @@ public class OperationTable {
                 DbContentProvider.OPERATION_URI, initialValues);
         op.mRowId = Long.parseLong(res.getLastPathSegment());
         if (op.mRowId > -1) {
-            AccountTable.updateProjection(ctx, accountId, op.mSum, op.getDate());
-            return true;
+            if (withUpdate) {
+                AccountTable.updateProjection(ctx, accountId, op.mSum, op.getDate());
+                if (op.mTransferAccountId > 0) {
+                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, op.getDate());
+                }
+            }
+            return op.mRowId;
         }
         Log.e(TAG, "error in creating op");
-        return false;
+        return -1;
     }
 
     public static boolean deleteOp(Context ctx, long rowId, final long accountId) {
         Cursor c = fetchOneOp(ctx, rowId, accountId);
         final long opSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
         final long opDate = c.getLong(c.getColumnIndex(KEY_OP_DATE));
+        final long transfertId = c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID));
         c.close();
-        if (ctx.getContentResolver().delete(
-                Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null,
-                null) > 0) {
+        if (ctx.getContentResolver().delete(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null, null) > 0) {
             AccountTable.updateProjection(ctx, accountId, -opSum, opDate);
+            if (transfertId > 0) {
+                AccountTable.updateProjection(ctx, transfertId, opSum, opDate);
+            }
             return true;
         }
         return false;
@@ -379,43 +390,73 @@ public class OperationTable {
 
     // return if need to update OP_SUM
     public static boolean updateOp(Context ctx, final long rowId,
-                                   final Operation op, final long oldSum) {
+                                   final Operation op, final Operation originalOp) {
         ContentValues args = createContentValuesFromOp(ctx, op, false);
         if (ctx.getContentResolver().update(
                 Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), args,
                 null, null) > 0) {
-            AccountTable.updateProjection(ctx, op.mAccountId, -oldSum + op.mSum, op.getDate());
+            AccountTable.updateProjection(ctx, op.mAccountId, -originalOp.mSum + op.mSum, op.getDate());
+
+            if (op.mTransferAccountId > 0) {
+                if (originalOp.mTransferAccountId <= 0) {
+                    // op was not a transfert, it is like adding an op in transfertAccountId
+                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, op.getDate());
+                } else {
+                    // op was a transfert
+                    if (originalOp.mTransferAccountId == op.mTransferAccountId) {
+                        // op was a transfert on same account, update with sum diff
+                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -(-originalOp.mSum + op.mSum), op.getDate());
+                    } else {
+                        // op was a transfert to another account
+                        // update new transfert account
+                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, op.getDate());
+                        // remove the original sum on original transfert account
+                        AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, op.getDate());
+                    }
+                }
+            } else if (originalOp.mTransferAccountId > 0) {
+                // op become not transfert, but was a transfert
+                AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, op.getDate());
+            }
+
             return true;
         }
         return false;
     }
 
-//    public static void updateOp(Context ctx, final long opId, final long schOpId) {
-//        ContentValues args = new ContentValues();
-//        args.put(KEY_OP_SCHEDULED_ID, schOpId);
-//        ctx.getContentResolver().update(
-//                Uri.parse(DbContentProvider.OPERATION_URI + "/" + opId), args,
-//                null, null);
-//    }
-
     public static int deleteAllOccurrences(Context ctx, final long accountId,
-                                           final long schOpId) {
-        return ctx.getContentResolver()
+                                           final long schOpId, final long transfertId) {
+        int nb = ctx.getContentResolver()
                 .delete(DbContentProvider.OPERATION_URI,
                         KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID
                                 + "=?",
                         new String[]{Long.toString(accountId),
                                 Long.toString(schOpId)});
+        if (nb > 0) {
+            AccountTable.consolidateSums(ctx, accountId);
+            if (transfertId > 0) {
+                AccountTable.consolidateSums(ctx, transfertId);
+            }
+        }
+        return nb;
     }
 
     public static int deleteAllFutureOccurrences(Context ctx,
-                                                 final long accountId, final long schOpId, final long date) {
-        return ctx.getContentResolver().delete(
+                                                 final long accountId, final long schOpId, final long date,
+                                                 final long transfertId) {
+        int nbDel = ctx.getContentResolver().delete(
                 DbContentProvider.OPERATION_URI,
                 KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND "
                         + KEY_OP_DATE + ">=?",
                 new String[]{Long.toString(accountId),
                         Long.toString(schOpId), Long.toString(date)});
+        if (nbDel > 0) {
+            AccountTable.consolidateSums(ctx, accountId);
+            if (transfertId > 0) {
+                AccountTable.consolidateSums(ctx, transfertId);
+            }
+        }
+        return nbDel;
     }
 
     public static int updateAllOccurrences(Context ctx, final long accountId,

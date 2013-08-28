@@ -20,7 +20,6 @@ import android.widget.SpinnerAdapter;
 import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
-import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -46,8 +45,6 @@ public class OperationEditFragment extends SherlockFragment {
     private EditText mNotesText;
     private CheckBox mIsTransfertCheck;
     private CommonOpEditor mActivity;
-    private boolean mIsInit = false;
-    private LinearLayout mRootLayeut;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,7 +55,6 @@ public class OperationEditFragment extends SherlockFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mActivity = (CommonOpEditor) getSherlockActivity();
-        mRootLayeut = (LinearLayout) mActivity.findViewById(R.id.edit_op_root);
         mOpThirdPartyText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_third_party);
         mOpModeText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_mode);
         mOpSumText = (EditText) mActivity.findViewById(R.id.edit_op_sum);
@@ -115,7 +111,7 @@ public class OperationEditFragment extends SherlockFragment {
             mSumTextWatcher.setAutoNegate(true);
         }
         if (mActivity.mCurrentOp != null) {
-            populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
+            populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
         }
         initViewAdapters();
         initListeners();
@@ -136,7 +132,6 @@ public class OperationEditFragment extends SherlockFragment {
                     @Override
                     public void onClick(View v) {
                         InfoManagerDialog.createThirdPartiesListDialog(mActivity).show(getFragmentManager(), "thirdPartiesDialog");
-                        //showDialog(THIRD_PARTIES_DIALOG_ID);
                     }
                 });
 
@@ -145,7 +140,6 @@ public class OperationEditFragment extends SherlockFragment {
                     @Override
                     public void onClick(View v) {
                         InfoManagerDialog.createTagsListDialog(mActivity).show(getFragmentManager(), "tagsDialog");
-                        // showDialog(TAGS_DIALOG_ID);
                     }
                 });
 
@@ -154,7 +148,6 @@ public class OperationEditFragment extends SherlockFragment {
                     @Override
                     public void onClick(View v) {
                         InfoManagerDialog.createModesListDialog(mActivity).show(getFragmentManager(), "modesDialog");
-                        // showDialog(MODES_DIALOG_ID);
                     }
                 });
 
@@ -276,8 +269,7 @@ public class OperationEditFragment extends SherlockFragment {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
         mSumTextWatcher.setAutoNegate(true);
-        populateTransfertSpinner(AccountManager.getInstance().getAllAccountsCursor());
-        this.mIsInit = true;
+        populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 
     private void invertSign() throws ParseException {
@@ -302,7 +294,8 @@ public class OperationEditFragment extends SherlockFragment {
             } else if (dstAccount.mAccountId == 0) {
                 errMsg.append(getString(R.string.err_transfert_no_dst));
                 res = false;
-            } else if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 && srcAccount.mAccountId == dstAccount.mAccountId) {
+            } else if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 &&
+                    srcAccount.mAccountId == dstAccount.mAccountId) {
                 errMsg.append(getString(R.string.err_transfert_same_acc));
                 res = false;
             }

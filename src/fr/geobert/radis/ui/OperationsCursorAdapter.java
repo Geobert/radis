@@ -83,14 +83,14 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
         if (mInnerViewBinder.getClass() == OperationRowViewBinder.class) {
             h.separator.clearAnimation();
             ((LinearLayout.LayoutParams) h.separator.getLayoutParams()).bottomMargin = -37;
-            ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 500);
+            ExpandUpAnimation anim = new ExpandUpAnimation(h.separator, 300);
             h.separator.startAnimation(anim);
         }
     }
 
     private void animateToolbar(OpRowHolder h) {
         h.actionsCont.clearAnimation();
-        ExpandAnimation anim = new ExpandAnimation(h.actionsCont, 500);
+        ExpandAnimation anim = new ExpandAnimation(h.actionsCont, 300);
         h.actionsCont.startAnimation(anim);
     }
 
