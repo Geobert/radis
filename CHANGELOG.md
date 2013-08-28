@@ -1,3 +1,6 @@
+Version 0.8.1 - 28/08/2013
+- fix de deux crashes
+
 Version 0.8 - 26/08/2013
 - refonte totale de l'interface
 - nouvelle icône (par Kénil Quach)

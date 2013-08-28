@@ -250,7 +250,9 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unregisterReceiver(mOnInsertionReceiver);
+        if (mOnInsertionReceiver != null) {
+            unregisterReceiver(mOnInsertionReceiver);
+        }
     }
 
     protected void consolidateDbIfNeeded() {

@@ -7,7 +7,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -164,19 +163,19 @@ public class InfoTables {
         }
     }
 
-    public static void fillCaches(FragmentActivity ctx) {
-        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
-            mModesMap = new LinkedHashMap<String, Long>();
-            mTagsMap = new LinkedHashMap<String, Long>();
-            mThirdPartiesMap = new LinkedHashMap<String, Long>();
-
-            InfoCacheFiller cbk = new InfoCacheFiller(ctx);
-
-            ctx.getSupportLoaderManager().initLoader(GET_TP, null, cbk);
-            ctx.getSupportLoaderManager().initLoader(GET_MODES, null, cbk);
-            ctx.getSupportLoaderManager().initLoader(GET_TAGS, null, cbk);
-        }
-    }
+//    public static void fillCaches(FragmentActivity ctx) {
+//        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
+//            mModesMap = new LinkedHashMap<String, Long>();
+//            mTagsMap = new LinkedHashMap<String, Long>();
+//            mThirdPartiesMap = new LinkedHashMap<String, Long>();
+//
+//            InfoCacheFiller cbk = new InfoCacheFiller(ctx);
+//
+//            ctx.getSupportLoaderManager().initLoader(GET_TP, null, cbk);
+//            ctx.getSupportLoaderManager().initLoader(GET_MODES, null, cbk);
+//            ctx.getSupportLoaderManager().initLoader(GET_TAGS, null, cbk);
+//        }
+//    }
 
     public static void fillCachesSync(Context ctx) {
         if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
