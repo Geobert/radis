@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui.editor;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -17,6 +18,7 @@ import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
+import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
@@ -78,6 +80,8 @@ public class OperationEditor extends CommonOpEditor {
 
     private void setResAndExit() {
         Intent res = new Intent();
+        res.putExtra("opId", mRowId);
+        res.putExtra("opDate", mCurrentOp.getDate());
         setResult(RESULT_OK, res);
         finish();
     }
@@ -87,16 +91,17 @@ public class OperationEditor extends CommonOpEditor {
         Operation op = mCurrentOp;
         Log.d(TAG, "saveOpAndExit, mRowId : " + mRowId);
         if (mRowId <= 0) {
-            OperationTable.createOp(this, op, op.mAccountId);
+            mRowId = OperationTable.createOp(this, op, op.mAccountId);
             setResAndExit();
         } else {
             if (op.equals(mOriginalOp)) {
                 setResAndExit();
             } else {
                 if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
-                    UpdateScsheduledOp.newInstance(mCurrentOp, mPreviousSum, mRowId).show(getSupportFragmentManager(), "dialog");
+                    UpdateScheduledOp.newInstance(mCurrentOp, mPreviousSum, mRowId).show(getSupportFragmentManager(),
+                            "dialog");
                 } else {
-                    OperationTable.updateOp(this, mRowId, op, mPreviousSum);
+                    OperationTable.updateOp(this, mRowId, op, mOriginalOp);
                     setResAndExit();
                 }
             }
@@ -181,9 +186,9 @@ public class OperationEditor extends CommonOpEditor {
 
     }
 
-    protected static class UpdateScsheduledOp extends DialogFragment {
-        public static UpdateScsheduledOp newInstance(Operation currentOp, long previousSum, long rowId) {
-            UpdateScsheduledOp frag = new UpdateScsheduledOp();
+    protected static class UpdateScheduledOp extends DialogFragment {
+        public static UpdateScheduledOp newInstance(Operation currentOp, long previousSum, long rowId) {
+            UpdateScheduledOp frag = new UpdateScheduledOp();
             Bundle args = new Bundle();
             args.putLong("previousSum", previousSum);
             args.putLong("rowId", rowId);
@@ -193,7 +198,7 @@ public class OperationEditor extends CommonOpEditor {
         }
 
         @Override
-        public void onCreate(Bundle savedInstanceState) {
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             final OperationEditor act = (OperationEditor) getActivity();
             Bundle args = getArguments();
@@ -208,14 +213,14 @@ public class OperationEditor extends CommonOpEditor {
                                 @Override
                                 public void onClick(DialogInterface dialog,
                                                     int which) {
-                                    final ScheduledOperation op = new ScheduledOperation(
-                                            currentOp, currentOp.mAccountId);
-                                    ScheduledOperationTable.updateScheduledOp(
-                                            act,
-                                            currentOp.mScheduledId, op, true);
-                                    ScheduledOperationTable.updateAllOccurences(
-                                            getActivity(), op,
-                                            previousSum,
+                                    final ScheduledOperation op =
+                                            new ScheduledOperation(currentOp, currentOp.mAccountId);
+                                    if (ScheduledOperationTable.updateScheduledOp(act, currentOp.mScheduledId, op,
+                                            true)) {
+                                        AccountTable.updateProjection(act, act.mCurAccountId, previousSum - op.mSum,
+                                                op.getDate());
+                                    }
+                                    ScheduledOperationTable.updateAllOccurences(getActivity(), op, previousSum,
                                             currentOp.mScheduledId);
                                     act.setResAndExit();
                                 }
@@ -225,10 +230,7 @@ public class OperationEditor extends CommonOpEditor {
                                 public void onClick(DialogInterface dialog,
                                                     int id) {
                                     currentOp.mScheduledId = 0;
-                                    OperationTable
-                                            .updateOp(act,
-                                                    rowId, currentOp,
-                                                    currentOp.mAccountId);
+                                    OperationTable.updateOp(act, rowId, currentOp, act.mOriginalOp);
                                     act.setResAndExit();
                                 }
                             })
@@ -239,7 +241,7 @@ public class OperationEditor extends CommonOpEditor {
                                     dialog.cancel();
                                 }
                             });
-            builder.create();
+            return builder.create();
         }
     }
 }

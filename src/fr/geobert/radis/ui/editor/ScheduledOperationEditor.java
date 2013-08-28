@@ -205,7 +205,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 // schedule
                 if ((op.getDate() != mOriginalSchOp.getDate())) {
                     // change the date of the source transaction
-                    OperationTable.updateOp(this, mOpIdSource, op, op.mAccountId);
+                    OperationTable.updateOp(this, mOpIdSource, op, mOriginalSchOp);
                 }
                 // do not insert another occurrence with same date
                 ScheduledOperation.addPeriodicityToDate(op);
@@ -218,7 +218,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             startInsertionServiceAndExit();
         } else {
             if (!op.equals(mOriginalSchOp)) {
-                UpdateOccurencesDialog.newInstance(this).show(getSupportFragmentManager(), "ask");
+                UpdateOccurencesDialog.newInstance().show(getSupportFragmentManager(), "askOnDiff");
             } else { // nothing to update
                 Intent res = new Intent();
                 setResult(RESULT_OK, res);
@@ -228,11 +228,8 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     }
 
     protected static class UpdateOccurencesDialog extends DialogFragment {
-        private ScheduledOperationEditor context;
-
-        public static UpdateOccurencesDialog newInstance(final ScheduledOperationEditor context) {
+        public static UpdateOccurencesDialog newInstance() {
             UpdateOccurencesDialog frag = new UpdateOccurencesDialog();
-            frag.context = context;
 //            Bundle args = new Bundle();
 //            args.putLong("accountId", accountId);
 //            frag.setArguments(args);
@@ -241,6 +238,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final ScheduledOperationEditor context = (ScheduledOperationEditor) getActivity();
             AlertDialog.Builder builder = new AlertDialog.Builder(context);
             builder.setMessage(R.string.ask_update_occurences)
                     .setCancelable(false)

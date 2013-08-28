@@ -14,11 +14,8 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
@@ -26,12 +23,14 @@ import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.GregorianCalendar;
@@ -40,15 +39,9 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     public static final String CURRENT_ACCOUNT = "accountId";
     private static final String TAG = "ScheduleOpList";
 
-    // context menu ids
-    private static final int DELETE_OP_ID = Menu.FIRST + 1;
-    private static final int EDIT_OP_ID = Menu.FIRST + 2;
-
     // dialog ids
-    private static final int DIALOG_DELETE = 0;
     private static final int GET_ALL_SCH_OPS = 900;
     private static final int GET_SCH_OPS_OF_ACCOUNT = 910;
-    private AdapterContextMenuInfo mOpToDelete;
 
     //    private Spinner mAccountSpinner;
     private long mCurrentAccount;
@@ -57,7 +50,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     private CursorLoader mLoader;
     private TextView mTotalLbl;
     private SimpleCursorAdapter mAccountAdapter;
-    private boolean isResuming = false;
 
     public static void callMe(Context ctx, final long currentAccountId) {
         Intent i = new Intent(ctx, ScheduledOpListActivity.class);
@@ -77,7 +69,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
         setContentView(R.layout.scheduled_list);
 
         mListView = (ListView) findViewById(android.R.id.list);
-//        registerForContextMenu(mListView);
         mTotalLbl = (TextView) findViewById(R.id.sch_op_sum_total);
         mCurrentAccount = getIntent().getLongExtra(CURRENT_ACCOUNT, 0);
         mListView.setEmptyView(findViewById(android.R.id.empty));
@@ -97,7 +88,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 selectOpAndAdjustOffset(i);
             }
         });
-        populateAccountSpinner();
     }
 
     @TargetApi(Build.VERSION_CODES.FROYO)
@@ -116,11 +106,12 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     }
 
     private void populateAccountSpinner() {
-        Cursor c = AccountManager.getInstance().getAllAccountsCursor();
+        Cursor c = mAccountManager.getAllAccountsCursor();
         if (c != null && c.moveToFirst()) {
             mAccountAdapter = new SimpleCursorAdapter(this, R.layout.sch_account_row, c,
                     new String[]{AccountTable.KEY_ACCOUNT_NAME},
                     new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+            mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
             if (mCurrentAccount != 0) {
                 int pos = 0;
                 while (pos < mAccountAdapter.getCount()) {
@@ -137,10 +128,8 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
             getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
                 @Override
                 public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                    if (!isResuming) {
-                        mCurrentAccount = itemId;
-                        fetchSchOpsOfAccount();
-                    }
+                    mCurrentAccount = itemId;
+                    fetchSchOpsOfAccount();
                     return true;
                 }
             });
@@ -155,8 +144,26 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     @Override
     protected void onResume() {
         super.onResume();
-        isResuming = true;
-        fetchSchOpsOfAccount();
+
+        mAccountManager.fetchAllAccounts(this, false, new Runnable() {
+            @Override
+            public void run() {
+                populateAccountSpinner();
+                fetchSchOpsOfAccount();
+            }
+        });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong("mCurrentAccount", mCurrentAccount);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentAccount = savedInstanceState.getLong("mCurrentAccount");
     }
 
     private void deleteSchOp(final boolean delAllOccurrences, final long opId) {
@@ -164,10 +171,16 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 opId);
         final long transId = cursorOp.getLong(cursorOp
                 .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+        boolean needRefresh = false;
         if (delAllOccurrences) {
             ScheduledOperationTable.deleteAllOccurences(this, opId);
+            needRefresh = true;
+            OperationListActivity.refreshAccountList(this);
         }
         if (ScheduledOperationTable.deleteScheduledOp(this, opId)) {
+            needRefresh = true;
+        }
+        if (needRefresh) {
             int req;
             if (mCurrentAccount == 0) {
                 req = GET_ALL_SCH_OPS;
@@ -183,9 +196,6 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 AccountTable.consolidateSums(this, transId);
             }
         }
-        Log.d(TAG, "REFRESH AFTER DEL SCH OP");
-//        AccountList.refreshDisplay(this);
-        mOpToDelete = null;
     }
 
 //    @Override
@@ -225,8 +235,9 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                 ScheduledOperationEditor.callMeForResult(this, 0, mCurrentAccount,
                         ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE);
                 return true;
+            default:
+                return Tools.onDefaultOptionItemSelected(this, item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -264,8 +275,7 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> arg0, Cursor data) {
-        hideProgress();
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor data) {
         mAdapter.changeCursor(data);
         computeTotal(data);
     }
@@ -322,8 +332,8 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
     }
 
     @Override
-    public DialogFragment getDeleteConfirmationDialog(long accountId, long opId) {
-        return DeleteOpConfirmationDialog.newInstance(opId);
+    public DialogFragment getDeleteConfirmationDialog(final Operation op) {
+        return DeleteOpConfirmationDialog.newInstance(op.mRowId);
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
@@ -366,5 +376,11 @@ public class ScheduledOpListActivity extends BaseActivity implements LoaderCallb
                             });
             return builder.create();
         }
+
+    }
+
+    @Override
+    public AccountManager getAccountManager() {
+        return mAccountManager;
     }
 }

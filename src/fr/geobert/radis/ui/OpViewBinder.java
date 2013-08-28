@@ -99,4 +99,8 @@ public abstract class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
     public void setSelectedPosition(int selectedPosition) {
         this.selectedPosition = selectedPosition;
     }
+
+    public void setCurrentAccountId(final long accountId) {
+        this.mCurAccountId = accountId;
+    }
 }

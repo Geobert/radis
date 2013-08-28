@@ -14,7 +14,9 @@ import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.ui.OperationListActivity;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -39,13 +41,32 @@ public class RadisService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         try {
-            DBPrefsManager.getInstance(this).fillCache(this);
+            DBPrefsManager prefs = DBPrefsManager.getInstance(this);
+            prefs.fillCache(this);
             InfoTables.fillCachesSync(this);
             processScheduledOps();
         } finally {
             if (getLock(this).isHeld()) {
                 Log.d(TAG, "release lock");
                 getLock(this).release();
+            }
+            PrefsManager prefs = PrefsManager.getInstance(this);
+            Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
+            Log.d(TAG, "needConsolidate : " + needConsolidate);
+            if (needConsolidate) {
+                Cursor cursor = AccountTable.fetchAllAccounts(this);
+                prefs.put("consolidateDB", false);
+                prefs.commit();
+                if (cursor != null) {
+                    if (cursor.moveToFirst()) {
+                        do {
+                            Log.d(TAG, "CONSOLIDATE ON consolidateDB set to true : " + cursor.getLong(0));
+                            AccountTable.consolidateSums(this, cursor.getLong(0));
+                        } while (cursor.moveToNext());
+                    }
+                    cursor.close();
+                }
+                OperationListActivity.refreshAccountList(this);
             }
         }
         stopSelf();
@@ -240,7 +261,7 @@ public class RadisService extends IntentService {
     private long insertSchOp(ScheduledOperation op, final long opRowId) {
         final long accountId = op.mAccountId;
         op.mScheduledId = opRowId;
-        boolean needUpdate = OperationTable.createOp(this, op, accountId);
+        boolean needUpdate = OperationTable.createOp(this, op, accountId, false) > -1;
 //        Log.d(TAG, "before addPeriodicity : " + op.getDateStr());
         ScheduledOperation.addPeriodicityToDate(op);
 //        Log.d(TAG, "after addPeriodicity : " + op.getDateStr());

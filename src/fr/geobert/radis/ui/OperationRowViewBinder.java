@@ -7,10 +7,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
-import fr.geobert.radis.data.AccountManager;
+import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.ui.editor.OperationEditor;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
@@ -46,30 +47,29 @@ class OperationRowViewBinder extends OpViewBinder {
         textView.setText(b.toString());
     }
 
-    private boolean setSchedImg(Cursor cursor, ImageView i) {
-        boolean res;
-        if (cursor.getLong(cursor
-                .getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID)) > 0) {
+    private long setSchedImg(Cursor cursor, ImageView i) {
+        long res = cursor.getLong(cursor
+                .getColumnIndex(OperationTable.KEY_OP_SCHEDULED_ID));
+        if (res > 0) {
             i.setVisibility(View.VISIBLE);
-            res = true;
         } else {
             i.setVisibility(View.GONE);
-            res = false;
         }
         return res;
     }
 
     private void configureCell(final Cursor cursor, OpRowHolder h) {
-        final boolean isSched = setSchedImg(cursor, h.scheduledImg);
+        final long schedId = setSchedImg(cursor, h.scheduledImg);
         final int position = cursor.getPosition();
         final boolean needInfos = position == selectedPosition;
+        final int op_date_idx = cursor.getColumnIndex(OperationTable.KEY_OP_DATE);
         boolean needMonth = false;
-        date1.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_DATE)));
+        date1.setTimeInMillis(cursor.getLong(op_date_idx));
         if (position == 0) {
             needMonth = true;
         } else {
             cursor.moveToPosition(position - 1);
-            date2.setTimeInMillis(cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_DATE)));
+            date2.setTimeInMillis(cursor.getLong(op_date_idx));
             if (date1.get(GregorianCalendar.MONTH) != date2.get(GregorianCalendar.MONTH)) {
                 needMonth = true;
             }
@@ -94,49 +94,55 @@ class OperationRowViewBinder extends OpViewBinder {
 
         if (needInfos) {
             h.sumAtSelection.setText(
-                    Formater.getSumFormater().format((AccountManager.getInstance().getCurrentAccountSum() +
+                    Formater.getSumFormater().format((activity.getAccountManager().getCurrentAccountSum() +
                             activity.computeSumFromCursor(cursor)) / 100.0d));
 
             final BaseActivity context = (BaseActivity) activity;
-            final long opId = cursor.getLong(0);
-            final long accountId = AccountManager.getInstance().getCurrentAccountId(context);
+            final long accountId = activity.getAccountManager().getCurrentAccountId(context);
+            final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    OperationEditor.callMeForResult(context, opId, accountId);
+                    OperationEditor.callMeForResult(context, op.mRowId, accountId);
                 }
             });
+            h.editBtn.setOnLongClickListener(Tools.createTooltip(R.string.op_edition));
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    activity.getDeleteConfirmationDialog(accountId, opId).show(context.getSupportFragmentManager(),
+                    activity.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });
+            h.deleteBtn.setOnLongClickListener(Tools.createTooltip(R.string.delete));
 
             int drawable;
             View.OnClickListener listener;
-            if (isSched) {
+            View.OnLongClickListener longClickListener;
+            if (schedId > 0) {
                 drawable = R.drawable.edit_sched_48;
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ScheduledOperationEditor.callMeForResult(context, opId, accountId,
+                        ScheduledOperationEditor.callMeForResult(context, schedId, accountId,
                                 ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                     }
                 };
+                longClickListener = Tools.createTooltip(R.string.edit_scheduling);
             } else {
                 drawable = R.drawable.sched_48;
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ScheduledOperationEditor.callMeForResult(context, opId, accountId,
+                        ScheduledOperationEditor.callMeForResult(context, op.mRowId, accountId,
                                 ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT);
                     }
                 };
+                longClickListener = Tools.createTooltip(R.string.convert_into_scheduling);
             }
             h.varBtn.setImageDrawable(context.getResources().getDrawable(drawable));
             h.varBtn.setOnClickListener(listener);
+            h.varBtn.setOnLongClickListener(longClickListener);
         } else {
             h.sumAtSelection.setText("");
             clearListeners(h);

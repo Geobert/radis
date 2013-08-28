@@ -111,25 +111,6 @@ public class AccountTable {
         db.execSQL(DATABASE_ACCOUNT_CREATE);
     }
 
-    // static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
-    // {
-    // switch (oldVersion) {
-    // case 4:
-    // db.execSQL(ADD_CUR_DATE_COLUNM);
-    // break;
-    // case 6:
-    // upgradeFromV6(db, oldVersion, newVersion);
-    // break;
-    // case 9:
-    // upgradeFromV9(db, oldVersion, newVersion);
-    // break;
-    // case 12:
-    // upgradeFromV12(db, oldVersion, newVersion);
-    // default:
-    // upgradeDefault(db, oldVersion, newVersion);
-    // }
-    // }
-
     public static long createAccount(Context ctx, String name, String desc,
                                      long start_sum, String currency, int projectionMode,
                                      String projectionDate) throws ParseException {
@@ -215,17 +196,13 @@ public class AccountTable {
             break;
             case PROJECTION_DAY_OF_NEXT_MONTH: {
                 GregorianCalendar projDate = Tools.createClearedCalendar();
-                if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
-                        .parseInt(projectionDate)) {
+                if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer.parseInt(projectionDate)) {
                     projDate.add(Calendar.MONTH, 1);
                 }
-                projDate.set(Calendar.DAY_OF_MONTH,
-                        Integer.parseInt(projectionDate));
+                projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(projectionDate));
                 projDate.add(Calendar.DAY_OF_MONTH, 1); // for query
-                Cursor op = OperationTable.fetchOpEarlierThan(ctx,
-                        projDate.getTimeInMillis(), 0, accountId);
-                projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
-                // query
+                Cursor op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, accountId);
+                projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after query
                 if (null != op) {
                     if (op.moveToFirst()) {
                         opSum = OperationTable.computeSumFromCursor(op, accountId);
@@ -240,8 +217,7 @@ public class AccountTable {
                 projDate.setTime(Formater.getFullDateFormater().parse(
                         projectionDate));
                 projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
-                Cursor op = OperationTable.fetchOpEarlierThan(ctx,
-                        projDate.getTimeInMillis(), 0, accountId);
+                Cursor op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, accountId);
                 projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
                 if (null != op) {
                     if (op.moveToFirst()) {
@@ -277,13 +253,9 @@ public class AccountTable {
                 null);
     }
 
-    static Cursor fetchAllAccounts(SQLiteDatabase db) {
-        Cursor c = db.query(DATABASE_ACCOUNT_TABLE, ACCOUNT_COLS, null, null,
-                null, null, null);
-        if (c != null) {
-            c.moveToFirst();
-        }
-        return c;
+    public static Cursor fetchAllAccounts(Context ctx) {
+        return ctx.getContentResolver().query(DbContentProvider.ACCOUNT_URI,
+                ACCOUNT_FULL_COLS, null, null, null);
     }
 
     public static CursorLoader getAllAccountsLoader(Context ctx) {
@@ -452,6 +424,7 @@ public class AccountTable {
     public static void updateProjection(Context ctx, long accountId,
                                         long sumToAdd, long opDate) {
         ContentValues args = new ContentValues();
+        assert (mProjectionMode != -1);
         Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode
                 + " / opDate " + opDate);
         if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
@@ -553,22 +526,15 @@ public class AccountTable {
             break;
             case 1: {
                 GregorianCalendar projDate = Tools.createClearedCalendar();
-                if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer
-                        .parseInt(projectionDate)) {
+                if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer.parseInt(projectionDate)) {
                     projDate.add(Calendar.MONTH, 1);
                 }
-                projDate.set(Calendar.DAY_OF_MONTH,
-                        Integer.parseInt(projectionDate));
+                projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(projectionDate));
                 projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
-                Cursor op = db.query(
-                        OperationTable.DATABASE_OP_TABLE_JOINTURE,
-                        OperationTable.OP_COLS_QUERY,
-                        OperationTable.RESTRICT_TO_ACCOUNT + " and ops."
-                                + OperationTable.KEY_OP_DATE + " < ?",
-                        new String[]{Long.toString(accountId),
-                                Long.toString(accountId),
-                                Long.toString(projDate.getTimeInMillis())}, null,
-                        null, OperationTable.OP_ORDERING);
+                Cursor op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY,
+                        OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?",
+                        new String[]{Long.toString(accountId), Long.toString(accountId),
+                                Long.toString(projDate.getTimeInMillis())}, null, null, OperationTable.OP_ORDERING);
                 projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
                 // query
                 if (null != op) {
@@ -618,25 +584,17 @@ public class AccountTable {
     private static void rawConsolidateSums(SQLiteDatabase db, long accountId) {
         if (0 != accountId) {
             ContentValues values = new ContentValues();
-            Cursor account = db
-                    .query(DATABASE_ACCOUNT_TABLE, ACCOUNT_FULL_COLS, "_id=?",
-                            new String[]{Long.toString(accountId)}, null,
-                            null, null);
+            Cursor account = db.query(DATABASE_ACCOUNT_TABLE, ACCOUNT_FULL_COLS, "_id=?",
+                    new String[]{Long.toString(accountId)}, null,
+                    null, null);
             if (account != null) {
                 if (account.moveToFirst()) {
                     try {
-                        rawSetCurrentSumAndDate(
-                                db,
-                                accountId,
-                                values,
-                                account.getLong(account
-                                        .getColumnIndex(KEY_ACCOUNT_START_SUM)),
-                                account.getInt(account
-                                        .getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
-                                account.getString(account
-                                        .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
-                        db.update(DATABASE_ACCOUNT_TABLE, values, "_id=?",
-                                new String[]{Long.toString(accountId)});
+                        rawSetCurrentSumAndDate(db, accountId, values,
+                                account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM)),
+                                account.getInt(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
+                                account.getString(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+                        db.update(DATABASE_ACCOUNT_TABLE, values, "_id=?", new String[]{Long.toString(accountId)});
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }

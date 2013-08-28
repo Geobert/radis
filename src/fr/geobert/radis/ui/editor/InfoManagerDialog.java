@@ -29,6 +29,10 @@ public class InfoManagerDialog extends DialogFragment {
     private InfoManager mInfoManager = null;
     private int mMode = -1;
 
+    public static void resetInfoManager() {
+        mInfoManagersMap.clear();
+    }
+
     public static InfoManagerDialog newInstance(Uri table, String colName,
                                                 String title, int editId, int deleteId, int mode) {
         InfoManagerDialog frag = new InfoManagerDialog();
@@ -200,8 +204,7 @@ public class InfoManagerDialog extends DialogFragment {
         final int deleteId = args.getInt("deleteId");
         final int mode = args.getInt("mode");
         mMode = mode;
-        mInfoManager = createInfoManagerIfNeeded(table, colName,
-                title, editId, deleteId);
+        mInfoManager = createInfoManagerIfNeeded(table, colName, title, editId, deleteId);
         switch (mode) {
             case THIRD_PARTIES_DIALOG_ID:
             case TAGS_DIALOG_ID:
@@ -217,9 +220,7 @@ public class InfoManagerDialog extends DialogFragment {
                 return Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        InfoManager infoManager = createInfoManagerIfNeeded(
-                                table, colName, title, editId, deleteId);
-                        infoManager.deleteInfo();
+                        createInfoManagerIfNeeded(table, colName, title, editId, deleteId).deleteInfo();
                     }
                 });
             default:
