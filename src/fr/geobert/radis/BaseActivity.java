@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.os.Bundle;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import fr.geobert.radis.data.AccountManager;
-import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.DBPrefsManager;
 
 public class BaseActivity extends SherlockFragmentActivity {
@@ -44,12 +43,6 @@ public class BaseActivity extends SherlockFragmentActivity {
     protected void onResume() {
         super.onResume();
         DBPrefsManager.getInstance(this).fillCache(this);
-        InfoTables.fillCachesSync(this);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        InfoTables.clearCache();
-    }
 }

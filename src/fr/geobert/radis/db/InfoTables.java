@@ -6,16 +6,11 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
-import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import fr.geobert.radis.tools.AsciiUtils;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Vector;
 
 // this class manage simple info tables which are _id / name schema
@@ -83,69 +78,64 @@ public class InfoTables {
         }
     };
 
-    private static final int GET_TP = 700;
-    private static final int GET_MODES = 710;
-    private static final int GET_TAGS = 720;
+//    private static final int GET_TP = 700;
+//    private static final int GET_MODES = 710;
+//    private static final int GET_TAGS = 720;
 
-    private static LinkedHashMap<String, Long> mThirdPartiesMap;
-    private static LinkedHashMap<String, Long> mTagsMap;
-    private static LinkedHashMap<String, Long> mModesMap;
-    private static HashMap<String, Cursor> mInfoCursorMap = new HashMap<String, Cursor>();
-
-    private static class InfoCacheFiller implements LoaderCallbacks<Cursor> {
-        private Context mCtx;
-
-        public InfoCacheFiller(Context ctx) {
-            mCtx = ctx;
-        }
-
-        @Override
-        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-            Uri u = null;
-            String[] cols = null;
-            switch (id) {
-                case GET_TP:
-                    cols = new String[]{KEY_THIRD_PARTY_ROWID,
-                            KEY_THIRD_PARTY_NORMALIZED_NAME};
-                    u = DbContentProvider.THIRD_PARTY_URI;
-                    break;
-                case GET_MODES:
-                    cols = new String[]{KEY_MODE_ROWID, KEY_MODE_NORMALIZED_NAME};
-                    u = DbContentProvider.MODES_URI;
-                    break;
-                case GET_TAGS:
-                    cols = new String[]{KEY_TAG_ROWID, KEY_TAG_NORMALIZED_NAME};
-                    u = DbContentProvider.TAGS_URI;
-                    break;
-                default:
-                    break;
-            }
-            return new CursorLoader(mCtx, u, cols, null, null, null);
-        }
-
-        @Override
-        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-            switch (loader.getId()) {
-                case GET_TP:
-                    fillCache(data, mThirdPartiesMap);
-                    break;
-                case GET_MODES:
-                    fillCache(data, mModesMap);
-                    break;
-                case GET_TAGS:
-                    fillCache(data, mTagsMap);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        @Override
-        public void onLoaderReset(Loader<Cursor> arg0) {
-
-        }
-
-    }
+//    private static class InfoCacheFiller implements LoaderCallbacks<Cursor> {
+//        private Context mCtx;
+//
+//        public InfoCacheFiller(Context ctx) {
+//            mCtx = ctx;
+//        }
+//
+//        @Override
+//        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+//            Uri u = null;
+//            String[] cols = null;
+//            switch (id) {
+//                case GET_TP:
+//                    cols = new String[]{KEY_THIRD_PARTY_ROWID,
+//                            KEY_THIRD_PARTY_NORMALIZED_NAME};
+//                    u = DbContentProvider.THIRD_PARTY_URI;
+//                    break;
+//                case GET_MODES:
+//                    cols = new String[]{KEY_MODE_ROWID, KEY_MODE_NORMALIZED_NAME};
+//                    u = DbContentProvider.MODES_URI;
+//                    break;
+//                case GET_TAGS:
+//                    cols = new String[]{KEY_TAG_ROWID, KEY_TAG_NORMALIZED_NAME};
+//                    u = DbContentProvider.TAGS_URI;
+//                    break;
+//                default:
+//                    break;
+//            }
+//            return new CursorLoader(mCtx, u, cols, null, null, null);
+//        }
+//
+//        @Override
+//        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+//            switch (loader.getId()) {
+//                case GET_TP:
+//                    fillCache(data, mThirdPartiesMap);
+//                    break;
+//                case GET_MODES:
+//                    fillCache(data, mModesMap);
+//                    break;
+//                case GET_TAGS:
+//                    fillCache(data, mTagsMap);
+//                    break;
+//                default:
+//                    break;
+//            }
+//        }
+//
+//        @Override
+//        public void onLoaderReset(Loader<Cursor> arg0) {
+//
+//        }
+//
+//    }
 
     static void onCreate(SQLiteDatabase db) {
         db.execSQL(DATABASE_THIRD_PARTIES_CREATE);
@@ -153,15 +143,15 @@ public class InfoTables {
         db.execSQL(DATABASE_MODES_CREATE);
     }
 
-    private static void fillCache(Cursor c, Map<String, Long> map) {
-        if (c.moveToFirst()) {
-            do {
-                String key = c.getString(1).toLowerCase();
-                Long value = c.getLong(0);
-                map.put(key, value);
-            } while (c.moveToNext());
-        }
-    }
+//    private static void fillCache(Cursor c, Map<String, Long> map) {
+//        if (c.moveToFirst()) {
+//            do {
+//                String key = c.getString(1).toLowerCase();
+//                Long value = c.getLong(0);
+//                map.put(key, value);
+//            } while (c.moveToNext());
+//        }
+//    }
 
 //    public static void fillCaches(FragmentActivity ctx) {
 //        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
@@ -177,102 +167,96 @@ public class InfoTables {
 //        }
 //    }
 
-    public static void fillCachesSync(Context ctx) {
-        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
-            mModesMap = new LinkedHashMap<String, Long>();
-            mTagsMap = new LinkedHashMap<String, Long>();
-            mThirdPartiesMap = new LinkedHashMap<String, Long>();
-            Uri u = null;
-            String[] cols = null;
-            cols = new String[]{KEY_THIRD_PARTY_ROWID,
-                    KEY_THIRD_PARTY_NORMALIZED_NAME};
-            u = DbContentProvider.THIRD_PARTY_URI;
-            Cursor data = ctx.getContentResolver().query(u, cols, null, null, null);
-            fillCache(data, mThirdPartiesMap);
+//    public static void fillCachesSync(Context ctx) {
+//        if (mModesMap == null || mTagsMap == null || mThirdPartiesMap == null) {
+//            mModesMap = new LinkedHashMap<String, Long>();
+//            mTagsMap = new LinkedHashMap<String, Long>();
+//            mThirdPartiesMap = new LinkedHashMap<String, Long>();
+//            Uri u = null;
+//            String[] cols = null;
+//            cols = new String[]{KEY_THIRD_PARTY_ROWID,
+//                    KEY_THIRD_PARTY_NORMALIZED_NAME};
+//            u = DbContentProvider.THIRD_PARTY_URI;
+//            Cursor data = ctx.getContentResolver().query(u, cols, null, null, null);
+//            fillCache(data, mThirdPartiesMap);
+//
+//            cols = new String[]{KEY_MODE_ROWID, KEY_MODE_NORMALIZED_NAME};
+//            u = DbContentProvider.MODES_URI;
+//            data = ctx.getContentResolver().query(u, cols, null, null, null);
+//            fillCache(data, mModesMap);
+//
+//            cols = new String[]{KEY_TAG_ROWID, KEY_TAG_NORMALIZED_NAME};
+//            u = DbContentProvider.TAGS_URI;
+//            data = ctx.getContentResolver().query(u, cols, null, null, null);
+//            fillCache(data, mTagsMap);
+//        }
+//    }
 
-            cols = new String[]{KEY_MODE_ROWID, KEY_MODE_NORMALIZED_NAME};
-            u = DbContentProvider.MODES_URI;
-            data = ctx.getContentResolver().query(u, cols, null, null, null);
-            fillCache(data, mModesMap);
+//    static long getKeyIdOrCreateFromThirdParties(Context ctx, String key) {
+//        return getKeyIdOrCreate(ctx, key, mThirdPartiesMap,
+//                DbContentProvider.THIRD_PARTY_URI, KEY_THIRD_PARTY_NAME);
+//    }
+//
+//    static long getKeyIdOrCreateFromTags(Context ctx, String key) {
+//        return getKeyIdOrCreate(ctx, key, mTagsMap, DbContentProvider.TAGS_URI,
+//                KEY_TAG_NAME);
+//    }
+//
+//    static long getKeyIdOrCreateFromModes(Context ctx, String key) {
+//        return getKeyIdOrCreate(ctx, key, mModesMap,
+//                DbContentProvider.MODES_URI, KEY_MODE_NAME);
+//    }
 
-            cols = new String[]{KEY_TAG_ROWID, KEY_TAG_NORMALIZED_NAME};
-            u = DbContentProvider.TAGS_URI;
-            data = ctx.getContentResolver().query(u, cols, null, null, null);
-            fillCache(data, mTagsMap);
-        }
-    }
-
-    static long getKeyIdOrCreateFromThirdParties(Context ctx, String key) {
-        return getKeyIdOrCreate(ctx, key, mThirdPartiesMap,
-                DbContentProvider.THIRD_PARTY_URI, KEY_THIRD_PARTY_NAME);
-    }
-
-    static long getKeyIdOrCreateFromTags(Context ctx, String key) {
-        return getKeyIdOrCreate(ctx, key, mTagsMap, DbContentProvider.TAGS_URI,
-                KEY_TAG_NAME);
-    }
-
-    static long getKeyIdOrCreateFromModes(Context ctx, String key) {
-        return getKeyIdOrCreate(ctx, key, mModesMap,
-                DbContentProvider.MODES_URI, KEY_MODE_NAME);
-    }
-
-    private static long getKeyIdOrCreate(Context ctx, String key,
-                                         LinkedHashMap<String, Long> map, Uri table, String col)
-            throws SQLException {
-        String origKey = key.toString();
+    private static long getKeyId(Context ctx, String key, Uri table, String col) throws SQLException {
+        long res = -1;
         key = AsciiUtils.convertNonAscii(key).trim().toLowerCase();
-        if (key.length() == 0) {
+        if (key == null || key.length() == 0) {
             return -1;
         }
-        Log.d("InfoTables", "getKeyIdOrCreate map / key" + map + " / " + key);
-        Long i = map.get(key);
-        if (null != i) {
-            return i.longValue();
-        } else {
-            ContentValues initialValues = new ContentValues();
-            initialValues.put(col, origKey);
-            initialValues.put(mColNameNormName.get(col), key);
-            Uri res = ctx.getContentResolver().insert(table, initialValues);
-            long id = Long.parseLong(res.getLastPathSegment());
-            if (id != -1) {
-                map.put(key, id);
-            } else {
-                throw new SQLException("Database insertion error : " + key
-                        + " in " + table);
+        Cursor c = ctx.getContentResolver().query(table, new String[]{"_id"},
+                mColNameNormName.get(col) + "= ?", new String[]{key}, null);
+        Long i = null;
+        if (c != null) {
+            if (c.moveToFirst()) {
+                i = c.getLong(0);
             }
-            return id;
+            c.close();
         }
-    }
-
-    public static long getKeyIdIfExists(String key, Uri table) {
-        long res = -1;
-        if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
-            res = getKeyIdIfExistsFromThirdParties(key);
-        } else if (table.equals(DbContentProvider.TAGS_URI)) {
-            res = getKeyIdIfExistsFromTags(key);
-        } else if (table.equals(DbContentProvider.MODES_URI)) {
-            res = getKeyIdIfExistsFromModes(key);
+        if (null != i) {
+            res = i.longValue();
         }
         return res;
     }
 
-    static long getKeyIdIfExistsFromThirdParties(String key) {
-        Long res = null;
-        res = mThirdPartiesMap.get(key.toLowerCase());
-        return res == null ? -1 : res.longValue();
+    private static long createKeyId(Context ctx, String key, Uri table, String col) throws SQLException {
+        String origKey = key.toString();
+        key = AsciiUtils.convertNonAscii(key).trim().toLowerCase();
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(col, origKey);
+        initialValues.put(mColNameNormName.get(col), key);
+        Uri res = ctx.getContentResolver().insert(table, initialValues);
+        long id = Long.parseLong(res.getLastPathSegment());
+        if (id == -1) {
+            throw new SQLException("Database insertion error : " + key
+                    + " in " + table);
+        }
+        return id;
     }
 
-    static long getKeyIdIfExistsFromTags(String key) {
-        Long res = null;
-        res = mTagsMap.get(key.toLowerCase());
-        return res == null ? -1 : res.longValue();
-    }
-
-    static long getKeyIdIfExistsFromModes(String key) {
-        Long res = null;
-        res = mModesMap.get(key.toLowerCase());
-        return res == null ? -1 : res.longValue();
+    public static long getKeyIdIfExistsOrCreate(Context ctx, String key, Uri table) {
+        String col = null;
+        if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
+            col = KEY_THIRD_PARTY_NAME;
+        } else if (table.equals(DbContentProvider.TAGS_URI)) {
+            col = KEY_TAG_NAME;
+        } else if (table.equals(DbContentProvider.MODES_URI)) {
+            col = KEY_MODE_NAME;
+        }
+        long res = getKeyId(ctx, key, table, col);
+        if (res == -1) {
+            createKeyId(ctx, key, table, col);
+        }
+        return res;
     }
 
     public static boolean updateInfo(Context ctx, Uri table, long rowId, String value, String oldValue) {
@@ -283,44 +267,7 @@ public class InfoTables {
         int res = ctx.getContentResolver().update(
                 Uri.parse(table + "/" + rowId), args, null, null);
 
-        // update cache
-        Map<String, Long> m = null;
-        if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
-            m = mThirdPartiesMap;
-        } else if (table.equals(DbContentProvider.TAGS_URI)) {
-            m = mTagsMap;
-        } else if (table.equals(DbContentProvider.MODES_URI)) {
-            m = mModesMap;
-        }
-        if (m != null) {
-            m.remove(oldValue);
-            m.put(value.toLowerCase(), rowId);
-        }
         return res > 0;
-    }
-
-    public static long createInfo(Context ctx, Uri table, String value) {
-        ContentValues args = new ContentValues();
-        String k = table.toString();
-        args.put(mInfoColMap.get(k), value);
-        args.put(mColNameNormName.get(mInfoColMap.get(k)), AsciiUtils
-                .convertNonAscii(value).trim().toLowerCase());
-        Uri r = ctx.getContentResolver().insert(table, args);
-        long res = Long.parseLong(r.getLastPathSegment());
-        if (res > 0) { // update cache
-            Map<String, Long> m = null;
-            if (table.equals(DbContentProvider.THIRD_PARTY_URI)) {
-                m = mThirdPartiesMap;
-            } else if (table.equals(DbContentProvider.TAGS_URI)) {
-                m = mTagsMap;
-            } else if (table.equals(DbContentProvider.MODES_URI)) {
-                m = mModesMap;
-            }
-            if (m != null) {
-                m.put(AsciiUtils.convertNonAscii(value).trim().toLowerCase(), res);
-            }
-        }
-        return res;
     }
 
     public static boolean deleteInfo(Context ctx, Uri table, long rowId) {
@@ -345,7 +292,6 @@ public class InfoTables {
         if (null != c) {
             c.moveToFirst();
         }
-        mInfoCursorMap.put(table.toString(), c);
         return c;
     }
 
@@ -361,40 +307,37 @@ public class InfoTables {
         }
         CursorLoader loader = new CursorLoader(ctx, table, new String[]{
                 "_id", colName}, where, params, colName + " asc");
-        // mInfoCursorMap.put(table.toString(), c);
+
         return loader;
     }
 
     static void putKeyIdInThirdParties(Context ctx, String key, ContentValues initialValues) {
         putKeyId(ctx, key, DbContentProvider.THIRD_PARTY_URI,
                 KEY_THIRD_PARTY_NAME, OperationTable.KEY_OP_THIRD_PARTY,
-                mThirdPartiesMap, initialValues);
+                initialValues);
     }
 
     static void putKeyIdInTags(Context ctx, String key, ContentValues initialValues) {
         putKeyId(ctx, key, DbContentProvider.TAGS_URI, KEY_TAG_NAME,
-                OperationTable.KEY_OP_TAG, mTagsMap, initialValues);
+                OperationTable.KEY_OP_TAG, initialValues);
     }
 
     static void putKeyIdInModes(Context ctx, String key, ContentValues initialValues) {
         putKeyId(ctx, key, DbContentProvider.MODES_URI, KEY_MODE_NAME,
-                OperationTable.KEY_OP_MODE, mModesMap, initialValues);
+                OperationTable.KEY_OP_MODE, initialValues);
     }
 
     private static void putKeyId(Context ctx, String key, Uri keyTableName, String keyTableCol, String opTableCol,
-                                 LinkedHashMap<String, Long> keyMap, ContentValues initialValues) {
-        long id = getKeyIdOrCreate(ctx, key, keyMap, keyTableName, keyTableCol);
+                                 ContentValues initialValues) {
+        long id = getKeyId(ctx, key, keyTableName, keyTableCol);
+        if (id == -1) {
+            id = createKeyId(ctx, key, keyTableName, keyTableCol);
+        }
         if (id != -1) {
             initialValues.put(opTableCol, id);
         } else {
             initialValues.putNull(opTableCol);
         }
-    }
-
-    public static void clearCache() {
-        mThirdPartiesMap = null;
-        mModesMap = null;
-        mTagsMap = null;
     }
 
     // UPGRADE FUNCTIONS
