@@ -284,8 +284,11 @@ public class AccountEditor extends BaseActivity implements
         } else {
             mOnRestore = false;
             if (mRowId == NO_ACCOUNT) {
-                initCurrencySpinner(Currency.getInstance(Locale.getDefault())
-                        .getCurrencyCode());
+                try {
+                    initCurrencySpinner(Currency.getInstance(Locale.getDefault()).getCurrencyCode());
+                } catch (IllegalArgumentException ex) {
+                    initCurrencySpinner(Currency.getInstance(new Locale("fr", "FR")).getCurrencyCode());
+                }
             }
         }
     }
