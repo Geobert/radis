@@ -9,7 +9,6 @@ import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
-import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.DBPrefsManager;
@@ -43,7 +42,6 @@ public class RadisService extends IntentService {
         try {
             DBPrefsManager prefs = DBPrefsManager.getInstance(this);
             prefs.fillCache(this);
-            InfoTables.fillCachesSync(this);
             processScheduledOps();
         } finally {
             if (getLock(this).isHeld()) {

@@ -3,6 +3,7 @@ package fr.geobert.radis.ui.editor;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
@@ -253,7 +254,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
             builder.setPositiveButton(context.getString(R.string.ok),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            saveText();
+                            saveText(mContext);
                         }
                     }).setNegativeButton(context.getString(R.string.cancel),
                     new DialogInterface.OnClickListener() {
@@ -272,7 +273,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         return mEditDialog;
     }
 
-    private void saveText() {
+    private void saveText(Context ctx) {
         EditText t = mEditorText;
         String value = t.getText().toString().trim();
         long rowId = mInfo.getLong("rowId");
@@ -280,14 +281,10 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
             InfoTables.updateInfo(mContext, (Uri) mInfo.getParcelable("table"),
                     rowId, value, mOldValue);
         } else { // create
-            long id = InfoTables.getKeyIdIfExists(value,
-                    (Uri) mInfo.getParcelable("table"));
+            long id = InfoTables.getKeyIdIfExistsOrCreate(ctx, value, (Uri) mInfo.getParcelable("table"));
             if (id > 0) { // already existing value, update
                 Tools.popError(mContext,
                         mContext.getString(R.string.item_exists), null);
-            } else {
-                InfoTables.createInfo(mContext,
-                        (Uri) mInfo.getParcelable("table"), value);
             }
         }
         refresh();

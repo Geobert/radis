@@ -1,3 +1,8 @@
+Version 0.8.2 - 01/09/2013
+- fix un crash survivant de la 0.8.1
+- fix un autre crash quand la ROM renvoie une locale non ISO (merci Kobo Arc)
+- fix impossible de sélectionner une opération après suppression d'une opération
+
 Version 0.8.1 - 28/08/2013
 - fix de deux crashes
 
