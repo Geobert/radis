@@ -344,7 +344,6 @@ public class OperationListActivity extends BaseActivity implements
     private void getOperationsList() {
         mAccountId = mAccountManager.getCurrentAccountId(this);
         if (mAccountId != null) {
-            //showProgress();
             if (mOperationsLoader == null) {
                 startOpDate = new GregorianCalendar();
                 mScrollLoader.setStartDate(startOpDate);
@@ -658,6 +657,15 @@ public class OperationListActivity extends BaseActivity implements
         return -1;
     }
 
+    protected void afterDelUpdateSelection() {
+        mOpListCursorAdapter.setSelectedPosition(-1);
+        mLastSelectionId = -1;
+        mLastSelectionPos = -1;
+        needRefreshSelection = true;
+        updateOperationList();
+        updateAccountList();
+    }
+
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
         private long accountId;
         private long operationId;
@@ -682,9 +690,7 @@ public class OperationListActivity extends BaseActivity implements
                 public void onClick(DialogInterface dialogInterface, int i) {
                     final OperationListActivity activity = (OperationListActivity) getActivity();
                     if (OperationTable.deleteOp(activity, operationId, accountId)) {
-                        activity.updateOperationList();
-                        activity.updateAccountList();
-                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                        activity.afterDelUpdateSelection();
                     }
 
                 }
@@ -726,9 +732,7 @@ public class OperationListActivity extends BaseActivity implements
                                 public void onClick(DialogInterface dialog, int which) {
                                     final OperationListActivity activity = (OperationListActivity) getActivity();
                                     if (OperationTable.deleteOp(activity, operationId, accountId)) {
-                                        activity.updateOperationList();
-                                        activity.updateAccountList();
-                                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                        activity.afterDelUpdateSelection();
                                     }
                                 }
                             })
@@ -743,9 +747,7 @@ public class OperationListActivity extends BaseActivity implements
                                                     date, transfertId);
                                     Log.d(TAG, "nbDel : " + nbDel);
                                     if (nbDel > 0) {
-                                        activity.updateOperationList();
-                                        activity.updateAccountList();
-                                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                        activity.afterDelUpdateSelection();
                                     }
                                 }
                             })
@@ -754,9 +756,7 @@ public class OperationListActivity extends BaseActivity implements
                                 public void onClick(DialogInterface dialog, int id) {
                                     final OperationListActivity activity = (OperationListActivity) getActivity();
                                     if (OperationTable.deleteAllOccurrences(activity, accountId, schId, transfertId) > 0) {
-                                        activity.updateOperationList();
-                                        activity.updateAccountList();
-                                        activity.mOpListCursorAdapter.setSelectedPosition(-1);
+                                        activity.afterDelUpdateSelection();
                                     }
                                 }
                             });
