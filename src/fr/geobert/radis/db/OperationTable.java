@@ -295,8 +295,8 @@ public class OperationTable {
                 DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE
-                        + " = (SELECT max(ops." + KEY_OP_DATE + ") FROM "
-                        + DATABASE_OPERATIONS_TABLE + ") ",
+                        + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM "
+                        + DATABASE_OPERATIONS_TABLE + " ops2) ",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId)}, OP_ORDERING);
         return c;
