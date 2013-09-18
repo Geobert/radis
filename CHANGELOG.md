@@ -1,3 +1,6 @@
+Version 0.8.3 - 18/09/2013
+- correction de deux crashes rares
+
 Version 0.8.2 - 01/09/2013
 - fix un crash survivant de la 0.8.1
 - fix un autre crash quand la ROM renvoie une locale non ISO (merci Kobo Arc)
