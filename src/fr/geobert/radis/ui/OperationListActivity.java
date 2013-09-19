@@ -798,6 +798,7 @@ public class OperationListActivity extends BaseActivity implements
         private int ACCOUNT_CUR_SUM;
         private int ACCOUNT_CUR_SUM_DATE;
         private int ACCOUNT_CURRENCY;
+        private String currencySymbol = null;
 
         private SimpleAccountViewBinder() {
         }
@@ -809,6 +810,11 @@ public class OperationListActivity extends BaseActivity implements
                 ACCOUNT_CUR_SUM = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
                 ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE);
                 ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY);
+                try {
+                    currencySymbol = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol();
+                } catch (IllegalArgumentException ex) {
+                    currencySymbol = "";
+                }
             }
 
             boolean res;
@@ -826,9 +832,7 @@ public class OperationListActivity extends BaseActivity implements
                     textView.setTextColor(greenColor);
                 }
                 stringBuilder.append(Formater.getSumFormater().format(sum / 100.0d));
-                stringBuilder.append(' ').append(Currency
-                        .getInstance(cursor.getString(ACCOUNT_CURRENCY))
-                        .getSymbol());
+                stringBuilder.append(' ').append(currencySymbol);
                 textView.setText(stringBuilder);
                 res = true;
             } else if (i == ACCOUNT_CUR_SUM_DATE) {

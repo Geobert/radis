@@ -177,21 +177,14 @@ public class AccountEditor extends BaseActivity implements
         }
         // check if currency is correct
         if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
-            String currency = mCustomCurrency.getText().toString().trim()
-                    .toUpperCase();
-            if (currency.length() == 0 || currency.length() > 3) {
+            String currency = mCustomCurrency.getText().toString().trim().toUpperCase();
+            try {
+                Currency.getInstance(currency);
+            } catch (IllegalArgumentException e) {
                 if (errMsg.length() > 0)
                     errMsg.append("\n");
                 errMsg.append(getString(R.string.bad_format_for_currency));
-            } else {
-                try {
-                    Currency.getInstance(currency);
-                } catch (IllegalArgumentException e) {
-                    if (errMsg.length() > 0)
-                        errMsg.append("\n");
-                    errMsg.append(getString(R.string.bad_format_for_currency));
-                    res = false;
-                }
+                res = false;
             }
         }
         // check projection date format
