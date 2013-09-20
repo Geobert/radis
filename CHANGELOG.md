@@ -1,3 +1,6 @@
+Version 0.8.4 - 20/09/2013
+- correction de deux crashes rares
+
 Version 0.8.3 - 18/09/2013
 - correction de deux crashes rares
 
