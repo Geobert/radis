@@ -266,7 +266,9 @@ public class AccountTable {
     static boolean checkNeedUpdateProjection(Context ctx, Operation op,
                                              final long accountId) {
         Cursor c = fetchAccount(ctx, accountId);
-        initProjectionDate(c);
+        if (c.moveToFirst()) {
+            initProjectionDate(c);
+        }
         c.close();
         final long opDate = op.getDate();
         final long projDate = mProjectionDate;
@@ -288,7 +290,7 @@ public class AccountTable {
 
     public static void initProjectionDate(Cursor c) {
         Log.d(TAG, "initProjectionDate cursor : " + c);
-        if (c != null && c.moveToFirst()) {
+        if (c != null) {
             mProjectionMode = c.getInt(c
                     .getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE));
             Log.d(TAG, "initProjectionDate mode : " + mProjectionMode);
