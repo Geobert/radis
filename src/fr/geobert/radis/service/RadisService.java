@@ -167,8 +167,7 @@ public class RadisService extends IntentService {
                 final Long transId = Long.valueOf(op.mTransferAccountId);
                 long sum = 0;
                 boolean needUpdate = false;
-                Cursor accountCursor = AccountTable.fetchAccount(this,
-                        accountId);
+                Cursor accountCursor = AccountTable.fetchAccount(this, accountId);
                 if (null != accountCursor) {
                     if (!accountCursor.moveToFirst()) {
                         c.moveToNext();
