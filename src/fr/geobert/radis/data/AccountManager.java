@@ -113,17 +113,23 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
         return pos;
     }
 
-    public void setCurrentAccountId(Long currentAccountId) {
+    public long setCurrentAccountId(Long currentAccountId) {
         mCurAccountId = currentAccountId;
         if (currentAccountId == null) {
             mCurAccountPos = -1;
+            return -1;
         } else {
             mCurAccountPos = setCurrentAccountSum();
+            return getCurrentAccountProjDate();
         }
     }
 
     public long getCurrentAccountSum() {
         return mCurSum;
+    }
+
+    private long getCurrentAccountProjDate() {
+        return AccountTable.getProjectionDate();
     }
 
     public void backupCurAccountId() {

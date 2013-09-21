@@ -689,4 +689,8 @@ public class AccountTable {
     static void upgradeFromV4(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(ADD_CUR_DATE_COLUNM);
     }
+
+    public static long getProjectionDate() {
+        return mProjectionDate;
+    }
 }
