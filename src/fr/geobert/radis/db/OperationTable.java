@@ -193,7 +193,7 @@ public class OperationTable {
         long sum = 0L;
         final int sumIdx = c.getColumnIndex(KEY_OP_SUM);
         final int transIdx = c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID);
-        if (c.moveToFirst()) {
+        if (!c.isBeforeFirst() && !c.isAfterLast()) {
             do {
                 long s = c.getLong(sumIdx);
                 if (c.getLong(transIdx) == curAccount) {
