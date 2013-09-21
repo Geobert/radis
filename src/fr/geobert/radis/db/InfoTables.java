@@ -331,7 +331,9 @@ public class InfoTables {
                                  ContentValues initialValues) {
         long id = getKeyId(ctx, key, keyTableName, keyTableCol);
         if (id == -1) {
-            id = createKeyId(ctx, key, keyTableName, keyTableCol);
+            if (key.length() > 0) {
+                id = createKeyId(ctx, key, keyTableName, keyTableCol);
+            }
         }
         if (id != -1) {
             initialValues.put(opTableCol, id);
@@ -466,5 +468,10 @@ public class InfoTables {
         db.execSQL(OperationTable.TRIGGER_ON_DELETE_THIRD_PARTY_CREATE);
         db.execSQL(OperationTable.TRIGGER_ON_DELETE_MODE_CREATE);
         db.execSQL(OperationTable.TRIGGER_ON_DELETE_TAG_CREATE);
+    }
+
+    public static void upgradeFromV15(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.delete(DATABASE_TAGS_TABLE, KEY_TAG_NAME + "=''", null);
+        db.delete(DATABASE_MODES_TABLE, KEY_MODE_NAME + "=''", null);
     }
 }

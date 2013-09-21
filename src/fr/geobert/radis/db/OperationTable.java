@@ -149,33 +149,6 @@ public class OperationTable {
         db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
     }
 
-//	static void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-//		switch (oldVersion) {
-//		case 1:
-//			OperationTable.upgradeFromV1(db, oldVersion, newVersion);
-//			break;
-//		case 2:
-//			db.execSQL(TRIGGER_ON_DELETE_MODE_CREATE);
-//			db.execSQL(TRIGGER_ON_DELETE_TAG_CREATE);
-//			break;
-//		case 3:
-//			db.execSQL(ADD_NOTES_COLUNM);
-//			break;
-//		case 5:
-//			upgradeFromV5(db, oldVersion, newVersion);
-//			break;
-//		case 6:
-//			upgradeFromV6(db, oldVersion, newVersion);
-//			break;
-//		case 9:
-//			upgradeFromV9(db, oldVersion, newVersion);
-//			break;
-//		case 11:
-//			upgradeFromV11(db, oldVersion, newVersion);
-//			break;
-//		}
-//	}
-
     public static Cursor fetchAllOps(Context ctx, final long accountId) {
         Cursor c = ctx.getContentResolver().query(
                 DbContentProvider.OPERATION_JOINED_URI,
