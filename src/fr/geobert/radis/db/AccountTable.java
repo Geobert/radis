@@ -296,14 +296,12 @@ public class AccountTable {
             Log.d(TAG, "initProjectionDate mode : " + mProjectionMode);
             switch (mProjectionMode) {
                 case PROJECTION_FURTHEST:
-                    mProjectionDate = c.getLong(c
-                            .getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
+                    mProjectionDate = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
                     break;
                 case PROJECTION_DAY_OF_NEXT_MONTH: {
                     GregorianCalendar projDate = Tools.createClearedCalendar();
                     projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(c
-                            .getString(c
-                                    .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))));
+                            .getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))));
                     GregorianCalendar today = Tools.createClearedCalendar();
                     if (projDate.compareTo(today) <= 0) {
                         projDate.add(Calendar.MONTH, 1);
@@ -690,5 +688,9 @@ public class AccountTable {
 
     static void upgradeFromV4(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(ADD_CUR_DATE_COLUNM);
+    }
+
+    public static long getProjectionDate() {
+        return mProjectionDate;
     }
 }

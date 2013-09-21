@@ -1,5 +1,8 @@
+Version 0.8.5 - 21/09/2013
+- La somme à la selection était incorrecte après un aller retour entre les comptes
+
 Version 0.8.4 - 20/09/2013
-- correction de deux crashes rares
+- La somme à la selection était incorrecte
 
 Version 0.8.3 - 18/09/2013
 - correction de deux crashes rares

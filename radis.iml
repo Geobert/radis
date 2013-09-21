@@ -3,9 +3,7 @@
   <component name="FacetManager">
     <facet type="android" name="Android">
       <configuration>
-        <option name="PROGUARD_CFG_PATH" value="/proguard.cfg" />
         <option name="UPDATE_PROPERTY_FILES" value="true" />
-        <includeSystemProguardFile>false</includeSystemProguardFile>
       </configuration>
     </facet>
   </component>

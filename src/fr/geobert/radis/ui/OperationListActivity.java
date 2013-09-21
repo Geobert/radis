@@ -232,8 +232,8 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     private boolean onAccountChanged(long itemId) {
+        mProjectionDate = mAccountManager.setCurrentAccountId(itemId);
         if (mQuickAddController != null && itemId != mAccountId) {
-            mAccountManager.setCurrentAccountId(itemId);
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
             mQuickAddController.setAccount(itemId);
             getOperationsList();
@@ -838,9 +838,6 @@ public class OperationListActivity extends BaseActivity implements
             } else if (i == ACCOUNT_CUR_SUM_DATE) {
                 TextView textView = (TextView) view;
                 long dateLong = cursor.getLong(i);
-                if (mAccountId == cursor.getLong(0)) {
-                    mProjectionDate = dateLong;
-                }
                 StringBuilder stringBuilder = new StringBuilder();
                 if (dateLong > 0) {
                     stringBuilder.append(String.format(
