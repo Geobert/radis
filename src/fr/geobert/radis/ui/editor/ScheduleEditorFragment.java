@@ -203,11 +203,25 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
             op.mPeriodicity = 1;
             op.mPeriodicityUnit = mPeriodicitySpinner.getSelectedItemPosition();
         } else {
-            op.mPeriodicity = Integer.parseInt(mCustomPeriodicityVal.getText()
-                    .toString());
-            op.mPeriodicityUnit = mCustomPeriodicityUnit
-                    .getSelectedItemPosition()
-                    + ScheduledOperation.CUSTOM_DAILY_PERIOD;
+            String periodicity = mCustomPeriodicityVal.getText().toString();
+            try {
+                op.mPeriodicity = Integer.parseInt(periodicity);
+            } catch (NumberFormatException e) {
+                StringBuffer b = new StringBuffer();
+                for (char c : periodicity.toCharArray()) {
+                    if ("0123456789".contains(String.valueOf(c))) {
+                        b.append(c);
+                    }
+                }
+                try {
+                    op.mPeriodicity = Integer.parseInt(b.toString());
+                    mCustomPeriodicityVal.setText(b);
+                } catch (NumberFormatException e2) {
+                    op.mPeriodicity = 0;
+                }
+            }
+            op.mPeriodicityUnit =
+                    mCustomPeriodicityUnit.getSelectedItemPosition() + ScheduledOperation.CUSTOM_DAILY_PERIOD;
         }
         if (mEndDatePicker.isEnabled()) {
             DatePicker dp = mEndDatePicker;
