@@ -158,6 +158,8 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
         int unit = mCurrentSchOp.mPeriodicityUnit;
         if (unit < ScheduledOperation.CUSTOM_DAILY_PERIOD) {
             mPeriodicitySpinner.setSelection(unit);
+        } else {
+            mPeriodicitySpinner.setSelection(ScheduledOperation.CUSTOM_DAILY_PERIOD);
         }
     }
 
