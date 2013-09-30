@@ -265,10 +265,11 @@ public class OperationEditFragment extends SherlockFragment {
         mSumTextWatcher.setAutoNegate(false);
         if (mActivity.mCurrentOp.mSum == 0.0) {
             mOpSumText.setText("");
+            mSumTextWatcher.setAutoNegate(true);
         } else {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
-        mSumTextWatcher.setAutoNegate(true);
+
         populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 
