@@ -84,8 +84,10 @@ public class AccountEditor extends BaseActivity implements
         mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
         mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
         mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
-        mAccountStartSumText.addTextChangedListener(new CorrectCommaWatcher(
-                Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mAccountStartSumText));
+        CorrectCommaWatcher w = new CorrectCommaWatcher(
+                Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mAccountStartSumText);
+        w.setAutoNegate(false);
+        mAccountStartSumText.addTextChangedListener(w);
         mAccountStartSumText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -225,13 +227,11 @@ public class AccountEditor extends BaseActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("name", mAccountNameText.getText().toString());
-        outState.putString("startSum", mAccountStartSumText.getText()
-                .toString());
+        outState.putString("startSum", mAccountStartSumText.getText().toString());
         outState.putInt("currency", mAccountCurrency.getSelectedItemPosition());
         outState.putInt("customCurrencyIdx", customCurrencyIdx);
         if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
-            outState.putString("customCurrency", mCustomCurrency.getText()
-                    .toString());
+            outState.putString("customCurrency", mCustomCurrency.getText().toString());
         }
         outState.putString("desc", mAccountDescText.getText().toString());
         mProjectionController.onSaveInstanceState(outState);
@@ -295,9 +295,7 @@ public class AccountEditor extends BaseActivity implements
         String name = mAccountNameText.getText().toString().trim();
         String desc = mAccountDescText.getText().toString().trim();
         try {
-            long startSum = Math.round(Formater.getSumFormater()
-                    .parse(mAccountStartSumText.getText().toString().trim())
-                    .doubleValue() * 100);
+            long startSum = Tools.extractSumFromStr(mAccountStartSumText.getText().toString());
             String currency = null;
             if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
                 currency = mCustomCurrency.getText().toString().trim()
