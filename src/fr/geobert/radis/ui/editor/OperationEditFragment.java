@@ -107,9 +107,7 @@ public class OperationEditFragment extends SherlockFragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (mOpSumText.getText().toString().trim().length() == 0) {
-            mSumTextWatcher.setAutoNegate(true);
-        }
+        mSumTextWatcher.setAutoNegate(mOpSumText.getText().toString().trim().length() == 0);
         if (mActivity.mCurrentOp != null) {
             populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
         }
@@ -123,6 +121,15 @@ public class OperationEditFragment extends SherlockFragment {
             }
         });
         configThirdPartyTransfertCont(mIsTransfertCheck.isChecked());
+        mOpThirdPartyText.clearFocus();
+        mOpSumText.clearFocus();
+        mOpModeText.clearFocus();
+        mOpTagText.clearFocus();
+        mNotesText.clearFocus();
+
+        if (mActivity.getCurrentFocus() != null) {
+            Tools.hideKeyboard(mActivity);
+        }
     }
 
     final protected void initListeners() {
@@ -265,10 +272,11 @@ public class OperationEditFragment extends SherlockFragment {
         mSumTextWatcher.setAutoNegate(false);
         if (mActivity.mCurrentOp.mSum == 0.0) {
             mOpSumText.setText("");
+            mSumTextWatcher.setAutoNegate(true);
         } else {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
-        mSumTextWatcher.setAutoNegate(true);
+
         populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 

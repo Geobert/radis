@@ -162,15 +162,9 @@ public class Operation implements Parcelable {
     }
 
     public void setSumStr(String sumStr) {
-        sumStr = sumStr.replace('+', ' ').trim();
-        double d;
-        try {
-            d = Formater.getSumFormater().parse(sumStr).doubleValue();
-        } catch (ParseException e) {
-            d = 0d;
-        }
-        mSum = Math.round(d * 100);
+        mSum = Tools.extractSumFromStr(sumStr);
     }
+
 
     public void setDateStr(String dateStr) throws ParseException {
         mDate.setTime(Formater.getFullDateFormater().parse(dateStr));
