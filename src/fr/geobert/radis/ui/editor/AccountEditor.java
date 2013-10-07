@@ -26,8 +26,10 @@ import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Currency;
+import java.util.Date;
 import java.util.Locale;
 
 public class AccountEditor extends BaseActivity implements
@@ -190,12 +192,24 @@ public class AccountEditor extends BaseActivity implements
             }
         }
         // check projection date format
-        if (mProjectionController.mProjectionDate.isEnabled()
-                && mProjectionController.getDate().trim().length() == 0) {
-            if (errMsg.length() > 0)
-                errMsg.append("\n");
-            errMsg.append(getString(R.string.bad_format_for_date));
-            res = false;
+        if (mProjectionController.mProjectionDate.isEnabled()) {
+//                && mProjectionController.getDate().trim().length() == 0) {
+            try {
+                SimpleDateFormat format;
+                if (mProjectionController.getMode() == AccountTable.PROJECTION_DAY_OF_NEXT_MONTH) {
+                    format = new SimpleDateFormat("dd");
+                } else {
+                    format = new SimpleDateFormat("dd/MM/yyyy");
+                }
+                Date d = format.parse(mProjectionController.getDate().trim());
+                mProjectionController.mProjectionDate.setText(format.format(d));
+            } catch (ParseException e) {
+                e.printStackTrace();
+                if (errMsg.length() > 0)
+                    errMsg.append("\n");
+                errMsg.append(getString(R.string.bad_format_for_date));
+                res = false;
+            }
         }
         return res;
     }

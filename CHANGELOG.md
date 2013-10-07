@@ -1,3 +1,12 @@
+Version 0.8.7 - 01/10/2013
+- Sur le formulaire d'opération, les champs texte pouvaient se bloquer
+- Modifier une somme positive d'opération existante la passait négative
+- Mettre des donnée erronée dans la périodicité personnalisée pouvait crasher l'appli
+- Le formulaire de compte accepte "+" en début de somme de départ désormais
+
+Version 0.8.6 - 22/09/2013
+- des catégories et des modes de paiement vides se créaient à chaque nouvelle opération
+
 Version 0.8.5 - 21/09/2013
 - La somme à la selection était incorrecte après un aller retour entre les comptes
 
