@@ -1,3 +1,6 @@
+Version 0.8.8 - 08/10/2013
+- fix de 3 crashes
+
 Version 0.8.7 - 01/10/2013
 - Sur le formulaire d'opération, les champs texte pouvaient se bloquer
 - Modifier une somme positive d'opération existante la passait négative

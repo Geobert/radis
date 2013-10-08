@@ -135,12 +135,14 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     }
 
     private void onOkClicked() {
-        StringBuilder errMsg = new StringBuilder();
-        if (isFormValid(errMsg)) {
-            fillOperationWithInputs(mSchedEditTab.getFragment().mCurrentSchOp);
-            saveOpAndExit();
-        } else {
-            Tools.popError(this, errMsg.toString(), null);
+        if (mRowId <= 0 || mOriginalSchOp != null) {
+            StringBuilder errMsg = new StringBuilder();
+            if (isFormValid(errMsg)) {
+                fillOperationWithInputs(mSchedEditTab.getFragment().mCurrentSchOp);
+                saveOpAndExit();
+            } else {
+                Tools.popError(this, errMsg.toString(), null);
+            }
         }
     }
 

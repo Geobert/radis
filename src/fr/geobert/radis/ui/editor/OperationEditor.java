@@ -67,14 +67,15 @@ public class OperationEditor extends CommonOpEditor {
     }
 
     private void onOkClicked() {
-        StringBuilder errMsg = new StringBuilder();
-
-        if (mEditFragment.isFormValid(errMsg)) {
-            fillOperationWithInputs(mCurrentOp);
-            saveOpAndExit();
-        } else {
-            Tools.popError(this,
-                    errMsg.toString(), null);
+        if (mRowId <= 0 || mOriginalOp != null) {
+            StringBuilder errMsg = new StringBuilder();
+            if (mEditFragment.isFormValid(errMsg)) {
+                fillOperationWithInputs(mCurrentOp);
+                saveOpAndExit();
+            } else {
+                Tools.popError(this,
+                        errMsg.toString(), null);
+            }
         }
     }
 
