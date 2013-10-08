@@ -191,6 +191,7 @@ public class OperationListActivity extends BaseActivity implements
 
     private void initOperationList() {
         mListView = (ListView) findViewById(android.R.id.list);
+        mScrollLoader = new OnOperationScrollLoader(this);
         mListView.setEmptyView(findViewById(android.R.id.empty));
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -198,7 +199,6 @@ public class OperationListActivity extends BaseActivity implements
                 selectOpAndAdjustOffset(i, false);
             }
         });
-        mScrollLoader = new OnOperationScrollLoader(this);
         mListView.setOnScrollListener(mScrollLoader);
         mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
         mListView.setSelector(android.R.color.transparent);
@@ -346,6 +346,9 @@ public class OperationListActivity extends BaseActivity implements
         if (mAccountId != null) {
             if (mOperationsLoader == null) {
                 startOpDate = new GregorianCalendar();
+                if (mScrollLoader == null) {
+                    initOperationList();
+                }
                 mScrollLoader.setStartDate(startOpDate);
                 startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
                 Tools.clearTimeOfCalendar(startOpDate);
