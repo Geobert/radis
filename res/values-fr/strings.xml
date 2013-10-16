@@ -207,4 +207,6 @@
     <string name="sch_edition">Saisie d\'échéance</string>
     <string name="delete_account">Supprimer le compte</string>
     <string name="debug">Debug</string>
+    <string name="use_weighted_infos">Utiliser la complétion pondérée</string>
+    <string name="use_weighted_infos_details">Les informations les plus utilisées seront proposées en tête</string>
 </resources>

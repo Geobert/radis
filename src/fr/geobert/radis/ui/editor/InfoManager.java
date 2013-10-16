@@ -279,7 +279,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         long rowId = mInfo.getLong("rowId");
         if (rowId != 0) { // update
             InfoTables.updateInfo(mContext, (Uri) mInfo.getParcelable("table"),
-                    rowId, value, mOldValue);
+                    rowId, value, null);
         } else { // create
             long id = InfoTables.getKeyIdIfExistsOrCreate(ctx, value, (Uri) mInfo.getParcelable("table"));
             if (id > 0) { // already existing value, update

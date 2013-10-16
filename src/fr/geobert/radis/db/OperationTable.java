@@ -206,13 +206,13 @@ public class OperationTable {
                                 final long accountId, final boolean withUpdate) {
         ContentValues initialValues = new ContentValues();
         String key = op.mThirdParty;
-        InfoTables.putKeyIdInThirdParties(ctx, key, initialValues);
+        InfoTables.putKeyIdInThirdParties(ctx, key, initialValues, false);
 
         key = op.mTag;
-        InfoTables.putKeyIdInTags(ctx, key, initialValues);
+        InfoTables.putKeyIdInTags(ctx, key, initialValues, false);
 
         key = op.mMode;
-        InfoTables.putKeyIdInModes(ctx, key, initialValues);
+        InfoTables.putKeyIdInModes(ctx, key, initialValues, false);
 
         initialValues.put(KEY_OP_SUM, op.mSum);
         initialValues.put(KEY_OP_DATE, op.getDate());
@@ -336,19 +336,20 @@ public class OperationTable {
                 OP_ORDERING);
     }
 
+    // used in update op only
     private static ContentValues createContentValuesFromOp(Context ctx,
                                                            final Operation op,
                                                            final boolean updateOccurrences) {
         ContentValues args = new ContentValues();
 
         String key = op.mThirdParty;
-        InfoTables.putKeyIdInThirdParties(ctx, key, args);
+        InfoTables.putKeyIdInThirdParties(ctx, key, args, true);
 
         key = op.mTag;
-        InfoTables.putKeyIdInTags(ctx, key, args);
+        InfoTables.putKeyIdInTags(ctx, key, args, true);
 
         key = op.mMode;
-        InfoTables.putKeyIdInModes(ctx, key, args);
+        InfoTables.putKeyIdInModes(ctx, key, args, true);
 
         args.put(KEY_OP_SUM, op.mSum);
         args.put(KEY_OP_NOTES, op.mNotes);

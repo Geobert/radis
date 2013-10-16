@@ -202,4 +202,6 @@
     <string name="sch_edition">Scheduled transaction edition</string>
     <string name="delete_account">Delete account</string>
     <string name="debug">Debug</string>
+    <string name="use_weighted_infos">Use weighted completion</string>
+    <string name="use_weighted_infos_details">Most used informations are suggested first</string>
 </resources>
