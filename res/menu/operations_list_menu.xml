@@ -6,7 +6,11 @@
             android:title="@string/new_op"
             android:id="@+id/create_operation"
             android:showAsAction="ifRoom"/>
-
+    <item
+            android:id="@+id/go_to_op_checking"
+            android:icon="@drawable/op_checking_48"
+            android:title="@string/op_checking"
+            android:showAsAction="ifRoom"/>
     <item
             android:id="@+id/go_to_sch_op"
             android:icon="@drawable/sched_48"

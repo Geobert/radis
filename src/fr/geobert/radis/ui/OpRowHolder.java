@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui;
 
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,4 +20,6 @@ class OpRowHolder {
     public ImageButton deleteBtn;
     public ImageButton editBtn;
     public ImageButton varBtn;
+    public CheckBox isCheckedBox;
+    public LinearLayout checkedBoxCont;
 }

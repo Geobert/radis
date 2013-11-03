@@ -287,7 +287,7 @@ public class OperationListActivity extends BaseActivity implements
                 if (mOpListCursorAdapter == null) {
                     String[] from = new String[]{OperationTable.KEY_OP_DATE,
                             InfoTables.KEY_THIRD_PARTY_NAME, OperationTable.KEY_OP_SUM,
-                            InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME};
+                            InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME, OperationTable.KEY_OP_CHECKED};
 
                     int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
                     mOpListCursorAdapter =
@@ -487,6 +487,9 @@ public class OperationListActivity extends BaseActivity implements
                 return true;
             case R.id.delete_account:
                 DeleteAccountConfirmationDialog.newInstance(mAccountId).show(getSupportFragmentManager(), "delAccount");
+                return true;
+            case R.id.go_to_op_checking:
+                CheckingOpActivity.callMe(this, mAccountId);
                 return true;
             default:
                 return Tools.onDefaultOptionItemSelected(this, item);

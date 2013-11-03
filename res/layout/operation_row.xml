@@ -2,137 +2,160 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="fill_parent"
               android:layout_height="wrap_content"
-              android:id="@+id/op_row"
+              android:orientation="horizontal"
               android:background="@drawable/op_line"
-              android:orientation="vertical"
-              android:padding="0px">
+              android:padding="0dp"
+        >
 
     <LinearLayout
-            android:id="@+id/separator"
-            android:layout_marginBottom="0dp"
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_margin="0dp"
-            style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_height="25dp">
-
-        <TextView
-                android:id="@+id/month"
-                android:layout_width="match_parent"
-                android:layout_weight="1"
-                android:layout_height="25dp"
-                android:textAllCaps="true"
-                android:layout_marginLeft="8dp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"/>
-
-        <TextView
-                android:id="@+id/today_amount"
-                android:textStyle="bold"
-                android:layout_width="match_parent"
-                android:layout_weight="1"
-                android:layout_height="25dp"
-                android:gravity="right"
-                android:layout_marginRight="5dp"
-                android:textColor="@android:color/white"/>
-
-    </LinearLayout>
-
-
-    <LinearLayout style="@style/OpLine">
-
-        <TextView
-                android:id="@+id/op_date"
-                style="@style/OpRowTextView"
-                android:minWidth="40sp"
-                android:text="24/12"/>
-
-        <TextView
-                android:id="@+id/op_third_party"
-                style="@style/OpRowTextView"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:text="toto"/>
-
-        <TextView
-                android:id="@+id/op_sum"
-                style="@style/OpRowTextView.Sums"
-                android:text="200,00"/>
-    </LinearLayout>
-
-    <LinearLayout
-            style="@style/OpLine"
-            android:gravity="right">
+            android:layout_weight="0.9"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/op_row"
+            android:orientation="vertical"
+            android:padding="0dp">
 
         <LinearLayout
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:layout_weight="1"
-                android:gravity="center_vertical|left"
-                android:orientation="horizontal"
-                android:paddingLeft="5dp">
+                android:id="@+id/separator"
+                android:layout_marginBottom="0dp"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_margin="0dp"
+                style="?android:attr/listSeparatorTextViewStyle"
+                android:layout_height="25dp">
 
-            <ImageView
-                    android:id="@+id/op_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/arrow_down16"
-                    android:contentDescription="@string/new_op"/>
+            <TextView
+                    android:id="@+id/month"
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:layout_height="25dp"
+                    android:textAllCaps="true"
+                    android:layout_marginLeft="8dp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"/>
 
-            <ImageView
-                    android:id="@+id/op_sch_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/sched_22"
-                    android:contentDescription="@string/scheduling"/>
+            <TextView
+                    android:id="@+id/today_amount"
+                    android:textStyle="bold"
+                    android:layout_width="match_parent"
+                    android:layout_weight="1"
+                    android:layout_height="25dp"
+                    android:gravity="right"
+                    android:layout_marginRight="5dp"
+                    android:textColor="@android:color/white"/>
 
-            <ImageView
-                    android:id="@+id/op_trans_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/transfer_left_right16"
-                    android:contentDescription="@string/transfert"/>
         </LinearLayout>
 
-        <TextView
-                android:id="@+id/op_infos"
-                style="@style/OpRowTextView.Infos"
-                android:layout_weight="0"/>
+
+        <LinearLayout style="@style/OpLine">
+
+            <TextView
+                    android:id="@+id/op_date"
+                    style="@style/OpRowTextView"
+                    android:minWidth="40sp"
+                    android:text="24/12"/>
+
+            <TextView
+                    android:id="@+id/op_third_party"
+                    style="@style/OpRowTextView"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:text="toto"/>
+
+            <TextView
+                    android:id="@+id/op_sum"
+                    style="@style/OpRowTextView.Sums"
+                    android:text="200,00"/>
+        </LinearLayout>
+
+        <LinearLayout
+                style="@style/OpLine"
+                android:gravity="right">
+
+            <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical|left"
+                    android:orientation="horizontal"
+                    android:paddingLeft="5dp">
+
+                <ImageView
+                        android:id="@+id/op_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/arrow_down16"
+                        android:contentDescription="@string/new_op"/>
+
+                <ImageView
+                        android:id="@+id/op_sch_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/sched_22"
+                        android:contentDescription="@string/scheduling"/>
+
+                <ImageView
+                        android:id="@+id/op_trans_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/transfer_left_right16"
+                        android:contentDescription="@string/transfert"/>
+            </LinearLayout>
+
+            <TextView
+                    android:id="@+id/op_infos"
+                    style="@style/OpRowTextView.Infos"
+                    android:layout_weight="0"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/actions_cont"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="-50dp"
+                android:visibility="gone"
+                android:gravity="right"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+            <ImageButton
+                    android:id="@+id/edit_op"
+                    android:src="@drawable/edit_48"
+                    android:layout_height="48dp"
+                    android:background="@drawable/action_bg_selector"
+                    android:layout_width="48dp"
+                    android:contentDescription="@string/edit"/>
+
+            <ImageButton
+                    android:id="@+id/variable_action"
+                    android:src="@drawable/edit_sched_48"
+                    android:layout_height="48dp"
+                    android:background="@drawable/action_bg_selector"
+                    android:layout_width="48dp"
+                    android:contentDescription="variable"/>
+
+            <ImageButton
+                    android:id="@+id/delete_op"
+                    android:src="@drawable/trash_48"
+                    android:layout_height="48dp"
+                    android:background="@drawable/action_bg_selector"
+                    android:layout_width="48dp"
+                    android:contentDescription="@string/delete"/>
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <LinearLayout
-            android:id="@+id/actions_cont"
-            android:layout_width="match_parent"
-            android:layout_marginBottom="-50dp"
+            android:id="@+id/checking_cont"
+            android:gravity="center"
             android:visibility="gone"
-            android:gravity="right"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="fill_parent"
+            android:layout_width="wrap_content">
 
-        <ImageButton
-                android:id="@+id/edit_op"
-                android:src="@drawable/edit_48"
-                android:layout_height="48dp"
-                android:background="@drawable/action_bg_selector"
-                android:layout_width="48dp"
-                android:contentDescription="@string/edit"/>
-
-        <ImageButton
-                android:id="@+id/variable_action"
-                android:src="@drawable/edit_sched_48"
-                android:layout_height="48dp"
-                android:background="@drawable/action_bg_selector"
-                android:layout_width="48dp"
-                android:contentDescription="variable"/>
-
-        <ImageButton
-                android:id="@+id/delete_op"
-                android:src="@drawable/trash_48"
-                android:layout_height="48dp"
-                android:background="@drawable/action_bg_selector"
-                android:layout_width="48dp"
-                android:contentDescription="@string/delete"/>
-
+        <CheckBox
+                android:layout_weight="0.1"
+                android:id="@+id/op_checkbox"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"/>
     </LinearLayout>
-
 </LinearLayout>

@@ -22,6 +22,7 @@ public class Operation implements Parcelable {
     public long mScheduledId;
     public long mRowId;
     public String mTransSrcAccName;
+    public boolean isChecked;
 
     // if these value are != 0, it is a transfert operation between 2 accounts
     // mTransferAccountId is the other account
@@ -41,6 +42,7 @@ public class Operation implements Parcelable {
         mTransferAccountId = op.mTransferAccountId;
         mTransSrcAccName = op.mTransSrcAccName;
         mAccountId = op.mAccountId;
+        isChecked = op.isChecked;
     }
 
     public Operation(Cursor op) {
@@ -85,6 +87,7 @@ public class Operation implements Parcelable {
         if (accIdx >= 0) {
             mAccountId = op.getLong(accIdx);
         }
+        isChecked = op.getInt(op.getColumnIndex(OperationTable.KEY_OP_CHECKED)) == 1;
     }
 
     public Operation() {
@@ -97,6 +100,7 @@ public class Operation implements Parcelable {
         mScheduledId = 0;
         mTransferAccountId = 0;
         mAccountId = 0;
+        isChecked = false;
     }
 
     public Operation(Parcel parcel) {
@@ -188,6 +192,7 @@ public class Operation implements Parcelable {
         dest.writeLong(mSum);
         dest.writeLong(mScheduledId);
         dest.writeLong(mTransferAccountId);
+        dest.writeInt(isChecked ? 1 : 0);
     }
 
     protected void readFromParcel(Parcel in) {
@@ -214,6 +219,7 @@ public class Operation implements Parcelable {
         mSum = in.readLong();
         mScheduledId = in.readLong();
         mTransferAccountId = in.readLong();
+        isChecked = in.readInt() == 1;
     }
 
     public static final Parcelable.Creator<Operation> CREATOR = new Parcelable.Creator<Operation>() {

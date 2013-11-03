@@ -52,6 +52,10 @@
                 android:launchMode="singleTop">
         </activity>
         <activity
+                android:name=".ui.CheckingOpActivity"
+                android:launchMode="singleTop">
+        </activity>
+        <activity
                 android:name=".ui.editor.ScheduledOperationEditor"
                 android:label="@string/sch_edition"
                 android:launchMode="singleTop">

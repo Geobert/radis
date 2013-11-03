@@ -209,4 +209,8 @@
     <string name="debug">Debug</string>
     <string name="use_weighted_infos">Utiliser la complétion pondérée</string>
     <string name="use_weighted_infos_details">Les informations les plus utilisées seront proposées en tête</string>
+    <string name="no_unchecked_operation">Aucune opération non pointée</string>
+    <string name="targeted_sum">Somme\nvisée :</string>
+    <string name="checked_ops_sums_title"><![CDATA[Pointées :\nReste :]]></string>
+    <string name="op_checking">Pointer les opérations</string>
 </resources>

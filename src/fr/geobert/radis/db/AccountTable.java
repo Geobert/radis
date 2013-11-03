@@ -34,16 +34,18 @@ public class AccountTable {
     public static final String KEY_ACCOUNT_CUR_SUM_DATE = "account_current_sum_date"; // according to current projection mode
     public static final String KEY_ACCOUNT_PROJECTION_MODE = "account_projection_mode";
     public static final String KEY_ACCOUNT_PROJECTION_DATE = "account_projection_date";
+    public static final String KEY_ACCOUNT_CHECKED_OP_SUM = "account_checked_op_sum";
+
     public static final String[] ACCOUNT_COLS = {KEY_ACCOUNT_ROWID,
             KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY,
             KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_PROJECTION_MODE,
-            KEY_ACCOUNT_PROJECTION_DATE};
+            KEY_ACCOUNT_PROJECTION_DATE, KEY_ACCOUNT_CHECKED_OP_SUM};
 
     public static final String[] ACCOUNT_FULL_COLS = {KEY_ACCOUNT_ROWID,
             KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY,
             KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_PROJECTION_MODE,
             KEY_ACCOUNT_PROJECTION_DATE, KEY_ACCOUNT_DESC,
-            KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_OP_SUM};
+            KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_CHECKED_OP_SUM};
 
     private static final String DATABASE_ACCOUNT_CREATE_v7 = "create table "
             + DATABASE_ACCOUNT_TABLE + "(" + KEY_ACCOUNT_ROWID
@@ -63,7 +65,7 @@ public class AccountTable {
             + " integer not null, " + KEY_ACCOUNT_CUR_SUM_DATE
             + " integer not null, " + KEY_ACCOUNT_CURRENCY + " text not null, "
             + KEY_ACCOUNT_PROJECTION_MODE + " integer not null, "
-            + KEY_ACCOUNT_PROJECTION_DATE + " string);";
+            + KEY_ACCOUNT_PROJECTION_DATE + " string, " + KEY_ACCOUNT_CHECKED_OP_SUM + " integer not null);";
 
     protected static final String ADD_CUR_DATE_COLUNM = "ALTER TABLE "
             + DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
@@ -76,6 +78,10 @@ public class AccountTable {
     protected static final String ADD_PROJECTION_MODE_DATE = "ALTER TABLE "
             + DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
             + KEY_ACCOUNT_PROJECTION_DATE + " string";
+
+    protected static final String ADD_CHECKED_SUM_COLUNM = "ALTER TABLE "
+            + DATABASE_ACCOUNT_TABLE + " ADD COLUMN "
+            + KEY_ACCOUNT_CHECKED_OP_SUM + " integer not null DEFAULT 0";
 
     protected static final String TRIGGER_ON_DELETE_ACCOUNT = "CREATE TRIGGER on_delete_account AFTER DELETE ON "
             + DATABASE_ACCOUNT_TABLE
@@ -121,6 +127,7 @@ public class AccountTable {
         values.put(KEY_ACCOUNT_CURRENCY, currency);
         values.put(KEY_ACCOUNT_PROJECTION_MODE, projectionMode);
         values.put(KEY_ACCOUNT_PROJECTION_DATE, projectionDate);
+        values.put(KEY_ACCOUNT_CHECKED_OP_SUM, 0);
 
         setCurrentSumAndDate(ctx, 0, values, start_sum, projectionMode,
                 projectionDate);
@@ -362,9 +369,7 @@ public class AccountTable {
                 setCurrentSumAndDate(ctx, accountId, args, start_sum, projMode,
                         projDate);
             }
-            return ctx.getContentResolver().update(
-                    Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
-                    args, null, null) > 0;
+            return updateAccount(ctx, accountId, args) > 0;
         } else {
             return false;
         }
@@ -398,9 +403,13 @@ public class AccountTable {
                                                 String currency) {
         ContentValues args = new ContentValues();
         args.put(KEY_ACCOUNT_CURRENCY, currency);
+        return updateAccount(ctx, accountId, args) > 0;
+    }
+
+    public static int updateAccount(Context ctx, long accountId, ContentValues values) {
         return ctx.getContentResolver().update(
                 Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
-                args, null, null) > 0;
+                values, null, null);
     }
 
     public static boolean updateAccount(Context ctx, long accountId,
@@ -416,9 +425,7 @@ public class AccountTable {
         args.put(KEY_ACCOUNT_PROJECTION_DATE, projectionController.getDate());
         setCurrentSumAndDate(ctx, accountId, args, start_sum,
                 projectionController.getMode(), projectionController.getDate());
-        return ctx.getContentResolver().update(
-                Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
-                args, null, null) > 0;
+        return updateAccount(ctx, accountId, args) > 0;
     }
 
     public static void updateProjection(Context ctx, long accountId,
@@ -478,9 +485,7 @@ public class AccountTable {
                         .getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum + sumToAdd);
             }
-            if (ctx.getContentResolver().update(
-                    Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
-                    args, null, null) > 0) {
+            if (updateAccount(ctx, accountId, args) > 0) {
                 if (mProjectionMode == 0) {
                     mProjectionDate = opDate;
                 }
@@ -488,6 +493,49 @@ public class AccountTable {
         }
         accountCursor.close();
     }
+
+    public static long getProjectionDate() {
+        return mProjectionDate;
+    }
+
+    public static void updateCheckedOpSum(Context ctx, Cursor op, boolean b) {
+        final long sum = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_SUM));
+        final long accountId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_ACCOUNT_ID));
+        final long transAccountId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+
+        Cursor acc = fetchAccount(ctx, accountId);
+        if (acc != null) {
+            if (acc.moveToFirst()) {
+                ContentValues values = new ContentValues();
+                values.put(KEY_ACCOUNT_CHECKED_OP_SUM,
+                        acc.getLong(acc.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (b ? sum : -sum));
+                updateAccount(ctx, accountId, values);
+
+                if (transAccountId > 0) {
+                    values.clear();
+                    acc.close();
+                    acc = fetchAccount(ctx, transAccountId);
+                    values.put(KEY_ACCOUNT_CHECKED_OP_SUM,
+                            acc.getLong(acc.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (b ? -sum : sum));
+                    updateAccount(ctx, transAccountId, values);
+                }
+            }
+            acc.close();
+        }
+    }
+
+    public static long getCheckedSum(Context ctx, Long accountId) {
+        Cursor c = fetchAccount(ctx, accountId);
+        long res = 0;
+        if (c != null) {
+            if (c.moveToFirst()) {
+                res = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM));
+            }
+            c.close();
+        }
+        return res;
+    }
+
 
     // UPGRADE FUNCTIONS
     private static void rawSetCurrentSumAndDate(SQLiteDatabase db,
@@ -618,6 +666,10 @@ public class AccountTable {
         }
     }
 
+    static void upgradeFromV16(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL(ADD_CHECKED_SUM_COLUNM);
+    }
+
     static void upgradeFromV9(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(ADD_PROJECTION_MODE_COLUNM);
         db.execSQL(ADD_PROJECTION_MODE_DATE);
@@ -690,7 +742,4 @@ public class AccountTable {
         db.execSQL(ADD_CUR_DATE_COLUNM);
     }
 
-    public static long getProjectionDate() {
-        return mProjectionDate;
-    }
 }

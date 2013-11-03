@@ -26,6 +26,7 @@ public class OperationTable {
     public static final String KEY_OP_NOTES = "notes";
     public static final String KEY_OP_TRANSFERT_ACC_ID = "transfert_acc_id";
     public static final String KEY_OP_TRANSFERT_ACC_NAME = "transfert_acc_src_name";
+    public static final String KEY_OP_CHECKED = "checked";
     public static final String OP_ORDERING = "ops." + KEY_OP_DATE
             + " desc, ops." + KEY_OP_ROWID + " desc";
     public static final String DATABASE_OP_TABLE_JOINTURE = DATABASE_OPERATIONS_TABLE
@@ -46,27 +47,35 @@ public class OperationTable {
             + " tag ON ops."
             + KEY_OP_TAG
             + " = tag." + InfoTables.KEY_TAG_ROWID;
-    public static final String[] OP_COLS_QUERY = {"ops." + KEY_OP_ROWID,
+    public static final String[] OP_COLS_QUERY = {"ops." + KEY_OP_ROWID, // 0
             "tp." + InfoTables.KEY_THIRD_PARTY_NAME,
             "tag." + InfoTables.KEY_TAG_NAME,
-            "mode." + InfoTables.KEY_MODE_NAME, "ops." + KEY_OP_SUM,
-            "ops." + KEY_OP_DATE, "ops." + KEY_OP_ACCOUNT_ID,
-            "ops." + KEY_OP_NOTES, "ops." + KEY_OP_SCHEDULED_ID,
+            "mode." + InfoTables.KEY_MODE_NAME,
+            "ops." + KEY_OP_SUM, // 4
+            "ops." + KEY_OP_DATE,
+            "ops." + KEY_OP_ACCOUNT_ID,
+            "ops." + KEY_OP_NOTES,
+            "ops." + KEY_OP_SCHEDULED_ID, // 8
             "ops." + KEY_OP_TRANSFERT_ACC_ID,
-            "ops." + KEY_OP_TRANSFERT_ACC_NAME};
+            "ops." + KEY_OP_TRANSFERT_ACC_NAME,
+            "ops." + KEY_OP_CHECKED}; // 11
     public static final String RESTRICT_TO_ACCOUNT = "(ops."
             + KEY_OP_ACCOUNT_ID + " = ? OR ops." + KEY_OP_TRANSFERT_ACC_ID
             + " = ?)";
     protected static final String DATABASE_OP_CREATE = "create table "
-            + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID
-            + " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY
-            + " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM
-            + " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, "
-            + KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, "
-            + KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID + " integer, "
-            + KEY_OP_TRANSFERT_ACC_NAME + " text, " + KEY_OP_TRANSFERT_ACC_ID
-            + " integer not null, FOREIGN KEY (" + KEY_OP_THIRD_PARTY
-            + ") REFERENCES " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + "("
+            + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID + " integer primary key autoincrement, "
+            + KEY_OP_THIRD_PARTY + " integer, "
+            + KEY_OP_TAG + " integer, "
+            + KEY_OP_SUM + " integer not null, "
+            + KEY_OP_ACCOUNT_ID + " integer not null, "
+            + KEY_OP_MODE + " integer, "
+            + KEY_OP_DATE + " integer not null, "
+            + KEY_OP_NOTES + " text, "
+            + KEY_OP_SCHEDULED_ID + " integer, "
+            + KEY_OP_TRANSFERT_ACC_NAME + " text, "
+            + KEY_OP_TRANSFERT_ACC_ID + " integer not null, "
+            + KEY_OP_CHECKED + " integer not null, "
+            + " FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + "("
             + InfoTables.KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY ("
             + KEY_OP_TAG + ") REFERENCES " + InfoTables.DATABASE_TAGS_TABLE
             + "(" + InfoTables.KEY_TAG_ROWID + "), FOREIGN KEY (" + KEY_OP_MODE
@@ -136,6 +145,9 @@ public class OperationTable {
             + KEY_OP_TRANSFERT_ACC_ID + " integer not null DEFAULT 0";
     protected static final String ADD_TRANSFERT_NAME_COLUNM = "ALTER TABLE %s ADD COLUMN "
             + KEY_OP_TRANSFERT_ACC_NAME + " text";
+    protected static final String ADD_CHECKED_COLUNM = "ALTER TABLE %s ADD COLUMN "
+            + KEY_OP_CHECKED + " integer not null DEFAULT 0";
+
     private static final String TAG = "OperationTable";
 
     static void onCreate(SQLiteDatabase db) {
@@ -221,6 +233,7 @@ public class OperationTable {
         initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
         initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
         initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
+        initialValues.put(KEY_OP_CHECKED, 0);
         Uri res = ctx.getContentResolver().insert(
                 DbContentProvider.OPERATION_URI, initialValues);
         op.mRowId = Long.parseLong(res.getLastPathSegment());
@@ -355,6 +368,7 @@ public class OperationTable {
         args.put(KEY_OP_NOTES, op.mNotes);
         args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
         args.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
+        args.put(KEY_OP_CHECKED, op.isChecked ? 1 : 0);
         if (!updateOccurrences) {
             args.put(KEY_OP_DATE, op.getDate());
             args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
@@ -458,9 +472,26 @@ public class OperationTable {
                                 Long.toString(schOpId)});
     }
 
+    public static void updateOpCheckedStatus(Context ctx, Cursor cursor, boolean b) {
+        ContentValues values = new ContentValues();
+        values.put(KEY_OP_CHECKED, b);
+        final int res =
+                ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + cursor.getLong(0)),
+                        values, null, null);
+        if (res == 1) {
+            AccountTable.updateCheckedOpSum(ctx, cursor, b);
+        } else {
+            Log.e(TAG, "updateOpCheckedStatus should update only one operation");
+        }
+    }
+
+
     // UPGRADE FUNCTIONS
-    static void upgradeFromV11(SQLiteDatabase db, int oldVersion,
-                               int newVersion) {
+    static void upgradeFromV16(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL(String.format(ADD_CHECKED_COLUNM, DATABASE_OPERATIONS_TABLE));
+    }
+
+    static void upgradeFromV11(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(String.format(ADD_TRANSFERT_ID_COLUNM,
                 DATABASE_OPERATIONS_TABLE));
         db.execSQL(String.format(ADD_TRANSFERT_NAME_COLUNM,

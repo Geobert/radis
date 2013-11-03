@@ -204,4 +204,8 @@
     <string name="debug">Debug</string>
     <string name="use_weighted_infos">Use weighted completion</string>
     <string name="use_weighted_infos_details">Most used informations are suggested first</string>
+    <string name="no_unchecked_operation">No unchecked transaction available</string>
+    <string name="targeted_sum">Targeted\nsum: </string>
+    <string name="checked_ops_sums_title"><![CDATA[Checked:\nLeft:]]></string>
+    <string name="op_checking">Transactions checking</string>
 </resources>

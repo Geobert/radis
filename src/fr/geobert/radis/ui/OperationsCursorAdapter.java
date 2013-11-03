@@ -6,6 +6,7 @@ import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -57,6 +58,8 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
         h.editBtn = (ImageButton) h.actionsCont.findViewById(R.id.edit_op);
         h.varBtn = (ImageButton) h.actionsCont.findViewById(R.id.variable_action);
         h.opName = (TextView) v.findViewById(R.id.op_third_party);
+        h.isCheckedBox = (CheckBox) v.findViewById(R.id.op_checkbox);
+        h.checkedBoxCont = (LinearLayout) v.findViewById(R.id.checking_cont);
         v.setTag(h);
         // HACK to workaround a glitch at the end of animation
         ExpandUpAnimation.mBg = h.separator.getBackground();

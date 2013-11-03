@@ -66,7 +66,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
     @Override
     public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
         final String colName = cursor.getColumnName(columnIndex);
-        final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent()).getTag();
+        final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent().getParent()).getTag();
         if (colName.equals(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY_UNIT)) {
             StringBuilder b = new StringBuilder();
             int periodicityUnit = cursor.getInt(columnIndex);

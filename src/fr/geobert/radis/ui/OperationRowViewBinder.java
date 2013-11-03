@@ -29,7 +29,7 @@ class OperationRowViewBinder extends OpViewBinder {
         initCache(c);
     }
 
-    private void fillTag(TextView textView, StringBuilder b, final Cursor cursor, final int columnIndex) {
+    protected void fillTag(TextView textView, StringBuilder b, final Cursor cursor, final int columnIndex) {
         b.setLength(0);
         String s = cursor.getString(columnIndex);
         if (null != s) {
@@ -58,7 +58,7 @@ class OperationRowViewBinder extends OpViewBinder {
         return res;
     }
 
-    private void configureCell(final Cursor cursor, OpRowHolder h) {
+    protected void configureCell(final Cursor cursor, OpRowHolder h) {
         final long schedId = setSchedImg(cursor, h.scheduledImg);
         final int position = cursor.getPosition();
         final boolean needInfos = position == selectedPosition;
@@ -153,12 +153,12 @@ class OperationRowViewBinder extends OpViewBinder {
     public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
         final String colName = cursor.getColumnName(columnIndex);
         if (colName.equals(InfoTables.KEY_TAG_NAME)) {
-            final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent()).getTag();
+            final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent().getParent()).getTag();
             fillTag((TextView) view, h.tagBuilder, cursor, columnIndex);
             configureCell(cursor, h);
             return true;
         } else if (colName.equals(InfoTables.KEY_THIRD_PARTY_NAME)) {
-            final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent()).getTag();
+            final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent().getParent()).getTag();
             TextView textView = h.opName;// ((TextView) view);
 //            h.opName = textView;
             final long transfertId = cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
