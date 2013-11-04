@@ -159,6 +159,23 @@ public class AccountTable {
                                 account.getString(account
                                         .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
 
+                        Cursor allOps = OperationTable.fetchAllCheckedOps(ctx, accountId);
+                        long sum = 0;
+                        if (allOps != null) {
+                            if (allOps.moveToFirst()) {
+                                final int sumIdx = allOps.getColumnIndex(OperationTable.KEY_OP_SUM);
+                                final int tranAccIdx = allOps.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID);
+                                do {
+                                    long s = allOps.getLong(sumIdx);
+                                    if (allOps.getLong(tranAccIdx) > 0) {
+                                        s = -s;
+                                    }
+                                    sum += s;
+                                } while (allOps.moveToNext());
+                            }
+                            allOps.close();
+                        }
+                        values.put(KEY_ACCOUNT_CHECKED_OP_SUM, sum);
                         res = ctx.getContentResolver().update(
                                 Uri.parse(DbContentProvider.ACCOUNT_URI + "/"
                                         + accountId), values, null, null);
@@ -498,11 +515,8 @@ public class AccountTable {
         return mProjectionDate;
     }
 
-    public static void updateCheckedOpSum(Context ctx, Cursor op, boolean b) {
-        final long sum = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_SUM));
-        final long accountId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_ACCOUNT_ID));
-        final long transAccountId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
-
+    public static void updateCheckedOpSum(Context ctx, final long sum, final long accountId,
+                                          final long transAccountId, final boolean b) {
         Cursor acc = fetchAccount(ctx, accountId);
         if (acc != null) {
             if (acc.moveToFirst()) {
@@ -522,6 +536,13 @@ public class AccountTable {
             }
             acc.close();
         }
+    }
+
+    public static void updateCheckedOpSum(Context ctx, Cursor op, boolean b) {
+        final long sum = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_SUM));
+        final long accountId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_ACCOUNT_ID));
+        final long transAccountId = op.getLong(op.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+        updateCheckedOpSum(ctx, sum, accountId, transAccountId, b);
     }
 
     public static long getCheckedSum(Context ctx, Long accountId) {

@@ -196,7 +196,7 @@
     <string name="err_transfert_no_src">Le transfert n\'a pas de source</string>
     <string name="err_transfert_no_dst">Le transfert n\'a pas de destination</string>
     <string name="err_transfert_same_acc">La source et la destination du transfert ne peuvent être identiques</string>
-    <string name="transfert">Transfert entre comptes</string>
+    <string name="transfert">Transfert</string>
     <string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
     <string name="choose_account">Sélectionnez un compte</string>
     <string name="defined_by_transfert">Défini par le transfert</string>
@@ -213,4 +213,5 @@
     <string name="targeted_sum">Somme\nvisée :</string>
     <string name="checked_ops_sums_title"><![CDATA[Pointées :\nReste :]]></string>
     <string name="op_checking">Pointer les opérations</string>
+    <string name="checked">Pointée</string>
 </resources>

@@ -174,6 +174,19 @@ public class OperationTable {
         return c;
     }
 
+    public static Cursor fetchAllCheckedOps(Context ctx, final long accountId) {
+        Cursor c = ctx.getContentResolver().query(
+                DbContentProvider.OPERATION_JOINED_URI,
+                OP_COLS_QUERY,
+                RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = 1",
+                new String[]{Long.toString(accountId),
+                        Long.toString(accountId)}, OP_ORDERING);
+        if (null != c) {
+            c.moveToFirst();
+        }
+        return c;
+    }
+
     public static long computeSumFromCursor(Cursor c, long curAccount) {
         long sum = 0L;
         final int sumIdx = c.getColumnIndex(KEY_OP_SUM);
@@ -368,7 +381,7 @@ public class OperationTable {
         args.put(KEY_OP_NOTES, op.mNotes);
         args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
         args.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
-        args.put(KEY_OP_CHECKED, op.isChecked ? 1 : 0);
+        args.put(KEY_OP_CHECKED, op.mIsChecked ? 1 : 0);
         if (!updateOccurrences) {
             args.put(KEY_OP_DATE, op.getDate());
             args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
@@ -405,6 +418,10 @@ public class OperationTable {
             } else if (originalOp.mTransferAccountId > 0) {
                 // op become not transfert, but was a transfert
                 AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, op.getDate());
+            }
+
+            if (originalOp.mIsChecked != op.mIsChecked) {
+                AccountTable.updateCheckedOpSum(ctx, op.mSum, op.mAccountId, op.mTransferAccountId, op.mIsChecked);
             }
 
             return true;

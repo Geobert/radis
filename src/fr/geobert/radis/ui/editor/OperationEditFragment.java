@@ -45,6 +45,7 @@ public class OperationEditFragment extends SherlockFragment {
     private EditText mNotesText;
     private CheckBox mIsTransfertCheck;
     private CommonOpEditor mActivity;
+    private CheckBox mIsChecked;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,8 +75,8 @@ public class OperationEditFragment extends SherlockFragment {
         mOpModeText.setNextFocusDownId(R.id.edit_op_notes);
 
         mIsTransfertCheck = (CheckBox) mActivity.findViewById(R.id.is_transfert);
-//        mTransfertCont.setVisibility(View.GONE);
-//        mThirdPartyCont.setVisibility(View.VISIBLE);
+        mIsChecked = (CheckBox) mActivity.findViewById(R.id.is_checked);
+
         mThirdPartyCont.post(new Runnable() {
             private void adjustImageButton(ImageButton btn) {
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
@@ -276,7 +277,7 @@ public class OperationEditFragment extends SherlockFragment {
         } else {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
-
+        mIsChecked.setChecked(op.mIsChecked);
         populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 
@@ -350,6 +351,7 @@ public class OperationEditFragment extends SherlockFragment {
         op.setDay(dp.getDayOfMonth());
         op.setMonth(dp.getMonth());
         op.setYear(dp.getYear());
+        op.mIsChecked = mIsChecked.isChecked();
 
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
