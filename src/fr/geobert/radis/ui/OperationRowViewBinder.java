@@ -60,6 +60,8 @@ class OperationRowViewBinder extends OpViewBinder {
 
     protected void configureCell(final Cursor cursor, OpRowHolder h) {
         final long schedId = setSchedImg(cursor, h.scheduledImg);
+        h.checkedImg.setVisibility(cursor.getInt(cursor.getColumnIndex(OperationTable.KEY_OP_CHECKED)) == 1 ?
+                View.VISIBLE : View.GONE);
         final int position = cursor.getPosition();
         final boolean needInfos = position == selectedPosition;
         final int op_date_idx = cursor.getColumnIndex(OperationTable.KEY_OP_DATE);

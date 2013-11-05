@@ -52,6 +52,7 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
         h.separator = (LinearLayout) v.findViewById(R.id.separator);
         h.month = (TextView) v.findViewById(R.id.month);
         h.scheduledImg = (ImageView) v.findViewById(R.id.op_sch_icon);
+        h.checkedImg = (ImageView) v.findViewById(R.id.op_checked_icon);
         h.sumAtSelection = (TextView) v.findViewById(R.id.today_amount);
         h.actionsCont = v.findViewById(R.id.actions_cont);
         h.deleteBtn = (ImageButton) h.actionsCont.findViewById(R.id.delete_op);

@@ -24,6 +24,7 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
     protected void configureCell(final Cursor cursor, OpRowHolder h) {
         final int position = cursor.getPosition();
         h.scheduledImg.setVisibility(View.GONE);
+        h.checkedImg.setVisibility(View.GONE);
         mCellStates[position] = STATE_REGULAR_CELL;
         h.sumAtSelection.setText("");
         h.month.setText("");

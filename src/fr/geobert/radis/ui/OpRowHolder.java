@@ -22,4 +22,5 @@ class OpRowHolder {
     public ImageButton varBtn;
     public CheckBox isCheckedBox;
     public LinearLayout checkedBoxCont;
+    public ImageView checkedImg;
 }

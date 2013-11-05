@@ -378,4 +378,9 @@ public class OperationEditFragment extends SherlockFragment {
         super.onPause();
         fillOperationWithInputs(mActivity.mCurrentOp);
     }
+
+    public void setCheckedEditVisibility(int visibility) {
+//        mActivity.findViewById(R.id.checked_title).setVisibility(visibility);
+        mIsChecked.setVisibility(visibility);
+    }
 }

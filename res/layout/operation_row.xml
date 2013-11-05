@@ -106,6 +106,14 @@
                     android:id="@+id/op_infos"
                     style="@style/OpRowTextView.Infos"
                     android:layout_weight="0"/>
+            <ImageView
+                    android:id="@+id/op_checked_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:src="@drawable/checked_26"
+                    android:layout_marginRight="2dp"
+                    android:contentDescription="@string/checked"/>
+
         </LinearLayout>
 
         <LinearLayout

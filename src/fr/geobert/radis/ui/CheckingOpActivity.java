@@ -22,8 +22,8 @@ import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
-import fr.geobert.radis.tools.CorrectCommaWatcher;
 import fr.geobert.radis.tools.Formater;
+import fr.geobert.radis.tools.TargetSumWatcher;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
@@ -74,8 +74,8 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
         actionbar.setIcon(R.drawable.op_checking_48);
         actionbar.setDisplayShowTitleEnabled(false);
 
-        final CorrectCommaWatcher w = new CorrectCommaWatcher(
-                Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mTargetedSum);
+        final TargetSumWatcher w = new TargetSumWatcher(
+                Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mTargetedSum, this);
         w.setAutoNegate(false);
         mTargetedSum.addTextChangedListener(w);
         mTargetedSum.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -175,7 +175,9 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     @Override
     public void onLoadFinished(Loader<Cursor> objectLoader, Cursor data) {
         mOpListCursorAdapter.changeCursor(data);
-
+        mTargetedSum.selectAll();
+        mTargetedSum.requestFocus();
+        Tools.showKeyboard(this);
     }
 
     @Override
@@ -212,10 +214,14 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     public void updateDisplay(Intent intent) {
         final long target = Tools.extractSumFromStr(mTargetedSum.getText().toString());
         final long checkedSum = mAccountManager.getCurrentAccountCheckedSum();
+        final long diff = target - checkedSum;
         final String currencySymbol = mAccountManager.getCurAccCurrencySymbol();
         mStatusTxt.setText(String.format("%s%s\n%s%s",
                 Formater.getSumFormater().format(checkedSum / 100.0d), currencySymbol,
-                Formater.getSumFormater().format((target - checkedSum) / 100.0d), currencySymbol));
+                Formater.getSumFormater().format(diff / 100.0d), currencySymbol));
+        if (diff == 0) {
+            // TODO popup 
+        }
     }
 
     @Override

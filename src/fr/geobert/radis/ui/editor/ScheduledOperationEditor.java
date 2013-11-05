@@ -14,6 +14,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.view.View;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
@@ -183,6 +184,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     @Override
     protected void populateFields() {
         mMainEditTab.getFragment().populateCommonFields(mCurrentOp);
+        mMainEditTab.getFragment().setCheckedEditVisibility(View.GONE);
         mSchedEditTab.getFragment().populateFields();
     }
 

@@ -156,6 +156,11 @@ public class Tools {
         return false;
     }
 
+    public static void showKeyboard(Activity ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.showSoftInput(ctx.getCurrentFocus(), InputMethodManager.SHOW_IMPLICIT);
+    }
+
     protected static class AdvancedDialog extends DialogFragment {
         private int mId;
 

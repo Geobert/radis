@@ -15,8 +15,7 @@ public class CorrectCommaWatcher implements TextWatcher {
         mEditText = w;
     }
 
-    @Override
-    public void afterTextChanged(Editable s) {
+    protected void correctComma(Editable s) {
         boolean haveComma = false;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -35,6 +34,9 @@ public class CorrectCommaWatcher implements TextWatcher {
                 }
             }
         }
+    }
+
+    protected void autoNegate(Editable s) {
         if (s.length() > 0) {
             char c = s.charAt(0);
             if (c == '+') {
@@ -51,6 +53,12 @@ public class CorrectCommaWatcher implements TextWatcher {
             mEditText.setGravity(Gravity.CENTER_VERTICAL | Gravity.LEFT);
             mAutoNegate = true;
         }
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        correctComma(s);
+        autoNegate(s);
     }
 
     @Override
