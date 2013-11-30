@@ -178,9 +178,22 @@ public class OperationTable {
         Cursor c = ctx.getContentResolver().query(
                 DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY,
-                RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = 1",
+                RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ?",
                 new String[]{Long.toString(accountId),
-                        Long.toString(accountId)}, OP_ORDERING);
+                        Long.toString(accountId), Integer.toString(1)}, OP_ORDERING);
+        if (null != c) {
+            c.moveToFirst();
+        }
+        return c;
+    }
+
+    public static Cursor fetchAllUncheckedOps(Context ctx, final long accountId, final long maxDate) {
+        Cursor c = ctx.getContentResolver().query(
+                DbContentProvider.OPERATION_JOINED_URI,
+                OP_COLS_QUERY,
+                RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ? AND ops." +
+                        KEY_OP_DATE + " <= ?", new String[]{Long.toString(accountId),
+                Long.toString(accountId), Integer.toString(0), Long.toString(maxDate)}, OP_ORDERING);
         if (null != c) {
             c.moveToFirst();
         }
@@ -502,6 +515,18 @@ public class OperationTable {
         }
     }
 
+    public static void updateOpCheckedStatus(Context ctx, Operation op, boolean b) {
+        ContentValues values = new ContentValues();
+        values.put(KEY_OP_CHECKED, b);
+        final int res =
+                ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + op.mRowId),
+                        values, null, null);
+        if (res == 1) {
+            AccountTable.updateCheckedOpSum(ctx, op, b);
+        } else {
+            Log.e(TAG, "updateOpCheckedStatus should update only one operation");
+        }
+    }
 
     // UPGRADE FUNCTIONS
     static void upgradeFromV16(SQLiteDatabase db, int oldVersion, int newVersion) {

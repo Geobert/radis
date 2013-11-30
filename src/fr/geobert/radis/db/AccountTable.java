@@ -284,7 +284,7 @@ public class AccountTable {
 
     public static CursorLoader getAllAccountsLoader(Context ctx) {
         return new CursorLoader(ctx, DbContentProvider.ACCOUNT_URI,
-                ACCOUNT_COLS, null, null, null);
+                ACCOUNT_FULL_COLS, null, null, null);
     }
 
     static boolean checkNeedUpdateProjection(Context ctx, Operation op,
@@ -545,6 +545,13 @@ public class AccountTable {
         updateCheckedOpSum(ctx, sum, accountId, transAccountId, b);
     }
 
+    public static void updateCheckedOpSum(Context ctx, Operation op, boolean b) {
+        final long sum = op.mSum;
+        final long accountId = op.mAccountId;
+        final long transAccountId = op.mTransferAccountId;
+        updateCheckedOpSum(ctx, sum, accountId, transAccountId, b);
+    }
+
     public static long getCheckedSum(Context ctx, Long accountId) {
         Cursor c = fetchAccount(ctx, accountId);
         long res = 0;
@@ -762,5 +769,4 @@ public class AccountTable {
     static void upgradeFromV4(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL(ADD_CUR_DATE_COLUNM);
     }
-
 }

@@ -1,6 +1,9 @@
 package fr.geobert.radis.ui;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -9,11 +12,15 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
@@ -27,6 +34,8 @@ import fr.geobert.radis.tools.TargetSumWatcher;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class CheckingOpActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
@@ -37,9 +46,12 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     private EditText mTargetedSum;
     private ListView mListView;
     private SimpleCursorAdapter mAccountAdapter;
-    private OperationsCursorAdapter mOpListCursorAdapter;
+    private OperationsCursorAdapter mOpListAdapter;
     private long mCurrentAccount;
     private CursorLoader mLoader;
+    private boolean initialized = false;
+    private Cursor mUncheckedOps;
+    private CheckingOpRowViewBinder mInnerOpViewBinder;
 
     public static void callMe(Context ctx, final long currentAccountId) {
         Intent i = new Intent(ctx, CheckingOpActivity.class);
@@ -61,11 +73,12 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME, OperationTable.KEY_OP_CHECKED};
 
         int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
-        mOpListCursorAdapter =
+        mInnerOpViewBinder = new CheckingOpRowViewBinder(this, null,
+                OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE);
+        mOpListAdapter =
                 new OperationsCursorAdapter(this, R.layout.operation_row, from, to, null,
-                        new CheckingOpRowViewBinder(this, null,
-                                OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE));
-        mListView.setAdapter(mOpListCursorAdapter);
+                        mInnerOpViewBinder);
+        mListView.setAdapter(mOpListAdapter);
         mListView.setEmptyView(findViewById(android.R.id.empty));
 
         ActionBar actionbar = getSupportActionBar();
@@ -129,11 +142,10 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                     if (id == mCurrentAccount) {
                         getSupportActionBar().setSelectedNavigationItem(pos);
                         mAccountManager.setCurrentAccountId(id);
-                        Cursor acc = (Cursor) mAccountAdapter.getItem(pos);
-                        final long curCheckedSum =
-                                acc.getLong(acc.getColumnIndex(AccountTable.KEY_ACCOUNT_CHECKED_OP_SUM));
-                        mTargetedSum.setText(Formater.getSumFormater().format(curCheckedSum / 100.d));
-                        updateDisplay(null);
+//                        Cursor acc = (Cursor) mAccountAdapter.getItem(pos);
+//                        final long curCheckedSum =
+//                                acc.getLong(acc.getColumnIndex(AccountTable.KEY_ACCOUNT_CHECKED_OP_SUM));
+                        mTargetedSum.setText(Formater.getSumFormater().format(mAccountManager.getCurrentAccountSum() / 100.d));
                         break;
                     } else {
                         pos++;
@@ -174,10 +186,12 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
 
     @Override
     public void onLoadFinished(Loader<Cursor> objectLoader, Cursor data) {
-        mOpListCursorAdapter.changeCursor(data);
+        mUncheckedOps = data;
+        mOpListAdapter.changeCursor(data);
         mTargetedSum.selectAll();
         mTargetedSum.requestFocus();
         Tools.showKeyboard(this);
+        this.initialized = true;
     }
 
     @Override
@@ -214,14 +228,23 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     public void updateDisplay(Intent intent) {
         final long target = Tools.extractSumFromStr(mTargetedSum.getText().toString());
         final long checkedSum = mAccountManager.getCurrentAccountCheckedSum();
-        final long diff = target - checkedSum;
+        final long total = mAccountManager.getCurrentAccountStartSum() + checkedSum;
+        final long diff = target - total;
         final String currencySymbol = mAccountManager.getCurAccCurrencySymbol();
         mStatusTxt.setText(String.format("%s%s\n%s%s",
-                Formater.getSumFormater().format(checkedSum / 100.0d), currencySymbol,
+                Formater.getSumFormater().format(total / 100.0d), currencySymbol,
                 Formater.getSumFormater().format(diff / 100.0d), currencySymbol));
-        if (diff == 0) {
-            // TODO popup 
+        if (initialized && diff == 0) {
+            Tools.popMessage(this, getString(R.string.targeted_sum_reached), R.string.op_checking,
+                    getString(R.string.ok), null);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getSupportMenuInflater();
+        inflater.inflate(R.menu.operations_checking_menu, menu);
+        return true;
     }
 
     @Override
@@ -230,8 +253,101 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
             case android.R.id.home:
                 finish();
                 return true;
+            case R.id.auto_checking:
+                AutoCheckingDialog.newInstance(new AutoCheckingClickListener()).show(getSupportFragmentManager(),
+                        "autochecking_dialog");
+                return true;
             default:
                 return Tools.onDefaultOptionItemSelected(this, item);
+        }
+    }
+
+    private class AutoCheckingClickListener implements DialogInterface.OnClickListener {
+        DatePicker datePicker;
+//        EditText nbMaxOps;
+
+        @Override
+        public void onClick(DialogInterface dialogInterface, int i) {
+            doAutoChecking(new GregorianCalendar(datePicker.getYear(), datePicker.getMonth(),
+                    datePicker.getDayOfMonth()));
+        }
+    }
+
+    private void doAutoChecking(final GregorianCalendar maxDate) {
+        Cursor uncheckedOps = mUncheckedOps;
+        if (uncheckedOps != null) {
+            final int origPos = uncheckedOps.getPosition();
+            final int sumIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_SUM);
+            if (uncheckedOps.moveToLast()) {
+                final long curCheckedSum = mAccountManager.getCurrentAccountCheckedSum();
+                final long targetSum = Tools.extractSumFromStr(mTargetedSum.getText().toString());
+                final int dateIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_DATE);
+                final int checkedIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_CHECKED);
+                long sum = mAccountManager.getCurrentAccountStartSum();
+                long total = 0;
+                long opSum;
+                ArrayList<Integer> checkedOpsPos = new ArrayList<Integer>();
+                do {
+                    if (!uncheckedOps.isBeforeFirst() && !uncheckedOps.isAfterLast()) {
+                        if (uncheckedOps.getLong(dateIdx) <= maxDate.getTimeInMillis() &&
+                                uncheckedOps.getInt(checkedIdx) == 0) {
+                            opSum = uncheckedOps.getLong(sumIdx);
+                            total = curCheckedSum + sum + opSum;
+                            if (total <= targetSum) {
+                                sum += opSum;
+                                checkedOpsPos.add(uncheckedOps.getPosition());
+                            }
+                        }
+                    }
+                } while (uncheckedOps.moveToPrevious() && total < targetSum);
+
+                if (total == targetSum) {
+                    // update list display
+                    mInnerOpViewBinder.setCheckedPosition(checkedOpsPos);
+                    mOpListAdapter.notifyDataSetChanged();
+                    // update database AFTER display update because the request only return unchecked op
+                    // but we still want the autochecked transaction at this point
+//                    for (Integer pos : checkedOpsPos) {
+//                        uncheckedOps.moveToPosition(pos);
+//                        OperationTable.updateOpCheckedStatus(this, uncheckedOps, true);
+//                    }
+                    // update displayed sum AFTER update database
+                    updateDisplay(null);
+                } else {
+                    Tools.popMessage(this,
+                            String.format(getString(R.string.missing_ops), Formater.getSumFormater().format(total / 100),
+                                    Formater.getSumFormater().format((targetSum - total) / 100)),
+                            R.string.auto_checking,
+                            getString(R.string.ok), null);
+                }
+            }
+            uncheckedOps.moveToPosition(origPos);
+        }
+
+    }
+
+    private static class AutoCheckingDialog extends DialogFragment {
+        private DatePicker mMaxDate;
+        private AutoCheckingClickListener onOkListener;
+
+        public static AutoCheckingDialog newInstance(AutoCheckingClickListener listener) {
+            AutoCheckingDialog frag = new AutoCheckingDialog();
+            frag.onOkListener = listener;
+            return frag;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+            View v = inflater.inflate(R.layout.autochecking_dialog, null);
+            mMaxDate = (DatePicker) v.findViewById(R.id.max_date);
+            GregorianCalendar d = new GregorianCalendar();
+            mMaxDate.updateDate(d.get(Calendar.YEAR), d.get(Calendar.MONTH), d.get(Calendar.DAY_OF_MONTH));
+            onOkListener.datePicker = mMaxDate;
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setView(v).setTitle(R.string.auto_checking).setNegativeButton(R.string.cancel, null).
+                    setPositiveButton(R.string.do_check, onOkListener);
+            return builder.create();
         }
     }
 }

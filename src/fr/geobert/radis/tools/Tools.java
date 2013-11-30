@@ -90,13 +90,18 @@ public class Tools {
         };
     }
 
+    public static void popMessage(final Activity ctx, final String msg, final int titleStrId, final String btnText,
+                                  DialogInterface.OnClickListener onClick) {
+        AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
+        alertDialog.setTitle(titleStrId);
+        alertDialog.setMessage(msg);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, btnText, onClick);
+        alertDialog.show();
+    }
+
     public static void popError(Activity ctx, String msg,
                                 DialogInterface.OnClickListener onClick) {
-        AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
-        alertDialog.setTitle("Erreur");
-        alertDialog.setMessage(msg);
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", onClick);
-        alertDialog.show();
+        Tools.popMessage(ctx, msg, R.string.error, ctx.getString(R.string.ok), onClick);
     }
 
     public static void setTextWithoutComplete(AutoCompleteTextView v,

@@ -210,8 +210,16 @@
     <string name="use_weighted_infos">Utiliser la complétion pondérée</string>
     <string name="use_weighted_infos_details">Les informations les plus utilisées seront proposées en tête</string>
     <string name="no_unchecked_operation">Aucune opération non pointée</string>
-    <string name="targeted_sum">Somme\nvisée :</string>
-    <string name="checked_ops_sums_title"><![CDATA[Pointées :\nReste :]]></string>
+    <string name="targeted_sum">Solde\nciblé :</string>
+    <string name="checked_ops_sums_title"><![CDATA[Pointé :\nReste :]]></string>
     <string name="op_checking">Pointer les opérations</string>
     <string name="checked">Pointée</string>
+    <string name="error">Erreur</string>
+    <string name="targeted_sum_reached">Vous avez atteint le solde ciblé !</string>
+    <string name="auto_checking">Pointage automatique</string>
+    <string name="with_nb_ops">Nombre d\'opérations à utiliser :</string>
+    <string name="left_zero_if_unknown">(laisser 0 si indéterminé)</string>
+    <string name="do_check">Pointer</string>
+    <string name="checking_max_date"><![CDATA[Tenir compte des opérations jusqu\'au :]]></string>
+    <string name="missing_ops">Le solde cible ne peut être atteint. Radis a atteint %1$s en pointant les opérations. Il vous reste %2$s à trouver :)</string>
 </resources>

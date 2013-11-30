@@ -28,6 +28,7 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     private CursorLoader mAccountLoader;
     private FragmentActivity mCtx;
     private String mCurAccCurrencySymbol;
+    private long mStartSum;
 
     public AccountManager() {
         mCallbacks = new ArrayList<Runnable>();
@@ -101,7 +102,6 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
         int pos = 0;
         if (mAllAccountsCursor != null) {
             mAllAccountsCursor.moveToFirst();
-
             do {
                 if (mCurAccountId == mAllAccountsCursor.getLong(0)) {
                     final int curSumIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
@@ -109,6 +109,7 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
                     AccountTable.initProjectionDate(mAllAccountsCursor);
                     mCurSum = mAllAccountsCursor.getLong(curSumIdx);
                     mCurAccCurrencySymbol = Currency.getInstance(mAllAccountsCursor.getString(currencyIdx)).getSymbol();
+                    mStartSum = mAllAccountsCursor.getLong(mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_START_SUM));
                     break;
                 }
                 pos++;
@@ -131,6 +132,10 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public long getCurrentAccountSum() {
         return mCurSum;
+    }
+
+    public long getCurrentAccountStartSum() {
+        return mStartSum;
     }
 
     private long getCurrentAccountProjDate() {

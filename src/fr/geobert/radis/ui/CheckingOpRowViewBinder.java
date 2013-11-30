@@ -6,11 +6,14 @@ import android.widget.CompoundButton;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
+import java.util.ArrayList;
+
 
 // class responsible for filling each operation row
 class CheckingOpRowViewBinder extends OperationRowViewBinder {
 
     private UpdateDisplayInterface updateListener = null;
+    private ArrayList<Integer> mCheckedPosition = new ArrayList<Integer>();
 
     public CheckingOpRowViewBinder(IOperationList activity, Cursor c,
                                    CharSequence sumColName, CharSequence dateColName) {
@@ -42,10 +45,15 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
 
     @Override
     public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-        boolean checked = cursor.getInt(11) == 1;
+        boolean checked = cursor.getInt(11) == 1 ||
+                mCheckedPosition.indexOf(Integer.valueOf(cursor.getPosition())) > -1;
         final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent().getParent()).getTag();
         configureCell(cursor, h);
         h.isCheckedBox.setChecked(checked);
         return super.setViewValue(view, cursor, columnIndex);
+    }
+
+    public void setCheckedPosition(ArrayList<Integer> checkedPosition) {
+        this.mCheckedPosition = checkedPosition;
     }
 }
