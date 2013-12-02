@@ -283,10 +283,12 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 final long targetSum = Tools.extractSumFromStr(mTargetedSum.getText().toString());
                 final int dateIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_DATE);
                 final int checkedIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_CHECKED);
-                long sum = mAccountManager.getCurrentAccountStartSum();
+                Long sum = mAccountManager.getCurrentAccountStartSum();
                 long total = 0;
                 long opSum;
                 ArrayList<Integer> checkedOpsPos = new ArrayList<Integer>();
+                ArrayList<Integer> notCheckedOpsPos = new ArrayList<Integer>();
+                // first pass
                 do {
                     if (!uncheckedOps.isBeforeFirst() && !uncheckedOps.isAfterLast()) {
                         if (uncheckedOps.getLong(dateIdx) <= maxDate.getTimeInMillis() &&
@@ -296,24 +298,36 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                             if (total <= targetSum) {
                                 sum += opSum;
                                 checkedOpsPos.add(uncheckedOps.getPosition());
+                            } else {
+                                notCheckedOpsPos.add(uncheckedOps.getPosition());
                             }
                         }
                     }
-                } while (uncheckedOps.moveToPrevious() && total < targetSum);
+                } while (uncheckedOps.moveToPrevious());
 
-                if (total == targetSum) {
-                    // update list display
-                    mInnerOpViewBinder.setCheckedPosition(checkedOpsPos);
-                    mOpListAdapter.notifyDataSetChanged();
-                    // update database AFTER display update because the request only return unchecked op
-                    // but we still want the autochecked transaction at this point
-//                    for (Integer pos : checkedOpsPos) {
-//                        uncheckedOps.moveToPosition(pos);
-//                        OperationTable.updateOpCheckedStatus(this, uncheckedOps, true);
-//                    }
-                    // update displayed sum AFTER update database
-                    updateDisplay(null);
-                } else {
+                final int opSumIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_SUM);
+                if (notCheckedOpsPos.size() > 0 && total != targetSum) {
+                    total = secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, false);
+                }
+                // update list display
+                mInnerOpViewBinder.setCheckedPosition(checkedOpsPos);
+                mOpListAdapter.notifyDataSetChanged();
+                // update database AFTER display update because the request only return unchecked op
+                // but we still want the autochecked transaction at this point
+
+                final int accIdIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_ACCOUNT_ID);
+                final int tranAccIdIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID);
+                for (Integer pos : checkedOpsPos) {
+                    uncheckedOps.moveToPosition(pos);
+                    final long opId = uncheckedOps.getLong(0);
+                    opSum = uncheckedOps.getLong(opSumIdx);
+                    final long accId = uncheckedOps.getLong(accIdIdx);
+                    final long transAccId = uncheckedOps.getLong(tranAccIdIdx);
+                    OperationTable.updateOpCheckedStatus(this, opId, opSum, accId, transAccId, true);
+                }
+                // update displayed sum AFTER update database
+                updateDisplay(null);
+                if (total != targetSum) {
                     Tools.popMessage(this,
                             String.format(getString(R.string.missing_ops), Formater.getSumFormater().format(total / 100),
                                     Formater.getSumFormater().format((targetSum - total) / 100)),
@@ -324,6 +338,50 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
             uncheckedOps.moveToPosition(origPos);
         }
 
+    }
+
+    private long secondPass(Cursor uncheckedOps, long targetSum, long total, ArrayList<Integer> checkedOpsPos,
+                            ArrayList<Integer> notCheckedOpsPos, final int opSumIdx, final boolean isLastCall) {
+        long opSum;
+        ArrayList<Integer> tmp = new ArrayList<Integer>(notCheckedOpsPos);
+        if (total > targetSum) {
+            for (Integer pos : tmp) {
+                uncheckedOps.moveToPosition(pos);
+                opSum = uncheckedOps.getLong(opSumIdx);
+                if (opSum <= 0) {
+                    total += opSum;
+                    checkedOpsPos.add(pos);
+                    notCheckedOpsPos.remove(pos);
+                } else if (isLastCall) {
+                    notCheckedOpsPos.remove(pos);
+                }
+                if (total == targetSum) {
+                    return total;
+                }
+            }
+            if (notCheckedOpsPos.size() > 0) {
+                return secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, true);
+            }
+        } else if (total < targetSum) {
+            for (Integer pos : tmp) {
+                uncheckedOps.moveToPosition(pos);
+                opSum = uncheckedOps.getLong(opSumIdx);
+                if (opSum >= 0) {
+                    total += opSum;
+                    checkedOpsPos.add(pos);
+                    notCheckedOpsPos.remove(pos);
+                } else if (isLastCall) {
+                    notCheckedOpsPos.remove(pos);
+                }
+                if (total == targetSum) {
+                    return total;
+                }
+            }
+            if (notCheckedOpsPos.size() > 0) {
+                return secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, true);
+            }
+        }
+        return total;
     }
 
     private static class AutoCheckingDialog extends DialogFragment {

@@ -32,10 +32,14 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
         h.sumAtSelection.setText("");
         h.month.setText("");
         h.checkedBoxCont.setVisibility(View.VISIBLE);
+        final long opId = cursor.getLong(0);
+        final long sum = cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_SUM));
+        final long accId = cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_ACCOUNT_ID));
+        final long transAccId = cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
         h.isCheckedBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                OperationTable.updateOpCheckedStatus(mCtx, cursor, b);
+                OperationTable.updateOpCheckedStatus(mCtx, opId, sum, accId, transAccId, b);
                 if (updateListener != null) {
                     updateListener.updateDisplay(null);
                 }
@@ -48,8 +52,9 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
         boolean checked = cursor.getInt(11) == 1 ||
                 mCheckedPosition.indexOf(Integer.valueOf(cursor.getPosition())) > -1;
         final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent().getParent()).getTag();
-        configureCell(cursor, h);
+        h.isCheckedBox.setOnCheckedChangeListener(null);
         h.isCheckedBox.setChecked(checked);
+        configureCell(cursor, h);
         return super.setViewValue(view, cursor, columnIndex);
     }
 

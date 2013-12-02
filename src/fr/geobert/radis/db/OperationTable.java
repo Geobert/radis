@@ -502,14 +502,15 @@ public class OperationTable {
                                 Long.toString(schOpId)});
     }
 
-    public static void updateOpCheckedStatus(Context ctx, Cursor cursor, boolean b) {
+    public static void updateOpCheckedStatus(Context ctx, final long opId, final long sum, final long accountId,
+                                             final long transAccountId, boolean b) {
         ContentValues values = new ContentValues();
         values.put(KEY_OP_CHECKED, b);
         final int res =
-                ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + cursor.getLong(0)),
+                ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + opId),
                         values, null, null);
         if (res == 1) {
-            AccountTable.updateCheckedOpSum(ctx, cursor, b);
+            AccountTable.updateCheckedOpSum(ctx, sum, accountId, transAccountId, b);
         } else {
             Log.e(TAG, "updateOpCheckedStatus should update only one operation");
         }
