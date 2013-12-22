@@ -76,6 +76,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 InfoTables.upgradeFromV16(db, oldVersion, newVersion);
                 OperationTable.upgradeFromV16(db, oldVersion, newVersion);
                 AccountTable.upgradeFromV16(db, oldVersion, newVersion);
+                ScheduledOperationTable.upgradeFromV16(db, oldVersion, newVersion);
             default:
                 AccountTable.upgradeDefault(db, oldVersion, newVersion);
         }

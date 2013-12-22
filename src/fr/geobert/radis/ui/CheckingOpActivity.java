@@ -340,46 +340,35 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
 
     }
 
+    private boolean testOpSum(final boolean totalSuperiorToTarget, final long opSum) {
+        if (totalSuperiorToTarget) {
+            return opSum <= 0;
+        } else {
+            return opSum >= 0;
+        }
+    }
+
     private long secondPass(Cursor uncheckedOps, long targetSum, long total, ArrayList<Integer> checkedOpsPos,
                             ArrayList<Integer> notCheckedOpsPos, final int opSumIdx, final boolean isLastCall) {
         long opSum;
         ArrayList<Integer> tmp = new ArrayList<Integer>(notCheckedOpsPos);
-        if (total > targetSum) {
-            for (Integer pos : tmp) {
-                uncheckedOps.moveToPosition(pos);
-                opSum = uncheckedOps.getLong(opSumIdx);
-                if (opSum <= 0) {
-                    total += opSum;
-                    checkedOpsPos.add(pos);
-                    notCheckedOpsPos.remove(pos);
-                } else if (isLastCall) {
-                    notCheckedOpsPos.remove(pos);
-                }
-                if (total == targetSum) {
-                    return total;
-                }
+        final boolean totalSuperiorToTarget = total > targetSum;
+        for (Integer pos : tmp) {
+            uncheckedOps.moveToPosition(pos);
+            opSum = uncheckedOps.getLong(opSumIdx);
+            if (testOpSum(totalSuperiorToTarget, opSum)) {
+                total += opSum;
+                checkedOpsPos.add(pos);
+                notCheckedOpsPos.remove(pos);
+            } else if (isLastCall) {
+                notCheckedOpsPos.remove(pos);
             }
-            if (notCheckedOpsPos.size() > 0) {
-                return secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, true);
+            if (total == targetSum) {
+                return total;
             }
-        } else if (total < targetSum) {
-            for (Integer pos : tmp) {
-                uncheckedOps.moveToPosition(pos);
-                opSum = uncheckedOps.getLong(opSumIdx);
-                if (opSum >= 0) {
-                    total += opSum;
-                    checkedOpsPos.add(pos);
-                    notCheckedOpsPos.remove(pos);
-                } else if (isLastCall) {
-                    notCheckedOpsPos.remove(pos);
-                }
-                if (total == targetSum) {
-                    return total;
-                }
-            }
-            if (notCheckedOpsPos.size() > 0) {
-                return secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, true);
-            }
+        }
+        if (notCheckedOpsPos.size() > 0) {
+            return secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, true);
         }
         return total;
     }

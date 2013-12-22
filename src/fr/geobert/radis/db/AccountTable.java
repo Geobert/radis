@@ -529,12 +529,20 @@ public class AccountTable {
                     values.clear();
                     acc.close();
                     acc = fetchAccount(ctx, transAccountId);
-                    values.put(KEY_ACCOUNT_CHECKED_OP_SUM,
-                            acc.getLong(acc.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (b ? -sum : sum));
-                    updateAccount(ctx, transAccountId, values);
+                    if (acc != null) {
+                        if (acc.moveToFirst()) {
+                            values.put(KEY_ACCOUNT_CHECKED_OP_SUM,
+                                    acc.getLong(acc.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (b ? -sum : sum));
+                            updateAccount(ctx, transAccountId, values);
+                        }
+                        acc.close();
+                    }
+                } else {
+                    acc.close();
                 }
+            } else {
+                acc.close();
             }
-            acc.close();
         }
     }
 
