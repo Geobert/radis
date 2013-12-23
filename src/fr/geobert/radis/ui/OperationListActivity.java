@@ -233,13 +233,15 @@ public class OperationListActivity extends BaseActivity implements
 
     private boolean onAccountChanged(long itemId) {
         mProjectionDate = mAccountManager.setCurrentAccountId(itemId);
-        if (mQuickAddController != null && itemId != mAccountId) {
-            ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
+        if (null != mQuickAddController && itemId != mAccountId) {
+            if (null != mOpListCursorAdapter) {
+                ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
+            }
             mQuickAddController.setAccount(itemId);
             getOperationsList();
             return true;
         } else {
-            if (mQuickAddController == null) {
+            if (null == mQuickAddController) {
                 getOperationsList();
                 initQuickAdd();
             }
@@ -250,7 +252,7 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mOnInsertionReceiver != null) {
+        if (null != mOnInsertionReceiver) {
             unregisterReceiver(mOnInsertionReceiver);
         }
     }
