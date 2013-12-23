@@ -239,7 +239,7 @@ public class OperationListActivity extends BaseActivity implements
             getOperationsList();
             return true;
         } else {
-            if (mQuickAddController == null) {
+            if (null == mQuickAddController) {
                 getOperationsList();
                 initQuickAdd();
             }
@@ -250,7 +250,7 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mOnInsertionReceiver != null) {
+        if (null != mOnInsertionReceiver) {
             unregisterReceiver(mOnInsertionReceiver);
         }
     }
