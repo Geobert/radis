@@ -87,7 +87,9 @@ public class Operation implements Parcelable {
         if (accIdx >= 0) {
             mAccountId = op.getLong(accIdx);
         }
-        mIsChecked = op.getInt(op.getColumnIndex(OperationTable.KEY_OP_CHECKED)) == 1;
+        if (!(this instanceof ScheduledOperation)) {
+            mIsChecked = op.getInt(op.getColumnIndex(OperationTable.KEY_OP_CHECKED)) == 1;
+        }
     }
 
     public Operation() {
