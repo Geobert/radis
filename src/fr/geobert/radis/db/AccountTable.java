@@ -167,7 +167,7 @@ public class AccountTable {
                                 final int tranAccIdx = allOps.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID);
                                 do {
                                     long s = allOps.getLong(sumIdx);
-                                    if (allOps.getLong(tranAccIdx) > 0) {
+                                    if (allOps.getLong(tranAccIdx) == accountId) {
                                         s = -s;
                                     }
                                     sum += s;
@@ -175,6 +175,7 @@ public class AccountTable {
                             }
                             allOps.close();
                         }
+                        Log.d(TAG, "consolidate checked sum : " + sum);
                         values.put(KEY_ACCOUNT_CHECKED_OP_SUM, sum);
                         res = ctx.getContentResolver().update(
                                 Uri.parse(DbContentProvider.ACCOUNT_URI + "/"
