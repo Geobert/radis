@@ -17,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
 import fr.geobert.radis.data.Operation;
@@ -250,9 +249,12 @@ public class OperationEditFragment extends Fragment {
 
     private void initAccountSpinner(Spinner spin, long accountId) {
         int pos = 0;
-        SpinnerAdapter adapter = spin.getAdapter();
+        ArrayAdapter<Account> adapter = (ArrayAdapter<Account>) spin.getAdapter();
+        Account acc;
+        long id;
         while (pos < adapter.getCount()) {
-            long id = adapter.getItemId(pos);
+            acc = adapter.getItem(pos);
+            id = acc.mAccountId;
             if (id == accountId) {
                 spin.setSelection(pos);
                 break;
