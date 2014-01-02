@@ -2,6 +2,7 @@ package fr.geobert.radis.ui.editor;
 
 import android.database.Cursor;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,14 +14,13 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
-import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
 
-public class ScheduleEditorFragment extends SherlockFragment implements OnTransfertCheckedChangeListener {
+public class ScheduleEditorFragment extends Fragment implements OnTransfertCheckedChangeListener {
     ScheduledOperation mCurrentSchOp;
     private DatePicker mEndDatePicker;
     private Spinner mAccountSpinner;
@@ -40,7 +40,7 @@ public class ScheduleEditorFragment extends SherlockFragment implements OnTransf
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mActivity = (ScheduledOperationEditor) getSherlockActivity();
+        mActivity = (ScheduledOperationEditor) getActivity();
         mOpEditFragment = mActivity;
         initViewReferences();
         initViewBehavior();

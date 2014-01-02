@@ -11,9 +11,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
@@ -116,7 +116,7 @@ public class OperationEditor extends CommonOpEditor {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.confirm_cancel_menu, menu);
         return true;
     }

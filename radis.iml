@@ -25,7 +25,17 @@
         <jarDirectory url="file://$MODULE_DIR$/libs" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="actionbarsherlock" />
+    <orderEntry type="module" module-name="appcompat" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://D:/android-sdks/extras/android/support/v7/appcompat/libs" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://D:/android-sdks/extras/android/support/v7/appcompat/libs" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>
 

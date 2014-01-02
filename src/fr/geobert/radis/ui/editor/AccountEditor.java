@@ -7,16 +7,16 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.AccountTable;
@@ -55,7 +55,7 @@ public class AccountEditor extends BaseActivity implements
 //        context.startActivity(intent);
 //    }
 
-    public static void callMeForResult(SherlockFragmentActivity context, long accountId) {
+    public static void callMeForResult(ActionBarActivity context, long accountId) {
         Intent intent = new Intent(context, AccountEditor.class);
         intent.putExtra(PARAM_ACCOUNT_ID, accountId);
         context.startActivityForResult(intent, ACCOUNT_EDITOR);
@@ -107,7 +107,7 @@ public class AccountEditor extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.confirm_cancel_menu, menu);
         return true;
     }

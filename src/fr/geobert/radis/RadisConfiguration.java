@@ -8,15 +8,15 @@ import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.tools.DBPrefsManager;
 
 import java.util.ArrayList;
 
-public class RadisConfiguration extends SherlockPreferenceActivity implements
+public class RadisConfiguration extends PreferenceActivity implements
         OnSharedPreferenceChangeListener {
     public final static String KEY_INSERTION_DATE = "insertion_date";
     public final static String KEY_LAST_INSERTION_DATE = "LAST_INSERT_DATE";

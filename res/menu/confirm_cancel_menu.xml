@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:radis="http://schemas.android.com/apk/res-auto">
     <item
             android:icon="@drawable/cancel_48"
             android:title="@string/cancel"
             android:id="@+id/cancel"
-            android:showAsAction="always"/>
+            radis:showAsAction="always"/>
 
     <item
             android:id="@+id/confirm"
             android:icon="@drawable/ok_48"
             android:title="@string/ok"
-            android:showAsAction="always"/>
+            radis:showAsAction="always"/>
 </menu>

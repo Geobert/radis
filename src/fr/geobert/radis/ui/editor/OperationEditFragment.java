@@ -3,6 +3,7 @@ package fr.geobert.radis.ui.editor;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +18,6 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
-import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
 import fr.geobert.radis.data.Operation;
@@ -31,7 +31,7 @@ import fr.geobert.radis.tools.Tools;
 
 import java.text.ParseException;
 
-public class OperationEditFragment extends SherlockFragment {
+public class OperationEditFragment extends Fragment {
     private MyAutoCompleteTextView mOpThirdPartyText;
     private MyAutoCompleteTextView mOpModeText;
     private EditText mOpSumText;
@@ -55,7 +55,7 @@ public class OperationEditFragment extends SherlockFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActivity = (CommonOpEditor) getSherlockActivity();
+        mActivity = (CommonOpEditor) getActivity();
         mOpThirdPartyText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_third_party);
         mOpModeText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_mode);
         mOpSumText = (EditText) mActivity.findViewById(R.id.edit_op_sum);
