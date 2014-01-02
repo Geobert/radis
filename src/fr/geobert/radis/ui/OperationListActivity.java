@@ -367,6 +367,8 @@ public class OperationListActivity extends BaseActivity implements
             case AccountEditor.ACCOUNT_EDITOR:
                 if (resultCode == RESULT_OK) {
                     updateAccountList();
+                } else { // back without filling an account
+                    finish();
                 }
                 break;
             case OperationEditor.OPERATION_EDITOR:
