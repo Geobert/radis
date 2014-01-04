@@ -22,6 +22,7 @@
     <string name="sum">Montant</string>
     <string name="tag">Catégorie</string>
     <string name="date">Date</string>
+    <string name="op_date">Date de l\'opération</string>
     <string name="mode">Mode de paiement</string>
     <string name="credit">Crédit</string>
     <string name="debit">Débit</string>

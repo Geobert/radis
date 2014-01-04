@@ -1,12 +1,15 @@
 package fr.geobert.radis.ui;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -24,6 +27,9 @@ import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.QuickAddTextWatcher;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class QuickAddController {
     private MyAutoCompleteTextView mQuickAddThirdParty;
@@ -98,6 +104,13 @@ public class QuickAddController {
                 }
             }
         });
+        mQuickAddButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                showDatePicker();
+                return true;
+            }
+        });
         QuickAddController.setQuickAddButEnabled(mQuickAddButton, false);
 
         mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
@@ -124,14 +137,50 @@ public class QuickAddController {
         });
     }
 
+    private void showDatePicker() {
+        GregorianCalendar today = new GregorianCalendar();
+        DatePickerDialog dialog = new DatePickerDialog(mActivity, new DatePickerDialog.OnDateSetListener() {
+            private boolean alreadyFired = false;
+
+            @Override
+            public void onDateSet(DatePicker datePicker, int y, int m, int d) {
+                // workaround known android bug
+                if (alreadyFired) {
+                    return;
+                } else {
+                    alreadyFired = true;
+                }
+                GregorianCalendar date = new GregorianCalendar(y, m, d);
+                try {
+                    quickAddOp(date);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
+        dialog.setTitle(R.string.op_date);
+        dialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, mActivity.getString(android.R.string.cancel),
+                (DialogInterface.OnClickListener) null);
+        dialog.show();
+    }
+
     private void quickAddOp() throws Exception {
+        quickAddOp(null);
+    }
+
+    private void quickAddOp(GregorianCalendar date) throws Exception {
         Operation op = new Operation();
+        if (date != null) {
+            Tools.clearTimeOfCalendar(date);
+            op.setDate(date.getTimeInMillis());
+        }
         op.mThirdParty = mQuickAddThirdParty.getText().toString();
         op.setSumStr(mQuickAddAmount.getText().toString());
         assert (mAccountId != 0);
         if (OperationTable.createOp(mActivity, op, mAccountId) > -1) {
             mProtocol.updateDisplay(null);
         }
+
         mQuickAddAmount.setText("");
         mQuickAddThirdParty.setText("");
         InputMethodManager mgr = (InputMethodManager) mActivity

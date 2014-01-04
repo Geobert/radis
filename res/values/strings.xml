@@ -30,6 +30,7 @@
     <string name="sum">Amount</string>
     <string name="tag">Category</string>
     <string name="date">Date</string>
+    <string name="op_date">Transaction\'s date</string>
     <string name="mode">Payment method</string>
     <string name="credit">Credit</string>
     <string name="debit">Debit</string>
