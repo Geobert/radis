@@ -4,6 +4,8 @@ import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +32,7 @@ import fr.geobert.radis.tools.Tools;
 
 import java.text.ParseException;
 
-public class OperationEditFragment extends Fragment {
+public class OperationEditFragment extends Fragment implements TextWatcher {
     private MyAutoCompleteTextView mOpThirdPartyText;
     private MyAutoCompleteTextView mOpModeText;
     private EditText mOpSumText;
@@ -45,6 +47,8 @@ public class OperationEditFragment extends Fragment {
     private CheckBox mIsTransfertCheck;
     private CommonOpEditor mActivity;
     private CheckBox mIsChecked;
+    private ImageButton mInvertSignBtn;
+    private boolean mWasInvertByTransfert;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -60,14 +64,14 @@ public class OperationEditFragment extends Fragment {
         mOpSumText = (EditText) mActivity.findViewById(R.id.edit_op_sum);
         mOpTagText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_tag);
         mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
-                .getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
+                .getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText, this);
         mDatePicker = (DatePicker) mActivity.findViewById(R.id.edit_op_date);
         mSrcAccount = (Spinner) mActivity.findViewById(R.id.trans_src_account);
         mDstAccount = (Spinner) mActivity.findViewById(R.id.trans_dst_account);
         mTransfertCont = (LinearLayout) mActivity.findViewById(R.id.transfert_cont);
         mThirdPartyCont = (LinearLayout) mActivity.findViewById(R.id.third_party_cont);
         mNotesText = (EditText) mActivity.findViewById(R.id.edit_op_notes);
-
+        mInvertSignBtn = (ImageButton) mActivity.findViewById(R.id.edit_op_sign);
         mOpThirdPartyText.setNextFocusDownId(R.id.edit_op_sum);
         mOpSumText.setNextFocusDownId(R.id.edit_op_tag);
         mOpTagText.setNextFocusDownId(R.id.edit_op_mode);
@@ -157,8 +161,7 @@ public class OperationEditFragment extends Fragment {
                         InfoManagerDialog.createModesListDialog(mActivity).show(getFragmentManager(), "modesDialog");
                     }
                 });
-
-        mActivity.findViewById(R.id.edit_op_sign).setOnClickListener(
+        mInvertSignBtn.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -175,6 +178,22 @@ public class OperationEditFragment extends Fragment {
         Animation in = AnimationUtils.loadAnimation(mActivity,
                 android.R.anim.fade_in);
         Animation out = AnimationUtils.makeOutAnimation(mActivity, true);
+        mSumTextWatcher.setAllowNegativeSum(!isChecked);
+        mInvertSignBtn.setEnabled(!isChecked);
+        long sum = Tools.extractSumFromStr(mOpSumText.getText().toString());
+        try {
+            if (sum < 0) {
+                invertSign();
+                this.mWasInvertByTransfert = true;
+            } else {
+                if (mWasInvertByTransfert) {
+                    invertSign();
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         if (isChecked == true) {
             mTransfertCont.startAnimation(in);
             mThirdPartyCont.startAnimation(out);
@@ -384,5 +403,20 @@ public class OperationEditFragment extends Fragment {
     public void setCheckedEditVisibility(int visibility) {
 //        mActivity.findViewById(R.id.checked_title).setVisibility(visibility);
         mIsChecked.setVisibility(visibility);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        // nothing
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        // nothing
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        mWasInvertByTransfert = false;
     }
 }

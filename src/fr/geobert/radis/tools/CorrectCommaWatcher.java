@@ -6,13 +6,22 @@ import android.view.Gravity;
 import android.widget.EditText;
 
 public class CorrectCommaWatcher implements TextWatcher {
+    private final TextWatcher mListener;
     private char mLocaleComma;
     private boolean mAutoNegate = false;
     private EditText mEditText;
+    private boolean mAllowNegativeSum = true;
 
     public CorrectCommaWatcher(char localeComma, EditText w) {
         mLocaleComma = localeComma;
         mEditText = w;
+        mListener = null;
+    }
+
+    public CorrectCommaWatcher(char localeComma, EditText w, TextWatcher listener) {
+        mLocaleComma = localeComma;
+        mEditText = w;
+        mListener = listener;
     }
 
     protected void correctComma(Editable s) {
@@ -42,11 +51,14 @@ public class CorrectCommaWatcher implements TextWatcher {
             if (c == '+') {
                 mAutoNegate = false;
             }
-            if (mAutoNegate) {
+            if (mAutoNegate && mAllowNegativeSum) {
                 if (c != '.' && c != ',' && c != '-') {
                     mAutoNegate = false;
                     s.insert(0, "-");
                 }
+            }
+            if (!mAllowNegativeSum && c == '-') {
+                s.replace(0, 1, "");
             }
             mEditText.setGravity(Gravity.CENTER_VERTICAL | Gravity.RIGHT);
         } else {
@@ -59,6 +71,9 @@ public class CorrectCommaWatcher implements TextWatcher {
     public void afterTextChanged(Editable s) {
         correctComma(s);
         autoNegate(s);
+        if (null != mListener) {
+            mListener.afterTextChanged(s);
+        }
     }
 
     @Override
@@ -73,5 +88,9 @@ public class CorrectCommaWatcher implements TextWatcher {
     public CorrectCommaWatcher setAutoNegate(boolean b) {
         mAutoNegate = b;
         return this;
+    }
+
+    public void setAllowNegativeSum(boolean allowNegativeSum) {
+        this.mAllowNegativeSum = allowNegativeSum;
     }
 }
