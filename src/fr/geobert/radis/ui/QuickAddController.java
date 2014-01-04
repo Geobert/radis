@@ -140,22 +140,20 @@ public class QuickAddController {
     private void showDatePicker() {
         GregorianCalendar today = new GregorianCalendar();
         DatePickerDialog dialog = new DatePickerDialog(mActivity, new DatePickerDialog.OnDateSetListener() {
-            private boolean alreadyFired = false;
+            private int alreadyFired = -1;
 
             @Override
             public void onDateSet(DatePicker datePicker, int y, int m, int d) {
                 // workaround known android bug
-                if (alreadyFired) {
-                    return;
-                } else {
-                    alreadyFired = true;
+                if (alreadyFired % 2 == 0) {
+                    GregorianCalendar date = new GregorianCalendar(y, m, d);
+                    try {
+                        quickAddOp(date);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
-                GregorianCalendar date = new GregorianCalendar(y, m, d);
-                try {
-                    quickAddOp(date);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                alreadyFired++;
             }
         }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH));
         dialog.setTitle(R.string.op_date);
