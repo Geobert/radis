@@ -446,8 +446,7 @@ public class AccountTable {
         return updateAccount(ctx, accountId, args) > 0;
     }
 
-    public static void updateProjection(Context ctx, long accountId,
-                                        long sumToAdd, long opDate) {
+    public static void updateProjection(Context ctx, long accountId, long opSum, long oldOpSum, long opDate) {
         ContentValues args = new ContentValues();
         assert (mProjectionMode != -1);
         Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode
@@ -479,29 +478,28 @@ public class AccountTable {
         }
         Cursor accountCursor = fetchAccount(ctx, accountId);
         if (accountCursor.moveToFirst()) {
-            long opSum = accountCursor.getLong(accountCursor
-                    .getColumnIndex(KEY_ACCOUNT_OP_SUM));
-            long startSum = accountCursor.getLong(accountCursor
-                    .getColumnIndex(KEY_ACCOUNT_START_SUM));
+            long accOpSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_OP_SUM));
+            //long startSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_START_SUM));
 
-            args.put(KEY_ACCOUNT_OP_SUM, opSum + sumToAdd);
+            args.put(KEY_ACCOUNT_OP_SUM, accOpSum + (-oldOpSum + opSum));
 
-            long date = 0;
+            long projDate = 0;
             Long tmp = args.getAsLong(KEY_ACCOUNT_CUR_SUM_DATE);
             if (tmp != null) {
-                date = tmp.longValue();
+                projDate = tmp.longValue();
             }
-            if (date == 0) {
-                date = accountCursor.getLong(accountCursor
-                        .getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
+            if (projDate == 0) {
+                projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
             }
-            Log.d(TAG, "updateProjection date "
-                    + Formater.getFullDateFormater().format(date) + "/opDate "
+            Log.d(TAG, "updateProjection projDate "
+                    + Formater.getFullDateFormater().format(projDate) + "/opDate "
                     + Formater.getFullDateFormater().format(opDate));
-            if (date == 0 || opDate == 0 || opDate <= date) {
-                long curSum = accountCursor.getLong(accountCursor
-                        .getColumnIndex(KEY_ACCOUNT_CUR_SUM));
-                args.put(KEY_ACCOUNT_CUR_SUM, curSum + sumToAdd);
+            if (projDate == 0 || opDate == 0 || opDate <= projDate) {
+                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+                args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum));
+            } else if (opDate > projDate) {
+                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+                args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum);
             }
             if (updateAccount(ctx, accountId, args) > 0) {
                 if (mProjectionMode == 0) {
