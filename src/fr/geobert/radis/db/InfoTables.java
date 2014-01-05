@@ -136,7 +136,7 @@ public class InfoTables {
         }
         Cursor inf = getInfoByKey(ctx, key, table, col);
         long res = -1;
-        if (inf == null) {
+        if (inf == null || inf.getCount() == 0) {
             createKeyId(ctx, key, table, col);
         } else {
             if (inf.moveToFirst()) {
