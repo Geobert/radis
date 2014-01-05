@@ -77,6 +77,7 @@ public class OperationListActivity extends BaseActivity implements
     private long mLastSelectionId = -1;
     private int mLastSelectionPos = -1;
     private boolean needRefreshSelection = false;
+    private boolean wasBackWithoutAccountSaved = false;
 
     public static void refreshAccountList(final Context ctx) {
         Intent intent = new Intent(INTENT_UPDATE_ACC_LIST);
@@ -318,8 +319,12 @@ public class OperationListActivity extends BaseActivity implements
         AccountManager accMan = mAccountManager;
         Cursor allAccounts = accMan.getAllAccountsCursor();
         if (allAccounts == null || allAccounts.getCount() == 0) {
-            // no account, open create account
-            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
+            if (this.wasBackWithoutAccountSaved) {
+                finish();
+            } else {
+                // no account, open create account
+                AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
+            }
         } else {
             mAccountId = accMan.getCurrentAccountId(this);
             if (mAccountId != null) {
@@ -368,7 +373,7 @@ public class OperationListActivity extends BaseActivity implements
                 if (resultCode == RESULT_OK) {
                     updateAccountList();
                 } else { // back without filling an account
-                    finish();
+                    this.wasBackWithoutAccountSaved = true;
                 }
                 break;
             case OperationEditor.OPERATION_EDITOR:
