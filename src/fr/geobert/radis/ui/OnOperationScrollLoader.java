@@ -28,7 +28,7 @@ public class OnOperationScrollLoader implements AbsListView.OnScrollListener {//
             startOpDate.add(Calendar.MONTH, -1);
             operationListActivity.getMoreOperations(startOpDate);
         } else {
-            if (lastTotalCount == 0) {
+            if (lastTotalCount > -1) {
                 operationListActivity.getMoreOperations(null);
             }
         }

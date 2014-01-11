@@ -234,7 +234,7 @@ public class RadisService extends IntentService {
             Long[] accountIds = sumsPerAccount.keySet().toArray(new Long[sumsPerAccount.size()]);
             for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
                 needUpdate = true;
-                updateAccountSum(e.getValue().longValue(), e.getKey().longValue(), 0,
+                updateAccountSum(e.getValue().longValue(), 0, e.getKey().longValue(),
                         greatestDatePerAccount.get(e.getKey()), this);
             }
 //            Log.d(TAG, "DOES NEED UPDATE : " + needUpdate);

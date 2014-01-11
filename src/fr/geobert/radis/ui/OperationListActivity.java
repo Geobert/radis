@@ -234,6 +234,11 @@ public class OperationListActivity extends BaseActivity implements
 
     private boolean onAccountChanged(long itemId) {
         mProjectionDate = mAccountManager.setCurrentAccountId(itemId);
+        startOpDate = Tools.createClearedCalendar();
+        startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+        if (null != mScrollLoader) {
+            mScrollLoader.setStartDate(startOpDate);
+        }
         if (mQuickAddController != null && itemId != mAccountId && mOpListCursorAdapter != null) {
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
             mQuickAddController.setAccount(itemId);
@@ -350,13 +355,12 @@ public class OperationListActivity extends BaseActivity implements
         mAccountId = mAccountManager.getCurrentAccountId(this);
         if (mAccountId != null) {
             if (mOperationsLoader == null) {
-                startOpDate = new GregorianCalendar();
+                startOpDate = Tools.createClearedCalendar();
                 if (mScrollLoader == null) {
                     initOperationList();
                 }
                 mScrollLoader.setStartDate(startOpDate);
                 startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
-                Tools.clearTimeOfCalendar(startOpDate);
                 Log.d(TAG, "startOpDate : " + Tools.getDateStr(startOpDate));
                 getSupportLoaderManager().initLoader(GET_OPS, null, this);
             } else {
@@ -392,7 +396,7 @@ public class OperationListActivity extends BaseActivity implements
                     }
                     mAccountManager.backupCurAccountId();
                     updateAccountList();
-                    updateOperationList();
+                    getOperationsList();
                 }
                 break;
         }
@@ -420,10 +424,6 @@ public class OperationListActivity extends BaseActivity implements
         updateAccountList();
     }
 
-    private void updateOperationList() {
-        getOperationsList();
-    }
-
     private void updateAccountList() {
         mAccountManager.fetchAllAccounts(this, true, new Runnable() {
             @Override
@@ -438,7 +438,6 @@ public class OperationListActivity extends BaseActivity implements
             initOperationList();
         }
         processAccountList();
-        updateOperationList();
     }
 
     private void cleanDatabaseIfTestingMode() {
@@ -612,13 +611,19 @@ public class OperationListActivity extends BaseActivity implements
             getOperationsList();
         } else {
             // no op found with cur month and month - 1, try if there is one
-            Cursor c = OperationTable.fetchLastOp(this, mAccountId);
+            Cursor c;
+            if (null == startOpDate) {
+                c = OperationTable.fetchLastOp(this, mAccountId);
+            } else {
+                c = OperationTable.fetchLastOpSince(this, mAccountId, startOpDate.getTimeInMillis());
+            }
             if (c != null) {
                 if (c.moveToFirst()) {
                     long date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE));
                     Log.d(TAG, "last chance date : " + Tools.getDateStr(date));
                     startOpDate = new GregorianCalendar();
                     startOpDate.setTimeInMillis(date);
+                    mScrollLoader.setStartDate(startOpDate);
                     getOperationsList();
                 }
                 c.close();
@@ -675,7 +680,7 @@ public class OperationListActivity extends BaseActivity implements
         mLastSelectionId = -1;
         mLastSelectionPos = -1;
         needRefreshSelection = true;
-        updateOperationList();
+        getOperationsList();
         updateAccountList();
     }
 
