@@ -446,33 +446,28 @@ public class AccountTable {
         return updateAccount(ctx, accountId, args) > 0;
     }
 
-    public static void updateProjection(Context ctx, long accountId, long opSum, long oldOpSum, long opDate) {
+    public static void updateProjection(Context ctx, long accountId, long opSum, long oldOpSum, long opDate,
+                                        long origOpDate) {
         ContentValues args = new ContentValues();
         assert (mProjectionMode != -1);
-        Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode
-                + " / opDate " + opDate);
+        Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode + " / opDate " + opDate);
         if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
             if (opDate == 0) {
                 Cursor op = OperationTable.fetchLastOp(ctx, accountId);
                 if (null != op) {
                     if (op.moveToFirst()) {
-                        Log.d(TAG,
-                                "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 0 : "
-                                        + Formater
-                                        .getFullDateFormater()
-                                        .format(new Date(
-                                                op.getLong(op
-                                                        .getColumnIndex(OperationTable.KEY_OP_DATE)))));
+                        Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 0 : "
+                                + Formater.getFullDateFormater().format(new Date(
+                                op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE)))));
+
                         args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op
                                 .getColumnIndex(OperationTable.KEY_OP_DATE)));
                     }
                     op.close();
                 }
             } else {
-                Log.d(TAG,
-                        "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 1 : "
-                                + Formater.getFullDateFormater().format(
-                                new Date(opDate)));
+                Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 1 : "
+                        + Formater.getFullDateFormater().format(new Date(opDate)));
                 args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
             }
         }
@@ -497,7 +492,7 @@ public class AccountTable {
             if (projDate == 0 || opDate == 0 || opDate <= projDate) {
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum));
-            } else if (opDate > projDate) {
+            } else if (opDate > projDate && (origOpDate == -1 || origOpDate <= projDate)) {
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum);
             }

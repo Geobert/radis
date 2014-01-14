@@ -264,9 +264,9 @@ public class OperationTable {
         op.mRowId = Long.parseLong(res.getLastPathSegment());
         if (op.mRowId > -1) {
             if (withUpdate) {
-                AccountTable.updateProjection(ctx, accountId, op.mSum, 0, op.getDate());
+                AccountTable.updateProjection(ctx, accountId, op.mSum, 0, op.getDate(), -1);
                 if (op.mTransferAccountId > 0) {
-                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate());
+                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
                 }
             }
             return op.mRowId;
@@ -282,9 +282,9 @@ public class OperationTable {
         final long transfertId = c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID));
         c.close();
         if (ctx.getContentResolver().delete(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null, null) > 0) {
-            AccountTable.updateProjection(ctx, accountId, -opSum, 0, opDate);
+            AccountTable.updateProjection(ctx, accountId, -opSum, 0, opDate, -1);
             if (transfertId > 0) {
-                AccountTable.updateProjection(ctx, transfertId, opSum, 0, opDate);
+                AccountTable.updateProjection(ctx, transfertId, opSum, 0, opDate, -1);
             }
             return true;
         }
@@ -417,32 +417,30 @@ public class OperationTable {
     public static boolean updateOp(Context ctx, final long rowId,
                                    final Operation op, final Operation originalOp) {
         ContentValues args = createContentValuesFromOp(ctx, op, false);
-        if (ctx.getContentResolver().update(
-                Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), args,
-                null, null) > 0) {
-            AccountTable.updateProjection(ctx, op.mAccountId, op.mSum, originalOp.mSum, op.getDate());
-
+        if (ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId),
+                args, null, null) > 0) {
+            AccountTable.updateProjection(ctx, op.mAccountId, op.mSum, originalOp.mSum, op.getDate(), originalOp.getDate());
             if (op.mTransferAccountId > 0) {
                 if (originalOp.mTransferAccountId <= 0) {
                     // op was not a transfert, it is like adding an op in transfertAccountId
-                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate());
+                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
                 } else {
                     // op was a transfert
                     if (originalOp.mTransferAccountId == op.mTransferAccountId) {
                         // op was a transfert on same account, update with sum diff
-                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, originalOp.mSum, op.getDate());
+                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, originalOp.mSum, op.getDate(), originalOp.getDate());
                     } else {
                         // op was a transfert to another account
                         // update new transfert account
-                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate());
+                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
                         // remove the original sum on original transfert account
                         AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum,
-                                0, op.getDate());
+                                0, op.getDate(), originalOp.getDate());
                     }
                 }
             } else if (originalOp.mTransferAccountId > 0) {
                 // op become not transfert, but was a transfert
-                AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, 0, op.getDate());
+                AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, 0, op.getDate(), -1);
             }
 
             if (originalOp.mIsChecked != op.mIsChecked) {

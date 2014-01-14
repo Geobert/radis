@@ -219,7 +219,7 @@ public class OperationEditor extends CommonOpEditor {
                                     if (ScheduledOperationTable.updateScheduledOp(act, currentOp.mScheduledId, op,
                                             true)) {
                                         AccountTable.updateProjection(act, act.mCurAccountId, op.mSum, previousSum,
-                                                op.getDate());
+                                                op.getDate(), -1);
                                     }
                                     ScheduledOperationTable.updateAllOccurences(getActivity(), op, previousSum,
                                             currentOp.mScheduledId);
