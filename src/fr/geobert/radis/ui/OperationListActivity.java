@@ -436,6 +436,8 @@ public class OperationListActivity extends BaseActivity implements
     private void onFetchAllAccountCbk() {
         if (mListView == null) {
             initOperationList();
+        } else {
+            getOperationsList();
         }
         processAccountList();
     }
