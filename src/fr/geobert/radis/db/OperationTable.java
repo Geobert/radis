@@ -428,7 +428,7 @@ public class OperationTable {
                     // op was a transfert
                     if (originalOp.mTransferAccountId == op.mTransferAccountId) {
                         // op was a transfert on same account, update with sum diff
-                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, originalOp.mSum, op.getDate(), originalOp.getDate());
+                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, -originalOp.mSum, op.getDate(), originalOp.getDate());
                     } else {
                         // op was a transfert to another account
                         // update new transfert account
