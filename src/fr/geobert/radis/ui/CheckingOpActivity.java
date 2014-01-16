@@ -303,7 +303,7 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                             }
                         }
                     }
-                } while (uncheckedOps.moveToPrevious());
+                } while (uncheckedOps.moveToPrevious() && total != targetSum);
 
                 final int opSumIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_SUM);
                 if (notCheckedOpsPos.size() > 0 && total != targetSum) {

@@ -258,7 +258,7 @@ public class OperationTable {
         initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
         initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
         initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
-        initialValues.put(KEY_OP_CHECKED, 0);
+        initialValues.put(KEY_OP_CHECKED, op.mIsChecked ? 1 : 0);
         Uri res = ctx.getContentResolver().insert(
                 DbContentProvider.OPERATION_URI, initialValues);
         op.mRowId = Long.parseLong(res.getLastPathSegment());
@@ -267,6 +267,9 @@ public class OperationTable {
                 AccountTable.updateProjection(ctx, accountId, op.mSum, 0, op.getDate(), -1);
                 if (op.mTransferAccountId > 0) {
                     AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
+                }
+                if (op.mIsChecked) {
+                    AccountTable.updateCheckedOpSum(ctx, op, op.mIsChecked);
                 }
             }
             return op.mRowId;
@@ -279,12 +282,16 @@ public class OperationTable {
         Cursor c = fetchOneOp(ctx, rowId, accountId);
         final long opSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
         final long opDate = c.getLong(c.getColumnIndex(KEY_OP_DATE));
+        final boolean checked = c.getInt(c.getColumnIndex(KEY_OP_CHECKED)) == 1;
         final long transfertId = c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID));
         c.close();
         if (ctx.getContentResolver().delete(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null, null) > 0) {
             AccountTable.updateProjection(ctx, accountId, -opSum, 0, opDate, -1);
             if (transfertId > 0) {
                 AccountTable.updateProjection(ctx, transfertId, opSum, 0, opDate, -1);
+            }
+            if (checked) {
+                AccountTable.updateCheckedOpSum(ctx, opSum, accountId, transfertId, false);
             }
             return true;
         }
