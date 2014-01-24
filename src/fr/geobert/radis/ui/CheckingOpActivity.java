@@ -277,38 +277,47 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
         Cursor uncheckedOps = mUncheckedOps;
         if (uncheckedOps != null) {
             final int origPos = uncheckedOps.getPosition();
-            final int sumIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_SUM);
+//            final int sumIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_SUM);
             if (uncheckedOps.moveToLast()) {
                 final long curCheckedSum = mAccountManager.getCurrentAccountCheckedSum();
                 final long targetSum = Tools.extractSumFromStr(mTargetedSum.getText().toString());
                 final int dateIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_DATE);
                 final int checkedIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_CHECKED);
                 Long sum = mAccountManager.getCurrentAccountStartSum();
-                long total = 0;
+                long total = curCheckedSum + sum;
                 long opSum;
                 ArrayList<Integer> checkedOpsPos = new ArrayList<Integer>();
                 ArrayList<Integer> notCheckedOpsPos = new ArrayList<Integer>();
                 // first pass
+//                do {
+//                    if (!uncheckedOps.isBeforeFirst() && !uncheckedOps.isAfterLast()) {
+//                        if (uncheckedOps.getLong(dateIdx) <= maxDate.getTimeInMillis() &&
+//                                uncheckedOps.getInt(checkedIdx) == 0) {
+//                            opSum = uncheckedOps.getLong(sumIdx);
+//                            total = curCheckedSum + sum + opSum;
+//                            if (total <= targetSum) {
+//                                sum += opSum;
+//                                checkedOpsPos.add(uncheckedOps.getPosition());
+//                            } else {
+//                                notCheckedOpsPos.add(uncheckedOps.getPosition());
+//                            }
+//                        }
+//                    }
+//                } while (uncheckedOps.moveToPrevious() && total != targetSum);
+
                 do {
                     if (!uncheckedOps.isBeforeFirst() && !uncheckedOps.isAfterLast()) {
                         if (uncheckedOps.getLong(dateIdx) <= maxDate.getTimeInMillis() &&
                                 uncheckedOps.getInt(checkedIdx) == 0) {
-                            opSum = uncheckedOps.getLong(sumIdx);
-                            total = curCheckedSum + sum + opSum;
-                            if (total <= targetSum) {
-                                sum += opSum;
-                                checkedOpsPos.add(uncheckedOps.getPosition());
-                            } else {
-                                notCheckedOpsPos.add(uncheckedOps.getPosition());
-                            }
+                            notCheckedOpsPos.add(uncheckedOps.getPosition());
                         }
                     }
-                } while (uncheckedOps.moveToPrevious() && total != targetSum);
+                } while (uncheckedOps.moveToPrevious());
 
                 final int opSumIdx = uncheckedOps.getColumnIndex(OperationTable.KEY_OP_SUM);
-                if (notCheckedOpsPos.size() > 0 && total != targetSum) {
-                    total = secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, false);
-                }
+//                if (notCheckedOpsPos.size() > 0 && total != targetSum) {
+                total = secondPass(uncheckedOps, targetSum, total, checkedOpsPos, notCheckedOpsPos, opSumIdx, false);
+//                }
                 // update list display
                 mInnerOpViewBinder.setCheckedPosition(checkedOpsPos);
                 mOpListAdapter.notifyDataSetChanged();
@@ -326,12 +335,17 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                     OperationTable.updateOpCheckedStatus(this, opId, opSum, accId, transAccId, true);
                 }
                 // update displayed sum AFTER update database
+                initialized = false; // avoid popup when updating checkbox
                 updateDisplay(null);
+                initialized = true;
                 if (total != targetSum) {
                     Tools.popMessage(this,
-                            String.format(getString(R.string.missing_ops), Formater.getSumFormater().format(total / 100),
-                                    Formater.getSumFormater().format((targetSum - total) / 100)),
+                            String.format(getString(R.string.missing_ops), Formater.getSumFormater().format(total / 100.0),
+                                    Formater.getSumFormater().format((targetSum - total) / 100.0)),
                             R.string.auto_checking,
+                            getString(R.string.ok), null);
+                } else {
+                    Tools.popMessage(this, getString(R.string.targeted_sum_reached), R.string.op_checking,
                             getString(R.string.ok), null);
                 }
             }
@@ -352,11 +366,12 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                             ArrayList<Integer> notCheckedOpsPos, final int opSumIdx, final boolean isLastCall) {
         long opSum;
         ArrayList<Integer> tmp = new ArrayList<Integer>(notCheckedOpsPos);
-        final boolean totalSuperiorToTarget = total > targetSum;
+//        final boolean totalSuperiorToTarget = total > targetSum;
         for (Integer pos : tmp) {
             uncheckedOps.moveToPosition(pos);
             opSum = uncheckedOps.getLong(opSumIdx);
-            if (testOpSum(totalSuperiorToTarget, opSum)) {
+//            if (testOpSum(totalSuperiorToTarget, opSum)) {
+            if (total != targetSum) {
                 total += opSum;
                 checkedOpsPos.add(pos);
                 notCheckedOpsPos.remove(pos);
