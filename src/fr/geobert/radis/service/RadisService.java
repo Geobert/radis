@@ -234,7 +234,7 @@ public class RadisService extends IntentService {
             Long[] accountIds = sumsPerAccount.keySet().toArray(new Long[sumsPerAccount.size()]);
             for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
                 needUpdate = true;
-                updateAccountSum(e.getValue().longValue(), e.getKey().longValue(),
+                updateAccountSum(e.getValue().longValue(), 0, e.getKey().longValue(),
                         greatestDatePerAccount.get(e.getKey()), this);
             }
 //            Log.d(TAG, "DOES NEED UPDATE : " + needUpdate);
@@ -250,9 +250,9 @@ public class RadisService extends IntentService {
         c.close();
     }
 
-    public static void updateAccountSum(final long sumToAdd, final long accountId,
+    public static void updateAccountSum(final long opSum, final long oldSum, final long accountId,
                                         final long opDate, final Context ctx) {
-        AccountTable.updateProjection(ctx, accountId, sumToAdd, opDate);
+        AccountTable.updateProjection(ctx, accountId, opSum, oldSum, opDate, -1);
     }
 
     private long insertSchOp(ScheduledOperation op, final long opRowId) {

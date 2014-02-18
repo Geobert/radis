@@ -30,6 +30,7 @@
     <string name="sum">Amount</string>
     <string name="tag">Category</string>
     <string name="date">Date</string>
+    <string name="op_date">Transaction\'s date</string>
     <string name="mode">Payment method</string>
     <string name="credit">Credit</string>
     <string name="debit">Debit</string>
@@ -191,7 +192,7 @@
     <string name="err_transfert_no_dst">Transfert has no destination</string>
     <string name="err_transfert_same_acc">Transfert\'s source and destination cannot be equals</string>
 
-    <string name="transfert">Transfert between account</string>
+    <string name="transfert">Transfert</string>
     <string name="sch_no_choosen_account">Please choose an account on planification page</string>
     <string name="choose_account">Choose an account</string>
     <string name="defined_by_transfert">Defined by transfert</string>
@@ -202,4 +203,19 @@
     <string name="sch_edition">Scheduled transaction edition</string>
     <string name="delete_account">Delete account</string>
     <string name="debug">Debug</string>
+    <string name="use_weighted_infos">Use weighted completion</string>
+    <string name="use_weighted_infos_details">Most used informations are suggested first</string>
+    <string name="no_unchecked_operation">No unchecked transaction available</string>
+    <string name="targeted_sum">Targeted\nsum: </string>
+    <string name="checked_ops_sums_title"><![CDATA[Checked:\nLeft:]]></string>
+    <string name="op_checking">Transactions checking</string>
+    <string name="checked">Checked</string>
+    <string name="error">Error</string>
+    <string name="targeted_sum_reached">You\'ve reached the targeted sum!</string>
+    <string name="auto_checking">Auto checking</string>
+    <string name="with_nb_ops">Number of transactions to use:</string>
+    <string name="left_zero_if_unknown">(keep 0 if you don\'t know)</string>
+    <string name="do_check">Do checking</string>
+    <string name="checking_max_date"><![CDATA[Use transactions until:]]></string>
+    <string name="missing_ops">The target sum can\'t be reached. Radis found %1$s by checking transactions. You have to find the %2$s left :)</string>
 </resources>

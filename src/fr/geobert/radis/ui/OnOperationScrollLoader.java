@@ -23,13 +23,15 @@ public class OnOperationScrollLoader implements AbsListView.OnScrollListener {//
     public void onScroll(AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
         boolean loadMore = firstVisible + visibleCount >= totalCount - 2;
 
-        if (loadMore && startOpDate != null && lastTotalCount != totalCount) {
-            lastTotalCount = totalCount;
-            startOpDate.add(Calendar.MONTH, -1);
-            operationListActivity.getMoreOperations(startOpDate);
-        } else {
-            if (lastTotalCount == 0) {
-                operationListActivity.getMoreOperations(null);
+        if (loadMore) {
+            if (startOpDate != null && lastTotalCount != totalCount) {
+                lastTotalCount = totalCount;
+                startOpDate.add(Calendar.MONTH, -1);
+                operationListActivity.getMoreOperations(startOpDate);
+            } else {
+                if (lastTotalCount > -1) {
+                    operationListActivity.getMoreOperations(null);
+                }
             }
         }
     }

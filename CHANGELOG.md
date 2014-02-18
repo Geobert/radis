@@ -1,3 +1,12 @@
+Version 0.9 - 17/02/2014
+- Nouveau : Pointage des opérations pour comparer avec le relevé
+- Nouveau : Appuie long sur l'ajout d'opération rapide pour choisir la date de l'opération
+- Nouveau : Les informations les plus utilisées sont en tête de proposition (désactivable dans les préfs)
+- fix : n'affichait pas les opérations de plus de 3 mois 
+- fix : corruption de la source et de la destination d'un transfert après édition de celui-ci
+- fix : la somme n'était pas bonne après édition de la date d'une opération et en la mettant après la date de projection
+- fix : lors du premier lancement, appuyer retour sur le formulaire de création de compte nous fait revenir dessus, en boucle
+
 Version 0.8.8 - 08/10/2013
 - fix de 3 crashes
 

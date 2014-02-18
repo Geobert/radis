@@ -1,27 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu
-        xmlns:android="http://schemas.android.com/apk/res/android">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:radis="http://schemas.android.com/apk/res-auto">
     <item
             android:icon="@drawable/plus_48"
             android:title="@string/new_op"
             android:id="@+id/create_operation"
-            android:showAsAction="ifRoom"/>
-
+            radis:showAsAction="ifRoom"/>
+    <item
+            android:id="@+id/go_to_op_checking"
+            android:icon="@drawable/op_checking_48"
+            android:title="@string/op_checking"
+            radis:showAsAction="ifRoom"/>
     <item
             android:id="@+id/go_to_sch_op"
             android:icon="@drawable/sched_48"
             android:title="@string/scheduled_ops"
-            android:showAsAction="ifRoom"/>
+            radis:showAsAction="ifRoom"/>
     <item
             android:id="@+id/go_to_create_account"
             android:title="@string/create_account"
-            android:showAsAction="never"/>
+            radis:showAsAction="never"/>
     <item
             android:id="@+id/go_to_edit_account"
             android:title="@string/account_edit"
-            android:showAsAction="never"/>
+            radis:showAsAction="never"/>
     <item
             android:id="@+id/delete_account"
             android:title="@string/delete_account"
-            android:showAsAction="never"/>
+            radis:showAsAction="never"/>
 </menu>

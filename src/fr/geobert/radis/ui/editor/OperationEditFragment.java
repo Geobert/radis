@@ -3,6 +3,9 @@ package fr.geobert.radis.ui.editor;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,8 +19,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
-import com.actionbarsherlock.app.SherlockFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
 import fr.geobert.radis.data.Operation;
@@ -31,7 +32,7 @@ import fr.geobert.radis.tools.Tools;
 
 import java.text.ParseException;
 
-public class OperationEditFragment extends SherlockFragment {
+public class OperationEditFragment extends Fragment implements TextWatcher {
     private MyAutoCompleteTextView mOpThirdPartyText;
     private MyAutoCompleteTextView mOpModeText;
     private EditText mOpSumText;
@@ -45,6 +46,9 @@ public class OperationEditFragment extends SherlockFragment {
     private EditText mNotesText;
     private CheckBox mIsTransfertCheck;
     private CommonOpEditor mActivity;
+    private CheckBox mIsChecked;
+    private ImageButton mInvertSignBtn;
+    private boolean mWasInvertByTransfert;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -54,28 +58,28 @@ public class OperationEditFragment extends SherlockFragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mActivity = (CommonOpEditor) getSherlockActivity();
+        mActivity = (CommonOpEditor) getActivity();
         mOpThirdPartyText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_third_party);
         mOpModeText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_mode);
         mOpSumText = (EditText) mActivity.findViewById(R.id.edit_op_sum);
         mOpTagText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_tag);
         mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
-                .getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText);
+                .getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText, this);
         mDatePicker = (DatePicker) mActivity.findViewById(R.id.edit_op_date);
         mSrcAccount = (Spinner) mActivity.findViewById(R.id.trans_src_account);
         mDstAccount = (Spinner) mActivity.findViewById(R.id.trans_dst_account);
         mTransfertCont = (LinearLayout) mActivity.findViewById(R.id.transfert_cont);
         mThirdPartyCont = (LinearLayout) mActivity.findViewById(R.id.third_party_cont);
         mNotesText = (EditText) mActivity.findViewById(R.id.edit_op_notes);
-
+        mInvertSignBtn = (ImageButton) mActivity.findViewById(R.id.edit_op_sign);
         mOpThirdPartyText.setNextFocusDownId(R.id.edit_op_sum);
         mOpSumText.setNextFocusDownId(R.id.edit_op_tag);
         mOpTagText.setNextFocusDownId(R.id.edit_op_mode);
         mOpModeText.setNextFocusDownId(R.id.edit_op_notes);
 
         mIsTransfertCheck = (CheckBox) mActivity.findViewById(R.id.is_transfert);
-//        mTransfertCont.setVisibility(View.GONE);
-//        mThirdPartyCont.setVisibility(View.VISIBLE);
+        mIsChecked = (CheckBox) mActivity.findViewById(R.id.is_checked);
+
         mThirdPartyCont.post(new Runnable() {
             private void adjustImageButton(ImageButton btn) {
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
@@ -157,8 +161,7 @@ public class OperationEditFragment extends SherlockFragment {
                         InfoManagerDialog.createModesListDialog(mActivity).show(getFragmentManager(), "modesDialog");
                     }
                 });
-
-        mActivity.findViewById(R.id.edit_op_sign).setOnClickListener(
+        mInvertSignBtn.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -175,6 +178,22 @@ public class OperationEditFragment extends SherlockFragment {
         Animation in = AnimationUtils.loadAnimation(mActivity,
                 android.R.anim.fade_in);
         Animation out = AnimationUtils.makeOutAnimation(mActivity, true);
+        mSumTextWatcher.setAllowNegativeSum(!isChecked);
+        mInvertSignBtn.setEnabled(!isChecked);
+        long sum = Tools.extractSumFromStr(mOpSumText.getText().toString());
+        try {
+            if (sum < 0) {
+                invertSign();
+                this.mWasInvertByTransfert = true;
+            } else {
+                if (mWasInvertByTransfert) {
+                    invertSign();
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         if (isChecked == true) {
             mTransfertCont.startAnimation(in);
             mThirdPartyCont.startAnimation(out);
@@ -249,9 +268,12 @@ public class OperationEditFragment extends SherlockFragment {
 
     private void initAccountSpinner(Spinner spin, long accountId) {
         int pos = 0;
-        SpinnerAdapter adapter = spin.getAdapter();
+        ArrayAdapter<Account> adapter = (ArrayAdapter<Account>) spin.getAdapter();
+        Account acc;
+        long id;
         while (pos < adapter.getCount()) {
-            long id = adapter.getItemId(pos);
+            acc = adapter.getItem(pos);
+            id = acc.mAccountId;
             if (id == accountId) {
                 spin.setSelection(pos);
                 break;
@@ -276,7 +298,7 @@ public class OperationEditFragment extends SherlockFragment {
         } else {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
-
+        mIsChecked.setChecked(op.mIsChecked);
         populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 
@@ -350,6 +372,7 @@ public class OperationEditFragment extends SherlockFragment {
         op.setDay(dp.getDayOfMonth());
         op.setMonth(dp.getMonth());
         op.setYear(dp.getYear());
+        op.mIsChecked = mIsChecked.isChecked();
 
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
@@ -375,5 +398,25 @@ public class OperationEditFragment extends SherlockFragment {
     public void onPause() {
         super.onPause();
         fillOperationWithInputs(mActivity.mCurrentOp);
+    }
+
+    public void setCheckedEditVisibility(int visibility) {
+//        mActivity.findViewById(R.id.checked_title).setVisibility(visibility);
+        mIsChecked.setVisibility(visibility);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        // nothing
+    }
+
+    @Override
+    public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+        // nothing
+    }
+
+    @Override
+    public void afterTextChanged(Editable editable) {
+        mWasInvertByTransfert = false;
     }
 }

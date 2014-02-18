@@ -19,18 +19,22 @@
             style="@style/EditorHorizontalLinearLayout"
             android:layout_marginTop="0dp">
 
-        <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="10dp"
-                android:layout_weight="1"
-                android:text="@string/transfert"/>
-
         <CheckBox
                 android:id="@+id/is_transfert"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"/>
+                android:layout_marginRight="3dp"
+                android:layout_weight="1"
+                android:text="@string/transfert"/>
+
+        <CheckBox
+                android:id="@+id/is_checked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="3dp"
+                android:layout_weight="1"
+                android:text="@string/checked"/>
+
     </LinearLayout>
 
     <LinearLayout

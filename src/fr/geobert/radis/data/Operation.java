@@ -22,6 +22,7 @@ public class Operation implements Parcelable {
     public long mScheduledId;
     public long mRowId;
     public String mTransSrcAccName;
+    public boolean mIsChecked;
 
     // if these value are != 0, it is a transfert operation between 2 accounts
     // mTransferAccountId is the other account
@@ -41,6 +42,7 @@ public class Operation implements Parcelable {
         mTransferAccountId = op.mTransferAccountId;
         mTransSrcAccName = op.mTransSrcAccName;
         mAccountId = op.mAccountId;
+        mIsChecked = op.mIsChecked;
     }
 
     public Operation(Cursor op) {
@@ -85,6 +87,10 @@ public class Operation implements Parcelable {
         if (accIdx >= 0) {
             mAccountId = op.getLong(accIdx);
         }
+        final int checkedIdx = op.getColumnIndex(OperationTable.KEY_OP_CHECKED);
+        if (-1 != checkedIdx) {
+            mIsChecked = op.getInt(checkedIdx) == 1;
+        }
     }
 
     public Operation() {
@@ -97,6 +103,7 @@ public class Operation implements Parcelable {
         mScheduledId = 0;
         mTransferAccountId = 0;
         mAccountId = 0;
+        mIsChecked = false;
     }
 
     public Operation(Parcel parcel) {
@@ -188,6 +195,7 @@ public class Operation implements Parcelable {
         dest.writeLong(mSum);
         dest.writeLong(mScheduledId);
         dest.writeLong(mTransferAccountId);
+        dest.writeInt(mIsChecked ? 1 : 0);
     }
 
     protected void readFromParcel(Parcel in) {
@@ -214,6 +222,7 @@ public class Operation implements Parcelable {
         mSum = in.readLong();
         mScheduledId = in.readLong();
         mTransferAccountId = in.readLong();
+        mIsChecked = in.readInt() == 1;
     }
 
     public static final Parcelable.Creator<Operation> CREATOR = new Parcelable.Creator<Operation>() {
@@ -240,6 +249,6 @@ public class Operation implements Parcelable {
         return mThirdParty.equals(op.mThirdParty) && mTag.equals(op.mTag)
                 && mMode.equals(op.mMode) && mNotes.equals(op.mNotes)
                 && mSum == op.mSum && mScheduledId == op.mScheduledId
-                && mTransferAccountId == op.mTransferAccountId;
+                && mTransferAccountId == op.mTransferAccountId && mIsChecked == op.mIsChecked;
     }
 }

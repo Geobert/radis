@@ -2,11 +2,11 @@ package fr.geobert.radis;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
+import android.support.v7.app.ActionBarActivity;
 import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.tools.DBPrefsManager;
 
-public class BaseActivity extends SherlockFragmentActivity {
+public class BaseActivity extends ActionBarActivity {
     private static final String TAG = "BaseActivity";
     protected ProgressDialog mProgress;
     private int mProgressCount = 0;

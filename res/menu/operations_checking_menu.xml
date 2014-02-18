@@ -3,8 +3,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:radis="http://schemas.android.com/apk/res-auto">
     <item
-            android:icon="@drawable/plus_48"
-            android:title="@string/debug"
-            android:id="@+id/debug"
-            radis:showAsAction="never"/>
+            android:icon="@drawable/auto_checking_48"
+            android:title="@string/auto_checking"
+            android:id="@+id/auto_checking"
+            radis:showAsAction="ifRoom"/>
 </menu>

@@ -19,12 +19,12 @@ import android.os.Handler;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
-import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
@@ -90,13 +90,18 @@ public class Tools {
         };
     }
 
+    public static void popMessage(final Activity ctx, final String msg, final int titleStrId, final String btnText,
+                                  DialogInterface.OnClickListener onClick) {
+        AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
+        alertDialog.setTitle(titleStrId);
+        alertDialog.setMessage(msg);
+        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, btnText, onClick);
+        alertDialog.show();
+    }
+
     public static void popError(Activity ctx, String msg,
                                 DialogInterface.OnClickListener onClick) {
-        AlertDialog alertDialog = new AlertDialog.Builder(ctx).create();
-        alertDialog.setTitle("Erreur");
-        alertDialog.setMessage(msg);
-        alertDialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK", onClick);
-        alertDialog.show();
+        Tools.popMessage(ctx, msg, R.string.error, ctx.getString(R.string.ok), onClick);
     }
 
     public static void setTextWithoutComplete(AutoCompleteTextView v,
@@ -154,6 +159,11 @@ public class Tools {
         }
 
         return false;
+    }
+
+    public static void showKeyboard(Activity ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.showSoftInput(ctx.getCurrentFocus(), InputMethodManager.SHOW_IMPLICIT);
     }
 
     protected static class AdvancedDialog extends DialogFragment {

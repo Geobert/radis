@@ -167,13 +167,10 @@
         <item name="android:imeOptions">actionDone</item>
     </style>
 
-    <style name="RadisTheme" parent="@style/Theme.Sherlock">
+    <style name="RadisTheme" parent="@style/Theme.AppCompat">
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
-        <item name="actionOverflowButtonStyle">@style/OverFlow</item>
-        <item name="actionButtonStyle">@style/MyActionButtonStyle</item>
         <item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>
         <item name="android:actionBarStyle">@style/MyActionBarStyle</item>
-        <item name="actionBarStyle">@style/MyActionBarStyle</item>
         <item name="android:imageButtonStyle">@style/RadisButton</item>
     </style>
 
@@ -181,13 +178,13 @@
         <item name="android:background">@drawable/radistheme_btn_default</item>
     </style>
 
-    <style name="OverFlow" parent="@style/Widget.Sherlock.ActionButton.Overflow">
+    <style name="OverFlow" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:minWidth">32dip</item>
         <item name="android:padding">0dip</item>
         <item name="android:src">@drawable/overflow_40</item>
     </style>
 
-    <style name="MyActionButtonStyle" parent="@style/Widget.Sherlock.ActionButton.Overflow">
+    <style name="MyActionButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:minWidth">40dip</item>
         <item name="android:paddingLeft">10dip</item>
         <item name="android:paddingRight">10dip</item>
@@ -195,14 +192,12 @@
         <item name="android:layout_marginRight">5dip</item>
     </style>
 
-    <style name="MyActionBarStyle" parent="@style/Widget.Sherlock.ActionBar">
+    <style name="MyActionBarStyle" parent="@style/Widget.AppCompat.ActionBar">
         <item name="android:titleTextStyle">@style/RadisTheme.TitleStyle</item>
-        <item name="titleTextStyle">@style/RadisTheme.TitleStyle</item>
         <item name="android:icon">@drawable/radis_no_disc_48</item>
-        <item name="icon">@drawable/radis_no_disc_48</item>
     </style>
 
-    <style name="RadisTheme.TitleStyle" parent="@style/TextAppearance.Sherlock.Widget.ActionBar.Title">
+    <style name="RadisTheme.TitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textSize">15dp</item>
     </style>
 </resources>

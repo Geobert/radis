@@ -6,11 +6,8 @@ import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 import fr.geobert.radis.R;
 import fr.geobert.radis.tools.ExpandAnimation;
 import fr.geobert.radis.tools.ExpandUpAnimation;
@@ -47,16 +44,7 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         View v = super.newView(context, cursor, parent);
-        OpRowHolder h = new OpRowHolder();
-        h.separator = (LinearLayout) v.findViewById(R.id.separator);
-        h.month = (TextView) v.findViewById(R.id.month);
-        h.scheduledImg = (ImageView) v.findViewById(R.id.op_sch_icon);
-        h.sumAtSelection = (TextView) v.findViewById(R.id.today_amount);
-        h.actionsCont = v.findViewById(R.id.actions_cont);
-        h.deleteBtn = (ImageButton) h.actionsCont.findViewById(R.id.delete_op);
-        h.editBtn = (ImageButton) h.actionsCont.findViewById(R.id.edit_op);
-        h.varBtn = (ImageButton) h.actionsCont.findViewById(R.id.variable_action);
-        h.opName = (TextView) v.findViewById(R.id.op_third_party);
+        OpRowHolder h = new OpRowHolder(v);
         v.setTag(h);
         // HACK to workaround a glitch at the end of animation
         ExpandUpAnimation.mBg = h.separator.getBackground();

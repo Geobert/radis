@@ -11,9 +11,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
@@ -116,7 +116,7 @@ public class OperationEditor extends CommonOpEditor {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.confirm_cancel_menu, menu);
         return true;
     }
@@ -200,7 +200,7 @@ public class OperationEditor extends CommonOpEditor {
 
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
+            super.onCreateDialog(savedInstanceState);
             final OperationEditor act = (OperationEditor) getActivity();
             Bundle args = getArguments();
             final Operation currentOp = args.getParcelable("currentOp");
@@ -218,8 +218,8 @@ public class OperationEditor extends CommonOpEditor {
                                             new ScheduledOperation(currentOp, currentOp.mAccountId);
                                     if (ScheduledOperationTable.updateScheduledOp(act, currentOp.mScheduledId, op,
                                             true)) {
-                                        AccountTable.updateProjection(act, act.mCurAccountId, previousSum - op.mSum,
-                                                op.getDate());
+                                        AccountTable.updateProjection(act, act.mCurAccountId, op.mSum, previousSum,
+                                                op.getDate(), -1);
                                     }
                                     ScheduledOperationTable.updateAllOccurences(getActivity(), op, previousSum,
                                             currentOp.mScheduledId);

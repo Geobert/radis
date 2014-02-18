@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="fr.geobert.radis"
-          android:versionCode="42"
-          android:versionName="0.8.8">
+          android:versionCode="43"
+          android:versionName="0.9">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE">
     </uses-permission>
@@ -49,6 +49,10 @@
                 android:theme="@android:style/Theme.Dialog"/>
         <activity
                 android:name=".ui.ScheduledOpListActivity"
+                android:launchMode="singleTop">
+        </activity>
+        <activity
+                android:name=".ui.CheckingOpActivity"
                 android:launchMode="singleTop">
         </activity>
         <activity

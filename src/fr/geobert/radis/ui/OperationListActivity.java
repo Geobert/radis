@@ -17,15 +17,15 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
@@ -77,6 +77,7 @@ public class OperationListActivity extends BaseActivity implements
     private long mLastSelectionId = -1;
     private int mLastSelectionPos = -1;
     private boolean needRefreshSelection = false;
+    private boolean wasBackWithoutAccountSaved = false;
 
     public static void refreshAccountList(final Context ctx) {
         Intent intent = new Intent(INTENT_UPDATE_ACC_LIST);
@@ -233,13 +234,18 @@ public class OperationListActivity extends BaseActivity implements
 
     private boolean onAccountChanged(long itemId) {
         mProjectionDate = mAccountManager.setCurrentAccountId(itemId);
-        if (mQuickAddController != null && itemId != mAccountId) {
+        startOpDate = Tools.createClearedCalendar();
+        startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
+        if (null != mScrollLoader) {
+            mScrollLoader.setStartDate(startOpDate);
+        }
+        if (mQuickAddController != null && itemId != mAccountId && mOpListCursorAdapter != null) {
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
             mQuickAddController.setAccount(itemId);
             getOperationsList();
             return true;
         } else {
-            if (mQuickAddController == null) {
+            if (null == mQuickAddController) {
                 getOperationsList();
                 initQuickAdd();
             }
@@ -250,7 +256,7 @@ public class OperationListActivity extends BaseActivity implements
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mOnInsertionReceiver != null) {
+        if (null != mOnInsertionReceiver) {
             unregisterReceiver(mOnInsertionReceiver);
         }
     }
@@ -287,7 +293,7 @@ public class OperationListActivity extends BaseActivity implements
                 if (mOpListCursorAdapter == null) {
                     String[] from = new String[]{OperationTable.KEY_OP_DATE,
                             InfoTables.KEY_THIRD_PARTY_NAME, OperationTable.KEY_OP_SUM,
-                            InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME};
+                            InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME, OperationTable.KEY_OP_CHECKED};
 
                     int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
                     mOpListCursorAdapter =
@@ -318,8 +324,12 @@ public class OperationListActivity extends BaseActivity implements
         AccountManager accMan = mAccountManager;
         Cursor allAccounts = accMan.getAllAccountsCursor();
         if (allAccounts == null || allAccounts.getCount() == 0) {
-            // no account, open create account
-            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
+            if (this.wasBackWithoutAccountSaved) {
+                finish();
+            } else {
+                // no account, open create account
+                AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
+            }
         } else {
             mAccountId = accMan.getCurrentAccountId(this);
             if (mAccountId != null) {
@@ -345,13 +355,12 @@ public class OperationListActivity extends BaseActivity implements
         mAccountId = mAccountManager.getCurrentAccountId(this);
         if (mAccountId != null) {
             if (mOperationsLoader == null) {
-                startOpDate = new GregorianCalendar();
+                startOpDate = Tools.createClearedCalendar();
                 if (mScrollLoader == null) {
                     initOperationList();
                 }
                 mScrollLoader.setStartDate(startOpDate);
                 startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
-                Tools.clearTimeOfCalendar(startOpDate);
                 Log.d(TAG, "startOpDate : " + Tools.getDateStr(startOpDate));
                 getSupportLoaderManager().initLoader(GET_OPS, null, this);
             } else {
@@ -367,6 +376,8 @@ public class OperationListActivity extends BaseActivity implements
             case AccountEditor.ACCOUNT_EDITOR:
                 if (resultCode == RESULT_OK) {
                     updateAccountList();
+                } else { // back without filling an account
+                    this.wasBackWithoutAccountSaved = true;
                 }
                 break;
             case OperationEditor.OPERATION_EDITOR:
@@ -385,7 +396,7 @@ public class OperationListActivity extends BaseActivity implements
                     }
                     mAccountManager.backupCurAccountId();
                     updateAccountList();
-                    updateOperationList();
+                    getOperationsList();
                 }
                 break;
         }
@@ -413,10 +424,6 @@ public class OperationListActivity extends BaseActivity implements
         updateAccountList();
     }
 
-    private void updateOperationList() {
-        getOperationsList();
-    }
-
     private void updateAccountList() {
         mAccountManager.fetchAllAccounts(this, true, new Runnable() {
             @Override
@@ -429,9 +436,10 @@ public class OperationListActivity extends BaseActivity implements
     private void onFetchAllAccountCbk() {
         if (mListView == null) {
             initOperationList();
+        } else {
+            getOperationsList();
         }
         processAccountList();
-        updateOperationList();
     }
 
     private void cleanDatabaseIfTestingMode() {
@@ -460,7 +468,7 @@ public class OperationListActivity extends BaseActivity implements
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getSupportMenuInflater();
+        MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.operations_list_menu, menu);
         inflater.inflate(R.menu.common_menu, menu);
         if (Tools.DEBUG_MODE) {
@@ -487,6 +495,9 @@ public class OperationListActivity extends BaseActivity implements
                 return true;
             case R.id.delete_account:
                 DeleteAccountConfirmationDialog.newInstance(mAccountId).show(getSupportFragmentManager(), "delAccount");
+                return true;
+            case R.id.go_to_op_checking:
+                CheckingOpActivity.callMe(this, mAccountId);
                 return true;
             default:
                 return Tools.onDefaultOptionItemSelected(this, item);
@@ -602,13 +613,19 @@ public class OperationListActivity extends BaseActivity implements
             getOperationsList();
         } else {
             // no op found with cur month and month - 1, try if there is one
-            Cursor c = OperationTable.fetchLastOp(this, mAccountId);
+            Cursor c;
+            if (null == startOpDate) {
+                c = OperationTable.fetchLastOp(this, mAccountId);
+            } else {
+                c = OperationTable.fetchLastOpSince(this, mAccountId, startOpDate.getTimeInMillis());
+            }
             if (c != null) {
                 if (c.moveToFirst()) {
                     long date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE));
                     Log.d(TAG, "last chance date : " + Tools.getDateStr(date));
                     startOpDate = new GregorianCalendar();
                     startOpDate.setTimeInMillis(date);
+                    mScrollLoader.setStartDate(startOpDate);
                     getOperationsList();
                 }
                 c.close();
@@ -665,7 +682,7 @@ public class OperationListActivity extends BaseActivity implements
         mLastSelectionId = -1;
         mLastSelectionPos = -1;
         needRefreshSelection = true;
-        updateOperationList();
+        getOperationsList();
         updateAccountList();
     }
 
