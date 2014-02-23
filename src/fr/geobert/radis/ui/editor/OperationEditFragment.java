@@ -22,6 +22,7 @@ import android.widget.Spinner;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
 import fr.geobert.radis.data.Operation;
+import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
@@ -144,7 +145,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                     public void onClick(View v) {
                         InfoManagerDialog.createThirdPartiesListDialog(mActivity).show(getFragmentManager(), "thirdPartiesDialog");
                     }
-                });
+                }
+        );
 
         mActivity.findViewById(R.id.edit_op_tags_list).setOnClickListener(
                 new View.OnClickListener() {
@@ -152,7 +154,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                     public void onClick(View v) {
                         InfoManagerDialog.createTagsListDialog(mActivity).show(getFragmentManager(), "tagsDialog");
                     }
-                });
+                }
+        );
 
         mActivity.findViewById(R.id.edit_op_modes_list).setOnClickListener(
                 new View.OnClickListener() {
@@ -160,7 +163,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                     public void onClick(View v) {
                         InfoManagerDialog.createModesListDialog(mActivity).show(getFragmentManager(), "modesDialog");
                     }
-                });
+                }
+        );
         mInvertSignBtn.setOnClickListener(
                 new View.OnClickListener() {
                     @Override
@@ -171,7 +175,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                             // nothing to do
                         }
                     }
-                });
+                }
+        );
     }
 
     final protected void onTransfertCheckedChanged(boolean isChecked) {
@@ -397,6 +402,13 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     @Override
     public void onPause() {
         super.onPause();
+        if (mActivity.mCurrentOp == null) {
+            if (mActivity instanceof OperationEditor) {
+                mActivity.mCurrentOp = new Operation();
+            } else if (mActivity instanceof ScheduledOperationEditor) {
+                mActivity.mCurrentOp = new ScheduledOperation(mActivity.mCurAccountId);
+            }
+        }
         fillOperationWithInputs(mActivity.mCurrentOp);
     }
 

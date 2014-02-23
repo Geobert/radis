@@ -7,8 +7,7 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.data.Operation;
 
-public abstract class CommonOpEditor extends BaseActivity implements
-        LoaderCallbacks<Cursor> {
+public abstract class CommonOpEditor extends BaseActivity implements LoaderCallbacks<Cursor> {
     public static final String PARAM_OP_ID = "op_id";
     protected Operation mCurrentOp;
     protected long mRowId;

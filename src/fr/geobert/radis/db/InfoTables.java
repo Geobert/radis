@@ -5,12 +5,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.DBPrefsManager;
+import org.acra.ACRA;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -281,16 +283,19 @@ public class InfoTables {
     // UPGRADE FUNCTIONS
     static void upgradeFromV8(SQLiteDatabase db, int oldVersion, int newVersion) {
         Cursor c = db.query(DATABASE_THIRD_PARTIES_TABLE, new String[]{
-                KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME}, null, null,
-                null, null, null);
+                        KEY_THIRD_PARTY_ROWID, KEY_THIRD_PARTY_NAME}, null, null,
+                null, null, null
+        );
         if (c != null && c.moveToFirst()) {
             do {
                 ContentValues v = new ContentValues();
                 v.put(KEY_THIRD_PARTY_NORMALIZED_NAME,
                         AsciiUtils.convertNonAscii(
                                 c.getString(c
-                                        .getColumnIndex(KEY_THIRD_PARTY_NAME)))
-                                .toLowerCase());
+                                        .getColumnIndex(KEY_THIRD_PARTY_NAME))
+                        )
+                                .toLowerCase()
+                );
                 db.update(
                         DATABASE_THIRD_PARTIES_TABLE,
                         v,
@@ -298,7 +303,8 @@ public class InfoTables {
                                 + "="
                                 + Long.toString(c.getLong(c
                                 .getColumnIndex(KEY_THIRD_PARTY_ROWID))),
-                        null);
+                        null
+                );
             } while (c.moveToNext());
             c.close();
         }
@@ -310,14 +316,16 @@ public class InfoTables {
                 v.put(KEY_TAG_NORMALIZED_NAME,
                         AsciiUtils.convertNonAscii(
                                 c.getString(c.getColumnIndex(KEY_TAG_NAME)))
-                                .toLowerCase());
+                                .toLowerCase()
+                );
                 db.update(
                         DATABASE_TAGS_TABLE,
                         v,
                         KEY_TAG_ROWID
                                 + "="
                                 + Long.toString(c.getLong(c
-                                .getColumnIndex(KEY_TAG_ROWID))), null);
+                                .getColumnIndex(KEY_TAG_ROWID))), null
+                );
             } while (c.moveToNext());
             c.close();
         }
@@ -330,14 +338,16 @@ public class InfoTables {
                 v.put(KEY_MODE_NORMALIZED_NAME,
                         AsciiUtils.convertNonAscii(
                                 c.getString(c.getColumnIndex(KEY_MODE_NAME)))
-                                .toLowerCase());
+                                .toLowerCase()
+                );
                 db.update(
                         DATABASE_MODES_TABLE,
                         v,
                         KEY_MODE_ROWID
                                 + "="
                                 + Long.toString(c.getLong(c
-                                .getColumnIndex(KEY_MODE_ROWID))), null);
+                                .getColumnIndex(KEY_MODE_ROWID))), null
+                );
             } while (c.moveToNext());
             c.close();
         }
@@ -412,8 +422,21 @@ public class InfoTables {
     }
 
     public static void upgradeFromV16(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_THIRD_PARTIES_TABLE));
-        db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_TAGS_TABLE));
-        db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_MODES_TABLE));
+        try {
+            db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_THIRD_PARTIES_TABLE));
+        } catch (SQLiteException e) {
+            ACRA.getErrorReporter().handleSilentException(e);
+        }
+        try {
+            db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_TAGS_TABLE));
+        } catch (SQLiteException e) {
+            ACRA.getErrorReporter().handleSilentException(e);
+        }
+        try {
+            db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_MODES_TABLE));
+        } catch (SQLiteException e) {
+            ACRA.getErrorReporter().handleSilentException(e);
+        }
+
     }
 }
