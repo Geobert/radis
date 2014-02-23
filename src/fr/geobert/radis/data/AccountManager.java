@@ -11,9 +11,11 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.DBPrefsManager;
+import org.acra.ACRA;
 
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Locale;
 
 public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int GET_ACCOUNTS = 200;
@@ -108,8 +110,16 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
                     final int currencyIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY);
                     AccountTable.initProjectionDate(mAllAccountsCursor);
                     mCurSum = mAllAccountsCursor.getLong(curSumIdx);
-                    mCurAccCurrencySymbol = Currency.getInstance(mAllAccountsCursor.getString(currencyIdx)).getSymbol();
-                    mStartSum = mAllAccountsCursor.getLong(mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_START_SUM));
+                    try {
+                        mCurAccCurrencySymbol = Currency.getInstance(mAllAccountsCursor.getString(currencyIdx)).getSymbol();
+                    } catch (IllegalArgumentException e) {
+                        ACRA.getErrorReporter().putCustomData("locale", "bad locale given for Currency : " +
+                                mAllAccountsCursor.getString(currencyIdx));
+                        ACRA.getErrorReporter().handleSilentException(e);
+                        mCurAccCurrencySymbol = Currency.getInstance(new Locale("fr", "FR")).getSymbol();
+                    }
+                    mStartSum = mAllAccountsCursor.getLong(
+                            mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_START_SUM));
                     break;
                 }
                 pos++;

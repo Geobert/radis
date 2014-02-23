@@ -174,6 +174,9 @@ public class OperationListActivity extends BaseActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mAccountId = savedInstanceState.getLong("mAccountId");
+        if (null == mAccountId) {
+            mAccountId = mAccountManager.getCurrentAccountId(this);
+        }
         final Bundle sis = savedInstanceState;
         DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
             @Override
@@ -299,7 +302,8 @@ public class OperationListActivity extends BaseActivity implements
                     mOpListCursorAdapter =
                             new OperationsCursorAdapter(this, R.layout.operation_row, from, to, cursor,
                                     new OperationRowViewBinder(this, cursor,
-                                            OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE));
+                                            OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE)
+                            );
                     mListView.setAdapter(mOpListCursorAdapter);
                     refresh = true;
                 }
@@ -513,7 +517,8 @@ public class OperationListActivity extends BaseActivity implements
             long opDate = op.getLong(dateIdx);
             Log.d(TAG,
                     "computeSumFromCursor mProjectionDate : "
-                            + Tools.getDateStr(mProjectionDate) + "  opDate : " + Tools.getDateStr(opDate));
+                            + Tools.getDateStr(mProjectionDate) + "  opDate : " + Tools.getDateStr(opDate)
+            );
             if (!op.isBeforeFirst() && !op.isAfterLast()) {
                 final int origPos = op.getPosition();
                 boolean canContinue;
@@ -755,7 +760,8 @@ public class OperationListActivity extends BaseActivity implements
                                         activity.afterDelUpdateSelection();
                                     }
                                 }
-                            })
+                            }
+                    )
                     .setNeutralButton(R.string.del_all_following,
                             new DialogInterface.OnClickListener() {
 
@@ -770,7 +776,8 @@ public class OperationListActivity extends BaseActivity implements
                                         activity.afterDelUpdateSelection();
                                     }
                                 }
-                            })
+                            }
+                    )
                     .setNegativeButton(R.string.del_all_occurrences,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
@@ -779,7 +786,8 @@ public class OperationListActivity extends BaseActivity implements
                                         activity.afterDelUpdateSelection();
                                     }
                                 }
-                            });
+                            }
+                    );
             return builder.create();
         }
     }
@@ -863,7 +871,8 @@ public class OperationListActivity extends BaseActivity implements
                     stringBuilder.append(String.format(
                             getString(R.string.balance_at),
                             Formater.getFullDateFormater().format(
-                                    new Date(dateLong))));
+                                    new Date(dateLong))
+                    ));
                 } else {
                     stringBuilder.append(getString(R.string.current_sum));
                 }
