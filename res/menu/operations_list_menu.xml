@@ -16,7 +16,7 @@
             android:id="@+id/go_to_sch_op"
             android:icon="@drawable/sched_48"
             android:title="@string/scheduled_ops"
-            radis:showAsAction="ifRoom"/>
+            radis:showAsAction="never"/>
     <item
             android:id="@+id/go_to_create_account"
             android:title="@string/create_account"
