@@ -11,11 +11,9 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.DBPrefsManager;
-import org.acra.ACRA;
 
 import java.util.ArrayList;
 import java.util.Currency;
-import java.util.Locale;
 
 public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int GET_ACCOUNTS = 200;
@@ -100,6 +98,7 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
         return mCurAccountPos;
     }
 
+
     private int setCurrentAccountSum() {
         int pos = 0;
         if (mAllAccountsCursor != null) {
@@ -110,13 +109,12 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
                     final int currencyIdx = mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY);
                     AccountTable.initProjectionDate(mAllAccountsCursor);
                     mCurSum = mAllAccountsCursor.getLong(curSumIdx);
+                    String curStr = mAllAccountsCursor.getString(currencyIdx);
                     try {
-                        mCurAccCurrencySymbol = Currency.getInstance(mAllAccountsCursor.getString(currencyIdx)).getSymbol();
+                        mCurAccCurrencySymbol = Currency.getInstance(curStr).getSymbol();
                     } catch (IllegalArgumentException e) {
-                        ACRA.getErrorReporter().putCustomData("locale", "bad locale given for Currency : " +
-                                mAllAccountsCursor.getString(currencyIdx));
-                        ACRA.getErrorReporter().handleSilentException(e);
-                        mCurAccCurrencySymbol = Currency.getInstance(new Locale("fr", "FR")).getSymbol();
+                        mCurAccCurrencySymbol =
+                                Currency.getInstance(mCtx.getResources().getConfiguration().locale).getSymbol();
                     }
                     mStartSum = mAllAccountsCursor.getLong(
                             mAllAccountsCursor.getColumnIndex(AccountTable.KEY_ACCOUNT_START_SUM));
