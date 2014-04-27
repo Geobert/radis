@@ -50,6 +50,7 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     private boolean initialized = false;
     private Cursor mUncheckedOps;
     private CheckingOpRowViewBinder mInnerOpViewBinder;
+    private TargetSumWatcher targetSumWatcher;
 
     public static void callMe(Context ctx, final long currentAccountId) {
         Intent i = new Intent(ctx, CheckingOpActivity.class);
@@ -85,15 +86,14 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
         actionbar.setIcon(R.drawable.op_checking_48);
         actionbar.setDisplayShowTitleEnabled(false);
 
-        final TargetSumWatcher w = new TargetSumWatcher(
+        this.targetSumWatcher = new TargetSumWatcher(
                 Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mTargetedSum, this);
-        w.setAutoNegate(false);
-        mTargetedSum.addTextChangedListener(w);
+        targetSumWatcher.setAutoNegate(false);
         mTargetedSum.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    w.setAutoNegate(false);
+                    targetSumWatcher.setAutoNegate(false);
                     ((EditText) v).selectAll();
                 }
             }
@@ -124,6 +124,13 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 fetchOpForChecking();
             }
         });
+        mTargetedSum.addTextChangedListener(targetSumWatcher);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mTargetedSum.removeTextChangedListener(targetSumWatcher);
     }
 
     private void populateAccountSpinner() {
@@ -140,9 +147,6 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                     if (id == mCurrentAccount) {
                         getSupportActionBar().setSelectedNavigationItem(pos);
                         mAccountManager.setCurrentAccountId(id);
-//                        Cursor acc = (Cursor) mAccountAdapter.getItem(pos);
-//                        final long curCheckedSum =
-//                                acc.getLong(acc.getColumnIndex(AccountTable.KEY_ACCOUNT_CHECKED_OP_SUM));
                         mTargetedSum.setText(Formater.getSumFormater().format(mAccountManager.getCurrentAccountSum() / 100.d));
                         break;
                     } else {
@@ -178,7 +182,8 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 OperationTable.RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = 0",
                 new String[]{Long.toString(mCurrentAccount),
                         Long.toString(mCurrentAccount)},
-                OperationTable.OP_ORDERING);
+                OperationTable.OP_ORDERING
+        );
         return mLoader;
     }
 
@@ -238,13 +243,6 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
         }
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.operations_checking_menu, menu);
-//        return true;
-//    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -259,6 +257,17 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 return Tools.onDefaultOptionItemSelected(this, item);
         }
     }
+
+
+    // AUTO CHECKING CODE not really working, need total rewrite
+
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.operations_checking_menu, menu);
+//        return true;
+//    }
+
 
     private class AutoCheckingClickListener implements DialogInterface.OnClickListener {
         DatePicker datePicker;
@@ -341,7 +350,8 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                             String.format(getString(R.string.missing_ops), Formater.getSumFormater().format(total / 100.0),
                                     Formater.getSumFormater().format((targetSum - total) / 100.0)),
                             R.string.auto_checking,
-                            getString(R.string.ok), null);
+                            getString(R.string.ok), null
+                    );
                 } else {
                     Tools.popMessage(this, getString(R.string.targeted_sum_reached), R.string.op_checking,
                             getString(R.string.ok), null);
