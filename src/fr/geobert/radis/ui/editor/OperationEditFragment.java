@@ -83,10 +83,12 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
 
         mThirdPartyCont.post(new Runnable() {
             private void adjustImageButton(ImageButton btn) {
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
-                params.bottomMargin = 3;
-                params.height = mThirdPartyCont.getMeasuredHeight();
-                btn.setLayoutParams(params);
+                if (btn != null) {
+                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) btn.getLayoutParams();
+                    params.bottomMargin = 3;
+                    params.height = mThirdPartyCont.getMeasuredHeight();
+                    btn.setLayoutParams(params);
+                }
             }
 
             @Override
