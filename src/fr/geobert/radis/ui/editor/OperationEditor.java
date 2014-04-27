@@ -156,7 +156,8 @@ public class OperationEditor extends CommonOpEditor {
                     l = new CursorLoader(this,
                             Uri.parse(DbContentProvider.OPERATION_JOINED_URI + "/"
                                     + mRowId), OperationTable.OP_COLS_QUERY, null,
-                            null, null);
+                            null, null
+                    );
                     break;
 
                 default:
@@ -171,9 +172,13 @@ public class OperationEditor extends CommonOpEditor {
         hideProgress();
         switch (loader.getId()) {
             case GET_OP:
-                data.moveToFirst();
-                mCurrentOp = new Operation(data);
-                mOriginalOp = new Operation(data);
+                if (data.moveToFirst()) {
+                    mCurrentOp = new Operation(data);
+                    mOriginalOp = new Operation(data);
+                } else {
+                    mCurrentOp = new Operation();
+                    mCurrentOp.mAccountId = mCurAccountId;
+                }
                 populateFields();
                 break;
             default:
@@ -225,7 +230,8 @@ public class OperationEditor extends CommonOpEditor {
                                             currentOp.mScheduledId);
                                     act.setResAndExit();
                                 }
-                            })
+                            }
+                    )
                     .setNeutralButton(R.string.disconnect,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
@@ -234,14 +240,16 @@ public class OperationEditor extends CommonOpEditor {
                                     OperationTable.updateOp(act, rowId, currentOp, act.mOriginalOp);
                                     act.setResAndExit();
                                 }
-                            })
+                            }
+                    )
                     .setNegativeButton(R.string.cancel,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int id) {
                                     dialog.cancel();
                                 }
-                            });
+                            }
+                    );
             return builder.create();
         }
     }
