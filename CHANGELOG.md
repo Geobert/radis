@@ -1,3 +1,11 @@
+Version 0.9.2 - 29/04/2014
+- corrections de crashs
+- correction de la logique sur les transferts : somme >= 0 depuis la 0.9, et dans ce cas, si A->B alors -somme dans A et +somme dans B, n'impacte pas les anciens transferts tant qu'il ne sont pas édités.
+- correction affichage du compte dans l'ActionBar sur grand écrans (dont Galaxy Note 3)
+
+Version 0.9.1 - 23/02/2014
+- fix : des crashs en moins
+
 Version 0.9 - 17/02/2014
 - Nouveau : Pointage des opérations pour comparer avec le relevé
 - Nouveau : Appuie long sur l'ajout d'opération rapide pour choisir la date de l'opération

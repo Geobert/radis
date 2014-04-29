@@ -266,7 +266,7 @@ public class OperationListActivity extends BaseActivity implements
 
     protected void consolidateDbIfNeeded() {
         PrefsManager prefs = PrefsManager.getInstance(this);
-        Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
+        Boolean needConsolidate = prefs.getBoolean(RadisService.CONSOLIDATE_DB, false);
         Log.d(TAG, "needConsolidate : " + needConsolidate);
         if (needConsolidate) {
             RadisService.acquireStaticLock(this);
