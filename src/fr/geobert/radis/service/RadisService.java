@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 public class RadisService extends IntentService {
     private static final String TAG = "RadisService";
     public static final String LOCK_NAME_STATIC = "fr.geobert.radis.StaticLock";
+    public static final String CONSOLIDATE_DB = "consolidateDB";
     private static PowerManager.WakeLock lockStatic = null;
 
     public static void callMe(Context context) {
@@ -35,6 +36,27 @@ public class RadisService extends IntentService {
 
     public RadisService() {
         super(TAG);
+    }
+
+    private void consolidateDbAfterRestore() {
+        PrefsManager prefs = PrefsManager.getInstance(this);
+        Boolean needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false);
+        Log.d(TAG, "needConsolidate : " + needConsolidate);
+        if (needConsolidate) {
+            Cursor cursor = AccountTable.fetchAllAccounts(this);
+            prefs.put(CONSOLIDATE_DB, false);
+            prefs.commit();
+            if (cursor != null) {
+                if (cursor.moveToFirst()) {
+                    do {
+                        Log.d(TAG, "CONSOLIDATE ON consolidateDB set to true : " + cursor.getLong(0));
+                        AccountTable.consolidateSums(this, cursor.getLong(0));
+                    } while (cursor.moveToNext());
+                }
+                cursor.close();
+            }
+            OperationListActivity.refreshAccountList(this);
+        }
     }
 
     @Override
@@ -48,24 +70,8 @@ public class RadisService extends IntentService {
                 Log.d(TAG, "release lock");
                 getLock(this).release();
             }
-            PrefsManager prefs = PrefsManager.getInstance(this);
-            Boolean needConsolidate = prefs.getBoolean("consolidateDB", false);
-            Log.d(TAG, "needConsolidate : " + needConsolidate);
-            if (needConsolidate) {
-                Cursor cursor = AccountTable.fetchAllAccounts(this);
-                prefs.put("consolidateDB", false);
-                prefs.commit();
-                if (cursor != null) {
-                    if (cursor.moveToFirst()) {
-                        do {
-                            Log.d(TAG, "CONSOLIDATE ON consolidateDB set to true : " + cursor.getLong(0));
-                            AccountTable.consolidateSums(this, cursor.getLong(0));
-                        } while (cursor.moveToNext());
-                    }
-                    cursor.close();
-                }
-                OperationListActivity.refreshAccountList(this);
-            }
+            // If the DB was restored, we consolidate the sums
+            consolidateDbAfterRestore();
         }
         stopSelf();
     }
@@ -152,40 +158,41 @@ public class RadisService extends IntentService {
     }
 
     private synchronized void processScheduledOps() {
-        Cursor c = ScheduledOperationTable.fetchAllScheduledOps(this);
-        if (c.isFirst()) {
-            DateFormat formater = Formater.getFullDateFormater(); // used in Log.d
-            TimeParams p = computeTimeParameters();
+        Cursor schOpsCursor = ScheduledOperationTable.fetchAllScheduledOps(this);
+        if (schOpsCursor.isFirst()) {
+//            DateFormat formater = Formater.getFullDateFormater(); // used in Log.d
+            TimeParams timeParams = computeTimeParameters();
 
             HashMap<Long, Long> sumsPerAccount = new LinkedHashMap<Long, Long>();
             HashMap<Long, Long> greatestDatePerAccount = new LinkedHashMap<Long, Long>();
-
+            ScheduledOperation op;
             do {
-                final long opRowId = c.getLong(c.getColumnIndex("_id"));
-                ScheduledOperation op = new ScheduledOperation(c);
+                final long OP_ROW_ID = schOpsCursor.getLong(schOpsCursor.getColumnIndex("_id"));
+                op = new ScheduledOperation(schOpsCursor);
                 final Long accountId = Long.valueOf(op.mAccountId);
                 final Long transId = Long.valueOf(op.mTransferAccountId);
                 long sum = 0;
                 boolean needUpdate = false;
+
                 Cursor accountCursor = AccountTable.fetchAccount(this, accountId);
                 if (null != accountCursor) {
                     if (!accountCursor.moveToFirst()) {
-                        c.moveToNext();
+                        schOpsCursor.moveToNext();
                         continue;
                     } else {
                         AccountTable.initProjectionDate(accountCursor);
                     }
                     accountCursor.close();
                 } else {
-                    c.moveToNext();
+                    schOpsCursor.moveToNext();
                     continue;
                 }
 
                 // insert all scheduled of the past until current month
 //                Log.d(TAG, "insert all scheduled of the past until current month");
                 int i = 0; // for logging purpose
-                while (op.getDate() <= p.currentMonth && !op.isObsolete()) {
-                    long opSum = insertSchOp(op, opRowId);
+                while (op.getDate() <= timeParams.currentMonth && !op.isObsolete()) {
+                    long opSum = insertSchOp(op, OP_ROW_ID);
                     i++;
                     if (opSum != 0) {
                         sum = sum + opSum;
@@ -194,14 +201,14 @@ public class RadisService extends IntentService {
                 }
 //                Log.d(TAG, "inserted " + i + " past scheduled op until current month");
                 i = 0;
-                if (p.today >= p.insertionDate) {
-                    while (op.getDate() < p.limitInsertionDate && !op.isObsolete()) {
+                if (timeParams.today >= timeParams.insertionDate) {
+                    while (op.getDate() < timeParams.limitInsertionDate && !op.isObsolete()) {
                         keepGreatestDate(greatestDatePerAccount, accountId, op.getDate());
                         if (transId > 0) {
                             keepGreatestDate(greatestDatePerAccount, transId, op.getDate());
                         }
 //                        Log.d(TAG, "op month before : " + op.getMonth());
-                        long opSum = insertSchOp(op, opRowId);
+                        long opSum = insertSchOp(op, OP_ROW_ID);
 //                        Log.d(TAG, "op month after : " + op.getMonth());
                         i++;
                         if (opSum != 0) {
@@ -211,7 +218,7 @@ public class RadisService extends IntentService {
                     }
 //                    Log.d(TAG, "inserted " + i + " ops current month scheduled op");
                 }
-                ScheduledOperationTable.updateScheduledOp(this, opRowId, op, false);
+                ScheduledOperationTable.updateScheduledOp(this, OP_ROW_ID, op, false);
                 if (needUpdate) {
                     Long curSum = sumsPerAccount.get(accountId);
                     if (curSum == null) {
@@ -229,7 +236,8 @@ public class RadisService extends IntentService {
                         keepGreatestDate(greatestDatePerAccount, transId, op.getDate());
                     }
                 }
-            } while (c.moveToNext());
+            } while (schOpsCursor.moveToNext());
+
             boolean needUpdate = false;
             Long[] accountIds = sumsPerAccount.keySet().toArray(new Long[sumsPerAccount.size()]);
             for (HashMap.Entry<Long, Long> e : sumsPerAccount.entrySet()) {
@@ -245,9 +253,9 @@ public class RadisService extends IntentService {
                 sendOrderedBroadcast(i, null);
             }
 //            Log.d(TAG, "save LAST_INSERT_DATE is todayInMillis: " + Formater.getFullDateFormater().format(p.today));
-            DBPrefsManager.getInstance(this).put(RadisConfiguration.KEY_LAST_INSERTION_DATE, p.today);
+            DBPrefsManager.getInstance(this).put(RadisConfiguration.KEY_LAST_INSERTION_DATE, timeParams.today);
         }
-        c.close();
+        schOpsCursor.close();
     }
 
     public static void updateAccountSum(final long opSum, final long oldSum, final long accountId,
@@ -259,9 +267,7 @@ public class RadisService extends IntentService {
         final long accountId = op.mAccountId;
         op.mScheduledId = opRowId;
         boolean needUpdate = OperationTable.createOp(this, op, accountId, false) > -1;
-//        Log.d(TAG, "before addPeriodicity : " + op.getDateStr());
         ScheduledOperation.addPeriodicityToDate(op);
-//        Log.d(TAG, "after addPeriodicity : " + op.getDateStr());
         return needUpdate ? op.mSum : 0;
     }
 

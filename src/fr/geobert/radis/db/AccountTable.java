@@ -458,7 +458,7 @@ public class AccountTable {
         ContentValues args = new ContentValues();
         assert (mProjectionMode != -1);
         Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode + " / opDate " + opDate);
-        if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
+        if (mProjectionMode == PROJECTION_FURTHEST && (opDate > mProjectionDate || opDate == 0)) {
             if (opDate == 0) {
                 Cursor op = OperationTable.fetchLastOp(ctx, accountId);
                 if (null != op) {
@@ -478,10 +478,10 @@ public class AccountTable {
                 args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
             }
         }
+
         Cursor accountCursor = fetchAccount(ctx, accountId);
         if (accountCursor.moveToFirst()) {
             long accOpSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_OP_SUM));
-            //long startSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_START_SUM));
 
             args.put(KEY_ACCOUNT_OP_SUM, accOpSum + (-oldOpSum + opSum));
 
@@ -493,9 +493,12 @@ public class AccountTable {
             if (projDate == 0) {
                 projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
             }
+
             Log.d(TAG, "updateProjection projDate "
                     + Formater.getFullDateFormater().format(projDate) + "/opDate "
                     + Formater.getFullDateFormater().format(opDate));
+
+            // when called from RadisService, there may be a bug here that lead to incorrect displayed sum
             if (projDate == 0 || opDate == 0 || opDate <= projDate) {
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum));
@@ -503,8 +506,9 @@ public class AccountTable {
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum);
             }
+
             if (updateAccount(ctx, accountId, args) > 0) {
-                if (mProjectionMode == 0) {
+                if (mProjectionMode == PROJECTION_FURTHEST) {
                     mProjectionDate = opDate;
                 }
             }

@@ -371,9 +371,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     protected void fillOperationWithInputs(Operation op) {
         op.mMode = mOpModeText.getText().toString().trim();
         op.mTag = mOpTagText.getText().toString().trim();
-        op.setSumStr(mOpSumText.getText().toString());
         op.mNotes = mNotesText.getText().toString().trim();
-
+        op.setSumStr(mOpSumText.getText().toString());
         DatePicker dp = mDatePicker;
         dp.clearChildFocus(mActivity.getCurrentFocus());
         op.setDay(dp.getDayOfMonth());
@@ -391,6 +390,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                 op.mAccountId = srcAccount.mAccountId;
                 op.mThirdParty = dstAccount.mName.trim();
                 op.mTransSrcAccName = srcAccount.mName;
+                // invert sum because with sum > 0 (and I forced it), A->B means -sum in A and +sum in B
+                op.mSum = -op.mSum;
             } else {
                 op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
             }

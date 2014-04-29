@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
+import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.PrefsManager;
 
 import java.io.File;
@@ -138,7 +139,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 dst.close();
                 srcFIS.close();
                 dstFOS.close();
-                PrefsManager.getInstance(ctx).put("consolidateDB", true);
+                PrefsManager.getInstance(ctx).put(RadisService.CONSOLIDATE_DB, true);
                 PrefsManager.getInstance(ctx).commit();
                 return true;
             }
