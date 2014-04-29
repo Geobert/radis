@@ -1,3 +1,6 @@
+Version 0.9.1 - 23/02/2014
+- fix : des crashs en moins
+
 Version 0.9 - 17/02/2014
 - Nouveau : Pointage des opérations pour comparer avec le relevé
 - Nouveau : Appuie long sur l'ajout d'opération rapide pour choisir la date de l'opération
