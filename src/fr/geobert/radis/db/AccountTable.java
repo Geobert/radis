@@ -157,7 +157,8 @@ public class AccountTable {
                                 account.getInt(account
                                         .getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
                                 account.getString(account
-                                        .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+                                        .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))
+                        );
 
                         Cursor allOps = OperationTable.fetchAllCheckedOps(ctx, accountId);
                         long sum = 0;
@@ -179,7 +180,8 @@ public class AccountTable {
                         values.put(KEY_ACCOUNT_CHECKED_OP_SUM, sum);
                         res = ctx.getContentResolver().update(
                                 Uri.parse(DbContentProvider.ACCOUNT_URI + "/"
-                                        + accountId), values, null, null);
+                                        + accountId), values, null, null
+                        );
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
@@ -212,7 +214,8 @@ public class AccountTable {
                                     accountId);
                             Log.d(TAG,
                                     "setCurrentSumAndDate allOps moved to first opSum = "
-                                            + opSum);
+                                            + opSum
+                            );
                         }
                         allOps.close();
                     }
@@ -275,7 +278,8 @@ public class AccountTable {
                                                 final long accountId) {
         return new CursorLoader(ctx, Uri.parse(DbContentProvider.ACCOUNT_URI
                 + "/" + accountId), AccountTable.ACCOUNT_FULL_COLS, null, null,
-                null);
+                null
+        );
     }
 
     public static Cursor fetchAllAccounts(Context ctx) {
@@ -309,7 +313,8 @@ public class AccountTable {
                         + "/opdate = "
                         + Formater.getFullDateFormater().format(
                         new Date(opDate)) + "/projMode = "
-                        + mProjectionMode);
+                        + mProjectionMode
+        );
         return res;
     }
 
@@ -380,7 +385,8 @@ public class AccountTable {
             account.close();
             Log.d(TAG,
                     "updateAccountProjectionDate, KEY_ACCOUNT_PROJECTION_DATE : "
-                            + projDate);
+                            + projDate
+            );
             args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode);
             args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate);
             if (updateSumAndDate) {
@@ -406,7 +412,8 @@ public class AccountTable {
                             c.getInt(c
                                     .getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
                             c.getString(c
-                                    .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), true);
+                                    .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), true
+                    );
                 }
                 c.close();
             }
@@ -451,7 +458,7 @@ public class AccountTable {
         ContentValues args = new ContentValues();
         assert (mProjectionMode != -1);
         Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode + " / opDate " + opDate);
-        if (mProjectionMode == 0 && (opDate > mProjectionDate || opDate == 0)) {
+        if (mProjectionMode == PROJECTION_FURTHEST && (opDate > mProjectionDate || opDate == 0)) {
             if (opDate == 0) {
                 Cursor op = OperationTable.fetchLastOp(ctx, accountId);
                 if (null != op) {
@@ -471,10 +478,10 @@ public class AccountTable {
                 args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
             }
         }
+
         Cursor accountCursor = fetchAccount(ctx, accountId);
         if (accountCursor.moveToFirst()) {
             long accOpSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_OP_SUM));
-            //long startSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_START_SUM));
 
             args.put(KEY_ACCOUNT_OP_SUM, accOpSum + (-oldOpSum + opSum));
 
@@ -486,9 +493,12 @@ public class AccountTable {
             if (projDate == 0) {
                 projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
             }
+
             Log.d(TAG, "updateProjection projDate "
                     + Formater.getFullDateFormater().format(projDate) + "/opDate "
                     + Formater.getFullDateFormater().format(opDate));
+
+            // when called from RadisService, there may be a bug here that lead to incorrect displayed sum
             if (projDate == 0 || opDate == 0 || opDate <= projDate) {
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum));
@@ -496,8 +506,9 @@ public class AccountTable {
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
                 args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum);
             }
+
             if (updateAccount(ctx, accountId, args) > 0) {
-                if (mProjectionMode == 0) {
+                if (mProjectionMode == PROJECTION_FURTHEST) {
                     mProjectionDate = opDate;
                 }
             }
@@ -555,6 +566,8 @@ public class AccountTable {
     }
 
     public static long getCheckedSum(Context ctx, Long accountId) {
+        Thread.dumpStack();
+        Log.d("getCheckedSum ", "ctx : " + ctx + " accountId : " + accountId);
         Cursor c = fetchAccount(ctx, accountId);
         long res = 0;
         if (c != null) {
@@ -585,7 +598,8 @@ public class AccountTable {
                             OperationTable.RESTRICT_TO_ACCOUNT,
                             new String[]{Long.toString(accountId),
                                     Long.toString(accountId)}, null, null,
-                            OperationTable.OP_ORDERING, null);
+                            OperationTable.OP_ORDERING, null
+                    );
                     if (null != allOps) {
                         Log.d(TAG, "raw setCurrentSumAndDate allOps not null : "
                                 + allOps.getCount());
@@ -612,7 +626,8 @@ public class AccountTable {
                 Cursor op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY,
                         OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?",
                         new String[]{Long.toString(accountId), Long.toString(accountId),
-                                Long.toString(projDate.getTimeInMillis())}, null, null, OperationTable.OP_ORDERING);
+                                Long.toString(projDate.getTimeInMillis())}, null, null, OperationTable.OP_ORDERING
+                );
                 projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
                 // query
                 if (null != op) {
@@ -637,7 +652,8 @@ public class AccountTable {
                         new String[]{Long.toString(accountId),
                                 Long.toString(accountId),
                                 Long.toString(projDate.getTimeInMillis())}, null,
-                        null, OperationTable.OP_ORDERING);
+                        null, OperationTable.OP_ORDERING
+                );
                 projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
                 // query
                 if (null != op) {
@@ -756,7 +772,8 @@ public class AccountTable {
                         OperationTable.KEY_OP_ACCOUNT_ID
                                 + "="
                                 + c.getLong(c.getColumnIndex(KEY_ACCOUNT_ROWID)),
-                        null);
+                        null
+                );
 
             } while (c.moveToNext());
             c.close();

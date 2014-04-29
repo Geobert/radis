@@ -1,5 +1,6 @@
 package fr.geobert.radis.ui.editor;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -46,7 +47,7 @@ public class AccountEditor extends BaseActivity implements
     private ProjectionDateController mProjectionController;
     private long mRowId;
     private ArrayAdapter<CharSequence> mCurrAdapter;
-    private int customCurrencyIdx;
+    private int customCurrencyIdx = -1;
     private boolean mOnRestore = false;
 
 //    public static void callMeForResult(Context context, long accountId) {
@@ -158,7 +159,7 @@ public class AccountEditor extends BaseActivity implements
                     @Override
                     public void onItemSelected(AdapterView<?> arg0, View arg1,
                                                int pos, long id) {
-                        mCustomCurrency.setEnabled(pos == customCurrencyIdx);
+                        mCustomCurrency.setEnabled(pos == getCustomCurrencyIdx(AccountEditor.this));
                     }
 
                     @Override
@@ -180,7 +181,7 @@ public class AccountEditor extends BaseActivity implements
             mAccountStartSumText.setText("0");
         }
         // check if currency is correct
-        if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
+        if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(this)) {
             String currency = mCustomCurrency.getText().toString().trim().toUpperCase();
             try {
                 Currency.getInstance(currency);
@@ -215,9 +216,6 @@ public class AccountEditor extends BaseActivity implements
     }
 
     private void populateFields(Cursor account) {
-        Resources res = getResources();
-        String[] allCurrencies = res.getStringArray(R.array.all_currencies);
-        customCurrencyIdx = allCurrencies.length - 1;
         mAccountNameText.setText(account.getString(account
                 .getColumnIndexOrThrow(AccountTable.KEY_ACCOUNT_NAME)));
         mAccountDescText.setText(account.getString(account
@@ -237,14 +235,24 @@ public class AccountEditor extends BaseActivity implements
         mProjectionController.populateFields(account);
     }
 
+    private int getCustomCurrencyIdx(Context ctx) {
+        if (customCurrencyIdx == -1) {
+            Resources res = ctx.getResources();
+            String[] allCurrencies = res.getStringArray(R.array.all_currencies);
+            customCurrencyIdx = allCurrencies.length - 1;
+        }
+        return customCurrencyIdx;
+    }
+
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putString("name", mAccountNameText.getText().toString());
         outState.putString("startSum", mAccountStartSumText.getText().toString());
         outState.putInt("currency", mAccountCurrency.getSelectedItemPosition());
-        outState.putInt("customCurrencyIdx", customCurrencyIdx);
-        if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
+        final int customCurIdx = getCustomCurrencyIdx(this);
+        outState.putInt("customCurrencyIdx", customCurIdx);
+        if (mAccountCurrency.getSelectedItemPosition() == customCurIdx) {
             outState.putString("customCurrency", mCustomCurrency.getText().toString());
         }
         outState.putString("desc", mAccountDescText.getText().toString());
@@ -259,7 +267,7 @@ public class AccountEditor extends BaseActivity implements
         mAccountStartSumText.setText(state.getString("startSum"));
         mAccountCurrency.setSelection(state.getInt("currency"));
         customCurrencyIdx = state.getInt("customCurrencyIdx");
-        if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
+        if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(this)) {
             mCustomCurrency.setText(state.getString("customCurrency"));
             mCustomCurrency.setEnabled(true);
         } else {
@@ -278,7 +286,7 @@ public class AccountEditor extends BaseActivity implements
             mAccountCurrency.setSelection(pos);
             mCustomCurrency.setEnabled(false);
         } else {
-            mAccountCurrency.setSelection(customCurrencyIdx);
+            mAccountCurrency.setSelection(getCustomCurrencyIdx(this));
             mCustomCurrency.setEnabled(true);
         }
     }
@@ -311,7 +319,7 @@ public class AccountEditor extends BaseActivity implements
         try {
             long startSum = Tools.extractSumFromStr(mAccountStartSumText.getText().toString());
             String currency = null;
-            if (mAccountCurrency.getSelectedItemPosition() == customCurrencyIdx) {
+            if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(this)) {
                 currency = mCustomCurrency.getText().toString().trim()
                         .toUpperCase();
             } else {

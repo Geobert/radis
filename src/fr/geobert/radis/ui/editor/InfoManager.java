@@ -93,7 +93,8 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
                         mSelectedInfo = item;
                         refreshToolbarStatus();
                     }
-                });
+                }
+        );
         builder.setTitle(title);
         LayoutInflater inflater = mContext.getLayoutInflater();
         View layout = inflater.inflate(R.layout.info_list, null);
@@ -111,7 +112,8 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
                         mDiagFragment.dismiss();
                         mSelectedInfo = -1;
                     }
-                }).setNegativeButton(mContext.getString(R.string.cancel),
+                }
+        ).setNegativeButton(mContext.getString(R.string.cancel),
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         mContext.getSupportLoaderManager().destroyLoader(GET_MATCHING_INFO_ID);
@@ -119,7 +121,8 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
                         mDiagFragment.dismiss();
                         mSelectedInfo = -1;
                     }
-                });
+                }
+        );
 
         mAddBut = (Button) layout.findViewById(R.id.create_info);
         mDelBut = (Button) layout.findViewById(R.id.del_info);
@@ -151,7 +154,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 
     protected void infoSelected() {
         ListView lv = mListDialog.getListView();
-        if (mCursor.moveToPosition(lv.getCheckedItemPosition())) {
+        if (mCursor != null && lv != null && mCursor.moveToPosition(lv.getCheckedItemPosition())) {
             Tools.setTextWithoutComplete(mInfoText, mCursor.getString(mCursor
                     .getColumnIndex(mInfo.getString("colName"))));
         }
@@ -256,12 +259,14 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
                         public void onClick(DialogInterface dialog, int id) {
                             saveText(mContext);
                         }
-                    }).setNegativeButton(context.getString(R.string.cancel),
+                    }
+            ).setNegativeButton(context.getString(R.string.cancel),
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
                         }
-                    });
+                    }
+            );
             Bundle info = mInfo;
             mEditorText = (EditText) layout.findViewById(R.id.info_edit_text);
             if (null != info) {
