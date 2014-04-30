@@ -566,7 +566,6 @@ public class AccountTable {
     }
 
     public static long getCheckedSum(Context ctx, Long accountId) {
-        Thread.dumpStack();
         Log.d("getCheckedSum ", "ctx : " + ctx + " accountId : " + accountId);
         Cursor c = fetchAccount(ctx, accountId);
         long res = 0;

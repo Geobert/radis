@@ -40,6 +40,11 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 OperationTable.updateOpCheckedStatus(mCtx, opId, sum, accId, transAccId, b);
+                if (b) {
+                    mCheckedPosition.add(position);
+                } else {
+                    mCheckedPosition.remove(position);
+                }
                 if (updateListener != null) {
                     updateListener.updateDisplay(null);
                 }
@@ -49,8 +54,7 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
 
     @Override
     public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
-        boolean checked = cursor.getInt(11) == 1 ||
-                mCheckedPosition.indexOf(Integer.valueOf(cursor.getPosition())) > -1;
+        boolean checked = cursor.getInt(11) == 1 || mCheckedPosition.indexOf(cursor.getPosition()) > -1;
         final OpRowHolder h = (OpRowHolder) ((View) view.getParent().getParent().getParent()).getTag();
         h.isCheckedBox.setOnCheckedChangeListener(null);
         h.isCheckedBox.setChecked(checked);
