@@ -260,7 +260,7 @@ public class RadisService extends IntentService {
 
     public static void updateAccountSum(final long opSum, final long oldSum, final long accountId,
                                         final long opDate, final Context ctx) {
-        AccountTable.updateProjection(ctx, accountId, opSum, oldSum, opDate, -1);
+        AccountTable.updateProjection(ctx, accountId, opSum, oldSum, opDate, -2);
     }
 
     private long insertSchOp(ScheduledOperation op, final long opRowId) {

@@ -453,9 +453,52 @@ public class AccountTable {
         return updateAccount(ctx, accountId, args) > 0;
     }
 
+
     public static void updateProjection(Context ctx, long accountId, long opSum, long oldOpSum, long opDate,
                                         long origOpDate) {
         ContentValues args = new ContentValues();
+        processProjectionFurthestCase(ctx, accountId, opDate, args);
+
+        Cursor accountCursor = fetchAccount(ctx, accountId);
+        if (accountCursor.moveToFirst()) {
+            long accOpSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_OP_SUM));
+
+            args.put(KEY_ACCOUNT_OP_SUM, accOpSum + (-oldOpSum + opSum));
+
+            long projDate = 0;
+            Long tmp = args.getAsLong(KEY_ACCOUNT_CUR_SUM_DATE);
+            if (tmp != null) {
+                projDate = tmp.longValue();
+            }
+            if (projDate == 0) {
+                projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
+            }
+
+            Log.d(TAG, "updateProjection projDate "
+                    + Formater.getFullDateFormater().format(projDate) + "/opDate "
+                    + Formater.getFullDateFormater().format(opDate));
+
+            if (origOpDate == -2) { // called from RadisService, oldSum = 0 and we always need to add opSum.
+                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+                args.put(KEY_ACCOUNT_CUR_SUM, curSum + opSum);
+            } else if (projDate == 0 || opDate == 0 || opDate <= projDate) {
+                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+                args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum));
+            } else if (opDate > projDate && (origOpDate == -1 || origOpDate <= projDate)) {
+                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
+                args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum);
+            }
+
+            if (updateAccount(ctx, accountId, args) > 0) {
+                if (mProjectionMode == PROJECTION_FURTHEST) {
+                    mProjectionDate = opDate;
+                }
+            }
+        }
+        accountCursor.close();
+    }
+
+    private static void processProjectionFurthestCase(Context ctx, long accountId, long opDate, ContentValues args) {
         assert (mProjectionMode != -1);
         Log.d(TAG, "updateProjection, mProjectionMode " + mProjectionMode + " / opDate " + opDate);
         if (mProjectionMode == PROJECTION_FURTHEST && (opDate > mProjectionDate || opDate == 0)) {
@@ -478,42 +521,6 @@ public class AccountTable {
                 args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
             }
         }
-
-        Cursor accountCursor = fetchAccount(ctx, accountId);
-        if (accountCursor.moveToFirst()) {
-            long accOpSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_OP_SUM));
-
-            args.put(KEY_ACCOUNT_OP_SUM, accOpSum + (-oldOpSum + opSum));
-
-            long projDate = 0;
-            Long tmp = args.getAsLong(KEY_ACCOUNT_CUR_SUM_DATE);
-            if (tmp != null) {
-                projDate = tmp.longValue();
-            }
-            if (projDate == 0) {
-                projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
-            }
-
-            Log.d(TAG, "updateProjection projDate "
-                    + Formater.getFullDateFormater().format(projDate) + "/opDate "
-                    + Formater.getFullDateFormater().format(opDate));
-
-            // when called from RadisService, there may be a bug here that lead to incorrect displayed sum
-            if (projDate == 0 || opDate == 0 || opDate <= projDate) {
-                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
-                args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum));
-            } else if (opDate > projDate && (origOpDate == -1 || origOpDate <= projDate)) {
-                long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
-                args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum);
-            }
-
-            if (updateAccount(ctx, accountId, args) > 0) {
-                if (mProjectionMode == PROJECTION_FURTHEST) {
-                    mProjectionDate = opDate;
-                }
-            }
-        }
-        accountCursor.close();
     }
 
     public static long getProjectionDate() {
@@ -566,6 +573,7 @@ public class AccountTable {
     }
 
     public static long getCheckedSum(Context ctx, Long accountId) {
+        Thread.dumpStack();
         Log.d("getCheckedSum ", "ctx : " + ctx + " accountId : " + accountId);
         Cursor c = fetchAccount(ctx, accountId);
         long res = 0;
