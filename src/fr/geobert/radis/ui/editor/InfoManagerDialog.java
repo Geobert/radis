@@ -33,8 +33,8 @@ public class InfoManagerDialog extends DialogFragment {
         mInfoManagersMap.clear();
     }
 
-    public static InfoManagerDialog newInstance(Uri table, String colName,
-                                                String title, int editId, int deleteId, int mode) {
+    private static InfoManagerDialog newInstance(Uri table, String colName,
+                                                 String title, int editId, int deleteId, int mode) {
         InfoManagerDialog frag = new InfoManagerDialog();
         Bundle args = new Bundle();
         args.putParcelable("table", table);
@@ -184,8 +184,7 @@ public class InfoManagerDialog extends DialogFragment {
         return d;
     }
 
-    private InfoManager createInfoManagerIfNeeded(Uri table, String colName,
-                                                  String title, int editId, int deleteId) {
+    private InfoManager createInfoManagerIfNeeded(Uri table, String colName, String title, int editId, int deleteId) {
         InfoManager i = mInfoManagersMap.get(table.toString());
         if (null == i) {
             i = new InfoManager(this, title, table, colName, editId, deleteId);

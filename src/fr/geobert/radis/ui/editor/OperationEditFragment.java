@@ -250,11 +250,11 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     protected void initViewAdapters() {
         mOpThirdPartyText.setAdapter(new InfoAdapter(mActivity,
                 DbContentProvider.THIRD_PARTY_URI,
-                InfoTables.KEY_THIRD_PARTY_NAME));
+                InfoTables.KEY_THIRD_PARTY_NAME, false));
         mOpModeText.setAdapter(new InfoAdapter(mActivity,
-                DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME));
+                DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, false));
         mOpTagText.setAdapter(new InfoAdapter(mActivity, DbContentProvider.TAGS_URI,
-                InfoTables.KEY_TAG_NAME));
+                InfoTables.KEY_TAG_NAME, false));
     }
 
     final protected void populateTransfertSpinner(Cursor c) {

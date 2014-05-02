@@ -87,9 +87,8 @@ public class QuickAddController {
     }
 
     public void initViewBehavior() {
-        mQuickAddThirdParty.setAdapter(new InfoAdapter(mActivity,
-                DbContentProvider.THIRD_PARTY_URI,
-                InfoTables.KEY_THIRD_PARTY_NAME));
+        mQuickAddThirdParty.setAdapter(new InfoAdapter(mActivity, DbContentProvider.THIRD_PARTY_URI,
+                InfoTables.KEY_THIRD_PARTY_NAME, true));
 
         mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher);
 
@@ -127,7 +126,8 @@ public class QuickAddController {
                                 mActivity,
                                 mActivity
                                         .getString(R.string.quickadd_fields_not_filled),
-                                null);
+                                null
+                        );
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
