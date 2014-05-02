@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AbsListView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ListPopupWindow;
+import android.widget.ListView;
 import fr.geobert.radis.RadisConfiguration;
 
 import java.lang.reflect.Field;
@@ -33,9 +34,12 @@ public class MyAutoCompleteTextView extends AutoCompleteTextView {
                 Field f = AutoCompleteTextView.class.getDeclaredField("mPopup");
                 f.setAccessible(true);
                 ListPopupWindow popupWindow = (ListPopupWindow) f.get(this);
-                popupWindow.getListView().setStackFromBottom(reverseOrder);
-                popupWindow.getListView().setTranscriptMode(reverseOrder ?
-                        AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL : AbsListView.TRANSCRIPT_MODE_DISABLED);
+                ListView l = popupWindow.getListView();
+                if (l != null) {
+                    popupWindow.getListView().setStackFromBottom(reverseOrder);
+                    popupWindow.getListView().setTranscriptMode(reverseOrder ?
+                            AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL : AbsListView.TRANSCRIPT_MODE_DISABLED);
+                }
             }
         } catch (NoSuchFieldException e) {
             e.printStackTrace();
