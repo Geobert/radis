@@ -169,7 +169,8 @@ public class InfoTables {
         return res;
     }
 
-    public static Cursor fetchMatchingInfo(Context ctx, Uri table, String colName, String constraint) {
+    public static Cursor fetchMatchingInfo(Context ctx, Uri table, String colName, String constraint,
+                                           final boolean isQuickAdd) {
         String where;
         String[] params;
         if (null != constraint) {
@@ -181,7 +182,14 @@ public class InfoTables {
         }
         String ordering = colName + " asc";
         if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true)) {
-            ordering = KEY_WEIGHT + " desc, " + ordering;
+            String order;
+            if (isQuickAdd && DBPrefsManager.getInstance(ctx).
+                    getBoolean(RadisConfiguration.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true)) {
+                order = " asc, ";
+            } else {
+                order = " desc, ";
+            }
+            ordering = KEY_WEIGHT + order + ordering;
         }
         Cursor c = ctx.getContentResolver().query(table,
                 new String[]{"_id", colName, KEY_WEIGHT}, where, params, ordering);

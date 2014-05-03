@@ -223,4 +223,6 @@
     <string name="do_check">Pointer</string>
     <string name="checking_max_date"><![CDATA[Tenir compte des opérations jusqu\'au :]]></string>
     <string name="missing_ops">Le solde cible ne peut être atteint. Radis a atteint %1$s en pointant les opérations. Il vous reste %2$s à trouver :)</string>
+    <string name="invert_completion_in_quick_add">Inverser l\'ordre des proposition dans l\'ajout rapide</string>
+    <string name="invert_completion_in_quick_add_details">Inverse l\'ordre dans l\'ajout rapide pour avoir le plus utilisé au plus près du champs texte</string>
 </resources>
