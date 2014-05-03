@@ -22,4 +22,9 @@
             android:title="@string/use_weighted_infos"
             android:summary="@string/use_weighted_infos_details"
             android:defaultValue="true"/>
+    <CheckBoxPreference
+            android:key="invert_completion_in_quick_add"
+            android:title="@string/invert_completion_in_quick_add"
+            android:summary="@string/invert_completion_in_quick_add_details"
+            android:defaultValue="true"/>
 </PreferenceScreen>

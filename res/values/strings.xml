@@ -218,4 +218,6 @@
     <string name="do_check">Do checking</string>
     <string name="checking_max_date"><![CDATA[Use transactions until:]]></string>
     <string name="missing_ops">The target sum can\'t be reached. Radis found %1$s by checking transactions. You have to find the %2$s left :)</string>
+    <string name="invert_completion_in_quick_add">Invert quick add completion order</string>
+    <string name="invert_completion_in_quick_add_details">Invest the display of completion in quick add to have the most used near the text field</string>
 </resources>

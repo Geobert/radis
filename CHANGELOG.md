@@ -1,3 +1,8 @@
+Version 0.9.3 - 03/05/2014
+- correction d'un crash
+- correction de problème de projection après une insertion d'échéances (faites un "recalculer le compte" pour remettre le tout correctement, ça ne devrait plus se corrompre)
+- nouveau : les propositions pour l'ajout rapide sont affichés en ordre inverse d'utilisation pour avoir les plus utilisés au plus proche du champs texte (désactivable dans les options)
+
 Version 0.9.2 - 29/04/2014
 - corrections de crashs
 - correction de la logique sur les transferts : somme >= 0 depuis la 0.9, et dans ce cas, si A->B alors -somme dans A et +somme dans B, n'impacte pas les anciens transferts tant qu'il ne sont pas édités.

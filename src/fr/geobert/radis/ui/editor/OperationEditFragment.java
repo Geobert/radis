@@ -145,7 +145,12 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        InfoManagerDialog.createThirdPartiesListDialog(mActivity).show(getFragmentManager(), "thirdPartiesDialog");
+                        synchronized (OperationEditFragment.this) {
+                            InfoManagerDialog d = InfoManagerDialog.createThirdPartiesListDialog(mActivity);
+                            if (!d.isAdded()) {
+                                d.show(getFragmentManager(), "thirdPartiesDialog");
+                            }
+                        }
                     }
                 }
         );
@@ -154,7 +159,12 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        InfoManagerDialog.createTagsListDialog(mActivity).show(getFragmentManager(), "tagsDialog");
+                        synchronized (OperationEditFragment.this) {
+                            InfoManagerDialog d = InfoManagerDialog.createTagsListDialog(mActivity);
+                            if (!d.isAdded()) {
+                                d.show(getFragmentManager(), "tagsDialog");
+                            }
+                        }
                     }
                 }
         );
@@ -163,7 +173,12 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        InfoManagerDialog.createModesListDialog(mActivity).show(getFragmentManager(), "modesDialog");
+                        synchronized (OperationEditFragment.this) {
+                            InfoManagerDialog d = InfoManagerDialog.createModesListDialog(mActivity);
+                            if (!d.isAdded()) {
+                                d.show(getFragmentManager(), "modesDialog");
+                            }
+                        }
                     }
                 }
         );
@@ -235,11 +250,11 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     protected void initViewAdapters() {
         mOpThirdPartyText.setAdapter(new InfoAdapter(mActivity,
                 DbContentProvider.THIRD_PARTY_URI,
-                InfoTables.KEY_THIRD_PARTY_NAME));
+                InfoTables.KEY_THIRD_PARTY_NAME, false));
         mOpModeText.setAdapter(new InfoAdapter(mActivity,
-                DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME));
+                DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, false));
         mOpTagText.setAdapter(new InfoAdapter(mActivity, DbContentProvider.TAGS_URI,
-                InfoTables.KEY_TAG_NAME));
+                InfoTables.KEY_TAG_NAME, false));
     }
 
     final protected void populateTransfertSpinner(Cursor c) {

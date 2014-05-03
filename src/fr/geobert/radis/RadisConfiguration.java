@@ -24,6 +24,7 @@ public class RadisConfiguration extends PreferenceActivity implements
     public final static String KEY_HIDE_ACCOUNT_QUICK_ADD = "hide_account_quick_add";
     public final static String KEY_HIDE_OPS_QUICK_ADD = "hide_ops_quick_add";
     public final static String KEY_USE_WEIGHTED_INFOS = "use_weighted_infos";
+    public final static String KEY_INVERT_COMPLETION_IN_QUICK_ADD = "invert_completion_in_quick_add";
     public final static String DEFAULT_INSERTION_DATE = "25";
 
     private ListPreference mAccountsChoice;
