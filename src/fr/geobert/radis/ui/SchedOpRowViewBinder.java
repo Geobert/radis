@@ -1,10 +1,10 @@
 package fr.geobert.radis.ui;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.view.View;
 import android.widget.TextView;
 import fr.geobert.radis.BaseActivity;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
@@ -21,9 +21,9 @@ import java.util.Date;
 // class responsible for filling each operation row
 class SchedOpRowViewBinder extends OpViewBinder {
 
-    public SchedOpRowViewBinder(IOperationList activity, Cursor c,
+    public SchedOpRowViewBinder(MainActivity mainActivity, IOperationList activity, Cursor c,
                                 CharSequence sumColName, CharSequence dateColName) {
-        super(activity, sumColName, dateColName, R.id.op_icon, activity.getCurrentAccountId());
+        super(mainActivity, activity, sumColName, dateColName, R.id.op_icon, activity.getCurrentAccountId());
         initCache(c);
     }
 
@@ -39,12 +39,12 @@ class SchedOpRowViewBinder extends OpViewBinder {
         h.sumAtSelection.setText("");
         h.month.setText("");
         if (needInfos) {
-            final BaseActivity context = (BaseActivity) activity;
+            final BaseActivity context = (BaseActivity) operationList;
             final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    ScheduledOperationEditor.callMeForResult((Activity) mCtx, op.mRowId, mCurAccountId,
+                    ScheduledOperationEditor.callMeForResult(mActivity, op.mRowId, mActivity.getCurrentAccountId(),
                             ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                 }
             });
@@ -52,7 +52,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    activity.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
+                    operationList.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });
@@ -72,7 +72,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
             int periodicityUnit = cursor.getInt(columnIndex);
             int periodicity = cursor.getInt(columnIndex - 1);
             long endDate = cursor.getLong(columnIndex - 2);
-            b.append(ScheduledOperation.getUnitStr((Activity) mCtx, periodicityUnit, periodicity));
+            b.append(ScheduledOperation.getUnitStr(mCtx, periodicityUnit, periodicity));
             b.append(" - ");
             if (endDate > 0) {
                 b.append(Formater.getFullDateFormater().format(
@@ -88,7 +88,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
             ((TextView) view).setText(Formater.getFullDateFormater().format(date));
             return true;
         } else if (colName.equals(InfoTables.KEY_THIRD_PARTY_NAME)) {
-            if (activity.getCurrentAccountId() == cursor.getLong(cursor
+            if (operationList.getCurrentAccountId() == cursor.getLong(cursor
                     .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID))) {
                 h.opName.setText(cursor.getString(cursor
                         .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_NAME)));

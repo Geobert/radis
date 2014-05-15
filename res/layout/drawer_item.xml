@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="40dp"
+              android:minHeight="40dp"
+        >
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:id="@+id/drawer_header"
+            android:gravity="center_vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <TextView
+                android:id="@+id/drawer_header_lbl"
+                android:layout_width="match_parent"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:gravity="center_vertical"
+                android:layout_height="match_parent"/>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_marginTop="1dp"
+                android:layout_marginRight="12dp"
+                android:layout_marginLeft="5dp"
+                android:layout_height="1dp"
+                android:background="#0099cc"/>
+    </LinearLayout>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:id="@+id/drawer_item"
+            android:minHeight="30dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <ImageView
+                android:id="@+id/drawer_item_img"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:layout_width="25dp"
+                android:layout_height="wrap_content"/>
+
+        <TextView
+                android:id="@+id/drawer_item_lbl"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="18sp"
+                android:gravity="center_vertical"/>
+    </LinearLayout>
+</LinearLayout>

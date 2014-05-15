@@ -40,24 +40,21 @@ public class QuickAddController {
     private Activity mActivity;
     private UpdateDisplayInterface mProtocol;
     private long mAccountId = 0;
+    private LinearLayout mLayout;
 
-    public QuickAddController(Activity activity, UpdateDisplayInterface protocol) {
+    public QuickAddController(Activity activity, View container, UpdateDisplayInterface protocol) {
         mActivity = activity;
-
         mProtocol = protocol;
-        mQuickAddThirdParty = (MyAutoCompleteTextView) activity
-                .findViewById(R.id.quickadd_third_party);
-        mQuickAddAmount = (EditText) activity
-                .findViewById(R.id.quickadd_amount);
-        mQuickAddButton = (ImageButton) activity
-                .findViewById(R.id.quickadd_validate);
+
+        mLayout = (LinearLayout) container.findViewById(R.id.quick_add_layout);
+        mQuickAddThirdParty = (MyAutoCompleteTextView) container.findViewById(R.id.quickadd_third_party);
+        mQuickAddAmount = (EditText) container.findViewById(R.id.quickadd_amount);
+        mQuickAddButton = (ImageButton) container.findViewById(R.id.quickadd_validate);
         mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount);
-        mCorrectCommaWatcher = new CorrectCommaWatcher(Formater
-                .getSumFormater().getDecimalFormatSymbols()
+        mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.getSumFormater().getDecimalFormatSymbols()
                 .getDecimalSeparator(), mQuickAddAmount).setAutoNegate(true);
 
-        mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty,
-                mQuickAddAmount, mQuickAddButton);
+        mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty, mQuickAddAmount, mQuickAddButton);
 
         QuickAddController.setQuickAddButEnabled(mQuickAddButton, false);
         mQuickAddButton.post(new Runnable() {
@@ -122,12 +119,7 @@ public class QuickAddController {
                     if (mQuickAddButton.isEnabled()) {
                         quickAddOp();
                     } else {
-                        Tools.popError(
-                                mActivity,
-                                mActivity
-                                        .getString(R.string.quickadd_fields_not_filled),
-                                null
-                        );
+                        Tools.popError(mActivity, mActivity.getString(R.string.quickadd_fields_not_filled), null);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -220,10 +212,10 @@ public class QuickAddController {
     }
 
     public void setVisibility(int visibility) {
-        mActivity.findViewById(R.id.quick_add_layout).setVisibility(visibility);
+        mLayout.setVisibility(visibility);
     }
 
     public boolean isVisible() {
-        return mActivity.findViewById(R.id.quick_add_layout).getVisibility() == View.VISIBLE;
+        return mLayout.getVisibility() == View.VISIBLE;
     }
 }

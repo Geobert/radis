@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.PowerManager;
 import android.util.Log;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
@@ -15,7 +16,6 @@ import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
-import fr.geobert.radis.ui.OperationListActivity;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -55,7 +55,7 @@ public class RadisService extends IntentService {
                 }
                 cursor.close();
             }
-            OperationListActivity.refreshAccountList(this);
+            MainActivity.refreshAccountList(this);
         }
     }
 

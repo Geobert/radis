@@ -17,7 +17,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +25,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 import fr.geobert.radis.BaseActivity;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.AccountTable;
@@ -33,8 +33,7 @@ import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
-import fr.geobert.radis.ui.IOperationList;
-import fr.geobert.radis.ui.OperationListActivity;
+import fr.geobert.radis.ui.OperationListFragment;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -128,11 +127,12 @@ public class Tools {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
-                        });
+                        }
+                );
         return builder.create();
     }
 
-    public static boolean onDefaultOptionItemSelected(FragmentActivity ctx, MenuItem item) {
+    public static boolean onDefaultOptionItemSelected(MainActivity ctx, MenuItem item) {
         mActivity = ctx;
         switch (item.getItemId()) {
             case R.id.restore:
@@ -150,8 +150,8 @@ public class Tools {
                         "process_scheduling");
                 return true;
             case R.id.recompute_account:
-                AccountTable.consolidateSums(ctx, ((IOperationList) ctx).getAccountManager().getCurrentAccountId(ctx));
-                OperationListActivity.refreshAccountList(ctx);
+                AccountTable.consolidateSums(ctx, ctx.getAccountManager().getCurrentAccountId(ctx));
+                MainActivity.refreshAccountList(ctx);
                 break;
             case R.id.debug:
                 Tools.showDebugDialog(ctx);
@@ -192,7 +192,8 @@ public class Tools {
                                     return DbHelper.backupDatabase();
                                 }
                             }, R.string.backup_success,
-                            R.string.backup_failed);
+                            R.string.backup_failed
+                    );
                     break;
                 case R.id.restore:
                     listener = createRestoreOrBackupClickListener(
@@ -202,7 +203,8 @@ public class Tools {
                                     return DbHelper.restoreDatabase(ctx);
                                 }
                             }, R.string.restore_success,
-                            R.string.restore_failed);
+                            R.string.restore_failed
+                    );
                     break;
                 case R.id.process_scheduling:
                     listener = new DialogInterface.OnClickListener() {
@@ -246,7 +248,8 @@ public class Tools {
                             public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
-                        });
+                        }
+                );
         return builder.create();
     }
 
@@ -281,7 +284,8 @@ public class Tools {
                             public void onClick(DialogInterface dialog, int id) {
                                 Tools.restartApp(ctx);
                             }
-                        });
+                        }
+                );
         return builder.create();
     }
 
@@ -326,7 +330,7 @@ public class Tools {
     // DEBUG TOOLS
     // ------------------------------------------------------
     public static void restartApp(Context ctx) {
-        OperationListActivity.restart(ctx);
+        OperationListFragment.restart(ctx);
     }
 
     public static void showDebugDialog(Context activity) {
@@ -350,7 +354,8 @@ public class Tools {
                         public void onClick(DialogInterface dialog, int id) {
                             dialog.cancel();
                         }
-                    });
+                    }
+            );
             builder.setItems(items, new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int item) {
                     switch (item) {

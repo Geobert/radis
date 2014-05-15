@@ -41,6 +41,8 @@ public abstract class CommonOpEditor extends BaseActivity implements LoaderCallb
                 .getLong(AccountEditor.PARAM_ACCOUNT_ID) : null;
         init(extras);
         setView();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     protected void init(final Bundle extras) {

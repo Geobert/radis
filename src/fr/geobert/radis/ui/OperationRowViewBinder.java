@@ -5,15 +5,13 @@ import android.text.format.DateFormat;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import fr.geobert.radis.BaseActivity;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
-import fr.geobert.radis.ui.editor.OperationEditor;
-import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.GregorianCalendar;
 
@@ -23,9 +21,9 @@ class OperationRowViewBinder extends OpViewBinder {
     private GregorianCalendar date1 = new GregorianCalendar();
     private GregorianCalendar date2 = new GregorianCalendar();
 
-    public OperationRowViewBinder(IOperationList activity, Cursor c,
+    public OperationRowViewBinder(MainActivity mainActivity, IOperationList activity, Cursor c,
                                   CharSequence sumColName, CharSequence dateColName) {
-        super(activity, sumColName, dateColName, R.id.op_icon, activity.getCurrentAccountId());
+        super(mainActivity, activity, sumColName, dateColName, R.id.op_icon, activity.getCurrentAccountId());
         initCache(c);
     }
 
@@ -96,23 +94,23 @@ class OperationRowViewBinder extends OpViewBinder {
 
         if (needInfos) {
             h.sumAtSelection.setText(
-                    Formater.getSumFormater().format((activity.getAccountManager().getCurrentAccountSum() +
-                            activity.computeSumFromCursor(cursor)) / 100.0d));
+                    Formater.getSumFormater().format((mCtx.getAccountManager().getCurrentAccountSum() +
+                            operationList.computeSumFromCursor(cursor)) / 100.0d)
+            );
 
-            final BaseActivity context = (BaseActivity) activity;
-            final long accountId = activity.getAccountManager().getCurrentAccountId(context);
             final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    OperationEditor.callMeForResult(context, op.mRowId, accountId);
+                    // TODO
+//                    OperationEditorFragment.callMeForResult(context, op.mRowId, accountId);
                 }
             });
             h.editBtn.setOnLongClickListener(Tools.createTooltip(R.string.op_edition));
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    activity.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
+                    operationList.getDeleteConfirmationDialog(op).show(mCtx.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });
@@ -126,8 +124,9 @@ class OperationRowViewBinder extends OpViewBinder {
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ScheduledOperationEditor.callMeForResult(context, schedId, accountId,
-                                ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
+                        // TODO
+//                        ScheduledOperationEditorFragment.callMeForResult(context, schedId, accountId,
+//                                ScheduledOperationEditorFragment.ACTIVITY_SCH_OP_EDIT);
                     }
                 };
                 longClickListener = Tools.createTooltip(R.string.edit_scheduling);
@@ -136,13 +135,14 @@ class OperationRowViewBinder extends OpViewBinder {
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        ScheduledOperationEditor.callMeForResult(context, op.mRowId, accountId,
-                                ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT);
+                        // TODO
+//                        ScheduledOperationEditorFragment.callMeForResult(context, op.mRowId, accountId,
+//                                ScheduledOperationEditorFragment.ACTIVITY_SCH_OP_CONVERT);
                     }
                 };
                 longClickListener = Tools.createTooltip(R.string.convert_into_scheduling);
             }
-            h.varBtn.setImageDrawable(context.getResources().getDrawable(drawable));
+            h.varBtn.setImageDrawable(mCtx.getResources().getDrawable(drawable));
             h.varBtn.setOnClickListener(listener);
             h.varBtn.setOnLongClickListener(longClickListener);
         } else {
@@ -164,7 +164,7 @@ class OperationRowViewBinder extends OpViewBinder {
             TextView textView = h.opName;// ((TextView) view);
 //            h.opName = textView;
             final long transfertId = cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
-            if (transfertId > 0 && transfertId == activity.getCurrentAccountId()) {
+            if (transfertId > 0 && transfertId == operationList.getCurrentAccountId()) {
                 textView.setText(cursor.getString(cursor.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_NAME)));
                 return true;
             } else {

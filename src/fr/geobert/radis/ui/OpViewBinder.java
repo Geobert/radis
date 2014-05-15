@@ -1,6 +1,5 @@
 package fr.geobert.radis.ui;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -8,6 +7,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import fr.geobert.radis.BaseFragment;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
@@ -19,8 +20,8 @@ public abstract class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
     private CharSequence mSumColName;
     protected CharSequence mDateColName;
     private int mArrowIconId;
-    protected Context mCtx;
-    protected IOperationList activity;
+    protected MainActivity mCtx;
+    protected IOperationList operationList;
     protected long mCurAccountId;
 
     protected int[] mCellStates = null;
@@ -29,11 +30,13 @@ public abstract class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
     static final int STATE_INFOS_CELL = 3;
     static final int STATE_MONTH_INFOS_CELL = 4;
     protected int selectedPosition = -1;
+    protected MainActivity mActivity;
 
-    public OpViewBinder(IOperationList context, CharSequence sumColName,
+    public OpViewBinder(MainActivity mainActivity, IOperationList context, CharSequence sumColName,
                         CharSequence dateColName, int arrowIconId, long curAccountId) {
-        activity = context;
-        mCtx = (Context) context;
+        mActivity = mainActivity;
+        operationList = context;
+        mCtx = (MainActivity) ((BaseFragment) context).getActivity();
         mRes = mCtx.getResources();
         mSumColName = sumColName;
         mDateColName = dateColName;
@@ -46,13 +49,11 @@ public abstract class OpViewBinder implements SimpleCursorAdapter.ViewBinder {
         String colName = cursor.getColumnName(columnIndex);
         if (colName.equals(mSumColName)) {
             TextView textView = ((TextView) view);
-            ImageView i = (ImageView) ((LinearLayout) view.getParent()
-                    .getParent()).findViewById(mArrowIconId);
+            assert view.getParent().getParent() != null;
+            ImageView i = (ImageView) ((LinearLayout) view.getParent().getParent()).findViewById(mArrowIconId);
             long sum = cursor.getLong(columnIndex);
-            ImageView transImg = (ImageView) ((LinearLayout) view.getParent()
-                    .getParent()).findViewById(R.id.op_trans_icon);
-            final long transfertId = cursor.getLong(cursor
-                    .getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
+            ImageView transImg = (ImageView) ((LinearLayout) view.getParent().getParent()).findViewById(R.id.op_trans_icon);
+            final long transfertId = cursor.getLong(cursor.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
             if (transfertId > 0) {
                 transImg.setVisibility(View.VISIBLE);
                 if (mCurAccountId != 0 && mCurAccountId == transfertId) {

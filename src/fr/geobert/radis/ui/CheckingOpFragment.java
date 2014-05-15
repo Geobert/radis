@@ -2,7 +2,6 @@ package fr.geobert.radis.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,19 +10,19 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import fr.geobert.radis.BaseActivity;
+import fr.geobert.radis.BaseFragment;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
-import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
@@ -36,14 +35,13 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-public class CheckingOpActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<Cursor>,
+public class CheckingOpFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>,
         IOperationList, UpdateDisplayInterface {
     public static final String CURRENT_ACCOUNT = "accountId";
     private static final int GET_UNCHECKED_OPS_OF_ACCOUNT = 1000;
     private TextView mStatusTxt;
     private EditText mTargetedSum;
     private ListView mListView;
-    private SimpleCursorAdapter mAccountAdapter;
     private OperationsCursorAdapter mOpListAdapter;
     private long mCurrentAccount;
     private CursorLoader mLoader;
@@ -51,40 +49,41 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     private Cursor mUncheckedOps;
     private CheckingOpRowViewBinder mInnerOpViewBinder;
     private TargetSumWatcher targetSumWatcher;
+    private LinearLayout ll;
 
-    public static void callMe(Context ctx, final long currentAccountId) {
-        Intent i = new Intent(ctx, CheckingOpActivity.class);
-        i.putExtra(CURRENT_ACCOUNT, currentAccountId);
-        ctx.startActivity(i);
-    }
+//    public static void callMe(Context ctx, final long currentAccountId) {
+//        Intent i = new Intent(ctx, CheckingOpFragment.class);
+//        i.putExtra(CURRENT_ACCOUNT, currentAccountId);
+//        ctx.startActivity(i);
+//    }
+
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.checking_list);
-        mStatusTxt = (TextView) findViewById(R.id.checking_op_status);
-        mTargetedSum = (EditText) findViewById(R.id.targeted_sum);
-        mListView = (ListView) findViewById(android.R.id.list);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        ll = (LinearLayout) inflater.inflate(R.layout.checking_list, container, false);
 
-        mCurrentAccount = getIntent().getLongExtra(CURRENT_ACCOUNT, 0);
+        mStatusTxt = (TextView) ll.findViewById(R.id.checking_op_status);
+        mTargetedSum = (EditText) ll.findViewById(R.id.targeted_sum);
+        mListView = (ListView) ll.findViewById(android.R.id.list);
+        mCurrentAccount = mActivity.getCurrentAccountId();
+
         String[] from = new String[]{OperationTable.KEY_OP_DATE,
                 InfoTables.KEY_THIRD_PARTY_NAME, OperationTable.KEY_OP_SUM,
                 InfoTables.KEY_TAG_NAME, InfoTables.KEY_MODE_NAME, OperationTable.KEY_OP_CHECKED};
 
         int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
-        mInnerOpViewBinder = new CheckingOpRowViewBinder(this, null,
+        mInnerOpViewBinder = new CheckingOpRowViewBinder(mActivity, this, null,
                 OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE);
         mOpListAdapter =
-                new OperationsCursorAdapter(this, R.layout.operation_row, from, to, null,
+                new OperationsCursorAdapter(mActivity, this, R.layout.operation_row, from, to, null,
                         mInnerOpViewBinder);
         mListView.setAdapter(mOpListAdapter);
-        mListView.setEmptyView(findViewById(android.R.id.empty));
+        mListView.setEmptyView(ll.findViewById(android.R.id.empty));
 
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        ActionBar actionbar = mActivity.getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setIcon(R.drawable.op_checking_48);
-        actionbar.setDisplayShowTitleEnabled(false);
 
         this.targetSumWatcher = new TargetSumWatcher(
                 Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mTargetedSum, this);
@@ -98,85 +97,84 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 }
             }
         });
-    }
-
-    private boolean onAccountChanged(long itemId) {
-        return false;
-    }
-
-    private void initAccountStuff() {
-        getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                return onAccountChanged(itemId);
-            }
-        });
+        return ll;
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        initAccountStuff();
-        mAccountManager.fetchAllAccounts(this, false, new Runnable() {
-            @Override
-            public void run() {
-                populateAccountSpinner();
-                fetchOpForChecking();
-            }
-        });
+        //populateAccountSpinner();
+        fetchOpForChecking();
         mTargetedSum.addTextChangedListener(targetSumWatcher);
     }
 
     @Override
-    protected void onPause() {
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+
+    }
+
+    @Override
+    public boolean onAccountChanged(long itemId) {
+        mCurrentAccount = itemId;
+        fetchOpForChecking();
+        return true;
+    }
+
+    @Override
+    public void onFetchAllAccountCbk() {
+
+    }
+
+    @Override
+    public void onPause() {
         super.onPause();
         mTargetedSum.removeTextChangedListener(targetSumWatcher);
     }
 
-    private void populateAccountSpinner() {
-        Cursor c = mAccountManager.getAllAccountsCursor();
-        if (c != null && c.moveToFirst()) {
-            mAccountAdapter = new SimpleCursorAdapter(this, R.layout.sch_account_row, c,
-                    new String[]{AccountTable.KEY_ACCOUNT_NAME},
-                    new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-            mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
-            if (mCurrentAccount != 0) {
-                int pos = 0;
-                while (pos < mAccountAdapter.getCount()) {
-                    long id = mAccountAdapter.getItemId(pos);
-                    if (id == mCurrentAccount) {
-                        getSupportActionBar().setSelectedNavigationItem(pos);
-                        mAccountManager.setCurrentAccountId(id);
-                        mTargetedSum.setText(Formater.getSumFormater().format(mAccountManager.getCurrentAccountSum() / 100.d));
-                        break;
-                    } else {
-                        pos++;
-                    }
-                }
-            }
-
-            getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
-                @Override
-                public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                    mCurrentAccount = itemId;
-                    fetchOpForChecking();
-                    return true;
-                }
-            });
-        }
-    }
+//    private void populateAccountSpinner() {
+//        Cursor c = mAccountManager.getAllAccountsCursor();
+//        if (c != null && c.moveToFirst()) {
+//            mAccountAdapter = new SimpleCursorAdapter(this, R.layout.sch_account_row, c,
+//                    new String[]{AccountTable.KEY_ACCOUNT_NAME},
+//                    new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+//            mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
+//            if (mCurrentAccount != 0) {
+//                int pos = 0;
+//                while (pos < mAccountAdapter.getCount()) {
+//                    long id = mAccountAdapter.getItemId(pos);
+//                    if (id == mCurrentAccount) {
+//                        getSupportActionBar().setSelectedNavigationItem(pos);
+//                        mAccountManager.setCurrentAccountId(id);
+//                        mTargetedSum.setText(Formater.getSumFormater().format(mAccountManager.getCurrentAccountSum() / 100.d));
+//                        break;
+//                    } else {
+//                        pos++;
+//                    }
+//                }
+//            }
+//
+//            getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
+//                @Override
+//                public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+//                    mCurrentAccount = itemId;
+//                    fetchOpForChecking();
+//                    return true;
+//                }
+//            });
+//        }
+//    }
 
     private void fetchOpForChecking() {
         if (mLoader == null) {
-            getSupportLoaderManager().initLoader(GET_UNCHECKED_OPS_OF_ACCOUNT, null, this);
+            getLoaderManager().initLoader(GET_UNCHECKED_OPS_OF_ACCOUNT, null, this);
         } else {
-            getSupportLoaderManager().restartLoader(GET_UNCHECKED_OPS_OF_ACCOUNT, null, this);
+            getLoaderManager().restartLoader(GET_UNCHECKED_OPS_OF_ACCOUNT, null, this);
         }
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        mLoader = new CursorLoader(this,
+        mLoader = new CursorLoader(mActivity,
                 DbContentProvider.OPERATION_JOINED_URI,
                 OperationTable.OP_COLS_QUERY,
                 OperationTable.RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = 0",
@@ -193,7 +191,7 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
         mOpListAdapter.changeCursor(data);
         mTargetedSum.selectAll();
         mTargetedSum.requestFocus();
-        Tools.showKeyboard(this);
+        Tools.showKeyboard(mActivity);
         this.initialized = true;
     }
 
@@ -238,7 +236,7 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                 Formater.getSumFormater().format(total / 100.0d), currencySymbol,
                 Formater.getSumFormater().format(diff / 100.0d), currencySymbol));
         if (initialized && diff == 0) {
-            Tools.popMessage(this, getString(R.string.targeted_sum_reached), R.string.op_checking,
+            Tools.popMessage(mActivity, getString(R.string.targeted_sum_reached), R.string.op_checking,
                     getString(R.string.ok), null);
         }
     }
@@ -247,14 +245,14 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+//                finish(); // TODO
                 return true;
             case R.id.auto_checking:
-                AutoCheckingDialog.newInstance(new AutoCheckingClickListener()).show(getSupportFragmentManager(),
+                AutoCheckingDialog.newInstance(new AutoCheckingClickListener()).show(getFragmentManager(),
                         "autochecking_dialog");
                 return true;
             default:
-                return Tools.onDefaultOptionItemSelected(this, item);
+                return Tools.onDefaultOptionItemSelected(mActivity, item);
         }
     }
 
@@ -339,21 +337,21 @@ public class CheckingOpActivity extends BaseActivity implements LoaderManager.Lo
                     opSum = uncheckedOps.getLong(opSumIdx);
                     final long accId = uncheckedOps.getLong(accIdIdx);
                     final long transAccId = uncheckedOps.getLong(tranAccIdIdx);
-                    OperationTable.updateOpCheckedStatus(this, opId, opSum, accId, transAccId, true);
+                    OperationTable.updateOpCheckedStatus(mActivity, opId, opSum, accId, transAccId, true);
                 }
                 // update displayed sum AFTER update database
                 initialized = false; // avoid popup when updating checkbox
                 updateDisplay(null);
                 initialized = true;
                 if (total != targetSum) {
-                    Tools.popMessage(this,
+                    Tools.popMessage(mActivity,
                             String.format(getString(R.string.missing_ops), Formater.getSumFormater().format(total / 100.0),
                                     Formater.getSumFormater().format((targetSum - total) / 100.0)),
                             R.string.auto_checking,
                             getString(R.string.ok), null
                     );
                 } else {
-                    Tools.popMessage(this, getString(R.string.targeted_sum_reached), R.string.op_checking,
+                    Tools.popMessage(mActivity, getString(R.string.targeted_sum_reached), R.string.op_checking,
                             getString(R.string.ok), null);
                 }
             }

@@ -4,7 +4,8 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:background="@color/normal_bg">
 
     <fragment
             android:name="fr.geobert.radis.ui.editor.OperationEditFragment"

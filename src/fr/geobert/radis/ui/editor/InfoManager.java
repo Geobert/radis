@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -40,7 +41,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         }
     };
     private DialogFragment mDiagFragment;
-    private CommonOpEditor mContext = null;
+    private MainActivity mContext = null;
     private AlertDialog.Builder mBuilder = null;
     private AlertDialog mListDialog = null;
     private Button mAddBut;
@@ -61,7 +62,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 
     InfoManager(DialogFragment fragment, String title, Uri table,
                 String colName, int editId, int deleteId) {
-        mContext = (CommonOpEditor) fragment.getActivity();
+        mContext = (MainActivity) fragment.getActivity();
         mDiagFragment = fragment;
         GET_MATCHING_INFO_ID = EDITTEXT_OF_INFO.get(table.toString());
         mAdapter = new SimpleCursorAdapter(mContext,
@@ -194,7 +195,8 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
     }
 
     private void onDeleteClicked() {
-        mContext.mCurrentInfoTable = (Uri) mInfo.getParcelable("table");
+        // TODO
+//        mContext.mCurrentInfoTable = (Uri) mInfo.getParcelable("table");
         InfoManagerDialog.createInfoDeleteDialog(mDeleteId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
     }
 
@@ -211,7 +213,8 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         Bundle info = mInfo;
         info.remove("value");
         info.remove("rowId");
-        mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
+        // TODO
+//        mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
         InfoManagerDialog.createInfoEditDialog(mEditId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
     }
 
@@ -222,7 +225,8 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         info.putString("value", mCursor.getString(mCursor.getColumnIndex(mInfo
                 .getString("colName"))));
         info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
-        mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
+        // TODO
+//        mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
         InfoManagerDialog.createInfoEditDialog(mEditId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
     }
 

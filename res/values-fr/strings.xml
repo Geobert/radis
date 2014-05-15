@@ -51,7 +51,7 @@
         \nConfirmer la suppression ?
     </string>
     <string name="yes">Oui</string>
-    <string name="advanced">Actions avancées…</string>
+    <string name="advanced">Actions avancées</string>
     <string name="backup_db">Sauver les comptes</string>
     <string name="restore_db">Restaurer les comptes</string>
     <string name="restore_confirm">La restauration va écraser vos données actuelles !
@@ -225,4 +225,7 @@
     <string name="missing_ops">Le solde cible ne peut être atteint. Radis a atteint %1$s en pointant les opérations. Il vous reste %2$s à trouver :)</string>
     <string name="invert_completion_in_quick_add">Inverser l\'ordre des proposition dans l\'ajout rapide</string>
     <string name="invert_completion_in_quick_add_details">Inverse l\'ordre dans l\'ajout rapide pour avoir le plus utilisé au plus près du champs texte</string>
+    <string name="operations">Opérations</string>
+    <string name="accounts">Comptes</string>
+    <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
 </resources>

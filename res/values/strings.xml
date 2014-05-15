@@ -220,4 +220,9 @@
     <string name="missing_ops">The target sum can\'t be reached. Radis found %1$s by checking transactions. You have to find the %2$s left :)</string>
     <string name="invert_completion_in_quick_add">Invert quick add completion order</string>
     <string name="invert_completion_in_quick_add_details">Invest the display of completion in quick add to have the most used near the text field</string>
+    <string name="op_list">Opérations</string>
+    <string name="operations">Opérations</string>
+    <string name="accounts">Comptes</string>
+    <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
+    <string name="navigation_drawer_close">Ferme le menu de navigation</string>
 </resources>

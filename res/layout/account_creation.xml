@@ -4,6 +4,7 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:padding="5dp"
+            android:background="@color/normal_bg"
             android:fillViewport="true">
 
     <LinearLayout

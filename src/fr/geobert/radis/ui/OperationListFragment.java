@@ -3,12 +3,9 @@ package fr.geobert.radis.ui;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,17 +13,19 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
-import fr.geobert.radis.BaseActivity;
+import fr.geobert.radis.BaseFragment;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.data.AccountManager;
@@ -35,78 +34,57 @@ import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
-import fr.geobert.radis.service.InstallRadisServiceReceiver;
-import fr.geobert.radis.service.OnInsertionReceiver;
-import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
-import fr.geobert.radis.tools.Formater;
-import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
-import fr.geobert.radis.ui.editor.AccountEditor;
 import fr.geobert.radis.ui.editor.OperationEditor;
 
 import java.util.Calendar;
-import java.util.Currency;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
-public class OperationListActivity extends BaseActivity implements
+public class OperationListFragment extends BaseFragment implements
         UpdateDisplayInterface, LoaderCallbacks<Cursor>, IOperationList {
-    // robotium test set this to true to activate database cleaning on launch
-    public static boolean ROBOTIUM_MODE = false;
-
-    public static final String INTENT_UPDATE_OP_LIST = "fr.geobert.radis.UPDATE_OP_LIST";
-    public static final String INTENT_UPDATE_ACC_LIST = "fr.geobert.radis.UPDATE_ACC_LIST";
-    private static final String TAG = "OperationListActivity";
+    private static final String TAG = "OperationListFragment";
     private static final int GET_OPS = 300;
-    private boolean mFirstStart = true;
-    private OnInsertionReceiver mOnInsertionReceiver;
-    private IntentFilter mOnInsertionIntentFilter;
     private CursorLoader mOperationsLoader;
-    private SimpleCursorAdapter mAccountAdapter;
-    private int redColor;
-    private int greenColor;
     private QuickAddController mQuickAddController = null;
     private OperationsCursorAdapter mOpListCursorAdapter;
     private ListView mListView;
     private GregorianCalendar startOpDate; // start date of ops to get
-    private Long mAccountId = null;
     private OnOperationScrollLoader mScrollLoader;
     private long mProjectionDate;
     private long mLastSelectionId = -1;
     private int mLastSelectionPos = -1;
     private boolean needRefreshSelection = false;
-    private boolean wasBackWithoutAccountSaved = false;
-
-    public static void refreshAccountList(final Context ctx) {
-        Intent intent = new Intent(INTENT_UPDATE_ACC_LIST);
-        ctx.sendBroadcast(intent);
-    }
+    private LinearLayout container;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Tools.checkDebugMode(this);
-        cleanDatabaseIfTestingMode();
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreateView(inflater, container, savedInstanceState);
+        this.container = (LinearLayout) inflater.inflate(R.layout.operation_list, container, false);
 
-        Resources resources = getResources();
-        redColor = resources.getColor(R.color.op_alert);
-        greenColor = resources.getColor(R.color.positiveSum);
+        setHasOptionsMenu(true);
 
-        ActionBar actionbar = getSupportActionBar();
-        actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        actionbar.setDisplayShowTitleEnabled(false);
+        ActionBar supportActionBar = mActivity.getSupportActionBar();
+        supportActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        supportActionBar.setDisplayShowTitleEnabled(false);
+        if (mActivity.getCurrentAccountId() != null) {
+            supportActionBar.setSelectedNavigationItem(
+                    mActivity.getAccountManager().getCurrentAccountPosition(mActivity));
+        }
 
-        setContentView(R.layout.operation_list);
-
-        installRadisTimer();
+        initOperationList();
+        initQuickAdd();
+        return this.container;
     }
 
-    private void doOnResume() {
-        AccountManager accMan = mAccountManager;
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        AccountManager accMan = mActivity.getAccountManager();
         Long curDefaultAccId = accMan.mCurDefaultAccount;
-        if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(this)) {
+        if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(mActivity)) {
             accMan.mCurDefaultAccount = null;
             accMan.setCurrentAccountId(null);
             mLastSelectionId = -1;
@@ -119,29 +97,35 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
-            @Override
-            public void run() {
-                consolidateDbIfNeeded();
-                if (mAccountAdapter == null) {
-                    initAccountStuff();
-                }
-                mAccountManager.fetchAllAccounts(OperationListActivity.this, false, new Runnable() {
-                    @Override
-                    public void run() {
-                        doOnResume();
-                    }
-                });
-            }
-        });
-    }
+//    @Override
+//    public void onResume() {
+//        super.onResume();
+//        processOnResume();
+//    }
+
+    //    @Override
+//    public void onResume() {
+//        super.onResume();
+//        DBPrefsManager.getInstance(mActivity).fillCache(mActivity, new Runnable() {
+//            @Override
+//            public void run() {
+//                consolidateDbIfNeeded();
+//                if (mAccountAdapter == null) {
+//                    initAccountStuff();
+//                }
+//                mAccountManager.fetchAllAccounts(mActivity, false, new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        doOnResume();
+//                    }
+//                });
+//            }
+//        });
+//    }
 
     private void initQuickAdd() {
-        mQuickAddController = new QuickAddController(this, this);
-        mQuickAddController.setAccount(mAccountId);
+        mQuickAddController = new QuickAddController(mActivity, container, this);
+        mQuickAddController.setAccount(mActivity.getCurrentAccountId());
         mQuickAddController.initViewBehavior();
         mQuickAddController.setAutoNegate(true);
         mQuickAddController.clearFocus();
@@ -150,7 +134,8 @@ public class OperationListActivity extends BaseActivity implements
 
     private void setQuickAddVisibility() {
         if (mQuickAddController != null) {
-            boolean hideQuickAdd = DBPrefsManager.getInstance(this).getBoolean(RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
+            boolean hideQuickAdd =
+                    DBPrefsManager.getInstance(mActivity).getBoolean(RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD);
             int visibility = View.VISIBLE;
             if (hideQuickAdd) {
                 visibility = View.GONE;
@@ -160,43 +145,20 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (mQuickAddController != null) {
             mQuickAddController.onSaveInstanceState(outState);
         }
-        if (mAccountId != null) {
-            outState.putLong("mAccountId", mAccountId);
+        if (mActivity.getCurrentAccountId() != null) {
+            outState.putLong("mAccountId", mActivity.getCurrentAccountId());
         }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        mAccountId = savedInstanceState.getLong("mAccountId");
-        if (null == mAccountId) {
-            mAccountId = mAccountManager.getCurrentAccountId(this);
-        }
-        final Bundle sis = savedInstanceState;
-        DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
-            @Override
-            public void run() {
-                initQuickAdd();
-                mQuickAddController.onRestoreInstanceState(sis);
-                if (mAccountManager.getSimpleCursorAdapter() == null) {
-                    initAccountStuff();
-                }
-                if (mAccountAdapter == null || mAccountAdapter.isEmpty()) {
-                    updateDisplay(null);
-                }
-            }
-        });
     }
 
     private void initOperationList() {
-        mListView = (ListView) findViewById(android.R.id.list);
+        mListView = (ListView) container.findViewById(android.R.id.list);
         mScrollLoader = new OnOperationScrollLoader(this);
-        mListView.setEmptyView(findViewById(android.R.id.empty));
+        mListView.setEmptyView(container.findViewById(android.R.id.empty));
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -206,43 +168,24 @@ public class OperationListActivity extends BaseActivity implements
         mListView.setOnScrollListener(mScrollLoader);
         mListView.setCacheColorHint(getResources().getColor(android.R.color.transparent));
         mListView.setSelector(android.R.color.transparent);
-        mOnInsertionReceiver = new OnInsertionReceiver(this);
-        mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
-        registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
-        registerReceiver(mOnInsertionReceiver, new IntentFilter(
-                OperationListActivity.INTENT_UPDATE_ACC_LIST));
-        registerReceiver(mOnInsertionReceiver, new IntentFilter(
-                INTENT_UPDATE_OP_LIST));
+
     }
 
-    private void initAccountStuff() {
-        String[] from = new String[]{AccountTable.KEY_ACCOUNT_NAME,
-                AccountTable.KEY_ACCOUNT_CUR_SUM,
-                AccountTable.KEY_ACCOUNT_CUR_SUM_DATE,
-                AccountTable.KEY_ACCOUNT_CURRENCY};
-
-        int[] to = new int[]{android.R.id.text1, R.id.account_sum, R.id.account_balance_at};
-
-        mAccountAdapter = new SimpleCursorAdapter(this, R.layout.account_row, null, from, to,
-                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-        mAccountAdapter.setViewBinder(new SimpleAccountViewBinder());
-        mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
-        getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                return onAccountChanged(itemId);
-            }
-        });
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        initQuickAdd();
+        mQuickAddController.onRestoreInstanceState(savedInstanceState);
     }
 
-    private boolean onAccountChanged(long itemId) {
+    @Override
+    public boolean onAccountChanged(long itemId) {
         mProjectionDate = mAccountManager.setCurrentAccountId(itemId);
         startOpDate = Tools.createClearedCalendar();
         startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
         if (null != mScrollLoader) {
             mScrollLoader.setStartDate(startOpDate);
         }
-        if (mQuickAddController != null && itemId != mAccountId && mOpListCursorAdapter != null) {
+        if (mQuickAddController != null && itemId != mActivity.getCurrentAccountId() && mOpListCursorAdapter != null) {
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
             mQuickAddController.setAccount(itemId);
             getOperationsList();
@@ -257,29 +200,11 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (null != mOnInsertionReceiver) {
-            unregisterReceiver(mOnInsertionReceiver);
-        }
-    }
-
-    protected void consolidateDbIfNeeded() {
-        PrefsManager prefs = PrefsManager.getInstance(this);
-        Boolean needConsolidate = prefs.getBoolean(RadisService.CONSOLIDATE_DB, false);
-        Log.d(TAG, "needConsolidate : " + needConsolidate);
-        if (needConsolidate) {
-            RadisService.acquireStaticLock(this);
-            this.startService(new Intent(this, RadisService.class));
-        }
-    }
-
-    @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
         Loader<Cursor> res;
         switch (i) {
             case GET_OPS:
-                res = OperationTable.getOpsBetweenDateLoader(this, startOpDate, mAccountId);
+                res = OperationTable.getOpsBetweenDateLoader(mActivity, startOpDate, mActivity.getCurrentAccountId());
                 mOperationsLoader = (CursorLoader) res;
                 break;
             default:
@@ -300,8 +225,8 @@ public class OperationListActivity extends BaseActivity implements
 
                     int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
                     mOpListCursorAdapter =
-                            new OperationsCursorAdapter(this, R.layout.operation_row, from, to, cursor,
-                                    new OperationRowViewBinder(this, cursor,
+                            new OperationsCursorAdapter(mActivity, this, R.layout.operation_row, from, to, cursor,
+                                    new OperationRowViewBinder(mActivity, this, cursor,
                                             OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE)
                             );
                     mListView.setAdapter(mOpListCursorAdapter);
@@ -312,33 +237,17 @@ public class OperationListActivity extends BaseActivity implements
                     ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).increaseCache(cursor);
                     old.close();
                 }
-                if (mQuickAddController == null) {
-                    initQuickAdd();
-                }
-                mQuickAddController.clearFocus();
+//                if (mQuickAddController == null) {
+//                    initQuickAdd();
+//                } else {
+//                    mQuickAddController.initViewBehavior();
+//                    mQuickAddController.clearFocus();
+//                }
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false;
                     refreshSelection();
                 }
                 break;
-        }
-    }
-
-    private void processAccountList() {
-        AccountManager accMan = mAccountManager;
-        Cursor allAccounts = accMan.getAllAccountsCursor();
-        if (allAccounts == null || allAccounts.getCount() == 0) {
-            if (this.wasBackWithoutAccountSaved) {
-                finish();
-            } else {
-                // no account, open create account
-                AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
-            }
-        } else {
-            mAccountId = accMan.getCurrentAccountId(this);
-            if (mAccountId != null) {
-                getSupportActionBar().setSelectedNavigationItem(accMan.getCurrentAccountPosition(this));
-            }
         }
     }
 
@@ -356,59 +265,59 @@ public class OperationListActivity extends BaseActivity implements
      * should be called after getAccountList
      */
     private void getOperationsList() {
-        mAccountId = mAccountManager.getCurrentAccountId(this);
-        if (mAccountId != null) {
+        if (mActivity.getCurrentAccountId() != null) {
             if (mOperationsLoader == null) {
                 startOpDate = Tools.createClearedCalendar();
-                if (mScrollLoader == null) {
-                    initOperationList();
-                }
+//                if (mScrollLoader == null) {
+//                    initOperationList();
+//                }
+                assert mScrollLoader != null;
                 mScrollLoader.setStartDate(startOpDate);
                 startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
                 Log.d(TAG, "startOpDate : " + Tools.getDateStr(startOpDate));
-                getSupportLoaderManager().initLoader(GET_OPS, null, this);
+                getLoaderManager().initLoader(GET_OPS, null, this);
             } else {
-                getSupportLoaderManager().restartLoader(GET_OPS, null, this);
+                getLoaderManager().restartLoader(GET_OPS, null, this);
             }
         }
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case AccountEditor.ACCOUNT_EDITOR:
-                if (resultCode == RESULT_OK) {
-                    updateAccountList();
-                } else { // back without filling an account
-                    this.wasBackWithoutAccountSaved = true;
-                }
-                break;
-            case OperationEditor.OPERATION_EDITOR:
-                if (resultCode == RESULT_OK) {
-                    this.needRefreshSelection = true;
-                    this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId);
-                    long date = data.getLongExtra("opDate", 0);
-                    if (date > 0) {
-                        GregorianCalendar opDate = new GregorianCalendar();
-                        opDate.setTimeInMillis(date);
-                        opDate.set(Calendar.DAY_OF_MONTH, 1);
-                        GregorianCalendar today = Tools.createClearedCalendar();
-                        if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
-                            this.startOpDate = opDate;
-                        }
-                    }
-                    mAccountManager.backupCurAccountId();
-                    updateAccountList();
-                    getOperationsList();
-                }
-                break;
-        }
-    }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        switch (requestCode) {
+//            case AccountEditorFragment.ACCOUNT_EDITOR:
+//                if (resultCode == RESULT_OK) {
+//                    updateAccountList();
+//                } else { // back without filling an account
+//                    this.wasBackWithoutAccountSaved = true;
+//                }
+//                break;
+//            case OperationEditorFragment.OPERATION_EDITOR:
+//                if (resultCode == RESULT_OK) {
+//                    this.needRefreshSelection = true;
+//                    this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId);
+//                    long date = data.getLongExtra("opDate", 0);
+//                    if (date > 0) {
+//                        GregorianCalendar opDate = new GregorianCalendar();
+//                        opDate.setTimeInMillis(date);
+//                        opDate.set(Calendar.DAY_OF_MONTH, 1);
+//                        GregorianCalendar today = Tools.createClearedCalendar();
+//                        if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
+//                            this.startOpDate = opDate;
+//                        }
+//                    }
+//                    mAccountManager.backupCurAccountId();
+//                    updateAccountList();
+//                    getOperationsList();
+//                }
+//                break;
+//        }
+//    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        if (!this.isFinishing()) {
+        if (!mActivity.isFinishing()) {
             switch (cursorLoader.getId()) {
                 case GET_OPS:
                     Cursor old = mOpListCursorAdapter.swapCursor(null);
@@ -425,86 +334,53 @@ public class OperationListActivity extends BaseActivity implements
 
     @Override
     public void updateDisplay(Intent intent) {
-        updateAccountList();
-    }
-
-    private void updateAccountList() {
-        mAccountManager.fetchAllAccounts(this, true, new Runnable() {
-            @Override
-            public void run() {
-                onFetchAllAccountCbk();
-            }
-        });
-    }
-
-    private void onFetchAllAccountCbk() {
-        if (mListView == null) {
-            initOperationList();
-        } else {
-            getOperationsList();
-        }
-        processAccountList();
-    }
-
-    private void cleanDatabaseIfTestingMode() {
-        // if run by robotium, delete database, can't do it from robotium test, it leads to crash
-        // see http://stackoverflow.com/questions/12125656/robotium-testing-failed-because-of-deletedatabase
-        if (ROBOTIUM_MODE) {
-            DBPrefsManager.getInstance(this).resetAll();
-            ContentProviderClient client = getContentResolver()
-                    .acquireContentProviderClient("fr.geobert.radis.db");
-            DbContentProvider provider = (DbContentProvider) client
-                    .getLocalContentProvider();
-            provider.deleteDatabase(this);
-            client.release();
-        }
-    }
-
-    private void installRadisTimer() {
-        if (mFirstStart) {
-            Intent i = new Intent(this, InstallRadisServiceReceiver.class);
-            i.setAction(Tools.INTENT_RADIS_STARTED);
-            sendBroadcast(i);
-            RadisService.callMe(this);
-            mFirstStart = false;
-        }
+        getOperationsList();
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
+    public void onFetchAllAccountCbk() {
+        getOperationsList();
+//        if (mListView == null) {
+//            initOperationList();
+//        } else {
+//            getOperationsList();
+//        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.operations_list_menu, menu);
-        inflater.inflate(R.menu.common_menu, menu);
+//        inflater.inflate(R.menu.common_menu, menu);
         if (Tools.DEBUG_MODE) {
             inflater.inflate(R.menu.debug_menu, menu);
         }
-        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.go_to_create_account:
-                AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT);
-                return true;
-            case R.id.go_to_edit_account:
-                long id = mAccountAdapter.getItemId(getSupportActionBar().getSelectedNavigationIndex());
-                AccountEditor.callMeForResult(this, id);
-                return true;
+//            case R.id.go_to_create_account:
+//                AccountEditorFragment.callMeForResult(this, AccountEditorFragment.NO_ACCOUNT);
+//                return true;
+//            case R.id.go_to_edit_account:
+//                long id = mAccountAdapter.getItemId(getSupportActionBar().getSelectedNavigationIndex());
+//                AccountEditorFragment.callMeForResult(this, id);
+//                return true;
             case R.id.create_operation:
-                OperationEditor.callMeForResult(this, OperationEditor.NO_OPERATION, mAccountId);
+                OperationEditor.callMeForResult(mActivity, OperationEditor.NO_OPERATION,
+                        mActivity.getCurrentAccountId());
                 return true;
-            case R.id.go_to_sch_op:
-                ScheduledOpListActivity.callMe(this, mAccountId);
-                return true;
-            case R.id.delete_account:
-                DeleteAccountConfirmationDialog.newInstance(mAccountId).show(getSupportFragmentManager(), "delAccount");
-                return true;
-            case R.id.go_to_op_checking:
-                CheckingOpActivity.callMe(this, mAccountId);
-                return true;
+//            case R.id.go_to_sch_op:
+//                ScheduledOpListFragment.callMe(this, mAccountId);
+//                return true;
+//            case R.id.delete_account:
+//                DeleteAccountConfirmationDialog.newInstance(mAccountId).show(getSupportFragmentManager(), "delAccount");
+//                return true;
+//            case R.id.go_to_op_checking:
+//                CheckingOpFragment.callMe(this, mAccountId);
+//                return true;
             default:
-                return Tools.onDefaultOptionItemSelected(this, item);
+                return Tools.onDefaultOptionItemSelected(mActivity, item);
         }
     }
 
@@ -528,7 +404,7 @@ public class OperationListActivity extends BaseActivity implements
                         opDate = op.getLong(dateIdx);
                         while (canContinue && (opDate <= mProjectionDate || mProjectionDate == 0)) {
                             long s = op.getLong(opSumIdx);
-                            if (op.getLong(transIdx) == mAccountId) {
+                            if (op.getLong(transIdx) == mActivity.getCurrentAccountId()) {
                                 s = -s;
                             }
                             sum = sum + s;
@@ -546,7 +422,7 @@ public class OperationListActivity extends BaseActivity implements
                         opDate = op.getLong(dateIdx);
                         while (canContinue && opDate > mProjectionDate) {
                             long s = op.getLong(opSumIdx);
-                            if (op.getLong(transIdx) == mAccountId) {
+                            if (op.getLong(transIdx) == mActivity.getCurrentAccountId()) {
                                 s = -s;
                             }
                             sum = sum + s;
@@ -573,9 +449,9 @@ public class OperationListActivity extends BaseActivity implements
     public DialogFragment getDeleteConfirmationDialog(final Operation operation) {
         if (operation.mScheduledId > 0) {
             return DeleteOccurenceConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId,
-                    operation.mScheduledId, operation.getDate(), operation.mTransferAccountId);
+                    operation.mScheduledId, operation.getDate(), operation.mTransferAccountId, this);
         } else {
-            return DeleteOpConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId);
+            return DeleteOpConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId, this);
         }
     }
 
@@ -620,9 +496,10 @@ public class OperationListActivity extends BaseActivity implements
             // no op found with cur month and month - 1, try if there is one
             Cursor c;
             if (null == startOpDate) {
-                c = OperationTable.fetchLastOp(this, mAccountId);
+                c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId());
             } else {
-                c = OperationTable.fetchLastOpSince(this, mAccountId, startOpDate.getTimeInMillis());
+                c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(),
+                        startOpDate.getTimeInMillis());
             }
             if (c != null) {
                 if (c.moveToFirst()) {
@@ -638,9 +515,10 @@ public class OperationListActivity extends BaseActivity implements
         }
     }
 
+    // TODO : to cleanup, not need this in interface as we have MainActivity now
     @Override
     public long getCurrentAccountId() {
-        return mAccountId;
+        return mActivity.getCurrentAccountId();
     }
 
     private void refreshSelection() {
@@ -688,15 +566,18 @@ public class OperationListActivity extends BaseActivity implements
         mLastSelectionPos = -1;
         needRefreshSelection = true;
         getOperationsList();
-        updateAccountList();
+        mActivity.updateAccountList();
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {
         private long accountId;
         private long operationId;
+        static OperationListFragment parentFrag;
 
-        public static DeleteOpConfirmationDialog newInstance(final long accountId, final long opId) {
+        public static DeleteOpConfirmationDialog newInstance(final long accountId, final long opId,
+                                                             final OperationListFragment parentFrag) {
             DeleteOpConfirmationDialog frag = new DeleteOpConfirmationDialog();
+            DeleteOpConfirmationDialog.parentFrag = parentFrag;
             Bundle args = new Bundle();
             args.putLong("accountId", accountId);
             args.putLong("opId", opId);
@@ -713,9 +594,8 @@ public class OperationListActivity extends BaseActivity implements
             return Tools.createDeleteConfirmationDialog(getActivity(), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
-                    final OperationListActivity activity = (OperationListActivity) getActivity();
-                    if (OperationTable.deleteOp(activity, operationId, accountId)) {
-                        activity.afterDelUpdateSelection();
+                    if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+                        parentFrag.afterDelUpdateSelection();
                     }
 
                 }
@@ -724,9 +604,13 @@ public class OperationListActivity extends BaseActivity implements
     }
 
     protected static class DeleteOccurenceConfirmationDialog extends DialogFragment {
+        static OperationListFragment parentFrag;
+
         public static DeleteOccurenceConfirmationDialog newInstance(final long accountId, final long opId,
                                                                     final long schId, final long date,
-                                                                    final long transfertId) {
+                                                                    final long transfertId,
+                                                                    final OperationListFragment parentFrag) {
+            DeleteOccurenceConfirmationDialog.parentFrag = parentFrag;
             DeleteOccurenceConfirmationDialog frag = new DeleteOccurenceConfirmationDialog();
             Bundle args = new Bundle();
             args.putLong("accountId", accountId);
@@ -755,9 +639,8 @@ public class OperationListActivity extends BaseActivity implements
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    final OperationListActivity activity = (OperationListActivity) getActivity();
-                                    if (OperationTable.deleteOp(activity, operationId, accountId)) {
-                                        activity.afterDelUpdateSelection();
+                                    if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+                                        parentFrag.afterDelUpdateSelection();
                                     }
                                 }
                             }
@@ -767,13 +650,12 @@ public class OperationListActivity extends BaseActivity implements
 
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    final OperationListActivity activity = (OperationListActivity) getActivity();
                                     int nbDel =
-                                            OperationTable.deleteAllFutureOccurrences(activity, accountId, schId,
+                                            OperationTable.deleteAllFutureOccurrences(getActivity(), accountId, schId,
                                                     date, transfertId);
                                     Log.d(TAG, "nbDel : " + nbDel);
                                     if (nbDel > 0) {
-                                        activity.afterDelUpdateSelection();
+                                        parentFrag.afterDelUpdateSelection();
                                     }
                                 }
                             }
@@ -781,9 +663,8 @@ public class OperationListActivity extends BaseActivity implements
                     .setNegativeButton(R.string.del_all_occurrences,
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    final OperationListActivity activity = (OperationListActivity) getActivity();
-                                    if (OperationTable.deleteAllOccurrences(activity, accountId, schId, transfertId) > 0) {
-                                        activity.afterDelUpdateSelection();
+                                    if (OperationTable.deleteAllOccurrences(getActivity(), accountId, schId, transfertId) > 0) {
+                                        parentFrag.afterDelUpdateSelection();
                                     }
                                 }
                             }
@@ -811,84 +692,13 @@ public class OperationListActivity extends BaseActivity implements
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     if (AccountTable.deleteAccount(getActivity(), accountId)) {
-                        OperationListActivity.refreshAccountList(getActivity());
+                        MainActivity.refreshAccountList(getActivity());
                     } else {
-                        ((OperationListActivity) getActivity()).mAccountManager.setCurrentAccountId(null);
+                        ((MainActivity) getActivity()).getAccountManager().setCurrentAccountId(null);
                     }
                 }
             }, R.string.account_delete_confirmation);
         }
-    }
-
-    // for accounts list
-    private class SimpleAccountViewBinder implements SimpleCursorAdapter.ViewBinder {
-        private int ACCOUNT_NAME_COL = -1;
-        private int ACCOUNT_CUR_SUM;
-        private int ACCOUNT_CUR_SUM_DATE;
-        private int ACCOUNT_CURRENCY;
-        private String currencySymbol = null;
-
-        private SimpleAccountViewBinder() {
-        }
-
-        @Override
-        public boolean setViewValue(View view, Cursor cursor, int i) {
-            if (ACCOUNT_NAME_COL == -1) {
-                ACCOUNT_NAME_COL = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME);
-                ACCOUNT_CUR_SUM = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
-                ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE);
-                ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY);
-                try {
-                    currencySymbol = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol();
-                } catch (IllegalArgumentException ex) {
-                    currencySymbol = "";
-                }
-            }
-
-            boolean res;
-            if (i == ACCOUNT_NAME_COL) {
-                TextView textView = (TextView) view;
-                textView.setText(cursor.getString(i));
-                res = true;
-            } else if (i == ACCOUNT_CUR_SUM) {
-                TextView textView = (TextView) view;
-                StringBuilder stringBuilder = new StringBuilder();
-                long sum = cursor.getLong(i);
-                if (sum < 0) {
-                    textView.setTextColor(redColor);
-                } else {
-                    textView.setTextColor(greenColor);
-                }
-                stringBuilder.append(Formater.getSumFormater().format(sum / 100.0d));
-                stringBuilder.append(' ').append(currencySymbol);
-                textView.setText(stringBuilder);
-                res = true;
-            } else if (i == ACCOUNT_CUR_SUM_DATE) {
-                TextView textView = (TextView) view;
-                long dateLong = cursor.getLong(i);
-                StringBuilder stringBuilder = new StringBuilder();
-                if (dateLong > 0) {
-                    stringBuilder.append(String.format(
-                            getString(R.string.balance_at),
-                            Formater.getFullDateFormater().format(
-                                    new Date(dateLong))
-                    ));
-                } else {
-                    stringBuilder.append(getString(R.string.current_sum));
-                }
-                textView.setText(stringBuilder);
-                res = true;
-            } else {
-                res = false;
-            }
-            return res;
-        }
-
-    }
-
-    @Override
-    public AccountManager getAccountManager() {
-        return mAccountManager;
     }
 }
 

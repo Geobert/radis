@@ -3,6 +3,7 @@ package fr.geobert.radis.ui;
 import android.database.Cursor;
 import android.view.View;
 import android.widget.CompoundButton;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
@@ -15,9 +16,9 @@ class CheckingOpRowViewBinder extends OperationRowViewBinder {
     private UpdateDisplayInterface updateListener = null;
     private ArrayList<Integer> mCheckedPosition = new ArrayList<Integer>();
 
-    public CheckingOpRowViewBinder(IOperationList activity, Cursor c,
+    public CheckingOpRowViewBinder(MainActivity mainActivity, IOperationList activity, Cursor c,
                                    CharSequence sumColName, CharSequence dateColName) {
-        super(activity, c, sumColName, dateColName);
+        super(mainActivity, activity, c, sumColName, dateColName);
         if (activity instanceof UpdateDisplayInterface) {
             this.updateListener = (UpdateDisplayInterface) activity;
         }

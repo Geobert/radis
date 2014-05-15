@@ -2,13 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:orientation="vertical"
               android:layout_width="fill_parent"
-              android:layout_height="fill_parent">
-    <!--<LinearLayout style="@style/SumsLayout">-->
-    <!--<TextView android:id="@+id/date_sum"-->
-    <!--style="@style/SumsTextView" />-->
-    <!--<Button android:id="@+id/future_sum" style="@style/SumsHeaderButton"-->
-    <!--android:gravity="right"/>-->
-    <!--</LinearLayout>-->
+              android:layout_height="fill_parent"
+                android:background="@color/normal_bg">
+
     <ListView
             android:id="@android:id/list"
             style="@style/OpListView"
