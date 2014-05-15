@@ -70,6 +70,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
     private FragmentHandler handler;
     private ActionBarDrawerToggle mDrawerToggle;
+    private int mActiveFragmentId;
 
     private class FragmentHandler extends PauseHandler {
         private MainActivity activity;
@@ -106,6 +107,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
             if (fragment != null) {
                 mActiveFragment = fragment;
+                mActiveFragmentId = message.what;
                 FragmentManager fragmentManager = activity.getSupportFragmentManager();
                 fragmentManager.beginTransaction().
                         setCustomAnimations(R.anim.enter_from_right, R.anim.zoom_exit,
@@ -207,12 +209,14 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     }
 
     public void displayFragment(int fragmentId, long id, int mode, boolean resuming) {
-        Message msg = new Message();
-        msg.what = fragmentId;
-        msg.obj = id;
-        msg.arg1 = mode;
+        if (fragmentId != mActiveFragmentId) {
+            Message msg = new Message();
+            msg.what = fragmentId;
+            msg.obj = id;
+            msg.arg1 = mode;
 //        msg.arg2 = resuming ? RESUMING : 0;
-        handler.sendMessage(msg);
+            handler.sendMessage(msg);
+        }
     }
 
     @Override

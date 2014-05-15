@@ -12,6 +12,8 @@ import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.ui.editor.OperationEditor;
+import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.GregorianCalendar;
 
@@ -102,8 +104,7 @@ class OperationRowViewBinder extends OpViewBinder {
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    // TODO
-//                    OperationEditorFragment.callMeForResult(context, op.mRowId, accountId);
+                    OperationEditor.callMeForResult(mCtx, op.mRowId, mCurAccountId);
                 }
             });
             h.editBtn.setOnLongClickListener(Tools.createTooltip(R.string.op_edition));
@@ -124,9 +125,8 @@ class OperationRowViewBinder extends OpViewBinder {
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // TODO
-//                        ScheduledOperationEditorFragment.callMeForResult(context, schedId, accountId,
-//                                ScheduledOperationEditorFragment.ACTIVITY_SCH_OP_EDIT);
+                        ScheduledOperationEditor.callMeForResult(mCtx, schedId, mCurAccountId,
+                                ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT);
                     }
                 };
                 longClickListener = Tools.createTooltip(R.string.edit_scheduling);
@@ -135,9 +135,8 @@ class OperationRowViewBinder extends OpViewBinder {
                 listener = new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        // TODO
-//                        ScheduledOperationEditorFragment.callMeForResult(context, op.mRowId, accountId,
-//                                ScheduledOperationEditorFragment.ACTIVITY_SCH_OP_CONVERT);
+                        ScheduledOperationEditor.callMeForResult(mCtx, op.mRowId, mCurAccountId,
+                                ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT);
                     }
                 };
                 longClickListener = Tools.createTooltip(R.string.convert_into_scheduling);
