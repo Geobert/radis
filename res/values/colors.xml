@@ -13,4 +13,5 @@
     <color name="line_end_gradient_color">#ff2A2A2A</color>
     <color name="text_color">#efefef</color>
     <color name="normal_bg">#0A0A0A</color>
+    <color name="drawer_bg">#171717</color>
 </resources>

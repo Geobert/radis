@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -18,6 +19,7 @@ import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
@@ -59,18 +61,27 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     private OnInsertionReceiver mOnInsertionReceiver;
     private IntentFilter mOnInsertionIntentFilter;
     private BaseFragment mActiveFragment;
-    //    private BaseFragment mPrevFragment;
+    private BaseFragment mPrevFragment;
     private int redColor;
     private int greenColor;
 
     // used for FragmentHandler
-    public static final int OP_LIST = 2;
-    public static final int SCH_OP_LIST = 3;
-    public static final int CHECKING_LIST = 6;
+    public static final int OP_LIST = 1;
+    public static final int SCH_OP_LIST = 2;
+    public static final int CHECKING_LIST = 3;
 
     private FragmentHandler handler;
     private ActionBarDrawerToggle mDrawerToggle;
     private int mActiveFragmentId;
+    private int mPrevFragmentId;
+
+    private class DrawerClickListener implements ListView.OnItemClickListener {
+
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            displayFragment(i, getCurrentAccountId());
+        }
+    }
 
     private class FragmentHandler extends PauseHandler {
         private MainActivity activity;
@@ -88,36 +99,61 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             return true;
         }
 
+        protected Fragment findOrCreateFragment(Class c, final int fragmentId) {
+            Fragment fragment;
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
+            fragment = fragmentManager.findFragmentByTag(c.getName());
+            if (fragment == null) {
+                try {
+                    fragment = (Fragment) c.newInstance();
+                } catch (InstantiationException e) {
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+                return fragment;
+            } else {
+                mPrevFragment = mActiveFragment;
+                mActiveFragment = (BaseFragment) fragment;
+                mPrevFragmentId = mActiveFragmentId;
+                mActiveFragmentId = fragmentId;
+                mDrawerList.setItemChecked(mActiveFragmentId, true);
+                mDrawerLayout.closeDrawer(mDrawerList);
+                fragmentManager.popBackStack(c.getName(), 0);
+                return null;
+            }
+        }
+
         @Override
         protected void processMessage(Message message) {
-            BaseFragment fragment = null;
+            Fragment fragment = null;
+            FragmentManager fragmentManager = activity.getSupportFragmentManager();
             switch (message.what) {
                 case OP_LIST:
-                    fragment = new OperationListFragment();
+                    fragment = findOrCreateFragment(OperationListFragment.class, message.what);
                     break;
                 case SCH_OP_LIST:
-                    fragment = new ScheduledOpListFragment();
+                    fragment = findOrCreateFragment(ScheduledOpListFragment.class, message.what);
                     break;
                 case CHECKING_LIST:
-                    fragment = new CheckingOpFragment();
+                    fragment = findOrCreateFragment(CheckingOpFragment.class, message.what);
                     break;
                 default:
                     Log.d(TAG, "Undeclared fragment");
             }
 
             if (fragment != null) {
-                mActiveFragment = fragment;
+                mPrevFragment = mActiveFragment;
+                mActiveFragment = (BaseFragment) fragment;
+                mPrevFragmentId = mActiveFragmentId;
                 mActiveFragmentId = message.what;
-                FragmentManager fragmentManager = activity.getSupportFragmentManager();
+                mDrawerList.setItemChecked(mActiveFragmentId, true);
                 fragmentManager.beginTransaction().
                         setCustomAnimations(R.anim.enter_from_right, R.anim.zoom_exit,
                                 R.anim.enter_from_left, R.anim.zoom_exit).
-                        replace(R.id.content_frame, fragment, fragment.getName()).
-                        addToBackStack(fragment.getName()).commit();
+                        replace(R.id.content_frame, fragment, mActiveFragment.getName()).
+                        addToBackStack(mActiveFragment.getName()).commit();
                 mDrawerLayout.closeDrawer(mDrawerList);
-//                if (message.arg2 == RESUMING) {
-//                    mActiveFragment.doOnResume();
-//                }
             }
         }
     }
@@ -159,6 +195,18 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
+            finish();
+        } else {
+            mActiveFragment = mPrevFragment;
+            mActiveFragmentId = mPrevFragmentId;
+            mDrawerList.setItemChecked(mActiveFragmentId, true);
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -208,13 +256,11 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    public void displayFragment(int fragmentId, long id, int mode, boolean resuming) {
+    public void displayFragment(int fragmentId, long id) {
         if (fragmentId != mActiveFragmentId) {
             Message msg = new Message();
             msg.what = fragmentId;
             msg.obj = id;
-            msg.arg1 = mode;
-//        msg.arg2 = resuming ? RESUMING : 0;
             handler.sendMessage(msg);
         }
     }
@@ -282,7 +328,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             if (mAccountAdapter == null) {
                 initAccountStuff();
             }
-            displayFragment(OP_LIST, -1, -1, resuming);
+            displayFragment(OP_LIST, -1);
         }
     }
 
@@ -300,6 +346,15 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 break;
         }
     }
+
+//    @Override
+//    public boolean onPrepareOptionsMenu(Menu menu) {
+//        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+//        if (drawerOpen) {
+//            mDrawerList.setItemChecked(mActiveFragmentId, true);
+//        }
+//        return super.onPrepareOptionsMenu(menu);
+//    }
 
     private void consolidateDbIfNeeded() {
         PrefsManager prefs = PrefsManager.getInstance(this);
@@ -375,6 +430,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         navDrawerItems.add(new NavDrawerItem(getString(R.string.recompute_account_sums), 0));
 
         mDrawerList.setAdapter(new NavDrawerListAdapter(getApplicationContext(), navDrawerItems));
+        mDrawerList.setOnItemClickListener(new DrawerClickListener());
     }
 
     private void installRadisTimer() {

@@ -78,7 +78,6 @@ public class OperationListFragment extends BaseFragment implements
         return this.container;
     }
 
-
     @Override
     public void onResume() {
         super.onResume();
@@ -229,9 +228,9 @@ public class OperationListFragment extends BaseFragment implements
                                     new OperationRowViewBinder(mActivity, this, cursor,
                                             OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE)
                             );
-                    mListView.setAdapter(mOpListCursorAdapter);
                     refresh = true;
                 }
+                mListView.setAdapter(mOpListCursorAdapter);
                 Cursor old = mOpListCursorAdapter.swapCursor(cursor);
                 if (old != null) {
                     ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).increaseCache(cursor);

@@ -208,7 +208,7 @@
     <string name="no_unchecked_operation">No unchecked transaction available</string>
     <string name="targeted_sum">Targeted\nsum: </string>
     <string name="checked_ops_sums_title"><![CDATA[Checked:\nLeft:]]></string>
-    <string name="op_checking">Transactions checking</string>
+    <string name="op_checking">Checking</string>
     <string name="checked">Checked</string>
     <string name="error">Error</string>
     <string name="targeted_sum_reached">You\'ve reached the targeted sum!</string>

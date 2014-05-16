@@ -213,7 +213,7 @@
     <string name="no_unchecked_operation">Aucune opération non pointée</string>
     <string name="targeted_sum">Solde\nciblé :</string>
     <string name="checked_ops_sums_title"><![CDATA[Pointé :\nReste :]]></string>
-    <string name="op_checking">Pointer les opérations</string>
+    <string name="op_checking">Pointage</string>
     <string name="checked">Pointée</string>
     <string name="error">Erreur</string>
     <string name="targeted_sum_reached">Vous avez atteint le solde ciblé !</string>

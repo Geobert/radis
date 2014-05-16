@@ -50,6 +50,11 @@ public class NavDrawerListAdapter extends BaseAdapter {
     }
 
     @Override
+    public boolean isEnabled(int position) {
+        return !((NavDrawerItem) getItem(position)).isHeader();
+    }
+
+    @Override
     public long getItemId(int i) {
         return i;
     }
