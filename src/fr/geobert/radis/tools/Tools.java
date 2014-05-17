@@ -166,7 +166,7 @@ public class Tools {
         inputManager.showSoftInput(ctx.getCurrentFocus(), InputMethodManager.SHOW_IMPLICIT);
     }
 
-    protected static class AdvancedDialog extends DialogFragment {
+    public static class AdvancedDialog extends DialogFragment {
         private int mId;
 
         public static AdvancedDialog newInstance(final int id) {

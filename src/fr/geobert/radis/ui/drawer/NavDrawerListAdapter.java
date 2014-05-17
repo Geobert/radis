@@ -82,6 +82,9 @@ public class NavDrawerListAdapter extends BaseAdapter {
             h.title.setText(item.getTitle());
             if (item.getIcon() != 0) {
                 h.icon.setImageResource(item.getIcon());
+                h.icon.setVisibility(View.VISIBLE);
+            } else {
+                h.icon.setVisibility(View.GONE);
             }
         }
         return view;

@@ -189,9 +189,6 @@ public class CheckingOpFragment extends BaseFragment implements LoaderManager.Lo
     public void onLoadFinished(Loader<Cursor> objectLoader, Cursor data) {
         mUncheckedOps = data;
         mOpListAdapter.changeCursor(data);
-        mTargetedSum.selectAll();
-        mTargetedSum.requestFocus();
-        Tools.showKeyboard(mActivity);
         this.initialized = true;
     }
 

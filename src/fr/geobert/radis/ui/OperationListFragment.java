@@ -672,7 +672,7 @@ public class OperationListFragment extends BaseFragment implements
         }
     }
 
-    protected static class DeleteAccountConfirmationDialog extends DialogFragment {
+    public static class DeleteAccountConfirmationDialog extends DialogFragment {
         private long accountId;
 
         public static DeleteAccountConfirmationDialog newInstance(final long accountId) {

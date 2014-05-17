@@ -36,6 +36,7 @@ import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.GregorianCalendar;
 
@@ -66,6 +67,9 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
+
+        setHasOptionsMenu(true);
+
         ll = (LinearLayout) inflater.inflate(R.layout.scheduled_list, container, false);
 
         ActionBar actionbar = mActivity.getSupportActionBar();
@@ -209,42 +213,12 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
         }
     }
 
-//    @Override
-//    public void onCreateContextMenu(ContextMenu menu, View v,
-//                                    ContextMenuInfo menuInfo) {
-//        if (((AdapterContextMenuInfo) menuInfo).id != -1) {
-//            super.onCreateContextMenu(menu, v, menuInfo);
-//            menu.add(0, EDIT_OP_ID, 0, R.string.edit);
-//            menu.add(0, DELETE_OP_ID, 0, R.string.delete);
-//        }
-//    }
-
-//    @Override
-//    public boolean onContextItemSelected(MenuItem item) {
-//        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-//                .getMenuInfo();
-//        switch (item.getItemId()) {
-//            case DELETE_OP_ID:
-//                showDialog(DIALOG_DELETE);
-//                mOpToDelete = info;
-//                return true;
-//            case EDIT_OP_ID:
-//                startEditScheduledOperation(info.id);
-//                return true;
-//        }
-//        return super.onContextItemSelected(item);
-//    }
-
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
-//                finish(); // TODO
-                return true;
             case R.id.create_operation:
-//                ScheduledOperationEditorFragment.callMeForResult(this, 0, mCurrentAccount,
-//                        ScheduledOperationEditorFragment.ACTIVITY_SCH_OP_CREATE); // TODO
+                ScheduledOperationEditor.callMeForResult(mActivity, 0, mCurrentAccount,
+                        ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE);
                 return true;
             default:
                 return Tools.onDefaultOptionItemSelected(mActivity, item);

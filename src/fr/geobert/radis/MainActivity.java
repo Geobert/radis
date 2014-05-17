@@ -70,6 +70,16 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     public static final int SCH_OP_LIST = 2;
     public static final int CHECKING_LIST = 3;
 
+    public static final int CREATE_ACCOUNT = 5;
+    public static final int EDIT_ACCOUNT = 6;
+    public static final int DELETE_ACCOUNT = 7;
+
+    public static final int PREFERENCES = 9;
+    public static final int SAVE_ACCOUNT = 10;
+    public static final int RESTORE_ACCOUNT = 11;
+    public static final int PROCESS_SCH = 12;
+    public static final int RECOMPUTE_ACCOUNT = 13;
+
     private FragmentHandler handler;
     private ActionBarDrawerToggle mDrawerToggle;
     private int mActiveFragmentId;
@@ -138,6 +148,42 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 case CHECKING_LIST:
                     fragment = findOrCreateFragment(CheckingOpFragment.class, message.what);
                     break;
+                case CREATE_ACCOUNT:
+                    AccountEditor.callMeForResult(activity, AccountEditor.NO_ACCOUNT);
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case EDIT_ACCOUNT:
+                    AccountEditor.callMeForResult(activity, getCurrentAccountId());
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case DELETE_ACCOUNT:
+                    OperationListFragment.DeleteAccountConfirmationDialog.
+                            newInstance(getCurrentAccountId()).show(fragmentManager, "delAccount");
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case PREFERENCES:
+                    Intent i = new Intent(activity, RadisConfiguration.class);
+                    activity.startActivity(i);
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case SAVE_ACCOUNT:
+                    Tools.AdvancedDialog.newInstance(R.id.backup).show(fragmentManager, "backup");
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case RESTORE_ACCOUNT:
+                    Tools.AdvancedDialog.newInstance(R.id.restore).show(fragmentManager, "restore");
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case PROCESS_SCH:
+                    Tools.AdvancedDialog.newInstance(R.id.process_scheduling).show(fragmentManager,
+                            "process_scheduling");
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
+                case RECOMPUTE_ACCOUNT:
+                    AccountTable.consolidateSums(activity, activity.getCurrentAccountId());
+                    MainActivity.refreshAccountList(activity);
+                    mDrawerList.setItemChecked(mActiveFragmentId, true);
+                    break;
                 default:
                     Log.d(TAG, "Undeclared fragment");
             }
@@ -153,8 +199,8 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                                 R.anim.enter_from_left, R.anim.zoom_exit).
                         replace(R.id.content_frame, fragment, mActiveFragment.getName()).
                         addToBackStack(mActiveFragment.getName()).commit();
-                mDrawerLayout.closeDrawer(mDrawerList);
             }
+            mDrawerLayout.closeDrawer(mDrawerList);
         }
     }
 
