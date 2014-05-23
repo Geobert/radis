@@ -205,16 +205,13 @@ public class AccountTable {
                 if (accountId > 0) {
                     Cursor allOps = OperationTable.fetchAllOps(ctx, accountId);
                     if (null != allOps) {
-                        Log.d(TAG, "setCurrentSumAndDate allOps not null : "
-                                + allOps.getCount());
+                        Log.d(TAG, "setCurrentSumAndDate allOps not null : " + allOps.getCount());
                         if (allOps.moveToFirst()) {
                             date = allOps.getLong(allOps
                                     .getColumnIndex(OperationTable.KEY_OP_DATE));
                             opSum = OperationTable.computeSumFromCursor(allOps,
                                     accountId);
-                            Log.d(TAG,
-                                    "setCurrentSumAndDate allOps moved to first opSum = "
-                                            + opSum
+                            Log.d(TAG, "setCurrentSumAndDate allOps moved to first opSum = " + opSum
                             );
                         }
                         allOps.close();

@@ -27,8 +27,6 @@ import android.widget.Toast;
 import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
-import fr.geobert.radis.RadisConfiguration;
-import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
@@ -135,24 +133,24 @@ public class Tools {
     public static boolean onDefaultOptionItemSelected(MainActivity ctx, MenuItem item) {
         mActivity = ctx;
         switch (item.getItemId()) {
-            case R.id.restore:
-                AdvancedDialog.newInstance(R.id.restore).show(ctx.getSupportFragmentManager(), "restore");
-                return true;
-            case R.id.backup:
-                AdvancedDialog.newInstance(R.id.backup).show(ctx.getSupportFragmentManager(), "backup");
-                return true;
-            case R.id.go_to_preferences:
-                Intent i = new Intent(ctx, RadisConfiguration.class);
-                ctx.startActivity(i);
-                return true;
-            case R.id.process_scheduling:
-                AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
-                        "process_scheduling");
-                return true;
-            case R.id.recompute_account:
-                AccountTable.consolidateSums(ctx, ctx.getAccountManager().getCurrentAccountId(ctx));
-                MainActivity.refreshAccountList(ctx);
-                break;
+//            case R.id.restore:
+//                AdvancedDialog.newInstance(R.id.restore).show(ctx.getSupportFragmentManager(), "restore");
+//                return true;
+//            case R.id.backup:
+//                AdvancedDialog.newInstance(R.id.backup).show(ctx.getSupportFragmentManager(), "backup");
+//                return true;
+//            case R.id.go_to_preferences:
+//                Intent i = new Intent(ctx, RadisConfiguration.class);
+//                ctx.startActivity(i);
+//                return true;
+//            case R.id.process_scheduling:
+//                AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
+//                        "process_scheduling");
+//                return true;
+//            case R.id.recompute_account:
+//                AccountTable.consolidateSums(ctx, ctx.getAccountManager().getCurrentAccountId(ctx));
+//                MainActivity.refreshAccountList(ctx);
+//                break;
             case R.id.debug:
                 Tools.showDebugDialog(ctx);
                 return true;
@@ -184,7 +182,7 @@ public class Tools {
             DialogInterface.OnClickListener listener;
             final Activity ctx = getActivity();
             switch (mId) {
-                case R.id.backup:
+                case MainActivity.SAVE_ACCOUNT:
                     listener = createRestoreOrBackupClickListener(
                             new BooleanResultNoParamFct() {
                                 @Override
@@ -195,7 +193,7 @@ public class Tools {
                             R.string.backup_failed
                     );
                     break;
-                case R.id.restore:
+                case MainActivity.RESTORE_ACCOUNT:
                     listener = createRestoreOrBackupClickListener(
                             new BooleanResultNoParamFct() {
                                 @Override
@@ -206,7 +204,7 @@ public class Tools {
                             R.string.restore_failed
                     );
                     break;
-                case R.id.process_scheduling:
+                case MainActivity.PROCESS_SCH:
                     listener = new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -227,13 +225,13 @@ public class Tools {
                                            DialogInterface.OnClickListener onClick) {
         int msgId = -1;
         switch (id) {
-            case R.id.restore:
+            case MainActivity.RESTORE_ACCOUNT:
                 msgId = R.string.restore_confirm;
                 break;
-            case R.id.backup:
+            case MainActivity.SAVE_ACCOUNT:
                 msgId = R.string.backup_confirm;
                 break;
-            case R.id.process_scheduling:
+            case MainActivity.PROCESS_SCH:
                 msgId = R.string.process_scheduled_transactions;
                 break;
             default:

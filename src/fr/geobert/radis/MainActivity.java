@@ -41,6 +41,7 @@ import fr.geobert.radis.ui.ScheduledOpListFragment;
 import fr.geobert.radis.ui.drawer.NavDrawerItem;
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter;
 import fr.geobert.radis.ui.editor.AccountEditor;
+import fr.geobert.radis.ui.editor.OperationEditor;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
     private FragmentHandler handler;
     private ActionBarDrawerToggle mDrawerToggle;
-    private int mActiveFragmentId;
+    private int mActiveFragmentId = -1;
     private int mPrevFragmentId;
 
     private class DrawerClickListener implements ListView.OnItemClickListener {
@@ -167,15 +168,15 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
                 case SAVE_ACCOUNT:
-                    Tools.AdvancedDialog.newInstance(R.id.backup).show(fragmentManager, "backup");
+                    Tools.AdvancedDialog.newInstance(SAVE_ACCOUNT).show(fragmentManager, "backup");
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
                 case RESTORE_ACCOUNT:
-                    Tools.AdvancedDialog.newInstance(R.id.restore).show(fragmentManager, "restore");
+                    Tools.AdvancedDialog.newInstance(RESTORE_ACCOUNT).show(fragmentManager, "restore");
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
                 case PROCESS_SCH:
-                    Tools.AdvancedDialog.newInstance(R.id.process_scheduling).show(fragmentManager,
+                    Tools.AdvancedDialog.newInstance(PROCESS_SCH).show(fragmentManager,
                             "process_scheduling");
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
@@ -215,6 +216,11 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         handler = new FragmentHandler(this);
         Tools.checkDebugMode(this);
         cleanDatabaseIfTestingMode();
+
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setDisplayShowTitleEnabled(false);
 
         Resources resources = getResources();
         redColor = resources.getColor(R.color.op_alert);
@@ -349,7 +355,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
     public void onAccountEditFinished(int result) {
         if (result == Activity.RESULT_OK) {
-            mAccountManager.fetchAllAccounts(MainActivity.this, false, new Runnable() {
+            mAccountManager.fetchAllAccounts(MainActivity.this, true, new Runnable() {
                 @Override
                 public void run() {
                     processAccountList(false);
@@ -373,13 +379,21 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         } else {
             if (mAccountAdapter == null) {
                 initAccountStuff();
+            } else {
+                Cursor old = mAccountAdapter.swapCursor(allAccounts);
+                if (old != null) {
+                    old.close();
+                }
             }
-            displayFragment(OP_LIST, -1);
+            if (mActiveFragmentId == -1) {
+                displayFragment(OP_LIST, -1);
+            }
         }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult : " + requestCode);
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case AccountEditor.ACCOUNT_EDITOR:
@@ -388,7 +402,12 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE:
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT:
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT:
-                // tODO
+                // nothing as we call RadisService to insert, and it calls updateDisplay
+                break;
+            case OperationEditor.OPERATION_EDITOR:
+                ((OperationListFragment) mActiveFragment).onOperationEditorResult(resultCode, data);
+                mAccountManager.backupCurAccountId();
+                updateAccountList();
                 break;
         }
     }
@@ -420,14 +439,13 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
         int[] to = new int[]{android.R.id.text1, R.id.account_sum, R.id.account_balance_at};
 
-        mAccountAdapter = new SimpleCursorAdapter(this, R.layout.account_row, null, from, to,
-                SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+        mAccountAdapter = new SimpleCursorAdapter(this, R.layout.account_row, null, from, to, 0);
         mAccountAdapter.setViewBinder(new SimpleAccountViewBinder());
         mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
         this.setActionBarListNavCbk(mAccountAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                if (mActiveFragment != null) {
+                if (mActiveFragment != null && mActiveFragment.isAdded()) {
                     return mActiveFragment.onAccountChanged(itemId);
                 }
                 return false;
@@ -527,10 +545,15 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     }
 
     @Override
-    public void updateDisplay(Intent intent) {
-        if (mActiveFragment != null) {
-            mActiveFragment.updateDisplay(intent);
-        }
+    public void updateDisplay(final Intent intent) {
+        mAccountManager.fetchAllAccounts(this, true, new Runnable() {
+            @Override
+            public void run() {
+                if (mActiveFragment != null) {
+                    mActiveFragment.updateDisplay(intent);
+                }
+            }
+        });
     }
 
     public Long getCurrentAccountId() {

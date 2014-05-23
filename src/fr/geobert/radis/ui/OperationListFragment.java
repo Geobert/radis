@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -66,8 +67,8 @@ public class OperationListFragment extends BaseFragment implements
         setHasOptionsMenu(true);
 
         ActionBar supportActionBar = mActivity.getSupportActionBar();
-        supportActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        supportActionBar.setDisplayShowTitleEnabled(false);
+        supportActionBar.setIcon(R.drawable.radis_no_disc_48);
+
         if (mActivity.getCurrentAccountId() != null) {
             supportActionBar.setSelectedNavigationItem(
                     mActivity.getAccountManager().getCurrentAccountPosition(mActivity));
@@ -75,6 +76,7 @@ public class OperationListFragment extends BaseFragment implements
 
         initOperationList();
         initQuickAdd();
+        onAccountChanged(mActivity.getCurrentAccountId());
         return this.container;
     }
 
@@ -88,7 +90,7 @@ public class OperationListFragment extends BaseFragment implements
             accMan.setCurrentAccountId(null);
             mLastSelectionId = -1;
         }
-        onFetchAllAccountCbk();
+//        onFetchAllAccountCbk();
         if (mQuickAddController != null) {
             mQuickAddController.setAutoNegate(true);
             mQuickAddController.clearFocus();
@@ -96,34 +98,8 @@ public class OperationListFragment extends BaseFragment implements
         }
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        processOnResume();
-//    }
-
-    //    @Override
-//    public void onResume() {
-//        super.onResume();
-//        DBPrefsManager.getInstance(mActivity).fillCache(mActivity, new Runnable() {
-//            @Override
-//            public void run() {
-//                consolidateDbIfNeeded();
-//                if (mAccountAdapter == null) {
-//                    initAccountStuff();
-//                }
-//                mAccountManager.fetchAllAccounts(mActivity, false, new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        doOnResume();
-//                    }
-//                });
-//            }
-//        });
-//    }
-
     private void initQuickAdd() {
-        mQuickAddController = new QuickAddController(mActivity, container, this);
+        mQuickAddController = new QuickAddController(mActivity, container, mActivity);
         mQuickAddController.setAccount(mActivity.getCurrentAccountId());
         mQuickAddController.initViewBehavior();
         mQuickAddController.setAutoNegate(true);
@@ -178,6 +154,9 @@ public class OperationListFragment extends BaseFragment implements
 
     @Override
     public boolean onAccountChanged(long itemId) {
+        if (mAccountManager == null) {
+            return false;
+        }
         mProjectionDate = mAccountManager.setCurrentAccountId(itemId);
         startOpDate = Tools.createClearedCalendar();
         startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
@@ -191,9 +170,9 @@ public class OperationListFragment extends BaseFragment implements
             return true;
         } else {
             if (null == mQuickAddController) {
-                getOperationsList();
                 initQuickAdd();
             }
+            getOperationsList();
             return false;
         }
     }
@@ -250,7 +229,6 @@ public class OperationListFragment extends BaseFragment implements
         }
     }
 
-
     public static void restart(Context ctx) {
         DbContentProvider.reinit(ctx);
         Intent intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
@@ -264,7 +242,10 @@ public class OperationListFragment extends BaseFragment implements
      * should be called after getAccountList
      */
     private void getOperationsList() {
+        Log.d(TAG, "getOperationsList mActivity.getCurrentAccountId() : " + mActivity.getCurrentAccountId());
+
         if (mActivity.getCurrentAccountId() != null) {
+            Log.d(TAG, "getOperationsList mOperationsLoader  : " + mOperationsLoader);
             if (mOperationsLoader == null) {
                 startOpDate = Tools.createClearedCalendar();
 //                if (mScrollLoader == null) {
@@ -338,7 +319,7 @@ public class OperationListFragment extends BaseFragment implements
 
     @Override
     public void onFetchAllAccountCbk() {
-        getOperationsList();
+//        getOperationsList();
 //        if (mListView == null) {
 //            initOperationList();
 //        } else {
@@ -488,18 +469,21 @@ public class OperationListFragment extends BaseFragment implements
 
     @Override
     public void getMoreOperations(final GregorianCalendar startDate) {
+        Log.d("getMoreOperations", "startDate : " + startDate);
         if (startDate != null) {
             startOpDate = startDate;
             getOperationsList();
         } else {
             // no op found with cur month and month - 1, try if there is one
             Cursor c;
+            Log.d("getMoreOperations", "startOpDate : " + startOpDate);
             if (null == startOpDate) {
                 c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId());
             } else {
                 c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(),
                         startOpDate.getTimeInMillis());
             }
+            Log.d("getMoreOperations", "cursor : " + c);
             if (c != null) {
                 if (c.moveToFirst()) {
                     long date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE));
@@ -566,6 +550,23 @@ public class OperationListFragment extends BaseFragment implements
         needRefreshSelection = true;
         getOperationsList();
         mActivity.updateAccountList();
+    }
+
+    public void onOperationEditorResult(int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId);
+            long date = data.getLongExtra("opDate", 0);
+            if (date > 0) {
+                GregorianCalendar opDate = new GregorianCalendar();
+                opDate.setTimeInMillis(date);
+                opDate.set(Calendar.DAY_OF_MONTH, 1);
+                GregorianCalendar today = Tools.createClearedCalendar();
+                if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
+                    this.startOpDate = opDate;
+                }
+                getOperationsList();
+            }
+        }
     }
 
     protected static class DeleteOpConfirmationDialog extends DialogFragment {

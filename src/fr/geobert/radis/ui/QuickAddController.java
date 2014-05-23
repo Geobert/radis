@@ -173,8 +173,7 @@ public class QuickAddController {
 
         mQuickAddAmount.setText("");
         mQuickAddThirdParty.setText("");
-        InputMethodManager mgr = (InputMethodManager) mActivity
-                .getSystemService(Context.INPUT_METHOD_SERVICE);
+        InputMethodManager mgr = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         mgr.hideSoftInputFromWindow(mQuickAddAmount.getWindowToken(), 0);
         mCorrectCommaWatcher.setAutoNegate(true);
         mQuickAddAmount.clearFocus();

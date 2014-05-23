@@ -73,10 +73,7 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
         ll = (LinearLayout) inflater.inflate(R.layout.scheduled_list, container, false);
 
         ActionBar actionbar = mActivity.getSupportActionBar();
-        actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setIcon(R.drawable.sched_48);
-        actionbar.setDisplayShowTitleEnabled(false);
 
         mListView = (ListView) ll.findViewById(android.R.id.list);
         mTotalLbl = (TextView) ll.findViewById(R.id.sch_op_sum_total);

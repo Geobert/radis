@@ -1,5 +1,6 @@
 package fr.geobert.radis.ui;
 
+import android.util.Log;
 import android.widget.AbsListView;
 
 import java.util.Calendar;
@@ -9,6 +10,7 @@ public class OnOperationScrollLoader implements AbsListView.OnScrollListener {//
     private int lastTotalCount = -1;
     private GregorianCalendar startOpDate;
     private IOperationList operationListActivity;
+    private boolean lastTry = false;
 
     public OnOperationScrollLoader(IOperationList operationList) {
         operationListActivity = operationList;
@@ -21,6 +23,8 @@ public class OnOperationScrollLoader implements AbsListView.OnScrollListener {//
 
     @Override
     public void onScroll(AbsListView absListView, int firstVisible, int visibleCount, int totalCount) {
+        Log.d("OnOperationScrollLoader", "firstVisible " + firstVisible + "/ visibleCount : " + visibleCount + "/ totalCount : " + totalCount);
+        Log.d("OnOperationScrollLoader", "startOpDate " + startOpDate + "/ lastTotalCount: " + lastTotalCount);
         boolean loadMore = firstVisible + visibleCount >= totalCount - 2;
 
         if (loadMore) {
@@ -29,7 +33,12 @@ public class OnOperationScrollLoader implements AbsListView.OnScrollListener {//
                 startOpDate.add(Calendar.MONTH, -1);
                 operationListActivity.getMoreOperations(startOpDate);
             } else {
-                if (lastTotalCount > -1) {
+                if (lastTotalCount != totalCount || (lastTotalCount == 0 && !lastTry)) {
+                    if (lastTotalCount == 0) {
+                        lastTry = true;
+                    } else {
+                        lastTry = false;
+                    }
                     operationListActivity.getMoreOperations(null);
                 }
             }
@@ -39,4 +48,5 @@ public class OnOperationScrollLoader implements AbsListView.OnScrollListener {//
     public void setStartDate(GregorianCalendar startOpDate) {
         this.startOpDate = startOpDate;
     }
+
 }

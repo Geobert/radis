@@ -22,7 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import fr.geobert.radis.MainActivity;
+import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
@@ -41,7 +41,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         }
     };
     private DialogFragment mDiagFragment;
-    private MainActivity mContext = null;
+    private BaseActivity mContext = null;
     private AlertDialog.Builder mBuilder = null;
     private AlertDialog mListDialog = null;
     private Button mAddBut;
@@ -62,7 +62,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 
     InfoManager(DialogFragment fragment, String title, Uri table,
                 String colName, int editId, int deleteId) {
-        mContext = (MainActivity) fragment.getActivity();
+        mContext = (BaseActivity) fragment.getActivity();
         mDiagFragment = fragment;
         GET_MATCHING_INFO_ID = EDITTEXT_OF_INFO.get(table.toString());
         mAdapter = new SimpleCursorAdapter(mContext,
@@ -175,8 +175,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         if (mListDialog == null) {
             mListDialog = mBuilder.create();
         } else {
-            mContext.getSupportLoaderManager().initLoader(GET_MATCHING_INFO_ID, mInfo,
-                    this);
+            mContext.getSupportLoaderManager().initLoader(GET_MATCHING_INFO_ID, mInfo, this);
         }
         return mListDialog;
     }

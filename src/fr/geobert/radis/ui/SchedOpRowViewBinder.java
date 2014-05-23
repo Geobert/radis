@@ -3,7 +3,6 @@ package fr.geobert.radis.ui;
 import android.database.Cursor;
 import android.view.View;
 import android.widget.TextView;
-import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
@@ -39,7 +38,6 @@ class SchedOpRowViewBinder extends OpViewBinder {
         h.sumAtSelection.setText("");
         h.month.setText("");
         if (needInfos) {
-            final BaseActivity context = (BaseActivity) operationList;
             final Operation op = new Operation(cursor);
             h.editBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -52,7 +50,7 @@ class SchedOpRowViewBinder extends OpViewBinder {
             h.deleteBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    operationList.getDeleteConfirmationDialog(op).show(context.getSupportFragmentManager(),
+                    operationList.getDeleteConfirmationDialog(op).show(mCtx.getSupportFragmentManager(),
                             "deleteOpConfirm");
                 }
             });
