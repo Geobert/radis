@@ -3,7 +3,28 @@
   <component name="FacetManager">
     <facet type="android" name="Android">
       <configuration>
+        <option name="RUN_PROGUARD" value="true" />
+        <proGuardCfgFiles>
+          <file>file://%MODULE_SDK_HOME%/tools/proguard/proguard-android.txt</file>
+          <file>file://$MODULE_DIR$/proguard_debug.cfg</file>
+        </proGuardCfgFiles>
         <option name="UPDATE_PROPERTY_FILES" value="true" />
+      </configuration>
+    </facet>
+    <facet type="scala" name="Scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryName" value="scala-compiler" />
+        <option name="continuations" value="true" />
+        <option name="deprecationWarnings" value="true" />
+        <option name="explainTypeErrors" value="true" />
+        <option name="languageLevel" value="Scala 2.11" />
+        <option name="pluginPaths">
+          <array>
+            <option value="D:\scala\lib\scala-continuations-plugin_2.11.1-1.0.2.jar" />
+          </array>
+        </option>
+        <option name="uncheckedWarnings" value="true" />
       </configuration>
     </facet>
   </component>
@@ -36,6 +57,8 @@
         <jarDirectory url="file://D:/android-sdks/extras/android/support/v7/appcompat/libs" recursive="false" />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="scala-library" level="project" />
+    <orderEntry type="library" name="scala-actors-2.11.0" level="project" />
   </component>
 </module>
 
