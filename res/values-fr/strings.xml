@@ -228,4 +228,5 @@
     <string name="operations">Opérations</string>
     <string name="accounts">Comptes</string>
     <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
+    <string name="statistics">Statistiques</string>
 </resources>

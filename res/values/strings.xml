@@ -225,4 +225,5 @@
     <string name="accounts">Comptes</string>
     <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
     <string name="navigation_drawer_close">Ferme le menu de navigation</string>
+    <string name="statistics">Statistics</string>
 </resources>

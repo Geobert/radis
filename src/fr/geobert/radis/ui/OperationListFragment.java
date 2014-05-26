@@ -163,8 +163,10 @@ public class OperationListFragment extends BaseFragment implements
         if (null != mScrollLoader) {
             mScrollLoader.setStartDate(startOpDate);
         }
-        if (mQuickAddController != null && itemId != mActivity.getCurrentAccountId() && mOpListCursorAdapter != null) {
+        if (mOpListCursorAdapter != null) {
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
+        }
+        if (mQuickAddController != null) {
             mQuickAddController.setAccount(itemId);
             getOperationsList();
             return true;
