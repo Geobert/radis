@@ -4,7 +4,7 @@
         xmlns:radis="http://schemas.android.com/apk/res-auto">
     <item
             android:icon="@drawable/plus_48"
-            android:title="@string/new_op"
-            android:id="@+id/create_operation"
+            android:title="@string/new_stat"
+            android:id="@+id/create_stat"
             radis:showAsAction="ifRoom"/>
 </menu>

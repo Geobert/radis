@@ -47,6 +47,10 @@
                 android:launchMode="singleTop">
         </activity>
         <activity
+                android:name=".ui.editor.StatisticEditor"
+                android:launchMode="singleTop">
+        </activity>
+        <activity
                 android:name="org.acra.CrashReportDialog"
                 android:excludeFromRecents="true"
                 android:finishOnTaskLaunch="true"

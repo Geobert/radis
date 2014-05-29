@@ -38,7 +38,7 @@ import fr.geobert.radis.tools.UpdateDisplayInterface;
 import fr.geobert.radis.ui.CheckingOpFragment;
 import fr.geobert.radis.ui.OperationListFragment;
 import fr.geobert.radis.ui.ScheduledOpListFragment;
-import fr.geobert.radis.ui.StatisticsFragment;
+import fr.geobert.radis.ui.StatisticsListFragment;
 import fr.geobert.radis.ui.drawer.NavDrawerItem;
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter;
 import fr.geobert.radis.ui.editor.AccountEditor;
@@ -152,7 +152,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                     fragment = findOrCreateFragment(CheckingOpFragment.class, message.what);
                     break;
                 case STATISTICS:
-                    fragment = findOrCreateFragment(StatisticsFragment.class, message.what);
+                    fragment = findOrCreateFragment(StatisticsListFragment.class, message.what);
                     break;
                 case CREATE_ACCOUNT:
                     AccountEditor.callMeForResult(activity, AccountEditor.NO_ACCOUNT);
@@ -482,13 +482,13 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         ArrayList<NavDrawerItem> navDrawerItems = new ArrayList<NavDrawerItem>();
 
         navDrawerItems.add(new NavDrawerItem(getString(R.string.operations)));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.op_list), R.drawable.auto_checking_48)); // TODO another icon
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.op_list), R.drawable.op_list_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.scheduled_ops), R.drawable.sched_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.op_checking), R.drawable.op_checking_48));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.statistics), R.drawable.auto_checking_48)); // TODO another icon
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.statistics), R.drawable.stat_48));
 
         navDrawerItems.add(new NavDrawerItem(getString(R.string.accounts)));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.create_account), R.drawable.plus_48)); // TODO another icon
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.create_account), R.drawable.new_account_48)); // TODO another icon
         navDrawerItems.add(new NavDrawerItem(getString(R.string.account_edit), R.drawable.edit_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.delete_account), R.drawable.trash_48));
 
@@ -520,8 +520,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             DBPrefsManager.getInstance(this).resetAll();
             ContentProviderClient client = getContentResolver()
                     .acquireContentProviderClient("fr.geobert.radis.db");
-            DbContentProvider provider = (DbContentProvider) client
-                    .getLocalContentProvider();
+            DbContentProvider provider = (DbContentProvider) client.getLocalContentProvider();
             provider.deleteDatabase(this);
             client.release();
         }

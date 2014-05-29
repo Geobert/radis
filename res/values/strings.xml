@@ -226,4 +226,6 @@
     <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
     <string name="navigation_drawer_close">Ferme le menu de navigation</string>
     <string name="statistics">Statistics</string>
+    <string name="no_statistic"><![CDATA[No configured statistic. Please press the "plus" button to create one.]]></string>
+    <string name="new_stat">Create a statistic</string>
 </resources>

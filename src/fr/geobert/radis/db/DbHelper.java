@@ -33,6 +33,7 @@ public class DbHelper extends SQLiteOpenHelper {
         OperationTable.createMeta(db);
         PreferenceTable.onCreate(db);
         ScheduledOperationTable.onCreate(db);
+        StatisticTable.onCreate(db);
     }
 
     @Override
@@ -77,6 +78,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 InfoTables.upgradeFromV16(db, oldVersion, newVersion);
                 OperationTable.upgradeFromV16(db, oldVersion, newVersion);
                 AccountTable.upgradeFromV16(db, oldVersion, newVersion);
+            case 17:
+                StatisticTable.upgradeFromV17(db, oldVersion, newVersion);
             default:
                 AccountTable.upgradeDefault(db, oldVersion, newVersion);
         }

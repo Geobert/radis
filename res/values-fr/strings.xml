@@ -229,4 +229,6 @@
     <string name="accounts">Comptes</string>
     <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
     <string name="statistics">Statistiques</string>
+    <string name="no_statistic"><![CDATA[Aucune statistique configurée. Appuyez sur le bouton « plus » pour en créer.]]></string>
+    <string name="new_stat">Créer une statistique</string>
 </resources>
