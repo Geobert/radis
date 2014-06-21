@@ -4,8 +4,9 @@ import android.database.sqlite.SQLiteDatabase
 import fr.geobert.radis.data.Statistic
 import android.content.{ContentValues, Context}
 import java.lang.Long
-import fr.geobert.radis.tools.STools
 import android.net.Uri
+import android.support.v4.content.CursorLoader
+import fr.geobert.radis.tools.scala.STools
 
 object StatisticTable {
   private val TAG = "StatisticTable"
@@ -47,16 +48,20 @@ object StatisticTable {
     args
   }
 
-  def createStatistic(ctx: Context, stat: Statistic) = {
+  def createStatistic(stat: Statistic)(implicit ctx: Context): Long = {
     val res = ctx.getContentResolver.insert(DbContentProvider.STATS_URI, fillContentValues(stat))
     Long.parseLong(res.getLastPathSegment)
   }
 
-  def updateStatistic(ctx: Context, stat: Statistic) = {
-    ctx.getContentResolver.update(Uri.parse(DbContentProvider.STATS_URI + "/" + stat.id), fillContentValues(stat), null, null)
+  def updateStatistic(stat: Statistic)(implicit ctx: Context): Int = {
+    ctx.getContentResolver.update(Uri.parse(s"${DbContentProvider.STATS_URI}/${stat.id}"), fillContentValues(stat), null, null)
   }
 
-  def deleteStatistic(ctx: Context, statId: Long) {
-    ctx.getContentResolver.delete(Uri.parse(DbContentProvider.STATS_URI + "/" + statId), null, null)
+  def deleteStatistic(statId: Long)(implicit ctx: Context) {
+    ctx.getContentResolver.delete(Uri.parse (s"${DbContentProvider.STATS_URI}/$statId"), null, null)
+  }
+
+  def getStatisticLoader(statId: Long)(implicit ctx: Context) = {
+    new CursorLoader(ctx, Uri.parse(s"${DbContentProvider.STATS_URI}/$statId"), STAT_COLS, null, null, null)
   }
 }

@@ -228,4 +228,21 @@
     <string name="statistics">Statistics</string>
     <string name="no_statistic"><![CDATA[No configured statistic. Please press the "plus" button to create one.]]></string>
     <string name="new_stat">Create a statistic</string>
+    <string name="stat_name_hint">Chart\'s name</string>
+    <string name="stat_editor_title">Chart\'s editor</string>
+    <string name="account_for_stat">Account to see</string>
+    <string name="filter_for_stat">Calculus filter</string>
+    <string name="period_for_stat">Time scale</string>
+    <string name="graph_type_for_stat">Graphic type</string>
+    <string name="days">Days</string>
+    <string name="monthes">Monthes</string>
+    <string name="years">Years</string>
+    <string name="absolute">Absolute</string>
+    <string name="last_male">last</string>
+    <string name="last_female">last</string>
+    <string name="empty_account_name">Account\'s name empty</string>
+    <string name="empty_stat_name">Chart\'s name empty</string>
+    <string name="xlast_invalid">The value of %1$s %2$s must be a positive number</string>
+    <string name="invalid_date_range">The time scale range is invalid</string>
+    <string name="err_db_stat">An error occurred while saving the chart</string>
 </resources>

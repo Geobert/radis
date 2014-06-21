@@ -231,4 +231,22 @@
     <string name="statistics">Statistiques</string>
     <string name="no_statistic"><![CDATA[Aucune statistique configurée. Appuyez sur le bouton « plus » pour en créer.]]></string>
     <string name="new_stat">Créer une statistique</string>
+    <string name="stat_name_hint">Nom de la statistique</string>
+    <string name="stat_editor_title">Édition de statistique</string>
+    <string name="no_filter">Édition de statistique</string>
+    <string name="account_for_stat">Compte à représenter</string>
+    <string name="filter_for_stat">Filtre de calcul</string>
+    <string name="period_for_stat">Échelle du temps</string>
+    <string name="graph_type_for_stat">Type de graphique</string>
+    <string name="days">Jours</string>
+    <string name="monthes">Mois</string>
+    <string name="years">Années</string>
+    <string name="absolute">Absolue</string>
+    <string name="last_male">derniers</string>
+    <string name="last_female">dernières</string>
+    <string name="empty_stat_name">Nom de statistique vide</string>
+    <string name="empty_account_name">Nom de compte vide</string>
+    <string name="xlast_invalid">La valeur des %1$s %2$s doit être un entier positif</string>
+    <string name="invalid_date_range">Les dates de début et de fin sont invalides</string>
+    <string name="err_db_stat">Une erreur est survenue pendant la sauvegarde de la statistique</string>
 </resources>

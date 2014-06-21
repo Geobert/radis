@@ -1,6 +1,7 @@
 package fr.geobert.radis;
 
 import android.app.Application;
+import android.content.pm.ApplicationInfo;
 import org.acra.ACRA;
 import org.acra.ACRAConfiguration;
 import org.acra.ReportingInteractionMode;
@@ -18,15 +19,18 @@ public class Radis extends Application {
         // The following line triggers the initialization of ACRA
         super.onCreate();
 
-        // dynamic config of acra to avoid user/password in code
-        // you'll need to add these in a string resource file that you should not push anywhere public
-        ACRAConfiguration acraCfg = ACRA.getNewDefaultConfig(this);
-        acraCfg.setFormUri(getString(R.string.acra_report_url));
-        acraCfg.setFormUriBasicAuthLogin(getString(R.string.acra_user));
-        acraCfg.setFormUriBasicAuthPassword(getString(R.string.acra_pwd));
-        ACRA.setConfig(acraCfg);
+        boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
+        if (!isDebuggable) {
+            // dynamic config of acra to avoid user/password in code
+            // you'll need to add these in a string resource file that you should not push anywhere public
+            ACRAConfiguration acraCfg = ACRA.getNewDefaultConfig(this);
+            acraCfg.setFormUri(getString(R.string.acra_report_url));
+            acraCfg.setFormUriBasicAuthLogin(getString(R.string.acra_user));
+            acraCfg.setFormUriBasicAuthPassword(getString(R.string.acra_pwd));
+            ACRA.setConfig(acraCfg);
 
-        ACRA.init(this);
+            ACRA.init(this);
+        }
     }
 
     @Override

@@ -128,10 +128,10 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         Account acc0 = (Account) mAccountSpinner.getItemAtPosition(0);
         if (acc0 != null) {
             if (isChecked) {
-                acc0.mName = getString(R.string.defined_by_transfert);
+                acc0.name_$eq(getString(R.string.defined_by_transfert));
                 mAccountSpinner.setSelection(0);
             } else {
-                acc0.mName = getString(R.string.choose_account);
+                acc0.name_$eq(getString(R.string.choose_account));
             }
         }
     }

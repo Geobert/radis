@@ -15,7 +15,7 @@ import java.nio.channels.FileChannel;
 
 public class DbHelper extends SQLiteOpenHelper {
     protected static final String DATABASE_NAME = "radisDb";
-    protected static final int DATABASE_VERSION = 17;
+    protected static final int DATABASE_VERSION = 18;
 
     private Context mCtx;
 

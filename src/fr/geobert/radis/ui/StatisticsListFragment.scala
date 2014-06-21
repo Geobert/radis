@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view._
 import fr.geobert.radis.ui.editor.StatisticEditor
+import org.scaloid.common.{SIntent, SContext, SActivity}
 
 class StatisticsListFragment extends BaseFragment {
 

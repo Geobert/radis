@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -31,6 +32,14 @@ public class OperationEditor extends CommonOpEditor {
     private static final int GET_OP = 610;
     protected Operation mOriginalOp;
     private OperationEditFragment mEditFragment;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        ActionBar bar = getSupportActionBar();
+        bar.setDisplayHomeAsUpEnabled(true);
+    }
 
     public static void callMeForResult(final BaseActivity context, final long opId, final long accountId) {
         final Intent intent = new Intent(context, OperationEditor.class);
@@ -73,8 +82,7 @@ public class OperationEditor extends CommonOpEditor {
                 fillOperationWithInputs(mCurrentOp);
                 saveOpAndExit();
             } else {
-                Tools.popError(this,
-                        errMsg.toString(), null);
+                Tools.popError(this, errMsg.toString(), null);
             }
         }
     }
@@ -124,6 +132,9 @@ public class OperationEditor extends CommonOpEditor {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
             case R.id.cancel:
                 onCancelClicked();
                 return true;

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,6 +69,9 @@ public class AccountEditor extends BaseActivity implements
 
         setContentView(R.layout.account_creation);
 
+        ActionBar bar = getSupportActionBar();
+        bar.setDisplayHomeAsUpEnabled(true);
+
         Long rowId = (null == savedInstanceState) ? null : (Long) savedInstanceState.getSerializable(PARAM_ACCOUNT_ID);
         if (null == rowId) {
             Bundle extras = getIntent().getExtras();
@@ -116,6 +120,9 @@ public class AccountEditor extends BaseActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
             case R.id.cancel:
                 onCancelClicked();
                 return true;
@@ -174,7 +181,7 @@ public class AccountEditor extends BaseActivity implements
         String startSumStr = mAccountStartSumText.getText().toString();
         boolean res = true;
         if (name == null || name.length() == 0) {
-            errMsg.append("Nom de compte vide");
+            errMsg.append(R.string.empty_account_name);
             res = false;
         }
         if (startSumStr.length() == 0) {
