@@ -1,6 +1,7 @@
 package fr.geobert.radis.data
 
-import java.util.Date
+import java.util.{Locale, Date}
+import android.content.Context
 import android.database.Cursor
 import fr.geobert.radis.db.AccountTable
 

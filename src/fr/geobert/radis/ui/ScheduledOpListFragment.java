@@ -87,7 +87,7 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
                 ScheduledOperationTable.KEY_SCHEDULED_END_DATE,};
 
         int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
-        mAdapter = new OperationsCursorAdapter(mActivity, this, R.layout.operation_row, from, to, null,
+        mAdapter = new OperationsCursorAdapter(mActivity, this, from, to, null,
                 new SchedOpRowViewBinder(mActivity, this, null, OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE));
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

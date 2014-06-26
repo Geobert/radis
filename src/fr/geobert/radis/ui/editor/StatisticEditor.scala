@@ -15,36 +15,35 @@ import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.tools.scala.RadisImplicits._
 import fr.geobert.radis.tools.scala.{RadisImplicits, STools}
 import fr.geobert.radis.tools.{Formater, ToggleImageButton}
-import fr.geobert.radis.{BaseActivity, MainActivity, R}
+import fr.geobert.radis.{BaseActivity, R}
 import org.scaloid.common._
 
-object StatisticEditor extends BaseActivity {
+object StatisticEditor {
   val STAT_ID = "stat_id"
 
-  def callMeForResult(activity: MainActivity, statId: Long = 0) = {
-    implicit val ctx = activity
-    activity.startActivityForResult(SIntent[StatisticEditor].putExtra(StatisticTable.KEY_STAT_ID, statId), 0)
+  def callMeForResult(statId: Long = 0)(implicit ctx: Activity) = {
+    ctx.startActivityForResult(SIntent[StatisticEditor].putExtra(StatisticTable.KEY_STAT_ID, statId), 0)
   }
 }
 
 class StatisticEditor extends BaseActivity with SActivity with LoaderCallbacks[Cursor] with Implicits
 with RadisImplicits {
-  private var mNameEdt: EditText = null
-  private var mAccountSpin: Spinner = null
-  private var mFilterSpin: Spinner = null
-  private var mTimeScaleSpin: Spinner = null
-  private var mxLastCont: LinearLayout = null
+  private var mNameEdt: EditText = _
+  private var mAccountSpin: Spinner = _
+  private var mFilterSpin: Spinner = _
+  private var mTimeScaleSpin: Spinner = _
+  private var mxLastCont: LinearLayout = _
   private var mxLastEdt: EditText = _
   private var mxLastSuffixLbl: TextView = _
-  private var mAbsDateCont: LinearLayout = null
-  private var mStartDate: Button = null
-  private var mEndDate: Button = null
-  private var mPieBtn: ToggleImageButton = null
-  private var mBarBtn: ToggleImageButton = null
-  private var mLineBtn: ToggleImageButton = null
+  private var mAbsDateCont: LinearLayout = _
+  private var mStartDate: Button = _
+  private var mEndDate: Button = _
+  private var mPieBtn: ToggleImageButton = _
+  private var mBarBtn: ToggleImageButton = _
+  private var mLineBtn: ToggleImageButton = _
 
-  private var mStat: Statistic = null
-  private var mOrigStat: Statistic = null
+  private var mStat: Statistic = _
+  private var mOrigStat: Statistic = _
 
   private val GET_STAT = 700
 
@@ -67,8 +66,7 @@ with RadisImplicits {
     fillTimeScaleSpinner()
     mAccountManager.fetchAllAccounts(this, false, () => {
       fillAccountSpinner()
-      val statId = getIntent.getIntExtra(StatisticEditor.STAT_ID, 0)
-      if (statId == 0) {
+      if (getIntent.getIntExtra(StatisticEditor.STAT_ID, 0) == 0) {
         mStat = new Statistic
         mOrigStat = new Statistic
         initAccountSpinner()
@@ -176,7 +174,7 @@ with RadisImplicits {
       getString(R.string.no_filter)).dropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     mFilterSpin.setAdapter(adapter)
     mFilterSpin.onItemSelected((a: AdapterView[_], v: View, p: Int, id: Long) => {
-      // TODO
+      mStat.filterType = p
     })
   }
 

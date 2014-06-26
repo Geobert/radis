@@ -10,6 +10,7 @@ import android.util.Log;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Tools;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class OperationTable {
@@ -389,14 +390,28 @@ public class OperationTable {
 //        return c;
 //    }
 
-    public static CursorLoader getOpsBetweenDateLoader(Context ctx,
-                                                       final GregorianCalendar startOpDate,
-                                                       final long accountId) {
+    public static CursorLoader getOpsWithStartDateLoader(Context ctx,
+                                                         final GregorianCalendar startOpDate,
+                                                         final long accountId) {
         return new CursorLoader(ctx, DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ?",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId),
                         Long.toString(startOpDate.getTimeInMillis())},
+                OP_ORDERING
+        );
+    }
+
+    public static Cursor getOpsBetweenDate(Context ctx,
+                                           final Date startOpDate,
+                                           final Date endOpDate,
+                                           final long accountId) {
+        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT
+                        + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?",
+                new String[]{Long.toString(accountId),
+                        Long.toString(accountId),
+                        Long.toString(startOpDate.getTime()),
+                        Long.toString(endOpDate.getTime())},
                 OP_ORDERING
         );
     }
