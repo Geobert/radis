@@ -76,7 +76,7 @@ public class CheckingOpFragment extends BaseFragment implements LoaderManager.Lo
         mInnerOpViewBinder = new CheckingOpRowViewBinder(mActivity, this, null,
                 OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE);
         mOpListAdapter =
-                new OperationsCursorAdapter(mActivity, this, R.layout.operation_row, from, to, null,
+                new OperationsCursorAdapter(mActivity, this, from, to, null,
                         mInnerOpViewBinder);
         mListView.setAdapter(mOpListAdapter);
         mListView.setEmptyView(ll.findViewById(android.R.id.empty));

@@ -10,6 +10,7 @@ import android.util.Log;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Tools;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class OperationTable {
@@ -166,7 +167,8 @@ public class OperationTable {
                 OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT,
                 new String[]{Long.toString(accountId),
-                        Long.toString(accountId)}, OP_ORDERING);
+                        Long.toString(accountId)}, OP_ORDERING
+        );
         if (null != c) {
             c.moveToFirst();
         }
@@ -179,7 +181,8 @@ public class OperationTable {
                 OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ?",
                 new String[]{Long.toString(accountId),
-                        Long.toString(accountId), Integer.toString(1)}, OP_ORDERING);
+                        Long.toString(accountId), Integer.toString(1)}, OP_ORDERING
+        );
         if (null != c) {
             c.moveToFirst();
         }
@@ -192,7 +195,8 @@ public class OperationTable {
                 OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ? AND ops." +
                         KEY_OP_DATE + " <= ?", new String[]{Long.toString(accountId),
-                Long.toString(accountId), Integer.toString(0), Long.toString(maxDate)}, OP_ORDERING);
+                        Long.toString(accountId), Integer.toString(0), Long.toString(maxDate)}, OP_ORDERING
+        );
         if (null != c) {
             c.moveToFirst();
         }
@@ -227,7 +231,8 @@ public class OperationTable {
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId), Long.toString(date)},
                 OP_ORDERING
-                        + (limit == null ? "" : " ops._id asc LIMIT " + limit));
+                        + (limit == null ? "" : " ops._id asc LIMIT " + limit)
+        );
         if (c != null) {
             c.moveToFirst();
         }
@@ -318,7 +323,8 @@ public class OperationTable {
                         + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." +
                         KEY_OP_TRANSFERT_ACC_ID + " = ?)) ",
                 new String[]{Long.toString(accountId), Long.toString(accountId), Long.toString(accountId),
-                        Long.toString(accountId)}, OP_ORDERING);
+                        Long.toString(accountId)}, OP_ORDERING
+        );
         return c;
     }
 
@@ -328,7 +334,8 @@ public class OperationTable {
                         + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." +
                         KEY_OP_TRANSFERT_ACC_ID + " = ?) AND ops2." + KEY_OP_DATE + " < ?) ",
                 new String[]{Long.toString(accountId), Long.toString(accountId), Long.toString(accountId),
-                        Long.toString(accountId), Long.toString(time)}, OP_ORDERING);
+                        Long.toString(accountId), Long.toString(time)}, OP_ORDERING
+        );
         return c;
     }
 
@@ -339,7 +346,8 @@ public class OperationTable {
                 OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_ROWID + " = ?",
                 new String[]{Long.toString(accountId),
-                        Long.toString(accountId), Long.toString(rowId)}, null);
+                        Long.toString(accountId), Long.toString(rowId)}, null
+        );
         if (c != null) {
             c.moveToFirst();
         }
@@ -382,15 +390,30 @@ public class OperationTable {
 //        return c;
 //    }
 
-    public static CursorLoader getOpsBetweenDateLoader(Context ctx,
-                                                       final GregorianCalendar startOpDate,
-                                                       final long accountId) {
+    public static CursorLoader getOpsWithStartDateLoader(Context ctx,
+                                                         final GregorianCalendar startOpDate,
+                                                         final long accountId) {
         return new CursorLoader(ctx, DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ?",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId),
                         Long.toString(startOpDate.getTimeInMillis())},
-                OP_ORDERING);
+                OP_ORDERING
+        );
+    }
+
+    public static Cursor getOpsBetweenDate(Context ctx,
+                                           final Date startOpDate,
+                                           final Date endOpDate,
+                                           final long accountId) {
+        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT
+                        + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?",
+                new String[]{Long.toString(accountId),
+                        Long.toString(accountId),
+                        Long.toString(startOpDate.getTime()),
+                        Long.toString(endOpDate.getTime())},
+                OP_ORDERING
+        );
     }
 
     // used in update op only
@@ -466,7 +489,8 @@ public class OperationTable {
                         KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID
                                 + "=?",
                         new String[]{Long.toString(accountId),
-                                Long.toString(schOpId)});
+                                Long.toString(schOpId)}
+                );
         if (nb > 0) {
             AccountTable.consolidateSums(ctx, accountId);
             if (transfertId > 0) {
@@ -484,7 +508,8 @@ public class OperationTable {
                 KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND "
                         + KEY_OP_DATE + ">=?",
                 new String[]{Long.toString(accountId),
-                        Long.toString(schOpId), Long.toString(date)});
+                        Long.toString(schOpId), Long.toString(date)}
+        );
         if (nbDel > 0) {
             AccountTable.consolidateSums(ctx, accountId);
             if (transfertId > 0) {
@@ -503,7 +528,8 @@ public class OperationTable {
                         KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID
                                 + "=?",
                         new String[]{Long.toString(accountId),
-                                Long.toString(schOpId)});
+                                Long.toString(schOpId)}
+                );
     }
 
     public static int disconnectAllOccurrences(Context ctx,
@@ -516,7 +542,8 @@ public class OperationTable {
                         KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID
                                 + "=?",
                         new String[]{Long.toString(accountId),
-                                Long.toString(schOpId)});
+                                Long.toString(schOpId)}
+                );
     }
 
     public static void updateOpCheckedStatus(Context ctx, final long opId, final long sum, final long accountId,
@@ -573,8 +600,9 @@ public class OperationTable {
                     Tools.clearTimeOfCalendar(d);
                     values.put(KEY_OP_DATE, d.getTimeInMillis());
                     db.update(DATABASE_OPERATIONS_TABLE, values, KEY_OP_ROWID
-                            + "=" + c.getLong(c.getColumnIndex(KEY_OP_ROWID)),
-                            null);
+                                    + "=" + c.getLong(c.getColumnIndex(KEY_OP_ROWID)),
+                            null
+                    );
                 } while (c.moveToNext());
             }
             c.close();
@@ -660,9 +688,10 @@ public class OperationTable {
         db.execSQL("ALTER TABLE operations RENAME TO operations_old;");
         db.execSQL(DATABASE_OP_CREATE);
         Cursor c = db.query("operations_old", new String[]{KEY_OP_ROWID,
-                KEY_OP_ACCOUNT_ID, KEY_OP_THIRD_PARTY, KEY_OP_TAG, KEY_OP_SUM,
-                KEY_OP_MODE, KEY_OP_DATE, KEY_OP_SCHEDULED_ID, KEY_OP_NOTES},
-                null, null, null, null, null);
+                        KEY_OP_ACCOUNT_ID, KEY_OP_THIRD_PARTY, KEY_OP_TAG, KEY_OP_SUM,
+                        KEY_OP_MODE, KEY_OP_DATE, KEY_OP_SCHEDULED_ID, KEY_OP_NOTES},
+                null, null, null, null, null
+        );
         if (null != c && c.moveToFirst()) {
             do {
                 ContentValues initialValues = new ContentValues();

@@ -25,6 +25,7 @@ public class DbContentProvider extends ContentProvider {
     private static final String TAGS_PATH = "tags";
     private static final String MODES_PATH = "modes";
     private static final String PREFS_PATH = "preferences";
+    private static final String STATS_PATH = "statistics";
     private static final String TAG = "DbContentProvider";
 
     public static final Uri ACCOUNT_URI = Uri.parse("content://" + AUTHORITY
@@ -45,6 +46,9 @@ public class DbContentProvider extends ContentProvider {
             + "/" + MODES_PATH);
     public static final Uri PREFS_URI = Uri.parse("content://" + AUTHORITY
             + "/" + PREFS_PATH);
+    public static final Uri STATS_URI = Uri.parse("content://" + AUTHORITY
+            + "/" + STATS_PATH);
+
     private static final int ACCOUNT = 10;
     private static final int OPERATION = 20;
     private static final int OPERATION_JOINED = 21;
@@ -54,6 +58,7 @@ public class DbContentProvider extends ContentProvider {
     private static final int TAGS = 50;
     private static final int MODES = 60;
     private static final int PREFS = 70;
+    private static final int STATS = 80;
     private static final int ACCOUNT_ID = 15;
     private static final int OPERATION_ID = 25;
     private static final int OPERATION_JOINED_ID = 26;
@@ -62,33 +67,30 @@ public class DbContentProvider extends ContentProvider {
     private static final int THIRD_PARTY_ID = 45;
     private static final int TAGS_ID = 55;
     private static final int MODES_ID = 65;
-    private static final UriMatcher sURIMatcher = new UriMatcher(
-            UriMatcher.NO_MATCH);
+    private static final int STATS_ID = 85;
+    private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
         sURIMatcher.addURI(AUTHORITY, ACCOUNTS_PATH, ACCOUNT);
         sURIMatcher.addURI(AUTHORITY, OPERATIONS_PATH, OPERATION);
         sURIMatcher.addURI(AUTHORITY, OPERATIONS_JOINED_PATH, OPERATION_JOINED);
         sURIMatcher.addURI(AUTHORITY, SCHEDULED_OPS_PATH, SCHEDULED_OP);
-        sURIMatcher.addURI(AUTHORITY, SCHEDULED_JOINED_OPS_PATH,
-                SCHEDULED_JOINED_OP);
+        sURIMatcher.addURI(AUTHORITY, SCHEDULED_JOINED_OPS_PATH, SCHEDULED_JOINED_OP);
         sURIMatcher.addURI(AUTHORITY, THIRD_PARTIES_PATH, THIRD_PARTY);
         sURIMatcher.addURI(AUTHORITY, TAGS_PATH, TAGS);
         sURIMatcher.addURI(AUTHORITY, MODES_PATH, MODES);
         sURIMatcher.addURI(AUTHORITY, PREFS_PATH, PREFS);
+        sURIMatcher.addURI(AUTHORITY, STATS_PATH, STATS);
 
         sURIMatcher.addURI(AUTHORITY, ACCOUNTS_PATH + "/#", ACCOUNT_ID);
         sURIMatcher.addURI(AUTHORITY, OPERATIONS_PATH + "/#", OPERATION_ID);
-        sURIMatcher.addURI(AUTHORITY, OPERATIONS_JOINED_PATH + "/#",
-                OPERATION_JOINED_ID);
-        sURIMatcher.addURI(AUTHORITY, SCHEDULED_OPS_PATH + "/#",
-                SCHEDULED_OP_ID);
-        sURIMatcher.addURI(AUTHORITY, SCHEDULED_JOINED_OPS_PATH + "/#",
-                SCHEDULED_JOINED_OP_ID);
-        sURIMatcher
-                .addURI(AUTHORITY, THIRD_PARTIES_PATH + "/#", THIRD_PARTY_ID);
+        sURIMatcher.addURI(AUTHORITY, OPERATIONS_JOINED_PATH + "/#", OPERATION_JOINED_ID);
+        sURIMatcher.addURI(AUTHORITY, SCHEDULED_OPS_PATH + "/#", SCHEDULED_OP_ID);
+        sURIMatcher.addURI(AUTHORITY, SCHEDULED_JOINED_OPS_PATH + "/#", SCHEDULED_JOINED_OP_ID);
+        sURIMatcher.addURI(AUTHORITY, THIRD_PARTIES_PATH + "/#", THIRD_PARTY_ID);
         sURIMatcher.addURI(AUTHORITY, TAGS_PATH + "/#", TAGS_ID);
         sURIMatcher.addURI(AUTHORITY, MODES_PATH + "/#", MODES_ID);
+        sURIMatcher.addURI(AUTHORITY, STATS_PATH + "/#", STATS_ID);
     }
 
     private static DbHelper mDbHelper = null;
@@ -158,10 +160,13 @@ public class DbContentProvider extends ContentProvider {
             case PREFS:
                 table = PreferenceTable.DATABASE_PREFS_TABLE;
                 break;
+            case STATS:
+            case STATS_ID:
+                table = StatisticTable.STAT_TABLE();
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-//		Log.d(TAG, "switchToTable : " + table);
         return table;
     }
 
@@ -169,11 +174,6 @@ public class DbContentProvider extends ContentProvider {
     public synchronized Cursor query(Uri uri, String[] projection,
                                      String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-//        Log.d(TAG, "query selection " + selection + "/" + uri);
-//        if (selectionArgs != null)
-//            for (String s : selectionArgs) {
-//                Log.d(TAG, "query param : " + s);
-//            }
         int uriType = sURIMatcher.match(uri);
         switch (uriType) {
             case ACCOUNT_ID:
@@ -182,6 +182,7 @@ public class DbContentProvider extends ContentProvider {
             case THIRD_PARTY_ID:
             case MODES_ID:
             case TAGS_ID:
+            case STATS_ID:
                 queryBuilder.appendWhere("_id=" + uri.getLastPathSegment());
                 break;
             case OPERATION_JOINED_ID:
@@ -195,7 +196,6 @@ public class DbContentProvider extends ContentProvider {
         }
         String table = switchToTable(uri);
         queryBuilder.setTables(table);
-//        Log.d(TAG, "query " + table);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
@@ -207,7 +207,7 @@ public class DbContentProvider extends ContentProvider {
                                    String[] selectionArgs) {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        int rowsDeleted = 0;
+        int rowsDeleted;
         String table = switchToTable(uri);
         String id = null;
         switch (uriType) {
@@ -254,9 +254,9 @@ public class DbContentProvider extends ContentProvider {
     public synchronized Uri insert(Uri uri, ContentValues values) {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        long id = 0;
+        long id;
         String table = switchToTable(uri);
-        String baseUrl = null;
+        String baseUrl;
         switch (uriType) {
             case ACCOUNT:
                 baseUrl = ACCOUNTS_PATH;
@@ -285,12 +285,13 @@ public class DbContentProvider extends ContentProvider {
             case PREFS:
                 baseUrl = PREFS_PATH;
                 break;
+            case STATS:
+                baseUrl = STATS_PATH;
+                break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
-//        Log.d(TAG, "do insert in " + table);
         id = db.insert(table, null, values);
-//        Log.d(TAG, "insert id : " + id);
         if (id > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
@@ -313,6 +314,7 @@ public class DbContentProvider extends ContentProvider {
             case THIRD_PARTY_ID:
             case MODES_ID:
             case TAGS_ID:
+            case STATS_ID:
                 id = uri.getLastPathSegment();
                 break;
             default:
@@ -322,7 +324,6 @@ public class DbContentProvider extends ContentProvider {
         if (id != null) {
             if (selection == null || selection.trim().length() == 0) {
                 rowsUpdated = db.update(table, values, "_id=?", new String[]{id});
-//                Log.d(TAG, "update (0) " + table + " nb : " + rowsUpdated + " values : " + values);
             } else {
                 if (selectionArgs != null) {
                     List<String> args = new ArrayList<String>(selectionArgs.length + 1);
@@ -333,11 +334,9 @@ public class DbContentProvider extends ContentProvider {
                     selectionArgs = new String[]{id};
                 }
                 rowsUpdated = db.update(table, values, "_id=? and " + selection, selectionArgs);
-//                Log.d(TAG, "update (1) " + table + " nb : " + rowsUpdated);
             }
         } else {
             rowsUpdated = db.update(table, values, selection, selectionArgs);
-//            Log.d(TAG, "update (2) " + table + " nb : " + rowsUpdated);
         }
         return rowsUpdated;
     }

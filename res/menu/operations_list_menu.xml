@@ -7,26 +7,4 @@
             android:title="@string/new_op"
             android:id="@+id/create_operation"
             radis:showAsAction="ifRoom"/>
-    <!--<item-->
-    <!--android:id="@+id/go_to_op_checking"-->
-    <!--android:icon="@drawable/op_checking_48"-->
-    <!--android:title="@string/op_checking"-->
-    <!--radis:showAsAction="ifRoom"/>-->
-    <!--<item-->
-    <!--android:id="@+id/go_to_sch_op"-->
-    <!--android:icon="@drawable/sched_48"-->
-    <!--android:title="@string/scheduled_ops"-->
-    <!--radis:showAsAction="never"/>-->
-    <!--<item-->
-    <!--android:id="@+id/go_to_create_account"-->
-    <!--android:title="@string/create_account"-->
-    <!--radis:showAsAction="never"/>-->
-    <!--<item-->
-    <!--android:id="@+id/go_to_edit_account"-->
-    <!--android:title="@string/account_edit"-->
-    <!--radis:showAsAction="never"/>-->
-    <!--<item-->
-    <!--android:id="@+id/delete_account"-->
-    <!--android:title="@string/delete_account"-->
-    <!--radis:showAsAction="never"/>-->
 </menu>

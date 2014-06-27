@@ -163,8 +163,10 @@ public class OperationListFragment extends BaseFragment implements
         if (null != mScrollLoader) {
             mScrollLoader.setStartDate(startOpDate);
         }
-        if (mQuickAddController != null && itemId != mActivity.getCurrentAccountId() && mOpListCursorAdapter != null) {
+        if (mOpListCursorAdapter != null) {
             ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).setCurrentAccountId(itemId);
+        }
+        if (mQuickAddController != null) {
             mQuickAddController.setAccount(itemId);
             getOperationsList();
             return true;
@@ -182,7 +184,7 @@ public class OperationListFragment extends BaseFragment implements
         Loader<Cursor> res;
         switch (i) {
             case GET_OPS:
-                res = OperationTable.getOpsBetweenDateLoader(mActivity, startOpDate, mActivity.getCurrentAccountId());
+                res = OperationTable.getOpsWithStartDateLoader(mActivity, startOpDate, mActivity.getCurrentAccountId());
                 mOperationsLoader = (CursorLoader) res;
                 break;
             default:
@@ -203,7 +205,7 @@ public class OperationListFragment extends BaseFragment implements
 
                     int[] to = new int[]{R.id.op_date, R.id.op_third_party, R.id.op_sum, R.id.op_infos};
                     mOpListCursorAdapter =
-                            new OperationsCursorAdapter(mActivity, this, R.layout.operation_row, from, to, cursor,
+                            new OperationsCursorAdapter(mActivity, this, from, to, cursor,
                                     new OperationRowViewBinder(mActivity, this, cursor,
                                             OperationTable.KEY_OP_SUM, OperationTable.KEY_OP_DATE)
                             );

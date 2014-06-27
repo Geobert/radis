@@ -21,8 +21,8 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     private boolean mJustClicked = false;
     private int mLastSelectedPosition = -1;
 
-    OperationsCursorAdapter(Context ctx, IOperationList opList, int layout, String[] from, int[] to, Cursor cursor, OpViewBinder innerViewBinder) {
-        super(ctx, layout, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+    OperationsCursorAdapter(Context ctx, IOperationList opList, String[] from, int[] to, Cursor cursor, OpViewBinder innerViewBinder) {
+        super(ctx, R.layout.operation_row, null, from, to, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
         this.opListActivity = opList;
         mInnerViewBinder = innerViewBinder;
         setViewBinder(mInnerViewBinder);

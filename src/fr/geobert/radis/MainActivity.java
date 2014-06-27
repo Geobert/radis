@@ -38,6 +38,7 @@ import fr.geobert.radis.tools.UpdateDisplayInterface;
 import fr.geobert.radis.ui.CheckingOpFragment;
 import fr.geobert.radis.ui.OperationListFragment;
 import fr.geobert.radis.ui.ScheduledOpListFragment;
+import fr.geobert.radis.ui.StatisticsListFragment;
 import fr.geobert.radis.ui.drawer.NavDrawerItem;
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter;
 import fr.geobert.radis.ui.editor.AccountEditor;
@@ -70,16 +71,17 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     public static final int OP_LIST = 1;
     public static final int SCH_OP_LIST = 2;
     public static final int CHECKING_LIST = 3;
+    public static final int STATISTICS = 4;
 
-    public static final int CREATE_ACCOUNT = 5;
-    public static final int EDIT_ACCOUNT = 6;
-    public static final int DELETE_ACCOUNT = 7;
+    public static final int CREATE_ACCOUNT = 6;
+    public static final int EDIT_ACCOUNT = 7;
+    public static final int DELETE_ACCOUNT = 8;
 
-    public static final int PREFERENCES = 9;
-    public static final int SAVE_ACCOUNT = 10;
-    public static final int RESTORE_ACCOUNT = 11;
-    public static final int PROCESS_SCH = 12;
-    public static final int RECOMPUTE_ACCOUNT = 13;
+    public static final int PREFERENCES = 10;
+    public static final int SAVE_ACCOUNT = 11;
+    public static final int RESTORE_ACCOUNT = 12;
+    public static final int PROCESS_SCH = 13;
+    public static final int RECOMPUTE_ACCOUNT = 14;
 
     private FragmentHandler handler;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -148,6 +150,9 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                     break;
                 case CHECKING_LIST:
                     fragment = findOrCreateFragment(CheckingOpFragment.class, message.what);
+                    break;
+                case STATISTICS:
+                    fragment = findOrCreateFragment(StatisticsListFragment.class, message.what);
                     break;
                 case CREATE_ACCOUNT:
                     AccountEditor.callMeForResult(activity, AccountEditor.NO_ACCOUNT);
@@ -477,12 +482,13 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         ArrayList<NavDrawerItem> navDrawerItems = new ArrayList<NavDrawerItem>();
 
         navDrawerItems.add(new NavDrawerItem(getString(R.string.operations)));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.op_list), R.drawable.auto_checking_48)); // TODO another icon
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.op_list), R.drawable.op_list_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.scheduled_ops), R.drawable.sched_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.op_checking), R.drawable.op_checking_48));
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.statistics), R.drawable.stat_48));
 
         navDrawerItems.add(new NavDrawerItem(getString(R.string.accounts)));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.create_account), R.drawable.plus_48)); // TODO another icon
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.create_account), R.drawable.new_account_48)); // TODO another icon
         navDrawerItems.add(new NavDrawerItem(getString(R.string.account_edit), R.drawable.edit_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.delete_account), R.drawable.trash_48));
 
@@ -514,8 +520,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             DBPrefsManager.getInstance(this).resetAll();
             ContentProviderClient client = getContentResolver()
                     .acquireContentProviderClient("fr.geobert.radis.db");
-            DbContentProvider provider = (DbContentProvider) client
-                    .getLocalContentProvider();
+            DbContentProvider provider = (DbContentProvider) client.getLocalContentProvider();
             provider.deleteDatabase(this);
             client.release();
         }

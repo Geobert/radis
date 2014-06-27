@@ -131,15 +131,12 @@ public class AccountTable {
 
         setCurrentSumAndDate(ctx, 0, values, start_sum, projectionMode,
                 projectionDate);
-        Uri res = ctx.getContentResolver().insert(
-                DbContentProvider.ACCOUNT_URI, values);
+        Uri res = ctx.getContentResolver().insert(DbContentProvider.ACCOUNT_URI, values);
         return Long.parseLong(res.getLastPathSegment());
     }
 
     public static boolean deleteAccount(Context ctx, final long accountId) {
-        // ScheduledOperationTable.deleteScheduledOpOfAccount(ctx, accountId);
-        return ctx.getContentResolver().delete(
-                Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
+        return ctx.getContentResolver().delete(Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
                 null, null) > 0;
     }
 
@@ -429,8 +426,7 @@ public class AccountTable {
     }
 
     public static int updateAccount(Context ctx, long accountId, ContentValues values) {
-        return ctx.getContentResolver().update(
-                Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
+        return ctx.getContentResolver().update(Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
                 values, null, null);
     }
 

@@ -248,11 +248,10 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     }
 
     protected void initViewAdapters() {
-        mOpThirdPartyText.setAdapter(new InfoAdapter(mActivity,
-                DbContentProvider.THIRD_PARTY_URI,
+        mOpThirdPartyText.setAdapter(new InfoAdapter(mActivity, DbContentProvider.THIRD_PARTY_URI,
                 InfoTables.KEY_THIRD_PARTY_NAME, false));
-        mOpModeText.setAdapter(new InfoAdapter(mActivity,
-                DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, false));
+        mOpModeText.setAdapter(new InfoAdapter(mActivity, DbContentProvider.MODES_URI,
+                InfoTables.KEY_MODE_NAME, false));
         mOpTagText.setAdapter(new InfoAdapter(mActivity, DbContentProvider.TAGS_URI,
                 InfoTables.KEY_TAG_NAME, false));
     }
@@ -266,8 +265,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             adapter.add(new Account(0, getString(R.string.no_transfert)));
             adapter2.add(new Account(0, getString(R.string.no_transfert)));
             do {
-                adapter.add(new Account(c));
-                adapter2.add(new Account(c));
+                adapter.add(Account.apply(c));
+                adapter2.add(Account.apply(c));
             } while (c.moveToNext());
 
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -289,19 +288,10 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     }
 
     private void initAccountSpinner(Spinner spin, long accountId) {
-        int pos = 0;
         ArrayAdapter<Account> adapter = (ArrayAdapter<Account>) spin.getAdapter();
-        Account acc;
-        long id;
-        while (pos < adapter.getCount()) {
-            acc = adapter.getItem(pos);
-            id = acc.mAccountId;
-            if (id == accountId) {
-                spin.setSelection(pos);
-                break;
-            } else {
-                pos++;
-            }
+        int pos = adapter.getPosition(new Account(accountId, ""));
+        if (pos > -1) {
+            spin.setSelection(pos);
         }
     }
 
@@ -340,14 +330,14 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
             final Account dstAccount = (Account) mDstAccount.getSelectedItem();
-            if (srcAccount.mAccountId == 0) {
+            if (srcAccount.id() == 0) {
                 errMsg.append(getString(R.string.err_transfert_no_src));
                 res = false;
-            } else if (dstAccount.mAccountId == 0) {
+            } else if (dstAccount.id() == 0) {
                 errMsg.append(getString(R.string.err_transfert_no_dst));
                 res = false;
-            } else if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0 &&
-                    srcAccount.mAccountId == dstAccount.mAccountId) {
+            } else if (srcAccount.id() > 0 && dstAccount.id() > 0 &&
+                    srcAccount.id() == dstAccount.id()) {
                 errMsg.append(getString(R.string.err_transfert_same_acc));
                 res = false;
             }
@@ -398,13 +388,13 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
             final Account dstAccount = (Account) mDstAccount.getSelectedItem();
-            if (srcAccount.mAccountId > 0 && dstAccount.mAccountId > 0
-                    && srcAccount.mAccountId != dstAccount.mAccountId) {
+            if (srcAccount.id() > 0 && dstAccount.id() > 0
+                    && srcAccount.id() != dstAccount.id()) {
                 // a valid transfert has been setup
-                op.mTransferAccountId = dstAccount.mAccountId;
-                op.mAccountId = srcAccount.mAccountId;
-                op.mThirdParty = dstAccount.mName.trim();
-                op.mTransSrcAccName = srcAccount.mName;
+                op.mTransferAccountId = dstAccount.id();
+                op.mAccountId = srcAccount.id();
+                op.mThirdParty = dstAccount.name().trim();
+                op.mTransSrcAccName = srcAccount.name();
                 // invert sum because with sum > 0 (and I forced it), A->B means -sum in A and +sum in B
                 op.mSum = -op.mSum;
             } else {
