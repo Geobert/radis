@@ -10,6 +10,7 @@ import fr.geobert.radis.tools.Tools;
 
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class Operation implements Parcelable {
@@ -150,6 +151,10 @@ public class Operation implements Parcelable {
     public void setDate(long date) {
         mDate.setTimeInMillis(date);
         Tools.clearTimeOfCalendar(mDate);
+    }
+
+    public Date getDateObj() {
+        return mDate.getTime();
     }
 
     public void addDay(int nbDays) {

@@ -1,21 +1,24 @@
 package fr.geobert.radis.ui
 
-import java.text.{DecimalFormat, ParsePosition, FieldPosition, NumberFormat}
-import java.util.{Currency, Calendar, Date}
+import java.text._
+import java.util.{Calendar, Currency, Date, GregorianCalendar, Locale}
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Color
+import android.database.Cursor
+import android.graphics.{Color, Paint}
+import android.os.Build
+import android.support.v4.widget.{SimpleCursorAdapter, CursorAdapter}
 import android.view.{View, ViewGroup}
-import android.widget.{ArrayAdapter, ImageButton, LinearLayout, TextView}
+import android.widget._
 import fr.geobert.radis.R
 import fr.geobert.radis.data.{Account, Operation, Statistic}
-import fr.geobert.radis.db.{AccountTable, OperationTable}
-import fr.geobert.radis.tools.Tools
-import org.achartengine.chart.BarChart
+import fr.geobert.radis.db.{StatisticTable, AccountTable, OperationTable}
+import fr.geobert.radis.tools.{Formater, Tools}
 import org.achartengine.chart.BarChart.Type
-import org.achartengine.model.{XYSeries, CategorySeries, XYMultipleSeriesDataset}
-import org.achartengine.renderer.{SimpleSeriesRenderer, XYMultipleSeriesRenderer, DefaultRenderer}
+import org.achartengine.chart.PointStyle
+import org.achartengine.model.{CategorySeries, TimeSeries, XYMultipleSeriesDataset, XYSeries}
+import org.achartengine.renderer.{DefaultRenderer, SimpleSeriesRenderer, XYMultipleSeriesRenderer, XYSeriesRenderer}
 import org.achartengine.{ChartFactory, GraphicalView}
 import org.scaloid.common.Implicits
 
@@ -23,48 +26,67 @@ import scala.collection.JavaConversions._
 
 class StatRowHolder(v: View) extends Implicits {
   val nameLbl: TextView = v.find(R.id.chart_name)
+  val accountNameLbl: TextView = v.find(R.id.chart_account_name)
   val trashBtn: ImageButton = v.find(R.id.chart_delete)
   val editBtn: ImageButton = v.find(R.id.edit_chart)
   val graph: LinearLayout = v.find(R.id.chart)
 }
 
 object StatListAdapter {
-  def apply(resource: Int)(implicit ctx: Context) = {
-    new ArrayAdapter[Statistic](ctx, resource) with StatListAdapter
+  def apply(cursor: Cursor)(implicit ctx: Context) = {
+    val a = new SimpleCursorAdapter(ctx, R.layout.statistic_row, cursor,
+      Array(StatisticTable.KEY_STAT_NAME, StatisticTable.KEY_STAT_ACCOUNT_NAME),
+      Array(R.id.chart_name, R.id.chart_account_name),
+      CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER) with StatListAdapter
+    a.ctx = ctx
+    a
   }
 }
 
-trait StatListAdapter extends ArrayAdapter[Statistic] with Implicits {
-  addAll(stubStatList().toIterable)
+trait StatListAdapter extends SimpleCursorAdapter with Implicits {
+  private val colors = List(Color.parseColor("#61C76A"), Color.parseColor("#3F91D9"),
+    Color.parseColor("#CC8ACF"), Color.parseColor("#69C5FF"), Color.parseColor("#FC5D73"), Color.parseColor("#E3C771"))
 
-  def ctx = getContext.asInstanceOf[Activity]
+  var ctx: Context = _
 
-  def stubStatList() = {
-    val s1 = new Statistic
-    s1.name = "s1"
-    s1.accountId = 1
-    s1.chartType = Statistic.CHART_PIE
-    s1.filterType = Statistic.THIRD_PARTY
-    s1.timeScaleType = Statistic.PERIOD_DAYS
-    s1.xLast = 5
-    val s2 = new Statistic
-    s2.name = "s2"
-    s2.accountId = 1
-    s2.chartType = Statistic.CHART_BAR
-    s2.filterType = Statistic.THIRD_PARTY
-    s2.timeScaleType = Statistic.PERIOD_MONTHES
-    s2.xLast = 5
-    val s3 = new Statistic
-    s3.name = "s3"
-    s3.accountId = 1
-    s3.chartType = Statistic.CHART_LINE
-    s3.filterType = Statistic.TAGS
-    s3.timeScaleType = Statistic.PERIOD_DAYS
-    s3.xLast = 5
-    s1 :: List()
+  class StatViewBinder extends SimpleCursorAdapter.ViewBinder {
+    override def setViewValue(v: View, c: Cursor, colIdx: Int): Boolean = {
+      val stat = Statistic(c)
+      c.getColumnName(colIdx) match {
+        case StatisticTable.KEY_STAT_NAME =>
+          v.asInstanceOf[TextView].text = stat.name
+        case StatisticTable.KEY_STAT_ACCOUNT_NAME =>
+          v.asInstanceOf[TextView].text = stat.accountName
+          val holder = v.getParent.asInstanceOf[View].getTag.asInstanceOf[StatRowHolder]
+          holder.trashBtn.onClick((_: View) => {
+            // TODO
+          })
+          holder.editBtn.onClick((_: View) => {
+            //StatisticEditor.callMeForResult(stat.id)
+          })
+          holder.graph.removeAllViews()
+          val chart = createChartView(stat)
+          chart.setBackgroundColor(ctx.getResources.getColor(android.R.color.transparent))
+          holder.graph.addView(chart)
+      }
+      true
+    }
   }
 
+  setViewBinder(new StatViewBinder)
 
+  override def newView(p1: Context, p2: Cursor, p3: ViewGroup): View = {
+    val row = super.newView(p1, p2, p3)
+    val h = new StatRowHolder(row)
+    row.setTag(h)
+    row
+  }
+
+  /**
+   * create a time range according to statistic's configuration
+   * @param stat
+   * @return (startDate, endDate)
+   */
   private def createTimeRange(stat: Statistic): (Date, Date) = {
     def createXLastRange(field: Int) = {
       val endDate = Tools.createClearedCalendar()
@@ -85,62 +107,196 @@ trait StatListAdapter extends ArrayAdapter[Statistic] with Implicits {
     }
   }
 
-  private def sumPerFilter(stat: Statistic) = {
+  /**
+   * get the ops list according to the time range and group by partFunc
+   * @param stat the stat to analyse
+   * @return a map with the group key and List(Operation)
+   */
+  private def partOps(stat: Statistic): Map[String, List[Operation]] = {
     val (startDate, endDate) = createTimeRange(stat)
     val ops = OperationTable.getOpsBetweenDate(ctx, startDate, endDate, stat.accountId).orm(c => new Operation(c))
+    ops.groupBy(partFunc(stat))
+  }
 
-    // partition the list according to filterType
-    def partAndSum[K](f: (Operation) => K) = {
-      ops.groupBy(f).mapValues(_.foldLeft(0l)((s: Long, o: Operation) => s + o.mSum))
-    }
+  /**
+   * get the partitioning function according to filterType
+   * @param stat the stat to analyse
+   * @return the partitioning function
+   */
+  private def partFunc(stat: Statistic): (Operation) => String = {
     stat.filterType match {
-      case Statistic.THIRD_PARTY =>
-        partAndSum(_.mThirdParty)
-      case Statistic.TAGS =>
-        partAndSum(_.mTag)
-      case Statistic.MODE =>
-        partAndSum(_.mMode)
+      case Statistic.THIRD_PARTY => {
+        _.mThirdParty
+      }
+      case Statistic.TAGS => {
+        _.mTag
+      }
+      case Statistic.MODE => {
+        _.mMode
+      }
+      case Statistic.NO_FILTER =>
+        (o: Operation) => {
+          val g = new GregorianCalendar()
+          g.setTimeInMillis(o.getDate)
+          stat.timeScaleType match {
+            case Statistic.PERIOD_DAYS | Statistic.PERIOD_ABSOLUTE =>
+              Formater.getFullDateFormater.format(g.getTime)
+            case Statistic.PERIOD_MONTHES =>
+              if (Build.VERSION.SDK_INT >= 9) {
+                g.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault)
+              } else {
+                new DateFormatSymbols().getShortMonths()(g.get(Calendar.MONTH))
+              }
+            case Statistic.PERIOD_YEARS =>
+              g.get(Calendar.YEAR).toString
+          }
+        }
     }
   }
 
-  private def createCategorySeries(stat: Statistic): (CategorySeries, DefaultRenderer) = {
-    /** Colors to be used for the pie slices. */
+  private def sumPerFilter(stat: Statistic): Map[String, Long] = {
+    // partition the list according to filterType
+    partOps(stat).mapValues(_.foldLeft(0l)((s: Long, o: Operation) => s + o.mSum))
+  }
+
+  private def initNumFormat(stat: Statistic): NumberFormat = {
     val cursor = AccountTable.fetchAccount(ctx, stat.accountId)
     cursor.moveToFirst()
     val account = Account(cursor)
-    val colors = List(Color.GREEN, Color.BLUE, Color.MAGENTA, Color.CYAN)
     val numFormat = NumberFormat.getCurrencyInstance
     numFormat.setCurrency(Currency.getInstance(account.currency))
     numFormat.setMinimumFractionDigits(2)
+    numFormat
+  }
 
+  private def createCategorySeries(stat: Statistic): (CategorySeries, DefaultRenderer) = {
     val data = new CategorySeries("")
     val renderer = new DefaultRenderer
     renderer.setStartAngle(180)
     renderer.setDisplayValues(true)
     renderer.setLegendTextSize(16)
     renderer.setLabelsTextSize(16)
-    renderer.setShowLegend(false)
+    renderer.setLabelsColor(Color.BLACK)
+    renderer.setShowLegend(true)
 
     // fill the data
     sumPerFilter(stat).foreach((t: (String, Long)) => {
       data.add(t._1, t._2 / 100.0d)
       val r = new SimpleSeriesRenderer
       r.setColor(colors((data.getItemCount - 1) % colors.length))
-      r.setChartValuesFormat(numFormat )
+      r.setChartValuesFormat(initNumFormat(stat))
       renderer.addSeriesRenderer(r)
     })
 
     data -> renderer
   }
 
-  private def createXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
+  private def createLineXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
     val data = new XYMultipleSeriesDataset
+    val renderer = createXYMultipleSeriesRenderer(stat)
+    def createXYSeriesRenderer: XYSeriesRenderer = {
+      val r = new XYSeriesRenderer
+      r.setColor(colors((data.getSeriesCount - 1) % colors.length))
+      r.setChartValuesFormat(initNumFormat(stat))
+      r.setDisplayChartValues(false) // otherwise, crash in achartengine
+      r.setPointStyle(PointStyle.CIRCLE)
+      r.setFillPoints(true)
+      r.setLineWidth(2)
+      r
+    }
+
+    stat.filterType match {
+      case Statistic.NO_FILTER =>
+        val s = new TimeSeries("") // TODO account name ?
+        partOps(stat).foreach((t: (String, List[Operation])) => {
+          val v = math.abs(t._2.foldLeft(0l)((i: Long, op: Operation) => {
+            i + op.mSum
+          }))
+          renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
+          renderer.addYTextLabel(v, Formater.getSumFormater.format(v))
+          s.add(t._2(0).getDateObj, v)
+        })
+        data.addSeries(s)
+        renderer.addSeriesRenderer(createXYSeriesRenderer)
+      case _ =>
+        partOps(stat).foreach((t: (String, List[Operation])) => {
+          val s = new TimeSeries(t._1)
+          t._2.foreach((op: Operation) => {
+            val v = math.abs(op.mSum / 100.0d)
+            renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
+            renderer.addYTextLabel(v, op.getSumStr)
+            s.add(op.getDateObj, v)
+          })
+          data.addSeries(s)
+          renderer.addSeriesRenderer(createXYSeriesRenderer)
+        })
+    }
+    data -> renderer
+  }
+
+  private def filterName(stat: Statistic): String = {
+    val stId = stat.filterType match {
+      case Statistic.THIRD_PARTY =>
+        R.string.third_parties
+      case Statistic.TAGS =>
+        R.string.tags
+      case Statistic.MODE =>
+        R.string.modes
+      case Statistic.NO_FILTER =>
+        R.string.time
+    }
+    ctx.getString(stId)
+  }
+
+  private def createXYMultipleSeriesRenderer(stat: Statistic): XYMultipleSeriesRenderer = {
     val renderer = new XYMultipleSeriesRenderer()
+    renderer.setBackgroundColor(ctx.getResources.getColor(android.R.color.transparent))
+    renderer.setApplyBackgroundColor(true)
+    renderer.setLabelsTextSize(18)
+    renderer.setShowLegend(false)
+    renderer.setMarginsColor(ctx.getResources.getColor(android.R.color.transparent))
+    renderer.setYAxisMin(0)
+    renderer.setMargins(Array[Int](0, 0, 0, 0)) // top, left, bottom, right
+    stat.chartType match {
+      case Statistic.CHART_BAR =>
+        renderer.setYLabelsAlign(Paint.Align.RIGHT)
+        renderer.setYTitle(ctx.getString(R.string.sum))
+        renderer.setXLabels(0)
+        renderer.setYLabels(0)
+        renderer.setXAxisMin(0)
+        renderer.setXAxisMax(0)
+        renderer.setBarWidth(50)
+        renderer.setBarSpacing(-0.5)
+        renderer.setXTitle(filterName(stat))
+      case Statistic.CHART_LINE =>
+        renderer.setPointSize(5)
+        renderer.setYLabelsAlign(Paint.Align.LEFT)
+    }
+    renderer
+  }
+
+  private def createBarXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
+    val data = new XYMultipleSeriesDataset
+    val renderer = createXYMultipleSeriesRenderer(stat)
+
     sumPerFilter(stat).foreach((t: (String, Long)) => {
-      val (catData, _) = createCategorySeries(stat)
-      data.addSeries(catData.toXYSeries)
-      // TODO renderer
+      val v = math.abs(t._2 / 100.0d)
+      renderer.setXAxisMax(renderer.getXAxisMax + 1)
+      renderer.addXTextLabel(renderer.getXAxisMax, t._1)
+      renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
+
+      val s = new XYSeries(t._1)
+      s.add(renderer.getXAxisMax, v)
+      data.addSeries(s)
+
+      val r = new XYSeriesRenderer
+      r.setColor(colors((data.getSeriesCount - 1) % colors.length))
+      r.setChartValuesFormat(initNumFormat(stat))
+      r.setDisplayChartValues(true)
+      r.setChartValuesTextSize(16)
+      renderer.addSeriesRenderer(r)
     })
+    renderer.setXAxisMax(renderer.getXAxisMax + 1)
 
     data -> renderer
   }
@@ -151,36 +307,20 @@ trait StatListAdapter extends ArrayAdapter[Statistic] with Implicits {
         val (dataSet, renderer) = createCategorySeries(stat)
         ChartFactory.getPieChartView(ctx, dataSet, renderer)
       case Statistic.CHART_BAR =>
-        val (dataSet, renderer) = createXYDataSet(stat)
-        ChartFactory.getBarChartView(ctx, dataSet, renderer, Type.DEFAULT)
+        val (dataSet, renderer) = createBarXYDataSet(stat)
+        ChartFactory.getBarChartView(ctx, dataSet, renderer, Type.STACKED)
       case Statistic.CHART_LINE =>
-        val (dataSet, renderer) = createXYDataSet(stat)
-        ChartFactory.getLineChartView(ctx, dataSet, renderer)
+        val (dataSet, renderer) = createLineXYDataSet(stat)
+        val format = stat.timeScaleType match {
+          case Statistic.PERIOD_DAYS | Statistic.PERIOD_ABSOLUTE =>
+            "dd/MM/yy"
+          case Statistic.PERIOD_MONTHES =>
+            "MM/yy"
+          case Statistic.PERIOD_YEARS =>
+            "yy"
+        }
+        ChartFactory.getTimeChartView(ctx, dataSet, renderer, format)
     }
-  }
-
-  override def getView(position: Int, convertView: View, parent: ViewGroup): View = {
-    var row = convertView
-
-    if (row == null) {
-      row = getContext.asInstanceOf[Activity].getLayoutInflater.inflate(R.layout.statistic_row, null)
-      val h = new StatRowHolder(row)
-      row.setTag(h)
-    }
-
-    val holder = row.getTag.asInstanceOf[StatRowHolder]
-    val stat = getItem(position)
-    holder.nameLbl.text = stat.name
-    holder.trashBtn.onClick((_: View) => {
-      // TODO
-    })
-    holder.editBtn.onClick((_: View) => {
-      //StatisticEditor.callMeForResult(stat.id)
-    })
-    holder.graph.removeAllViews()
-    val chart = createChartView(stat)
-    holder.graph.addView(chart)
-    row
   }
 
 }

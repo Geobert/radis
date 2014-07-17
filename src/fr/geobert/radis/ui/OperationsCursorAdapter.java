@@ -116,6 +116,7 @@ class OperationsCursorAdapter extends SimpleCursorAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View v = super.getView(position, convertView, parent);
         final int state = mInnerViewBinder.mCellStates[position];
+        assert v != null;
         final OpRowHolder h = (OpRowHolder) v.getTag();
         if (mLastSelectedPosition == position) {
             v.setBackgroundResource(R.drawable.line_selected_gradient);

@@ -1,7 +1,11 @@
 package fr.geobert.radis.data
 
+import java.io.Serializable
+
 import android.database.Cursor
 import java.util.{Calendar, GregorianCalendar, Date}
+import android.os.Parcelable.Creator
+import android.os.{Parcel, Parcelable}
 import fr.geobert.radis.db.StatisticTable
 
 object Statistic {
@@ -38,10 +42,11 @@ object Statistic {
   }
 }
 
-class Statistic {
+class Statistic extends Serializable {
   var id = 0L
   var name = ""
   var accountId = 0L
+  var accountName = ""
   var xLast = 1
   var endDate: Date = new GregorianCalendar().getTime
   val date = new GregorianCalendar()
@@ -54,6 +59,7 @@ class Statistic {
   def getValue(value: String) = {
     value match {
       case StatisticTable.KEY_STAT_NAME => name
+      case StatisticTable.KEY_STAT_ACCOUNT_NAME => accountName
       case StatisticTable.KEY_STAT_ACCOUNT => accountId
       case StatisticTable.KEY_STAT_TYPE => chartType
       case StatisticTable.KEY_STAT_FILTER => filterType

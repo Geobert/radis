@@ -249,4 +249,5 @@
     <string name="xlast_invalid">La valeur des %1$s %2$s doit être un entier positif</string>
     <string name="invalid_date_range">Les dates de début et de fin sont invalides</string>
     <string name="err_db_stat">Une erreur est survenue pendant la sauvegarde de la statistique</string>
+    <string name="time">Temps</string>
 </resources>

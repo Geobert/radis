@@ -67,8 +67,10 @@ with RadisImplicits {
     mAccountManager.fetchAllAccounts(this, false, () => {
       fillAccountSpinner()
       if (getIntent.getIntExtra(StatisticEditor.STAT_ID, 0) == 0) {
-        mStat = new Statistic
-        mOrigStat = new Statistic
+        if (null == mStat) {
+          mStat = new Statistic
+          mOrigStat = new Statistic
+        }
         initAccountSpinner()
         initTimeScaleSpinner()
         initInfoSpinner()
@@ -77,6 +79,21 @@ with RadisImplicits {
         getSupportLoaderManager.initLoader(GET_STAT, null, this)
       }
     })
+  }
+
+
+  override def onSaveInstanceState(outState: Bundle): Unit = {
+    outState.putSerializable("mStat", mStat)
+    outState.putSerializable("mOrigStat", mOrigStat)
+    outState.putCharSequence("xLast", mxLastEdt.text)
+    outState.putCharSequence("name", mNameEdt.text)
+  }
+
+  override def onRestoreInstanceState(savedInstanceState: Bundle): Unit = {
+    mStat = savedInstanceState.getSerializable("mStat").asInstanceOf[Statistic]
+    mOrigStat = savedInstanceState.getSerializable("mOrigStat").asInstanceOf[Statistic]
+    mxLastEdt.text = savedInstanceState.getCharSequence("xLast")
+    mNameEdt.text = savedInstanceState.getCharSequence("name")
   }
 
   private def initInfoSpinner() {
@@ -181,11 +198,13 @@ with RadisImplicits {
   private def fillAccountSpinner(): Unit = {
     val adapter = new ArrayAdapter[Account](this, android.R.layout.simple_spinner_item)
     val allAccCursor = mAccountManager.getAllAccountsCursor
-    allAccCursor.map(c => adapter.add(Account(c)))
+    allAccCursor.moveToPosition(-1)
+    allAccCursor.foreach(c => adapter.add(Account(c)))
     mAccountSpin.setAdapter(adapter)
     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
     mAccountSpin.onItemSelected((a: AdapterView[_], v: View, p: Int, id: Long) => {
-      mStat.accountId = id
+      mStat.accountId = a.getSelectedItem.asInstanceOf[Account].id
+      mStat.accountName = v.asInstanceOf[TextView].text.toString
     })
   }
 

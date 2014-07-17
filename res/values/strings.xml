@@ -245,4 +245,5 @@
     <string name="xlast_invalid">The value of %1$s %2$s must be a positive number</string>
     <string name="invalid_date_range">The time scale range is invalid</string>
     <string name="err_db_stat">An error occurred while saving the chart</string>
+    <string name="time">Time</string>
 </resources>

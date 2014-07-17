@@ -62,7 +62,7 @@ public class CheckingOpFragment extends BaseFragment implements LoaderManager.Lo
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
         ll = (LinearLayout) inflater.inflate(R.layout.checking_list, container, false);
-
+        assert ll != null;
         mStatusTxt = (TextView) ll.findViewById(R.id.checking_op_status);
         mTargetedSum = (EditText) ll.findViewById(R.id.targeted_sum);
         mListView = (ListView) ll.findViewById(android.R.id.list);

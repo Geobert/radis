@@ -92,7 +92,7 @@
 
                 <EditText
                         android:id="@+id/x_last_edt"
-                        android:layout_width="40dp"
+                        android:layout_width="80dp"
                         android:layout_height="wrap_content"/>
 
                 <TextView
