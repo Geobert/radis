@@ -270,10 +270,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     public boolean onOptionsItemSelected(MenuItem item) {
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item);
     }
 
     private void setUpDrawerToggle() {
@@ -314,7 +311,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     }
 
     public void displayFragment(int fragmentId, long id) {
-        if (fragmentId != mActiveFragmentId) {
+        if (fragmentId != mActiveFragmentId || mActiveFragment == null) {
             Message msg = new Message();
             msg.what = fragmentId;
             msg.obj = id;
@@ -392,6 +389,8 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             }
             if (mActiveFragmentId == -1) {
                 displayFragment(OP_LIST, -1);
+            } else if (resuming) {
+                displayFragment(mActiveFragmentId, getCurrentAccountId());
             }
         }
     }
@@ -527,8 +526,19 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("activeFragId", mActiveFragmentId);
+        outState.putInt("prevFragId", mPrevFragmentId);
+        if (mActiveFragment != null) {
+            mActiveFragment.onSaveInstanceState(outState);
+        }
+    }
+
+    @Override
     protected void onRestoreInstanceState(final Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        mActiveFragmentId = savedInstanceState.getInt("activeFragId");
+        mPrevFragmentId = savedInstanceState.getInt("prevFragId");
         DBPrefsManager.getInstance(this).fillCache(this, new Runnable() {
             @Override
             public void run() {

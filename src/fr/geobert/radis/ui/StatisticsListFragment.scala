@@ -95,4 +95,8 @@ class StatisticsListFragment extends BaseFragment with LoaderCallbacks[Cursor] w
       mAdapter.changeCursor(cursor)
     }
   }
+
+  override def onSaveInstanceState(outState: Bundle): Unit = {
+
+  }
 }

@@ -15,4 +15,17 @@
     <color name="normal_bg">#0A0A0A</color>
     <color name="drawer_bg">#171717</color>
     <color name="holo_blue_dark">#ff0099cc</color>
+    <string-array name="positive_colors">
+        <item>#61C76A</item>
+        <item>#3F91D9</item>
+        <item>#E3C771</item>
+        <item>#69C5FF</item>
+    </string-array>
+
+    <string-array name="negative_colors">
+        <item>#AB165C</item>
+        <item>#CC8ACF</item>
+        <item>#FC5D73</item>
+        <item>#E37730</item>
+    </string-array>
 </resources>

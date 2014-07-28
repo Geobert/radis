@@ -44,8 +44,10 @@ object StatListAdapter {
 }
 
 trait StatListAdapter extends SimpleCursorAdapter with Implicits {
-  private val colors = List(Color.parseColor("#61C76A"), Color.parseColor("#3F91D9"),
-    Color.parseColor("#CC8ACF"), Color.parseColor("#69C5FF"), Color.parseColor("#FC5D73"), Color.parseColor("#E3C771"))
+  private def getColorsArray(id: Int) = ctx.getResources.getStringArray(id).map((s) => Color.parseColor(s))
+
+  private lazy val pos_colors: Array[Int] = getColorsArray(R.array.positive_colors)
+  private lazy val neg_colors: Array[Int] = getColorsArray(R.array.negative_colors)
 
   var ctx: Context = _
 
@@ -112,10 +114,11 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
    * @param stat the stat to analyse
    * @return a map with the group key and List(Operation)
    */
-  private def partOps(stat: Statistic): Map[String, List[Operation]] = {
+  private def partOps(stat: Statistic): (Map[String, List[Operation]], Map[String, List[Operation]]) = {
     val (startDate, endDate) = createTimeRange(stat)
     val ops = OperationTable.getOpsBetweenDate(ctx, startDate, endDate, stat.accountId).orm(c => new Operation(c))
-    ops.groupBy(partFunc(stat))
+    val (pos, neg) = ops.partition(o => o.mSum > 0)
+    (pos.groupBy(partFunc(stat)), neg.groupBy(partFunc(stat)))
   }
 
   /**
@@ -154,9 +157,12 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     }
   }
 
-  private def sumPerFilter(stat: Statistic): Map[String, Long] = {
+  private def sumPerFilter(stat: Statistic): (Map[String, Long], Map[String, Long]) = {
     // partition the list according to filterType
-    partOps(stat).mapValues(_.foldLeft(0l)((s: Long, o: Operation) => s + o.mSum))
+    //partOps(stat).mapValues(_.foldLeft(0l)((s: Long, o: Operation) => s + o.mSum))
+    def sumMap(m: Map[String, List[Operation]]) = m.mapValues(_.foldLeft(0l)((s: Long, o: Operation) => s + o.mSum))
+    val (pos, neg) = partOps(stat)
+    (sumMap(pos), sumMap(neg))
   }
 
   private def initNumFormat(stat: Statistic): NumberFormat = {
@@ -169,6 +175,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     numFormat
   }
 
+  // for pie chart
   private def createCategorySeries(stat: Statistic): (CategorySeries, DefaultRenderer) = {
     val data = new CategorySeries("")
     val renderer = new DefaultRenderer
@@ -180,21 +187,26 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     renderer.setShowLegend(true)
 
     // fill the data
-    sumPerFilter(stat).foreach((t: (String, Long)) => {
-      data.add(t._1, t._2 / 100.0d)
-      val r = new SimpleSeriesRenderer
-      r.setColor(colors((data.getItemCount - 1) % colors.length))
-      r.setChartValuesFormat(initNumFormat(stat))
-      renderer.addSeriesRenderer(r)
-    })
-
+    val (pos, neg) = sumPerFilter(stat)
+    def construct(m: Map[String, Long], colors: Array[Int]): Unit = {
+      m.foreach((t: (String, Long)) => {
+        data.add(t._1, t._2 / 100.0d)
+        val r = new SimpleSeriesRenderer
+        r.setColor(colors((data.getItemCount - 1) % colors.length))
+        r.setChartValuesFormat(initNumFormat(stat))
+        renderer.addSeriesRenderer(r)
+      })
+    }
+    construct(pos, pos_colors)
+    construct(neg, neg_colors)
     data -> renderer
   }
 
+  // for lines chart
   private def createLineXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
     val data = new XYMultipleSeriesDataset
     val renderer = createXYMultipleSeriesRenderer(stat)
-    def createXYSeriesRenderer: XYSeriesRenderer = {
+    def createXYSeriesRenderer(colors: Array[Int]): XYSeriesRenderer = {
       val r = new XYSeriesRenderer
       r.setColor(colors((data.getSeriesCount - 1) % colors.length))
       r.setChartValuesFormat(initNumFormat(stat))
@@ -208,28 +220,38 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     stat.filterType match {
       case Statistic.NO_FILTER =>
         val s = new TimeSeries("") // TODO account name ?
-        partOps(stat).foreach((t: (String, List[Operation])) => {
-          val v = math.abs(t._2.foldLeft(0l)((i: Long, op: Operation) => {
-            i + op.mSum
-          }))
-          renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
-          renderer.addYTextLabel(v, Formater.getSumFormater.format(v))
-          s.add(t._2(0).getDateObj, v)
-        })
-        data.addSeries(s)
-        renderer.addSeriesRenderer(createXYSeriesRenderer)
-      case _ =>
-        partOps(stat).foreach((t: (String, List[Operation])) => {
-          val s = new TimeSeries(t._1)
-          t._2.foreach((op: Operation) => {
-            val v = math.abs(op.mSum / 100.0d)
+      val (pos, neg) = partOps(stat)
+        def construct(m: Map[String, List[Operation]], colors: Array[Int]): Unit = {
+          m.foreach((t: (String, List[Operation])) => {
+            val v = math.abs(t._2.foldLeft(0l)((i: Long, op: Operation) => {
+              i + op.mSum
+            }))
             renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
-            renderer.addYTextLabel(v, op.getSumStr)
-            s.add(op.getDateObj, v)
+            renderer.addYTextLabel(v, Formater.getSumFormater.format(v))
+            s.add(t._2(0).getDateObj, v)
           })
           data.addSeries(s)
-          renderer.addSeriesRenderer(createXYSeriesRenderer)
-        })
+          renderer.addSeriesRenderer(createXYSeriesRenderer(colors))
+        }
+        construct(pos, pos_colors)
+        construct(neg, neg_colors)
+      case _ =>
+        val (pos, neg) = partOps(stat)
+        def construct(m: Map[String, List[Operation]], colors: Array[Int]): Unit = {
+          m.foreach((t: (String, List[Operation])) => {
+            val s = new TimeSeries(t._1)
+            t._2.foreach((op: Operation) => {
+              val v = math.abs(op.mSum / 100.0d)
+              renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
+              renderer.addYTextLabel(v, op.getSumStr)
+              s.add(op.getDateObj, v)
+            })
+            data.addSeries(s)
+            renderer.addSeriesRenderer(createXYSeriesRenderer(colors))
+          })
+        }
+        construct(pos, pos_colors)
+        construct(neg, neg_colors)
     }
     data -> renderer
   }
@@ -248,6 +270,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     ctx.getString(stId)
   }
 
+  // for bar and lines chart
   private def createXYMultipleSeriesRenderer(stat: Statistic): XYMultipleSeriesRenderer = {
     val renderer = new XYMultipleSeriesRenderer()
     renderer.setBackgroundColor(ctx.getResources.getColor(android.R.color.transparent))
@@ -266,7 +289,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
         renderer.setXAxisMin(0)
         renderer.setXAxisMax(0)
         renderer.setBarWidth(50)
-        renderer.setBarSpacing(-0.5)
+        renderer.setBarSpacing(0.5)
         renderer.setXTitle(filterName(stat))
       case Statistic.CHART_LINE =>
         renderer.setPointSize(5)
@@ -275,33 +298,52 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     renderer
   }
 
+  // for bar chart
   private def createBarXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
     val data = new XYMultipleSeriesDataset
     val renderer = createXYMultipleSeriesRenderer(stat)
-
-    sumPerFilter(stat).foreach((t: (String, Long)) => {
-      val v = math.abs(t._2 / 100.0d)
-      renderer.setXAxisMax(renderer.getXAxisMax + 1)
-      renderer.addXTextLabel(renderer.getXAxisMax, t._1)
-      renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
-
-      val s = new XYSeries(t._1)
-      s.add(renderer.getXAxisMax, v)
-      data.addSeries(s)
-
-      val r = new XYSeriesRenderer
-      r.setColor(colors((data.getSeriesCount - 1) % colors.length))
-      r.setChartValuesFormat(initNumFormat(stat))
-      r.setDisplayChartValues(true)
-      r.setChartValuesTextSize(16)
-      renderer.addSeriesRenderer(r)
+    var (pos, neg) = sumPerFilter(stat)
+    pos.keys.foreach(s1 => {
+      if (!neg.keys.exists(s2 => s1.equals(s2))) neg += (s1 -> 0l)
     })
-    renderer.setXAxisMax(renderer.getXAxisMax + 1)
+    neg.keys.foreach(s1 => {
+      if (!pos.keys.exists(s2 => s1.equals(s2))) pos += (s1 -> 0l)
+    })
+    var xLabels: List[String] = List()
+    def construct(m: Map[String, Long], isPos: Boolean): Unit = {
+      val s = new CategorySeries(if (isPos) "pos" else "neg")
+      m.foreach((t: (String, Long)) => {
+        val v = math.abs(t._2 / 100.0d)
+        renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
 
+        val existingSeries = xLabels.find(ser => ser.equals(t._1))
+        if (!existingSeries.isDefined) {
+          renderer.setXAxisMax(renderer.getXAxisMax + 1)
+          renderer.addXTextLabel(renderer.getXAxisMax, t._1)
+          xLabels = t._1 :: xLabels
+        }
+        s.add(v)
+        data.addSeries(s.toXYSeries)
+
+        val r = new XYSeriesRenderer
+        r.setColor(if (isPos) pos_colors(0) else neg_colors(0))
+        r.setChartValuesFormat(initNumFormat(stat))
+        r.setDisplayChartValues(true)
+        r.setChartValuesTextSize(16)
+        renderer.addSeriesRenderer(r)
+      })
+
+      renderer.setXAxisMax(renderer.getXAxisMax + 1)
+    }
+    construct(pos, isPos = true)
+    construct(neg, isPos = false)
     data -> renderer
   }
 
   private def createChartView(stat: Statistic): GraphicalView = {
+    stat.chartType = Statistic.CHART_BAR
+    stat.timeScaleType = Statistic.PERIOD_DAYS
+    stat.xLast = 100
     stat.chartType match {
       case Statistic.CHART_PIE =>
         val (dataSet, renderer) = createCategorySeries(stat)

@@ -70,8 +70,15 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     public Long getDefaultAccountId(Context context) {
         if (this.mCurDefaultAccount == null) {
             this.mCurDefaultAccount = DBPrefsManager.getInstance(context).getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+            if (mCurDefaultAccount == null) {
+                // no pref set, take the first account, set it as default
+                if (this.mAllAccountsCursor.moveToFirst()) {
+                    this.mCurDefaultAccount = this.mAllAccountsCursor.getLong(0);
+                    DBPrefsManager.getInstance(context).put(RadisConfiguration.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount);
+                }
+            }
         }
-        return DBPrefsManager.getInstance(context).getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+        return this.mCurDefaultAccount;
     }
 
     public Long getCurrentAccountId(Context context) {
