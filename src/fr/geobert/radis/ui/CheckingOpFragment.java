@@ -51,13 +51,6 @@ public class CheckingOpFragment extends BaseFragment implements LoaderManager.Lo
     private TargetSumWatcher targetSumWatcher;
     private LinearLayout ll;
 
-//    public static void callMe(Context ctx, final long currentAccountId) {
-//        Intent i = new Intent(ctx, CheckingOpFragment.class);
-//        i.putExtra(CURRENT_ACCOUNT, currentAccountId);
-//        ctx.startActivity(i);
-//    }
-
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
