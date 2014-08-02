@@ -37,7 +37,6 @@
 
         <TextView
                 android:id="@+id/checking_op_status"
-                android:text="1234€\n213€"
                 android:gravity="right"
                 android:layout_height="fill_parent"
                 android:layout_marginLeft="5dp"
