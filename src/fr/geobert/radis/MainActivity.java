@@ -586,6 +586,10 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         private SimpleAccountViewBinder() {
         }
 
+        String cleanupSymbol(String s, String c) {
+            return s.contains(c) ? c : s;
+        }
+
         @Override
         public boolean setViewValue(View view, Cursor cursor, int i) {
             if (ACCOUNT_NAME_COL == -1) {
@@ -593,11 +597,14 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 ACCOUNT_CUR_SUM = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM);
                 ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE);
                 ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY);
-                try {
-                    currencySymbol = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol();
-                } catch (IllegalArgumentException ex) {
-                    currencySymbol = "";
-                }
+            }
+
+            try {
+                currencySymbol = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol();
+                currencySymbol = cleanupSymbol(currencySymbol, "£");
+                currencySymbol = cleanupSymbol(currencySymbol, "$");
+            } catch (IllegalArgumentException ex) {
+                currencySymbol = "";
             }
 
             boolean res;
