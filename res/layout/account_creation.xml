@@ -56,6 +56,7 @@
         <EditText
                 android:id="@+id/projection_date_value"
                 style="@style/EditorEditText.Date"
+                android:inputType="number"
                 android:layout_marginBottom="5dip"/>
 
         <EditText
