@@ -19,8 +19,6 @@ import fr.geobert.radis.{BaseActivity, R}
 import org.scaloid.common._
 
 object StatisticEditor {
-  val STAT_ID = "stat_id"
-
   def callMeForResult(statId: Long = 0)(implicit ctx: Activity) = {
     ctx.startActivityForResult(SIntent[StatisticEditor].putExtra(StatisticTable.KEY_STAT_ID, statId), 0)
   }
@@ -42,6 +40,7 @@ with RadisImplicits {
   private var mBarBtn: ToggleImageButton = _
   private var mLineBtn: ToggleImageButton = _
 
+  private var mStatId: Long = _
   private var mStat: Statistic = _
   private var mOrigStat: Statistic = _
 
@@ -62,15 +61,16 @@ with RadisImplicits {
 
   override def onResume() {
     super.onResume()
-    fillInfoSpinner()
-    fillTimeScaleSpinner()
     mAccountManager.fetchAllAccounts(this, false, () => {
-      fillAccountSpinner()
-      if (getIntent.getIntExtra(StatisticEditor.STAT_ID, 0) == 0) {
+      mStatId = getIntent.getLongExtra(StatisticTable.KEY_STAT_ID, 0)
+      if (mStatId == 0) {
         if (null == mStat) {
           mStat = new Statistic
           mOrigStat = new Statistic
         }
+        fillInfoSpinner()
+        fillTimeScaleSpinner()
+        fillAccountSpinner()
         initAccountSpinner()
         initTimeScaleSpinner()
         initInfoSpinner()
@@ -126,6 +126,7 @@ with RadisImplicits {
       } else {
         mxLastCont.visibility = View.VISIBLE
         mAbsDateCont.visibility = View.GONE
+        mxLastEdt.text = mStat.xLast.toString
       }
     }
 
@@ -362,21 +363,30 @@ with RadisImplicits {
   }
 
   override def onCreateLoader(p1: Int, p2: Bundle): Loader[Cursor] = {
-    StatisticTable.getStatisticLoader(mStat.id)
+    StatisticTable.getStatisticLoader(mStatId)
   }
 
   override def onLoaderReset(p1: Loader[Cursor]): Unit = {
   }
 
-  override def onLoadFinished(p1: Loader[Cursor], p2: Cursor): Unit = {
-    mStat = Statistic(p2)
-    mOrigStat = Statistic(p2)
+  def initForm() = {
+    mNameEdt.text = mStat.name
 
-    fillInfoSpinner()
-    fillTimeScaleSpinner()
-    initAccountSpinner()
-    initTimeScaleSpinner()
-    initInfoSpinner()
-    initChartTypeButtons()
+  }
+
+  override def onLoadFinished(p1: Loader[Cursor], p2: Cursor): Unit = {
+    if (p2.moveToFirst()) {
+      mStat = Statistic(p2)
+      mOrigStat = Statistic(p2)
+
+      fillAccountSpinner()
+      fillInfoSpinner()
+      fillTimeScaleSpinner()
+      initAccountSpinner()
+      initTimeScaleSpinner()
+      initInfoSpinner()
+      initChartTypeButtons()
+      initForm()
+    }
   }
 }

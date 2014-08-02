@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 
-public class OnInsertionReceiver extends BroadcastReceiver {
+public class OnRefreshReceiver extends BroadcastReceiver {
 
     private UpdateDisplayInterface mActivity;
 
-    public OnInsertionReceiver(UpdateDisplayInterface activity) {
+    public OnRefreshReceiver(UpdateDisplayInterface activity) {
         super();
         mActivity = activity;
     }

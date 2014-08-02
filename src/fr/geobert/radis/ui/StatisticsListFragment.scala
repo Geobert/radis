@@ -1,18 +1,17 @@
 package fr.geobert.radis.ui
 
-import android.app.Activity
 import android.content.Intent
 import android.database.Cursor
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager.LoaderCallbacks
-import android.support.v4.content.{Loader, CursorLoader}
+import android.support.v4.content.{CursorLoader, Loader}
 import android.support.v7.app.ActionBar
 import android.view._
 import android.widget.ListView
 import fr.geobert.radis.db.{DbContentProvider, StatisticTable}
 import fr.geobert.radis.ui.editor.StatisticEditor
-import fr.geobert.radis.{BaseActivity, BaseFragment, R}
+import fr.geobert.radis.{BaseFragment, R}
 import org.scaloid.common.Implicits
 
 class StatisticsListFragment extends BaseFragment with LoaderCallbacks[Cursor] with Implicits {
@@ -22,6 +21,24 @@ class StatisticsListFragment extends BaseFragment with LoaderCallbacks[Cursor] w
   private var mList: ListView = _
   private var mAdapter: StatListAdapter = _
   private var mLoader: Option[Loader[Cursor]] = None
+
+
+//  private var mOnRefreshReceiver: OnRefreshReceiver = _
+  //  private var mOnInsertionIntentFilter: IntentFilter = _
+  //
+  //  override def onCreate(savedInstanceState: Bundle): Unit = {
+  //    super.onCreate(savedInstanceState)
+  //    mOnRefreshReceiver = new OnRefreshReceiver(this)
+  //    mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_REFRESH_NEEDED)
+  //  }
+  //
+  //
+  //  override def onDestroy(): Unit = {
+  //    super.onDestroy()
+  //    if (null != mOnRefreshReceiver) {
+  //      ctx.unregisterReceiver(mOnRefreshReceiver)
+  //    }
+  //  }
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
     super.onCreateView(inflater, container, savedInstanceState)
@@ -72,7 +89,9 @@ class StatisticsListFragment extends BaseFragment with LoaderCallbacks[Cursor] w
 
   override def onAccountChanged(itemId: Long): Boolean = false
 
-  override def updateDisplay(intent: Intent): Unit = {}
+  override def updateDisplay(intent: Intent): Unit = {
+    fetchStats()
+  }
 
   override def onCreateLoader(p1: Int, p2: Bundle): Loader[Cursor] = {
     mLoader = Some(new CursorLoader(ctx, DbContentProvider.STATS_URI, StatisticTable.STAT_COLS, null, null, null))

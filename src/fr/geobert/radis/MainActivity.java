@@ -27,7 +27,7 @@ import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
-import fr.geobert.radis.service.OnInsertionReceiver;
+import fr.geobert.radis.service.OnRefreshReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.tools.Formater;
@@ -60,7 +60,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     private ListView mDrawerList;
     private boolean mFirstStart = true;
     private SimpleCursorAdapter mAccountAdapter;
-    private OnInsertionReceiver mOnInsertionReceiver;
+    private OnRefreshReceiver mOnRefreshReceiver;
     private IntentFilter mOnInsertionIntentFilter;
     private BaseFragment mActiveFragment;
     private BaseFragment mPrevFragment;
@@ -231,12 +231,12 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         redColor = resources.getColor(R.color.op_alert);
         greenColor = resources.getColor(R.color.positiveSum);
 
-        mOnInsertionReceiver = new OnInsertionReceiver(this);
-        mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_OP_INSERTED);
+        mOnRefreshReceiver = new OnRefreshReceiver(this);
+        mOnInsertionIntentFilter = new IntentFilter(Tools.INTENT_REFRESH_NEEDED);
 
-        registerReceiver(mOnInsertionReceiver, mOnInsertionIntentFilter);
-        registerReceiver(mOnInsertionReceiver, new IntentFilter(INTENT_UPDATE_ACC_LIST));
-        registerReceiver(mOnInsertionReceiver, new IntentFilter(INTENT_UPDATE_OP_LIST));
+        registerReceiver(mOnRefreshReceiver, mOnInsertionIntentFilter);
+        registerReceiver(mOnRefreshReceiver, new IntentFilter(INTENT_UPDATE_ACC_LIST));
+        registerReceiver(mOnRefreshReceiver, new IntentFilter(INTENT_UPDATE_OP_LIST));
 
         initDrawer();
         installRadisTimer();
@@ -350,8 +350,8 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (null != mOnInsertionReceiver) {
-            unregisterReceiver(mOnInsertionReceiver);
+        if (null != mOnRefreshReceiver) {
+            unregisterReceiver(mOnRefreshReceiver);
         }
     }
 

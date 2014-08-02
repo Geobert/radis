@@ -8,6 +8,7 @@ import android.content.Context
 import android.database.Cursor
 import android.graphics.{Color, Paint}
 import android.os.Build
+import android.support.v4.app.FragmentActivity
 import android.support.v4.widget.{SimpleCursorAdapter, CursorAdapter}
 import android.view.{View, ViewGroup}
 import android.widget._
@@ -15,6 +16,7 @@ import fr.geobert.radis.R
 import fr.geobert.radis.data.{Account, Operation, Statistic}
 import fr.geobert.radis.db.{StatisticTable, AccountTable, OperationTable}
 import fr.geobert.radis.tools.{Formater, Tools}
+import fr.geobert.radis.ui.editor.StatisticEditor
 import org.achartengine.chart.BarChart.Type
 import org.achartengine.chart.PointStyle
 import org.achartengine.model.{CategorySeries, TimeSeries, XYMultipleSeriesDataset, XYSeries}
@@ -33,7 +35,7 @@ class StatRowHolder(v: View) extends Implicits {
 }
 
 object StatListAdapter {
-  def apply(cursor: Cursor)(implicit ctx: Context) = {
+  def apply(cursor: Cursor)(implicit ctx: Activity) = {
     val a = new SimpleCursorAdapter(ctx, R.layout.statistic_row, cursor,
       Array(StatisticTable.KEY_STAT_NAME, StatisticTable.KEY_STAT_ACCOUNT_NAME),
       Array(R.id.chart_name, R.id.chart_account_name),
@@ -49,7 +51,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
   private lazy val pos_colors: Array[Int] = getColorsArray(R.array.positive_colors)
   private lazy val neg_colors: Array[Int] = getColorsArray(R.array.negative_colors)
 
-  var ctx: Context = _
+  implicit var ctx: Activity = _
 
   class StatViewBinder extends SimpleCursorAdapter.ViewBinder {
     override def setViewValue(v: View, c: Cursor, colIdx: Int): Boolean = {
@@ -61,10 +63,10 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
           v.asInstanceOf[TextView].text = stat.accountName
           val holder = v.getParent.asInstanceOf[View].getTag.asInstanceOf[StatRowHolder]
           holder.trashBtn.onClick((_: View) => {
-            // TODO
+            DeleteStatConfirmationDiag(stat.id).show(ctx.asInstanceOf[FragmentActivity].getSupportFragmentManager, "")
           })
           holder.editBtn.onClick((_: View) => {
-            //StatisticEditor.callMeForResult(stat.id)
+            StatisticEditor.callMeForResult(stat.id)
           })
           holder.graph.removeAllViews()
           val chart = createChartView(stat)
@@ -206,6 +208,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
   private def createLineXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
     val data = new XYMultipleSeriesDataset
     val renderer = createXYMultipleSeriesRenderer(stat)
+
     def createXYSeriesRenderer(colors: Array[Int]): XYSeriesRenderer = {
       val r = new XYSeriesRenderer
       r.setColor(colors((data.getSeriesCount - 1) % colors.length))
@@ -219,8 +222,8 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
 
     stat.filterType match {
       case Statistic.NO_FILTER =>
-        val s = new TimeSeries("") // TODO account name ?
-      val (pos, neg) = partOps(stat)
+        val s = new TimeSeries("")
+        val (pos, neg) = partOps(stat)
         def construct(m: Map[String, List[Operation]], colors: Array[Int]): Unit = {
           m.foreach((t: (String, List[Operation])) => {
             val v = math.abs(t._2.foldLeft(0l)((i: Long, op: Operation) => {
@@ -276,12 +279,12 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     renderer.setBackgroundColor(ctx.getResources.getColor(android.R.color.transparent))
     renderer.setApplyBackgroundColor(true)
     renderer.setLabelsTextSize(18)
-    renderer.setShowLegend(false)
     renderer.setMarginsColor(ctx.getResources.getColor(android.R.color.transparent))
     renderer.setYAxisMin(0)
     renderer.setMargins(Array[Int](0, 0, 0, 0)) // top, left, bottom, right
     stat.chartType match {
       case Statistic.CHART_BAR =>
+        renderer.setShowLegend(false)
         renderer.setYLabelsAlign(Paint.Align.RIGHT)
         renderer.setYTitle(ctx.getString(R.string.sum))
         renderer.setXLabels(0)
@@ -292,8 +295,10 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
         renderer.setBarSpacing(0.5)
         renderer.setXTitle(filterName(stat))
       case Statistic.CHART_LINE =>
+        renderer.setShowLegend(true)
         renderer.setPointSize(5)
         renderer.setYLabelsAlign(Paint.Align.LEFT)
+        renderer.setZoomEnabled(false)
     }
     renderer
   }
@@ -341,9 +346,6 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
   }
 
   private def createChartView(stat: Statistic): GraphicalView = {
-    stat.chartType = Statistic.CHART_BAR
-    stat.timeScaleType = Statistic.PERIOD_DAYS
-    stat.xLast = 100
     stat.chartType match {
       case Statistic.CHART_PIE =>
         val (dataSet, renderer) = createCategorySeries(stat)

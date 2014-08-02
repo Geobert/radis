@@ -247,7 +247,7 @@ public class RadisService extends IntentService {
             }
 //            Log.d(TAG, "DOES NEED UPDATE : " + needUpdate);
             if (needUpdate) {
-                Intent i = new Intent(Tools.INTENT_OP_INSERTED);
+                Intent i = new Intent(Tools.INTENT_REFRESH_NEEDED);
                 i.putExtra("accountIds", accountIds);
 //                Log.d(TAG, "sendOrderedBroadcast" + i.toString());
                 sendOrderedBroadcast(i, null);

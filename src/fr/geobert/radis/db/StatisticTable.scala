@@ -58,8 +58,8 @@ object StatisticTable {
     ctx.getContentResolver.update(Uri.parse(s"${DbContentProvider.STATS_URI}/${stat.id}"), fillContentValues(stat), null, null)
   }
 
-  def deleteStatistic(statId: Long)(implicit ctx: Context) {
-    ctx.getContentResolver.delete(Uri.parse(s"${DbContentProvider.STATS_URI}/$statId"), null, null)
+  def deleteStatistic(statId: Long)(implicit ctx: Context): Boolean = {
+    ctx.getContentResolver.delete(Uri.parse(s"${DbContentProvider.STATS_URI}/$statId"), null, null) > 0
   }
 
   def getStatisticLoader(statId: Long)(implicit ctx: Context) = {

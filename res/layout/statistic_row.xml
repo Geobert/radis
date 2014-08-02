@@ -26,13 +26,13 @@
 
     <ImageButton
             android:id="@+id/chart_delete"
-            android:layout_marginTop="5dp"
+            android:padding="8dp"
             android:layout_alignTop="@+id/chart_name"
             android:layout_width="wrap_content"
             android:src="@drawable/trash_48"
             android:layout_toLeftOf="@+id/edit_chart"
             android:layout_marginRight="15dp"
-            android:background="@android:color/transparent"
+            android:background="@drawable/action_bg_selector"
             android:layout_height="wrap_content"/>
 
     <ImageButton
@@ -41,8 +41,9 @@
             android:layout_alignTop="@+id/chart_delete"
             android:layout_width="wrap_content"
             android:src="@drawable/edit_48"
+            android:padding="8dp"
             android:layout_marginRight="15dp"
-            android:background="@android:color/transparent"
+            android:background="@drawable/action_bg_selector"
             android:layout_height="wrap_content"/>
 
     <LinearLayout
