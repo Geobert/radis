@@ -352,6 +352,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                     populateFields();
                 } else {
                     if (!onOpNotFound()) {
+                        mOpIdSource = 0;
                         populateFields();
                     }
                 }
@@ -364,6 +365,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                     populateFields();
                 } else {
                     if (!onOpNotFound()) {
+                        mOpIdSource = 0;
                         populateFields();
                     }
                 }

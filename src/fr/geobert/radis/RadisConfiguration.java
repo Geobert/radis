@@ -110,8 +110,7 @@ public class RadisConfiguration extends PreferenceActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        String value = getPrefs().getString(KEY_INSERTION_DATE,
-                DEFAULT_INSERTION_DATE);
+        String value = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE);
         EditTextPreference ep = (EditTextPreference) findPreference(KEY_INSERTION_DATE);
         ep.getEditText().setText(value);
 

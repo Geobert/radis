@@ -285,39 +285,27 @@ public class OperationTable {
 
     public static boolean deleteOp(Context ctx, long rowId, final long accountId) {
         Cursor c = fetchOneOp(ctx, rowId, accountId);
-        final long opSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
-        final long opDate = c.getLong(c.getColumnIndex(KEY_OP_DATE));
-        final boolean checked = c.getInt(c.getColumnIndex(KEY_OP_CHECKED)) == 1;
-        final long transfertId = c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID));
-        c.close();
-        if (ctx.getContentResolver().delete(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null, null) > 0) {
-            AccountTable.updateProjection(ctx, accountId, -opSum, 0, opDate, -1);
-            if (transfertId > 0) {
-                AccountTable.updateProjection(ctx, transfertId, opSum, 0, opDate, -1);
+        if (c.moveToFirst()) {
+            final long opSum = c.getLong(c.getColumnIndex(KEY_OP_SUM));
+            final long opDate = c.getLong(c.getColumnIndex(KEY_OP_DATE));
+            final boolean checked = c.getInt(c.getColumnIndex(KEY_OP_CHECKED)) == 1;
+            final long transfertId = c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID));
+            c.close();
+            if (ctx.getContentResolver().delete(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId), null, null) > 0) {
+                AccountTable.updateProjection(ctx, accountId, -opSum, 0, opDate, -1);
+                if (transfertId > 0) {
+                    AccountTable.updateProjection(ctx, transfertId, opSum, 0, opDate, -1);
+                }
+                if (checked) {
+                    AccountTable.updateCheckedOpSum(ctx, opSum, accountId, transfertId, false);
+                }
+                return true;
             }
-            if (checked) {
-                AccountTable.updateCheckedOpSum(ctx, opSum, accountId, transfertId, false);
-            }
-            return true;
         }
         return false;
     }
 
-//    static Cursor fetchNLastOps(Context ctx, int nbOps, final long accountId) {
-//        return ctx.getContentResolver().query(
-//                DbContentProvider.OPERATION_JOINED_URI,
-//                OP_COLS_QUERY,
-//                RESTRICT_TO_ACCOUNT,
-//                new String[]{Long.toString(accountId),
-//                        Long.toString(accountId)},
-//                OP_ORDERING + " ops._id asc LIMIT " + Integer.toString(nbOps));
-//    }
-
     public static Cursor fetchLastOp(Context ctx, final long accountId) {
-//        Cursor c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY,
-//                RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM "
-//                        + DATABASE_OPERATIONS_TABLE + " ops2) ",
-//                new String[]{Long.toString(accountId), Long.toString(accountId)}, OP_ORDERING);
         Cursor c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM "
                         + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." +
@@ -339,8 +327,7 @@ public class OperationTable {
         return c;
     }
 
-    public static Cursor fetchOneOp(Context ctx, final long rowId,
-                                    final long accountId) {
+    public static Cursor fetchOneOp(Context ctx, final long rowId, final long accountId) {
         Cursor c = ctx.getContentResolver().query(
                 DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY,
@@ -353,42 +340,6 @@ public class OperationTable {
         }
         return c;
     }
-
-//    static Cursor fetchOpOfMonth(Context ctx, final GregorianCalendar date,
-//                                 final long limitDate, final long accountId) {
-//        Cursor c = null;
-//        GregorianCalendar startDate = Tools.createClearedCalendar();
-//        GregorianCalendar endDate = Tools.createClearedCalendar();
-//
-//        startDate.set(Calendar.DAY_OF_MONTH, 1);
-//        endDate.set(Calendar.DAY_OF_MONTH, 1);
-//
-//        startDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
-//        endDate.set(Calendar.MONTH, date.get(Calendar.MONTH));
-//
-//        startDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
-//        endDate.set(Calendar.YEAR, date.get(Calendar.YEAR));
-//
-//        startDate.set(Calendar.DAY_OF_MONTH,
-//                startDate.getActualMinimum(Calendar.DAY_OF_MONTH));
-//        endDate.set(Calendar.DAY_OF_MONTH,
-//                endDate.getActualMaximum(Calendar.DAY_OF_MONTH));
-//        c = ctx.getContentResolver().query(
-//                DbContentProvider.OPERATION_JOINED_URI,
-//                OP_COLS_QUERY,
-//                RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE
-//                        + " <= ? AND ops." + KEY_OP_DATE + " >= ? AND ops."
-//                        + KEY_OP_DATE + " < ?",
-//                new String[]{Long.toString(accountId),
-//                        Long.toString(accountId),
-//                        Long.toString(endDate.getTimeInMillis()),
-//                        Long.toString(startDate.getTimeInMillis()),
-//                        Long.toString(limitDate)}, OP_ORDERING);
-//        if (c != null) {
-//            c.moveToFirst();
-//        }
-//        return c;
-//    }
 
     public static CursorLoader getOpsWithStartDateLoader(Context ctx,
                                                          final GregorianCalendar startOpDate,

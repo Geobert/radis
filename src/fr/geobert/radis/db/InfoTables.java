@@ -12,7 +12,6 @@ import android.util.Log;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.DBPrefsManager;
-import org.acra.ACRA;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -433,17 +432,14 @@ public class InfoTables {
         try {
             db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_THIRD_PARTIES_TABLE));
         } catch (SQLiteException e) {
-            ACRA.getErrorReporter().handleSilentException(e);
         }
         try {
             db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_TAGS_TABLE));
         } catch (SQLiteException e) {
-            ACRA.getErrorReporter().handleSilentException(e);
         }
         try {
             db.execSQL(String.format(ADD_WEIGHT_COL, DATABASE_MODES_TABLE));
         } catch (SQLiteException e) {
-            ACRA.getErrorReporter().handleSilentException(e);
         }
 
     }
