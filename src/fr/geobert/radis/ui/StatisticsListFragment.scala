@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import android.support.v4.content.{CursorLoader, Loader}
 import android.support.v7.app.ActionBar
+import android.view.View.OnTouchListener
 import android.view._
 import android.widget.ListView
 import fr.geobert.radis.db.{DbContentProvider, StatisticTable}
@@ -23,7 +24,7 @@ class StatisticsListFragment extends BaseFragment with LoaderCallbacks[Cursor] w
   private var mLoader: Option[Loader[Cursor]] = None
 
 
-//  private var mOnRefreshReceiver: OnRefreshReceiver = _
+  //  private var mOnRefreshReceiver: OnRefreshReceiver = _
   //  private var mOnInsertionIntentFilter: IntentFilter = _
   //
   //  override def onCreate(savedInstanceState: Bundle): Unit = {
@@ -46,6 +47,7 @@ class StatisticsListFragment extends BaseFragment with LoaderCallbacks[Cursor] w
     val v = inflater.inflate(R.layout.statistics_fragment, container, false)
     mList = v.find(android.R.id.list)
     mList.setEmptyView(v.find(android.R.id.empty))
+    //    mList.mCanScroll = false
 
     val actionbar: ActionBar = mActivity.getSupportActionBar
     actionbar.setDisplayHomeAsUpEnabled(true)

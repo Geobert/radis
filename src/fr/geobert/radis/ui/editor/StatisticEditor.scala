@@ -231,9 +231,7 @@ with RadisImplicits {
     mLineBtn = find[ToggleImageButton](R.id.line_btn)
     mStartDate = find[Button](R.id.start_date_btn)
     mEndDate = find[Button](R.id.end_date_btn)
-
-    // TODO remove
-    getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    //getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
   }
 
   private def setupChartTypeButtons() {
@@ -319,13 +317,12 @@ with RadisImplicits {
   }
 
   private def onConfirmPressed() = {
-    if (mStat.id == 0 || mStat != mOrigStat) {
-      formErrorMessage match {
-        case Some(msg) =>
-          STools.popError(msg)
-        case None =>
-          fillStat()
-
+    formErrorMessage match {
+      case Some(msg) =>
+        STools.popError(msg)
+      case None =>
+        fillStat()
+        if (mStat.id == 0 || mStat != mOrigStat) {
           // create or update stat
           val success = if (mStat.id == 0) {
             StatisticTable.createStatistic(mStat) > 0
@@ -339,10 +336,10 @@ with RadisImplicits {
           } else {
             STools.popError(getString(R.string.err_db_stat))
           }
-      }
-    } else {
-      setResult(Activity.RESULT_CANCELED)
-      finish()
+        } else {
+          setResult(Activity.RESULT_CANCELED)
+          finish()
+        }
     }
   }
 

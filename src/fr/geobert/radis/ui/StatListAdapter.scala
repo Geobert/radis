@@ -25,6 +25,7 @@ import org.achartengine.{ChartFactory, GraphicalView}
 import org.scaloid.common.Implicits
 
 import scala.collection.JavaConversions._
+import scala.collection.immutable.ListMap
 
 class StatRowHolder(v: View) extends Implicits {
   val nameLbl: TextView = v.find(R.id.chart_name)
@@ -187,6 +188,8 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     renderer.setLabelsTextSize(16)
     renderer.setLabelsColor(Color.BLACK)
     renderer.setShowLegend(true)
+    renderer.setInScroll(true)
+    renderer.setPanEnabled(false)
 
     // fill the data
     val (pos, neg) = sumPerFilter(stat)
@@ -201,6 +204,9 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     }
     construct(pos, pos_colors)
     construct(neg, neg_colors)
+    if (data.getItemCount > 10) {
+      renderer.setShowLabels(false)
+    }
     data -> renderer
   }
 
@@ -208,6 +214,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
   private def createLineXYDataSet(stat: Statistic): (XYMultipleSeriesDataset, XYMultipleSeriesRenderer) = {
     val data = new XYMultipleSeriesDataset
     val renderer = createXYMultipleSeriesRenderer(stat)
+    renderer.setInScroll(true)
 
     def createXYSeriesRenderer(colors: Array[Int]): XYSeriesRenderer = {
       val r = new XYSeriesRenderer
@@ -282,6 +289,9 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     renderer.setMarginsColor(ctx.getResources.getColor(android.R.color.transparent))
     renderer.setYAxisMin(0)
     renderer.setMargins(Array[Int](0, 0, 0, 0)) // top, left, bottom, right
+    renderer.setInScroll(true)
+    renderer.setPanEnabled(true, false)
+
     stat.chartType match {
       case Statistic.CHART_BAR =>
         renderer.setShowLegend(false)
@@ -291,7 +301,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
         renderer.setYLabels(0)
         renderer.setXAxisMin(0)
         renderer.setXAxisMax(0)
-        renderer.setBarWidth(50)
+        renderer.setBarWidth(70)
         renderer.setBarSpacing(0.5)
         renderer.setXTitle(filterName(stat))
       case Statistic.CHART_LINE =>
@@ -314,21 +324,22 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     neg.keys.foreach(s1 => {
       if (!pos.keys.exists(s2 => s1.equals(s2))) pos += (s1 -> 0l)
     })
-    var xLabels: List[String] = List()
+    var xLabels: ListMap[String, Double] = ListMap()
     def construct(m: Map[String, Long], isPos: Boolean): Unit = {
-      val s = new CategorySeries(if (isPos) "pos" else "neg")
+      val s2 = new XYSeries("")
       m.foreach((t: (String, Long)) => {
+        val lbl = if (t._1.length == 0) ctx.getString(R.string.no_lbl) else t._1
         val v = math.abs(t._2 / 100.0d)
-        renderer.setYAxisMax(math.max(v + 1, renderer.getYAxisMax))
+        renderer.setYAxisMax(math.max(v, renderer.getYAxisMax))
 
-        val existingSeries = xLabels.find(ser => ser.equals(t._1))
+        val existingSeries = xLabels.find((v) => v._1.equals(lbl))
         if (!existingSeries.isDefined) {
-          renderer.setXAxisMax(renderer.getXAxisMax + 1)
-          renderer.addXTextLabel(renderer.getXAxisMax, t._1)
-          xLabels = t._1 :: xLabels
+          val idx = data.getSeriesCount * 0.5 + 0.5
+          renderer.addXTextLabel(idx, lbl)
+          xLabels += (lbl -> idx)
         }
-        s.add(v)
-        data.addSeries(s.toXYSeries)
+        s2.add(existingSeries.getOrElse(xLabels.find((v) => v._1.equals(lbl)).get)._2, v)
+        data.addSeries(s2)
 
         val r = new XYSeriesRenderer
         r.setColor(if (isPos) pos_colors(0) else neg_colors(0))
@@ -342,6 +353,7 @@ trait StatListAdapter extends SimpleCursorAdapter with Implicits {
     }
     construct(pos, isPos = true)
     construct(neg, isPos = false)
+    renderer.setRange(Array(0, renderer.getXAxisMax, 0, renderer.getYAxisMax * 1.1))
     data -> renderer
   }
 

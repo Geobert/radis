@@ -246,4 +246,5 @@
     <string name="invalid_date_range">The time scale range is invalid</string>
     <string name="err_db_stat">An error occurred while saving the chart</string>
     <string name="time">Time</string>
+    <string name="no_lbl">[None]</string>
 </resources>

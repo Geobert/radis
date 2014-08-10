@@ -13,7 +13,7 @@
     </facet>
     <facet type="scala" name="Scala">
       <configuration>
-        <option name="compilerLibraryLevel" value="Project" />
+        <option name="compilerLibraryLevel" value="Global" />
         <option name="compilerLibraryName" value="scala-compiler" />
         <option name="continuations" value="true" />
         <option name="deprecationWarnings" value="true" />
@@ -57,8 +57,8 @@
         <jarDirectory url="file://D:/android-sdks/extras/android/support/v7/appcompat/libs" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="scala-library" level="project" />
-    <orderEntry type="library" name="scala-actors-2.11.0" level="project" />
+    <orderEntry type="library" name="scala-library" level="application" />
+    <orderEntry type="library" name="scala-actors-2.11.0" level="application" />
   </component>
 </module>
 

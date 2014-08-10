@@ -20,6 +20,8 @@
         <item>#3F91D9</item>
         <item>#E3C771</item>
         <item>#69C5FF</item>
+        <item>#73E36D</item>
+        <item>#FFD675</item>
     </string-array>
 
     <string-array name="negative_colors">
@@ -27,5 +29,12 @@
         <item>#CC8ACF</item>
         <item>#FC5D73</item>
         <item>#E37730</item>
+        <item>#C215BC</item>
+        <item>#BF1111</item>
+        <item>#FF5500</item>
+        <item>#910D23</item>
+        <item>#8A0BD9</item>
+        <item>#800600</item>
+        <item>#946800</item>
     </string-array>
 </resources>

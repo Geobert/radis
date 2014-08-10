@@ -26,7 +26,6 @@ public class DbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.d("Radis", "onCreate DbHelper");
         AccountTable.onCreate(db);
         OperationTable.onCreate(db);
         InfoTables.onCreate(db);

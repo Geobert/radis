@@ -219,6 +219,7 @@ public class DbContentProvider extends ContentProvider {
             case THIRD_PARTY_ID:
             case MODES_ID:
             case TAGS_ID:
+            case STATS_ID:
                 id = uri.getLastPathSegment();
                 break;
             default:
