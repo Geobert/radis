@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:gravity="fill_horizontal"
-                android:layout_height="wrap_content"
+                android:layout_height="44dp"
                 android:orientation="vertical">
 
     <TextView
@@ -20,6 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:orientation="horizontal"
+            android:gravity="fill_horizontal"
             android:layout_below="@android:id/text1">
 
         <TextView
