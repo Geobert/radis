@@ -233,7 +233,7 @@
     <string name="new_stat">Créer une statistique</string>
     <string name="stat_name_hint">Nom de la statistique</string>
     <string name="stat_editor_title">Édition de statistique</string>
-    <string name="no_filter">Édition de statistique</string>
+    <string name="no_filter">Temps</string>
     <string name="account_for_stat">Compte à représenter</string>
     <string name="filter_for_stat">Filtre de calcul</string>
     <string name="period_for_stat">Échelle du temps</string>

@@ -230,6 +230,7 @@
     <string name="new_stat">Create a statistic</string>
     <string name="stat_name_hint">Chart\'s name</string>
     <string name="stat_editor_title">Chart\'s editor</string>
+    <string name="no_filter">Time</string>
     <string name="account_for_stat">Account to see</string>
     <string name="filter_for_stat">Calculus filter</string>
     <string name="period_for_stat">Time scale</string>
