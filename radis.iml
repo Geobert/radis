@@ -21,7 +21,7 @@
         <option name="languageLevel" value="Scala 2.11" />
         <option name="pluginPaths">
           <array>
-            <option value="D:\scala\lib\scala-continuations-plugin_2.11.1-1.0.2.jar" />
+            <option value="D:\scala\lib\scala-continuations-plugin_2.11.2-1.0.2.jar" />
           </array>
         </option>
         <option name="uncheckedWarnings" value="true" />

@@ -13,7 +13,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,9 +53,6 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
     private OperationsCursorAdapter mAdapter;
     private CursorLoader mLoader;
     private TextView mTotalLbl;
-    private SimpleCursorAdapter mAccountAdapter;
-
-    private LinearLayout ll;
 
     public static void callMe(Context ctx, final long currentAccountId) {
         Intent i = new Intent(ctx, ScheduledOpListFragment.class);
@@ -70,7 +66,7 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
 
         setHasOptionsMenu(true);
 
-        ll = (LinearLayout) inflater.inflate(R.layout.scheduled_list, container, false);
+        LinearLayout ll = (LinearLayout) inflater.inflate(R.layout.scheduled_list, container, false);
 
         ActionBar actionbar = mActivity.getSupportActionBar();
         actionbar.setIcon(R.drawable.sched_48);
@@ -172,7 +168,9 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
 
     @Override
     public boolean onAccountChanged(long itemId) {
-        return false;
+        mCurrentAccount = itemId;
+        fetchSchOpsOfAccount();
+        return true;
     }
 
     @Override
@@ -237,8 +235,7 @@ public class ScheduledOpListFragment extends BaseFragment implements LoaderCallb
                         null, ScheduledOperationTable.SCHEDULED_OP_ORDERING);
                 break;
             case GET_SCH_OPS_OF_ACCOUNT:
-                mLoader = new CursorLoader(mActivity,
-                        DbContentProvider.SCHEDULED_JOINED_OP_URI,
+                mLoader = new CursorLoader(mActivity, DbContentProvider.SCHEDULED_JOINED_OP_URI,
                         ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, "sch."
                         + ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID
                         + " = ? OR sch."
