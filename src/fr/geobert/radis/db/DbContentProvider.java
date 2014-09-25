@@ -28,26 +28,18 @@ public class DbContentProvider extends ContentProvider {
     private static final String STATS_PATH = "statistics";
     private static final String TAG = "DbContentProvider";
 
-    public static final Uri ACCOUNT_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + ACCOUNTS_PATH);
-    public static final Uri OPERATION_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + OPERATIONS_PATH);
-    public static final Uri OPERATION_JOINED_URI = Uri.parse("content://"
-            + AUTHORITY + "/" + OPERATIONS_JOINED_PATH);
-    public static final Uri SCHEDULED_OP_URI = Uri.parse("content://"
-            + AUTHORITY + "/" + SCHEDULED_OPS_PATH);
-    public static final Uri SCHEDULED_JOINED_OP_URI = Uri.parse("content://"
-            + AUTHORITY + "/" + SCHEDULED_JOINED_OPS_PATH);
-    public static final Uri THIRD_PARTY_URI = Uri.parse("content://"
-            + AUTHORITY + "/" + THIRD_PARTIES_PATH);
-    public static final Uri TAGS_URI = Uri.parse("content://" + AUTHORITY + "/"
-            + TAGS_PATH);
-    public static final Uri MODES_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + MODES_PATH);
-    public static final Uri PREFS_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + PREFS_PATH);
-    public static final Uri STATS_URI = Uri.parse("content://" + AUTHORITY
-            + "/" + STATS_PATH);
+    private static final String BASE_URI = "content://" + AUTHORITY;
+
+    public static final Uri ACCOUNT_URI = Uri.parse(BASE_URI + "/" + ACCOUNTS_PATH);
+    public static final Uri OPERATION_URI = Uri.parse(BASE_URI + "/" + OPERATIONS_PATH);
+    public static final Uri OPERATION_JOINED_URI = Uri.parse(BASE_URI + "/" + OPERATIONS_JOINED_PATH);
+    public static final Uri SCHEDULED_OP_URI = Uri.parse(BASE_URI + "/" + SCHEDULED_OPS_PATH);
+    public static final Uri SCHEDULED_JOINED_OP_URI = Uri.parse(BASE_URI + "/" + SCHEDULED_JOINED_OPS_PATH);
+    public static final Uri THIRD_PARTY_URI = Uri.parse(BASE_URI + "/" + THIRD_PARTIES_PATH);
+    public static final Uri TAGS_URI = Uri.parse(BASE_URI + "/" + TAGS_PATH);
+    public static final Uri MODES_URI = Uri.parse(BASE_URI + "/" + MODES_PATH);
+    public static final Uri PREFS_URI = Uri.parse(BASE_URI + "/" + PREFS_PATH);
+    public static final Uri STATS_URI = Uri.parse(BASE_URI + "/" + STATS_PATH);
 
     private static final int ACCOUNT = 10;
     private static final int OPERATION = 20;
@@ -162,7 +154,7 @@ public class DbContentProvider extends ContentProvider {
                 break;
             case STATS:
             case STATS_ID:
-                table = StatisticTable.STAT_TABLE();
+                table = StatisticTable.instance$.getSTAT_TABLE();
                 break;
             default:
                 throw new IllegalArgumentException("Unknown URI: " + uri);
@@ -203,8 +195,7 @@ public class DbContentProvider extends ContentProvider {
     }
 
     @Override
-    public synchronized int delete(Uri uri, String selection,
-                                   String[] selectionArgs) {
+    public synchronized int delete(Uri uri, String selection, String[] selectionArgs) {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
         int rowsDeleted;

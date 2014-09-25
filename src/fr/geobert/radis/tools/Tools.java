@@ -32,6 +32,7 @@ import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.ui.OperationListFragment;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -109,6 +110,7 @@ public class Tools {
         v.setAdapter(adapter);
     }
 
+    @NotNull
     public static Dialog createDeleteConfirmationDialog(Context ctx,
                                                         DialogInterface.OnClickListener onClick) {
         return Tools.createDeleteConfirmationDialog(ctx, onClick, R.string.delete_confirmation);
@@ -167,7 +169,8 @@ public class Tools {
     public static class AdvancedDialog extends DialogFragment {
         private int mId;
 
-        public static AdvancedDialog newInstance(final int id) {
+        public static AdvancedDialog newInstance(final int id, final Context ctx) {
+            mActivity = (Activity) ctx;
             AdvancedDialog frag = new AdvancedDialog();
             Bundle args = new Bundle();
             args.putInt("id", id);
@@ -311,6 +314,7 @@ public class Tools {
         };
     }
 
+    @NotNull
     public static GregorianCalendar createClearedCalendar() {
         GregorianCalendar cal = new GregorianCalendar();
         clearTimeOfCalendar(cal);

@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
+import fr.geobert.radis.data.DataPackage;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.DbContentProvider;
@@ -265,8 +266,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             adapter.add(new Account(0, getString(R.string.no_transfert)));
             adapter2.add(new Account(0, getString(R.string.no_transfert)));
             do {
-                adapter.add(Account.apply(c));
-                adapter2.add(Account.apply(c));
+                adapter.add(DataPackage.Account(c));
+                adapter2.add(DataPackage.Account(c));
             } while (c.moveToNext());
 
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -330,14 +331,14 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
             final Account dstAccount = (Account) mDstAccount.getSelectedItem();
-            if (srcAccount.id() == 0) {
+            if (srcAccount.getId() == 0) {
                 errMsg.append(getString(R.string.err_transfert_no_src));
                 res = false;
-            } else if (dstAccount.id() == 0) {
+            } else if (dstAccount.getId() == 0) {
                 errMsg.append(getString(R.string.err_transfert_no_dst));
                 res = false;
-            } else if (srcAccount.id() > 0 && dstAccount.id() > 0 &&
-                    srcAccount.id() == dstAccount.id()) {
+            } else if (srcAccount.getId() > 0 && dstAccount.getId() > 0 &&
+                    srcAccount.getId() == dstAccount.getId()) {
                 errMsg.append(getString(R.string.err_transfert_same_acc));
                 res = false;
             }
@@ -388,13 +389,13 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
             final Account dstAccount = (Account) mDstAccount.getSelectedItem();
-            if (srcAccount.id() > 0 && dstAccount.id() > 0
-                    && srcAccount.id() != dstAccount.id()) {
+            if (srcAccount.getId() > 0 && dstAccount.getId() > 0
+                    && srcAccount.getId() != dstAccount.getId()) {
                 // a valid transfert has been setup
-                op.mTransferAccountId = dstAccount.id();
-                op.mAccountId = srcAccount.id();
-                op.mThirdParty = dstAccount.name().trim();
-                op.mTransSrcAccName = srcAccount.name();
+                op.mTransferAccountId = dstAccount.getId();
+                op.mAccountId = srcAccount.getId();
+                op.mThirdParty = dstAccount.getName().trim();
+                op.mTransSrcAccName = srcAccount.getName();
                 // invert sum because with sum > 0 (and I forced it), A->B means -sum in A and +sum in B
                 op.mSum = -op.mSum;
             } else {

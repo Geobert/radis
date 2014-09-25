@@ -7,6 +7,7 @@ import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.PrefsManager;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,18 +26,18 @@ public class DbHelper extends SQLiteOpenHelper {
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void onCreate(@NotNull SQLiteDatabase db) {
         AccountTable.onCreate(db);
         OperationTable.onCreate(db);
         InfoTables.onCreate(db);
         OperationTable.createMeta(db);
         PreferenceTable.onCreate(db);
         ScheduledOperationTable.onCreate(db);
-        StatisticTable.onCreate(db);
+        StatisticTable.instance$.onCreate(db);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+    public void onUpgrade(@NotNull SQLiteDatabase db, int oldVersion, int newVersion) {
         switch (oldVersion) {
             case 1:
                 OperationTable.upgradeFromV1(db, oldVersion, newVersion);
@@ -78,7 +79,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 OperationTable.upgradeFromV16(db, oldVersion, newVersion);
                 AccountTable.upgradeFromV16(db, oldVersion, newVersion);
             case 17:
-                StatisticTable.upgradeFromV17(db, oldVersion, newVersion);
+                StatisticTable.instance$.upgradeFromV17(db, oldVersion, newVersion);
             default:
                 AccountTable.upgradeDefault(db, oldVersion, newVersion);
         }

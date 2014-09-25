@@ -173,15 +173,15 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
                 case SAVE_ACCOUNT:
-                    Tools.AdvancedDialog.newInstance(SAVE_ACCOUNT).show(fragmentManager, "backup");
+                    Tools.AdvancedDialog.newInstance(SAVE_ACCOUNT, activity).show(fragmentManager, "backup");
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
                 case RESTORE_ACCOUNT:
-                    Tools.AdvancedDialog.newInstance(RESTORE_ACCOUNT).show(fragmentManager, "restore");
+                    Tools.AdvancedDialog.newInstance(RESTORE_ACCOUNT, activity).show(fragmentManager, "restore");
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
                 case PROCESS_SCH:
-                    Tools.AdvancedDialog.newInstance(PROCESS_SCH).show(fragmentManager,
+                    Tools.AdvancedDialog.newInstance(PROCESS_SCH, activity).show(fragmentManager,
                             "process_scheduling");
                     mDrawerList.setItemChecked(mActiveFragmentId, true);
                     break;
@@ -397,7 +397,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.d(TAG, "onActivityResult : " + requestCode);
+        //Log.d(TAG, "onActivityResult : " + requestCode);
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case AccountEditor.ACCOUNT_EDITOR:

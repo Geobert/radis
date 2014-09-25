@@ -12,6 +12,7 @@ import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
 import org.acra.ACRA;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.util.Calendar;
@@ -262,6 +263,7 @@ public class AccountTable {
         values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
     }
 
+    @NotNull
     public static Cursor fetchAccount(Context ctx, final long accountId) {
         return ctx.getContentResolver().query(
                 Uri.parse(DbContentProvider.ACCOUNT_URI + "/" + accountId),
