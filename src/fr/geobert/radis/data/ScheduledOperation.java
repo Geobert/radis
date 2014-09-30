@@ -146,7 +146,7 @@ public class ScheduledOperation extends Operation {
     };
 
     public boolean isObsolete() {
-        return (getEndDate() > 0) && (getEndDate() <= getDate());
+        return (getEndDate() > 0) && (getEndDate() < getDate());
     }
 
     @Override

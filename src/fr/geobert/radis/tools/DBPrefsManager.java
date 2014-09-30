@@ -16,6 +16,7 @@ import fr.geobert.radis.R;
 import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.PreferenceTable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 
@@ -49,6 +50,7 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
         }
     }
 
+    @NotNull
     public static DBPrefsManager getInstance(Context ctx) {
         if (null == mInstance) {
             mInstance = new DBPrefsManager();
