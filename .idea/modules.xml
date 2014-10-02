@@ -2,9 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://D:/android-sdks/extras/android/support/v7/appcompat/appcompat.iml" filepath="D:/android-sdks/extras/android/support/v7/appcompat/appcompat.iml" />
       <module fileurl="file://$PROJECT_DIR$/radis.iml" filepath="$PROJECT_DIR$/radis.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../radis-robotium/radis-robotium.iml" filepath="$PROJECT_DIR$/../radis-robotium/radis-robotium.iml" />
+      <module fileurl="file://$PROJECT_DIR$/radis/radis-radis.iml" filepath="$PROJECT_DIR$/radis/radis-radis.iml" />
     </modules>
   </component>
 </project>

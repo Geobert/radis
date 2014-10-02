@@ -1,6 +1,8 @@
-res/values/acra.xml
-.idea/workspace.xml
-.idea/uiDesigner.xml
-classes/
-gen/
-install_on_n4.bat
+.gradle
+/local.properties
+/.idea/workspace.xml
+.DS_Store
+/build
+radis/crashlytics.properties
+radis/src/main/res/values/acra.xml
+radis/src/main/res/values/com_crashlytics_export_strings.xml
