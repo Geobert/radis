@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:descendantFocusability="blocksDescendants"
+                android:background="@drawable/stat_line">
+
+    <TextView
+            android:id="@+id/chart_name"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_width="wrap_content"
+            android:text="NAME"
+            android:layout_height="wrap_content"/>
+
+    <ImageView
+            android:id="@+id/account_ico"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="10dp"
+            android:layout_below="@+id/chart_name"
+
+            android:src="@drawable/account_48"
+            />
+
+    <TextView
+            android:id="@+id/chart_account_name"
+            android:layout_marginLeft="3dp"
+            android:layout_width="wrap_content"
+            android:text="Courant"
+            android:layout_below="@+id/chart_name"
+            android:layout_marginTop="-2dp"
+            android:layout_toRightOf="@id/account_ico"
+            android:layout_height="wrap_content"/>
+
+
+    <ImageButton
+            android:id="@+id/chart_delete"
+            android:padding="8dp"
+            android:layout_alignTop="@+id/chart_name"
+            android:layout_width="wrap_content"
+            android:src="@drawable/trash_48"
+            android:layout_toLeftOf="@+id/edit_chart"
+            android:layout_marginRight="8dp"
+            android:background="@drawable/action_bg_selector"
+            android:layout_height="wrap_content"/>
+
+    <ImageButton
+            android:id="@+id/edit_chart"
+            android:layout_alignParentRight="true"
+            android:layout_alignTop="@+id/chart_delete"
+            android:layout_width="wrap_content"
+            android:src="@drawable/edit_48"
+            android:padding="8dp"
+            android:layout_marginRight="5dp"
+            android:background="@drawable/action_bg_selector"
+            android:layout_height="wrap_content"/>
+
+    <ImageView
+            android:id="@+id/chart_type"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_below="@+id/chart_account_name"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="7dp"
+            android:src="@drawable/stat_bar"
+            />
+
+    <ImageView
+            android:id="@+id/filter_ico"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_below="@+id/chart_account_name"
+            android:layout_toRightOf="@id/chart_type"
+            android:src="@drawable/filter_48"
+            />
+
+    <TextView
+            android:id="@+id/filter_lbl"
+            android:layout_alignTop="@id/filter_ico"
+            android:layout_alignBottom="@id/filter_ico"
+            android:layout_width="wrap_content"
+            android:text="toto"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/filter_ico"
+            android:layout_height="0dp"
+            android:layout_marginLeft="6dp"/>
+
+    <ImageView
+            android:id="@+id/time_ico"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="5dp"
+            android:layout_below="@+id/filter_ico"
+            android:layout_toRightOf="@id/chart_type"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/clock_48"
+            />
+
+    <TextView
+            android:id="@+id/time_scale"
+            android:layout_alignTop="@id/time_ico"
+            android:layout_alignBottom="@id/time_ico"
+            android:layout_width="wrap_content"
+            android:text="12/12/2000 - 12/12/2001"
+            android:layout_toRightOf="@id/time_ico"
+            android:gravity="center_vertical"
+            android:layout_height="0dp"
+            android:textSize="12sp"
+            android:layout_marginLeft="6dp"/>
+
+    <View
+            android:layout_width="wrap_content"
+            android:layout_height="8dp"
+            android:layout_below="@id/chart_type"/>
+</RelativeLayout>

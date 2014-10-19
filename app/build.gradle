@@ -1,0 +1,57 @@
+buildscript {
+    ext.kotlin_version = '0.9.+'
+    ext.crashlytics_version = '1.+'
+    repositories {
+        mavenCentral()
+        maven { url 'http://download.crashlytics.com/maven' }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.13.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.crashlytics.tools.gradle:crashlytics-gradle:$crashlytics_version"
+    }
+}
+apply plugin: 'com.android.application'
+apply plugin: 'crashlytics'
+apply plugin: 'kotlin-android'
+
+repositories {
+    mavenCentral()
+    maven { url 'http://download.crashlytics.com/maven' }
+}
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion '20.0.0'
+    lintOptions {
+        disable 'MissingTranslation'
+    }
+    defaultConfig {
+        applicationId "fr.geobert.radis"
+        minSdkVersion 8
+        targetSdkVersion 20
+        versionCode 46
+        versionName "1.0b7"
+    }
+    buildTypes {
+        release {
+            runProguard true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    kotlinOptions.annotations = file('kotlin_ext_annotations')
+}
+
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:20.0.0'
+    compile 'com.android.support:support-v4:20.0.0'
+    compile "com.crashlytics.android:crashlytics:$crashlytics_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+}
