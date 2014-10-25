@@ -219,12 +219,6 @@ public class OperationListFragment extends BaseFragment implements
                     ((OperationRowViewBinder) mOpListCursorAdapter.getViewBinder()).increaseCache(cursor);
                     old.close();
                 }
-//                if (mQuickAddController == null) {
-//                    initQuickAdd();
-//                } else {
-//                    mQuickAddController.initViewBehavior();
-//                    mQuickAddController.clearFocus();
-//                }
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false;
                     refreshSelection();
@@ -252,9 +246,6 @@ public class OperationListFragment extends BaseFragment implements
             Log.d(TAG, "getOperationsList mOperationsLoader  : " + mOperationsLoader);
             if (mOperationsLoader == null) {
                 startOpDate = Tools.createClearedCalendar();
-//                if (mScrollLoader == null) {
-//                    initOperationList();
-//                }
                 assert mScrollLoader != null;
                 mScrollLoader.setStartDate(startOpDate);
                 startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH));
@@ -266,38 +257,6 @@ public class OperationListFragment extends BaseFragment implements
         }
     }
 
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//        switch (requestCode) {
-//            case AccountEditorFragment.ACCOUNT_EDITOR:
-//                if (resultCode == RESULT_OK) {
-//                    updateAccountList();
-//                } else { // back without filling an account
-//                    this.wasBackWithoutAccountSaved = true;
-//                }
-//                break;
-//            case OperationEditorFragment.OPERATION_EDITOR:
-//                if (resultCode == RESULT_OK) {
-//                    this.needRefreshSelection = true;
-//                    this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId);
-//                    long date = data.getLongExtra("opDate", 0);
-//                    if (date > 0) {
-//                        GregorianCalendar opDate = new GregorianCalendar();
-//                        opDate.setTimeInMillis(date);
-//                        opDate.set(Calendar.DAY_OF_MONTH, 1);
-//                        GregorianCalendar today = Tools.createClearedCalendar();
-//                        if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
-//                            this.startOpDate = opDate;
-//                        }
-//                    }
-//                    mAccountManager.backupCurAccountId();
-//                    updateAccountList();
-//                    getOperationsList();
-//                }
-//                break;
-//        }
-//    }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {

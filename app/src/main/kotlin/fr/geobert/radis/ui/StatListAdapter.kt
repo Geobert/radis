@@ -66,12 +66,12 @@ class StatListAdapter(val ctx: Activity, cursor: Cursor) :
 
 
     inner class StatViewBinder : SimpleCursorAdapter.ViewBinder {
-        override fun setViewValue(v: View?, c: Cursor?, colIdx: Int): Boolean {
+        override fun setViewValue(v: View, c: Cursor, colIdx: Int): Boolean {
             val stat = Statistic(c as Cursor)
             when (c.getColumnName(colIdx)) {
                 StatisticTable.KEY_STAT_NAME -> (v as TextView).setText(stat.name)
                 StatisticTable.KEY_STAT_ACCOUNT_NAME -> {
-                    val holder = (v?.getParent() as View).getTag() as StatRowHolder
+                    val holder = (v.getParent() as View).getTag() as StatRowHolder
                     holder.accountNameLbl.setText(stat.accountName)
                     holder.trashBtn.setOnClickListener {
                         DeleteStatConfirmationDiag(stat.id).show((ctx as FragmentActivity).getSupportFragmentManager(),
@@ -92,19 +92,14 @@ class StatListAdapter(val ctx: Activity, cursor: Cursor) :
                     val f = Formater.getFullDateFormater()
                     holder.timeScale.setText("${f.format(start)} ${ctx.getString(R.string.rarr)} ${f.format(end)}")
                     holder.stat = stat
-
-                    //                    holder.graph.removeAllViews()
-                    //                    val chart = createChartView(stat)
-                    //                    chart.setBackgroundColor(ctx.getResources()?.getColor(android.R.color.transparent) ?: 0)
-                    //                    holder.graph.addView(chart)
                 }
             }
             return true
         }
     }
 
-    override fun newView(p1: Context?, p2: Cursor?, p3: ViewGroup?): View {
-        val row = super.newView(p1, p2, p3) as View
+    override fun newView(p1: Context, p2: Cursor, p3: ViewGroup): View {
+        val row = super.newView(p1, p2, p3)
         val h = StatRowHolder(row)
         row.setTag(h)
         return row

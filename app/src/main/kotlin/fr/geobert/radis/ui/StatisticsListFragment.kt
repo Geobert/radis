@@ -52,6 +52,8 @@ import org.achartengine.model.XYSeries
 import org.achartengine.ChartFactory
 import org.achartengine.chart.BarChart.Type
 import android.widget.Adapter
+import android.util.Log
+import android.app.Activity
 
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     val ctx: FragmentActivity by Delegates.lazy { getActivity() }
@@ -98,6 +100,13 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     override fun onResume(): Unit {
         super<BaseFragment>.onResume()
         fetchStats()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super<BaseFragment>.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            fetchStats()
+        }
     }
 
     fun onItemClicked(v: View) {
@@ -161,7 +170,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private val neg_colors: List<Int> by Delegates.lazy { getColorsArray(R.array.negative_colors) }
 
     /**
-     * get the ops list according to the time range and group by partFunc
+     * get the ops list according to the time range, split by sum sign and group each by partFunc
      * @param stat the stat to analyse
      * @return a map with the group key and List(Operation)
      */
@@ -190,7 +199,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                         Statistic.PERIOD_DAYS, Statistic.PERIOD_ABSOLUTE -> Formater.getFullDateFormater().format(g.getTime())
                         Statistic.PERIOD_MONTHES ->
                             if (Build.VERSION.SDK_INT >= 9) {
-                                g.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault() as Locale) ?: ""
+                                g.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) ?: ""
                             } else {
                                 DateFormatSymbols().getShortMonths()?.get(g[Calendar.MONTH]) ?: ""
                             }
@@ -203,12 +212,36 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             }
 
 
+    // group sums that represents less than 10% of the total in a "misc" category
+    private fun cleanMap(m: Map<String, Long>, total: Long): Map<String, Long> {
+        val limit = Math.abs(total * 0.05)
+        val result: MutableMap<String, Long> = hashMapOf()
+        val miscKey = ctx.getString(R.string.misc_chart_cat)
+        m.forEach {
+            Log.d("StatisticListFragment", "key: ${it.key} / value: ${it.value} / limit: $limit / total: $total / m.size: ${m.size}")
+            if (Math.abs(it.value) < limit) {
+                val p = result[miscKey]
+                if (p != null) {
+                    result.put(miscKey, p + it.value)
+                } else {
+                    result.put(miscKey, it.value)
+                }
+            } else {
+                result.put(it.key, it.value)
+            }
+        }
+        return result
+    }
+
     private fun sumPerFilter(stat: Statistic): Pair<Map<String, Long>, Map<String, Long>> {
         // partition the list according to filterType
-        //partOps(stat).mapValues(_.foldLeft(0l)((s: Long, o: Operation) => s + o.mSum))
-        fun sumMap(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) {(s: Long, o: Operation) -> s + o.mSum } }
+        fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) {(s: Long, o: Operation) -> s + o.mSum } }
+        fun sumMap(m: Map<String, Long>) = m.values().fold(0L) {(s: Long, l: Long) -> s + l }
         val (pos, neg) = partOps(stat)
-        return Pair(sumMap(pos), sumMap(neg))
+        val sumP = sumMapOfList(pos)
+        val sumN = sumMapOfList(neg)
+        val total = sumMap(sumP) + Math.abs(sumMap(sumN))
+        return Pair(cleanMap(sumP, total), cleanMap(sumN, total))
     }
 
     private fun initNumFormat(stat: Statistic): NumberFormat {
@@ -229,17 +262,17 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         renderer.setDisplayValues(true)
         renderer.setLegendTextSize(16f)
         renderer.setLabelsTextSize(16f)
-        renderer.setLabelsColor(Color.BLACK)
+        renderer.setLabelsColor(Color.WHITE)
         renderer.setShowLegend(true)
         renderer.setInScroll(false)
-        renderer.setPanEnabled(false)
+        renderer.setPanEnabled(true)
         renderer.setZoomButtonsVisible(ZOOM_ENABLED)
 
         // fill the data
         val (pos, neg) = sumPerFilter(stat)
         fun construct(m: Map<String, Long>, colors: List<Int>) {
             m.forEach {
-                data.add(it.key, it.value / 100.0)
+                data.add(it.key, Math.abs(it.value) / 100.0)
                 val r = SimpleSeriesRenderer()
                 r.setColor(colors[(data.getItemCount() - 1) % colors.size])
                 r.setChartValuesFormat(initNumFormat(stat))
@@ -272,10 +305,10 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             return r
         }
 
+        val (pos, neg) = partOps(stat)
         when (stat.filterType) {
             Statistic.NO_FILTER -> {
                 val s = TimeSeries("")
-                val (pos, neg) = partOps(stat)
                 fun construct(m: Map<String, List<Operation>>, colors: List<Int>) {
                     m.forEach {
                         val v = Math.abs(it.value.fold(0L) {(i: Long, op: Operation) -> i + op.mSum }) + 0.0
@@ -290,7 +323,6 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                 construct(neg, neg_colors)
             }
             else -> {
-                val (pos, neg) = partOps(stat)
                 fun construct(m: Map<String, List<Operation>>, colors: List<Int>) {
                     m.forEach {
                         val s = TimeSeries(it.key)

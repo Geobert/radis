@@ -248,4 +248,5 @@
     <string name="err_db_stat">An error occurred while saving the chart</string>
     <string name="time">Time</string>
     <string name="no_lbl">[None]</string>
+    <string name="misc_chart_cat">Misc</string>
 </resources>

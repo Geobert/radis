@@ -251,4 +251,5 @@
     <string name="err_db_stat">Une erreur est survenue pendant la sauvegarde de la statistique</string>
     <string name="time">Temps</string>
     <string name="no_lbl">[Aucun]</string>
+    <string name="misc_chart_cat">Divers</string>
 </resources>
