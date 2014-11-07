@@ -53,7 +53,7 @@ public inline fun Cursor?.forEach(f: (it: Cursor) -> Unit): Unit {
     }
 }
 
-public inline fun <T> Cursor?.map(transform: (it: Cursor) -> T): Collection<T> {
+public inline fun <T> Cursor?.map(transform: (it: Cursor) -> T): MutableCollection<T> {
     return mapTo(LinkedList<T>(), transform)
 }
 

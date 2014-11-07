@@ -9,6 +9,7 @@ import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Tools;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -341,6 +342,7 @@ public class OperationTable {
         return c;
     }
 
+    @NotNull
     public static CursorLoader getOpsWithStartDateLoader(Context ctx,
                                                          final GregorianCalendar startOpDate,
                                                          final long accountId) {

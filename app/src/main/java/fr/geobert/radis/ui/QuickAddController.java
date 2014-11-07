@@ -1,6 +1,5 @@
 package fr.geobert.radis.ui;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import fr.geobert.radis.MainActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.DbContentProvider;
@@ -26,7 +26,6 @@ import fr.geobert.radis.tools.InfoAdapter;
 import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.QuickAddTextWatcher;
 import fr.geobert.radis.tools.Tools;
-import fr.geobert.radis.tools.UpdateDisplayInterface;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -37,15 +36,12 @@ public class QuickAddController {
     private ImageButton mQuickAddButton;
     private QuickAddTextWatcher mQuickAddTextWatcher;
     private CorrectCommaWatcher mCorrectCommaWatcher;
-    private Activity mActivity;
-    private UpdateDisplayInterface mProtocol;
+    private MainActivity mActivity;
     private long mAccountId = 0;
     private LinearLayout mLayout;
 
-    public QuickAddController(Activity activity, View container, UpdateDisplayInterface protocol) {
+    public QuickAddController(MainActivity activity, View container) {
         mActivity = activity;
-        mProtocol = protocol;
-
         mLayout = (LinearLayout) container.findViewById(R.id.quick_add_layout);
         mQuickAddThirdParty = (MyAutoCompleteTextView) container.findViewById(R.id.quickadd_third_party);
         mQuickAddAmount = (EditText) container.findViewById(R.id.quickadd_amount);
@@ -168,7 +164,7 @@ public class QuickAddController {
         op.setSumStr(mQuickAddAmount.getText().toString());
         assert (mAccountId != 0);
         if (OperationTable.createOp(mActivity, op, mAccountId) > -1) {
-            mProtocol.updateDisplay(null);
+            mActivity.updateDisplay(null);
         }
 
         mQuickAddAmount.setText("");

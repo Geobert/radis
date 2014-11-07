@@ -45,11 +45,9 @@
 
     </LinearLayout>
 
-    <ListView
+    <android.support.v7.widget.RecyclerView
             android:id="@android:id/list"
-            style="@style/OpListView"
-            android:listSelector="@android:color/transparent"
-            android:cacheColorHint="@android:color/transparent"/>
+            style="@style/OpListView"/>
 
     <ViewStub
             android:id="@android:id/empty"

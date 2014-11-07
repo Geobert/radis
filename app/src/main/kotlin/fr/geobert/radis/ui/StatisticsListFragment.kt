@@ -129,8 +129,6 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
     }
 
-    override fun onFetchAllAccountCbk() {
-    }
 
     override fun onAccountChanged(itemId: Long): Boolean = false
 

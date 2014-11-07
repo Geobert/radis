@@ -47,8 +47,6 @@ public abstract class BaseFragment extends Fragment implements UpdateDisplayInte
 
     public abstract boolean onAccountChanged(long itemId);
 
-    public abstract void onFetchAllAccountCbk();
-
     public String getName() {
         return this.getClass().getName();
     }

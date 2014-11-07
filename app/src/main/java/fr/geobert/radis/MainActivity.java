@@ -36,7 +36,6 @@ import fr.geobert.radis.tools.PauseHandler;
 import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
-import fr.geobert.radis.ui.CheckingOpFragment;
 import fr.geobert.radis.ui.OperationListFragment;
 import fr.geobert.radis.ui.ScheduledOpListFragment;
 import fr.geobert.radis.ui.StatisticsListFragment;
@@ -71,7 +70,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     // used for FragmentHandler
     public static final int OP_LIST = 1;
     public static final int SCH_OP_LIST = 2;
-    public static final int CHECKING_LIST = 3;
+
     public static final int STATISTICS = 4;
 
     public static final int CREATE_ACCOUNT = 6;
@@ -148,9 +147,6 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                     break;
                 case SCH_OP_LIST:
                     fragment = findOrCreateFragment(ScheduledOpListFragment.class, message.what);
-                    break;
-                case CHECKING_LIST:
-                    fragment = findOrCreateFragment(CheckingOpFragment.class, message.what);
                     break;
                 case STATISTICS:
                     fragment = findOrCreateFragment(StatisticsListFragment.class, message.what);
@@ -470,9 +466,6 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     }
 
     private void onFetchAllAccountCbk() {
-        if (mActiveFragment != null) {
-            mActiveFragment.onFetchAllAccountCbk();
-        }
         processAccountList(false);
     }
 
@@ -486,7 +479,6 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         navDrawerItems.add(new NavDrawerItem(getString(R.string.operations)));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.op_list), R.drawable.op_list_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.scheduled_ops), R.drawable.sched_48));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.op_checking), R.drawable.op_checking_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.statistics), R.drawable.stat_48));
 
         navDrawerItems.add(new NavDrawerItem(getString(R.string.accounts)));
