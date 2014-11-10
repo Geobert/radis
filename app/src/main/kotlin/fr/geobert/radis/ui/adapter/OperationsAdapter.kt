@@ -28,6 +28,7 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         val op = this.operationAt(pos)
         fillTag(viewHolder.tag, viewHolder.tagBuilder, op)
         configureCell(op, viewHolder, pos)
+        doAnimations(viewHolder, pos)
     }
 
     protected fun fillTag(textView: TextView, b: StringBuilder, op: Operation) {
@@ -70,17 +71,14 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
             }
         }
 
-        val cellStates = mCellStates
-        if (cellStates != null) {
-            if (needInfos && needMonth) {
-                cellStates[position] = CellState.STATE_MONTH_INFOS_CELL
-            } else if (needInfos) {
-                cellStates[position] = CellState.STATE_INFOS_CELL
-            } else if (needMonth) {
-                cellStates[position] = CellState.STATE_MONTH_CELL
-            } else {
-                cellStates[position] = CellState.STATE_REGULAR_CELL
-            }
+        if (needInfos && needMonth) {
+            mCellStates[position] = CellState.STATE_MONTH_INFOS_CELL
+        } else if (needInfos) {
+            mCellStates[position] = CellState.STATE_INFOS_CELL
+        } else if (needMonth) {
+            mCellStates[position] = CellState.STATE_MONTH_CELL
+        } else {
+            mCellStates[position] = CellState.STATE_REGULAR_CELL
         }
 
         h.month.setText(if (needMonth) DateFormat.format("MMMM", date1) else

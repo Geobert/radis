@@ -9,4 +9,5 @@ public interface IOperationList {
     public void getMoreOperations(final GregorianCalendar startDate);
 
     public DialogFragment getDeleteConfirmationDialog(final Operation op);
+
 }

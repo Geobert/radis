@@ -131,14 +131,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mListView.setHasFixedSize(true)
         mScrollLoader = OnOperationScrollLoader(this, mListLayout)
         mListView.setOnScrollListener(mScrollLoader)
-
-        // TODO
-        //        mListView!!.setEmptyView(container!!.findViewById(android.R.id.empty))
-        //        mListView!!.setOnItemClickListener(object : AdapterView.OnItemClickListener {
+        //        mListView.setOnItemClickListener(object : AdapterView.OnItemClickListener {
         //            override fun onItemClick(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
         //                selectOpAndAdjustOffset(i, false)
         //            }
         //        })
+        // TODO
+        //        mListView!!.setEmptyView(container!!.findViewById(android.R.id.empty))
+
 
         val transparent = getResources().getColor(android.R.color.transparent)
         //        mListView.setCacheColorHint(transparent)
@@ -433,8 +433,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mActivity.updateAccountList()
     }
 
-    public fun onOperationEditorResult(resultCode: Int, data: Intent) {
-        if (resultCode == Activity.RESULT_OK) {
+    public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK && data != null) {
             this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId)
             val date = data.getLongExtra("opDate", 0)
             if (date > 0) {

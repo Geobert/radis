@@ -24,8 +24,8 @@ public class OnOperationScrollLoader(val operationListActivity: IOperationList,
         val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
         val totalCount = linearLayoutManager.getItemCount()
 
-        Log.d("OnOperationScrollLoader", "lastVisible: $lastVisible/ totalCount: $totalCount/ lastTotal: $lastTotalCount")
-        Log.d("OnOperationScrollLoader", "startOpDate " + startOpDate)
+//        Log.d("OnOperationScrollLoader", "lastVisible: $lastVisible/ totalCount: $totalCount/ lastTotal: $lastTotalCount")
+        //        Log.d("OnOperationScrollLoader", "startOpDate " + startOpDate)
         val loadMore = totalCount - lastVisible <= 3
 
         if (loadMore) {
