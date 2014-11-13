@@ -124,9 +124,12 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.cancel:
-                onCancelClicked();
+            case android.R.id.home:
+                onBackPressed();
                 return true;
+//            case R.id.cancel:
+//                onCancelClicked();
+//                return true;
             case R.id.confirm:
                 onOkClicked();
                 return true;
@@ -165,7 +168,8 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
             getSupportLoaderManager().initLoader(GET_SCH_OP_SRC, getIntent().getExtras(), this);
             return false;
         } else {
-            mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(mCurAccountId);
+            mSchedEditTab.getFragment().mCurrentSchOp =
+                    fr.geobert.radis.data.DataPackage.ScheduledOperation(mCurAccountId);
             mCurrentOp = mSchedEditTab.getFragment().mCurrentSchOp;
             populateFields();
             return true;
@@ -274,7 +278,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
 
     protected void onDisconnectFromOccurences() {
         ScheduledOperationTable.updateScheduledOp(this, mRowId, mSchedEditTab.getFragment().mCurrentSchOp, false);
-        OperationTable.disconnectAllOccurrences(this, mSchedEditTab.getFragment().mCurrentSchOp.mAccountId, mRowId);
+        OperationTable.disconnectAllOccurrences(this, mSchedEditTab.getFragment().mCurrentSchOp.getmAccountId(), mRowId);
         startInsertionServiceAndExit();
     }
 
@@ -283,7 +287,7 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
         if (mSchedEditTab.getFragment().mCurrentSchOp.periodicityEquals(mOriginalSchOp)) {
             ScheduledOperationTable.updateAllOccurences(this, mSchedEditTab.getFragment().mCurrentSchOp,
                     mPreviousSum, mRowId);
-            AccountTable.consolidateSums(this, mCurrentOp.mAccountId);
+            AccountTable.consolidateSums(this, mCurrentOp.getmAccountId());
         } else {
             ScheduledOperationTable.deleteAllOccurences(this, mRowId);
         }
@@ -346,9 +350,9 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
         switch (loader.getId()) {
             case GET_SCH_OP:
                 if (data.getCount() > 0 && data.moveToFirst()) {
-                    mSchedEditTab.getFragment().mCurrentSchOp = new ScheduledOperation(data);
-                    mOriginalSchOp = new ScheduledOperation(data);
-                    mCurrentOp = new ScheduledOperation(data);
+                    mSchedEditTab.getFragment().mCurrentSchOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(data);
+                    mOriginalSchOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(data);
+                    mCurrentOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(data);
                     populateFields();
                 } else {
                     if (!onOpNotFound()) {
@@ -359,9 +363,9 @@ public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFr
                 break;
             case GET_SCH_OP_SRC:
                 if (data.getCount() > 0 && data.moveToFirst()) {
-                    mCurrentOp = new ScheduledOperation(data, mCurAccountId);
+                    mCurrentOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(data, mCurAccountId);
                     mSchedEditTab.getFragment().mCurrentSchOp = (ScheduledOperation) mCurrentOp;
-                    mOriginalSchOp = new ScheduledOperation(data, mCurAccountId);
+                    mOriginalSchOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(data, mCurAccountId);
                     populateFields();
                 } else {
                     if (!onOpNotFound()) {

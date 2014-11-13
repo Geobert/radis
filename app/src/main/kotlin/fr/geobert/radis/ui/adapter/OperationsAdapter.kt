@@ -18,12 +18,14 @@ import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 
 public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
-        BaseOperationAdapter(activity, opList, cursor) {
+        BaseOperationAdapter<Operation>(activity, opList, cursor) {
     var date1 = GregorianCalendar()
     var date2 = GregorianCalendar()
     var projectionDate = 0L
 
-    override fun onBindViewHolder(viewHolder: OpRowHolder, pos: Int) {
+    override fun operationFactory(c: Cursor): Operation = Operation(c)
+
+    override fun onBindViewHolder(viewHolder: OpRowHolder<Operation>, pos: Int) {
         super<BaseOperationAdapter>.onBindViewHolder(viewHolder, pos)
         val op = this.operationAt(pos)
         fillTag(viewHolder.tag, viewHolder.tagBuilder, op)
@@ -55,9 +57,8 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         return res
     }
 
-    private fun configureCell(operation: Operation, h: OpRowHolder, position: Int) {
+    private fun configureCell(operation: Operation, h: OpRowHolder<Operation>, position: Int) {
         val schedId = setSchedImg(operation, h.scheduledImg)
-        h.checkedImg.setVisibility(if (operation.mIsChecked) View.VISIBLE else View.GONE)
         val needInfos = position == selectedPosition
         var needMonth = false
         date1.setTimeInMillis(operation.getDate())

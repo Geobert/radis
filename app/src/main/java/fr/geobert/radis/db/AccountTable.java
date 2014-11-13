@@ -560,9 +560,9 @@ public class AccountTable {
     }
 
     public static void updateCheckedOpSum(Context ctx, Operation op, boolean b) {
-        final long sum = op.mSum;
-        final long accountId = op.mAccountId;
-        final long transAccountId = op.mTransferAccountId;
+        final long sum = op.getmSum();
+        final long accountId = op.getmAccountId();
+        final long transAccountId = op.getmTransferAccountId();
         updateCheckedOpSum(ctx, sum, accountId, transAccountId, b);
     }
 

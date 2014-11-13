@@ -76,8 +76,9 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
         setContentView(R.layout.statistics_editor_fragment)
 
         val bar = getSupportActionBar()
-        bar?.setTitle(R.string.stat_editor_title)
-        bar?.setDisplayHomeAsUpEnabled(true)
+        bar.setTitle(R.string.stat_editor_title)
+        bar.setDisplayHomeAsUpEnabled(true)
+        bar.setHomeAsUpIndicator(R.drawable.cancel_48);
 
         setupChartTypeButtons()
     }
@@ -243,6 +244,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
                         stat.accountName = (v as TextView).getText().toString()
                     }
                 }
+
                 override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
                     // nothing
                 }
@@ -378,10 +380,10 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
                     onBackPressed()
                     true
                 }
-                R.id.cancel -> {
-                    onCancelPressed()
-                    true
-                }
+            //                R.id.cancel -> {
+            //                    onCancelPressed()
+            //                    true
+            //                }
                 R.id.confirm -> {
                     onConfirmPressed()
                     true

@@ -71,6 +71,7 @@ public class AccountEditor extends BaseActivity implements
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
+        bar.setHomeAsUpIndicator(R.drawable.cancel_48);
 
         Long rowId = (null == savedInstanceState) ? null : (Long) savedInstanceState.getSerializable(PARAM_ACCOUNT_ID);
         if (null == rowId) {
@@ -123,9 +124,9 @@ public class AccountEditor extends BaseActivity implements
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.cancel:
-                onCancelClicked();
-                return true;
+//            case R.id.cancel:
+//                onCancelClicked();
+//                return true;
             case R.id.confirm:
                 onOkClicked();
                 return true;

@@ -23,7 +23,6 @@ import fr.geobert.radis.R;
 import fr.geobert.radis.data.Account;
 import fr.geobert.radis.data.DataPackage;
 import fr.geobert.radis.data.Operation;
-import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
@@ -275,11 +274,11 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             mSrcAccount.setAdapter(adapter);
             mDstAccount.setAdapter(adapter2);
 
-            final boolean isTransfert = mActivity.mCurrentOp.mTransferAccountId > 0;
+            final boolean isTransfert = mActivity.mCurrentOp.getmTransferAccountId() > 0;
             mIsTransfertCheck.setChecked(isTransfert);
             if (isTransfert) {
-                initAccountSpinner(mSrcAccount, mActivity.mCurrentOp.mAccountId);
-                initAccountSpinner(mDstAccount, mActivity.mCurrentOp.mTransferAccountId);
+                initAccountSpinner(mSrcAccount, mActivity.mCurrentOp.getmAccountId());
+                initAccountSpinner(mDstAccount, mActivity.mCurrentOp.getmTransferAccountId());
             } else {
                 if (mActivity.mCurAccountId != 0) {
                     initAccountSpinner(mSrcAccount, mActivity.mCurAccountId);
@@ -297,21 +296,21 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     }
 
     final protected void populateCommonFields(Operation op) {
-        Tools.setTextWithoutComplete(mOpThirdPartyText, op.mThirdParty);
-        Tools.setTextWithoutComplete(mOpModeText, op.mMode);
-        Tools.setTextWithoutComplete(mOpTagText, op.mTag);
+        Tools.setTextWithoutComplete(mOpThirdPartyText, op.getmThirdParty());
+        Tools.setTextWithoutComplete(mOpModeText, op.getmMode());
+        Tools.setTextWithoutComplete(mOpTagText, op.getmTag());
         mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
-        mActivity.mPreviousSum = op.mSum;
-        mNotesText.setText(op.mNotes);
+        mActivity.mPreviousSum = op.getmSum();
+        mNotesText.setText(op.getmNotes());
         Tools.setSumTextGravity(mOpSumText);
         mSumTextWatcher.setAutoNegate(false);
-        if (mActivity.mCurrentOp.mSum == 0.0) {
+        if (mActivity.mCurrentOp.getmSum() == 0.0) {
             mOpSumText.setText("");
             mSumTextWatcher.setAutoNegate(true);
         } else {
             mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
         }
-        mIsChecked.setChecked(op.mIsChecked);
+        mIsChecked.setChecked(op.getmIsChecked());
         populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
     }
 
@@ -375,16 +374,16 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     }
 
     protected void fillOperationWithInputs(Operation op) {
-        op.mMode = mOpModeText.getText().toString().trim();
-        op.mTag = mOpTagText.getText().toString().trim();
-        op.mNotes = mNotesText.getText().toString().trim();
+        op.setmMode(mOpModeText.getText().toString().trim());
+        op.setmTag(mOpTagText.getText().toString().trim());
+        op.setmNotes(mNotesText.getText().toString().trim());
         op.setSumStr(mOpSumText.getText().toString());
         DatePicker dp = mDatePicker;
         dp.clearChildFocus(mActivity.getCurrentFocus());
         op.setDay(dp.getDayOfMonth());
         op.setMonth(dp.getMonth());
         op.setYear(dp.getYear());
-        op.mIsChecked = mIsChecked.isChecked();
+        op.setmIsChecked(mIsChecked.isChecked());
 
         if (mIsTransfertCheck.isChecked()) {
             final Account srcAccount = (Account) mSrcAccount.getSelectedItem();
@@ -392,19 +391,19 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             if (srcAccount.getId() > 0 && dstAccount.getId() > 0
                     && srcAccount.getId() != dstAccount.getId()) {
                 // a valid transfert has been setup
-                op.mTransferAccountId = dstAccount.getId();
-                op.mAccountId = srcAccount.getId();
-                op.mThirdParty = dstAccount.getName().trim();
-                op.mTransSrcAccName = srcAccount.getName();
+                op.setmTransferAccountId(dstAccount.getId());
+                op.setmAccountId(srcAccount.getId());
+                op.setmThirdParty(dstAccount.getName().trim());
+                op.setmTransSrcAccName(srcAccount.getName());
                 // invert sum because with sum > 0 (and I forced it), A->B means -sum in A and +sum in B
-                op.mSum = -op.mSum;
+                op.setmSum(-op.getmSum());
             } else {
-                op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
+                op.setmThirdParty(mOpThirdPartyText.getText().toString().trim());
             }
         } else {
-            op.mTransferAccountId = 0;
-            op.mTransSrcAccName = "";
-            op.mThirdParty = mOpThirdPartyText.getText().toString().trim();
+            op.setmTransferAccountId(0);
+            op.setmTransSrcAccName("");
+            op.setmThirdParty(mOpThirdPartyText.getText().toString().trim());
         }
     }
 
@@ -415,7 +414,7 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             if (mActivity instanceof OperationEditor) {
                 mActivity.mCurrentOp = new Operation();
             } else if (mActivity instanceof ScheduledOperationEditor) {
-                mActivity.mCurrentOp = new ScheduledOperation(mActivity.mCurAccountId);
+                mActivity.mCurrentOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(mActivity.mCurAccountId);
             }
         }
         fillOperationWithInputs(mActivity.mCurrentOp);

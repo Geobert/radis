@@ -405,7 +405,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE:
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT:
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT:
-                // nothing as we call RadisService to insert, and it calls updateDisplay
+                ((ScheduledOpListFragment) mActiveFragment).onOperationEditorResult(resultCode, data);
                 break;
             case OperationEditor.OPERATION_EDITOR:
                 ((OperationListFragment) mActiveFragment).onOperationEditorResult(resultCode, data);

@@ -39,6 +39,7 @@ public class OperationEditor extends CommonOpEditor {
 
         ActionBar bar = getSupportActionBar();
         bar.setDisplayHomeAsUpEnabled(true);
+        bar.setHomeAsUpIndicator(R.drawable.cancel_48);
     }
 
     public static void callMeForResult(final BaseActivity context, final long opId, final long accountId) {
@@ -60,7 +61,7 @@ public class OperationEditor extends CommonOpEditor {
             fetchOp(GET_OP);
         } else {
             mCurrentOp = new Operation();
-            mCurrentOp.mAccountId = mCurAccountId;
+            mCurrentOp.setmAccountId(mCurAccountId);
             populateFields();
         }
     }
@@ -100,13 +101,13 @@ public class OperationEditor extends CommonOpEditor {
         Operation op = mCurrentOp;
         Log.d(TAG, "saveOpAndExit, mRowId : " + mRowId);
         if (mRowId <= 0) {
-            mRowId = OperationTable.createOp(this, op, op.mAccountId);
+            mRowId = OperationTable.createOp(this, op, op.getmAccountId());
             setResAndExit();
         } else {
             if (op.equals(mOriginalOp)) {
                 setResAndExit();
             } else {
-                if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
+                if (op.getmScheduledId() > 0 && !op.equalsButDate(mOriginalOp)) {
                     UpdateScheduledOp.newInstance(mCurrentOp, mPreviousSum, mRowId).show(getSupportFragmentManager(),
                             "dialog");
                 } else {
@@ -135,9 +136,9 @@ public class OperationEditor extends CommonOpEditor {
             case android.R.id.home:
                 onBackPressed();
                 return true;
-            case R.id.cancel:
-                onCancelClicked();
-                return true;
+//            case R.id.cancel:
+//                onCancelClicked();
+//                return true;
             case R.id.confirm:
                 onOkClicked();
                 return true;
@@ -184,11 +185,11 @@ public class OperationEditor extends CommonOpEditor {
         switch (loader.getId()) {
             case GET_OP:
                 if (data.moveToFirst()) {
-                    mCurrentOp = new Operation(data);
-                    mOriginalOp = new Operation(data);
+                    mCurrentOp = fr.geobert.radis.data.DataPackage.Operation(data);
+                    mOriginalOp = fr.geobert.radis.data.DataPackage.Operation(data);
                 } else {
                     mCurrentOp = new Operation();
-                    mCurrentOp.mAccountId = mCurAccountId;
+                    mCurrentOp.setmAccountId(mCurAccountId);
                 }
                 populateFields();
                 break;
@@ -231,14 +232,15 @@ public class OperationEditor extends CommonOpEditor {
                                 public void onClick(DialogInterface dialog,
                                                     int which) {
                                     final ScheduledOperation op =
-                                            new ScheduledOperation(currentOp, currentOp.mAccountId);
-                                    if (ScheduledOperationTable.updateScheduledOp(act, currentOp.mScheduledId, op,
+                                            fr.geobert.radis.data.DataPackage.ScheduledOperation(currentOp,
+                                                    currentOp.getmAccountId());
+                                    if (ScheduledOperationTable.updateScheduledOp(act, currentOp.getmScheduledId(), op,
                                             true)) {
-                                        AccountTable.updateProjection(act, act.mCurAccountId, op.mSum, previousSum,
+                                        AccountTable.updateProjection(act, act.mCurAccountId, op.getmSum(), previousSum,
                                                 op.getDate(), -1);
                                     }
                                     ScheduledOperationTable.updateAllOccurences(getActivity(), op, previousSum,
-                                            currentOp.mScheduledId);
+                                            currentOp.getmScheduledId());
                                     act.setResAndExit();
                                 }
                             }
@@ -247,7 +249,7 @@ public class OperationEditor extends CommonOpEditor {
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int id) {
-                                    currentOp.mScheduledId = 0;
+                                    currentOp.setmScheduledId(0);
                                     OperationTable.updateOp(act, rowId, currentOp, act.mOriginalOp);
                                     act.setResAndExit();
                                 }

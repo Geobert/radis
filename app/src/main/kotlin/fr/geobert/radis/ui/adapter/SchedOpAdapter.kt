@@ -12,9 +12,11 @@ import fr.geobert.radis.R
 import fr.geobert.radis.tools.Formater
 
 public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor) :
-        BaseOperationAdapter(act, opList, c) {
+        BaseOperationAdapter<ScheduledOperation>(act, opList, c) {
 
-    override fun onBindViewHolder(viewHolder: OpRowHolder, pos: Int) {
+    override fun operationFactory(c: Cursor): ScheduledOperation = ScheduledOperation(c)
+
+    override fun onBindViewHolder(viewHolder: OpRowHolder<ScheduledOperation>, pos: Int) {
         super<BaseOperationAdapter>.onBindViewHolder(viewHolder, pos)
         val op = operationAt(pos) as ScheduledOperation
 
@@ -35,9 +37,10 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
         viewHolder.opDate.setText(Formater.getFullDateFormater().format(op.getDateObj()));
 
         configureCell(op, viewHolder, pos)
+        doAnimations(viewHolder, pos)
     }
 
-    private fun configureCell(op: ScheduledOperation, h: OpRowHolder, position: Int) {
+    private fun configureCell(op: ScheduledOperation, h: OpRowHolder<ScheduledOperation>, position: Int) {
         val needInfos = position == selectedPosition
         h.scheduledImg.setVisibility(View.GONE)
         mCellStates[position] = if (needInfos) {

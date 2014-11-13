@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="acra_report_url">https://geobert.cloudant.com/acra-radis/_design/acra-storage/_update/report</string>
-    <string name="acra_user">hentoulsolcolastiveremal</string>
-    <string name="acra_pwd">ELfOU2rNPxUe88SWmWRbRoRq</string>
-</resources>

@@ -63,8 +63,8 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         }
         ScheduledOperation op = mCurrentSchOp;
         mActivity.mCurrentOp = op;
-        mCustomPeriodicityVal.setText(mCurrentSchOp.mPeriodicity == 0 ? ""
-                : Integer.toString(mCurrentSchOp.mPeriodicity));
+        mCustomPeriodicityVal.setText(mCurrentSchOp.getmPeriodicity() == 0 ? ""
+                : Integer.toString(mCurrentSchOp.getmPeriodicity()));
         poputatePeriodicitySpinner();
         populateCustomPeriodicitySpinner();
         populateAccountSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
@@ -110,7 +110,7 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mCustomPeriodicityUnit.setAdapter(adapter);
 
-        int unit = mCurrentSchOp.mPeriodicityUnit;
+        int unit = mCurrentSchOp.getmPeriodicityUnit();
         if (unit >= ScheduledOperation.CUSTOM_DAILY_PERIOD) {
             mCustomPeriodicityUnit.setSelection(unit
                     - ScheduledOperation.CUSTOM_DAILY_PERIOD);
@@ -155,7 +155,7 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
                     public void onNothingSelected(AdapterView<?> arg0) {
                     }
                 });
-        int unit = mCurrentSchOp.mPeriodicityUnit;
+        int unit = mCurrentSchOp.getmPeriodicityUnit();
         if (unit < ScheduledOperation.CUSTOM_DAILY_PERIOD) {
             mPeriodicitySpinner.setSelection(unit);
         } else {
@@ -170,11 +170,11 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
                     new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mAccountSpinner.setAdapter(adapter);
-            if (mCurrentSchOp.mAccountId != 0 || mActivity.mCurAccountId != 0) {
+            if (mCurrentSchOp.getmAccountId() != 0 || mActivity.mCurAccountId != 0) {
                 int pos = 1;
                 while (pos < adapter.getCount()) {
                     long id = adapter.getItemId(pos);
-                    if (id == mCurrentSchOp.mAccountId || id == mActivity.mCurAccountId) {
+                    if (id == mCurrentSchOp.getmAccountId() || id == mActivity.mCurAccountId) {
                         mAccountSpinner.setSelection(pos);
                         break;
                     } else {
@@ -197,17 +197,17 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         ScheduledOperation op = (ScheduledOperation) operation;
         if (!mActivity.isTransfertChecked()) {
             Cursor c = (Cursor) mAccountSpinner.getSelectedItem();
-            op.mAccountId = c.getLong(0);
+            op.setmAccountId(c.getLong(0));
         }
         final boolean isCustom = mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner
                 .getAdapter().getCount() - 1);
         if (!isCustom) {
-            op.mPeriodicity = 1;
-            op.mPeriodicityUnit = mPeriodicitySpinner.getSelectedItemPosition();
+            op.setmPeriodicity(1);
+            op.setmPeriodicityUnit(mPeriodicitySpinner.getSelectedItemPosition());
         } else {
             String periodicity = mCustomPeriodicityVal.getText().toString();
             try {
-                op.mPeriodicity = Integer.parseInt(periodicity);
+                op.setmPeriodicity(Integer.parseInt(periodicity));
             } catch (NumberFormatException e) {
                 StringBuffer b = new StringBuffer();
                 for (char c : periodicity.toCharArray()) {
@@ -216,14 +216,14 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
                     }
                 }
                 try {
-                    op.mPeriodicity = Integer.parseInt(b.toString());
+                    op.setmPeriodicity(Integer.parseInt(b.toString()));
                     mCustomPeriodicityVal.setText(b);
                 } catch (NumberFormatException e2) {
-                    op.mPeriodicity = 0;
+                    op.setmPeriodicity(0);
                 }
             }
-            op.mPeriodicityUnit =
-                    mCustomPeriodicityUnit.getSelectedItemPosition() + ScheduledOperation.CUSTOM_DAILY_PERIOD;
+            op.setmPeriodicityUnit(mCustomPeriodicityUnit.getSelectedItemPosition() +
+                    ScheduledOperation.CUSTOM_DAILY_PERIOD);
         }
         if (mEndDatePicker.isEnabled()) {
             DatePicker dp = mEndDatePicker;
@@ -232,7 +232,7 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
             op.setEndMonth(dp.getMonth());
             op.setEndYear(dp.getYear());
         } else {
-            op.mEndDate.clear();
+            op.getmEndDate().clear();
         }
     }
 
@@ -264,8 +264,8 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
                 errMsg.append(getString(R.string.end_date_incorrect));
                 res = false;
             }
-            if ((op.mPeriodicityUnit >= ScheduledOperation.CUSTOM_DAILY_PERIOD)
-                    && op.mPeriodicity <= 0) {
+            if ((op.getmPeriodicityUnit() >= ScheduledOperation.CUSTOM_DAILY_PERIOD)
+                    && op.getmPeriodicity() <= 0) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n");
                 }

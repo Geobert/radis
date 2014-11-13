@@ -41,6 +41,8 @@ import android.support.v7.widget.DefaultItemAnimator
 import kotlin.platform.platformStatic
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
+    private var freshLoader: Boolean = false
+
     private var mListLayout: LinearLayoutManager by Delegates.notNull()
     private val TAG = "OperationListFragment"
     private val GET_OPS = 300
@@ -84,7 +86,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             accMan.setCurrentAccountId(null)
             mLastSelectionId = (-1).toLong()
         }
-        //        onFetchAllAccountCbk();
+
         val q = mQuickAddController
         if (q != null) {
             q.setAutoNegate(true)
@@ -123,6 +125,13 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
+
+    override fun onStop() {
+        super<BaseFragment>.onStop()
+        Log.d("OperationListFragment", "onStop")
+        getLoaderManager().destroyLoader(GET_OPS)
+    }
+
     private fun initOperationList() {
         mListView = container.findViewById(android.R.id.list) as RecyclerView
         mListLayout = LinearLayoutManager(mActivity)
@@ -131,18 +140,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mListView.setHasFixedSize(true)
         mScrollLoader = OnOperationScrollLoader(this, mListLayout)
         mListView.setOnScrollListener(mScrollLoader)
-        //        mListView.setOnItemClickListener(object : AdapterView.OnItemClickListener {
-        //            override fun onItemClick(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
-        //                selectOpAndAdjustOffset(i, false)
-        //            }
-        //        })
-        // TODO
-        //        mListView!!.setEmptyView(container!!.findViewById(android.R.id.empty))
-
-
-        val transparent = getResources().getColor(android.R.color.transparent)
-        //        mListView.setCacheColorHint(transparent)
-        //        mListView.setSelector(ColorDrawable(transparent))
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -176,7 +173,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun onCreateLoader(i: Int, bundle: Bundle): Loader<Cursor>? =
             when (i) {
                 GET_OPS -> {
-                    mOperationsLoader = OperationTable.getOpsWithStartDateLoader(mActivity, startOpDate, mActivity.getCurrentAccountId())
+                    mOperationsLoader = OperationTable.getOpsWithStartDateLoader(mActivity, startOpDate,
+                            mActivity.getCurrentAccountId())
                     mOperationsLoader
                 }
                 else -> null
@@ -187,15 +185,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         when (cursorLoader.getId()) {
             GET_OPS -> {
                 var refresh = false
+                Log.d("OperationListFragment", "onLoadFinished $mOpListAdapter")
                 val adapter = mOpListAdapter
                 if (adapter == null) {
                     mOpListAdapter = fr.geobert.radis.ui.adapter.OperationsAdapter(mActivity, this, cursor)
-                    mListView.setAdapter(mOpListAdapter)
                     refresh = true
+                    mListView.setAdapter(mOpListAdapter)
                 } else {
                     adapter.increaseCache(cursor)
+                    Log.d("OperationListFragment", "onLoadFinished fresh $freshLoader")
+                    if (freshLoader)
+                        mListView.setAdapter(adapter)
                 }
-
+                freshLoader = false
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
@@ -224,6 +226,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (mActivity.getCurrentAccountId() != null) {
             Log.d(TAG, "getOperationsList mOperationsLoader  : " + mOperationsLoader)
             if (mOperationsLoader == null) {
+                freshLoader = true
                 val startOpDate = Tools.createClearedCalendar()
                 mScrollLoader.setStartDate(startOpDate)
                 startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate!!.getActualMinimum(Calendar.DAY_OF_MONTH))
@@ -238,9 +241,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {
+        Log.d("OperationListFragment", "onLoaderReset")
         if (!mActivity.isFinishing()) {
             when (cursorLoader.getId()) {
                 GET_OPS -> {
+                    Log.d("OperationListFragment", "onLoaderReset doing reset")
                     mOpListAdapter?.reset()
                     mOperationsLoader = null
                 }
@@ -250,7 +255,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    override fun updateDisplay(intent: Intent) {
+    override fun updateDisplay(intent: Intent?) {
         getOperationsList()
     }
 
@@ -273,69 +278,17 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    //    fun computeSumFromCursor(op: Cursor?): Long {
-    //        var sum = 0L
-    //        if (null != op) {
-    //            val dateIdx = op.getColumnIndex(OperationTable.KEY_OP_DATE)
-    //            val opSumIdx = op.getColumnIndex(OperationTable.KEY_OP_SUM)
-    //            val transIdx = op.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID)
-    //            var opDate = op.getLong(dateIdx)
-    //            Log.d(TAG, "computeSumFromCursor mProjectionDate : " + Tools.getDateStr(mProjectionDate) + "  opDate : " + Tools.getDateStr(opDate))
-    //            if (!op.isBeforeFirst() && !op.isAfterLast()) {
-    //                val origPos = op.getPosition()
-    //                var canContinue: Boolean
-    //                if (opDate <= mProjectionDate || mProjectionDate == 0L) {
-    //                    canContinue = op.moveToPrevious()
-    //                    if (canContinue) {
-    //                        opDate = op.getLong(dateIdx)
-    //                        while (canContinue && (opDate <= mProjectionDate || mProjectionDate == 0L)) {
-    //                            var s = op.getLong(opSumIdx)
-    //                            if (op.getLong(transIdx) == mActivity.getCurrentAccountId()) {
-    //                                s = -s
-    //                            }
-    //                            sum = sum + s
-    //                            canContinue = op.moveToPrevious()
-    //                            if (canContinue) {
-    //                                opDate = op.getLong(dateIdx)
-    //                            }
-    //                        }
-    //                        sum = -sum
-    //                    }
-    //                } else {
-    //                    sum = op.getLong(opSumIdx)
-    //                    canContinue = op.moveToNext()
-    //                    if (canContinue) {
-    //                        opDate = op.getLong(dateIdx)
-    //                        while (canContinue && opDate > mProjectionDate) {
-    //                            var s = op.getLong(opSumIdx)
-    //                            if (op.getLong(transIdx) == mActivity.getCurrentAccountId()) {
-    //                                s = -s
-    //                            }
-    //                            sum = sum + s
-    //                            canContinue = op.moveToNext()
-    //                            if (canContinue) {
-    //                                opDate = op.getLong(dateIdx)
-    //                            }
-    //                        }
-    //                    }
-    //                }
-    //                op.moveToPosition(origPos)
-    //            }
-    //        }
-    //        Log.d(TAG, "computeSumFromCursor after sum = " + sum)
-    //        return sum
-    //    }
-
-    override fun getDeleteConfirmationDialog(operation: Operation): DialogFragment {
-        if (operation.mScheduledId > 0) {
-            return DeleteOccurrenceConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId,
-                    operation.mScheduledId, operation.getDate(), operation.mTransferAccountId, this)
+    override fun getDeleteConfirmationDialog(op: Operation): DialogFragment {
+        if (op.mScheduledId > 0) {
+            return DeleteOccurrenceConfirmationDialog.newInstance(op.mAccountId, op.mRowId,
+                    op.mScheduledId, op.getDate(), op.mTransferAccountId, this)
         } else {
-            return DeleteOpConfirmationDialog.newInstance(operation.mAccountId, operation.mRowId, this)
+            return DeleteOpConfirmationDialog.newInstance(op.mAccountId, op.mRowId, this)
         }
     }
 
     private fun selectOpAndAdjustOffset(position: Int, delayScroll: Boolean) {
+        Log.d("selectOpAndAdjustOffset", "pos: $position, delayScroll: $delayScroll, lastPos: $mLastSelectionPos")
         if (position != mLastSelectionPos) {
             val adapter = mOpListAdapter
             if (adapter != null) {
@@ -345,12 +298,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 if (delayScroll) {
                     mListView.postDelayed(object : Runnable {
                         override fun run() {
+                            Log.d("selectOpAndAdjustOffset", "run postDelayed")
                             mListView.post(object : Runnable {
                                 override fun run() {
-                                    if (mListLayout.findFirstCompletelyVisibleItemPosition() == position) {
-                                        mListView.smoothScrollToPosition(position - 3) // scroll in order to see fully expanded op row
-                                    } else if (mListLayout.findLastCompletelyVisibleItemPosition() == position) {
-                                        mListView.smoothScrollToPosition(position + 3) // scroll in order to see fully expanded op row
+                                    val half = mListLayout.getChildCount() / 2 + 1
+                                    if (mListLayout.findFirstCompletelyVisibleItemPosition() >= position) {
+                                        mListView.smoothScrollToPosition(position - half) // scroll in order to see fully expanded op row
+                                    } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position) {
+                                        mListView.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
                                     }
                                 }
                             })

@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import fr.geobert.radis.BaseActivity;
+import fr.geobert.radis.R;
 import fr.geobert.radis.data.Operation;
 
 public abstract class CommonOpEditor extends BaseActivity implements LoaderCallbacks<Cursor> {
@@ -43,6 +44,7 @@ public abstract class CommonOpEditor extends BaseActivity implements LoaderCallb
         setView();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.cancel_48);
     }
 
     protected void init(final Bundle extras) {

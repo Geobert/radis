@@ -248,37 +248,37 @@ public class OperationTable {
     public static long createOp(Context ctx, final Operation op,
                                 final long accountId, final boolean withUpdate) {
         ContentValues initialValues = new ContentValues();
-        String key = op.mThirdParty;
+        String key = op.getmThirdParty();
         InfoTables.putKeyIdInThirdParties(ctx, key, initialValues, false);
 
-        key = op.mTag;
+        key = op.getmTag();
         InfoTables.putKeyIdInTags(ctx, key, initialValues, false);
 
-        key = op.mMode;
+        key = op.getmMode();
         InfoTables.putKeyIdInModes(ctx, key, initialValues, false);
 
-        initialValues.put(KEY_OP_SUM, op.mSum);
+        initialValues.put(KEY_OP_SUM, op.getmSum());
         initialValues.put(KEY_OP_DATE, op.getDate());
         initialValues.put(KEY_OP_ACCOUNT_ID, accountId);
-        initialValues.put(KEY_OP_NOTES, op.mNotes);
-        initialValues.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
-        initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
-        initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
-        initialValues.put(KEY_OP_CHECKED, op.mIsChecked ? 1 : 0);
+        initialValues.put(KEY_OP_NOTES, op.getmNotes());
+        initialValues.put(KEY_OP_SCHEDULED_ID, op.getmScheduledId());
+        initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.getmTransferAccountId());
+        initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.getmTransSrcAccName());
+        initialValues.put(KEY_OP_CHECKED, op.getmIsChecked() ? 1 : 0);
         Uri res = ctx.getContentResolver().insert(
                 DbContentProvider.OPERATION_URI, initialValues);
-        op.mRowId = Long.parseLong(res.getLastPathSegment());
-        if (op.mRowId > -1) {
+        op.setmRowId(Long.parseLong(res.getLastPathSegment()));
+        if (op.getmRowId() > -1) {
             if (withUpdate) {
-                AccountTable.updateProjection(ctx, accountId, op.mSum, 0, op.getDate(), -1);
-                if (op.mTransferAccountId > 0) {
-                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
+                AccountTable.updateProjection(ctx, accountId, op.getmSum(), 0, op.getDate(), -1);
+                if (op.getmTransferAccountId() > 0) {
+                    AccountTable.updateProjection(ctx, op.getmTransferAccountId(), -op.getmSum(), 0, op.getDate(), -1);
                 }
-                if (op.mIsChecked) {
-                    AccountTable.updateCheckedOpSum(ctx, op, op.mIsChecked);
+                if (op.getmIsChecked()) {
+                    AccountTable.updateCheckedOpSum(ctx, op, op.getmIsChecked());
                 }
             }
-            return op.mRowId;
+            return op.getmRowId();
         }
         Log.e(TAG, "error in creating op");
         return -1;
@@ -375,23 +375,23 @@ public class OperationTable {
                                                            final boolean updateOccurrences) {
         ContentValues args = new ContentValues();
 
-        String key = op.mThirdParty;
+        String key = op.getmThirdParty();
         InfoTables.putKeyIdInThirdParties(ctx, key, args, true);
 
-        key = op.mTag;
+        key = op.getmTag();
         InfoTables.putKeyIdInTags(ctx, key, args, true);
 
-        key = op.mMode;
+        key = op.getmMode();
         InfoTables.putKeyIdInModes(ctx, key, args, true);
 
-        args.put(KEY_OP_SUM, op.mSum);
-        args.put(KEY_OP_NOTES, op.mNotes);
-        args.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
-        args.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
-        args.put(KEY_OP_CHECKED, op.mIsChecked ? 1 : 0);
+        args.put(KEY_OP_SUM, op.getmSum());
+        args.put(KEY_OP_NOTES, op.getmNotes());
+        args.put(KEY_OP_TRANSFERT_ACC_ID, op.getmTransferAccountId());
+        args.put(KEY_OP_TRANSFERT_ACC_NAME, op.getmTransSrcAccName());
+        args.put(KEY_OP_CHECKED, op.getmIsChecked() ? 1 : 0);
         if (!updateOccurrences) {
             args.put(KEY_OP_DATE, op.getDate());
-            args.put(KEY_OP_SCHEDULED_ID, op.mScheduledId);
+            args.put(KEY_OP_SCHEDULED_ID, op.getmScheduledId());
         }
         return args;
     }
@@ -402,32 +402,37 @@ public class OperationTable {
         ContentValues args = createContentValuesFromOp(ctx, op, false);
         if (ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + rowId),
                 args, null, null) > 0) {
-            AccountTable.updateProjection(ctx, op.mAccountId, op.mSum, originalOp.mSum, op.getDate(), originalOp.getDate());
-            if (op.mTransferAccountId > 0) {
-                if (originalOp.mTransferAccountId <= 0) {
+            AccountTable.updateProjection(ctx, op.getmAccountId(), op.getmSum(), originalOp.getmSum(),
+                    op.getDate(), originalOp.getDate());
+            if (op.getmTransferAccountId() > 0) {
+                if (originalOp.getmTransferAccountId() <= 0) {
                     // op was not a transfert, it is like adding an op in transfertAccountId
-                    AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
+                    AccountTable.updateProjection(ctx, op.getmTransferAccountId(), -op.getmSum(), 0, op.getDate(), -1);
                 } else {
                     // op was a transfert
-                    if (originalOp.mTransferAccountId == op.mTransferAccountId) {
+                    if (originalOp.getmTransferAccountId() == op.getmTransferAccountId()) {
                         // op was a transfert on same account, update with sum diff
-                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, -originalOp.mSum, op.getDate(), originalOp.getDate());
+                        AccountTable.updateProjection(ctx, op.getmTransferAccountId(), -op.getmSum(),
+                                -originalOp.getmSum(), op.getDate(), originalOp.getDate());
                     } else {
                         // op was a transfert to another account
                         // update new transfert account
-                        AccountTable.updateProjection(ctx, op.mTransferAccountId, -op.mSum, 0, op.getDate(), -1);
+                        AccountTable.updateProjection(ctx, op.getmTransferAccountId(),
+                                -op.getmSum(), 0, op.getDate(), -1);
                         // remove the original sum on original transfert account
-                        AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum,
+                        AccountTable.updateProjection(ctx, originalOp.getmTransferAccountId(), originalOp.getmSum(),
                                 0, op.getDate(), originalOp.getDate());
                     }
                 }
-            } else if (originalOp.mTransferAccountId > 0) {
+            } else if (originalOp.getmTransferAccountId() > 0) {
                 // op become not transfert, but was a transfert
-                AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, 0, op.getDate(), -1);
+                AccountTable.updateProjection(ctx, originalOp.getmTransferAccountId(), originalOp.getmSum(), 0,
+                        op.getDate(), -1);
             }
 
-            if (originalOp.mIsChecked != op.mIsChecked) {
-                AccountTable.updateCheckedOpSum(ctx, op.mSum, op.mAccountId, op.mTransferAccountId, op.mIsChecked);
+            if (originalOp.getmIsChecked() != op.getmIsChecked()) {
+                AccountTable.updateCheckedOpSum(ctx, op.getmSum(), op.getmAccountId(), op.getmTransferAccountId(),
+                        op.getmIsChecked());
             }
 
             return true;
@@ -517,7 +522,7 @@ public class OperationTable {
         ContentValues values = new ContentValues();
         values.put(KEY_OP_CHECKED, b);
         final int res =
-                ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + op.mRowId),
+                ctx.getContentResolver().update(Uri.parse(DbContentProvider.OPERATION_URI + "/" + op.getmRowId()),
                         values, null, null);
         if (res == 1) {
             AccountTable.updateCheckedOpSum(ctx, op, b);

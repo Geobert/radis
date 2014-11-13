@@ -8,8 +8,9 @@ import android.widget.ImageView
 import android.widget.ImageButton
 import android.widget.CheckBox
 import fr.geobert.radis.R
+import fr.geobert.radis.data.Operation
 
-public class OpRowHolder(val view: View, val adapter: BaseOperationAdapter) : RecyclerView.ViewHolder(view), View.OnClickListener {
+public class OpRowHolder<T : Operation>(val view: View, val adapter: BaseOperationAdapter<T>) : RecyclerView.ViewHolder(view), View.OnClickListener {
     public var separator: LinearLayout = view.findViewById(R.id.separator) as LinearLayout
     public var month: TextView = view.findViewById(R.id.month) as TextView
     public var scheduledImg: ImageView = view.findViewById(R.id.op_sch_icon) as ImageView

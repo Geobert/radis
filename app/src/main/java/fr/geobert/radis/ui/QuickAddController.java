@@ -160,7 +160,7 @@ public class QuickAddController {
             Tools.clearTimeOfCalendar(date);
             op.setDate(date.getTimeInMillis());
         }
-        op.mThirdParty = mQuickAddThirdParty.getText().toString();
+        op.setmThirdParty(mQuickAddThirdParty.getText().toString());
         op.setSumStr(mQuickAddAmount.getText().toString());
         assert (mAccountId != 0);
         if (OperationTable.createOp(mActivity, op, mAccountId) > -1) {

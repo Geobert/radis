@@ -151,9 +151,9 @@ public class RadisService extends IntentService {
             ScheduledOperation op;
             do {
                 final long OP_ROW_ID = schOpsCursor.getLong(schOpsCursor.getColumnIndex("_id"));
-                op = new ScheduledOperation(schOpsCursor);
-                final Long accountId = op.mAccountId;
-                final Long transId = op.mTransferAccountId;
+                op = fr.geobert.radis.data.DataPackage.ScheduledOperation(schOpsCursor);
+                final Long accountId = op.getmAccountId();
+                final Long transId = op.getmTransferAccountId();
                 long sum = 0;
                 boolean needUpdate = false;
 
@@ -247,11 +247,11 @@ public class RadisService extends IntentService {
     }
 
     private long insertSchOp(ScheduledOperation op, final long opRowId) {
-        final long accountId = op.mAccountId;
-        op.mScheduledId = opRowId;
+        final long accountId = op.getmAccountId();
+        op.setmScheduledId(opRowId);
         boolean needUpdate = OperationTable.createOp(this, op, accountId, false) > -1;
         ScheduledOperation.addPeriodicityToDate(op);
-        return needUpdate ? op.mSum : 0;
+        return needUpdate ? op.getmSum() : 0;
     }
 
     public static void acquireStaticLock(Context context) {

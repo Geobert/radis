@@ -16,15 +16,17 @@ import android.widget.LinearLayout
 import fr.geobert.radis.tools.ExpandAnimation
 import fr.geobert.radis.tools.Tools
 import android.util.Log
+import fr.geobert.radis.ui.OperationListFragment
 
-public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
-        RecyclerView.Adapter<fr.geobert.radis.ui.adapter.OpRowHolder>() {
+public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
+        RecyclerView.Adapter<fr.geobert.radis.ui.adapter.OpRowHolder<T>>() {
     var justClicked: Boolean = false
 
     val operationsList = opList
     val activity: MainActivity = activity
-    protected var operations: MutableCollection<Operation> = cursor.map<Operation>({ Operation(it) })
+    protected var operations: MutableCollection<T> = cursor.map<T>({ operationFactory(it) })
     var mCellStates: Array<CellState?> = arrayOfNulls(operations.count())
+    val needSeparator = opList is OperationListFragment
 
     enum class CellState {
         STATE_MONTH_CELL
@@ -32,6 +34,8 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
         STATE_INFOS_CELL
         STATE_MONTH_INFOS_CELL
     }
+
+    protected abstract fun operationFactory(c: Cursor): T
 
     protected var prevExpandedPos: Int = -1
     var selectedPosition: Int = -1
@@ -52,9 +56,9 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
         }
     val resources = activity.getResources()
 
-    override fun onCreateViewHolder(view: ViewGroup, viewType: Int): OpRowHolder {
+    override fun onCreateViewHolder(view: ViewGroup, viewType: Int): OpRowHolder<T> {
         val l = LayoutInflater.from(view.getContext()).inflate(fr.geobert.radis.R.layout.operation_row, view, false)
-        val h = OpRowHolder(l, this)
+        val h = OpRowHolder<T>(l, this)
         // HACK to workaround a glitch at the end of animation
         ExpandUpAnimation.mBg = h.separator.getBackground();
         Tools.setViewBg(h.separator, null);
@@ -63,7 +67,7 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
         return h
     }
 
-    override fun onBindViewHolder(viewHolder: OpRowHolder, pos: Int) {
+    override fun onBindViewHolder(viewHolder: OpRowHolder<T>, pos: Int) {
         val op = operationAt(pos)
 
         val transfertId: Long = op.mTransferAccountId
@@ -96,6 +100,8 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
         } else {
             op.mThirdParty
         });
+
+        viewHolder.checkedImg.setVisibility(if (op.mIsChecked) View.VISIBLE else View.GONE)
     }
 
     override fun getItemCount(): Int = operations.count()
@@ -111,7 +117,7 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
         return cut.filter(f)
     }
 
-    protected fun clearListeners(h: OpRowHolder) {
+    protected fun clearListeners(h: OpRowHolder<T>) {
         h.deleteBtn.setOnClickListener(null)
         h.varBtn.setOnClickListener(null)
         h.editBtn.setOnClickListener(null)
@@ -120,10 +126,10 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
     public fun increaseCache(c: Cursor) {
         val tmp = mCellStates
         val oldCount = operations.count()
-        operations = c.map { Operation(it) }
+        operations = c.map { operationFactory(it) }
         mCellStates = arrayOfNulls(operations.count())
         System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())
-        notifyItemRangeInserted(oldCount, operations.count() - oldCount);
+        notifyDataSetChanged()
     }
 
     fun reset() {
@@ -132,7 +138,7 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
     }
 
     // animations
-    protected fun doAnimations(viewHolder: OpRowHolder, pos: Int) {
+    protected fun doAnimations(viewHolder: OpRowHolder<T>, pos: Int) {
         if (selectedPosition == pos) {
             if (selectedPosition != prevExpandedPos) {
                 viewHolder.view.setBackgroundResource(R.drawable.line_selected_gradient)
@@ -186,40 +192,46 @@ public abstract class BaseOperationAdapter(activity: MainActivity, opList: IOper
         }
     }
 
-    private fun animateSeparator(h: OpRowHolder) {
-        h.separator.clearAnimation()
-        (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
-        val anim = ExpandUpAnimation(h.separator, 300)
-        h.separator.startAnimation(anim)
+    private fun animateSeparator(h: OpRowHolder<T>) {
+        if (needSeparator) {
+            h.separator.clearAnimation()
+            (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
+            val anim = ExpandUpAnimation(h.separator, 300)
+            h.separator.startAnimation(anim)
+        }
     }
 
-    private fun animateToolbar(h: OpRowHolder) {
+    private fun animateToolbar(h: OpRowHolder<T>) {
         h.actionsCont.clearAnimation()
         val anim = ExpandAnimation(h.actionsCont, 300)
         h.actionsCont.startAnimation(anim)
     }
 
-    private fun collapseSeparatorNoAnim(h: OpRowHolder) {
-        h.separator.clearAnimation()
-        (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -50
-        h.separator.setVisibility(View.GONE)
+    private fun collapseSeparatorNoAnim(h: OpRowHolder<T>) {
+        if (needSeparator) {
+            h.separator.clearAnimation()
+            (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -50
+            h.separator.setVisibility(View.GONE)
+        }
     }
 
-    private fun collapseToolbarNoAnim(h: OpRowHolder) {
+    private fun collapseToolbarNoAnim(h: OpRowHolder<T>) {
         h.actionsCont.clearAnimation()
         (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
         h.actionsCont.setVisibility(View.GONE)
     }
 
-    private fun expandSeparatorNoAnim(h: OpRowHolder) {
-        h.separator.clearAnimation()
-        (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
-        h.separator.setVisibility(View.VISIBLE)
-        ExpandUpAnimation.setChildrenVisibility(h.separator, View.VISIBLE)
-        Tools.setViewBg(h.separator, ExpandUpAnimation.mBg)
+    private fun expandSeparatorNoAnim(h: OpRowHolder<T>) {
+        if (needSeparator) {
+            h.separator.clearAnimation()
+            (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
+            h.separator.setVisibility(View.VISIBLE)
+            ExpandUpAnimation.setChildrenVisibility(h.separator, View.VISIBLE)
+            Tools.setViewBg(h.separator, ExpandUpAnimation.mBg)
+        }
     }
 
-    private fun expandToolbarNoAnim(h: OpRowHolder) {
+    private fun expandToolbarNoAnim(h: OpRowHolder<T>) {
         h.actionsCont.clearAnimation()
         (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
         h.actionsCont.setVisibility(View.VISIBLE)

@@ -132,7 +132,7 @@ public class ScheduledOperationTable {
                                              final long accountId) {
         Cursor c = db.query(DATABASE_SCHEDULED_TABLE_JOINTURE,
                 SCHEDULED_OP_COLS_QUERY, "sch." + KEY_SCHEDULED_ACCOUNT_ID
-                + " = " + accountId, null, null, null,
+                        + " = " + accountId, null, null, null,
                 SCHEDULED_OP_ORDERING);
         if (null != c) {
             c.moveToFirst();
@@ -143,7 +143,7 @@ public class ScheduledOperationTable {
     public static void updateAllOccurences(Context ctx,
                                            final ScheduledOperation op, final long prevSum, final long rowId) {
         Log.d(TAG, "updateAllOccurences");
-        final long accountId = op.mAccountId;
+        final long accountId = op.getmAccountId();
         OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
         AccountTable.consolidateSums(ctx, accountId);
     }
@@ -173,27 +173,25 @@ public class ScheduledOperationTable {
 
     public static long createScheduledOp(Context ctx, ScheduledOperation op) {
         ContentValues initialValues = new ContentValues();
-        String key = op.mThirdParty;
+        String key = op.getmThirdParty();
         InfoTables.putKeyIdInThirdParties(ctx, key, initialValues, false);
 
-        key = op.mTag;
+        key = op.getmTag();
         InfoTables.putKeyIdInTags(ctx, key, initialValues, false);
 
-        key = op.mMode;
+        key = op.getmMode();
         InfoTables.putKeyIdInModes(ctx, key, initialValues, false);
 
-        initialValues.put(OperationTable.KEY_OP_SUM, op.mSum);
+        initialValues.put(OperationTable.KEY_OP_SUM, op.getmSum());
         initialValues.put(OperationTable.KEY_OP_DATE, op.getDate());
-        initialValues.put(OperationTable.KEY_OP_TRANSFERT_ACC_ID,
-                op.mTransferAccountId);
-        initialValues.put(OperationTable.KEY_OP_TRANSFERT_ACC_NAME,
-                op.mTransSrcAccName);
-        initialValues.put(OperationTable.KEY_OP_NOTES, op.mNotes);
+        initialValues.put(OperationTable.KEY_OP_TRANSFERT_ACC_ID, op.getmTransferAccountId());
+        initialValues.put(OperationTable.KEY_OP_TRANSFERT_ACC_NAME, op.getmTransSrcAccName());
+        initialValues.put(OperationTable.KEY_OP_NOTES, op.getmNotes());
 
-        initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
+        initialValues.put(KEY_SCHEDULED_ACCOUNT_ID, op.getmAccountId());
         initialValues.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
-        initialValues.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
-        initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
+        initialValues.put(KEY_SCHEDULED_PERIODICITY, op.getmPeriodicity());
+        initialValues.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.getmPeriodicityUnit());
         Uri res = ctx.getContentResolver().insert(
                 DbContentProvider.SCHEDULED_OP_URI, initialValues);
         return Long.parseLong(res.getLastPathSegment());
@@ -204,24 +202,24 @@ public class ScheduledOperationTable {
         Log.d(TAG, "updateScheduledOp");
         ContentValues args = new ContentValues();
 
-        String key = op.mThirdParty;
+        String key = op.getmThirdParty();
         InfoTables.putKeyIdInThirdParties(ctx, key, args, true);
 
-        key = op.mTag;
+        key = op.getmTag();
         InfoTables.putKeyIdInTags(ctx, key, args, true);
 
-        key = op.mMode;
+        key = op.getmMode();
         InfoTables.putKeyIdInModes(ctx, key, args, true);
 
-        args.put(OperationTable.KEY_OP_SUM, op.mSum);
-        args.put(OperationTable.KEY_OP_NOTES, op.mNotes);
-        args.put(OperationTable.KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId);
-        args.put(OperationTable.KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName);
+        args.put(OperationTable.KEY_OP_SUM, op.getmSum());
+        args.put(OperationTable.KEY_OP_NOTES, op.getmNotes());
+        args.put(OperationTable.KEY_OP_TRANSFERT_ACC_ID, op.getmTransferAccountId());
+        args.put(OperationTable.KEY_OP_TRANSFERT_ACC_NAME, op.getmTransSrcAccName());
         if (!isUpdatedFromOccurence) { // update from schedule editor
             args.put(KEY_SCHEDULED_END_DATE, op.getEndDate());
-            args.put(KEY_SCHEDULED_PERIODICITY, op.mPeriodicity);
-            args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.mPeriodicityUnit);
-            args.put(KEY_SCHEDULED_ACCOUNT_ID, op.mAccountId);
+            args.put(KEY_SCHEDULED_PERIODICITY, op.getmPeriodicity());
+            args.put(KEY_SCHEDULED_PERIODICITY_UNIT, op.getmPeriodicityUnit());
+            args.put(KEY_SCHEDULED_ACCOUNT_ID, op.getmAccountId());
             args.put(OperationTable.KEY_OP_DATE, op.getDate());
         }
         return ctx.getContentResolver().update(

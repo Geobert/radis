@@ -36,6 +36,9 @@ import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import java.util.GregorianCalendar
 import kotlin.properties.Delegates
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.DefaultItemAnimator
+import android.app.Activity
+import java.util.Calendar
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
     private var mListView: RecyclerView by Delegates.notNull()
@@ -44,7 +47,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     private var mLoader: CursorLoader? = null
     private var mTotalLbl: TextView by Delegates.notNull()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
 
         setHasOptionsMenu(true)
@@ -57,15 +60,8 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         mListView = ll.findViewById(android.R.id.list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
         mListView.setHasFixedSize(true)
-
-
-        //        mListView.setEmptyView(ll.findViewById(android.R.id.empty));
-        //        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-        //            @Override
-        //            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        //                selectOpAndAdjustOffset(i);
-        //            }
-        //        });
+        mListView.setLayoutManager(mListLayout)
+        mListView.setItemAnimator(DefaultItemAnimator())
 
         return ll
     }
@@ -80,42 +76,11 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     private fun fetchSchOpsOfAccount() {
         if (mLoader == null) {
-            getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, null, this)
+            getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
         } else {
-            getLoaderManager().restartLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, null, this)
+            getLoaderManager().restartLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
         }
     }
-
-    //    private void populateAccountSpinner() {
-    //        Cursor c = mAccountManager.getAllAccountsCursor();
-    //        if (c != null && c.moveToFirst()) {
-    //            mAccountAdapter = new SimpleCursorAdapter(this, R.layout.sch_account_row, c,
-    //                    new String[]{AccountTable.KEY_ACCOUNT_NAME},
-    //                    new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
-    //            mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
-    //            if (mCurrentAccount != 0) {
-    //                int pos = 0;
-    //                while (pos < mAccountAdapter.getCount()) {
-    //                    long id = mAccountAdapter.getItemId(pos);
-    //                    if (id == mCurrentAccount) {
-    //                        mActivity.getSupportActionBar().setSelectedNavigationItem(pos);
-    //                        break;
-    //                    } else {
-    //                        pos++;
-    //                    }
-    //                }
-    //            }
-    //
-    //            getSupportActionBar().setListNavigationCallbacks(mAccountAdapter, new ActionBar.OnNavigationListener() {
-    //                @Override
-    //                public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-    //                    mCurrentAccount = itemId;
-    //                    fetchSchOpsOfAccount();
-    //                    return true;
-    //                }
-    //            });
-    //        }
-    //    }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         // nothing ?
@@ -130,7 +95,6 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         super<BaseFragment>.onResume()
         mAccountManager.fetchAllAccounts(mActivity, false, object : Runnable {
             override fun run() {
-                //                populateAccountSpinner();
                 fetchSchOpsOfAccount()
             }
         })
@@ -171,8 +135,8 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when (item!!.getItemId()) {
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.getItemId()) {
             R.id.create_operation -> {
                 ScheduledOperationEditor.callMeForResult(mActivity, 0,
                         mActivity.getCurrentAccountId(), ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE)
@@ -204,9 +168,12 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, data: Cursor) {
-        if (mAdapter == null) {
+        val adapter = mAdapter
+        if (adapter == null) {
             mAdapter = SchedOpAdapter(mActivity, this, data)
             mListView.setAdapter(mAdapter)
+        } else {
+            adapter.increaseCache(data)
         }
         computeTotal(data)
     }
@@ -237,7 +204,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {
     }
 
-    override fun getMoreOperations(startDate: GregorianCalendar) {
+    override fun getMoreOperations(startDate: GregorianCalendar?) {
         // not needed
     }
 
@@ -245,7 +212,14 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         return DeleteOpConfirmationDialog.newInstance(op.mRowId, this)
     }
 
-    override fun updateDisplay(intent: Intent) {
+    override fun updateDisplay(intent: Intent?) {
+        fetchSchOpsOfAccount()
+    }
+
+    public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+        if (resultCode == Activity.RESULT_OK) {
+            fetchSchOpsOfAccount()
+        }
     }
 
     public class DeleteOpConfirmationDialog : DialogFragment() {
