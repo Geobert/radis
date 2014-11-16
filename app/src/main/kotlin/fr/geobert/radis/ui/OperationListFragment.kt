@@ -188,7 +188,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 Log.d("OperationListFragment", "onLoadFinished $mOpListAdapter")
                 val adapter = mOpListAdapter
                 if (adapter == null) {
-                    mOpListAdapter = fr.geobert.radis.ui.adapter.OperationsAdapter(mActivity, this, cursor)
+                    val a = fr.geobert.radis.ui.adapter.OperationsAdapter(mActivity, this, cursor)
+                    a.projectionDate = AccountTable.getProjectionDate()
+                    mOpListAdapter = a
                     refresh = true
                     mListView.setAdapter(mOpListAdapter)
                 } else {
@@ -298,10 +300,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 if (delayScroll) {
                     mListView.postDelayed(object : Runnable {
                         override fun run() {
-                            Log.d("selectOpAndAdjustOffset", "run postDelayed")
                             mListView.post(object : Runnable {
                                 override fun run() {
-                                    val half = mListLayout.getChildCount() / 2 + 1
+                                    val half = mListLayout.getChildCount() / 2
+                                    Log.d("selectOpAndAdjustOffset", "half: $half")
                                     if (mListLayout.findFirstCompletelyVisibleItemPosition() >= position) {
                                         mListView.smoothScrollToPosition(position - half) // scroll in order to see fully expanded op row
                                     } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position) {

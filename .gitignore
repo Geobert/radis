@@ -3,3 +3,5 @@
 /.idea/workspace.xml
 .DS_Store
 /build
+install_on_n4.bat
+app/crashlytics.properties

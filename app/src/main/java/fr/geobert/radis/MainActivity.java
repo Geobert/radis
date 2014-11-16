@@ -70,18 +70,17 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     // used for FragmentHandler
     public static final int OP_LIST = 1;
     public static final int SCH_OP_LIST = 2;
+    public static final int STATISTICS = 3;
 
-    public static final int STATISTICS = 4;
+    public static final int CREATE_ACCOUNT = 5;
+    public static final int EDIT_ACCOUNT = 6;
+    public static final int DELETE_ACCOUNT = 7;
 
-    public static final int CREATE_ACCOUNT = 6;
-    public static final int EDIT_ACCOUNT = 7;
-    public static final int DELETE_ACCOUNT = 8;
-
-    public static final int PREFERENCES = 10;
-    public static final int SAVE_ACCOUNT = 11;
-    public static final int RESTORE_ACCOUNT = 12;
-    public static final int PROCESS_SCH = 13;
-    public static final int RECOMPUTE_ACCOUNT = 14;
+    public static final int PREFERENCES = 9;
+    public static final int SAVE_ACCOUNT = 10;
+    public static final int RESTORE_ACCOUNT = 11;
+    public static final int PROCESS_SCH = 12;
+    public static final int RECOMPUTE_ACCOUNT = 13;
 
     private FragmentHandler handler;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -482,7 +481,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         navDrawerItems.add(new NavDrawerItem(getString(R.string.statistics), R.drawable.stat_48));
 
         navDrawerItems.add(new NavDrawerItem(getString(R.string.accounts)));
-        navDrawerItems.add(new NavDrawerItem(getString(R.string.create_account), R.drawable.new_account_48)); // TODO another icon
+        navDrawerItems.add(new NavDrawerItem(getString(R.string.create_account), R.drawable.new_account_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.account_edit), R.drawable.edit_48));
         navDrawerItems.add(new NavDrawerItem(getString(R.string.delete_account), R.drawable.trash_48));
 

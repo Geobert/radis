@@ -86,10 +86,6 @@
                 android:icon="@drawable/stat_48"
                 android:parentActivityName=".MainActivity"
                 android:launchMode="singleTop"/>
-
-        <meta-data
-                android:name="com.crashlytics.ApiKey"
-                android:value="cdb6acc7419d0fc379eb7edad6ffe53f3bd06391"/>
     </application>
 
 </manifest>
