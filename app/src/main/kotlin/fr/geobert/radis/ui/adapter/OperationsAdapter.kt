@@ -16,6 +16,7 @@ import fr.geobert.radis.MainActivity
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
+import java.util.NoSuchElementException
 
 public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
         BaseOperationAdapter<Operation>(activity, opList, cursor) {
@@ -153,7 +154,12 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         }
     }
 
-    fun findLastOpBeforeDatePos(date: java.util.GregorianCalendar): Int =
-            operations.indexOf(operations.first { it.getDate() <= date.getTimeInMillis() })
+    fun findLastOpBeforeDatePos(date: java.util.GregorianCalendar): Int {
+        try {
+            return operations.indexOf(operations.first { it.getDate() <= date.getTimeInMillis() })
+        } catch(e: NoSuchElementException) {
+            return 0
+        }
+    }
 
 }
