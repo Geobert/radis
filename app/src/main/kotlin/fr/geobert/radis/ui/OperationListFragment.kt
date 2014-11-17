@@ -125,10 +125,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-
-    override fun onStop() {
-        super<BaseFragment>.onStop()
-        Log.d("OperationListFragment", "onStop")
+    override fun onDestroyView() {
+        super<BaseFragment>.onDestroyView()
+        Log.d("OperationListFragment", "onDestroyView")
         getLoaderManager().destroyLoader(GET_OPS)
     }
 
