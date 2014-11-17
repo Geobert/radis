@@ -289,33 +289,39 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    private fun selectOpAndAdjustOffset(position: Int, delayScroll: Boolean) {
-        Log.d("selectOpAndAdjustOffset", "pos: $position, delayScroll: $delayScroll, lastPos: $mLastSelectionPos")
-        if (position != mLastSelectionPos) {
-            val adapter = mOpListAdapter
-            if (adapter != null) {
+    private fun adjustScroll(position: Int) {
+        val half = mListLayout.getChildCount() / 2
+        Log.d("adjustScroll", "half: $half, pos: $position, first: ${mListLayout.findFirstCompletelyVisibleItemPosition()}, last: ${mListLayout.findLastCompletelyVisibleItemPosition()}")
+        if (mListLayout.findFirstCompletelyVisibleItemPosition() >= position) {
+            if (mListLayout.findFirstCompletelyVisibleItemPosition() == position) {
+                mListView.smoothScrollToPosition(position - half) // scroll in order to see fully expanded op row
+            } else {
+                mListView.smoothScrollToPosition(position - 1) // scroll in order to see fully expanded op row
+            }
+        } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position ) {
+            if (mListLayout.findLastCompletelyVisibleItemPosition() == position) {
+                mListView.smoothScrollToPosition(position + 1)
+            } else {
+                mListView.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
+            }
+        }
+    }
+
+    private fun selectOpAndAdjustOffset(position: Int) {
+        val adapter = mOpListAdapter
+        if (adapter != null && adapter.getItemCount() > 0) {
+            Log.d("selectOpAndAdjustOffset", "pos: $position, lastPos: $mLastSelectionPos")
+            if (position != mLastSelectionPos) {
                 mLastSelectionPos = position
                 mLastSelectionId = adapter.operationAt(position).mRowId
 
-                if (delayScroll) {
-                    mListView.postDelayed(object : Runnable {
-                        override fun run() {
-                            mListView.post(object : Runnable {
-                                override fun run() {
-                                    val half = mListLayout.getChildCount() / 2
-                                    Log.d("selectOpAndAdjustOffset", "half: $half")
-                                    if (mListLayout.findFirstCompletelyVisibleItemPosition() >= position) {
-                                        mListView.smoothScrollToPosition(position - half) // scroll in order to see fully expanded op row
-                                    } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position) {
-                                        mListView.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
-                                    }
-                                }
-                            })
-                        }
-                    }, 400)
-                } else {
-                    mListView.smoothScrollToPosition(position + 3) // scroll in order to see fully expanded op row
-                }
+                mListView.post(object : Runnable {
+                    override fun run() {
+                        adjustScroll(position)
+                    }
+                })
+                //, 400)
+
                 adapter.selectedPosition = position
             }
         }
@@ -357,9 +363,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             if (mLastSelectionId == -1L) {
                 val today = Tools.createClearedCalendar()
                 val pos = adapter.findLastOpBeforeDatePos(today)
-                selectOpAndAdjustOffset(pos, true)
+                selectOpAndAdjustOffset(pos)
             } else {
-                selectOpAndAdjustOffset(findOpPosition(mLastSelectionId), true)
+                selectOpAndAdjustOffset(findOpPosition(mLastSelectionId))
             }
         } else {
             throw IllegalStateException()
