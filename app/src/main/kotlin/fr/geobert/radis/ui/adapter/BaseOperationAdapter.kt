@@ -19,7 +19,7 @@ import android.util.Log
 import fr.geobert.radis.ui.OperationListFragment
 
 public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
-        RecyclerView.Adapter<fr.geobert.radis.ui.adapter.OpRowHolder<T>>() {
+        RecyclerView.Adapter<OpRowHolder<T>>() {
     var justClicked: Boolean = false
 
     val operationsList = opList
@@ -126,7 +126,9 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     public fun increaseCache(c: Cursor) {
         val tmp = mCellStates
         val oldCount = operations.count()
+        Log.d("BaseOperationAdapter", "increaseCache oldCount: $oldCount")
         operations = c.map { operationFactory(it) }
+        Log.d("BaseOperationAdapter", "increaseCache newcount: ${operations.count()}")
         mCellStates = arrayOfNulls(operations.count())
         System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())
         notifyDataSetChanged()

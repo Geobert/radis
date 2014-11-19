@@ -4,7 +4,6 @@ import android.database.Cursor
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import android.support.v7.app.ActionBar
-import android.widget.ListView
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.ui.editor.StatisticEditor
@@ -21,8 +20,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.content.Intent
 import android.support.v4.content.CursorLoader
-import android.widget.ListAdapter
-import android.widget.AdapterView
 import fr.geobert.radis.data.Statistic
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.OperationTable
@@ -51,15 +48,20 @@ import android.support.v4.util.SimpleArrayMap
 import org.achartengine.model.XYSeries
 import org.achartengine.ChartFactory
 import org.achartengine.chart.BarChart.Type
-import android.widget.Adapter
 import android.util.Log
 import android.app.Activity
+import android.view.ViewStub
+import android.support.v7.widget.RecyclerView
+import fr.geobert.radis.ui.adapter.StatisticAdapter
+import android.support.v7.widget.DefaultItemAnimator
 
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     val ctx: FragmentActivity by Delegates.lazy { getActivity() }
     private val STAT_LOADER = 2000
-    private var mList: ListView by Delegates.notNull()
-    private var mAdapter: StatListAdapter? = null
+    private var mContainer: View? = null
+    private var mList: RecyclerView by Delegates.notNull()
+    private val mEmptyView: ViewStub by Delegates.lazy { mContainer?.findViewById(android.R.id.empty) as ViewStub }
+    private var mAdapter: StatisticAdapter? = null
     private var mLoader: Loader<Cursor>? = null
     private val ZOOM_ENABLED = true
 
@@ -67,14 +69,11 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
         setHasOptionsMenu(true)
         val v = inflater?.inflate(R.layout.statistics_list_fragment, container, false) as View
-        mList = v.findViewById(android.R.id.list) as ListView
-        mList.setEmptyView(v.findViewById(android.R.id.empty))
-        mList.setOnItemClickListener(object : AdapterView.OnItemClickListener {
-
-            override fun onItemClick(p0: AdapterView<out Adapter?>, p1: View, p2: Int, p3: Long) {
-                onItemClicked(p1)
-            }
-        })
+        mContainer = v
+        mList = v.findViewById(android.R.id.list) as RecyclerView
+        mList.setLayoutManager(android.support.v7.widget.LinearLayoutManager(getActivity()))
+        mList.setHasFixedSize(true)
+        mList.setItemAnimator(DefaultItemAnimator())
 
         val actionbar: ActionBar = mActivity?.getSupportActionBar() as ActionBar
         actionbar.setDisplayHomeAsUpEnabled(true)
@@ -109,14 +108,6 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         }
     }
 
-    fun onItemClicked(v: View) {
-        //val stat = mAdapter?.getItem(i)
-        val h = v.getTag() as StatListAdapter.StatRowHolder
-        val stat = h.stat
-        if (stat != null)
-            startActivity(createChartView(stat))
-    }
-
     private fun fetchStats() {
         when (mLoader) {
             null ->
@@ -145,14 +136,20 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         mLoader?.reset()
     }
 
-    override fun onLoadFinished(loader: Loader<Cursor>?, cursor: Cursor?): Unit {
-        if (cursor != null)
-            if (mAdapter == null) {
-                mAdapter = StatListAdapter(ctx, cursor)
-                mList.setAdapter(mAdapter as ListAdapter)
-            } else {
-                mAdapter?.changeCursor(cursor)
-            }
+    override fun onLoadFinished(loader: Loader<Cursor>?, cursor: Cursor): Unit {
+        if (mAdapter == null) {
+            mAdapter = StatisticAdapter(cursor, this)
+            mList.setAdapter(mAdapter)
+        } else {
+            mAdapter?.swapCursor(cursor)
+        }
+        if (mAdapter?.getItemCount() == 0) {
+            mList.setVisibility(View.GONE)
+            mEmptyView.setVisibility(View.VISIBLE)
+        } else {
+            mList.setVisibility(View.VISIBLE)
+            mEmptyView.setVisibility(View.GONE)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?): Unit {
@@ -438,7 +435,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         return Pair(data, renderer)
     }
 
-    private fun createChartView(stat: Statistic): Intent? {
+    fun createChartView(stat: Statistic): Intent? {
         val intent = when (stat.chartType) {
             Statistic.CHART_PIE -> {
                 val (dataSet, renderer) = createCategorySeries(stat)

@@ -17,12 +17,13 @@ import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import java.util.NoSuchElementException
+import android.util.Log
+import fr.geobert.radis.db.AccountTable
 
 public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
         BaseOperationAdapter<Operation>(activity, opList, cursor) {
     var date1 = GregorianCalendar()
     var date2 = GregorianCalendar()
-    var projectionDate = 0L
 
     override fun operationFactory(c: Cursor): Operation = Operation(c)
 
@@ -88,9 +89,10 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
 
         if (needInfos) {
             val currentAccountId = activity.getCurrentAccountId()
-            h.sumAtSelection.setText(Formater.getSumFormater().format(
-                    (activity.getAccountManager().getCurrentAccountSum() +
-                            computeSumFromPosition(position)).toDouble() / 100.0))
+            val currentAccSum = activity.getAccountManager().getCurrentAccountSum()
+            val sumFromPos = computeSumFromPosition(position)
+            Log.d("OperationAdapter", "currentAccSum = $currentAccSum / sumFromPos = $sumFromPos")
+            h.sumAtSelection.setText(Formater.getSumFormater().format((currentAccSum + sumFromPos).toDouble() / 100.0))
 
             h.editBtn.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(view: View) {
@@ -141,6 +143,8 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         val op = operationAt(pos)
         val opDate = op.getDate()
         val currentAccountId = activity.getCurrentAccountId()
+        val projectionDate = AccountTable.getProjectionDate()
+        Log.d("OperationAdapter", "compute projDate % $projectionDate")
         return if (opDate < projectionDate || projectionDate == 0L) {
             val opList = filterFrom(pos, true) { projectionDate == 0L || it.getDate() < projectionDate }
             -opList.fold(0L) { s, op ->

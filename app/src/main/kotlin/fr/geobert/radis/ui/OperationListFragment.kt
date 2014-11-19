@@ -39,6 +39,8 @@ import fr.geobert.radis.MainActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.DefaultItemAnimator
 import kotlin.platform.platformStatic
+import fr.geobert.radis.ui.adapter.OperationsAdapter
+import android.view.ViewStub
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var freshLoader: Boolean = false
@@ -48,8 +50,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private val GET_OPS = 300
     private var mOperationsLoader: CursorLoader? = null
     private var mQuickAddController: QuickAddController? = null
-    private var mOpListAdapter: fr.geobert.radis.ui.adapter.OperationsAdapter? = null
+    private var mOpListAdapter: OperationsAdapter? = null
     private var mListView: RecyclerView by Delegates.notNull()
+    private val mEmptyView: ViewStub by Delegates.lazy { this.container.findViewById(android.R.id.empty) as ViewStub }
     private var startOpDate: GregorianCalendar? = null // start date of ops to get
     private var mScrollLoader: OnOperationScrollLoader by Delegates.notNull()
     private var mLastSelectionId = -1L
@@ -70,7 +73,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (mActivity.getCurrentAccountId() != null) {
             supportActionBar.setSelectedNavigationItem(mActivity.getAccountManager().getCurrentAccountPosition(mActivity))
         }
-
         initOperationList()
         initQuickAdd()
         onAccountChanged(mActivity.getCurrentAccountId()!!)
@@ -117,11 +119,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super<BaseFragment>.onSaveInstanceState(outState)
         mQuickAddController?.onSaveInstanceState(outState)
         if (mActivity.getCurrentAccountId() != null) {
-            outState!!.putLong("mAccountId", mActivity.getCurrentAccountId()!!)
+            outState.putLong("mAccountId", mActivity.getCurrentAccountId()!!)
         }
     }
 
@@ -150,9 +152,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (mAccountManager == null) {
             return false
         }
-        val adapter = mOpListAdapter
-        if (adapter != null)
-            adapter.projectionDate = mAccountManager.setCurrentAccountId(itemId)
+        mAccountManager.setCurrentAccountId(itemId)
         val startDate = Tools.createClearedCalendar()
         startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
         startOpDate = startDate
@@ -160,11 +160,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val q = mQuickAddController
         if (q != null) {
             q.setAccount(itemId)
-            getOperationsList()
+            getMoreOperations(null)// getOperationsList()
             return true
         } else {
             initQuickAdd()
-            getOperationsList()
+            getMoreOperations(null)// getOperationsList()
             return false
         }
     }
@@ -187,8 +187,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 Log.d("OperationListFragment", "onLoadFinished $mOpListAdapter")
                 val adapter = mOpListAdapter
                 if (adapter == null) {
-                    val a = fr.geobert.radis.ui.adapter.OperationsAdapter(mActivity, this, cursor)
-                    a.projectionDate = AccountTable.getProjectionDate()
+                    val a = OperationsAdapter(mActivity, this, cursor)
                     mOpListAdapter = a
                     refresh = true
                     mListView.setAdapter(mOpListAdapter)
@@ -199,6 +198,13 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         mListView.setAdapter(adapter)
                 }
                 freshLoader = false
+                if (mOpListAdapter?.getItemCount() == 0) {
+                    mListView.setVisibility(View.GONE)
+                    mEmptyView.setVisibility(View.VISIBLE)
+                } else {
+                    mListView.setVisibility(View.VISIBLE)
+                    mEmptyView.setVisibility(View.GONE)
+                }
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
@@ -218,8 +224,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     /**
-     * get the operations of current account
-     * should be called after getAccountList
+     * get the operations of current account, should be called after getAccountList
      */
     private fun getOperationsList() {
         Log.d(TAG, "getOperationsList mActivity.getCurrentAccountId() : " + mActivity.getCurrentAccountId())
@@ -228,10 +233,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             Log.d(TAG, "getOperationsList mOperationsLoader  : " + mOperationsLoader)
             if (mOperationsLoader == null) {
                 freshLoader = true
-                val startOpDate = Tools.createClearedCalendar()
-                mScrollLoader.setStartDate(startOpDate)
-                startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate!!.getActualMinimum(Calendar.DAY_OF_MONTH))
-                this.startOpDate = startOpDate
+                //                val startOpDate = Tools.createClearedCalendar()
+                //                startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH))
+                //                mScrollLoader.setStartDate(startOpDate)
+                //                this.startOpDate = startOpDate
                 Log.d(TAG, "startOpDate : " + Tools.getDateStr(startOpDate))
                 getLoaderManager().initLoader<Cursor>(GET_OPS, Bundle(), this)
             } else {
@@ -257,7 +262,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun updateDisplay(intent: Intent?) {
-        getOperationsList()
+        getMoreOperations(null)// getOperationsList()
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -336,9 +341,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val c: Cursor?
             Log.d("getMoreOperations", "startOpDate : " + startOpDate)
             if (null == startOpDate) {
-                c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId()!!)
+                c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
             } else {
-                c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId()!!, startOpDate!!.getTimeInMillis())
+                c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), startOpDate!!.getTimeInMillis())
             }
             Log.d("getMoreOperations", "cursor : " + c)
             if (c != null) {
@@ -391,7 +396,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mLastSelectionId = -1L
         mLastSelectionPos = -1
         needRefreshSelection = true
-        getOperationsList()
+        getOperationsList() // TODO getMoreOperations(null)// getOperationsList() ?
         mActivity.updateAccountList()
     }
 
@@ -407,7 +412,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
                     this.startOpDate = opDate
                 }
-                getOperationsList()
+                getOperationsList() // TODO getMoreOperations(null)// getOperationsList() ?
             }
         }
     }

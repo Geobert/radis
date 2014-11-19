@@ -38,10 +38,12 @@ import kotlin.properties.Delegates
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.DefaultItemAnimator
 import android.app.Activity
-import java.util.Calendar
+import android.view.ViewStub
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
+    private var mContainer: LinearLayout? = null
     private var mListView: RecyclerView by Delegates.notNull()
+    private val mEmptyView: ViewStub by Delegates.lazy { mContainer?.findViewById(android.R.id.empty) as ViewStub }
     private val mListLayout by Delegates.lazy { LinearLayoutManager(getActivity()) }
     private var mAdapter: SchedOpAdapter? = null
     private var mLoader: CursorLoader? = null
@@ -53,7 +55,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         setHasOptionsMenu(true)
 
         val ll = inflater.inflate(R.layout.scheduled_list, container, false) as LinearLayout
-
+        mContainer = ll
         val actionbar = mActivity.getSupportActionBar()
         actionbar.setIcon(R.drawable.sched_48)
 
@@ -174,6 +176,13 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             mListView.setAdapter(mAdapter)
         } else {
             adapter.increaseCache(data)
+        }
+        if (mAdapter?.getItemCount() == 0) {
+            mListView.setVisibility(View.GONE)
+            mEmptyView.setVisibility(View.VISIBLE)
+        } else {
+            mListView.setVisibility(View.VISIBLE)
+            mEmptyView.setVisibility(View.GONE)
         }
         computeTotal(data)
     }
