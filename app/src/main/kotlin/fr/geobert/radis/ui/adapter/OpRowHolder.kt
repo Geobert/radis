@@ -22,7 +22,7 @@ public class OpRowHolder<T : Operation>(val view: View, val adapter: BaseOperati
     public var editBtn: ImageButton = this.actionsCont.findViewById(R.id.edit_op) as ImageButton
     public var varBtn: ImageButton = this.actionsCont.findViewById(R.id.variable_action) as ImageButton
     public var isCheckedBox: CheckBox = view.findViewById(R.id.op_checkbox) as CheckBox
-    public var checkedBoxCont: LinearLayout = view.findViewById(R.id.checking_cont) as LinearLayout
+    //public var checkedBoxCont: LinearLayout = view.findViewById(R.id.checking_cont) as LinearLayout
     public var checkedImg: ImageView = view.findViewById(R.id.op_checked_icon) as ImageView
     public var arrowImg: ImageView = view.findViewById(R.id.op_icon) as ImageView
     public var transfertImg: ImageView = view.findViewById(R.id.op_trans_icon) as ImageView

@@ -9,7 +9,7 @@ import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.R
-import fr.geobert.radis.tools.Formater
+import fr.geobert.radis.tools.formatDate
 
 public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor) :
         BaseOperationAdapter<ScheduledOperation>(act, opList, c) {
@@ -27,14 +27,14 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
         b.append(ScheduledOperation.getUnitStr(activity, periodicityUnit, periodicity));
         b.append(" - ");
         if (endDate.getTimeInMillis() > 0L) {
-            b.append(Formater.getFullDateFormater().format(endDate.getTime()));
+            b.append(endDate.getTime().formatDate());
         } else {
             b.append(activity.getString(R.string.no_end_date));
         }
         viewHolder.tag.setText(b.toString());
 
         // date
-        viewHolder.opDate.setText(Formater.getFullDateFormater().format(op.getDateObj()));
+        viewHolder.opDate.setText(op.getDateObj().formatDate());
 
         configureCell(op, viewHolder, pos)
         doAnimations(viewHolder, pos)

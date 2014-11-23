@@ -36,7 +36,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 
 public class Tools {
@@ -402,10 +401,7 @@ public class Tools {
     }
 
     public static String getDateStr(long date) {
-//        GregorianCalendar g = new GregorianCalendar();
-//        g.setTimeInMillis(date);
-//        return getDateStr(g);
-        return Formater.getFullDateFormater().format(new Date(date));
+        return ToolsPackage.formatDate(date);
     }
 
     public static String getDateStr(Calendar cal) {
@@ -445,7 +441,7 @@ public class Tools {
         sumStr = sumStr.replace('+', ' ').trim();
         double d;
         try {
-            d = Formater.getSumFormater().parse(sumStr).doubleValue();
+            d = ToolsPackage.parseSum(sumStr);
         } catch (ParseException e) {
             d = 0d;
         }

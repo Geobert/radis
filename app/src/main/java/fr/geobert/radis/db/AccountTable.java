@@ -8,9 +8,9 @@ import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import fr.geobert.radis.data.Operation;
-import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.ToolsPackage;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
@@ -236,8 +236,7 @@ public class AccountTable {
             break;
             case PROJECTION_ABSOLUTE_DATE: {
                 GregorianCalendar projDate = Tools.createClearedCalendar();
-                projDate.setTime(Formater.getFullDateFormater().parse(
-                        projectionDate));
+                projDate.setTime(ToolsPackage.parseDate(projectionDate));
                 projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
                 Cursor op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, accountId);
                 projDate.add(Calendar.DAY_OF_MONTH, -1); // restore date after
@@ -258,7 +257,7 @@ public class AccountTable {
         values.put(KEY_ACCOUNT_OP_SUM, opSum);
         values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum);
         Log.d(TAG, "setCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : "
-                + Formater.getFullDateFormater().format(new Date(date)));
+                + ToolsPackage.formatDate(new Date(date)));
         values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
     }
 
@@ -303,11 +302,9 @@ public class AccountTable {
                 "checkNeedUpdateProjection : "
                         + res
                         + "/mProjectionDate : "
-                        + Formater.getFullDateFormater().format(
-                        new Date(mProjectionDate))
+                        + ToolsPackage.formatDate(new Date(mProjectionDate))
                         + "/opdate = "
-                        + Formater.getFullDateFormater().format(
-                        new Date(opDate)) + "/projMode = "
+                        + ToolsPackage.formatDate(new Date(opDate)) + "/projMode = "
                         + mProjectionMode
         );
         return res;
@@ -336,10 +333,8 @@ public class AccountTable {
                 break;
                 case PROJECTION_ABSOLUTE_DATE:
                     try {
-                        Date projDate = Formater
-                                .getFullDateFormater()
-                                .parse(c.getString(c
-                                        .getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
+                        Date projDate =
+                                ToolsPackage.parseDate(c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)));
                         GregorianCalendar cal = new GregorianCalendar();
                         cal.setTime(projDate);
                         cal.set(Calendar.HOUR, 0);
@@ -468,9 +463,8 @@ public class AccountTable {
                 projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
             }
 
-            Log.d(TAG, "updateProjection projDate "
-                    + Formater.getFullDateFormater().format(projDate) + "/opDate "
-                    + Formater.getFullDateFormater().format(opDate));
+            Log.d(TAG, "updateProjection projDate " + ToolsPackage.formatDate(projDate) + "/opDate "
+                    + ToolsPackage.formatDate(opDate));
 
             if (origOpDate == -2) { // called from RadisService, oldSum = 0 and we always need to add opSum.
                 long curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM));
@@ -501,8 +495,7 @@ public class AccountTable {
                 if (null != op) {
                     if (op.moveToFirst()) {
                         Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 0 : "
-                                + Formater.getFullDateFormater().format(new Date(
-                                op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE)))));
+                                + ToolsPackage.formatDate(op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE))));
 
                         args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op
                                 .getColumnIndex(OperationTable.KEY_OP_DATE)));
@@ -510,8 +503,7 @@ public class AccountTable {
                     op.close();
                 }
             } else {
-                Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 1 : "
-                        + Formater.getFullDateFormater().format(new Date(opDate)));
+                Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 1 : " + ToolsPackage.formatDate(opDate));
                 args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate);
             }
         }
@@ -567,7 +559,6 @@ public class AccountTable {
     }
 
     public static long getCheckedSum(Context ctx, Long accountId) {
-        Thread.dumpStack();
         Log.d("getCheckedSum ", "ctx : " + ctx + " accountId : " + accountId);
         Cursor c = fetchAccount(ctx, accountId);
         long res = 0;
@@ -642,8 +633,7 @@ public class AccountTable {
             break;
             case 2: {
                 GregorianCalendar projDate = Tools.createClearedCalendar();
-                projDate.setTime(Formater.getFullDateFormater().parse(
-                        projectionDate));
+                projDate.setTime(ToolsPackage.parseDate(projectionDate));
                 projDate.add(Calendar.DAY_OF_MONTH, 1); // roll for query
                 Cursor op = db.query(
                         OperationTable.DATABASE_OP_TABLE_JOINTURE,
@@ -671,8 +661,7 @@ public class AccountTable {
         }
         values.put(KEY_ACCOUNT_OP_SUM, opSum);
         values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum);
-        Log.d(TAG, "rawSetCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : "
-                + Formater.getFullDateFormater().format(new Date(date)));
+        Log.d(TAG, "rawSetCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : " + ToolsPackage.formatDate(date));
         values.put(KEY_ACCOUNT_CUR_SUM_DATE, date);
     }
 

@@ -7,7 +7,6 @@ import fr.geobert.radis.tools.map
 import android.view.View
 import fr.geobert.radis.R
 import fr.geobert.radis.MainActivity
-import fr.geobert.radis.tools.Formater
 import fr.geobert.radis.ui.IOperationList
 import android.view.ViewGroup
 import android.view.LayoutInflater
@@ -17,6 +16,8 @@ import fr.geobert.radis.tools.ExpandAnimation
 import fr.geobert.radis.tools.Tools
 import android.util.Log
 import fr.geobert.radis.ui.OperationListFragment
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.formatShortDate
 
 public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
         RecyclerView.Adapter<OpRowHolder<T>>() {
@@ -91,8 +92,8 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
             viewHolder.arrowImg.setImageResource(R.drawable.arrow_down16)
         }
 
-        viewHolder.opSum.setText(Formater.getSumFormater().format(sum.toDouble() / 100.0))
-        viewHolder.opDate.setText(Formater.getShortDateFormater(activity).format(op.getDateObj()))
+        viewHolder.opSum.setText((sum.toDouble() / 100.0).formatSum())
+        viewHolder.opDate.setText(op.getDateObj().formatShortDate())
 
         // third party
         viewHolder.opName.setText(if (activity.getCurrentAccountId() == transfertId) {
@@ -101,7 +102,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
             op.mThirdParty
         });
 
-        viewHolder.checkedImg.setVisibility(if (op.mIsChecked) View.VISIBLE else View.GONE)
+        //        viewHolder.checkedImg.setVisibility(if (op.mIsChecked) View.VISIBLE else View.GONE)
     }
 
     override fun getItemCount(): Int = operations.count()

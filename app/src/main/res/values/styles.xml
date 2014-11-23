@@ -129,18 +129,18 @@
         <item name="android:paddingLeft">3dp</item>
         <item name="android:paddingRight">3dp</item>
         <item name="android:paddingBottom">2dp</item>
-        <item name="android:textSize">18dp</item>
+        <item name="android:textSize">18sp</item>
         <item name="android:singleLine">true</item>
     </style>
 
     <style name="OpRowTextView.Infos">
         <item name="android:gravity">right</item>
-        <item name="android:textSize">12dp</item>
+        <item name="android:textSize">12sp</item>
     </style>
 
     <style name="OpRowTextView.Sums">
         <item name="android:minWidth">60sp</item>
-        <item name="android:gravity">right</item>
+        <item name="android:gravity">right|center_vertical</item>
         <item name="android:layout_weight">0</item>
     </style>
 

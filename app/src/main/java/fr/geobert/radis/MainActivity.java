@@ -31,10 +31,10 @@ import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnRefreshReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.tools.DBPrefsManager;
-import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.PauseHandler;
 import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.ToolsPackage;
 import fr.geobert.radis.tools.UpdateDisplayInterface;
 import fr.geobert.radis.ui.OperationListFragment;
 import fr.geobert.radis.ui.ScheduledOpListFragment;
@@ -213,6 +213,9 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ToolsPackage.initShortDate(this);
+
         if (!BuildConfig.DEBUG)
             Crashlytics.start(this);
         setContentView(R.layout.activity_main);
@@ -615,7 +618,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 } else {
                     textView.setTextColor(greenColor);
                 }
-                stringBuilder.append(Formater.getSumFormater().format(sum / 100.0d));
+                stringBuilder.append(ToolsPackage.formatSum(sum / 100.0d));
                 stringBuilder.append(' ').append(currencySymbol);
                 textView.setText(stringBuilder);
                 res = true;
@@ -624,10 +627,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 long dateLong = cursor.getLong(i);
                 StringBuilder stringBuilder = new StringBuilder();
                 if (dateLong > 0) {
-                    stringBuilder.append(String.format(
-                            getString(R.string.balance_at),
-                            Formater.getFullDateFormater().format(
-                                    new Date(dateLong))
+                    stringBuilder.append(String.format(getString(R.string.balance_at), ToolsPackage.formatDate(new Date(dateLong))
                     ));
                 } else {
                     stringBuilder.append(getString(R.string.current_sum));

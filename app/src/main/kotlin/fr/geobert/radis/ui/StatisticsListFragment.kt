@@ -25,7 +25,6 @@ import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.map
 import java.util.GregorianCalendar
-import fr.geobert.radis.tools.Formater
 import android.os.Build
 import java.util.Calendar
 import java.util.Locale
@@ -54,6 +53,8 @@ import android.view.ViewStub
 import android.support.v7.widget.RecyclerView
 import fr.geobert.radis.ui.adapter.StatisticAdapter
 import android.support.v7.widget.DefaultItemAnimator
+import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.tools.formatSum
 
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     val ctx: FragmentActivity by Delegates.lazy { getActivity() }
@@ -191,7 +192,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                     val g = GregorianCalendar()
                     g.setTimeInMillis(o.getDate())
                     when (stat.timeScaleType) {
-                        Statistic.PERIOD_DAYS, Statistic.PERIOD_ABSOLUTE -> Formater.getFullDateFormater().format(g.getTime())
+                        Statistic.PERIOD_DAYS, Statistic.PERIOD_ABSOLUTE -> g.getTime().formatDate()
                         Statistic.PERIOD_MONTHES ->
                             if (Build.VERSION.SDK_INT >= 9) {
                                 g.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) ?: ""
@@ -308,7 +309,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                     m.forEach {
                         val v = Math.abs(it.value.fold(0L) {(i: Long, op: Operation) -> i + op.mSum }) + 0.0
                         renderer.setYAxisMax(Math.max(v + 1.0, renderer.getYAxisMax()))
-                        renderer.addYTextLabel(v, Formater.getSumFormater().format(v))
+                        renderer.addYTextLabel(v, v.formatSum())
                         s.add(it.value[0].getDateObj(), v)
                     }
                     data.addSeries(s)
@@ -460,8 +461,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         intent.putExtra(StatisticActivity.ACCOUNT_NAME, stat.accountName)
         intent.putExtra(StatisticActivity.FILTER, ctx.getString(stat.getFilterStr()))
         val (start, end) = stat.createTimeRange()
-        val f = Formater.getFullDateFormater()
-        val time = "${f.format(start)} ${ctx.getString(R.string.rarr)} ${f.format(end)}"
+        val time = "${start.formatDate()} ${ctx.getString(R.string.rarr)} ${end.formatDate()}"
         intent.putExtra(StatisticActivity.TIME_SCALE, time)
         return intent
     }

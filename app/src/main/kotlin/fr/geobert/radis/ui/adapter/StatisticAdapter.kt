@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import android.view.LayoutInflater
 import fr.geobert.radis.ui.DeleteStatConfirmationDiag
 import fr.geobert.radis.R
-import fr.geobert.radis.tools.Formater
 import fr.geobert.radis.ui.editor.StatisticEditor
 import fr.geobert.radis.ui.StatisticsListFragment
+import fr.geobert.radis.tools.formatDate
 
 public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) : RecyclerView.Adapter<StatRowHolder>() {
     var statistics = cursor.map<Statistic> { Statistic(it) }
@@ -41,8 +41,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
         holder.filterName.setText(stat.getFilterStr())
 
         val (start, end) = stat.createTimeRange()
-        val f = Formater.getFullDateFormater()
-        holder.timeScale.setText("${f.format(start)} ${ctx.getString(R.string.rarr)} ${f.format(end)}")
+        holder.timeScale.setText("${start.formatDate()} ${ctx.getString(R.string.rarr)} ${end.formatDate()}")
         //        holder.stat = stat
     }
 

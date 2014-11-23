@@ -30,7 +30,7 @@
                     android:layout_weight="1"
                     android:layout_height="25dp"
                     android:textAllCaps="true"
-                    android:layout_marginLeft="8dp"
+                    android:layout_marginLeft="5dp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"/>
 
@@ -41,7 +41,7 @@
                     android:layout_weight="1"
                     android:layout_height="25dp"
                     android:gravity="right"
-                    android:layout_marginRight="5dp"
+                    android:layout_marginRight="12dp"
                     android:textColor="@android:color/white"/>
 
         </LinearLayout>
@@ -66,6 +66,11 @@
                     android:id="@+id/op_sum"
                     style="@style/OpRowTextView.Sums"
                     android:text="200,00"/>
+
+            <CheckBox
+                    android:id="@+id/op_checkbox"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"/>
         </LinearLayout>
 
         <LinearLayout
@@ -105,13 +110,16 @@
             <TextView
                     android:id="@+id/op_infos"
                     style="@style/OpRowTextView.Infos"
+                    android:layout_marginRight="12dp"
                     android:layout_weight="0"/>
+
             <ImageView
                     android:id="@+id/op_checked_icon"
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
                     android:src="@drawable/checked_26"
                     android:layout_marginRight="2dp"
+                    android:visibility="gone"
                     android:contentDescription="@string/checked"/>
 
         </LinearLayout>
@@ -150,20 +158,5 @@
                     android:contentDescription="@string/delete"/>
 
         </LinearLayout>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/checking_cont"
-            android:gravity="center"
-            android:visibility="gone"
-            android:layout_height="fill_parent"
-            android:layout_width="wrap_content">
-
-        <CheckBox
-                android:layout_weight="0.1"
-                android:id="@+id/op_checkbox"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"/>
     </LinearLayout>
 </LinearLayout>

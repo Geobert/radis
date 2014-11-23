@@ -23,9 +23,9 @@ import fr.geobert.radis.BaseActivity;
 import fr.geobert.radis.R;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
-import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.ProjectionDateController;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.ToolsPackage;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -92,8 +92,7 @@ public class AccountEditor extends BaseActivity implements
         mAccountNameText = (EditText) findViewById(R.id.edit_account_name);
         mAccountDescText = (EditText) findViewById(R.id.edit_account_desc);
         mAccountStartSumText = (EditText) findViewById(R.id.edit_account_start_sum);
-        CorrectCommaWatcher w = new CorrectCommaWatcher(
-                Formater.getSumFormater().getDecimalFormatSymbols().getDecimalSeparator(), mAccountStartSumText);
+        CorrectCommaWatcher w = new CorrectCommaWatcher(ToolsPackage.getSumSeparator(), mAccountStartSumText);
         w.setAutoNegate(false);
         mAccountStartSumText.addTextChangedListener(w);
         mAccountStartSumText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
@@ -229,9 +228,8 @@ public class AccountEditor extends BaseActivity implements
         mAccountDescText.setText(account.getString(account
                 .getColumnIndexOrThrow(AccountTable.KEY_ACCOUNT_DESC)));
         mAccountStartSumText
-                .setText(Formater
-                        .getSumFormater()
-                        .format(account.getLong(account
+                .setText(ToolsPackage
+                        .formatSum(account.getLong(account
                                 .getColumnIndexOrThrow(AccountTable.KEY_ACCOUNT_START_SUM)) / 100.0d));
         String currencyStr = account.getString(account
                 .getColumnIndexOrThrow(AccountTable.KEY_ACCOUNT_CURRENCY));

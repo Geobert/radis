@@ -11,7 +11,6 @@ import fr.geobert.radis.R
 import java.util.Calendar
 import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
 import android.text.format.DateFormat
-import fr.geobert.radis.tools.Formater
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.tools.Tools
@@ -19,8 +18,11 @@ import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import java.util.NoSuchElementException
 import android.util.Log
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.ui.CheckingOpDashboard
 
-public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
+public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor,
+                               val checkingOpDashboard: CheckingOpDashboard?) :
         BaseOperationAdapter<Operation>(activity, opList, cursor) {
     var date1 = GregorianCalendar()
     var date2 = GregorianCalendar()
@@ -32,6 +34,11 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         val op = this.operationAt(pos)
         fillTag(viewHolder.tag, viewHolder.tagBuilder, op)
         configureCell(op, viewHolder, pos)
+        viewHolder.isCheckedBox.setOnCheckedChangeListener(null)
+        viewHolder.isCheckedBox.setChecked(op.mIsChecked)
+        viewHolder.isCheckedBox.setOnCheckedChangeListener {(compoundButton, b) ->
+            checkingOpDashboard?.onCheckedChanged(op, b)
+        }
         doAnimations(viewHolder, pos)
     }
 
@@ -92,7 +99,7 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
             val currentAccSum = activity.getAccountManager().getCurrentAccountSum()
             val sumFromPos = computeSumFromPosition(position)
             Log.d("OperationAdapter", "currentAccSum = $currentAccSum / sumFromPos = $sumFromPos")
-            h.sumAtSelection.setText(Formater.getSumFormater().format((currentAccSum + sumFromPos).toDouble() / 100.0))
+            h.sumAtSelection.setText(((currentAccSum + sumFromPos).toDouble() / 100.0).formatSum())
 
             h.editBtn.setOnClickListener(object : View.OnClickListener {
                 override fun onClick(view: View) {

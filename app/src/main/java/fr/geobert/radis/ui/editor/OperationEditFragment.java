@@ -26,10 +26,10 @@ import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
-import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.InfoAdapter;
 import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.ToolsPackage;
 
 import java.text.ParseException;
 
@@ -64,8 +64,7 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
         mOpModeText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_mode);
         mOpSumText = (EditText) mActivity.findViewById(R.id.edit_op_sum);
         mOpTagText = (MyAutoCompleteTextView) mActivity.findViewById(R.id.edit_op_tag);
-        mSumTextWatcher = new CorrectCommaWatcher(Formater.getSumFormater()
-                .getDecimalFormatSymbols().getDecimalSeparator(), mOpSumText, this);
+        mSumTextWatcher = new CorrectCommaWatcher(ToolsPackage.getSumSeparator(), mOpSumText, this);
         mDatePicker = (DatePicker) mActivity.findViewById(R.id.edit_op_date);
         mSrcAccount = (Spinner) mActivity.findViewById(R.id.trans_src_account);
         mDstAccount = (Spinner) mActivity.findViewById(R.id.trans_dst_account);
@@ -316,12 +315,11 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
 
     private void invertSign() throws ParseException {
         mSumTextWatcher.setAutoNegate(false);
-        Double sum = Formater.getSumFormater()
-                .parse(mOpSumText.getText().toString()).doubleValue();
+        Double sum = ToolsPackage.parseSum(mOpSumText.getText().toString());
         if (sum != null) {
             sum = -sum;
         }
-        mOpSumText.setText(Formater.getSumFormater().format(sum));
+        mOpSumText.setText(ToolsPackage.formatSum(sum));
     }
 
     protected boolean isFormValid(StringBuilder errMsg) {
@@ -360,7 +358,7 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             res = false;
         } else {
             try {
-                Formater.getSumFormater().parse(str).doubleValue();
+                ToolsPackage.parseSum(str);
             } catch (ParseException e) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n");

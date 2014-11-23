@@ -15,7 +15,6 @@ import kotlin.properties.Delegates
 import fr.geobert.radis.R
 import android.os.Bundle
 import android.view.View
-import fr.geobert.radis.tools.Formater
 import android.widget.ArrayAdapter
 import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.Adapter
@@ -36,6 +35,8 @@ import android.view.MenuItem
 import android.support.v4.content.Loader
 import android.os.Message
 import android.content.Intent
+import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.tools.parseDate
 
 public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
     private val mNameEdt: EditText by Delegates.lazy { findViewById(R.id.stat_name_edt) as EditText }
@@ -141,8 +142,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
             if (show) {
                 mxLastCont.setVisibility(View.GONE)
                 mAbsDateCont.setVisibility(View.VISIBLE)
-                mStartDate.setText(Formater.getFullDateFormater().format(mStat?.startDate))
-                mEndDate.setText(Formater.getFullDateFormater().format(mStat?.endDate))
+                mStartDate.setText(mStat?.startDate?.formatDate())
+                mEndDate.setText(mStat?.endDate?.formatDate())
             } else {
                 mxLastCont.setVisibility(View.VISIBLE)
                 mAbsDateCont.setVisibility(View.GONE)
@@ -193,7 +194,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
 
     fun showDatePicker(button: Button): Unit {
         val date = GregorianCalendar()
-        date.setTime(Formater.getFullDateFormater().parse(button.getText().toString()) as Date)
+        date.setTime(button.getText().toString().parseDate())
         val datePicker = DatePickerDialog(this, {(v: DatePicker?, y: Int, m: Int, d: Int) ->
             val dt = GregorianCalendar(y, m, d).getTime()
             val stat = mStat
@@ -202,7 +203,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
                     R.id.start_date_btn -> stat.startDate = dt
                     R.id.end_date_btn -> stat.endDate = dt
                 }
-            button.setText(Formater.getFullDateFormater().format(dt))
+            button.setText(dt.formatDate())
         }, date[Calendar.YEAR], date[Calendar.MONTH], date[Calendar.DAY_OF_MONTH])
         datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(android.R.string.cancel), null:Message?)
         datePicker.show()

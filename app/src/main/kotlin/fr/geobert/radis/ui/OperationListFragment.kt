@@ -43,8 +43,8 @@ import fr.geobert.radis.ui.adapter.OperationsAdapter
 import android.view.ViewStub
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
+    private var checkingDashboard: CheckingOpDashboard? = null
     private var freshLoader: Boolean = false
-
     private var mListLayout: LinearLayoutManager by Delegates.notNull()
     private val TAG = "OperationListFragment"
     private val GET_OPS = 300
@@ -95,6 +95,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             q.clearFocus()
             setQuickAddVisibility()
         }
+        checkingDashboard?.onResume()
+    }
+
+    override fun onPause() {
+        super<BaseFragment>.onPause()
+        checkingDashboard?.onPause()
     }
 
     private fun initQuickAdd() {
@@ -187,7 +193,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 Log.d("OperationListFragment", "onLoadFinished $mOpListAdapter")
                 val adapter = mOpListAdapter
                 if (adapter == null) {
-                    val a = OperationsAdapter(mActivity, this, cursor)
+                    val a = OperationsAdapter(mActivity, this, cursor, checkingDashboard)
                     mOpListAdapter = a
                     refresh = true
                     mListView.setAdapter(mOpListAdapter)
@@ -267,7 +273,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.operations_list_menu, menu)
-        //        inflater.inflate(R.menu.common_menu, menu);
+        val l = menu.findItem(R.id.checking_op).getActionView() as LinearLayout
+        this.checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
+        checkingDashboard?.onResume()
         if (Tools.DEBUG_MODE) {
             inflater.inflate(R.menu.debug_menu, menu)
         }

@@ -28,7 +28,6 @@ import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
-import fr.geobert.radis.tools.Formater
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.ui.adapter.SchedOpAdapter
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
@@ -39,6 +38,7 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.DefaultItemAnimator
 import android.app.Activity
 import android.view.ViewStub
+import fr.geobert.radis.tools.formatSum
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
     private var mContainer: LinearLayout? = null
@@ -205,9 +205,9 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             } while (data.moveToNext())
         }
         mTotalLbl.setText(getString(R.string.sched_op_total_sum).format(
-                Formater.getSumFormater().format(credit.toDouble() / 100.0),
-                Formater.getSumFormater().format(debit.toDouble() / 100.0),
-                Formater.getSumFormater().format((credit + debit).toDouble() / 100.0)))
+                (credit.toDouble() / 100.0).formatSum(),
+                (debit.toDouble() / 100.0).formatSum(),
+                ((credit + debit).toDouble() / 100.0).formatSum()))
     }
 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {

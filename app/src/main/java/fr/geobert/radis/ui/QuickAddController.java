@@ -21,11 +21,11 @@ import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.InfoTables;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.tools.CorrectCommaWatcher;
-import fr.geobert.radis.tools.Formater;
 import fr.geobert.radis.tools.InfoAdapter;
 import fr.geobert.radis.tools.MyAutoCompleteTextView;
 import fr.geobert.radis.tools.QuickAddTextWatcher;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.tools.ToolsPackage;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -47,8 +47,7 @@ public class QuickAddController {
         mQuickAddAmount = (EditText) container.findViewById(R.id.quickadd_amount);
         mQuickAddButton = (ImageButton) container.findViewById(R.id.quickadd_validate);
         mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount);
-        mCorrectCommaWatcher = new CorrectCommaWatcher(Formater.getSumFormater().getDecimalFormatSymbols()
-                .getDecimalSeparator(), mQuickAddAmount).setAutoNegate(true);
+        mCorrectCommaWatcher = new CorrectCommaWatcher(ToolsPackage.getSumSeparator(), mQuickAddAmount).setAutoNegate(true);
 
         mQuickAddTextWatcher = new QuickAddTextWatcher(mQuickAddThirdParty, mQuickAddAmount, mQuickAddButton);
 
