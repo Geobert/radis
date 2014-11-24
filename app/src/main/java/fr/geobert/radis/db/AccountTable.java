@@ -311,11 +311,9 @@ public class AccountTable {
     }
 
     public static void initProjectionDate(Cursor c) {
-        Log.d(TAG, "initProjectionDate cursor : " + c);
         if (c != null) {
             mProjectionMode = c.getInt(c
                     .getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE));
-            Log.d(TAG, "initProjectionDate mode : " + mProjectionMode);
             switch (mProjectionMode) {
                 case PROJECTION_FURTHEST:
                     mProjectionDate = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE));
@@ -559,7 +557,6 @@ public class AccountTable {
     }
 
     public static long getCheckedSum(Context ctx, Long accountId) {
-        Log.d("getCheckedSum ", "ctx : " + ctx + " accountId : " + accountId);
         Cursor c = fetchAccount(ctx, accountId);
         long res = 0;
         if (c != null) {

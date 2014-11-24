@@ -31,9 +31,9 @@ import fr.geobert.radis.tools.Tools;
 
 public class ScheduledOperationEditor extends CommonOpEditor implements OpEditFragmentAccessor {
     // activities ids
-    public static final int ACTIVITY_SCH_OP_CREATE = 0;
-    public static final int ACTIVITY_SCH_OP_EDIT = 1;
-    public static final int ACTIVITY_SCH_OP_CONVERT = 2;
+    public static final int ACTIVITY_SCH_OP_CREATE = 3000;
+    public static final int ACTIVITY_SCH_OP_EDIT = 3001;
+    public static final int ACTIVITY_SCH_OP_CONVERT = 3002;
     public static final String PARAM_SRC_OP_TO_CONVERT = "sourceOpId";
 
     protected static final int ASK_UPDATE_OCCURENCES_DIALOG_ID = 10;

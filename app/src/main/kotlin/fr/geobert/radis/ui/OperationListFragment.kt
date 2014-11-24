@@ -75,7 +75,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
         initOperationList()
         initQuickAdd()
-        onAccountChanged(mActivity.getCurrentAccountId()!!)
+        processAccountChanged(mActivity.getCurrentAccountId()!!)
         return this.container
     }
 
@@ -154,10 +154,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mQuickAddController?.onRestoreInstanceState(savedInstanceState)
     }
 
-    override fun onAccountChanged(itemId: Long): Boolean {
-        if (mAccountManager == null) {
-            return false
-        }
+    fun processAccountChanged(itemId: Long): Boolean {
         mAccountManager.setCurrentAccountId(itemId)
         val startDate = Tools.createClearedCalendar()
         startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
@@ -175,6 +172,18 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
+    override fun onAccountChanged(itemId: Long): Boolean {
+        if (mAccountManager == null) {
+            return false
+        }
+        Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())}")
+        if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
+            getLoaderManager().destroyLoader(GET_OPS)
+            processAccountChanged(itemId)
+        }
+        return false
+    }
+
     override fun onCreateLoader(i: Int, bundle: Bundle): Loader<Cursor>? =
             when (i) {
                 GET_OPS -> {
@@ -185,6 +194,15 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 else -> null
             }
 
+    fun setEmptyViewVisibility(visible: Boolean) {
+        if (visible) {
+            mListView.setVisibility(View.GONE)
+            mEmptyView.setVisibility(View.VISIBLE)
+        } else {
+            mListView.setVisibility(View.VISIBLE)
+            mEmptyView.setVisibility(View.GONE)
+        }
+    }
 
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, cursor: Cursor) {
         when (cursorLoader.getId()) {
@@ -204,13 +222,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         mListView.setAdapter(adapter)
                 }
                 freshLoader = false
-                if (mOpListAdapter?.getItemCount() == 0) {
-                    mListView.setVisibility(View.GONE)
-                    mEmptyView.setVisibility(View.VISIBLE)
-                } else {
-                    mListView.setVisibility(View.VISIBLE)
-                    mEmptyView.setVisibility(View.GONE)
-                }
+                Log.d("OperationListFragment", "onLoadFinished item count : ${mOpListAdapter?.getItemCount()}")
+                setEmptyViewVisibility(mOpListAdapter?.getItemCount() == 0)
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
@@ -233,17 +246,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
      * get the operations of current account, should be called after getAccountList
      */
     private fun getOperationsList() {
-        Log.d(TAG, "getOperationsList mActivity.getCurrentAccountId() : " + mActivity.getCurrentAccountId())
-
         if (mActivity.getCurrentAccountId() != null) {
-            Log.d(TAG, "getOperationsList mOperationsLoader  : " + mOperationsLoader)
             if (mOperationsLoader == null) {
                 freshLoader = true
-                //                val startOpDate = Tools.createClearedCalendar()
-                //                startOpDate.set(Calendar.DAY_OF_MONTH, startOpDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-                //                mScrollLoader.setStartDate(startOpDate)
-                //                this.startOpDate = startOpDate
-                Log.d(TAG, "startOpDate : " + Tools.getDateStr(startOpDate))
                 getLoaderManager().initLoader<Cursor>(GET_OPS, Bundle(), this)
             } else {
                 getLoaderManager().restartLoader<Cursor>(GET_OPS, Bundle(), this)
@@ -363,6 +368,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     mScrollLoader.setStartDate(d)
                     startOpDate = d
                     getOperationsList()
+                } else {
+                    setEmptyViewVisibility(true)
                 }
                 c.close()
             }

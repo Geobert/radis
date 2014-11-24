@@ -414,17 +414,10 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 mAccountManager.backupCurAccountId();
                 updateAccountList();
                 break;
+            default:
+                break;
         }
     }
-
-//    @Override
-//    public boolean onPrepareOptionsMenu(Menu menu) {
-//        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
-//        if (drawerOpen) {
-//            mDrawerList.setItemChecked(mActiveFragmentId, true);
-//        }
-//        return super.onPrepareOptionsMenu(menu);
-//    }
 
     private void consolidateDbIfNeeded() {
         PrefsManager prefs = PrefsManager.getInstance(this);
@@ -450,6 +443,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         this.setActionBarListNavCbk(mAccountAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                mAccountManager.setCurrentAccountId(itemId);
                 if (mActiveFragment != null && mActiveFragment.isAdded()) {
                     return mActiveFragment.onAccountChanged(itemId);
                 }

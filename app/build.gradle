@@ -23,7 +23,7 @@ repositories {
 
 android {
     compileSdkVersion 21
-    buildToolsVersion '21.0.1'
+    buildToolsVersion '21.1'
     lintOptions {
         disable 'MissingTranslation'
     }
@@ -32,7 +32,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 21
         versionCode 46
-        versionName "1.0b11"
+        versionName "1.0b12"
     }
     buildTypes {
         release {

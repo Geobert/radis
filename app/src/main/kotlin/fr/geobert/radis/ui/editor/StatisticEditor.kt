@@ -61,14 +61,17 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
     private val GET_STAT = 700
 
     class object {
+        public val ACTIVITY_STAT_CREATE: Int = 4000;
+        public val ACTIVITY_STAT_EDIT: Int = 4001;
+
         public fun callMeForResult(ctx: Activity) {
-            ctx.startActivityForResult(Intent(ctx, javaClass<StatisticEditor>()), 0)
+            ctx.startActivityForResult(Intent(ctx, javaClass<StatisticEditor>()), ACTIVITY_STAT_CREATE)
         }
 
         public fun callMeForResult(ctx: Activity, statId: Long) {
             val i = Intent(ctx, javaClass<StatisticEditor>())
             i.putExtra(StatisticTable.KEY_STAT_ID, statId)
-            ctx.startActivityForResult(i, 0)
+            ctx.startActivityForResult(i, ACTIVITY_STAT_EDIT)
         }
     }
 

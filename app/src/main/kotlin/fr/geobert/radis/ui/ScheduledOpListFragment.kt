@@ -39,6 +39,7 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.app.Activity
 import android.view.ViewStub
 import fr.geobert.radis.tools.formatSum
+import android.util.Log
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
     private var mContainer: LinearLayout? = null
@@ -103,6 +104,12 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onAccountChanged(itemId: Long): Boolean {
+        val req = if (mActivity.getCurrentAccountId() == 0L) {
+            GET_ALL_SCH_OPS
+        } else {
+            GET_SCH_OPS_OF_ACCOUNT
+        }
+        getLoaderManager().destroyLoader(req)
         fetchSchOpsOfAccount()
         return true
     }
@@ -120,11 +127,10 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             needRefresh = true
         }
         if (needRefresh) {
-            val req: Int
-            if (mActivity.getCurrentAccountId() == 0L) {
-                req = GET_ALL_SCH_OPS
+            val req = if (mActivity.getCurrentAccountId() == 0L) {
+                GET_ALL_SCH_OPS
             } else {
-                req = GET_SCH_OPS_OF_ACCOUNT
+                GET_SCH_OPS_OF_ACCOUNT
             }
             if (mLoader != null) {
                 getLoaderManager().restartLoader<Cursor>(req, null, this)
@@ -154,6 +160,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor>? {
         val currentAccountId = mActivity.getCurrentAccountId()
+        Log.d("SchedOpList", "onCreateLoader account id : $currentAccountId")
         when (id) {
             GET_ALL_SCH_OPS -> mLoader = CursorLoader(mActivity, DbContentProvider.SCHEDULED_JOINED_OP_URI,
                     ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY, null, null,
@@ -211,6 +218,8 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {
+        mAdapter?.reset()
+        mLoader = null
     }
 
     override fun getMoreOperations(startDate: GregorianCalendar?) {
