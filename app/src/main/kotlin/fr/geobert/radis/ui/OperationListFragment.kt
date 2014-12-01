@@ -142,7 +142,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private fun initOperationList() {
         mListView = container.findViewById(android.R.id.list) as RecyclerView
         mListLayout = LinearLayoutManager(mActivity)
-        mListView.setLayoutManager(mListLayout)
+        if (mListView.getLayoutManager() == null) {
+            mListView.setLayoutManager(mListLayout)
+        }
         mListView.setItemAnimator(DefaultItemAnimator())
         mListView.setHasFixedSize(true)
         mScrollLoader = OnOperationScrollLoader(this, mListLayout)
@@ -176,7 +178,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (mAccountManager == null) {
             return false
         }
-        Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())}")
+        Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
         if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
             getLoaderManager().destroyLoader(GET_OPS)
             processAccountChanged(itemId)

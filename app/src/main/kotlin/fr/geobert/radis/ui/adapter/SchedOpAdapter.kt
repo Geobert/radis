@@ -36,6 +36,8 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
         // date
         viewHolder.opDate.setText(op.getDateObj().formatDate());
 
+        viewHolder.isCheckedBox.setVisibility(View.GONE)
+
         configureCell(op, viewHolder, pos)
         doAnimations(viewHolder, pos)
     }

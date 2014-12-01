@@ -63,9 +63,10 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         mListView = ll.findViewById(android.R.id.list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
         mListView.setHasFixedSize(true)
-        mListView.setLayoutManager(mListLayout)
+        if (mListView.getLayoutManager() == null) {
+            mListView.setLayoutManager(mListLayout)
+        }
         mListView.setItemAnimator(DefaultItemAnimator())
-
         return ll
     }
 
@@ -104,13 +105,16 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onAccountChanged(itemId: Long): Boolean {
-        val req = if (mActivity.getCurrentAccountId() == 0L) {
-            GET_ALL_SCH_OPS
-        } else {
-            GET_SCH_OPS_OF_ACCOUNT
+        if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
+            mAccountManager.setCurrentAccountId(itemId)
+            val req = if (mActivity.getCurrentAccountId() == 0L) {
+                GET_ALL_SCH_OPS
+            } else {
+                GET_SCH_OPS_OF_ACCOUNT
+            }
+            getLoaderManager().destroyLoader(req)
+            fetchSchOpsOfAccount()
         }
-        getLoaderManager().destroyLoader(req)
-        fetchSchOpsOfAccount()
         return true
     }
 

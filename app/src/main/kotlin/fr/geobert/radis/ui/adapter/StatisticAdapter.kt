@@ -42,7 +42,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
 
         val (start, end) = stat.createTimeRange()
         holder.timeScale.setText("${start.formatDate()} ${ctx.getString(R.string.rarr)} ${end.formatDate()}")
-        //        holder.stat = stat
+        holder.stat = stat
     }
 
     fun statisticAt(pos: Int) = statistics.elementAt(pos)

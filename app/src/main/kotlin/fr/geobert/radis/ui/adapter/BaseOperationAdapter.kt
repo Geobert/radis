@@ -111,7 +111,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     fun filterFrom(pos: Int, up: Boolean, f: (Operation) -> Boolean): List<Operation> {
         val cut = if (up) {
-            operations.reverse().drop(operations.count() - pos - 1)
+            operations.reverse().drop(operations.count() - pos)
         } else {
             operations.drop(pos)
         }
@@ -126,12 +126,13 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     public fun increaseCache(c: Cursor) {
         val tmp = mCellStates
-        val oldCount = operations.count()
-        Log.d("BaseOperationAdapter", "increaseCache oldCount: $oldCount")
+        Log.d("BaseOperationAdapter", "increaseCache oldCount: ${tmp.count()}")
         operations = c.map { operationFactory(it) }
         Log.d("BaseOperationAdapter", "increaseCache newcount: ${operations.count()}")
         mCellStates = arrayOfNulls(operations.count())
-        System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())
+        if (tmp.count() <= mCellStates.count()) {
+            System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())
+        }
         notifyDataSetChanged()
     }
 
