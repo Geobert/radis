@@ -43,6 +43,8 @@ import fr.geobert.radis.ui.adapter.OperationsAdapter
 import android.view.ViewStub
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
+    private var mOldChildCount: Int = -1
+
     private var checkingDashboard: CheckingOpDashboard? = null
     private var freshLoader: Boolean = false
     private var mListLayout: LinearLayoutManager by Delegates.notNull()
@@ -81,6 +83,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onResume() {
         super<BaseFragment>.onResume()
+        mOldChildCount = -1
         val accMan = mActivity.getAccountManager()
         val curDefaultAccId = accMan.mCurDefaultAccount
         if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(mActivity)) {
@@ -161,7 +164,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val startDate = Tools.createClearedCalendar()
         startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
         startOpDate = startDate
-        mScrollLoader.setStartDate(startDate)
+//        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
         if (q != null) {
             q.setAccount(itemId)
@@ -229,6 +232,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
+                } else {
+                    mListView.post {
+                        val curChildCount = mListLayout.getChildCount()
+                        Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
+                        if (mOldChildCount != curChildCount &&
+                                curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
+                            mOldChildCount = mListLayout.getChildCount()
+                            mScrollLoader.onScrolled(mListView, 0, 0)
+                        }
+                    }
                 }
             }
         }
@@ -313,13 +326,27 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         Log.d("adjustScroll", "half: $half, pos: $position, first: ${mListLayout.findFirstCompletelyVisibleItemPosition()}, last: ${mListLayout.findLastCompletelyVisibleItemPosition()}")
         if (mListLayout.findFirstCompletelyVisibleItemPosition() >= position) {
             if (mListLayout.findFirstCompletelyVisibleItemPosition() == position) {
-                mListView.smoothScrollToPosition(position - half) // scroll in order to see fully expanded op row
+                if (position - half > 0) {
+                    // scroll in order to see fully expanded op row
+                    mListView.smoothScrollToPosition(position - half)
+                } else {
+                    mScrollLoader.onScrolled(mListView, 0, 0);
+                }
             } else {
-                mListView.smoothScrollToPosition(position - 1) // scroll in order to see fully expanded op row
+                if (position - 1 > 0) {
+                    // scroll in order to see fully expanded op row
+                    mListView.smoothScrollToPosition(position - 1)
+                } else {
+                    mScrollLoader.onScrolled(mListView, 0, 0);
+                }
             }
         } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position ) {
             if (mListLayout.findLastCompletelyVisibleItemPosition() == position) {
-                mListView.smoothScrollToPosition(position + 1)
+                if (position + 1 > mListLayout.getChildCount()) {
+                    mListView.smoothScrollToPosition(position + 1)
+                } else {
+                    mScrollLoader.onScrolled(mListView, 0, 0);
+                }
             } else {
                 mListView.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
             }
@@ -367,10 +394,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
                     val d = GregorianCalendar()
                     d.setTimeInMillis(date)
-                    mScrollLoader.setStartDate(d)
+                    d.set(Calendar.DAY_OF_MONTH, d.getMinimum(Calendar.DAY_OF_MONTH))
+//                    mScrollLoader.setStartDate(d)
                     startOpDate = d
                     getOperationsList()
-                } else {
+                } else if (mOpListAdapter?.getItemCount() == 0) {
                     setEmptyViewVisibility(true)
                 }
                 c.close()

@@ -152,8 +152,8 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         val currentAccountId = activity.getCurrentAccountId()
         val projectionDate = AccountTable.getProjectionDate()
         Log.d("OperationAdapter", "compute projDate % $projectionDate")
-        return if (opDate < projectionDate || projectionDate == 0L) {
-            val opList = filterFrom(pos, true) { projectionDate == 0L || it.getDate() < projectionDate }
+        val s = if (opDate < projectionDate || projectionDate == 0L) {
+            val opList = filterFrom(pos, true) { projectionDate == 0L || it.getDate() <= projectionDate }
             -opList.fold(0L) { s, op ->
                 if (op.mTransferAccountId == currentAccountId) s - op.mSum else s + op.mSum
             }
@@ -163,6 +163,8 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
                 if (op.mTransferAccountId == currentAccountId) s - op.mSum else s + op.mSum
             }
         }
+        Log.d("OperationAdapter", "compute sum = $s")
+        return s
     }
 
     fun findLastOpBeforeDatePos(date: java.util.GregorianCalendar): Int {
