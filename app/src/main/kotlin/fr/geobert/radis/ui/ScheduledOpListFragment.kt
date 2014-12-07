@@ -244,6 +244,10 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
+    override fun getListLayoutManager(): LinearLayoutManager = mListLayout
+
+    override fun getRecyclerView(): RecyclerView = mListView
+
     public class DeleteOpConfirmationDialog : DialogFragment() {
         private var operationId: Long = 0
 

@@ -2,16 +2,14 @@ package fr.geobert.radis.ui
 
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-
-import java.util.Calendar
-import java.util.GregorianCalendar
 import android.support.v7.widget.LinearLayoutManager
 
-public class OnOperationScrollLoader(val operationListActivity: IOperationList,
-                                     val linearLayoutManager: LinearLayoutManager) : RecyclerView.OnScrollListener() {// Load more operations while scrolling
+
+public class OnOperationScrollLoader(val operationListActivity: IOperationList) : RecyclerView.OnScrollListener() {// Load more operations while scrolling
     private var lastTotalCount = -1
     //    private var startOpDate: GregorianCalendar? = null
     private var lastTry = false
+    private val linearLayoutManager: LinearLayoutManager = operationListActivity.getListLayoutManager()
 
     override fun onScrollStateChanged(recyclerView: RecyclerView?, i: Int) {
         super<RecyclerView.OnScrollListener>.onScrollStateChanged(recyclerView, i)

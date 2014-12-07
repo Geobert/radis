@@ -34,7 +34,7 @@ public class ExpandUpAnimation extends Animation {
         if (mIsVisibleAfter) {
             mAnimatedView.setVisibility(View.GONE);
         } else {
-            mAnimatedView.setVisibility(View.INVISIBLE);
+            mAnimatedView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -43,16 +43,18 @@ public class ExpandUpAnimation extends Animation {
      *
      * @param view     The layout we want to animate
      * @param duration The duration of the animation, in ms
+     * @param expand   expand or collapse animation
      */
-    public ExpandUpAnimation(View view, int duration) {
+    public ExpandUpAnimation(View view, int duration, boolean expand) {
 
         setDuration(duration);
-        //setFillAfter(true);
+        setFillEnabled(true);
+        setFillAfter(true);
         mAnimatedView = (LinearLayout) view;
         mViewLayoutParams = (LayoutParams) view.getLayoutParams();
 
         // decide to show or hide the view
-        mIsVisibleAfter = (view.getVisibility() == View.VISIBLE);
+        mIsVisibleAfter = !expand;
 
         mMarginStart = mViewLayoutParams.bottomMargin;
         mMarginEnd = (mMarginStart == 0 ? 0 - view.getHeight() : 0);
@@ -77,15 +79,12 @@ public class ExpandUpAnimation extends Animation {
             mViewLayoutParams.bottomMargin = mMarginStart
                     + (int) ((mMarginEnd - mMarginStart) * interpolatedTime);
 
-//            mViewLayoutParams.height = mHeightStart
-//                    + (int) ((mHeightEnd - mHeightStart) * interpolatedTime);
             // Invalidating the layout, making us seeing the changes we made
             mAnimatedView.requestLayout();
 
             // Making sure we didn't run the ending before (it happens!)
         } else if (!mWasEndedAlready) {
             mViewLayoutParams.bottomMargin = mMarginEnd;
-//            mViewLayoutParams.height = mHeightEnd;
             mAnimatedView.requestLayout();
 
             if (mIsVisibleAfter) {

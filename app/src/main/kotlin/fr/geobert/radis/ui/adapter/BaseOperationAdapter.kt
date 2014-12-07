@@ -142,72 +142,87 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     }
 
     // animations
-    protected fun doAnimations(viewHolder: OpRowHolder<T>, pos: Int) {
-        if (selectedPosition == pos) {
-            if (selectedPosition != prevExpandedPos) {
-                viewHolder.view.setBackgroundResource(R.drawable.line_selected_gradient)
-                when (mCellStates[pos]) {
-                    CellState.STATE_MONTH_CELL ->
-                        expandSeparatorNoAnim(viewHolder)
-                    CellState.STATE_INFOS_CELL ->
-                        if (justClicked) {
-                            justClicked = false
-                            animateSeparator(viewHolder)
-                            animateToolbar(viewHolder)
-                            // TODO oldPos update ?
-                        } else {
-                            expandToolbarNoAnim(viewHolder)
-                            expandSeparatorNoAnim(viewHolder)
-                        }
-                    CellState.STATE_MONTH_INFOS_CELL -> {
-                        expandSeparatorNoAnim(viewHolder)
-                        if (justClicked) {
-                            justClicked = false
-                            animateToolbar(viewHolder)
-                        } else {
-                            expandToolbarNoAnim(viewHolder)
-                        }
-                    }
-                }
-            }
-        } else {
-            viewHolder.view.setBackgroundResource(R.drawable.op_line)
+    private fun animateSelectedPos(viewHolder: OpRowHolder<T>, pos: Int) {
+        if (selectedPosition != prevExpandedPos) {
+            viewHolder.view.setBackgroundResource(R.drawable.line_selected_gradient)
             when (mCellStates[pos]) {
-                CellState.STATE_MONTH_CELL -> {
+                CellState.STATE_MONTH_CELL ->
                     expandSeparatorNoAnim(viewHolder)
-                    if (pos == prevExpandedPos) {
-                        animateToolbar(viewHolder)
-                        prevExpandedPos = -1
+                CellState.STATE_INFOS_CELL ->
+                    if (justClicked) {
+                        justClicked = false
+                        animateSeparator(viewHolder, true)
+                        animateToolbar(viewHolder, true)
+                        operationsList.getRecyclerView().post {
+                            val l = operationsList.getListLayoutManager()
+                            val firstIdx = l.findFirstVisibleItemPosition()
+                            val lastIdx = l.findLastVisibleItemPosition()
+                            if (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx) {
+                                prevExpandedPos = -1
+                            }
+                        }
                     } else {
-                        collapseToolbarNoAnim(viewHolder)
+                        expandToolbarNoAnim(viewHolder)
+                        expandSeparatorNoAnim(viewHolder)
                     }
-                }
-                CellState.STATE_REGULAR_CELL -> {
-                    if (pos == prevExpandedPos) {
-                        animateSeparator(viewHolder)
-                        animateToolbar(viewHolder)
-                        prevExpandedPos = -1
+                CellState.STATE_MONTH_INFOS_CELL -> {
+                    expandSeparatorNoAnim(viewHolder)
+                    if (justClicked) {
+                        justClicked = false
+                        animateToolbar(viewHolder, true)
                     } else {
-                        collapseSeparatorNoAnim(viewHolder)
-                        collapseToolbarNoAnim(viewHolder)
+                        expandToolbarNoAnim(viewHolder)
                     }
                 }
             }
         }
     }
 
-    private fun animateSeparator(h: OpRowHolder<T>) {
+    private fun animateNotSelectedPos(viewHolder: OpRowHolder<T>, pos: Int) {
+        viewHolder.view.setBackgroundResource(R.drawable.op_line)
+        when (mCellStates[pos]) {
+            CellState.STATE_MONTH_CELL -> {
+                expandSeparatorNoAnim(viewHolder)
+                if (pos == prevExpandedPos) {
+                    animateToolbar(viewHolder, false)
+                    prevExpandedPos = -1
+                } else {
+                    collapseToolbarNoAnim(viewHolder)
+                }
+            }
+            CellState.STATE_REGULAR_CELL -> {
+                if (pos == prevExpandedPos) {
+                    animateSeparator(viewHolder, false)
+                    animateToolbar(viewHolder, false)
+                    prevExpandedPos = -1
+                } else {
+                    collapseSeparatorNoAnim(viewHolder)
+                    collapseToolbarNoAnim(viewHolder)
+                }
+            }
+        }
+    }
+
+    protected fun doAnimations(viewHolder: OpRowHolder<T>, pos: Int) {
+        if (selectedPosition == pos) {
+            animateSelectedPos(viewHolder, pos)
+        } else {
+            animateNotSelectedPos(viewHolder, pos)
+        }
+    }
+
+    private fun animateSeparator(h: OpRowHolder<T>, expand: Boolean) {
         if (needSeparator) {
             h.separator.clearAnimation()
             (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
-            val anim = ExpandUpAnimation(h.separator, 300)
+            val anim = ExpandUpAnimation(h.separator, 300, expand)
             h.separator.startAnimation(anim)
         }
     }
 
-    private fun animateToolbar(h: OpRowHolder<T>) {
+    private fun animateToolbar(h: OpRowHolder<T>, expand: Boolean) {
         h.actionsCont.clearAnimation()
-        val anim = ExpandAnimation(h.actionsCont, 300)
+        val anim = ExpandAnimation(h.actionsCont, 300, expand)
         h.actionsCont.startAnimation(anim)
     }
 

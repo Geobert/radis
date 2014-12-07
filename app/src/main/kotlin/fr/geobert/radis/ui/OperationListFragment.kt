@@ -150,7 +150,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
         mListView.setItemAnimator(DefaultItemAnimator())
         mListView.setHasFixedSize(true)
-        mScrollLoader = OnOperationScrollLoader(this, mListLayout)
+        mScrollLoader = OnOperationScrollLoader(this)
         mListView.setOnScrollListener(mScrollLoader)
     }
 
@@ -164,7 +164,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val startDate = Tools.createClearedCalendar()
         startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
         startOpDate = startDate
-//        mScrollLoader.setStartDate(startDate)
+        //        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
         if (q != null) {
             q.setAccount(itemId)
@@ -395,7 +395,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     val d = GregorianCalendar()
                     d.setTimeInMillis(date)
                     d.set(Calendar.DAY_OF_MONTH, d.getMinimum(Calendar.DAY_OF_MONTH))
-//                    mScrollLoader.setStartDate(d)
+                    //                    mScrollLoader.setStartDate(d)
                     startOpDate = d
                     getOperationsList()
                 } else if (mOpListAdapter?.getItemCount() == 0) {
@@ -461,6 +461,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             }
         }
     }
+
+    override fun getListLayoutManager(): LinearLayoutManager = mListLayout
+
+    override fun getRecyclerView(): RecyclerView = mListView
 
     public class DeleteOpConfirmationDialog : DialogFragment() {
         private var accountId: Long = 0
