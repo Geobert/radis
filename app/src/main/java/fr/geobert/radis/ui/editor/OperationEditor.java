@@ -58,8 +58,10 @@ public class OperationEditor extends CommonOpEditor {
     @Override
     protected void fetchOrCreateCurrentOp() {
         if (mRowId > 0) {
+            getSupportActionBar().setTitle(R.string.op_edition);
             fetchOp(GET_OP);
         } else {
+            getSupportActionBar().setTitle(R.string.op_creation);
             mCurrentOp = new Operation();
             mCurrentOp.setmAccountId(mCurAccountId);
             populateFields();
@@ -69,11 +71,6 @@ public class OperationEditor extends CommonOpEditor {
     @Override
     protected void populateFields() {
         mEditFragment.populateCommonFields(mCurrentOp);
-    }
-
-    private void onCancelClicked() {
-        setResult(CommonOpEditor.RESULT_CANCELED);
-        finish();
     }
 
     private void onOkClicked() {

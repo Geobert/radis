@@ -161,7 +161,6 @@ public class QuickAddController {
         }
         op.setmThirdParty(mQuickAddThirdParty.getText().toString());
         op.setSumStr(mQuickAddAmount.getText().toString());
-        assert (mAccountId != 0);
         if (OperationTable.createOp(mActivity, op, mAccountId) > -1) {
             mActivity.updateDisplay(null);
         }

@@ -1,7 +1,6 @@
 package fr.geobert.radis;
 
 import android.app.Activity;
-import android.content.ContentProviderClient;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -26,7 +25,6 @@ import android.widget.TextView;
 import com.crashlytics.android.Crashlytics;
 import fr.geobert.radis.data.AccountManager;
 import fr.geobert.radis.db.AccountTable;
-import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.OnRefreshReceiver;
 import fr.geobert.radis.service.RadisService;
@@ -54,8 +52,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     public static final String INTENT_UPDATE_ACC_LIST = "fr.geobert.radis.UPDATE_ACC_LIST";
     private static final String TAG = "MainActivity";
     //    private static final int RESUMING = 1;
-    // robotium test set this to true to activate database cleaning on launch
-    public static boolean ROBOTIUM_MODE = false;
+
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private boolean mFirstStart = true;
@@ -221,7 +218,6 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         setContentView(R.layout.activity_main);
         handler = new FragmentHandler(this);
         Tools.checkDebugMode(this);
-        cleanDatabaseIfTestingMode();
 
         ActionBar actionbar = getSupportActionBar();
         actionbar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
@@ -499,19 +495,6 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             sendBroadcast(i);
             RadisService.callMe(this);
             mFirstStart = false;
-        }
-    }
-
-    private void cleanDatabaseIfTestingMode() {
-        // if run by robotium, delete database, can't do it from robotium test, it leads to crash
-        // see http://stackoverflow.com/questions/12125656/robotium-testing-failed-because-of-deletedatabase
-        if (ROBOTIUM_MODE) {
-            DBPrefsManager.getInstance(this).resetAll();
-            ContentProviderClient client = getContentResolver()
-                    .acquireContentProviderClient("fr.geobert.radis.db");
-            DbContentProvider provider = (DbContentProvider) client.getLocalContentProvider();
-            provider.deleteDatabase(this);
-            client.release();
         }
     }
 

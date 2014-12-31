@@ -252,4 +252,5 @@
     <string name="time">Temps</string>
     <string name="no_lbl">[Aucun]</string>
     <string name="misc_chart_cat">Divers</string>
+    <string name="op_creation">Créer une opération</string>
 </resources>

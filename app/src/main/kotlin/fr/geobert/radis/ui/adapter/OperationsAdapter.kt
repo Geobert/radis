@@ -98,7 +98,6 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
             val currentAccountId = activity.getCurrentAccountId()
             val currentAccSum = activity.getAccountManager().getCurrentAccountSum()
             val sumFromPos = computeSumFromPosition(position)
-            Log.d("OperationAdapter", "currentAccSum = $currentAccSum / sumFromPos = $sumFromPos")
             h.sumAtSelection.setText(((currentAccSum + sumFromPos).toDouble() / 100.0).formatSum())
 
             h.editBtn.setOnClickListener(object : View.OnClickListener {
@@ -151,7 +150,6 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         val opDate = op.getDate()
         val currentAccountId = activity.getCurrentAccountId()
         val projectionDate = AccountTable.getProjectionDate()
-        Log.d("OperationAdapter", "compute projDate % $projectionDate")
         val s = if (opDate < projectionDate || projectionDate == 0L) {
             val opList = filterFrom(pos, true) { projectionDate == 0L || it.getDate() <= projectionDate }
             -opList.fold(0L) { s, op ->
@@ -163,7 +161,6 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
                 if (op.mTransferAccountId == currentAccountId) s - op.mSum else s + op.mSum
             }
         }
-        Log.d("OperationAdapter", "compute sum = $s")
         return s
     }
 

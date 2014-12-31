@@ -41,7 +41,6 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     protected var prevExpandedPos: Int = -1
     var selectedPosition: Int = -1
         set(value) {
-            Log.d("set selection position", "value: $value - oldPos: $prevExpandedPos - selectedPosition: $selectedPosition")
             val tmpOldPos = selectedPosition
             if ($selectedPosition != -1) {
                 prevExpandedPos = $selectedPosition
@@ -53,7 +52,6 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
             if (tmpOldPos != -1) {
                 notifyItemChanged(tmpOldPos)
             }
-            Log.d("AFTER set selection position", "value: $value - oldPos: $prevExpandedPos - selectedPosition: $selectedPosition")
         }
     val resources = activity.getResources()
 
@@ -126,9 +124,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     public fun increaseCache(c: Cursor) {
         val tmp = mCellStates
-        Log.d("BaseOperationAdapter", "increaseCache oldCount: ${tmp.count()}")
         operations = c.map { operationFactory(it) }
-        Log.d("BaseOperationAdapter", "increaseCache newcount: ${operations.count()}")
         mCellStates = arrayOfNulls(operations.count())
         if (tmp.count() <= mCellStates.count()) {
             System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())

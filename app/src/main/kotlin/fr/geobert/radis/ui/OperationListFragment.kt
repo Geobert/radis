@@ -41,6 +41,7 @@ import android.support.v7.widget.DefaultItemAnimator
 import kotlin.platform.platformStatic
 import fr.geobert.radis.ui.adapter.OperationsAdapter
 import android.view.ViewStub
+import fr.geobert.radis.tools.formatDate
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var mOldChildCount: Int = -1
@@ -163,16 +164,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mAccountManager.setCurrentAccountId(itemId)
         val startDate = Tools.createClearedCalendar()
         startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-        startOpDate = startDate
+        //startOpDate = startDate
         //        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
         if (q != null) {
             q.setAccount(itemId)
-            getMoreOperations(null)// getOperationsList()
+            getMoreOperations(startDate)// getOperationsList()
             return true
         } else {
             initQuickAdd()
-            getMoreOperations(null)// getOperationsList()
+            getMoreOperations(startDate)// getOperationsList()
             return false
         }
     }
@@ -192,6 +193,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun onCreateLoader(i: Int, bundle: Bundle): Loader<Cursor>? =
             when (i) {
                 GET_OPS -> {
+                    if (startOpDate == null) {
+                        val startDate = Tools.createClearedCalendar()
+                        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
+                        startOpDate = startDate
+                    }
                     mOperationsLoader = OperationTable.getOpsWithStartDateLoader(mActivity, startOpDate,
                             mActivity.getCurrentAccountId())
                     mOperationsLoader
@@ -227,15 +233,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         mListView.setAdapter(adapter)
                 }
                 freshLoader = false
-                Log.d("OperationListFragment", "onLoadFinished item count : ${mOpListAdapter?.getItemCount()}")
-                setEmptyViewVisibility(mOpListAdapter?.getItemCount() == 0)
+                val itemCount = mOpListAdapter?.getItemCount()
+                Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount}")
+                setEmptyViewVisibility(itemCount == 0)
+                if (itemCount == 0) {
+                    startOpDate = null
+                }
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
                 } else {
                     mListView.post {
                         val curChildCount = mListLayout.getChildCount()
-                        Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
+                        // Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
                         if (mOldChildCount != curChildCount &&
                                 curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
                             mOldChildCount = mListLayout.getChildCount()
@@ -374,20 +384,21 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun getMoreOperations(startDate: GregorianCalendar?) {
-        Log.d("getMoreOperations", "startDate : " + startDate)
+        Log.d("getMoreOperations", "startDate : " + startDate?.getTime()?.formatDate())
         if (startDate != null) {
             startOpDate = startDate
             getOperationsList()
         } else {
             // no op found with cur month and month - 1, try if there is one
             val c: Cursor?
-            Log.d("getMoreOperations", "startOpDate : " + startOpDate)
-            if (null == startOpDate) {
+            Log.d("getMoreOperations", "startOpDate : " + startOpDate?.getTime()?.formatDate())
+            val start = startOpDate
+            if (null == start) {
                 c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
             } else {
-                c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), startOpDate!!.getTimeInMillis())
+                c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
             }
-            Log.d("getMoreOperations", "cursor : " + c)
+            Log.d("getMoreOperations", "cursor count : " + c?.getCount())
             if (c != null) {
                 if (c.moveToFirst()) {
                     val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
