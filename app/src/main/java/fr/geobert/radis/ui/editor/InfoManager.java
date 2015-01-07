@@ -299,8 +299,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
     }
 
     private void refresh() {
-        mContext.getSupportLoaderManager().restartLoader(GET_MATCHING_INFO_ID,
-                mInfo, this);
+        mContext.getSupportLoaderManager().restartLoader(GET_MATCHING_INFO_ID, mInfo, this);
     }
 
     @Override

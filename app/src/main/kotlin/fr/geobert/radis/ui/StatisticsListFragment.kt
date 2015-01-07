@@ -59,9 +59,9 @@ import fr.geobert.radis.tools.formatSum
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     val ctx: FragmentActivity by Delegates.lazy { getActivity() }
     private val STAT_LOADER = 2000
-    private var mContainer: View? = null
+    private var mContainer: View by Delegates.notNull()
     private var mList: RecyclerView by Delegates.notNull()
-    private val mEmptyView: ViewStub by Delegates.lazy { mContainer?.findViewById(android.R.id.empty) as ViewStub }
+    private val mEmptyView: View by Delegates.lazy { mContainer.findViewById(R.id.empty_textview) }
     private var mAdapter: StatisticAdapter? = null
     private var mLoader: Loader<Cursor>? = null
     private val ZOOM_ENABLED = true
@@ -232,6 +232,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun sumPerFilter(stat: Statistic): Pair<Map<String, Long>, Map<String, Long>> {
         // partition the list according to filterType
         fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) {(s: Long, o: Operation) -> s + o.mSum } }
+
         fun sumMap(m: Map<String, Long>) = m.values().fold(0L) {(s: Long, l: Long) -> s + l }
         val (pos, neg) = partOps(stat)
         val sumP = sumMapOfList(pos)

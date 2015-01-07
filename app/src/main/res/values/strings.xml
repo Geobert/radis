@@ -38,8 +38,8 @@
     <string name="sum_at">At %1$s = %2$s</string>
     <string name="allowed_sum_digits">0123456789+-.,</string>
     <string name="date_chars">0123456789/</string>
-    <string name="no_operation_sch">No transaction. Press the "plus" button at top to create one.</string>
-    <string name="no_operation">No transaction. Press the "plus" button at top or quick add at bottom to create one.
+    <string name="no_operation_sch">No scheduled transaction. Press the top right "plus" button to create one.</string>
+    <string name="no_operation">No transaction. Press the top right "plus" button or use quick add at bottom to create one.
     </string>
     <string name="new_op">New transaction</string>
     <string name="tp_account_name">Account %s</string>

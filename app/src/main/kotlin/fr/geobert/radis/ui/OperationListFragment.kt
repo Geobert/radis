@@ -55,7 +55,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private var mQuickAddController: QuickAddController? = null
     private var mOpListAdapter: OperationsAdapter? = null
     private var mListView: RecyclerView by Delegates.notNull()
-    private val mEmptyView: ViewStub by Delegates.lazy { this.container.findViewById(android.R.id.empty) as ViewStub }
+    //    private val mStubView: ViewStub by Delegates.lazy { this.container.findViewById(android.R.id.empty) as ViewStub }
+    private val mEmptyView: View by Delegates.lazy { this.container.findViewById(R.id.empty_textview) }
     private var startOpDate: GregorianCalendar? = null // start date of ops to get
     private var mScrollLoader: OnOperationScrollLoader by Delegates.notNull()
     private var mLastSelectionId = -1L
@@ -208,6 +209,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     fun setEmptyViewVisibility(visible: Boolean) {
         if (visible) {
             mListView.setVisibility(View.GONE)
+            Log.d(TAG, "mEmptyView parent : ${mEmptyView.getParent()}")
             mEmptyView.setVisibility(View.VISIBLE)
         } else {
             mListView.setVisibility(View.VISIBLE)
@@ -246,7 +248,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     mListView.post {
                         val curChildCount = mListLayout.getChildCount()
                         // Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
-                        if (mOldChildCount != curChildCount &&
+                        if (curChildCount > 0 && mOldChildCount != curChildCount &&
                                 curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
                             mOldChildCount = mListLayout.getChildCount()
                             mScrollLoader.onScrolled(mListView, 0, 0)
@@ -524,28 +526,31 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val transfertId = args.getLong("transfertId")
             Log.d(TAG, "date of op to del : " + Tools.getDateStr(date))
             val builder = AlertDialog.Builder(getActivity())
-            builder.setMessage(R.string.delete_recurring_op).setCancelable(true).setPositiveButton(R.string.del_only_current, object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface, which: Int) {
-                    if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
-                        parentFrag.afterDelUpdateSelection()
-                    }
-                }
-            }).setNeutralButton(R.string.del_all_following, object : DialogInterface.OnClickListener {
+            builder.setMessage(R.string.delete_recurring_op).setCancelable(true).
+                    setPositiveButton(R.string.del_only_current, object : DialogInterface.OnClickListener {
+                        override fun onClick(dialog: DialogInterface, which: Int) {
+                            if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+                                parentFrag.afterDelUpdateSelection()
+                            }
+                        }
+                    }).
+                    setNeutralButton(R.string.del_all_following, object : DialogInterface.OnClickListener {
 
-                override fun onClick(dialog: DialogInterface, which: Int) {
-                    val nbDel = OperationTable.deleteAllFutureOccurrences(getActivity(), accountId, schId, date, transfertId)
-                    Log.d(TAG, "nbDel : " + nbDel)
-                    if (nbDel > 0) {
-                        parentFrag.afterDelUpdateSelection()
-                    }
-                }
-            }).setNegativeButton(R.string.del_all_occurrences, object : DialogInterface.OnClickListener {
-                override fun onClick(dialog: DialogInterface, id: Int) {
-                    if (OperationTable.deleteAllOccurrences(getActivity(), accountId, schId, transfertId) > 0) {
-                        parentFrag.afterDelUpdateSelection()
-                    }
-                }
-            })
+                        override fun onClick(dialog: DialogInterface, which: Int) {
+                            val nbDel = OperationTable.deleteAllFutureOccurrences(getActivity(), accountId, schId, date, transfertId)
+                            Log.d(TAG, "nbDel : " + nbDel)
+                            if (nbDel > 0) {
+                                parentFrag.afterDelUpdateSelection()
+                            }
+                        }
+                    }).
+                    setNegativeButton(R.string.del_all_occurrences, object : DialogInterface.OnClickListener {
+                        override fun onClick(dialog: DialogInterface, id: Int) {
+                            if (OperationTable.deleteAllOccurrences(getActivity(), accountId, schId, transfertId) > 0) {
+                                parentFrag.afterDelUpdateSelection()
+                            }
+                        }
+                    })
             return builder.create()
         }
 

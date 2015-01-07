@@ -31,7 +31,7 @@
     <string name="no_operation">Aucune opération. Appuyez sur le bouton « Plus » en haut ou utilisez l\'ajout rapide en
         bas pour en créer.
     </string>
-    <string name="no_operation_sch">Aucune opération. Appuyez sur le bouton « Plus » en haut pour en créer.
+    <string name="no_operation_sch">Aucune échéance. Appuyez sur le bouton « Plus » en haut pour en créer.
     </string>
     <string name="new_op">Nouvelle opération</string>
     <string name="tp_account_name">Compte %s</string>

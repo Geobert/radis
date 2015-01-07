@@ -48,7 +48,6 @@ public class ScheduledOperation : Operation() {
             val __ = ScheduledOperation()
             __.initWithCursor(op)
             __.mAccountId = op.getLong(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID))
-            __.mEndDate = GregorianCalendar()
             __.mEndDate.setTimeInMillis(op.getLong(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_END_DATE)))
             Tools.clearTimeOfCalendar(__.mEndDate)
             __.mPeriodicity = op.getInt(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY))
@@ -59,6 +58,7 @@ public class ScheduledOperation : Operation() {
         fun new(accountId: Long): ScheduledOperation {
             val __ = ScheduledOperation()
             __.mAccountId = accountId
+            __.mEndDate.setTimeInMillis(0)
             return __
         }
 

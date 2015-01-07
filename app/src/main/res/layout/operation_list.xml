@@ -9,13 +9,15 @@
             android:id="@android:id/list"
             style="@style/OpListView"/>
 
-    <ViewStub
-            android:id="@android:id/empty"
+
+    <TextView
+            android:id="@+id/empty_textview"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_gravity="center"
             android:layout_weight="1"
-            android:layout="@layout/empty_op_list"/>
+            android:gravity="center"
+            android:text="@string/no_operation"
+            android:textSize="18sp"/>
 
     <include layout="@layout/quick_add"/>
 </LinearLayout>

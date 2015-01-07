@@ -10,12 +10,13 @@
             style="@style/StatListView"
             />
 
-    <ViewStub
-            android:id="@android:id/empty"
+    <TextView
+            android:id="@+id/empty_textview"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_gravity="center"
             android:layout_weight="1"
-            android:layout="@layout/empty_stats_list"/>
+            android:gravity="center"
+            android:text="@string/no_statistic"
+            android:textSize="18sp"/>
 
 </LinearLayout>

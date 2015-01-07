@@ -68,11 +68,10 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         poputatePeriodicitySpinner();
         populateCustomPeriodicitySpinner();
         populateAccountSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
-        if (mCurrentSchOp.getEndDate() > 0) {
+        if (op.getEndDate() > 0) {
             mEndDateCheck.setChecked(true);
             mEndDatePicker.setEnabled(true);
-            mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth(),
-                    op.getEndDay());
+            mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth(), op.getEndDay());
         } else {
             mEndDateCheck.setChecked(false);
             mEndDatePicker.setEnabled(false);

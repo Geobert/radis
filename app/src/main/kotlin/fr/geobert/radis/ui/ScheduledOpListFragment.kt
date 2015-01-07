@@ -42,9 +42,9 @@ import fr.geobert.radis.tools.formatSum
 import android.util.Log
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
-    private var mContainer: LinearLayout? = null
+    private var mContainer: LinearLayout by Delegates.notNull()
     private var mListView: RecyclerView by Delegates.notNull()
-    private val mEmptyView: ViewStub by Delegates.lazy { mContainer?.findViewById(android.R.id.empty) as ViewStub }
+    private val mEmptyView: View by Delegates.lazy { mContainer.findViewById(R.id.empty_textview) }
     private val mListLayout by Delegates.lazy { LinearLayoutManager(getActivity()) }
     private var mAdapter: SchedOpAdapter? = null
     private var mLoader: CursorLoader? = null
@@ -137,9 +137,9 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
                 GET_SCH_OPS_OF_ACCOUNT
             }
             if (mLoader != null) {
-                getLoaderManager().restartLoader<Cursor>(req, null, this)
+                getLoaderManager().restartLoader<Cursor>(req, Bundle(), this)
             } else {
-                getLoaderManager().initLoader<Cursor>(req, null, this)
+                getLoaderManager().initLoader<Cursor>(req, Bundle(), this)
             }
             if (transId > 0) {
                 AccountTable.consolidateSums(mActivity, transId)

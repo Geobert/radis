@@ -23,6 +23,11 @@ import java.util.Calendar
 import android.support.test.espresso.Espresso
 import android.widget.EditText
 import android.widget.Button
+import android.support.test.espresso.ViewAction
+import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
+import fr.geobert.radis.ui.adapter.OpRowHolder
+import fr.geobert.radis.data.Operation
+import android.support.test.espresso.matcher.RootMatchers
 
 class Helpers {
 
@@ -69,14 +74,15 @@ class Helpers {
 
         fun callAccountEdit() {
             clickInDrawer(R.string.account_edit)
+            checkTitleBarDisplayed(R.string.account_edit_title)
+            Helpers.pauseTest(1000)
         }
 
         fun addAccount() {
             checkTitleBarDisplayed(R.string.account_creation)
             onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME))
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
-            onView(withId(R.id.edit_account_desc)).perform(scrollTo())
-            onView(withId(R.id.edit_account_desc)).perform(typeText(RadisTest.ACCOUNT_DESC))
+            scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
             onView(withText(equalTo(activity.getString(R.string.no_operation)))).check(matches(isDisplayed()))
             onView(withId(android.R.id.text1)).check(matches(withText(equalTo(RadisTest.ACCOUNT_NAME))))
@@ -89,33 +95,27 @@ class Helpers {
             for (j in 0..9) {
                 onView(withId(R.id.create_operation)).perform(click())
                 checkTitleBarDisplayed(R.string.op_creation)
-                onView(withId(R.id.edit_op_third_party)).perform(typeText(RadisTest.OP_TP + j))
-                onView(withId(R.id.edit_op_sum)).perform(scrollTo())
-                onView(withId(R.id.edit_op_sum)).perform(typeText(RadisTest.OP_AMOUNT_2))
-                onView(withId(R.id.edit_op_tag)).perform(scrollTo())
-                onView(withId(R.id.edit_op_tag)).perform(typeText(RadisTest.OP_TAG))
-                onView(withId(R.id.edit_op_mode)).perform(scrollTo())
-                onView(withId(R.id.edit_op_mode)).perform(typeText(RadisTest.OP_MODE))
-                onView(withId(R.id.edit_op_notes)).perform(scrollTo())
-                onView(withId(R.id.edit_op_notes)).perform(typeText(RadisTest.OP_DESC))
+                scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP + j)
+                scrollThenTypeText(R.id.edit_op_sum, RadisTest.OP_AMOUNT_2)
+                scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
+                scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
+                scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
                 clickOnActionItemConfirm()
             }
             onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
-            onView(withId(R.id.account_sum)).check(matches(withText(containsString(0.5.formatSum()))))
+            checkAccountSumIs(0.5.formatSum())
         }
 
         fun setUpSchOp() {
             addAccount()
             clickInDrawer(R.string.preferences)
             onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(clearText())
-
             val today = Tools.createClearedCalendar()
             today.add(Calendar.DAY_OF_MONTH, 1)
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(typeText(Integer.toString(today.get(Calendar.DAY_OF_MONTH))))
+            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.get(Calendar.DAY_OF_MONTH))))
             Espresso.closeSoftKeyboard()
-            pauseTest(1200) // needed to workaround espresso 2.0 bug
-            onView(allOf(iz(instanceOf(javaClass<Button>())), withText(R.string.ok), isDisplayed()) as Matcher<View>).perform(click())
+            pauseTest(2000) // needed to workaround espresso 2.0 bug
+            clickOnDialogButton(R.string.ok)
 
             Espresso.pressBack()
 
@@ -129,18 +129,14 @@ class Helpers {
             checkTitleBarDisplayed(R.string.sch_edition)
 
             val today = Tools.createClearedCalendar()
+            // +1 is because MONTH is 0 indexed
             onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
 
-            onView(withId(R.id.edit_op_third_party)).perform(scrollTo())
-            onView(withId(R.id.edit_op_third_party)).perform(typeText(RadisTest.OP_TP))
-            onView(withId(R.id.edit_op_sum)).perform(scrollTo())
-            onView(withId(R.id.edit_op_sum)).perform(typeText("9,50"))
-            onView(withId(R.id.edit_op_tag)).perform(scrollTo())
-            onView(withId(R.id.edit_op_tag)).perform(typeText(RadisTest.OP_TAG))
-            onView(withId(R.id.edit_op_mode)).perform(scrollTo())
-            onView(withId(R.id.edit_op_mode)).perform(typeText(RadisTest.OP_MODE))
-            onView(withId(R.id.edit_op_notes)).perform(scrollTo())
-            onView(withId(R.id.edit_op_notes)).perform(typeText(RadisTest.OP_DESC))
+            scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP)
+            scrollThenTypeText(R.id.edit_op_sum, "9,50")
+            scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
+            scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
+            scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
 
             onView(withText(R.string.scheduling)).perform(click())
 
@@ -150,7 +146,6 @@ class Helpers {
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
             clickOnActionItemConfirm()
 
-
             onView(withText(R.string.no_operation_sch)).check(matches(not(isDisplayed())))
             // TODO assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
 
@@ -158,16 +153,75 @@ class Helpers {
 
             // TODO assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
             onView(withText(R.string.no_operation)).check(doesNotExist())
+            checkAccountSumIs(991.0.formatSum())
+        }
 
-            onView(withId(R.id.account_sum)).check(matches(withText(containsString(991.0.formatSum()))))
+
+        fun setupDelOccFromOps(): Int {
+            setUpSchOp()
+            onView(withId(R.id.create_operation)).perform(click())
+            checkTitleBarDisplayed(R.string.sch_edition)
+            val today = Tools.createClearedCalendar()
+            today.add(Calendar.DAY_OF_MONTH, -14)
+            onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1,
+                    today.get(Calendar.DAY_OF_MONTH)))
+
+            scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP)
+            scrollThenTypeText(R.id.edit_op_sum, "1,00")
+            scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
+            scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
+            scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
+
+            onView(withText(R.string.scheduling)).perform(click())
+
+            onView(withId(R.id.periodicity_choice)).perform(scrollTo())
+            onView(withId(R.id.periodicity_choice)).perform(click())
+            val strs = activity.getResources().getStringArray(R.array.periodicity_choices).get(0)
+            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+
+            clickOnActionItemConfirm()
+            Espresso.pressBack()
+            checkAccountSumIs((1000.5 - 3).formatSum())
+            return 3
         }
 
         fun pauseTest(t: Long) {
             try {
                 Thread.sleep(t)
+
             } catch (e: Exception) {
 
             }
         }
+
+        fun actionOnOpListAtPosition(pos: Int, viewAction: ViewAction) =
+                actionOnItemAtPosition<OpRowHolder<Operation>>(pos, viewAction)
+
+        fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(textId),
+                isDisplayed()) as Matcher<View>).perform(click())
+
+        fun clickOnRecyclerViewAtPos(pos: Int) =
+                onView(withId(android.R.id.list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+
+        fun checkAccountSumIs(text: String) =
+                onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))
+
+        fun scrollThenTypeText(edtId: Int, str: String) = onView(withId(edtId)).perform(scrollTo()).perform(typeText(str))
+
+        fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {
+            onView(withId(spinnerId)).perform(scrollTo())
+            onView(withId(spinnerId)).perform(click())
+            val strs = activity.getResources().getStringArray(arrayResId).get(pos)
+            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+        }
+
+        fun clickOnAccountSpinner(accName: String) {
+            onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            onView(withText(accName)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
+        }
+
+        fun checkSelectedSumIs(text: String) =
+                onView(allOf(withId(R.id.today_amount), isDisplayed(),
+                        withText(not(equalTo(""))))).check(matches(withText(containsString(text))))
     }
 }
