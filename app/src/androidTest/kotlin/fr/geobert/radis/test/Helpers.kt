@@ -28,6 +28,8 @@ import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtP
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import fr.geobert.radis.data.Operation
 import android.support.test.espresso.matcher.RootMatchers
+import android.widget.ListView
+import android.widget.RelativeLayout
 
 class Helpers {
 
@@ -64,6 +66,7 @@ class Helpers {
             val str = activity.getString(text)
             Log.d("clickInDrawer", "wanted text : " + str)
             openDrawer(R.id.drawer_layout)
+            pauseTest(100)
             onView(withId(R.id.drawer_layout)).check(matches(isOpen()))
             onData(allOf(iz(instanceOf(javaClass<NavDrawerItem>())), withNavDrawerItem(str))).perform(click())
         }
@@ -84,10 +87,37 @@ class Helpers {
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
+            Helpers.pauseTest(800)
             onView(withText(equalTo(activity.getString(R.string.no_operation)))).check(matches(isDisplayed()))
             onView(withId(android.R.id.text1)).check(matches(withText(equalTo(RadisTest.ACCOUNT_NAME))))
             onView(withId(R.id.account_sum)).check(matches(withText(equalTo(RadisTest.ACCOUNT_START_SUM_FORMATED_ON_LIST))))
             // TODO test if only one entry once converted the actionbar to Toolbar
+        }
+
+        public fun addAccount2() {
+            callAccountCreation()
+            checkTitleBarDisplayed(R.string.account_creation)
+            onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME_2))
+            onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM_2))
+            scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC_2)
+            clickOnActionItemConfirm()
+
+            onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(2, javaClass<RelativeLayout>()))
+            onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
+        }
+
+        public fun addAccount3() {
+            callAccountCreation()
+            checkTitleBarDisplayed(R.string.account_creation)
+            onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME_3))
+            onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
+            scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
+            clickOnActionItemConfirm()
+
+            onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(3, javaClass<RelativeLayout>()))
+            onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
         fun addManyOps() {
@@ -101,9 +131,21 @@ class Helpers {
                 scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
                 scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
                 clickOnActionItemConfirm()
+                Helpers.pauseTest(600)
             }
             onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
             checkAccountSumIs(0.5.formatSum())
+        }
+
+        fun addOp() {
+            onView(withId(R.id.create_operation)).perform(click())
+            checkTitleBarDisplayed(R.string.op_creation)
+            scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP)
+            scrollThenTypeText(R.id.edit_op_sum, RadisTest.OP_AMOUNT)
+            scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
+            scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
+            scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
+            clickOnActionItemConfirm()
         }
 
         fun setUpSchOp() {
@@ -140,10 +182,7 @@ class Helpers {
 
             onView(withText(R.string.scheduling)).perform(click())
 
-            onView(withId(R.id.periodicity_choice)).perform(scrollTo())
-            onView(withId(R.id.periodicity_choice)).perform(click())
-            val strs = activity.getResources().getStringArray(R.array.periodicity_choices).get(1)
-            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+            clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 1)
             clickOnActionItemConfirm()
 
             onView(withText(R.string.no_operation_sch)).check(matches(not(isDisplayed())))
@@ -152,7 +191,8 @@ class Helpers {
             Espresso.pressBack()
 
             // TODO assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
-            onView(withText(R.string.no_operation)).check(doesNotExist())
+            //            onView(withText(R.string.no_operation)).check(doesNotExist())
+            onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
             checkAccountSumIs(991.0.formatSum())
         }
 
@@ -181,6 +221,7 @@ class Helpers {
 
             clickOnActionItemConfirm()
             Espresso.pressBack()
+            Helpers.pauseTest(300)
             checkAccountSumIs((1000.5 - 3).formatSum())
             return 3
         }
@@ -213,6 +254,12 @@ class Helpers {
             onView(withId(spinnerId)).perform(click())
             val strs = activity.getResources().getStringArray(arrayResId).get(pos)
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+        }
+
+        fun clickOnSpinner(spinnerId: Int, text: String) {
+            onView(withId(spinnerId)).perform(scrollTo())
+            onView(withId(spinnerId)).perform(click())
+            onView(withText(equalTo(text))).perform(click())
         }
 
         fun clickOnAccountSpinner(accName: String) {
