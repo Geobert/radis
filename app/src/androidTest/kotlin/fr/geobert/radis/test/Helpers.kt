@@ -50,7 +50,10 @@ class Helpers {
             }
         }
 
-        fun clickOnActionItemConfirm() = onView(withId(R.id.confirm)).perform(click())
+        fun clickOnActionItemConfirm() {
+            onView(withId(R.id.confirm)).perform(click())
+            pauseTest(700)
+        }
 
         fun ACTIONBAR_TITLE_MATCHER(title: String): Matcher<View> {
             val actionBarId = radisTest.getInstrumentation().getTargetContext().getResources().getIdentifier("action_bar_container", "id", "android");
@@ -87,7 +90,7 @@ class Helpers {
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
-            Helpers.pauseTest(800)
+            Helpers.pauseTest(1000)
             onView(withText(equalTo(activity.getString(R.string.no_operation)))).check(matches(isDisplayed()))
             onView(withId(android.R.id.text1)).check(matches(withText(equalTo(RadisTest.ACCOUNT_NAME))))
             onView(withId(R.id.account_sum)).check(matches(withText(equalTo(RadisTest.ACCOUNT_START_SUM_FORMATED_ON_LIST))))
@@ -221,7 +224,7 @@ class Helpers {
 
             clickOnActionItemConfirm()
             Espresso.pressBack()
-            Helpers.pauseTest(300)
+            Helpers.pauseTest(1000)
             checkAccountSumIs((1000.5 - 3).formatSum())
             return 3
         }
@@ -264,6 +267,7 @@ class Helpers {
 
         fun clickOnAccountSpinner(accName: String) {
             onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            pauseTest(500)
             onView(withText(accName)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 

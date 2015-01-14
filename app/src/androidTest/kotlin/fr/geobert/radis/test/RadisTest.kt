@@ -579,6 +579,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_notes, OP_DESC)
         Helpers.clickOnActionItemConfirm()
 
+        Helpers.pauseTest(700)
+
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
 
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -708,8 +710,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
         val today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, 12)
-        today.add(Calendar.MONTH, -1)
+        today.add(Calendar.DAY_OF_MONTH, -28)
         Log.d(TAG, "date: ${today.getTime().formatDate()}")
         onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
                 today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
@@ -730,7 +731,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         Espresso.pressBack()
         val sum = 9 * 10.50
-        Helpers.pauseTest(300)
+        Helpers.pauseTest(700)
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
         //        Log.d(TAG, "addSchTransfertHebdo sum = " + sum + " / nb = ")
         //        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX : " + solo!!.getText(CUR_ACC_SUM_IDX).getText().toString())
