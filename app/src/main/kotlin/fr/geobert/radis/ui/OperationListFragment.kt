@@ -309,7 +309,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         this.checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
         checkingDashboard?.onResume()
         if (Tools.DEBUG_MODE) {
-            inflater.inflate(R.menu.debug_menu, menu)
+            //inflater.inflate(R.menu.debug_menu, menu)
         }
     }
 

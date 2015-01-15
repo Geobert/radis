@@ -6,3 +6,4 @@
 install_on_n4.bat
 app/crashlytics.properties
 app/src/main/res/values/com_crashlytics_export_strings.xml
+app/manifest-merger-release-report.txt

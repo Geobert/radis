@@ -48,7 +48,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         provider.deleteDatabase(appCtx)
         client.release()
 
-        Helpers.radisTest = this
+        Helpers.instrumentationTest = this
         Helpers.activity = getActivity()
     }
 
@@ -238,6 +238,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         // 2 following lines are hack because a bug of Espresso
         Helpers.clickOnDialogButton(R.string.cancel)
+        Helpers.pauseTest(1000)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -301,7 +302,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         var today = Tools.createClearedCalendar()
         today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
         today.add(Calendar.MONTH, 3)
-        Helpers.pauseTest(300)
+        Helpers.pauseTest(500)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
         onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
 
@@ -391,6 +392,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         //        Log.d(TAG, "addOpMode1 before add " + solo.getCurrentViews(ListView.class).get(0).getCount());
         today.add(Calendar.DAY_OF_MONTH, -1)
         addOpOnDate(today, 0)
+
+        Helpers.pauseTest(1000)
 
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
         Helpers.checkAccountSumIs(999.50.formatSum())
@@ -494,7 +497,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.projection_date_value,
                 "${Integer.toString(today.get(Calendar.DAY_OF_MONTH))}/${Integer.toString(today.get(Calendar.MONTH) + 1)}/${Integer.toString(today.get(Calendar.YEAR))}")
         Helpers.clickOnActionItemConfirm()
-
+        Helpers.pauseTest(1000)
         Helpers.checkAccountSumIs(1000.50.formatSum())
 
         today.add(Calendar.DAY_OF_MONTH, -1)
@@ -731,7 +734,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         Espresso.pressBack()
         val sum = 9 * 10.50
-        Helpers.pauseTest(700)
+        Helpers.pauseTest(2000)
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
         //        Log.d(TAG, "addSchTransfertHebdo sum = " + sum + " / nb = ")
         //        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX : " + solo!!.getText(CUR_ACC_SUM_IDX).getText().toString())
@@ -881,6 +884,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(withText(R.string.scheduling)).perform(click())
         Helpers.clickOnActionItemConfirm()
     }
+
 
     class object {
         private val WAIT_DIALOG_TIME = 2000

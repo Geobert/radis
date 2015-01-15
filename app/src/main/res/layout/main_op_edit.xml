@@ -10,6 +10,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:calendarViewShown="false"
+            android:datePickerMode="spinner"
             android:paddingBottom="0dp"
             android:paddingTop="0dp"
             android:layout_marginTop="0dp"

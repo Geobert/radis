@@ -30,18 +30,22 @@ import fr.geobert.radis.data.Operation
 import android.support.test.espresso.matcher.RootMatchers
 import android.widget.ListView
 import android.widget.RelativeLayout
+import android.test.ActivityInstrumentationTestCase2
+import fr.geobert.radis.MainActivity
+import java.util.GregorianCalendar
+import android.support.test.espresso.contrib.PickerActions
 
 class Helpers {
 
     class object {
-        var radisTest: RadisTest by Delegates.notNull()
+        var instrumentationTest: ActivityInstrumentationTestCase2<MainActivity> by Delegates.notNull()
         var activity: Activity by Delegates.notNull()
 
         fun backOutToHome() {
             var more = true
             while (more) {
                 try {
-                    radisTest.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+                    instrumentationTest.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
                 } catch (e: SecurityException) {
                     // Done, at Home.
                     more = false
@@ -51,12 +55,14 @@ class Helpers {
         }
 
         fun clickOnActionItemConfirm() {
+            pauseTest(1000)
             onView(withId(R.id.confirm)).perform(click())
-            pauseTest(700)
+            pauseTest(1200)
+            onView(withId(R.id.confirm)).check(doesNotExist())
         }
 
         fun ACTIONBAR_TITLE_MATCHER(title: String): Matcher<View> {
-            val actionBarId = radisTest.getInstrumentation().getTargetContext().getResources().getIdentifier("action_bar_container", "id", "android");
+            val actionBarId = instrumentationTest.getInstrumentation().getTargetContext().getResources().getIdentifier("action_bar_container", "id", "android");
             // isDescendantOfA(withId(actionBarId)),
             return allOf(withText(title))
         }
@@ -90,7 +96,6 @@ class Helpers {
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
-            Helpers.pauseTest(1000)
             onView(withText(equalTo(activity.getString(R.string.no_operation)))).check(matches(isDisplayed()))
             onView(withId(android.R.id.text1)).check(matches(withText(equalTo(RadisTest.ACCOUNT_NAME))))
             onView(withId(R.id.account_sum)).check(matches(withText(equalTo(RadisTest.ACCOUNT_START_SUM_FORMATED_ON_LIST))))
@@ -123,17 +128,26 @@ class Helpers {
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
+        fun addOp(date: GregorianCalendar, third: String, amount: String, tag: String, mode: String, desc: String) {
+            onView(withId(R.id.create_operation)).perform(click())
+            checkTitleBarDisplayed(R.string.op_creation)
+            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.get(Calendar.YEAR),
+                    date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
+            fillOpForm(third, amount, tag, mode, desc)
+            clickOnActionItemConfirm()
+        }
+
+        fun addOp(third: String, amount: String, tag: String, mode: String, desc: String) {
+            onView(withId(R.id.create_operation)).perform(click())
+            checkTitleBarDisplayed(R.string.op_creation)
+            fillOpForm(third, amount, tag, mode, desc)
+            clickOnActionItemConfirm()
+        }
+
         fun addManyOps() {
             addAccount()
             for (j in 0..9) {
-                onView(withId(R.id.create_operation)).perform(click())
-                checkTitleBarDisplayed(R.string.op_creation)
-                scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP + j)
-                scrollThenTypeText(R.id.edit_op_sum, RadisTest.OP_AMOUNT_2)
-                scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
-                scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
-                scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
-                clickOnActionItemConfirm()
+                addOp(RadisTest.OP_TP, RadisTest.OP_AMOUNT_2, RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
                 Helpers.pauseTest(600)
             }
             onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
@@ -141,14 +155,7 @@ class Helpers {
         }
 
         fun addOp() {
-            onView(withId(R.id.create_operation)).perform(click())
-            checkTitleBarDisplayed(R.string.op_creation)
-            scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP)
-            scrollThenTypeText(R.id.edit_op_sum, RadisTest.OP_AMOUNT)
-            scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
-            scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
-            scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
-            clickOnActionItemConfirm()
+            addOp(RadisTest.OP_TP, RadisTest.OP_AMOUNT, RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
         }
 
         fun setUpSchOp() {
@@ -177,17 +184,12 @@ class Helpers {
             // +1 is because MONTH is 0 indexed
             onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
 
-            scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP)
-            scrollThenTypeText(R.id.edit_op_sum, "9,50")
-            scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
-            scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
-            scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
+            fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             onView(withText(R.string.scheduling)).perform(click())
 
             clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 1)
             clickOnActionItemConfirm()
-
             onView(withText(R.string.no_operation_sch)).check(matches(not(isDisplayed())))
             // TODO assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
 
@@ -209,11 +211,7 @@ class Helpers {
             onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1,
                     today.get(Calendar.DAY_OF_MONTH)))
 
-            scrollThenTypeText(R.id.edit_op_third_party, RadisTest.OP_TP)
-            scrollThenTypeText(R.id.edit_op_sum, "1,00")
-            scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
-            scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
-            scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
+            fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             onView(withText(R.string.scheduling)).perform(click())
 
@@ -224,7 +222,7 @@ class Helpers {
 
             clickOnActionItemConfirm()
             Espresso.pressBack()
-            Helpers.pauseTest(1000)
+            Helpers.pauseTest(2000)
             checkAccountSumIs((1000.5 - 3).formatSum())
             return 3
         }
@@ -274,5 +272,13 @@ class Helpers {
         fun checkSelectedSumIs(text: String) =
                 onView(allOf(withId(R.id.today_amount), isDisplayed(),
                         withText(not(equalTo(""))))).check(matches(withText(containsString(text))))
+
+        fun fillOpForm(third: String, amount: String, tag: String, mode: String, desc: String) {
+            scrollThenTypeText(R.id.edit_op_third_party, third)
+            scrollThenTypeText(R.id.edit_op_sum, amount)
+            scrollThenTypeText(R.id.edit_op_tag, tag)
+            scrollThenTypeText(R.id.edit_op_mode, mode)
+            scrollThenTypeText(R.id.edit_op_notes, desc)
+        }
     }
 }
