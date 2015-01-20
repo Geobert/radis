@@ -41,7 +41,7 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
     public void fillCache(Context ctx) {
         if (mCache == null) {
             Cursor data = ctx.getContentResolver().query(DbContentProvider.PREFS_URI, PreferenceTable.PREFS_COLS, null, null, null);
-            mCache = new HashMap<String, String>();
+            mCache = new HashMap<>();
             if (data.moveToFirst()) {
                 do {
                     mCache.put(data.getString(0), data.getString(1));

@@ -56,18 +56,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private var mOpListAdapter: OperationsAdapter? = null
     private var mListView: RecyclerView by Delegates.notNull()
     //    private val mStubView: ViewStub by Delegates.lazy { this.container.findViewById(android.R.id.empty) as ViewStub }
-    private val mEmptyView: View by Delegates.lazy { this.container.findViewById(R.id.empty_textview) }
+    private val mEmptyView: View? by Delegates.lazy { this.container?.findViewById(R.id.empty_textview) }
     private var startOpDate: GregorianCalendar? = null // start date of ops to get
     private var mScrollLoader: OnOperationScrollLoader by Delegates.notNull()
     private var mLastSelectionId = -1L
     private var mLastSelectionPos = -1
     private var needRefreshSelection = false
-    private var container: LinearLayout by Delegates.notNull()
+    private var container: LinearLayout? = null
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
-        this.container = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
+        val c = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
+        this.container = c
 
         setHasOptionsMenu(true)
 
@@ -80,7 +81,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         initOperationList()
         initQuickAdd()
         processAccountChanged(mActivity.getCurrentAccountId()!!)
-        return this.container
+        return c
     }
 
     override fun onResume() {
@@ -109,13 +110,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun initQuickAdd() {
-        val q = QuickAddController(mActivity, container)
-        q.setAccount(mActivity.getCurrentAccountId())
-        q.initViewBehavior()
-        q.setAutoNegate(true)
-        q.clearFocus()
-        mQuickAddController = q;
-        setQuickAddVisibility()
+        val c = container
+        if (c != null) {
+            val q = QuickAddController(mActivity, c)
+            q.setAccount(mActivity.getCurrentAccountId())
+            q.initViewBehavior()
+            q.setAutoNegate(true)
+            q.clearFocus()
+            mQuickAddController = q;
+            setQuickAddVisibility()
+        }
     }
 
     private fun setQuickAddVisibility() {
@@ -145,15 +149,18 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun initOperationList() {
-        mListView = container.findViewById(android.R.id.list) as RecyclerView
-        mListLayout = LinearLayoutManager(mActivity)
-        if (mListView.getLayoutManager() == null) {
-            mListView.setLayoutManager(mListLayout)
+        val c = container
+        if (c != null) {
+            mListView = c.findViewById(android.R.id.list) as RecyclerView
+            mListLayout = LinearLayoutManager(mActivity)
+            if (mListView.getLayoutManager() == null) {
+                mListView.setLayoutManager(mListLayout)
+            }
+            mListView.setItemAnimator(DefaultItemAnimator())
+            mListView.setHasFixedSize(true)
+            mScrollLoader = OnOperationScrollLoader(this)
+            mListView.setOnScrollListener(mScrollLoader)
         }
-        mListView.setItemAnimator(DefaultItemAnimator())
-        mListView.setHasFixedSize(true)
-        mScrollLoader = OnOperationScrollLoader(this)
-        mListView.setOnScrollListener(mScrollLoader)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -207,13 +214,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             }
 
     fun setEmptyViewVisibility(visible: Boolean) {
-        if (visible) {
-            mListView.setVisibility(View.GONE)
-            Log.d(TAG, "mEmptyView parent : ${mEmptyView.getParent()}")
-            mEmptyView.setVisibility(View.VISIBLE)
-        } else {
-            mListView.setVisibility(View.VISIBLE)
-            mEmptyView.setVisibility(View.GONE)
+        val e = mEmptyView
+        if (e != null) {
+            if (visible) {
+                mListView.setVisibility(View.GONE)
+                Log.d(TAG, "mEmptyView parent : ${e.getParent()}")
+                e.setVisibility(View.VISIBLE)
+            } else {
+                mListView.setVisibility(View.VISIBLE)
+                e.setVisibility(View.GONE)
+            }
         }
     }
 
@@ -305,9 +315,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.operations_list_menu, menu)
-        val l = menu.findItem(R.id.checking_op).getActionView() as LinearLayout
-        this.checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
-        checkingDashboard?.onResume()
+        //        val l = menu.findItem(R.id.checking_op).getActionView() as LinearLayout
+        //        this.checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
+        //        checkingDashboard?.onResume()
         if (Tools.DEBUG_MODE) {
             //inflater.inflate(R.menu.debug_menu, menu)
         }

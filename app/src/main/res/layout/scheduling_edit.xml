@@ -79,6 +79,7 @@
             android:id="@+id/edit_end_date"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:calendarViewShown="false"/>
+            android:calendarViewShown="false"
+            android:datePickerMode="spinner"/>
 
 </LinearLayout>
