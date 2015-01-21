@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/normal_bg">
+
+    <ImageView
+            android:id="@+id/account_ico"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="8dp"
+            android:layout_below="@+id/chart_name"
+
+            android:src="@drawable/account_48"
+            />
+
+    <TextView
+            android:id="@+id/chart_account_name"
+            android:layout_marginLeft="3dp"
+            android:layout_width="wrap_content"
+            android:text="Courant"
+            android:layout_marginTop="-2dp"
+            android:layout_toRightOf="@id/account_ico"
+            android:layout_alignTop="@id/account_ico"
+            android:layout_height="wrap_content"/>
+
+    <ImageView
+            android:id="@+id/filter_ico"
+            android:layout_width="14dp"
+            android:layout_height="14dp"
+            android:layout_toRightOf="@id/chart_account_name"
+            android:layout_marginLeft="8dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/filter_48"
+            />
+
+    <TextView
+            android:id="@+id/filter_lbl"
+            android:layout_alignTop="@id/filter_ico"
+            android:layout_alignBottom="@id/filter_ico"
+            android:layout_width="wrap_content"
+            android:text="toto"
+            android:gravity="center_vertical"
+            android:textSize="12sp"
+            android:layout_toRightOf="@id/filter_ico"
+            android:layout_height="0dp"
+            android:layout_marginLeft="6dp"/>
+
+    <ImageView
+            android:id="@+id/time_ico"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginLeft="10dp"
+            android:layout_below="@+id/account_ico"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/clock_48"
+            />
+
+    <TextView
+            android:id="@+id/time_scale_lbl"
+            android:layout_alignTop="@id/time_ico"
+            android:layout_alignBottom="@id/time_ico"
+            android:layout_width="wrap_content"
+            android:text="12/12/2000 - 12/12/2001"
+            android:layout_toRightOf="@id/time_ico"
+            android:gravity="center_vertical"
+            android:layout_height="0dp"
+            android:textSize="12sp"
+            android:layout_marginLeft="6dp"/>
+
+    <LinearLayout
+            android:id="@+id/chart"
+            android:gravity="center"
+            android:layout_below="@id/time_ico"
+            android:layout_margin="8dp"
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"/>
+</RelativeLayout>

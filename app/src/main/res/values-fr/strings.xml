@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Radis</string>
+    <string name="no_account">Pas de compte créé. Appuyez sur le bouton « Créer »
+        ci-dessous.
+    </string>
+    <string name="create_account">Créer un compte</string>
+    <string name="name">Nom</string>
+    <string name="account_creation">Création de compte</string>
+    <string name="description">Description</string>
+    <string name="start_sum">Montant de départ</string>
+    <string name="create">Créer</string>
+    <string name="cancel">Annuler</string>
+    <string name="accounts_list">Liste des comptes</string>
+    <string name="currency">Devise</string>
+    <string name="delete">Supprimer</string>
+    <string name="account_prompt">Sélectionnez une devise</string>
+    <string name="edit">Modifier</string>
+    <string name="ok">Ok</string>
+    <string name="third_party">Tiers</string>
+    <string name="sum">Montant</string>
+    <string name="tag">Catégorie</string>
+    <string name="date">Date</string>
+    <string name="op_date">Date de l\'opération</string>
+    <string name="mode">Mode de paiement</string>
+    <string name="credit">Crédit</string>
+    <string name="debit">Débit</string>
+    <string name="current_sum">Solde : </string>
+    <string name="sum_at">Au %1$s = %2$s</string>
+    <string name="no_operation">Aucune opération. Appuyez sur le bouton « Plus » en haut ou utilisez l\'ajout rapide en
+        bas pour en créer.
+    </string>
+    <string name="no_operation_sch">Aucune échéance. Appuyez sur le bouton « Plus » en haut pour en créer.
+    </string>
+    <string name="new_op">Nouvelle opération</string>
+    <string name="tp_account_name">Compte %s</string>
+    <string name="account_edit">Modifier le compte</string>
+    <string name="account_edit_title">Modifier</string>
+    <string name="op_edition">Modifier l\'opération</string>
+    <string name="future_sum_at">Projection au %1$s = %2$s</string>
+    <string name="sum_at_selection">Solde à la selection</string>
+    <string name="list_of">Liste des %s</string>
+
+    <string name="tags">Catégories</string>
+    <string name="modes">Modes</string>
+    <string name="third_parties">Tiers</string>
+    <string name="get_more_op">Mois précédent…</string>
+    <string name="delete_confirmation">Confirmer la suppression ?</string>
+    <string name="account_delete_confirmation">Supprimer un compte va aussi supprimer les échéances associées.
+        \nConfirmer la suppression ?
+    </string>
+    <string name="yes">Oui</string>
+    <string name="advanced">Actions avancées</string>
+    <string name="backup_db">Sauver les comptes</string>
+    <string name="restore_db">Restaurer les comptes</string>
+    <string name="restore_confirm">La restauration va écraser vos données actuelles !
+        Cette opération est irréversible.
+    </string>
+    <string name="backup_confirm">La sauvegarde va écraser la sauvegarde précédente
+        si elle existe !
+    </string>
+    <string name="to_continue">Continuer</string>
+    <string name="backup_success">Sauvegarde réussie !</string>
+    <string name="backup_failed">Sauvegarde échouée.</string>
+    <string name="restore_success">Restauration réussie !</string>
+    <string name="restore_failed">Restauration échouée.</string>
+    <string name="restarting">Redémarrage en cours…</string>
+    <string name="will_restart">L\'application va redémarrer.</string>
+    <string name="no_more_ops">Fin de la liste d\'opérations</string>
+    <string name="no_start_amount">Le montant de départ est vide</string>
+    <string name="invalid_amount">Le montant est invalide</string>
+    <string name="misc">Divers</string>
+    <string name="notes">Remarques</string>
+    <string name="balance_at">au %s : </string>
+    <string name="crash_notif_ticker_text">Radis a crashé. Merci de m\'envoyer des infos…
+    </string>
+    <string name="crash_notif_title">Radis a crashé…</string>
+    <string name="crash_notif_text">Cliquer ici pour m\'aider à résoudre le problème.
+    </string>
+    <string name="crash_dialog_title">Radis a crashé</string>
+    <string name="crash_dialog_text">Désolé, Radis a rencontré une erreur fatale. Merci
+        de bien vouloir m\'aider à la résoudre,
+        en appuyant simplement sur \'OK\'. Aucune information sur vos dépenses
+        ne sera envoyé !
+    </string>
+    <string name="crash_dialog_comment_prompt">Ou peut-être désirez vous ajouter des détails sur
+        le probème avant ?
+    </string>
+    <string name="crash_dialog_ok_toast">Merci pour votre aide précieuse !</string>
+    <string name="empty_amount">Le montant est vide</string>
+    <string name="empty_third_party">Le tiers est vide</string>
+    <string name="item_exists">L\'élément existe déjà</string>
+    <string-array name="periodicity_choices">
+        <item>Hebdomadaire</item>
+        <item>Mensuelle</item>
+        <item>Annuelle</item>
+        <item>Personnalisée</item>
+    </string-array>
+    <string-array name="periodicity_custom_choices">
+        <item>Jours</item>
+        <item>Semaines</item>
+        <item>Mois</item>
+        <item>Années</item>
+    </string-array>
+    <string-array name="periodicity_labels">
+        <item>Hebdomadaire</item>
+        <item>Mensuelle</item>
+        <item>Annuelle</item>
+        <item>Tous les %d jours</item>
+        <item>Toutes les %d semaines</item>
+        <item>Tous les %d mois</item>
+        <item>Toutes les %d années</item>
+    </string-array>
+    <string name="every">Tous les</string>
+    <string name="every_fem">Toutes les</string>
+    <string name="no_end_date">Pas de fin</string>
+    <string name="scheduling">Planification</string>
+    <string name="basics">Opération</string>
+    <string name="end_date">Date de fin</string>
+    <string name="scheduled_ops">Échéancier</string>
+    <string name="account">Compte</string>
+    <string name="periodicity">Périodicité</string>
+    <string name="end_date_incorrect">La date de fin est antérieure à celle de début
+    </string>
+    <string name="periodicity_must_be_greater_0">La périodicité doit être supérieure à zéro</string>
+    <string name="periodicity_must_be_num">La périodicité doit être un chiffre ou un nombre</string>
+    <string name="ask_delete_occurrences">Voulez-vous supprimer cette échéance ainsi que
+        toutes ses occurrences ?
+    </string>
+    <string name="del_all_occurrences">Toutes</string>
+    <string name="cancel_delete_occurrences">L\'échéance</string>
+    <string name="cancel_sch_deletion">Rien</string>
+    <string name="prefs_insertion_date_text">L\'insertion des échéances se fera le %s du mois</string>
+    <string name="prefs_insertion_date_title">Entrez le jour du mois</string>
+    <string name="prefs_insertion_date_label">Date d\'insertion</string>
+    <string name="preferences">Préférences</string>
+    <string name="ask_update_occurences">Voulez-vous metter à jour les occurrences ?\nSinon,
+        vous pouvez décorréler les occurrences existantes de cette échéance.
+    </string>
+    <string name="no">Non</string>
+    <string name="update">Mettre à jour</string>
+    <string name="disconnect">Décorréler</string>
+    <string name="ask_update_scheduling">Cette opération proviens d\'une échéance.
+        Voulez-vous mettre à jour cette échéance et toutes ses occurences ? Si
+        non, cette opération sera décorrélée de l\'échéance.
+    </string>
+    <string name="convert_into_scheduling">Convertir en échéance</string>
+    <string name="edit_scheduling">Modifier l\'échéance</string>
+    <string name="process_scheduled_transactions">Traiter les échéances</string>
+    <string name="must_be_day_of_month">Vous devez saisir un jour du mois entre 1 et 31
+    </string>
+    <string name="quickadd_account">Compte par défaut</string>
+    <string name="quickadd_account_desc">Compte cible pour l\'ajout rapide de l\'écran
+        d\'acceuil : %s
+    </string>
+    <string name="quickadd_target">Ajouter une opération à : %s</string>
+    <string name="quickadd_target_to_configure">Allez dans les préférences pour choisir le compte
+    </string>
+    <string name="quickadd_target_no_account">Créer un compte pour activer</string>
+    <string name="quickadd_fields_not_filled">Remplir les champs correctement pour ajouter une opération</string>
+    <string name="projection_date">Date de projection</string>
+    <string name="projection_day_of_month">Jour du mois</string>
+    <string name="projection_full_date">jj/MM/yyyy</string>
+    <string name="projection_date_mode">Mode de projection</string>
+    <string-array name="projection_modes">
+        <item>Au plus loin</item>
+        <item>Un jour du mois suivant</item>
+        <item>Une date absolue</item>
+    </string-array>
+    <string name="bad_format_for_date">La date est invalide</string>
+    <string name="recompute_account_sums">Recalculer le compte</string>
+    <string-array name="all_currencies">
+        <item>CAD</item>
+        <item>EUR</item>
+        <item>GBP</item>
+        <item>JPY</item>
+        <item>USD</item>
+        <item>Autre</item>
+    </string-array>
+    <string name="custom_currency_hint">Entrez un code de devise ISO 4217</string>
+    <string name="bad_format_for_currency">La devise doit être au format ISO 4217 (regardez sur wikipedia si vous le
+        connaissez pas le code de votre devise)
+    </string>
+    <string name="error_on_write_prefs">Erreur lors de l\'écriture des préférences</string>
+    <string name="short_date_format">dd/MM</string>
+    <string name="all_accounts">Tous les comptes</string>
+    <string name="delete_recurring_op">Voulez vous supprimer cette opération, toutes les opérations de la série ou cette
+        opération ainsi que les suivantes ? (Pressez le bouton retour pour annuler)
+    </string>
+    <string name="del_all_following">Suivantes</string>
+    <string name="del_only_current">Courante</string>
+    <string name="hide_ops_quick_add">Masquer l\'ajout rapide</string>
+    <string name="hide_ops_quick_add_details">Masquer l\'ajout rapide de la liste des opérations</string>
+
+    <string name="no_transfert">Aucun transfert</string>
+    <string name="err_transfert_no_src">Le transfert n\'a pas de source</string>
+    <string name="err_transfert_no_dst">Le transfert n\'a pas de destination</string>
+    <string name="err_transfert_same_acc">La source et la destination du transfert ne peuvent être identiques</string>
+    <string name="transfert">Transfert</string>
+    <string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
+    <string name="choose_account">Sélectionnez un compte</string>
+    <string name="defined_by_transfert">Défini par le transfert</string>
+
+    <string name="loading">Chargement…</string>
+    <string name="sched_op_total_sum">Total crédit : %1$s — Total débit : %2$"s\nBalance : %3$s</string>
+    <string name="sched_op_total_choose_account">Choisir un compte pour avoir son total des échéances</string>
+    <string name="sch_edition">Saisie d\'échéance</string>
+    <string name="delete_account">Supprimer le compte</string>
+    <string name="debug">Debug</string>
+    <string name="use_weighted_infos">Utiliser la complétion pondérée</string>
+    <string name="use_weighted_infos_details">Les informations les plus utilisées seront proposées en tête</string>
+    <string name="no_unchecked_operation">Aucune opération non pointée</string>
+    <string name="targeted_sum">Solde\nciblé :</string>
+    <string name="checked_ops_sums_title"><![CDATA[Pointé :\nReste :]]></string>
+    <string name="op_checking">Pointage</string>
+    <string name="checked">Pointée</string>
+    <string name="error">Erreur</string>
+    <string name="targeted_sum_reached">Vous avez atteint le solde ciblé !</string>
+    <string name="auto_checking">Pointage automatique</string>
+    <string name="with_nb_ops">Nombre d\'opérations à utiliser :</string>
+    <string name="left_zero_if_unknown">(laisser 0 si indéterminé)</string>
+    <string name="do_check">Pointer</string>
+    <string name="checking_max_date"><![CDATA[Tenir compte des opérations jusqu\'au :]]></string>
+    <string name="missing_ops">Le solde cible ne peut être atteint. Radis a atteint %1$s en pointant les opérations. Il vous reste %2$s à trouver :)</string>
+    <string name="invert_completion_in_quick_add">Inverser l\'ordre des proposition dans l\'ajout rapide</string>
+    <string name="invert_completion_in_quick_add_details">Inverse l\'ordre dans l\'ajout rapide pour avoir le plus utilisé au plus près du champs texte</string>
+    <string name="operations">Opérations</string>
+    <string name="accounts">Comptes</string>
+    <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
+    <string name="statistics">Statistiques</string>
+    <string name="no_statistic"><![CDATA[Aucune statistique configurée. Appuyez sur le bouton « plus » pour en créer.]]></string>
+    <string name="new_stat">Créer une statistique</string>
+    <string name="stat_name_hint">Nom de la statistique</string>
+    <string name="stat_editor_title">Édition de statistique</string>
+    <string name="no_filter">Temps</string>
+    <string name="account_for_stat">Compte à représenter</string>
+    <string name="filter_for_stat">Filtre de calcul</string>
+    <string name="period_for_stat">Échelle du temps</string>
+    <string name="graph_type_for_stat">Type de graphique</string>
+    <string name="days">Jours</string>
+    <string name="monthes">Mois</string>
+    <string name="years">Années</string>
+    <string name="absolute">Absolue</string>
+    <string name="last_male">derniers</string>
+    <string name="last_female">dernières</string>
+    <string name="empty_stat_name">Nom de statistique vide</string>
+    <string name="empty_account_name">Nom de compte vide</string>
+    <string name="xlast_invalid">La valeur des %1$s %2$s doit être un entier positif</string>
+    <string name="invalid_date_range">Les dates de début et de fin sont invalides</string>
+    <string name="err_db_stat">Une erreur est survenue pendant la sauvegarde de la statistique</string>
+    <string name="time">Temps</string>
+    <string name="no_lbl">[Aucun]</string>
+    <string name="misc_chart_cat">Divers</string>
+    <string name="op_creation">Créer une opération</string>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:orientation="vertical"
+              android:background="@color/normal_bg">
+
+    <android.support.v7.widget.RecyclerView
+            android:id="@android:id/list"
+            style="@style/OpListView"/>
+
+    <TextView
+            android:id="@+id/empty_textview"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/no_operation_sch"
+            android:textSize="18sp"/>
+
+    <TextView
+            android:id="@+id/sch_op_sum_total"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp"
+            android:textSize="11dp"/>
+
+</LinearLayout>
