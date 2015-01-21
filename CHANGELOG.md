@@ -3,7 +3,7 @@ Version 1.0 - 21/01/2015
 - navigation par panneau latéral
 - fusion du pointage dans la liste des opérations
 - compatibilité Android 5
-- plus de détails sur http://geobert.fr/2015/01/13/radis-1-0
+- sous le capot, Kotlin (plus de détails sur http://geobert.fr/2015/01/13/radis-1-0)
 
 Version 0.9.3 - 03/05/2014
 - correction d'un crash

@@ -31,6 +31,15 @@ import android.database.Cursor
 import java.util.GregorianCalendar
 import java.text.SimpleDateFormat
 import fr.geobert.espresso.DebugEspresso
+import android.app.Instrumentation
+import java.util.concurrent.atomic.AtomicReference
+import com.android.support.test.deps.guava.base.Throwables
+import android.app.Activity
+import android.support.test.runner.lifecycle.Stage
+import com.android.support.test.deps.guava.collect.Sets
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import java.util.concurrent.Callable
+import java.util.HashSet
 
 public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
 
@@ -51,6 +60,80 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.instrumentationTest = this
         Helpers.activity = getActivity()
     }
+
+    override fun tearDown() {
+        closeAllActivities(getInstrumentation())
+        super.tearDown()
+    }
+
+    throws(javaClass<Exception>())
+    public fun closeAllActivities(instrumentation: Instrumentation) {
+        val NUMBER_OF_RETRIES = 100
+        var i = 0
+        while (closeActivity(instrumentation)) {
+            if (i++ > NUMBER_OF_RETRIES) {
+                throw AssertionError("Limit of retries excesses")
+            }
+            Thread.sleep(200)
+        }
+    }
+
+    throws(javaClass<Exception>())
+    public fun <X> callOnMainSync(instrumentation: Instrumentation, callable: Callable<X>): X {
+        val retAtomic = AtomicReference<X>()
+        val exceptionAtomic = AtomicReference<Throwable>()
+        instrumentation.runOnMainSync(object : Runnable {
+            override fun run() {
+                try {
+                    retAtomic.set(callable.call())
+                } catch (e: Throwable) {
+                    exceptionAtomic.set(e)
+                }
+
+            }
+        })
+        val exception = exceptionAtomic.get()
+        if (exception != null) {
+            Throwables.propagateIfInstanceOf(exception, javaClass<Exception>())
+            Throwables.propagate(exception)
+        }
+        return retAtomic.get()
+    }
+
+    public fun getActivitiesInStages(vararg stages: Stage): HashSet<Activity> {
+        val activities = Sets.newHashSet<Activity>()
+        val instance = ActivityLifecycleMonitorRegistry.getInstance()
+        for (stage in stages) {
+            val activitiesInStage = instance.getActivitiesInStage(stage)
+            if (activitiesInStage != null) {
+                activities.addAll(activitiesInStage)
+            }
+        }
+        return activities
+    }
+
+    throws(javaClass<Exception>())
+    private fun closeActivity(instrumentation: Instrumentation): Boolean {
+        val activityClosed = callOnMainSync(instrumentation, object : Callable<Boolean> {
+            throws(javaClass<Exception>())
+            override public fun call(): Boolean {
+                val activities = getActivitiesInStages(Stage.RESUMED, Stage.STARTED, Stage.PAUSED, Stage.STOPPED, Stage.CREATED)
+                activities.removeAll(getActivitiesInStages(Stage.DESTROYED))
+                if (activities.size() > 0) {
+                    val activity = activities.iterator().next()
+                    activity.finish()
+                    return true
+                } else {
+                    return false
+                }
+            }
+        })
+        if (activityClosed) {
+            instrumentation.waitForIdleSync()
+        }
+        return activityClosed
+    }
+
 
     public fun testEditOp() {
         TAG = "testEditOp"
@@ -302,7 +385,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         var today = Tools.createClearedCalendar()
         today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
         today.add(Calendar.MONTH, 3)
-        Helpers.pauseTest(500)
+        Helpers.pauseTest(1000)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
         onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
 
