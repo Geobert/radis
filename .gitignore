@@ -1,8 +1,8 @@
-res/values/acra.xml
-.idea/workspace.xml
-.idea/uiDesigner.xml
-classes/
-gen/
+.gradle
+/local.properties
+/.idea/workspace.xml
+.DS_Store
+/build
 install_on_n4.bat
 app/build/
 .gradle/1.10/taskArtifacts/cache.properties
@@ -50,7 +50,5 @@ app/build/
 .idea/libraries/support_v4_21_0_3.xml
 .idea/libraries/testing_support_lib_0_1.xml
 app/crashlytics.properties
+app/src/main/res/values/com_crashlytics_export_strings.xml
 app/manifest-merger-release-report.txt
-build/intermediates/dex-cache/cache.xml
-build/intermediates/model_data.bin
-local.properties

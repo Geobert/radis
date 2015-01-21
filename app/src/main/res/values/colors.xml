@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="highlight">#FFFF9100</color>
+    <color name="op_alert">#FFFA9898</color>
+    <color name="positiveSum">#7ee897</color>
+    <!--<color name="line_color">#FF000000</color>-->
+    <!--<color name="line_end_gradient_color">#FF202020</color>-->
+    <!--<color name="op_selected">#FF2f5839</color>-->
+    <!--<color name="op_selected_end_gradient">#ff284b30</color>-->
+    <color name="op_selected">#FF0f4c6b</color>
+    <color name="op_selected_end_gradient">#ff0e435e</color>
+    <color name="line_color">#FF353535</color>
+    <color name="line_end_gradient_color">#ff2A2A2A</color>
+    <color name="text_color">#efefef</color>
+    <color name="normal_bg">#0A0A0A</color>
+    <color name="drawer_bg">#171717</color>
+    <color name="holo_blue_dark">#ff0099cc</color>
+    <string-array name="positive_colors">
+        <item>#61C76A</item>
+        <item>#3F91D9</item>
+        <item>#E3C771</item>
+        <item>#69C5FF</item>
+        <item>#73E36D</item>
+        <item>#FFD675</item>
+    </string-array>
+
+    <string-array name="negative_colors">
+        <item>#AB165C</item>
+        <item>#CC8ACF</item>
+        <item>#FC5D73</item>
+        <item>#E37730</item>
+        <item>#C215BC</item>
+        <item>#BF1111</item>
+        <item>#FF5500</item>
+        <item>#910D23</item>
+        <item>#8A0BD9</item>
+        <item>#800600</item>
+        <item>#946800</item>
+    </string-array>
+</resources>
