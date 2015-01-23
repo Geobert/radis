@@ -43,6 +43,8 @@ import fr.geobert.radis.ui.editor.AccountEditor;
 import fr.geobert.radis.ui.editor.OperationEditor;
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor;
 
+import io.fabric.sdk.android.Fabric;
+
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Date;
@@ -210,11 +212,11 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         ToolsPackage.initShortDate(this);
 
         if (!BuildConfig.DEBUG)
-            Crashlytics.start(this);
+            Fabric.with(this, new Crashlytics());
+
         setContentView(R.layout.activity_main);
         handler = new FragmentHandler(this);
         Tools.checkDebugMode(this);
@@ -403,10 +405,10 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE:
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT:
             case ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT:
-                ((ScheduledOpListFragment) mActiveFragment).onOperationEditorResult(resultCode, data);
+                mActiveFragment.onOperationEditorResult(resultCode, data);
                 break;
             case OperationEditor.OPERATION_EDITOR:
-                ((OperationListFragment) mActiveFragment).onOperationEditorResult(resultCode, data);
+                mActiveFragment.onOperationEditorResult(resultCode, data);
                 mAccountManager.backupCurAccountId();
                 updateAccountList();
                 break;
@@ -518,9 +520,9 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
                 if (mActiveFragment != null) {
                     mActiveFragment.onRestoreInstanceState(savedInstanceState);
                 }
-                if (mAccountManager.getSimpleCursorAdapter() == null) {
-                    initAccountStuff();
-                }
+                //if (mAccountManager == null || mAccountManager.getSimpleCursorAdapter() == null) {
+                initAccountStuff();
+//                }
                 if (mAccountAdapter == null || mAccountAdapter.isEmpty()) {
                     updateDisplay(null);
                 }

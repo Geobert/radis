@@ -40,8 +40,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.DefaultItemAnimator
 import kotlin.platform.platformStatic
 import fr.geobert.radis.ui.adapter.OperationsAdapter
-import android.view.ViewStub
 import fr.geobert.radis.tools.formatDate
+import android.support.v4.content.IntentCompat
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var mOldChildCount: Int = -1
@@ -274,7 +274,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             DbContentProvider.reinit(ctx)
             val intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName())
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            intent.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
             ctx.startActivity(intent)
         }
     }
@@ -468,7 +468,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mActivity.updateAccountList()
     }
 
-    public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+    override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data != null) {
             this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId)
             val date = data.getLongExtra("opDate", 0)

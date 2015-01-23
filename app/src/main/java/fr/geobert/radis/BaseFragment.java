@@ -1,5 +1,6 @@
 package fr.geobert.radis;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -44,6 +45,8 @@ public abstract class BaseFragment extends Fragment implements UpdateDisplayInte
 //    }
 
     public abstract void onRestoreInstanceState(Bundle savedInstanceState);
+
+    public abstract void onOperationEditorResult(int resultCode, Intent data);
 
     public abstract boolean onAccountChanged(long itemId);
 
