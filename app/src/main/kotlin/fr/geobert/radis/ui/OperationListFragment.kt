@@ -40,8 +40,8 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.DefaultItemAnimator
 import kotlin.platform.platformStatic
 import fr.geobert.radis.ui.adapter.OperationsAdapter
-import android.view.ViewStub
 import fr.geobert.radis.tools.formatDate
+import android.support.v4.content.IntentCompat
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var mOldChildCount: Int = -1
@@ -170,18 +170,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     fun processAccountChanged(itemId: Long): Boolean {
         mAccountManager.setCurrentAccountId(itemId)
-        val startDate = Tools.createClearedCalendar()
-        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-        //startOpDate = startDate
+        //        val startDate = Tools.createClearedCalendar()
+        //        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
+        startOpDate = null
+        mOldChildCount = -1
         //        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
         if (q != null) {
             q.setAccount(itemId)
-            getMoreOperations(startDate)// getOperationsList()
+            getMoreOperations(null)// getOperationsList()
             return true
         } else {
             initQuickAdd()
-            getMoreOperations(startDate)// getOperationsList()
+            getMoreOperations(null)// getOperationsList()
             return false
         }
     }
@@ -257,7 +258,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 } else {
                     mListView.post {
                         val curChildCount = mListLayout.getChildCount()
-                        // Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
+                        //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
                         if (curChildCount > 0 && mOldChildCount != curChildCount &&
                                 curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
                             mOldChildCount = mListLayout.getChildCount()
@@ -274,7 +275,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             DbContentProvider.reinit(ctx)
             val intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName())
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            intent.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
             ctx.startActivity(intent)
         }
     }
@@ -421,6 +422,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     //                    mScrollLoader.setStartDate(d)
                     startOpDate = d
                     getOperationsList()
+                } else if (start == null) {
+                    val s = Tools.createClearedCalendar()
+                    s.set(Calendar.DAY_OF_MONTH, s.getActualMinimum(Calendar.DAY_OF_MONTH))
+                    startOpDate = s
+                    getOperationsList()
                 } else if (mOpListAdapter?.getItemCount() == 0) {
                     setEmptyViewVisibility(true)
                 }
@@ -468,7 +474,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mActivity.updateAccountList()
     }
 
-    public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+    override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data != null) {
             this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId)
             val date = data.getLongExtra("opDate", 0)

@@ -45,7 +45,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     private var mContainer: LinearLayout by Delegates.notNull()
     private var mListView: RecyclerView by Delegates.notNull()
     private val mEmptyView: View by Delegates.lazy { mContainer.findViewById(R.id.empty_textview) }
-    private val mListLayout by Delegates.lazy { LinearLayoutManager(getActivity()) }
+    private var mListLayout: LinearLayoutManager by Delegates.notNull()
     private var mAdapter: SchedOpAdapter? = null
     private var mLoader: CursorLoader? = null
     private var mTotalLbl: TextView by Delegates.notNull()
@@ -63,6 +63,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         mListView = ll.findViewById(android.R.id.list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
         mListView.setHasFixedSize(true)
+        mListLayout = LinearLayoutManager(getActivity())
         if (mListView.getLayoutManager() == null) {
             mListView.setLayoutManager(mListLayout)
         }
@@ -238,7 +239,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         fetchSchOpsOfAccount()
     }
 
-    public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+    override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             fetchSchOpsOfAccount()
         }

@@ -49,7 +49,6 @@ import org.achartengine.ChartFactory
 import org.achartengine.chart.BarChart.Type
 import android.util.Log
 import android.app.Activity
-import android.view.ViewStub
 import android.support.v7.widget.RecyclerView
 import fr.geobert.radis.ui.adapter.StatisticAdapter
 import android.support.v7.widget.DefaultItemAnimator
@@ -107,6 +106,10 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         if (resultCode == Activity.RESULT_OK) {
             fetchStats()
         }
+    }
+
+    override fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+        // nothing
     }
 
     private fun fetchStats() {

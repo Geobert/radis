@@ -2,22 +2,21 @@ buildscript {
     ext.kotlin_version = '0.10.195'
     repositories {
         mavenCentral()
-        maven { url 'http://download.crashlytics.com/maven' }
+        maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:1.0.0'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:0.10.4"
-        classpath "com.crashlytics.tools.gradle:crashlytics-gradle:1.14.7"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'io.fabric.tools:gradle:1.+'
     }
 }
 apply plugin: 'com.android.application'
-apply plugin: 'crashlytics'
+apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 
 repositories {
     mavenCentral()
-    maven { url 'http://download.crashlytics.com/maven' }
+    maven { url 'https://maven.fabric.io/public' }
 }
 
 android {
@@ -30,8 +29,8 @@ android {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
         targetSdkVersion 21
-        versionCode 47
-        versionName "1.0"
+        versionCode 49
+        versionName "1.0.2"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -60,7 +59,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:21.0.3"
     compile "com.android.support:support-v4:21.0.3"
     compile "com.android.support:recyclerview-v7:21.0.0"
-    compile "com.crashlytics.android:crashlytics:1.1.13"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
 //    androidTestCompile 'org.hamcrest:hamcrest-core:1.1'
@@ -79,5 +77,8 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-v4'
         exclude module: 'recyclerview-v7'
         //  exclude group: 'org.hamcrest'
+    }
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.0@aar') {
+        transitive = true;
     }
 }
