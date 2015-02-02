@@ -321,7 +321,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         // 2 following lines are hack because a bug of Espresso
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(1000)
+        Helpers.pauseTest(1500)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)

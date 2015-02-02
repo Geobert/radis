@@ -20,3 +20,5 @@
 -dontwarn org.w3c.dom.events.*
 
 -keep class org.achartengine.** { *; }
+
+-keepattributes SourceFile,LineNumberTable

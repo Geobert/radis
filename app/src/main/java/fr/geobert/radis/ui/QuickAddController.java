@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -103,7 +104,6 @@ public class QuickAddController {
             }
         });
         QuickAddController.setQuickAddButEnabled(mQuickAddButton, false);
-
         mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher);
         mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher);
         mQuickAddAmount.setOnEditorActionListener(new OnEditorActionListener() {
@@ -127,10 +127,11 @@ public class QuickAddController {
     private void showDatePicker() {
         GregorianCalendar today = new GregorianCalendar();
         DatePickerDialog dialog = new DatePickerDialog(mActivity, new DatePickerDialog.OnDateSetListener() {
-            private int alreadyFired = -1;
+            private int alreadyFired = 0;
 
             @Override
             public void onDateSet(DatePicker datePicker, int y, int m, int d) {
+                Log.d("QuickAdd", "date set : " + y + "/" + m + "/" + d + " ///" + alreadyFired % 2);
                 // workaround known android bug
                 if (alreadyFired % 2 == 0) {
                     GregorianCalendar date = new GregorianCalendar(y, m, d);

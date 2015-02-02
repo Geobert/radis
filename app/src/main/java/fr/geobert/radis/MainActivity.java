@@ -450,6 +450,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
     }
 
     public void updateAccountList() {
+        mAccountManager.setSimpleCursorAdapter(mAccountAdapter);
         mAccountManager.fetchAllAccounts(this, true, new Runnable() {
             @Override
             public void run() {

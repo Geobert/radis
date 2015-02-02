@@ -170,18 +170,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     fun processAccountChanged(itemId: Long): Boolean {
         mAccountManager.setCurrentAccountId(itemId)
-        val startDate = Tools.createClearedCalendar()
-        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-        //startOpDate = startDate
+        //        val startDate = Tools.createClearedCalendar()
+        //        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
+        startOpDate = null
+        mOldChildCount = -1
         //        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
         if (q != null) {
             q.setAccount(itemId)
-            getMoreOperations(startDate)// getOperationsList()
+            getMoreOperations(null)// getOperationsList()
             return true
         } else {
             initQuickAdd()
-            getMoreOperations(startDate)// getOperationsList()
+            getMoreOperations(null)// getOperationsList()
             return false
         }
     }
@@ -257,7 +258,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 } else {
                     mListView.post {
                         val curChildCount = mListLayout.getChildCount()
-                        // Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
+                        //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
                         if (curChildCount > 0 && mOldChildCount != curChildCount &&
                                 curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
                             mOldChildCount = mListLayout.getChildCount()
@@ -420,6 +421,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     d.set(Calendar.DAY_OF_MONTH, d.getMinimum(Calendar.DAY_OF_MONTH))
                     //                    mScrollLoader.setStartDate(d)
                     startOpDate = d
+                    getOperationsList()
+                } else if (start == null) {
+                    val s = Tools.createClearedCalendar()
+                    s.set(Calendar.DAY_OF_MONTH, s.getActualMinimum(Calendar.DAY_OF_MONTH))
+                    startOpDate = s
                     getOperationsList()
                 } else if (mOpListAdapter?.getItemCount() == 0) {
                     setEmptyViewVisibility(true)
