@@ -380,6 +380,7 @@ public class MainActivity extends BaseActivity implements UpdateDisplayInterface
         } else {
             if (mAccountAdapter == null) {
                 initAccountStuff();
+                mAccountManager.setAllAccountsCursor(allAccounts);
             } else {
                 Cursor old = mAccountAdapter.swapCursor(allAccounts);
                 if (old != null) {
