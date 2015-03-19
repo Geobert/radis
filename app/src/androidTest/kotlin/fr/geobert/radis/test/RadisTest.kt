@@ -969,7 +969,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
 
-    class object {
+    companion object {
         private val WAIT_DIALOG_TIME = 2000
 
         var TAG = "RadisRobotium"

@@ -175,7 +175,7 @@
         <item name="android:imeOptions">actionDone</item>
     </style>
 
-    <style name="RadisTheme" parent="@style/Theme.AppCompat">
+    <style name="RadisTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
         <item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>
         <item name="android:actionBarStyle">@style/MyActionBarStyle</item>

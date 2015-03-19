@@ -113,7 +113,7 @@ public class ToggleImageButton extends ImageButton implements Checkable {
         super.onRestoreInstanceState(state);
     }
 
-    public static interface OnCheckedChangeListener {
+    public interface OnCheckedChangeListener {
 
         void onCheckedChanged(ToggleImageButton buttonView, boolean isChecked);
     }

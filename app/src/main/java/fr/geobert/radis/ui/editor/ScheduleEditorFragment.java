@@ -44,7 +44,8 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         mOpEditFragment = mActivity;
         initViewReferences();
         initViewBehavior();
-        populateFields();
+        // done by ScheduledOperationEditor
+        //populateFields();
     }
 
     private void initViewReferences() {
@@ -57,17 +58,17 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
         mEndDateCheck = (CheckBox) mActivity.findViewById(R.id.end_date_check);
     }
 
-    void populateFields() {
+    public void populateFields() {
         if (mActivity == null) {
             return;
         }
         ScheduledOperation op = mCurrentSchOp;
-        mActivity.mCurrentOp = op;
+        mActivity.setmCurrentOp(op);
         mCustomPeriodicityVal.setText(mCurrentSchOp.getmPeriodicity() == 0 ? ""
                 : Integer.toString(mCurrentSchOp.getmPeriodicity()));
         poputatePeriodicitySpinner();
         populateCustomPeriodicitySpinner();
-        populateAccountSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
+        populateAccountSpinner(((CommonOpEditor) getActivity()).getmAccountManager().getAllAccountsCursor());
         if (op.getEndDate() > 0) {
             mEndDateCheck.setChecked(true);
             mEndDatePicker.setEnabled(true);
@@ -169,11 +170,11 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
                     new int[]{android.R.id.text1}, SimpleCursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             mAccountSpinner.setAdapter(adapter);
-            if (mCurrentSchOp.getmAccountId() != 0 || mActivity.mCurAccountId != 0) {
+            if (mCurrentSchOp.getmAccountId() != 0 || mActivity.getmCurAccountId() != 0) {
                 int pos = 1;
                 while (pos < adapter.getCount()) {
                     long id = adapter.getItemId(pos);
-                    if (id == mCurrentSchOp.getmAccountId() || id == mActivity.mCurAccountId) {
+                    if (id == mCurrentSchOp.getmAccountId() || id == mActivity.getmCurAccountId()) {
                         mAccountSpinner.setSelection(pos);
                         break;
                     } else {
@@ -289,6 +290,6 @@ public class ScheduleEditorFragment extends Fragment implements OnTransfertCheck
     @Override
     public void onPause() {
         super.onPause();
-        fillOperationWithInputs(mActivity.mCurrentOp);
+        fillOperationWithInputs(mActivity.getmCurrentOp());
     }
 }

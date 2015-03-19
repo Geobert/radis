@@ -67,7 +67,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
-        setHasOptionsMenu(true)
+
         val v = inflater?.inflate(R.layout.statistics_list_fragment, container, false) as View
         mContainer = v
         mList = v.findViewById(android.R.id.list) as RecyclerView
@@ -75,18 +75,12 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         mList.setHasFixedSize(true)
         mList.setItemAnimator(DefaultItemAnimator())
 
-        val actionbar: ActionBar = mActivity?.getSupportActionBar() as ActionBar
-        actionbar.setDisplayHomeAsUpEnabled(true)
-        actionbar.setIcon(R.drawable.stat_48)
+        setIcon(R.drawable.stat_48)
+        setMenu(R.menu.operations_list_menu)
         return v
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?): Unit {
-        super<BaseFragment>.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.operations_list_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+    override fun onMenuItemClick(item: MenuItem?): Boolean =
             when (item?.getItemId()) {
                 R.id.create_operation -> {
                     StatisticEditor.callMeForResult(ctx)
@@ -101,7 +95,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         fetchStats()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super<BaseFragment>.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             fetchStats()
@@ -121,7 +115,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     }
 
 

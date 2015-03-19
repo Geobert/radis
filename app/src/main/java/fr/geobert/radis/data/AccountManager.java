@@ -31,7 +31,7 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
     private long mStartSum;
 
     public AccountManager() {
-        mCallbacks = new ArrayList<Runnable>();
+        mCallbacks = new ArrayList<>();
     }
 
     public Cursor getAllAccountsCursor() {
@@ -57,10 +57,6 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
                 this.mSimpleCursorAdapter.changeCursor(null);
             }
         }
-    }
-
-    public SimpleCursorAdapter getSimpleCursorAdapter() {
-        return mSimpleCursorAdapter;
     }
 
     public void setSimpleCursorAdapter(SimpleCursorAdapter adapter) {
@@ -205,7 +201,4 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
         return AccountTable.getCheckedSum(mCtx, mCurAccountId);
     }
 
-    public String getCurAccCurrencySymbol() {
-        return mCurAccCurrencySymbol;
-    }
 }

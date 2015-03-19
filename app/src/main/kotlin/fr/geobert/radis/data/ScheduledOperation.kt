@@ -29,7 +29,7 @@ public class ScheduledOperation : Operation() {
     public var mPeriodicityUnit: Int = 1
     public var mEndDate: GregorianCalendar = Tools.createClearedCalendar()
 
-    class object {
+    companion object {
         fun new(op: Operation, accountId: Long): ScheduledOperation {
             val __ = ScheduledOperation()
             __.initWithOperation(op)

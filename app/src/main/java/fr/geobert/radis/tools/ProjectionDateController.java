@@ -108,7 +108,7 @@ public class ProjectionDateController {
 
     public static AlertDialog getDialog(Activity activity) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        LayoutInflater inflater = (LayoutInflater) activity.getLayoutInflater();
+        LayoutInflater inflater = activity.getLayoutInflater();
         View layout = inflater.inflate(R.layout.projection_date_dialog, null);
         builder.setPositiveButton(activity.getString(R.string.ok),
                 new DialogInterface.OnClickListener() {

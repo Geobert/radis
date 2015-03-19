@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_height="44dp"
+            android:layout_width="match_parent"
+            android:minHeight="44dp"
+            android:background="?attr/colorPrimary"/>
+
+    <ScrollView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_weight="1"
@@ -7,61 +20,62 @@
             android:background="@color/normal_bg"
             android:fillViewport="true">
 
-    <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="5dp">
-
-        <EditText
-                android:id="@+id/edit_account_name"
-                style="@style/EditorEditText"
-                android:hint="@string/name"/>
-
-        <EditText
-                android:id="@+id/edit_account_start_sum"
-                style="@style/EditorEditText.Sum"
-                android:hint="@string/start_sum"/>
-
-        <TextView
-                style="@style/EditorTextView"
-                android:text="@string/currency"/>
-
-        <Spinner
-                android:id="@+id/currency_spinner"
+        <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:drawSelectorOnTop="true"
-                android:prompt="@string/account_prompt">
-        </Spinner>
+                android:orientation="vertical"
+                android:padding="5dp">
 
-        <EditText
-                android:id="@+id/custom_currency"
-                style="@style/EditorEditText"
-                android:maxLength="3"
-                android:layout_marginBottom="5dip"
-                android:hint="@string/custom_currency_hint"/>
+            <EditText
+                    android:id="@+id/edit_account_name"
+                    style="@style/EditorEditText"
+                    android:hint="@string/name"/>
 
-        <TextView
-                style="@style/EditorTextView"
-                android:text="@string/projection_date"/>
+            <EditText
+                    android:id="@+id/edit_account_start_sum"
+                    style="@style/EditorEditText.Sum"
+                    android:hint="@string/start_sum"/>
 
-        <Spinner
-                android:id="@+id/projection_date_spinner"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:drawSelectorOnTop="true"
-                android:prompt="@string/projection_date_mode"/>
+            <TextView
+                    style="@style/EditorTextView"
+                    android:text="@string/currency"/>
 
-        <EditText
-                android:id="@+id/projection_date_value"
-                style="@style/EditorEditText.Date"
-                android:inputType="number"
-                android:layout_marginBottom="5dip"/>
+            <Spinner
+                    android:id="@+id/currency_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:drawSelectorOnTop="true"
+                    android:prompt="@string/account_prompt">
+            </Spinner>
 
-        <EditText
-                android:id="@+id/edit_account_desc"
-                style="@style/DescEditText"
-                android:hint="@string/description"/>
-    </LinearLayout>
-</ScrollView>
+            <EditText
+                    android:id="@+id/custom_currency"
+                    style="@style/EditorEditText"
+                    android:maxLength="3"
+                    android:layout_marginBottom="5dip"
+                    android:hint="@string/custom_currency_hint"/>
+
+            <TextView
+                    style="@style/EditorTextView"
+                    android:text="@string/projection_date"/>
+
+            <Spinner
+                    android:id="@+id/projection_date_spinner"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:drawSelectorOnTop="true"
+                    android:prompt="@string/projection_date_mode"/>
+
+            <EditText
+                    android:id="@+id/projection_date_value"
+                    style="@style/EditorEditText.Date"
+                    android:inputType="number"
+                    android:layout_marginBottom="5dip"/>
+
+            <EditText
+                    android:id="@+id/edit_account_desc"
+                    style="@style/DescEditText"
+                    android:hint="@string/description"/>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

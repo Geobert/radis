@@ -53,12 +53,11 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
 
-        setHasOptionsMenu(true)
-
         val ll = inflater.inflate(R.layout.scheduled_list, container, false) as LinearLayout
         mContainer = ll
-        val actionbar = mActivity.getSupportActionBar()
-        actionbar.setIcon(R.drawable.sched_48)
+
+        setIcon(R.drawable.sched_48)
+        setMenu(R.menu.scheduled_list_menu)
 
         mListView = ll.findViewById(android.R.id.list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
@@ -71,13 +70,13 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         return ll
     }
 
-    private fun selectOpAndAdjustOffset(position: Int) {
-        val adapter = mAdapter
-        if (adapter != null) {
-            adapter.selectedPosition = position
-            mListView.smoothScrollToPosition(position + 2) // scroll in order to see fully expanded op row
-        }
-    }
+    //    private fun selectOpAndAdjustOffset(position: Int) {
+    //        val adapter = mAdapter
+    //        if (adapter != null) {
+    //            adapter.selectedPosition = position
+    //            mListView.smoothScrollToPosition(position + 2) // scroll in order to see fully expanded op row
+    //        }
+    //    }
 
     private fun fetchSchOpsOfAccount() {
         if (mLoader == null) {
@@ -87,7 +86,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         // nothing ?
     }
 
@@ -148,7 +147,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.getItemId()) {
             R.id.create_operation -> {
                 ScheduledOperationEditor.callMeForResult(mActivity, 0,
@@ -157,10 +156,6 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             }
             else -> return Tools.onDefaultOptionItemSelected(mActivity, item)
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.scheduled_list_menu, menu)
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor>? {
@@ -274,7 +269,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             return builder.create()
         }
 
-        class object {
+        companion object {
             var parentFrag: ScheduledOpListFragment by Delegates.notNull()
 
             public fun newInstance(opId: Long, parentFrag: ScheduledOpListFragment): DeleteOpConfirmationDialog {
@@ -289,18 +284,12 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     }
 
-    class object {
-        public val CURRENT_ACCOUNT: String = "accountId"
-        private val TAG = "ScheduleOpList"
+    companion object {
+        //        public val CURRENT_ACCOUNT: String = "accountId"
+        //        private val TAG = "ScheduleOpList"
 
         // dialog ids
         private val GET_ALL_SCH_OPS = 900
         private val GET_SCH_OPS_OF_ACCOUNT = 910
-
-        public fun callMe(ctx: Context, currentAccountId: Long) {
-            val i = Intent(ctx, javaClass<ScheduledOpListFragment>())
-            i.putExtra(CURRENT_ACCOUNT, currentAccountId)
-            ctx.startActivity(i)
-        }
     }
 }

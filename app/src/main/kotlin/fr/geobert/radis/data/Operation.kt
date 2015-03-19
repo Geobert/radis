@@ -49,7 +49,7 @@ public open class Operation : Parcelable {
     public var mTransferAccountId: Long = 0
     public var mAccountId: Long = 0
 
-    class object {
+    companion object {
         fun new(p: Parcel): Operation {
             val __ = Operation()
             __.readFromParcel(p)
@@ -142,14 +142,14 @@ public open class Operation : Parcelable {
     public fun setYear(year: Int) {
         this.mDate.set(Calendar.YEAR, year)
     }
-
-    public fun getDateStr(): String {
-        return mDate.getTime().formatDate()
-    }
-
-    public fun getShortDateStr(): String {
-        return mDate.getTime().formatShortDate()
-    }
+    //
+    //    public fun getDateStr(): String {
+    //        return mDate.getTime().formatDate()
+    //    }
+    //
+    //    public fun getShortDateStr(): String {
+    //        return mDate.getTime().formatShortDate()
+    //    }
 
     public fun getDate(): Long {
         return mDate.getTimeInMillis()
@@ -184,9 +184,9 @@ public open class Operation : Parcelable {
         mSum = Tools.extractSumFromStr(sumStr)
     }
 
-    public fun setDateStr(dateStr: String) {
-        mDate.setTime(dateStr.parseDate())
-    }
+    //    public fun setDateStr(dateStr: String) {
+    //        mDate.setTime(dateStr.parseDate())
+    //    }
 
     override fun describeContents(): Int {
         return 0
@@ -211,10 +211,10 @@ public open class Operation : Parcelable {
         setMonth(p.readInt())
         setYear(p.readInt())
 
-        mThirdParty = p.readString() ?: ""
-        mTag = p.readString() ?: ""
-        mMode = p.readString() ?: ""
-        mNotes = p.readString() ?: ""
+        mThirdParty = p.readString()
+        mTag = p.readString()
+        mMode = p.readString()
+        mNotes = p.readString()
         mSum = p.readLong()
         mScheduledId = p.readLong()
         mTransferAccountId = p.readLong()

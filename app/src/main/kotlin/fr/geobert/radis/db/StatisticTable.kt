@@ -37,7 +37,7 @@ public object StatisticTable {
         db.execSQL(CREATE_TABLE)
     }
 
-    platformStatic fun upgradeFromV17(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+    platformStatic fun upgradeFromV17(db: SQLiteDatabase) {
         onCreate(db)
     }
 

@@ -114,8 +114,8 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     public void onResume() {
         super.onResume();
         mSumTextWatcher.setAutoNegate(mOpSumText.getText().toString().trim().length() == 0);
-        if (mActivity.mCurrentOp != null) {
-            populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
+        if (mActivity.getmCurrentOp() != null) {
+            populateTransfertSpinner(((CommonOpEditor) getActivity()).getmAccountManager().getAllAccountsCursor());
         }
         initViewAdapters();
         initListeners();
@@ -273,14 +273,14 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
             mSrcAccount.setAdapter(adapter);
             mDstAccount.setAdapter(adapter2);
 
-            final boolean isTransfert = mActivity.mCurrentOp.getmTransferAccountId() > 0;
+            final boolean isTransfert = mActivity.getmCurrentOp().getmTransferAccountId() > 0;
             mIsTransfertCheck.setChecked(isTransfert);
             if (isTransfert) {
-                initAccountSpinner(mSrcAccount, mActivity.mCurrentOp.getmAccountId());
-                initAccountSpinner(mDstAccount, mActivity.mCurrentOp.getmTransferAccountId());
+                initAccountSpinner(mSrcAccount, mActivity.getmCurrentOp().getmAccountId());
+                initAccountSpinner(mDstAccount, mActivity.getmCurrentOp().getmTransferAccountId());
             } else {
-                if (mActivity.mCurAccountId != 0) {
-                    initAccountSpinner(mSrcAccount, mActivity.mCurAccountId);
+                if (mActivity.getmCurAccountId() != 0) {
+                    initAccountSpinner(mSrcAccount, mActivity.getmCurAccountId());
                 }
             }
         }
@@ -299,18 +299,18 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
         Tools.setTextWithoutComplete(mOpModeText, op.getmMode());
         Tools.setTextWithoutComplete(mOpTagText, op.getmTag());
         mDatePicker.updateDate(op.getYear(), op.getMonth(), op.getDay());
-        mActivity.mPreviousSum = op.getmSum();
+        mActivity.setmPreviousSum(op.getmSum());
         mNotesText.setText(op.getmNotes());
         Tools.setSumTextGravity(mOpSumText);
         mSumTextWatcher.setAutoNegate(false);
-        if (mActivity.mCurrentOp.getmSum() == 0.0) {
+        if (mActivity.getmCurrentOp().getmSum() == 0.0) {
             mOpSumText.setText("");
             mSumTextWatcher.setAutoNegate(true);
         } else {
-            mOpSumText.setText(mActivity.mCurrentOp.getSumStr());
+            mOpSumText.setText(mActivity.getmCurrentOp().getSumStr());
         }
         mIsChecked.setChecked(op.getmIsChecked());
-        populateTransfertSpinner(((CommonOpEditor) getActivity()).getAccountManager().getAllAccountsCursor());
+        populateTransfertSpinner(((CommonOpEditor) getActivity()).getmAccountManager().getAllAccountsCursor());
     }
 
     private void invertSign() throws ParseException {
@@ -408,14 +408,14 @@ public class OperationEditFragment extends Fragment implements TextWatcher {
     @Override
     public void onPause() {
         super.onPause();
-        if (mActivity.mCurrentOp == null) {
+        if (mActivity.getmCurrentOp() == null) {
             if (mActivity instanceof OperationEditor) {
-                mActivity.mCurrentOp = new Operation();
+                mActivity.setmCurrentOp(new Operation());
             } else if (mActivity instanceof ScheduledOperationEditor) {
-                mActivity.mCurrentOp = fr.geobert.radis.data.DataPackage.ScheduledOperation(mActivity.mCurAccountId);
+                mActivity.setmCurrentOp(fr.geobert.radis.data.DataPackage.ScheduledOperation(mActivity.getmCurAccountId()));
             }
         }
-        fillOperationWithInputs(mActivity.mCurrentOp);
+        fillOperationWithInputs(mActivity.getmCurrentOp());
     }
 
     public void setCheckedEditVisibility(int visibility) {

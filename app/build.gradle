@@ -1,13 +1,14 @@
 buildscript {
-    ext.kotlin_version = '0.10.195'
+    ext.kotlin_version = '0.11.91'
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.0.0'
+        classpath 'com.android.tools.build:gradle:1.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'io.fabric.tools:gradle:1.+'
+        //classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+        classpath 'io.fabric.tools:gradle:1.15.2'
     }
 }
 apply plugin: 'com.android.application'
@@ -17,18 +18,21 @@ apply plugin: 'kotlin-android'
 repositories {
     mavenCentral()
     maven { url 'https://maven.fabric.io/public' }
+    maven {
+        url 'http://oss.sonatype.org/content/repositories/snapshots'
+    }
 }
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion '21.1.2'
+    compileSdkVersion 22
+    buildToolsVersion '22'
     lintOptions {
         disable 'MissingTranslation'
     }
     defaultConfig {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode 49
         versionName "1.0.2"
         testApplicationId "fr.geobert.radis.test"
@@ -53,12 +57,11 @@ android {
     }
 }
 
-
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile "com.android.support:appcompat-v7:21.0.3"
-    compile "com.android.support:support-v4:21.0.3"
-    compile "com.android.support:recyclerview-v7:21.0.0"
+    compile "com.android.support:appcompat-v7:22.0.0"
+    compile "com.android.support:support-v4:22.0.0"
+    compile "com.android.support:recyclerview-v7:22.0.0"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
 //    androidTestCompile 'org.hamcrest:hamcrest-core:1.1'
@@ -78,7 +81,7 @@ dependencies {
         exclude module: 'recyclerview-v7'
         //  exclude group: 'org.hamcrest'
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.2.0@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.2@aar') {
         transitive = true;
     }
 }

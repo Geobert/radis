@@ -10,16 +10,16 @@ public fun Account(cursor: Cursor): Account {
 
     val s = Account()
     s.id = cursor.getLong(0)
-    s.name = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_NAME)) as String
+    s.name = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_NAME))
     s.startSum = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_START_SUM))
     s.curSum = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_CUR_SUM))
     s.curSumDate = Date(cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE)))
-    s.currency = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_CURRENCY)) as String
+    s.currency = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_CURRENCY))
     s.projMode = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_PROJECTION_MODE))
     s.projDate = Date(cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_PROJECTION_DATE)))
     s.opSum = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_OP_SUM))
     s.checkedSum = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_CHECKED_OP_SUM))
-    s.description = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_DESC)) as String
+    s.description = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_DESC))
     return s
 }
 

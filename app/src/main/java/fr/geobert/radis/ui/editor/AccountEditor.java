@@ -8,10 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -47,17 +44,10 @@ public class AccountEditor extends BaseActivity implements
     private EditText mCustomCurrency;
     private ProjectionDateController mProjectionController;
     private long mRowId;
-    private ArrayAdapter<CharSequence> mCurrAdapter;
     private int customCurrencyIdx = -1;
     private boolean mOnRestore = false;
 
-//    public static void callMeForResult(Context context, long accountId) {
-//        Intent intent = new Intent(context, AccountEditor.class);
-//        intent.putExtra(PARAM_ACCOUNT_ID, accountId);
-//        context.startActivity(intent);
-//    }
-
-    public static void callMeForResult(ActionBarActivity context, long accountId) {
+    public static void callMeForResult(ActionBarActivity context, Long accountId) {
         Intent intent = new Intent(context, AccountEditor.class);
         intent.putExtra(PARAM_ACCOUNT_ID, accountId);
         context.startActivityForResult(intent, ACCOUNT_EDITOR);
@@ -69,9 +59,14 @@ public class AccountEditor extends BaseActivity implements
 
         setContentView(R.layout.account_creation);
 
-        ActionBar bar = getSupportActionBar();
-        bar.setDisplayHomeAsUpEnabled(true);
-        bar.setHomeAsUpIndicator(R.drawable.cancel_48);
+        setIcon(R.drawable.cancel_48);
+        setIconOnClick(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+        setMenu(R.menu.confirm_cancel_menu);
 
         Long rowId = (null == savedInstanceState) ? null : (Long) savedInstanceState.getSerializable(PARAM_ACCOUNT_ID);
         if (null == rowId) {
@@ -111,13 +106,6 @@ public class AccountEditor extends BaseActivity implements
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.confirm_cancel_menu, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -147,15 +135,15 @@ public class AccountEditor extends BaseActivity implements
         }
     }
 
-    private void onCancelClicked() {
-        setResult(RESULT_CANCELED);
-        finish();
-        AccountEditor.this.overridePendingTransition(
-                R.anim.enter_from_right, 0);
-    }
+//    private void onCancelClicked() {
+//        setResult(RESULT_CANCELED);
+//        finish();
+//        AccountEditor.this.overridePendingTransition(
+//                R.anim.enter_from_right, 0);
+//    }
 
     private void fillCurrencySpinner() {
-        mCurrAdapter = ArrayAdapter.createFromResource(this,
+        ArrayAdapter<CharSequence> mCurrAdapter = ArrayAdapter.createFromResource(this,
                 R.array.all_currencies, android.R.layout.simple_spinner_item);
         mCurrAdapter
                 .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -180,7 +168,7 @@ public class AccountEditor extends BaseActivity implements
         String name = mAccountNameText.getText().toString();
         String startSumStr = mAccountStartSumText.getText().toString();
         boolean res = true;
-        if (name == null || name.length() == 0) {
+        if (name.length() == 0) {
             errMsg.append(R.string.empty_account_name);
             res = false;
         }

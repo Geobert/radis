@@ -9,7 +9,7 @@ import android.content.Context
 import kotlin.platform.platformStatic
 
 data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth: Long, val limitInsertionDate: Long) {
-    class object {
+    companion object {
         platformStatic fun computeTimeParams(ctx: Context): TimeParams {
             val dayOfMonth = Calendar.DAY_OF_MONTH
             val todayInMs = Tools.createClearedCalendar().getTimeInMillis()
@@ -20,7 +20,7 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
 
             // manage February if insertionDayOfMonth is 29, 30 or 31
             val cfgInsertDay = DBPrefsManager.getInstance(ctx).getInt(RadisConfiguration.KEY_INSERTION_DATE,
-                    Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE)) as Int
+                    Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE))
             val insertionDayOfMonth = if (cfgInsertDay > maxDayOfCurMonth) maxDayOfCurMonth else cfgInsertDay
             val insertionDate = Tools.createClearedCalendar()
             insertionDate.set(dayOfMonth, insertionDayOfMonth)
@@ -30,7 +30,7 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
                 insertionDate.add(Calendar.MONTH, 1)
             }
 
-            val lastInsertDate = DBPrefsManager.getInstance(ctx).getLong(RadisConfiguration.KEY_LAST_INSERTION_DATE, 0) as Long
+            val lastInsertDate = DBPrefsManager.getInstance(ctx).getLong(RadisConfiguration.KEY_LAST_INSERTION_DATE, 0)
             if (lastInsertDate > insertionDate.getTimeInMillis()) {
                 // can this happens?
                 insertionDate.add(Calendar.MONTH, 1)

@@ -1,0 +1,103 @@
+package fr.geobert.radis.ui.editor
+
+import android.database.Cursor
+import android.net.Uri
+import android.os.Bundle
+import android.support.v4.app.LoaderManager.LoaderCallbacks
+import fr.geobert.radis.BaseActivity
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.R
+import android.view.View
+import android.support.v7.widget.Toolbar
+import android.view.MenuItem
+
+public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
+    protected var mCurrentOp: Operation? = null
+    protected var mRowId: Long = 0
+    protected var mOnRestore: Boolean = false
+    protected var mPreviousSum: Long = 0
+    protected var mCurAccountId: Long? = null
+    var mCurrentInfoTable: Uri? = null
+
+    // abstract methods
+    protected abstract fun setView()
+
+    protected abstract fun populateFields()
+
+    protected abstract fun fetchOrCreateCurrentOp()
+
+    protected fun fetchOp(loaderId: Int) {
+        showProgress()
+        getSupportLoaderManager().initLoader<Cursor>(loaderId, null, this)
+    }
+
+    // default and common behaviors
+    protected open fun saveOpAndExit() {
+        finish()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super<BaseActivity>.onCreate(savedInstanceState)
+        val extras = getIntent().getExtras()
+        mCurAccountId = extras?.getLong(AccountEditor.PARAM_ACCOUNT_ID)
+        init(extras)
+        setView()
+
+        initToolbar(this)
+    }
+
+    protected open fun init(extras: Bundle?) {
+        mRowId = if (extras != null) extras.getLong(PARAM_OP_ID) else 0
+    }
+
+    override fun onResume() {
+        super<BaseActivity>.onResume()
+        mAccountManager.fetchAllAccounts(this, false, object : Runnable {
+            override fun run() {
+                if (!mOnRestore) {
+                    fetchOrCreateCurrentOp()
+                } else {
+                    populateFields()
+                    mOnRestore = false
+                }
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        super<BaseActivity>.onDestroy()
+        InfoManagerDialog.resetInfoManager()
+    }
+
+    protected abstract fun fillOperationWithInputs(operation: Operation)
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        if (mRowId > 0) {
+            outState.putLong(PARAM_OP_ID, mRowId)
+        }
+
+        val op = mCurrentOp
+        if (op != null) {
+            fillOperationWithInputs(op)
+            outState.putParcelable("currentOp", op)
+        }
+        outState.putLong("previousSum", mPreviousSum)
+        outState.putParcelable("mCurrentInfoTable", mCurrentInfoTable)
+        mOnRestore = true
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        mOnRestore = true
+        val rowId = savedInstanceState.getLong(PARAM_OP_ID)
+        mRowId = if (rowId > 0) java.lang.Long.valueOf(rowId) else 0
+        val op = savedInstanceState.getParcelable<Operation>("currentOp")
+        mCurrentOp = op
+        mCurrentInfoTable = savedInstanceState.getParcelable<Uri>("mCurrentInfoTable")
+        //        populateFields();
+        mPreviousSum = savedInstanceState.getLong("previousSum")
+    }
+
+    companion object {
+        public val PARAM_OP_ID: String = "op_id"
+    }
+}

@@ -37,7 +37,7 @@ import android.support.test.espresso.contrib.PickerActions
 
 class Helpers {
 
-    class object {
+    companion object {
         var instrumentationTest: ActivityInstrumentationTestCase2<MainActivity> by Delegates.notNull()
         var activity: Activity by Delegates.notNull()
 

@@ -14,8 +14,8 @@ import fr.geobert.radis.R
 public fun Statistic(cursor: Cursor): Statistic {
     val s = Statistic()
     s.id = cursor.getLong(0)
-    s.name = cursor.getString(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_NAME)) as String
-    s.accountName = cursor.getString(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_ACCOUNT_NAME)) as String
+    s.name = cursor.getString(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_NAME))
+    s.accountName = cursor.getString(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_ACCOUNT_NAME))
     s.accountId = cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_ACCOUNT))
     s.chartType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_TYPE))
     s.filterType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_FILTER))
@@ -30,7 +30,7 @@ public fun Statistic(cursor: Cursor): Statistic {
 }
 
 public class Statistic : Serializable {
-    class object {
+    companion object {
         val PERIOD_DAYS = 0
         val PERIOD_MONTHES = 1
         val PERIOD_YEARS = 2
@@ -46,6 +46,7 @@ public class Statistic : Serializable {
         val MODE = 2
         val NO_FILTER = 3
     }
+
     var id = 0L
     var name = ""
     var accountId = 0L
@@ -58,7 +59,7 @@ public class Statistic : Serializable {
     var chartType = Statistic.CHART_PIE
     var filterType: Int = 0
 
-    {
+    init {
         date.add(Calendar.MONTH, -1)
         startDate = date.getTime()
     }
@@ -97,9 +98,9 @@ public class Statistic : Serializable {
             } else {
                 false
             }
+
     /**
      * create a time range according to statistic's configuration
-     * @param stat
      * @return (startDate, endDate)
      */
     fun createTimeRange(): Pair<Date, Date> {

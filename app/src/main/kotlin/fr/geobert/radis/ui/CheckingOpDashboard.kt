@@ -17,7 +17,7 @@ public class CheckingOpDashboard(val activity: MainActivity, layout: LinearLayou
     val sumWatcher = TargetSumWatcher(getSumSeparator(), targetedSumEdt, this)
     val statusLbl = layout.findViewById(R.id.checking_op_status) as TextView
 
-    {
+    init {
         sumWatcher.setAutoNegate(false)
         targetedSumEdt.setOnFocusChangeListener {(view, b) ->
             if (b) {
@@ -30,7 +30,7 @@ public class CheckingOpDashboard(val activity: MainActivity, layout: LinearLayou
     }
 
     fun updateDisplay() {
-        val accountManager = activity.getAccountManager()
+        val accountManager = activity.mAccountManager
         val target = Tools.extractSumFromStr(targetedSumEdt.getText().toString())
         val checkedSum = accountManager.getCurrentAccountCheckedSum()
         val total = accountManager.getCurrentAccountStartSum() - checkedSum

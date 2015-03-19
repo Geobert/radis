@@ -26,8 +26,6 @@ import android.support.v4.content.Loader
 import android.content.Context
 import fr.geobert.radis.db.DbContentProvider
 import android.util.Log
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import fr.geobert.radis.ui.editor.OperationEditor
 import android.app.Activity
@@ -64,30 +62,27 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private var needRefreshSelection = false
     private var container: LinearLayout? = null
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
         val c = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
         this.container = c
 
-        setHasOptionsMenu(true)
-
-        val supportActionBar = mActivity.getSupportActionBar()
-        supportActionBar.setLogo(R.drawable.radis_no_disc_48)
-
-        if (mActivity.getCurrentAccountId() != null) {
-            supportActionBar.setSelectedNavigationItem(mActivity.getAccountManager().getCurrentAccountPosition(mActivity))
-        }
+        setMenu(R.menu.operations_list_menu)
+        setIcon(R.drawable.radis_no_disc_48)
+        mActivity.mAccountSpinner.setSelection(mActivity.mAccountManager.getCurrentAccountPosition(mActivity))
+        // TODO : useless in actual form
+        //        checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
+        //        checkingDashboard?.onResume()
         initOperationList()
         initQuickAdd()
-        processAccountChanged(mActivity.getCurrentAccountId()!!)
+        processAccountChanged(mActivity.getCurrentAccountId())
         return c
     }
 
     override fun onResume() {
         super<BaseFragment>.onResume()
         mOldChildCount = -1
-        val accMan = mActivity.getAccountManager()
+        val accMan = mActivity.mAccountManager
         val curDefaultAccId = accMan.mCurDefaultAccount
         if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(mActivity)) {
             accMan.mCurDefaultAccount = null
@@ -137,9 +132,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun onSaveInstanceState(outState: Bundle) {
         super<BaseFragment>.onSaveInstanceState(outState)
         mQuickAddController?.onSaveInstanceState(outState)
-        if (mActivity.getCurrentAccountId() != null) {
-            outState.putLong("mAccountId", mActivity.getCurrentAccountId()!!)
-        }
+        outState.putLong("mAccountId", mActivity.getCurrentAccountId())
     }
 
     override fun onDestroyView() {
@@ -188,9 +181,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun onAccountChanged(itemId: Long): Boolean {
-        if (mAccountManager == null) {
-            return false
-        }
         Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
         if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
             getLoaderManager().destroyLoader(GET_OPS)
@@ -270,7 +260,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    class object {
+    companion object {
         platformStatic public fun restart(ctx: Context) {
             DbContentProvider.reinit(ctx)
             val intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName())
@@ -284,16 +274,13 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
      * get the operations of current account, should be called after getAccountList
      */
     private fun getOperationsList() {
-        if (mActivity.getCurrentAccountId() != null) {
-            if (mOperationsLoader == null) {
-                freshLoader = true
-                getLoaderManager().initLoader<Cursor>(GET_OPS, Bundle(), this)
-            } else {
-                getLoaderManager().restartLoader<Cursor>(GET_OPS, Bundle(), this)
-            }
+        if (mOperationsLoader == null) {
+            freshLoader = true
+            getLoaderManager().initLoader<Cursor>(GET_OPS, Bundle(), this)
+        } else {
+            getLoaderManager().restartLoader<Cursor>(GET_OPS, Bundle(), this)
         }
     }
-
 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {
         Log.d("OperationListFragment", "onLoaderReset")
@@ -314,17 +301,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         getMoreOperations(null)// getOperationsList()
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.operations_list_menu, menu)
-        //        val l = menu.findItem(R.id.checking_op).getActionView() as LinearLayout
-        //        this.checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
-        //        checkingDashboard?.onResume()
-        if (Tools.DEBUG_MODE) {
-            //inflater.inflate(R.menu.debug_menu, menu)
-        }
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.getItemId()) {
             R.id.create_operation -> {
                 OperationEditor.callMeForResult(mActivity, OperationEditor.NO_OPERATION,
@@ -514,7 +491,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             })
         }
 
-        class object {
+        companion object {
             var parentFrag: OperationListFragment by Delegates.notNull()
 
             public fun newInstance(accountId: Long, opId: Long, parentFrag: OperationListFragment): DeleteOpConfirmationDialog {
@@ -570,7 +547,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             return builder.create()
         }
 
-        class object {
+        companion object {
             var parentFrag: OperationListFragment by Delegates.notNull()
 
             public fun newInstance(accountId: Long, opId: Long, schId: Long, date: Long, transfertId: Long, parentFrag: OperationListFragment): DeleteOccurrenceConfirmationDialog {
@@ -599,13 +576,13 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     if (AccountTable.deleteAccount(getActivity(), accountId)) {
                         MainActivity.refreshAccountList(getActivity())
                     } else {
-                        (getActivity() as MainActivity).getAccountManager().setCurrentAccountId(null)
+                        (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null)
                     }
                 }
             }, R.string.account_delete_confirmation)
         }
 
-        class object {
+        companion object {
             platformStatic public fun newInstance(accountId: Long): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()

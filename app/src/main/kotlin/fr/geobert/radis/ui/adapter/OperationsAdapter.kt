@@ -96,7 +96,7 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
 
         if (needInfos) {
             val currentAccountId = activity.getCurrentAccountId()
-            val currentAccSum = activity.getAccountManager().getCurrentAccountSum()
+            val currentAccSum = activity.mAccountManager.getCurrentAccountSum()
             val sumFromPos = computeSumFromPosition(position)
             h.sumAtSelection.setText(((currentAccSum + sumFromPos).toDouble() / 100.0).formatSum())
 
