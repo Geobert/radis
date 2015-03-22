@@ -1,85 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/edit_scheduling_root"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:orientation="vertical"
-              android:layout_marginTop="5dp">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:id="@+id/main_content"
+            android:fillViewport="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/normal_bg">
 
     <LinearLayout
+            android:id="@+id/edit_scheduling_root"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_marginTop="5dp">
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:text="@string/account"/>
-
-        <Spinner
-                android:id="@+id/account_choice"
+        <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="5dp"
-                android:prompt="@string/account"/>
-    </LinearLayout>
+                android:orientation="vertical">
 
-    <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:text="@string/account"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="5dp"
-                android:text="@string/periodicity"/>
+            <Spinner
+                    android:id="@+id/account_choice"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:prompt="@string/account"/>
+        </LinearLayout>
 
-        <Spinner
-                android:id="@+id/periodicity_choice"
+        <LinearLayout
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/custom_periodicity"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-        <TextView
-                android:id="@+id/custom_periodicity_text"
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingRight="5dp"
-                android:text="@string/every"/>
+                android:orientation="vertical">
 
-        <EditText
-                android:id="@+id/custom_periodicity_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:minEms="2"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="5dp"
+                    android:text="@string/periodicity"/>
 
-        <Spinner
-                android:id="@+id/custom_periodicity_choice"
+            <Spinner
+                    android:id="@+id/periodicity_choice"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/custom_periodicity"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+            <TextView
+                    android:id="@+id/custom_periodicity_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="5dp"
+                    android:text="@string/every"/>
+
+            <EditText
+                    android:id="@+id/custom_periodicity_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:minEms="2"/>
+
+            <Spinner
+                    android:id="@+id/custom_periodicity_choice"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <CheckBox
+                android:id="@+id/end_date_check"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/end_date"/>
+
+        <DatePicker
+                android:id="@+id/edit_end_date"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"/>
+
     </LinearLayout>
-
-    <CheckBox
-            android:id="@+id/end_date_check"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/end_date"/>
-
-    <DatePicker
-            android:id="@+id/edit_end_date"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:calendarViewShown="false"
-            android:datePickerMode="spinner"/>
-
-</LinearLayout>
+</ScrollView>

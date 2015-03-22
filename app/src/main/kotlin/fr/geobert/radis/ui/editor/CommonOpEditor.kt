@@ -6,17 +6,13 @@ import android.os.Bundle
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.data.Operation
-import fr.geobert.radis.R
-import android.view.View
-import android.support.v7.widget.Toolbar
-import android.view.MenuItem
 
 public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
-    protected var mCurrentOp: Operation? = null
+    var mCurrentOp: Operation? = null
     protected var mRowId: Long = 0
     protected var mOnRestore: Boolean = false
     protected var mPreviousSum: Long = 0
-    protected var mCurAccountId: Long? = null
+    var mCurAccountId: Long? = null
     var mCurrentInfoTable: Uri? = null
 
     // abstract methods
@@ -28,7 +24,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
 
     protected fun fetchOp(loaderId: Int) {
         showProgress()
-        getSupportLoaderManager().initLoader<Cursor>(loaderId, null, this)
+        getSupportLoaderManager().initLoader<Cursor>(loaderId, Bundle(), this)
     }
 
     // default and common behaviors

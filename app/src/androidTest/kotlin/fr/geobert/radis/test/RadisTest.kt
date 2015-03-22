@@ -1,45 +1,48 @@
 package fr.geobert.radis.test
 
+import android.app.Activity
+import android.app.Instrumentation
 import android.content.Intent
-import android.test.ActivityInstrumentationTestCase2
-import fr.geobert.radis.R
-import fr.geobert.radis.tools.*
-
-import android.support.test.espresso.contrib.RecyclerViewActions.*
-import android.support.test.espresso.action.ViewActions.*
-import android.support.test.espresso.Espresso.*
-import android.support.test.espresso.matcher.ViewMatchers.*
-import android.support.test.espresso.assertion.ViewAssertions.*
-import org.hamcrest.Matchers.*
-
-import fr.geobert.radis.ui.adapter.OpRowHolder
-import fr.geobert.radis.data.Operation
-import fr.geobert.radis.MainActivity
-import fr.geobert.radis.db.DbContentProvider
-import android.support.test.espresso.ViewAction
-import android.view.View
-import org.hamcrest.Matcher
-import android.support.test.espresso.UiController
-import android.widget.TextView
-import java.util.Calendar
-import android.support.test.espresso.contrib.PickerActions
+import android.database.Cursor
 import android.support.test.espresso.Espresso
+import android.support.test.espresso.Espresso.onData
+import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.UiController
+import android.support.test.espresso.ViewAction
+import android.support.test.espresso.action.ViewActions.*
+import android.support.test.espresso.assertion.ViewAssertions.matches
+import android.support.test.espresso.contrib.PickerActions
+import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
+import android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition
+import android.support.test.espresso.matcher.ViewMatchers.*
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import android.support.test.runner.lifecycle.Stage
+import android.test.ActivityInstrumentationTestCase2
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.ListView
-import android.database.Cursor
-import java.util.GregorianCalendar
-import java.text.SimpleDateFormat
-import fr.geobert.espresso.DebugEspresso
-import android.app.Instrumentation
-import java.util.concurrent.atomic.AtomicReference
+import android.widget.TextView
 import com.android.support.test.deps.guava.base.Throwables
-import android.app.Activity
-import android.support.test.runner.lifecycle.Stage
 import com.android.support.test.deps.guava.collect.Sets
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry
-import java.util.concurrent.Callable
+import fr.geobert.espresso.DebugEspresso
+import fr.geobert.radis.MainActivity
+import fr.geobert.radis.R
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.db.DbContentProvider
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.ui.adapter.OpRowHolder
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers.*
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.GregorianCalendar
 import java.util.HashSet
+import java.util.concurrent.Callable
+import java.util.concurrent.atomic.AtomicReference
 
 public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
 
@@ -276,7 +279,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
 
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerLeft()
 
         onView(withId(R.id.periodicity_choice)).perform(scrollTo())
         onView(withId(R.id.periodicity_choice)).perform(click())
@@ -321,7 +324,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         // 2 following lines are hack because a bug of Espresso
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(1500)
+        Helpers.pauseTest(2000)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -810,7 +813,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_mode, OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, OP_DESC)
 
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerLeft()
 
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 0)
         Helpers.clickOnActionItemConfirm()
@@ -957,14 +960,14 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, OP_AMOUNT)
 
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerLeft()
 
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 3)
         onView(withId(R.id.custom_periodicity_value)).check(matches(isEnabled()))
         onView(withId(R.id.custom_periodicity_value)).perform(typeText(".2"))
 
-        onView(withText(R.string.basics)).perform(click())
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerRight()
+        Helpers.swipePagerLeft()
         Helpers.clickOnActionItemConfirm()
     }
 

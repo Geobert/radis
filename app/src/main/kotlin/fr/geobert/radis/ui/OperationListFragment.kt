@@ -1,45 +1,45 @@
 package fr.geobert.radis.ui
 
-import fr.geobert.radis.BaseFragment
-import fr.geobert.radis.tools.UpdateDisplayInterface
-import android.database.Cursor
-import android.content.Intent
-import android.os.Bundle
-import java.util.GregorianCalendar
-import fr.geobert.radis.data.Operation
-import android.support.v4.app.DialogFragment
-import android.support.v4.content.CursorLoader
-import kotlin.properties.Delegates
-import android.widget.LinearLayout
-import android.support.v7.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.view.View
-import fr.geobert.radis.R
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.RadisConfiguration
-import fr.geobert.radis.tools.Tools
-import java.util.Calendar
-import fr.geobert.radis.db.OperationTable
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
-import android.content.Context
-import fr.geobert.radis.db.DbContentProvider
-import android.util.Log
-import android.view.MenuItem
-import fr.geobert.radis.ui.editor.OperationEditor
 import android.app.Activity
-import android.app.Dialog
-import android.content.DialogInterface
 import android.app.AlertDialog
-import fr.geobert.radis.db.AccountTable
-import fr.geobert.radis.MainActivity
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.DefaultItemAnimator
-import kotlin.platform.platformStatic
-import fr.geobert.radis.ui.adapter.OperationsAdapter
-import fr.geobert.radis.tools.formatDate
+import android.app.Dialog
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.database.Cursor
+import android.os.Bundle
+import android.support.v4.app.DialogFragment
+import android.support.v4.app.LoaderManager
+import android.support.v4.content.CursorLoader
 import android.support.v4.content.IntentCompat
+import android.support.v4.content.Loader
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import fr.geobert.radis.BaseFragment
+import fr.geobert.radis.MainActivity
+import fr.geobert.radis.R
+import fr.geobert.radis.RadisConfiguration
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.DbContentProvider
+import fr.geobert.radis.db.OperationTable
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.UpdateDisplayInterface
+import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.ui.adapter.OperationsAdapter
+import fr.geobert.radis.ui.editor.OperationEditor
+import java.util.Calendar
+import java.util.GregorianCalendar
+import kotlin.platform.platformStatic
+import kotlin.properties.Delegates
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var mOldChildCount: Int = -1
@@ -550,7 +550,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         companion object {
             var parentFrag: OperationListFragment by Delegates.notNull()
 
-            public fun newInstance(accountId: Long, opId: Long, schId: Long, date: Long, transfertId: Long, parentFrag: OperationListFragment): DeleteOccurrenceConfirmationDialog {
+            public fun newInstance(accountId: Long, opId: Long, schId: Long, date: Long, transfertId: Long,
+                                   parentFrag: OperationListFragment): DeleteOccurrenceConfirmationDialog {
                 DeleteOccurrenceConfirmationDialog.parentFrag = parentFrag
                 val frag = DeleteOccurrenceConfirmationDialog()
                 val args = Bundle()
@@ -574,6 +575,18 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
                 override fun onClick(dialogInterface: DialogInterface, i: Int) {
                     if (AccountTable.deleteAccount(getActivity(), accountId)) {
+                        val act = getActivity() as MainActivity
+                        val accMan = act.mAccountManager
+                        // attempt to fix Fatal Exception: java.lang.IllegalStateException
+                        // couldn't move cursor to position 4
+                        if (accountId == accMan.getCurrentAccountId(act)) {
+                            accMan.setCurrentAccountId(null)
+                        }
+                        if (accountId == accMan.getDefaultAccountId(act)) {
+                            accMan.mCurDefaultAccount = null
+                            accMan.setCurrentAccountId(null)
+                            DBPrefsManager.getInstance(act).put(RadisConfiguration.KEY_DEFAULT_ACCOUNT, null)
+                        }
                         MainActivity.refreshAccountList(getActivity())
                     } else {
                         (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null)

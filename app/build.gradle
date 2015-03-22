@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '0.11.91'
+    ext.android_support = '21.0.3'
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
@@ -25,14 +26,14 @@ repositories {
 
 android {
     compileSdkVersion 22
-    buildToolsVersion '22'
+    buildToolsVersion '22.0.1'
     lintOptions {
         disable 'MissingTranslation'
     }
     defaultConfig {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
-        targetSdkVersion 22
+        targetSdkVersion 21
         versionCode 49
         versionName "1.0.2"
         testApplicationId "fr.geobert.radis.test"
@@ -59,9 +60,9 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile "com.android.support:appcompat-v7:22.0.0"
-    compile "com.android.support:support-v4:22.0.0"
-    compile "com.android.support:recyclerview-v7:22.0.0"
+    compile "com.android.support:appcompat-v7:$android_support"
+    compile "com.android.support:support-v4:$android_support"
+    compile "com.android.support:recyclerview-v7:$android_support"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
 //    androidTestCompile 'org.hamcrest:hamcrest-core:1.1'

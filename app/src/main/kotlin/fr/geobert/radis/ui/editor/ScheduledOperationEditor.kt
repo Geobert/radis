@@ -10,8 +10,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
+import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -26,8 +28,6 @@ import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.service.RadisService
 import fr.geobert.radis.tools.Tools
 import kotlin.properties.Delegates
-import android.support.v4.view.ViewPager
-import android.support.v4.app.FragmentPagerAdapter
 
 public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor {
     private var mOriginalSchOp: ScheduledOperation? = null
@@ -89,7 +89,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         if (mRowId <= 0 || mOriginalSchOp != null) {
             val errMsg = StringBuilder()
             if (isFormValid(errMsg)) {
-                fillOperationWithInputs(mPagerAdapter.getSchFragment().mCurrentSchOp)
+                fillOperationWithInputs(mPagerAdapter.getSchFragment().mCurrentSchOp as Operation)
                 saveOpAndExit()
             } else {
                 Tools.popError(this, errMsg.toString(), null)
@@ -146,31 +146,33 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
     override fun saveOpAndExit() {
         val op = mPagerAdapter.getSchFragment().mCurrentSchOp
-        if (mRowId <= 0) {
-            if (mOpIdSource > 0) {
-                // is converting a transaction into a
-                // schedule
-                if ((op.getDate() != mOriginalSchOp!!.getDate())) {
-                    // change the date of the source transaction
-                    OperationTable.updateOp(this, mOpIdSource, op, mOriginalSchOp)
+        if (op != null) {
+            if (mRowId <= 0) {
+                if (mOpIdSource > 0) {
+                    // is converting a transaction into a
+                    // schedule
+                    if ((op.getDate() != mOriginalSchOp!!.getDate())) {
+                        // change the date of the source transaction
+                        OperationTable.updateOp(this, mOpIdSource, op, mOriginalSchOp)
+                    }
+                    // do not insert another occurrence with same date
+                    ScheduledOperation.addPeriodicityToDate(op)
                 }
-                // do not insert another occurrence with same date
-                ScheduledOperation.addPeriodicityToDate(op)
-            }
-            val id = ScheduledOperationTable.createScheduledOp(this, op)
-            Log.d("SCHEDULED_OP_EDITOR", "created sch op id : " + id)
-            if (id > 0) {
-                mRowId = id
-            }
-            startInsertionServiceAndExit()
-        } else {
-            if (!op.equals(mOriginalSchOp)) {
-                UpdateOccurencesDialog.newInstance().show(getSupportFragmentManager(), "askOnDiff")
+                val id = ScheduledOperationTable.createScheduledOp(this, op)
+                Log.d("SCHEDULED_OP_EDITOR", "created sch op id : " + id)
+                if (id > 0) {
+                    mRowId = id
+                }
+                startInsertionServiceAndExit()
             } else {
-                // nothing to update
-                val res = Intent()
-                setResult(Activity.RESULT_OK, res)
-                finish()
+                if (!op.equals(mOriginalSchOp)) {
+                    UpdateOccurencesDialog.newInstance().show(getSupportFragmentManager(), "askOnDiff")
+                } else {
+                    // nothing to update
+                    val res = Intent()
+                    setResult(Activity.RESULT_OK, res)
+                    finish()
+                }
             }
         }
     }
@@ -208,16 +210,20 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     protected fun onDisconnectFromOccurences() {
-        ScheduledOperationTable.updateScheduledOp(this, mRowId, mPagerAdapter.getSchFragment().mCurrentSchOp, false)
-        OperationTable.disconnectAllOccurrences(this, mPagerAdapter.getSchFragment().mCurrentSchOp.mAccountId, mRowId)
-        startInsertionServiceAndExit()
+        val schOp = mPagerAdapter.getSchFragment().mCurrentSchOp
+        if (schOp != null) {
+            ScheduledOperationTable.updateScheduledOp(this, mRowId, schOp, false)
+            OperationTable.disconnectAllOccurrences(this, schOp.mAccountId, mRowId)
+            startInsertionServiceAndExit()
+        }
     }
 
     private fun onUpdateAllOccurenceClicked() {
         ScheduledOperationTable.updateScheduledOp(this, mRowId, mPagerAdapter.getSchFragment().mCurrentSchOp, false)
         val orig = mOriginalSchOp
-        if (orig != null) {
-            if (mPagerAdapter.getSchFragment().mCurrentSchOp.periodicityEquals(orig)) {
+        val schOp = mPagerAdapter.getSchFragment().mCurrentSchOp
+        if (orig != null && schOp != null) {
+            if (schOp.periodicityEquals(orig)) {
                 ScheduledOperationTable.updateAllOccurences(this, mPagerAdapter.getSchFragment().mCurrentSchOp, mPreviousSum, mRowId)
                 AccountTable.consolidateSums(this, mCurrentOp?.mAccountId as Long)
             } else {
