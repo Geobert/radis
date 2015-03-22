@@ -380,15 +380,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             getOperationsList()
         } else {
             // no op found with cur month and month - 1, try if there is one
-            val c: Cursor?
             Log.d("getMoreOperations", "startOpDate : " + startOpDate?.getTime()?.formatDate())
             val start = startOpDate
-            if (null == start) {
-                c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
+            val c = if (null == start) {
+                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
             } else {
-                c = OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
+                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
             }
-            Log.d("getMoreOperations", "cursor count : " + c?.getCount())
+            Log.d("getMoreOperations", "cursor count : " + c.getCount())
             if (c != null) {
                 if (c.moveToFirst()) {
                     val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))

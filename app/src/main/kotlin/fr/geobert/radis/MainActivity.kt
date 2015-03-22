@@ -79,8 +79,42 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private var mFirstStart = true
     private var mPrevFragment: BaseFragment? = null
     private var mActiveFragmentId = -1
-
     private var mPrevFragmentId: Int = 0
+
+
+    protected fun findOrCreateFragment(c: Class<out BaseFragment>, fragmentId: Int): Fragment? {
+        var fragment: Fragment?
+        val fragmentManager = getSupportFragmentManager()
+        fragment = fragmentManager.findFragmentByTag(c.getName())
+        when (fragment) {
+            null -> {
+                try {
+                    return updateFragmentRefs(c.newInstance(), fragmentId)
+                } catch (e: InstantiationException) {
+                    e.printStackTrace()
+                } catch (e: IllegalAccessException) {
+                    e.printStackTrace()
+                }
+                return null
+            }
+            else -> {
+                updateFragmentRefs(fragment!!, fragmentId)
+                mDrawerLayout.closeDrawer(mDrawerList)
+                fragmentManager.popBackStack(c.getName(), 0)
+                return null
+            }
+        }
+    }
+
+    protected fun updateFragmentRefs(fragment: Fragment, id: Int): Fragment {
+        val f = fragment as BaseFragment
+        mPrevFragment = mActiveFragment
+        mActiveFragment = f
+        mPrevFragmentId = mActiveFragmentId
+        mActiveFragmentId = id
+        mDrawerList.setItemChecked(mActiveFragmentId, true)
+        return fragment
+    }
 
     private inner class FragmentHandler(private var activity: MainActivity) : PauseHandler() {
 
@@ -90,35 +124,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
         override fun storeMessage(message: Message): Boolean {
             return true
-        }
-
-        protected fun findOrCreateFragment(c: Class<out BaseFragment>, fragmentId: Int): Fragment? {
-            var fragment: Fragment?
-            val fragmentManager = activity.getSupportFragmentManager()
-            fragment = fragmentManager.findFragmentByTag(c.getName())
-            when (fragment) {
-                null -> {
-                    try {
-                        fragment = c.newInstance()
-                    } catch (e: InstantiationException) {
-                        e.printStackTrace()
-                    } catch (e: IllegalAccessException) {
-                        e.printStackTrace()
-                    }
-
-                    return fragment
-                }
-                else -> {
-                    mPrevFragment = mActiveFragment
-                    mActiveFragment = fragment as BaseFragment
-                    mPrevFragmentId = mActiveFragmentId
-                    mActiveFragmentId = fragmentId
-                    mDrawerList.setItemChecked(mActiveFragmentId, true)
-                    mDrawerLayout.closeDrawer(mDrawerList)
-                    fragmentManager.popBackStack(c.getName(), 0)
-                    return null
-                }
-            }
         }
 
         override fun processMessage(message: Message) {
@@ -165,20 +170,15 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 else -> Log.d(TAG, "Undeclared fragment")
             }
 
-            if (fragment != null) {
-                val f = fragment as BaseFragment
-                mPrevFragment = mActiveFragment
-                mActiveFragment = f
-                mPrevFragmentId = mActiveFragmentId
-                mActiveFragmentId = message.what
-                mDrawerList.setItemChecked(mActiveFragmentId, true)
+            val tmp = fragment
+            if (tmp != null) {
+                val f = tmp as BaseFragment
                 fragmentManager.beginTransaction().setCustomAnimations(R.anim.enter_from_right, R.anim.zoom_exit,
                         R.anim.enter_from_left, R.anim.zoom_exit).replace(R.id.content_frame, f,
                         f.getName()).addToBackStack(f.getName()).commit()
             }
             mDrawerLayout.closeDrawer(mDrawerList)
         }
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -322,6 +322,9 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> mActiveFragment?.onOperationEditorResult(resultCode, data)
             OperationEditor.OPERATION_EDITOR -> {
+                if (mActiveFragment == null) {
+                    findOrCreateFragment(javaClass<OperationListFragment>(), OP_LIST)
+                }
                 mActiveFragment?.onOperationEditorResult(resultCode, data)
                 mAccountManager.backupCurAccountId()
                 updateAccountList()
@@ -422,9 +425,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         mPrevFragmentId = savedInstanceState.getInt("prevFragId")
         DBPrefsManager.getInstance(this).fillCache(this, object : Runnable {
             override fun run() {
-                if (mActiveFragment != null) {
-                    mActiveFragment!!.onRestoreInstanceState(savedInstanceState)
-                }
+                mActiveFragment?.onRestoreInstanceState(savedInstanceState)
                 initAccountStuff()
                 if (mAccountAdapter.isEmpty()) {
                     updateDisplay(null)
@@ -440,9 +441,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     override fun updateDisplay(intent: Intent?) {
         mAccountManager.fetchAllAccounts(this, true, object : Runnable {
             override fun run() {
-                if (mActiveFragment != null) {
-                    mActiveFragment!!.updateDisplay(intent)
-                }
+                mActiveFragment?.updateDisplay(intent)
             }
         })
     }

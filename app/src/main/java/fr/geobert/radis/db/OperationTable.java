@@ -307,25 +307,23 @@ public class OperationTable {
     }
 
     public static Cursor fetchLastOp(Context ctx, final long accountId) {
-        Cursor c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY,
+        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM "
                         + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." +
                         KEY_OP_TRANSFERT_ACC_ID + " = ?)) ",
                 new String[]{Long.toString(accountId), Long.toString(accountId), Long.toString(accountId),
                         Long.toString(accountId)}, OP_ORDERING
         );
-        return c;
     }
 
     public static Cursor fetchLastOpSince(Context ctx, final long accountId, final long time) {
-        Cursor c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY,
+        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY,
                 RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM "
                         + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." +
                         KEY_OP_TRANSFERT_ACC_ID + " = ?) AND ops2." + KEY_OP_DATE + " < ?) ",
                 new String[]{Long.toString(accountId), Long.toString(accountId), Long.toString(accountId),
                         Long.toString(accountId), Long.toString(time)}, OP_ORDERING
         );
-        return c;
     }
 
     public static Cursor fetchOneOp(Context ctx, final long rowId, final long accountId) {
