@@ -320,7 +320,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         when (requestCode) {
             AccountEditor.ACCOUNT_EDITOR -> onAccountEditFinished(resultCode)
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
-            ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> mActiveFragment?.onOperationEditorResult(resultCode, data)
+            ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> {
+                if (mActiveFragment == null) {
+                    findOrCreateFragment(if (mActiveFragmentId == OP_LIST) javaClass<OperationListFragment>() else
+                        javaClass<ScheduledOpListFragment>(), mActiveFragmentId)
+                }
+                mActiveFragment?.onOperationEditorResult(resultCode, data)
+            }
             OperationEditor.OPERATION_EDITOR -> {
                 if (mActiveFragment == null) {
                     findOrCreateFragment(javaClass<OperationListFragment>(), OP_LIST)
@@ -441,7 +447,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     override fun updateDisplay(intent: Intent?) {
         mAccountManager.fetchAllAccounts(this, true, object : Runnable {
             override fun run() {
-                mActiveFragment?.updateDisplay(intent)
+                val f = mActiveFragment
+                if (f != null && f.isAdded()) {
+                    f.updateDisplay(intent)
+                }
             }
         })
     }

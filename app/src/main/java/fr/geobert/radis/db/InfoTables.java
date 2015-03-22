@@ -102,12 +102,11 @@ public class InfoTables {
 
     private static Cursor getInfoByKey(Context ctx, String key, Uri table, String col) throws SQLException {
         key = AsciiUtils.convertNonAscii(key).trim().toLowerCase();
-        if (key == null || key.length() == 0) {
+        if (key.length() == 0) {
             return null;
         }
-        Cursor c = ctx.getContentResolver().query(table, new String[]{"_id", KEY_WEIGHT},
+        return ctx.getContentResolver().query(table, new String[]{"_id", KEY_WEIGHT},
                 mColNameNormName.get(col) + "= ?", new String[]{key}, null);
-        return c;
     }
 
     private static long createKeyId(Context ctx, String key, Uri table, String col) throws SQLException {

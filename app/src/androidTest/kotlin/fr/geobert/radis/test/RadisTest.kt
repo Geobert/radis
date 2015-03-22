@@ -322,9 +322,10 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).check(has(1, javaClass<ListView>()))
 
-        // 2 following lines are hack because a bug of Espresso
+        // 3 following lines are hack because a bug of Espresso
+        Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(2000)
+        Helpers.pauseTest(1000)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
