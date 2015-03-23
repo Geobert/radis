@@ -108,7 +108,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val c = container
         if (c != null) {
             val q = QuickAddController(mActivity, c)
-            q.setAccount(mActivity.getCurrentAccountId())
+            //            q.setAccount(mActivity.getCurrentAccountId())
             q.initViewBehavior()
             q.setAutoNegate(true)
             q.clearFocus()
@@ -170,7 +170,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         //        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
         if (q != null) {
-            q.setAccount(itemId)
+            //            q.setAccount(itemId)
             getMoreOperations(null)// getOperationsList()
             return true
         } else {
@@ -382,11 +382,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             // no op found with cur month and month - 1, try if there is one
             Log.d("getMoreOperations", "startOpDate : " + startOpDate?.getTime()?.formatDate())
             val start = startOpDate
-            val c = if (null == start) {
-                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
-            } else {
-                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
-            }
+            val c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
+//            if (null == start) {
+            //                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
+            //            } else {
+            //                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
+            //            }
             Log.d("getMoreOperations", "cursor count : " + c.getCount())
             if (c != null) {
                 if (c.moveToFirst()) {
