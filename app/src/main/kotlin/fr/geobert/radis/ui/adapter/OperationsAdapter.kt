@@ -1,25 +1,25 @@
 package fr.geobert.radis.ui.adapter
 
-import fr.geobert.radis.ui.IOperationList
 import android.database.Cursor
-import android.widget.TextView
-import android.widget.ImageView
-import android.view.View
-import fr.geobert.radis.data.Operation
-import java.util.GregorianCalendar
-import fr.geobert.radis.R
-import java.util.Calendar
-import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
 import android.text.format.DateFormat
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import fr.geobert.radis.MainActivity
-import fr.geobert.radis.ui.editor.OperationEditor
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.ui.editor.ScheduledOperationEditor
-import java.util.NoSuchElementException
-import android.util.Log
+import fr.geobert.radis.R
+import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.OperationTable
+import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.CheckingOpDashboard
+import fr.geobert.radis.ui.IOperationList
+import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
+import fr.geobert.radis.ui.editor.OperationEditor
+import fr.geobert.radis.ui.editor.ScheduledOperationEditor
+import java.util.Calendar
+import java.util.GregorianCalendar
+import java.util.NoSuchElementException
 
 public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor,
                                val checkingOpDashboard: CheckingOpDashboard?) :
@@ -37,7 +37,9 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         viewHolder.isCheckedBox.setOnCheckedChangeListener(null)
         viewHolder.isCheckedBox.setChecked(op.mIsChecked)
         viewHolder.isCheckedBox.setOnCheckedChangeListener {(compoundButton, b) ->
-            checkingOpDashboard?.onCheckedChanged(op, b)
+            //            checkingOpDashboard?.onCheckedChanged(op, b)
+            OperationTable.updateOpCheckedStatus(activity, op, b)
+            op.mIsChecked = b
         }
         doAnimations(viewHolder, pos)
     }
