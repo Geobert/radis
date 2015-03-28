@@ -7,14 +7,13 @@ import android.database.Cursor;
 import android.os.PowerManager;
 import android.util.Log;
 import fr.geobert.radis.MainActivity;
-import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.data.ScheduledOperation;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.db.OperationTable;
 import fr.geobert.radis.db.ScheduledOperationTable;
 import fr.geobert.radis.tools.DBPrefsManager;
-import fr.geobert.radis.tools.PrefsManager;
 import fr.geobert.radis.tools.Tools;
+import fr.geobert.radis.ui.ConfigFragment;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,13 +34,13 @@ public class RadisService extends IntentService {
     }
 
     private void consolidateDbAfterRestore() {
-        PrefsManager prefs = PrefsManager.getInstance(this);
+        DBPrefsManager prefs = DBPrefsManager.getInstance(this);
         Boolean needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false);
         Log.d(TAG, "needConsolidate : " + needConsolidate);
         if (needConsolidate) {
             Cursor cursor = AccountTable.fetchAllAccounts(this);
             prefs.put(CONSOLIDATE_DB, false);
-            prefs.commit();
+//            prefs.commit();
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
@@ -104,8 +103,8 @@ public class RadisService extends IntentService {
 //        GregorianCalendar insertionDate = new GregorianCalendar();
 //        final int maxDayOfCurMonth = today.getActualMaximum(Calendar.DAY_OF_MONTH);
 //        // manage February if insertionDayOfMonth is 29, 30 or 31
-//        final int cfgInsertDay = DBPrefsManager.getInstance(this).getInt(RadisConfiguration.KEY_INSERTION_DATE,
-//                Integer.parseInt(RadisConfiguration.DEFAULT_INSERTION_DATE));
+//        final int cfgInsertDay = DBPrefsManager.getInstance(this).getInt(ConfigFragment.KEY_INSERTION_DATE,
+//                Integer.parseInt(ConfigFragment.DEFAULT_INSERTION_DATE));
 //        final int insertionDayOfMonth = cfgInsertDay > maxDayOfCurMonth ? maxDayOfCurMonth : cfgInsertDay;
 //        insertionDate.set(Calendar.DAY_OF_MONTH, insertionDayOfMonth);
 //        Tools.clearTimeOfCalendar(insertionDate);
@@ -123,7 +122,7 @@ public class RadisService extends IntentService {
 ////        Log.d(TAG, "limitInsertionDate : " + Formater.getFullDateFormater().format(limitInsertionDate.getTime()));
 //
 //        final long lastInsertDate =
-//                DBPrefsManager.getInstance(this).getLong(RadisConfiguration.KEY_LAST_INSERTION_DATE, 0);
+//                DBPrefsManager.getInstance(this).getLong(ConfigFragment.KEY_LAST_INSERTION_DATE, 0);
 ////        Log.d(TAG, "lastInsertDate : " + Formater.getFullDateFormater().format(lastInsertDate));
 //        if (lastInsertDate > insertionDateInMillis) {
 //            insertionDate.add(Calendar.MONTH, 1);
@@ -236,7 +235,7 @@ public class RadisService extends IntentService {
                 sendOrderedBroadcast(i, null);
             }
 //            Log.d(TAG, "save LAST_INSERT_DATE is todayInMillis: " + Formater.getFullDateFormater().format(p.today));
-            DBPrefsManager.getInstance(this).put(RadisConfiguration.KEY_LAST_INSERTION_DATE, timeParams.getToday());
+            DBPrefsManager.getInstance(this).put(ConfigFragment.KEY_LAST_INSERTION_DATE, timeParams.getToday());
         }
         schOpsCursor.close();
     }

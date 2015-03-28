@@ -1,17 +1,19 @@
 package fr.geobert.radis.ui
 
-import android.widget.LinearLayout
-import fr.geobert.radis.R
 import android.widget.EditText
+import android.widget.LinearLayout
 import android.widget.TextView
-import fr.geobert.radis.tools.TargetSumWatcher
-import fr.geobert.radis.tools.getSumSeparator
 import fr.geobert.radis.MainActivity
-import fr.geobert.radis.db.OperationTable
+import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
+import fr.geobert.radis.db.OperationTable
+import fr.geobert.radis.tools.TargetSumWatcher
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.getSumSeparator
 
+
+// TODO : useless in this current form, deactivated. see later if I can do something with it
 public class CheckingOpDashboard(val activity: MainActivity, layout: LinearLayout) {
     val targetedSumEdt = layout.findViewById(R.id.targeted_sum) as EditText
     val sumWatcher = TargetSumWatcher(getSumSeparator(), targetedSumEdt, this)

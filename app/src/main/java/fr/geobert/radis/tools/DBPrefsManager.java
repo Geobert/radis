@@ -13,9 +13,9 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import fr.geobert.radis.R;
-import fr.geobert.radis.RadisConfiguration;
 import fr.geobert.radis.db.DbContentProvider;
 import fr.geobert.radis.db.PreferenceTable;
+import fr.geobert.radis.ui.ConfigFragment;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -29,6 +29,7 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
 
     private Runnable mCbk;
 
+    // async
     public void fillCache(FragmentActivity ctx, Runnable cbk) {
         if (mCache == null) {
             mCbk = cbk;
@@ -38,14 +39,18 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
         }
     }
 
+    // sync
     public void fillCache(Context ctx) {
         if (mCache == null) {
             Cursor data = ctx.getContentResolver().query(DbContentProvider.PREFS_URI, PreferenceTable.PREFS_COLS, null, null, null);
             mCache = new HashMap<>();
-            if (data.moveToFirst()) {
-                do {
-                    mCache.put(data.getString(0), data.getString(1));
-                } while (data.moveToNext());
+            if (data != null) {
+                if (data.moveToFirst()) {
+                    do {
+                        mCache.put(data.getString(0), data.getString(1));
+                    } while (data.moveToNext());
+                }
+                data.close();
             }
         }
     }
@@ -151,21 +156,21 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
     public void clearAccountRelated() {
         Editor editor = mCurrentCtx.getSharedPreferences(SHARED_PREF_NAME,
                 PreferenceActivity.MODE_PRIVATE).edit();
-        editor.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+        editor.remove(ConfigFragment.KEY_DEFAULT_ACCOUNT);
         editor.commit();
-        deletePref(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+        deletePref(ConfigFragment.KEY_DEFAULT_ACCOUNT);
         if (mCache != null) {
-            mCache.remove(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+            mCache.remove(ConfigFragment.KEY_DEFAULT_ACCOUNT);
         }
     }
 
     public void resetAll() {
         clearAccountRelated();
-        deletePref(RadisConfiguration.KEY_INSERTION_DATE);
-        deletePref(RadisConfiguration.KEY_LAST_INSERTION_DATE);
+        deletePref(ConfigFragment.KEY_INSERTION_DATE);
+        deletePref(ConfigFragment.KEY_LAST_INSERTION_DATE);
         if (mCache != null) {
-            mCache.remove(RadisConfiguration.KEY_INSERTION_DATE);
-            mCache.remove(RadisConfiguration.KEY_LAST_INSERTION_DATE);
+            mCache.remove(ConfigFragment.KEY_INSERTION_DATE);
+            mCache.remove(ConfigFragment.KEY_LAST_INSERTION_DATE);
         }
         Editor editor = mCurrentCtx.getSharedPreferences(SHARED_PREF_NAME,
                 PreferenceActivity.MODE_PRIVATE).edit();
@@ -192,7 +197,7 @@ public class DBPrefsManager implements LoaderCallbacks<Cursor> {
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch (loader.getId()) {
             case FILL_CACHE:
-                mCache = new HashMap<String, String>();
+                mCache = new HashMap<>();
                 if (data.moveToFirst()) {
                     do {
                         mCache.put(data.getString(0), data.getString(1));

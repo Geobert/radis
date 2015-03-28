@@ -8,7 +8,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
-import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.ui.ConfigFragment;
 import fr.geobert.radis.db.AccountTable;
 import fr.geobert.radis.tools.DBPrefsManager;
 
@@ -65,12 +65,12 @@ public class AccountManager implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public Long getDefaultAccountId(Context context) {
         if (this.mCurDefaultAccount == null) {
-            this.mCurDefaultAccount = DBPrefsManager.getInstance(context).getLong(RadisConfiguration.KEY_DEFAULT_ACCOUNT);
+            this.mCurDefaultAccount = DBPrefsManager.getInstance(context).getLong(ConfigFragment.KEY_DEFAULT_ACCOUNT);
             if (mCurDefaultAccount == null) {
                 // no pref set, take the first account, set it as default
                 if (this.mAllAccountsCursor.moveToFirst()) {
                     this.mCurDefaultAccount = this.mAllAccountsCursor.getLong(0);
-                    DBPrefsManager.getInstance(context).put(RadisConfiguration.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount);
+                    DBPrefsManager.getInstance(context).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount);
                 }
             }
         }

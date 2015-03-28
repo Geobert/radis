@@ -139,14 +139,14 @@
     <string name="prefs_insertion_date_title">Enter day of month</string>
     <string name="prefs_insertion_date_label">Insertion date</string>
     <string name="preferences">Preferences</string>
-    <string name="ask_update_occurences">Do you want to update all occurrences?\nIf not,
-        existing occurences will be disconnected from this scheduling.
+    <string name="ask_update_occurrences">Do you want to update all occurrences?\nIf not,
+        existing occurrences will be disconnected from this scheduling.
     </string>
     <string name="no">No</string>
     <string name="update">Update</string>
     <string name="disconnect">Disconnect</string>
     <string name="ask_update_scheduling">This transaction is from a scheduled one. Do you
-        want to update the scheduled transaction and all its occurences? If
+        want to update the scheduled transaction and all its occurrences? If
         not, current transaction will be disconnected from the scheduled one.
     </string>
     <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
@@ -154,8 +154,6 @@
     <string name="process_scheduled_transactions">Process scheduled transactions</string>
     <string name="must_be_day_of_month">ou must input a day of month between 1 and 31</string>
     <string name="error_on_write_prefs">Error while writing preferences</string>
-    <string name="quickadd_account">Target account for quick add</string>
-    <string name="quickadd_account_desc">arget account for homescreen quick add: %s</string>
     <string name="quickadd_target">Add transaction to: %s</string>
     <string name="quickadd_target_to_configure">Do to preferences to choose default account</string>
     <string name="quickadd_target_no_account">Create account to enable</string>
@@ -250,4 +248,7 @@
     <string name="no_lbl">[None]</string>
     <string name="misc_chart_cat">Misc</string>
     <string name="op_creation">Transaction creation</string>
+    <string name="default_account">Default account</string>
+    <string name="account_defaults">Account\'s default values</string>
+    <string name="default_account_desc">Opened account on start: %s</string>
 </resources>

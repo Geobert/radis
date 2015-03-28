@@ -22,6 +22,7 @@ import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
 import fr.geobert.radis.service.RadisService
 import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.ConfigEditor
 import fr.geobert.radis.ui.OperationListFragment
 import fr.geobert.radis.ui.ScheduledOpListFragment
 import fr.geobert.radis.ui.StatisticsListFragment
@@ -146,7 +147,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 PREFERENCES -> {
-                    val i = Intent(activity, javaClass<RadisConfiguration>())
+                    val i = Intent(activity, javaClass<ConfigEditor>())
                     activity.startActivity(i)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
@@ -341,7 +342,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     private fun consolidateDbIfNeeded() {
-        val prefs = PrefsManager.getInstance(this)
+        val prefs = DBPrefsManager.getInstance(this)
         val needConsolidate = prefs.getBoolean(RadisService.CONSOLIDATE_DB, false)
         Log.d(TAG, "needConsolidate : " + needConsolidate)
         if (needConsolidate!!) {

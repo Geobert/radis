@@ -25,7 +25,6 @@ import android.widget.LinearLayout
 import fr.geobert.radis.BaseFragment
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
-import fr.geobert.radis.RadisConfiguration
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
@@ -120,7 +119,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private fun setQuickAddVisibility() {
         val q = mQuickAddController
         if (q != null) {
-            val hideQuickAdd = DBPrefsManager.getInstance(mActivity).getBoolean(RadisConfiguration.KEY_HIDE_OPS_QUICK_ADD)
+            val hideQuickAdd = DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD)
             var visibility = View.VISIBLE
             if (hideQuickAdd) {
                 visibility = View.GONE
@@ -383,7 +382,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             Log.d("getMoreOperations", "startOpDate : " + startOpDate?.getTime()?.formatDate())
             val start = startOpDate
             val c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
-//            if (null == start) {
+            //            if (null == start) {
             //                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
             //            } else {
             //                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
@@ -585,7 +584,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         if (accountId == accMan.getDefaultAccountId(act)) {
                             accMan.mCurDefaultAccount = null
                             accMan.setCurrentAccountId(null)
-                            DBPrefsManager.getInstance(act).put(RadisConfiguration.KEY_DEFAULT_ACCOUNT, null)
+                            DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
                         }
                         MainActivity.refreshAccountList(getActivity())
                     } else {

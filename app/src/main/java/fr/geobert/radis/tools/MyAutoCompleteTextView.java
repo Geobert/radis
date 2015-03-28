@@ -9,7 +9,7 @@ import android.widget.AbsListView;
 import android.widget.AutoCompleteTextView;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
-import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.ui.ConfigFragment;
 
 import java.lang.reflect.Field;
 
@@ -54,7 +54,7 @@ public class MyAutoCompleteTextView extends AutoCompleteTextView {
         super.onFilterComplete(count);
         if (count > 0) {
             setReverseOrder(DBPrefsManager.getInstance(getContext()).
-                    getBoolean(RadisConfiguration.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true));
+                    getBoolean(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true));
         }
     }
 

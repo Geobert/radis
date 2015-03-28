@@ -78,7 +78,7 @@
         </receiver>
 
         <activity
-                android:name="RadisConfiguration"
+                android:name=".ui.ConfigEditor"
                 android:launchMode="singleTop">
         </activity>
         <activity

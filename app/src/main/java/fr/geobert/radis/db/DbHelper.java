@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Environment;
 import android.util.Log;
 import fr.geobert.radis.service.RadisService;
-import fr.geobert.radis.tools.PrefsManager;
+import fr.geobert.radis.tools.DBPrefsManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -16,7 +16,7 @@ import java.nio.channels.FileChannel;
 
 public class DbHelper extends SQLiteOpenHelper {
     protected static final String DATABASE_NAME = "radisDb";
-    protected static final int DATABASE_VERSION = 18;
+    protected static final int DATABASE_VERSION = 19;
 
     private Context mCtx;
 
@@ -46,12 +46,12 @@ public class DbHelper extends SQLiteOpenHelper {
             case 3:
                 OperationTable.upgradeFromV3(db, oldVersion, newVersion);
             case 4:
-                AccountTable.upgradeFromV4(db, oldVersion, newVersion);
+                AccountTable.upgradeFromV4(db);
             case 5:
                 ScheduledOperationTable.upgradeFromV5(db, oldVersion, newVersion);
                 OperationTable.upgradeFromV5(db, oldVersion, newVersion);
             case 6:
-                AccountTable.upgradeFromV6(db, oldVersion, newVersion);
+                AccountTable.upgradeFromV6(db);
                 ScheduledOperationTable.upgradeFromV6(db, oldVersion, newVersion);
                 OperationTable.upgradeFromV6(db, oldVersion, newVersion);
             case 7:
@@ -59,15 +59,15 @@ public class DbHelper extends SQLiteOpenHelper {
             case 8:
                 InfoTables.upgradeFromV8(db, oldVersion, newVersion);
             case 9:
-                AccountTable.upgradeFromV9(db, oldVersion, newVersion);
+                AccountTable.upgradeFromV9(db);
             case 10:
-                PreferenceTable.upgradeFromV10(mCtx, db, oldVersion, newVersion);
+                PreferenceTable.upgradeFromV10(mCtx, db);
             case 11:
                 OperationTable.upgradeFromV11(db, oldVersion, newVersion);
                 ScheduledOperationTable.upgradeFromV11(db, oldVersion, newVersion);
             case 12:
                 ScheduledOperationTable.upgradeFromV12(db, oldVersion, newVersion);
-                AccountTable.upgradeFromV12(db, oldVersion, newVersion);
+                AccountTable.upgradeFromV12(db);
             case 13:
                 InfoTables.upgradeFromV13(db, oldVersion, newVersion);
             case 14:
@@ -77,11 +77,13 @@ public class DbHelper extends SQLiteOpenHelper {
             case 16:
                 InfoTables.upgradeFromV16(db, oldVersion, newVersion);
                 OperationTable.upgradeFromV16(db, oldVersion, newVersion);
-                AccountTable.upgradeFromV16(db, oldVersion, newVersion);
+                AccountTable.upgradeFromV16(db);
             case 17:
                 StatisticTable.upgradeFromV17(db);
+            case 18:
+                AccountTable.upgradeFromV18(db);
             default:
-                AccountTable.upgradeDefault(db, oldVersion, newVersion);
+                AccountTable.upgradeDefault(db);
         }
     }
 
@@ -142,8 +144,8 @@ public class DbHelper extends SQLiteOpenHelper {
                 dst.close();
                 srcFIS.close();
                 dstFOS.close();
-                PrefsManager.getInstance(ctx).put(RadisService.CONSOLIDATE_DB, true);
-                PrefsManager.getInstance(ctx).commit();
+                DBPrefsManager.getInstance(ctx).put(RadisService.CONSOLIDATE_DB, true);
+//                PrefsManager.getInstance(ctx).commit();
                 return true;
             }
         } catch (Exception e) {

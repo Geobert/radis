@@ -135,7 +135,7 @@
     <string name="prefs_insertion_date_title">Entrez le jour du mois</string>
     <string name="prefs_insertion_date_label">Date d\'insertion</string>
     <string name="preferences">Préférences</string>
-    <string name="ask_update_occurences">Voulez-vous metter à jour les occurrences ?\nSinon,
+    <string name="ask_update_occurrences">Voulez-vous metter à jour les occurrences ?\nSinon,
         vous pouvez décorréler les occurrences existantes de cette échéance.
     </string>
     <string name="no">Non</string>
@@ -149,10 +149,6 @@
     <string name="edit_scheduling">Modifier l\'échéance</string>
     <string name="process_scheduled_transactions">Traiter les échéances</string>
     <string name="must_be_day_of_month">Vous devez saisir un jour du mois entre 1 et 31
-    </string>
-    <string name="quickadd_account">Compte par défaut</string>
-    <string name="quickadd_account_desc">Compte cible pour l\'ajout rapide de l\'écran
-        d\'acceuil : %s
     </string>
     <string name="quickadd_target">Ajouter une opération à : %s</string>
     <string name="quickadd_target_to_configure">Allez dans les préférences pour choisir le compte
@@ -253,4 +249,7 @@
     <string name="no_lbl">[Aucun]</string>
     <string name="misc_chart_cat">Divers</string>
     <string name="op_creation">Créer une opération</string>
+    <string name="default_account">Compte par défaut</string>
+    <string name="account_defaults">Valeurs par défaut des comptes</string>
+    <string name="default_account_desc">Compte ouvert au lancement : %s</string>
 </resources>

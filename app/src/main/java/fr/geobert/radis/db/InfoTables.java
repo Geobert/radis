@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
-import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.ui.ConfigFragment;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.DBPrefsManager;
 
@@ -179,10 +179,10 @@ public class InfoTables {
             params = null;
         }
         String ordering = colName + " asc";
-        if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true)) {
+        if (DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true)) {
             String order;
             if (isQuickAdd && DBPrefsManager.getInstance(ctx).
-                    getBoolean(RadisConfiguration.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true)) {
+                    getBoolean(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true)) {
                 order = " asc, ";
             } else {
                 order = " desc, ";
@@ -208,7 +208,7 @@ public class InfoTables {
             params = null;
         }
         String ordering = colName + " asc";
-        if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true)) {
+        if (DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true)) {
             ordering = KEY_WEIGHT + " desc, " + ordering;
         }
         CursorLoader loader = new CursorLoader(ctx, table, new String[]{"_id", colName, KEY_WEIGHT}, where, params,
@@ -270,7 +270,7 @@ public class InfoTables {
         }
 
         if (id != -1) {
-            if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true) &&
+            if (DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true) &&
                     !isUpdate && !justCreated) { // update of weight
                 Cursor maxWeightInf = fetchMaxWeight(ctx, keyTableName);
                 if (maxWeightInf != null) {

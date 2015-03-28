@@ -65,7 +65,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     override fun setView() {
-        setContentView(R.layout.scheduled_editor)
+        setContentView(R.layout.multipaged_editor)
         mViewPager.setAdapter(mPagerAdapter)
     }
 
@@ -182,7 +182,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             val context = getActivity() as ScheduledOperationEditor
             val builder = AlertDialog.Builder(context)
-            builder.setMessage(R.string.ask_update_occurences).setCancelable(false).setPositiveButton(R.string.update, object : DialogInterface.OnClickListener {
+            builder.setMessage(R.string.ask_update_occurrences).setCancelable(false).setPositiveButton(R.string.update, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface, which: Int) {
                     context.onUpdateAllOccurenceClicked()
                 }
