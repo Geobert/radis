@@ -118,12 +118,12 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         }
 
         updateLabel(KEY_INSERTION_DATE)
-        getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
 
     override fun onPause() {
         super<PreferenceFragment>.onPause()
-        getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
