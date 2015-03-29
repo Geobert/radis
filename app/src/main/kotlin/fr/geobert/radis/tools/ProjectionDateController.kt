@@ -9,18 +9,17 @@ import android.widget.EditText
 import android.widget.Spinner
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
+import kotlin.properties.Delegates
 
 public class ProjectionDateController(private val mActivity: Activity) {
-    private val mProjectionMode: Spinner
-    public var mProjectionDate: EditText
+    private val mProjectionMode: Spinner by Delegates.lazy { mActivity.findViewById(R.id.projection_date_spinner) as Spinner }
+    public val mProjectionDate: EditText by Delegates.lazy { mActivity.findViewById(R.id.projection_date_value) as EditText }
     private var mAccountId: Long = 0
     private var mOrigProjMode: Int = 0
     private var mOrigProjDate: String? = null
     private var mCurPos: Int = 0
 
     init {
-        mProjectionDate = mActivity.findViewById(R.id.projection_date_value) as EditText
-        mProjectionMode = mActivity.findViewById(R.id.projection_date_spinner) as Spinner
         initViews()
     }
 
@@ -32,7 +31,7 @@ public class ProjectionDateController(private val mActivity: Activity) {
         mProjectionMode.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
 
             override fun onItemSelected(arg0: AdapterView<*>, arg1: View, pos: Int, id: Long) {
-                mProjectionDate.setEnabled(pos > 0)
+                mProjectionDate.setVisibility(if (pos > 0) View.VISIBLE else View.GONE)
                 if (pos != mCurPos) {
                     mProjectionDate.setText("")
                 }
@@ -61,7 +60,7 @@ public class ProjectionDateController(private val mActivity: Activity) {
         setHint(mCurPos)
         mOrigProjMode = mCurPos
         mProjectionMode.setSelection(mCurPos)
-        mProjectionDate.setEnabled(mCurPos > 0)
+        mProjectionDate.setVisibility(if (mCurPos > 0) View.VISIBLE else View.GONE)
         mProjectionDate.setText(mOrigProjDate)
     }
 
@@ -76,22 +75,6 @@ public class ProjectionDateController(private val mActivity: Activity) {
     public fun hasChanged(): Boolean {
         return mOrigProjMode != mProjectionMode.getSelectedItemPosition() || (mOrigProjMode != 0 && mOrigProjDate != mProjectionDate.getText().toString())
     }
-
-    //    protected fun saveProjectionDate() {
-    //        try {
-    //            AccountTable.updateAccountProjectionDate(mActivity, mAccountId, mInstance)
-    //            if (mActivity is UpdateDisplayInterface) {
-    //                (mActivity as UpdateDisplayInterface).updateDisplay(null)
-    //            }
-    //        } catch (e: ParseException) {
-    //            Tools.popError(mActivity, mActivity.getString(R.string.bad_format_for_date), null)
-    //            e.printStackTrace()
-    //        } catch (e: NumberFormatException) {
-    //            Tools.popError(mActivity, mActivity.getString(R.string.bad_format_for_date), null)
-    //            e.printStackTrace()
-    //        }
-    //
-    //    }
 
     public fun onSaveInstanceState(outState: Bundle) {
         outState.putInt("projectionMode", mProjectionMode.getSelectedItemPosition())
@@ -111,9 +94,25 @@ public class ProjectionDateController(private val mActivity: Activity) {
         mAccountId = state.getLong("accountId")
         setHint(mCurPos)
         mProjectionMode.setSelection(mCurPos)
-        mProjectionDate.setEnabled(mCurPos > 0)
+        mProjectionDate.setVisibility(if (mCurPos > 0) View.VISIBLE else View.GONE)
         mProjectionDate.setText(mOrigProjDate)
     }
+
+    //    protected fun saveProjectionDate() {
+    //        try {
+    //            AccountTable.updateAccountProjectionDate(mActivity, mAccountId, mInstance)
+    //            if (mActivity is UpdateDisplayInterface) {
+    //                (mActivity as UpdateDisplayInterface).updateDisplay(null)
+    //            }
+    //        } catch (e: ParseException) {
+    //            Tools.popError(mActivity, mActivity.getString(R.string.bad_format_for_date), null)
+    //            e.printStackTrace()
+    //        } catch (e: NumberFormatException) {
+    //            Tools.popError(mActivity, mActivity.getString(R.string.bad_format_for_date), null)
+    //            e.printStackTrace()
+    //        }
+    //
+    //    }
 
     //    companion object {
     //

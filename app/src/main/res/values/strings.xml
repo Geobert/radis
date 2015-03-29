@@ -251,4 +251,8 @@
     <string name="default_account">Default account</string>
     <string name="account_defaults">Account\'s default values</string>
     <string name="default_account_desc">Opened account on start: %s</string>
+    <string name="override_insert_date">Override insertion date</string>
+    <string name="override_hide_quickadd">Override hide quick add</string>
+    <string name="override_use_info">Override use weighted completion</string>
+    <string name="override_invert_quickadd_completion">Override invert quick add completion</string>
 </resources>

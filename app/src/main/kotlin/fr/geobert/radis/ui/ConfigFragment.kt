@@ -7,6 +7,8 @@ import android.preference.CheckBoxPreference
 import android.preference.EditTextPreference
 import android.preference.ListPreference
 import android.support.v4.preference.PreferenceFragment
+import android.view.View
+import android.view.ViewGroup
 import fr.geobert.radis.R
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
@@ -22,7 +24,14 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     override fun onCreate(savedInstanceState: Bundle?) {
         super<PreferenceFragment>.onCreate(savedInstanceState)
         addPreferencesFromResource(if (isAccountEditor) R.xml.account_prefs else R.xml.preferences)
-        initAccountChoices()
+        if (!isAccountEditor)
+            initAccountChoices()
+    }
+
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super<PreferenceFragment>.onViewCreated(view, savedInstanceState)
+        if (isAccountEditor)
+            getListView().setBackgroundColor(getResources().getColor(R.color.normal_bg))
     }
 
     private fun getPrefs(): DBPrefsManager {
@@ -66,10 +75,11 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         var summary: String? = null
 
         if (KEY_INSERTION_DATE == key) {
-            val value = getPrefs().getString(key, DEFAULT_INSERTION_DATE)
+            val value = getPrefs().getString(getKey(key), DEFAULT_INSERTION_DATE)
             val s = getString(R.string.prefs_insertion_date_text)
             summary = s.format(value)
         } else if (KEY_DEFAULT_ACCOUNT == key) {
+            // !isAccountEditor only
             val l = findPreference(key) as ListPreference
             val s = l.getEntry()
             if (null != s) {
@@ -86,23 +96,28 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
 
     }
 
+    fun getKey(k: String) = if (isAccountEditor) "${k}_for_account" else k
+
     override fun onResume() {
         super<PreferenceFragment>.onResume()
-        var value: String? = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE)
-        val ep = findPreference(KEY_INSERTION_DATE) as EditTextPreference
-        ep.getEditText().setText(value)
 
-        value = getPrefs().getString(KEY_DEFAULT_ACCOUNT)
-        if (value != null) {
-            for (s in mAccountsChoice.getEntryValues()) {
-                if (value == s) {
-                    mAccountsChoice.setValue(s.toString())
+        if (!isAccountEditor) {
+            var value: String? = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE)
+            val ep = findPreference(KEY_INSERTION_DATE) as EditTextPreference
+            ep.getEditText().setText(value)
+
+            value = getPrefs().getString(KEY_DEFAULT_ACCOUNT)
+            if (value != null) {
+                for (s in mAccountsChoice.getEntryValues()) {
+                    if (value == s) {
+                        mAccountsChoice.setValue(s.toString())
+                    }
                 }
             }
+            updateLabel(KEY_DEFAULT_ACCOUNT)
         }
 
         updateLabel(KEY_INSERTION_DATE)
-        updateLabel(KEY_DEFAULT_ACCOUNT)
         getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
 

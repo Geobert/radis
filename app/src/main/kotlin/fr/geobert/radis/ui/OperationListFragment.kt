@@ -120,10 +120,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val q = mQuickAddController
         if (q != null) {
             val hideQuickAdd = DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD)
-            var visibility = View.VISIBLE
-            if (hideQuickAdd) {
-                visibility = View.GONE
-            }
+            val visibility = if (hideQuickAdd) View.GONE else View.VISIBLE
+
             q.setVisibility(visibility)
         }
     }

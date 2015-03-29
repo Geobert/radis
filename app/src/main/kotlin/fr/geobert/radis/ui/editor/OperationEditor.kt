@@ -207,7 +207,7 @@ public class OperationEditor : CommonOpEditor() {
         public fun callMeForResult(context: BaseActivity, opId: Long, accountId: Long) {
             val intent = Intent(context, javaClass<OperationEditor>())
             intent.putExtra(CommonOpEditor.PARAM_OP_ID, opId)
-            intent.putExtra(AccountEditor.PARAM_ACCOUNT_ID, accountId)
+            intent.putExtra(AccountEditFragment.PARAM_ACCOUNT_ID, accountId)
             context.startActivityForResult(intent, OPERATION_EDITOR)
         }
     }

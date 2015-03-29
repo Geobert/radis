@@ -252,4 +252,8 @@
     <string name="default_account">Compte par défaut</string>
     <string name="account_defaults">Valeurs par défaut des comptes</string>
     <string name="default_account_desc">Compte ouvert au lancement : %s</string>
+    <string name="override_insert_date">Supplanter la date d\'insertion</string>
+    <string name="override_hide_quickadd">Supplanter masquer l\'ajout rapide</string>
+    <string name="override_use_info">Supplanter la complétion pondérée</string>
+    <string name="override_invert_quickadd_completion">Supplanter l\'invertion des propositions</string>
 </resources>

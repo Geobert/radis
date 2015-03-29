@@ -28,6 +28,7 @@ import fr.geobert.radis.ui.ScheduledOpListFragment
 import fr.geobert.radis.ui.StatisticsListFragment
 import fr.geobert.radis.ui.drawer.NavDrawerItem
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter
+import fr.geobert.radis.ui.editor.AccountEditFragment
 import fr.geobert.radis.ui.editor.AccountEditor
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
@@ -135,7 +136,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 SCH_OP_LIST -> fragment = findOrCreateFragment(javaClass<ScheduledOpListFragment>(), message.what)
                 STATISTICS -> fragment = findOrCreateFragment(javaClass<StatisticsListFragment>(), message.what)
                 CREATE_ACCOUNT -> {
-                    AccountEditor.callMeForResult(activity, AccountEditor.NO_ACCOUNT)
+                    AccountEditor.callMeForResult(activity, AccountEditFragment.NO_ACCOUNT)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 EDIT_ACCOUNT -> {
@@ -298,7 +299,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         val allAccounts = accMan.getAllAccountsCursor()
         if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
-            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT)
+            AccountEditor.callMeForResult(this, AccountEditFragment.NO_ACCOUNT)
         } else {
             //            if (mAccountAdapter == null) {
             //                initAccountStuff()
@@ -319,7 +320,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         //Log.d(TAG, "onActivityResult : " + requestCode);
         super<BaseActivity>.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            AccountEditor.ACCOUNT_EDITOR -> onAccountEditFinished(resultCode)
+            AccountEditFragment.ACCOUNT_EDITOR -> onAccountEditFinished(resultCode)
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> {
                 if (mActiveFragment == null) {

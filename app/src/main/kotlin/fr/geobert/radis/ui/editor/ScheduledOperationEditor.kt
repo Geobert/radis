@@ -57,15 +57,13 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                     0 -> getString(R.string.basics)
                     else -> getString(R.string.scheduling)
                 }
-
-
-        fun getOpFragment() = fragmentsList.get(0) as OperationEditFragment
-        fun getSchFragment() = fragmentsList.get(1) as ScheduleEditorFragment
-
     }
 
+    fun getOpFragment() = mPagerAdapter.getItem(0) as OperationEditFragment
+    fun getSchFragment() = mPagerAdapter.getItem(1) as ScheduleEditorFragment
+
     override fun setView() {
-        setContentView(R.layout.multipaged_editor)
+        setContentView(R.layout.multipane_editor)
         mViewPager.setAdapter(mPagerAdapter)
     }
 
@@ -89,7 +87,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         if (mRowId <= 0 || mOriginalSchOp != null) {
             val errMsg = StringBuilder()
             if (isFormValid(errMsg)) {
-                fillOperationWithInputs(mPagerAdapter.getSchFragment().mCurrentSchOp as Operation)
+                fillOperationWithInputs(getSchFragment().mCurrentSchOp as Operation)
                 saveOpAndExit()
             } else {
                 Tools.popError(this, errMsg.toString(), null)
@@ -109,8 +107,8 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
             getSupportLoaderManager().initLoader<Cursor>(GET_SCH_OP_SRC, getIntent().getExtras(), this)
             return false
         } else {
-            mPagerAdapter.getSchFragment().mCurrentSchOp = ScheduledOperation(mCurAccountId!!)
-            mCurrentOp = mPagerAdapter.getSchFragment().mCurrentSchOp
+            getSchFragment().mCurrentSchOp = ScheduledOperation(mCurAccountId!!)
+            mCurrentOp = getSchFragment().mCurrentSchOp
             populateFields()
             return true
         }
@@ -126,9 +124,9 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     override fun populateFields() {
-        mPagerAdapter.getOpFragment().populateCommonFields(mCurrentOp)
-        mPagerAdapter.getOpFragment().setCheckedEditVisibility(View.GONE)
-        mPagerAdapter.getSchFragment().populateFields()
+        getOpFragment().populateCommonFields(mCurrentOp)
+        getOpFragment().setCheckedEditVisibility(View.GONE)
+        getSchFragment().populateFields()
     }
 
     private fun startInsertionServiceAndExit() {
@@ -145,7 +143,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     override fun saveOpAndExit() {
-        val op = mPagerAdapter.getSchFragment().mCurrentSchOp
+        val op = getSchFragment().mCurrentSchOp
         if (op != null) {
             if (mRowId <= 0) {
                 if (mOpIdSource > 0) {
@@ -210,7 +208,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     protected fun onDisconnectFromOccurences() {
-        val schOp = mPagerAdapter.getSchFragment().mCurrentSchOp
+        val schOp = getSchFragment().mCurrentSchOp
         if (schOp != null) {
             ScheduledOperationTable.updateScheduledOp(this, mRowId, schOp, false)
             OperationTable.disconnectAllOccurrences(this, schOp.mAccountId, mRowId)
@@ -219,12 +217,12 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     private fun onUpdateAllOccurenceClicked() {
-        ScheduledOperationTable.updateScheduledOp(this, mRowId, mPagerAdapter.getSchFragment().mCurrentSchOp, false)
+        ScheduledOperationTable.updateScheduledOp(this, mRowId, getSchFragment().mCurrentSchOp, false)
         val orig = mOriginalSchOp
-        val schOp = mPagerAdapter.getSchFragment().mCurrentSchOp
+        val schOp = getSchFragment().mCurrentSchOp
         if (orig != null && schOp != null) {
             if (schOp.periodicityEquals(orig)) {
-                ScheduledOperationTable.updateAllOccurences(this, mPagerAdapter.getSchFragment().mCurrentSchOp, mPreviousSum, mRowId)
+                ScheduledOperationTable.updateAllOccurences(this, getSchFragment().mCurrentSchOp, mPreviousSum, mRowId)
                 AccountTable.consolidateSums(this, mCurrentOp?.mAccountId as Long)
             } else {
                 ScheduledOperationTable.deleteAllOccurences(this, mRowId)
@@ -234,28 +232,28 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     protected fun isFormValid(errMsg: StringBuilder): Boolean {
-        var res = mPagerAdapter.getOpFragment().isFormValid(errMsg)
+        var res = getOpFragment().isFormValid(errMsg)
         if (res) {
-            res = mPagerAdapter.getSchFragment().isFormValid(errMsg)
+            res = getSchFragment().isFormValid(errMsg)
         }
         return res
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable("originalOp", mOriginalSchOp)
-        outState.putParcelable("currentSchOp", mPagerAdapter.getSchFragment().mCurrentSchOp)
+        outState.putParcelable("currentSchOp", getSchFragment().mCurrentSchOp)
         super<CommonOpEditor>.onSaveInstanceState(outState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        mPagerAdapter.getSchFragment().mCurrentSchOp = savedInstanceState.getParcelable<ScheduledOperation>("currentSchOp")
+        getSchFragment().mCurrentSchOp = savedInstanceState.getParcelable<ScheduledOperation>("currentSchOp")
         mOriginalSchOp = savedInstanceState.getParcelable<ScheduledOperation>("originalOp")
         super<CommonOpEditor>.onRestoreInstanceState(savedInstanceState)
     }
 
     override fun fillOperationWithInputs(operation: Operation) {
-        mPagerAdapter.getOpFragment().fillOperationWithInputs(operation)
-        mPagerAdapter.getSchFragment().fillOperationWithInputs(operation)
+        getOpFragment().fillOperationWithInputs(operation)
+        getSchFragment().fillOperationWithInputs(operation)
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor> =
@@ -271,7 +269,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         hideProgress()
         when (loader.getId()) {
             GET_SCH_OP -> if (data.getCount() > 0 && data.moveToFirst()) {
-                mPagerAdapter.getSchFragment().mCurrentSchOp = ScheduledOperation(data)
+                getSchFragment().mCurrentSchOp = ScheduledOperation(data)
                 mOriginalSchOp = ScheduledOperation(data)
                 mCurrentOp = ScheduledOperation(data)
                 populateFields()
@@ -283,7 +281,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
             }
             GET_SCH_OP_SRC -> if (data.getCount() > 0 && data.moveToFirst()) {
                 mCurrentOp = ScheduledOperation(data, mCurAccountId!!)
-                mPagerAdapter.getSchFragment().mCurrentSchOp = mCurrentOp as ScheduledOperation
+                getSchFragment().mCurrentSchOp = mCurrentOp as ScheduledOperation
                 mOriginalSchOp = ScheduledOperation(data, mCurAccountId!!)
                 populateFields()
             } else {
@@ -301,11 +299,11 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     override fun isTransfertChecked(): Boolean {
-        return mPagerAdapter.getOpFragment().isTransfertChecked()
+        return getOpFragment().isTransfertChecked()
     }
 
     override fun getSrcAccountSpinnerIdx(): Int {
-        return mPagerAdapter.getOpFragment().getSrcAccountIdx()
+        return getOpFragment().getSrcAccountIdx()
     }
 
     companion object {
@@ -326,7 +324,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
             } else {
                 i.putExtra(CommonOpEditor.PARAM_OP_ID, opId)
             }
-            i.putExtra(AccountEditor.PARAM_ACCOUNT_ID, mAccountId)
+            i.putExtra(AccountEditFragment.PARAM_ACCOUNT_ID, mAccountId)
             context.startActivityForResult(i, mode)
         }
     }

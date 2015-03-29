@@ -1,26 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+            android:key="override_insertion_date"
+            android:title="@string/override_insert_date"/>
     <fr.geobert.radis.tools.ValidatedEditTextPreference
             android:dialogTitle="@string/prefs_insertion_date_title"
             android:positiveButtonText="@string/ok"
             android:negativeButtonText="@string/cancel"
             android:title="@string/prefs_insertion_date_label"
-            android:key="insertion_date"
+            android:key="insertion_date_for_account"
             android:summary="@string/prefs_insertion_date_text"
             android:inputType="number"
+            android:dependency="override_insertion_date"
+            android:shouldDisableView="true"
             android:persistent="true"/>
     <CheckBoxPreference
-            android:key="hide_ops_quick_add"
-            android:title="@string/hide_ops_quick_add"
-            android:summary="@string/hide_ops_quick_add_details"/>
+            android:key="override_hide_quickadd"
+            android:title="@string/override_hide_quickadd"/>
     <CheckBoxPreference
-            android:key="use_weighted_infos"
+            android:key="hide_ops_quick_add_for_account"
+            android:title="@string/hide_ops_quick_add"
+            android:summary="@string/hide_ops_quick_add_details"
+            android:shouldDisableView="true"
+            android:dependency="override_hide_quickadd"/>
+    <CheckBoxPreference
+            android:key="override_use_weighted_info"
+            android:title="@string/override_use_info"/>
+    <CheckBoxPreference
+            android:key="use_weighted_infos_for_account"
             android:title="@string/use_weighted_infos"
             android:summary="@string/use_weighted_infos_details"
+            android:dependency="override_use_weighted_info"
+            android:shouldDisableView="true"
             android:defaultValue="true"/>
     <CheckBoxPreference
-            android:key="invert_completion_in_quick_add"
+            android:key="override_invert_quickadd_completion"
+            android:title="@string/override_invert_quickadd_completion"/>
+    <CheckBoxPreference
+            android:key="invert_completion_in_quick_add_for_account"
             android:title="@string/invert_completion_in_quick_add"
             android:summary="@string/invert_completion_in_quick_add_details"
+            android:dependency="override_invert_quickadd_completion"
+            android:shouldDisableView="true"
             android:defaultValue="true"/>
 </PreferenceScreen>
