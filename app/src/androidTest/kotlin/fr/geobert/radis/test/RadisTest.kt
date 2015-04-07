@@ -323,7 +323,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         // 3 following lines are hack because a bug of Espresso
         Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(2000)
+        Helpers.pauseTest(2500)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -462,6 +462,9 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         // set projection to a day of next month
         val tomorrow = DateTime.today(TIME_ZONE).plusDays(1)
         Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(tomorrow.getDay()))
+
+        Helpers.pauseTest(10000)
+
         Helpers.clickOnActionItemConfirm()
 
         onView(withText(R.string.no_operation)).check(matches(isDisplayed()))
@@ -836,7 +839,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
         Helpers.clickOnDialogButton(R.string.del_only_current)
 
-        val sum = nb * 10.50
+        val sum = (nb - 1) * 10.50
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())

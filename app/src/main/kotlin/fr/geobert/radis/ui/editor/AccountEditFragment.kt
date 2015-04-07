@@ -247,7 +247,11 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             } else {
                 mAccountCurrency.getSelectedItem().toString()
             }
+            mAccount.projMode = mProjectionController.getMode()
+            mAccount.projDate = mProjectionController.getDate()
+
             // TODO prefs
+
             if (mRowId == NO_ACCOUNT) {
                 AccountTable.createAccount(getActivity(), mAccount)
             } else {
