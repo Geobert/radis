@@ -122,7 +122,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (q != null) {
             val account = mAccountManager.getCurrentAccount()
             val hideQuickAdd = if (account?.overrideHideQuickAdd ?: false) account?.hideQuickAdd ?: false else
-                DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD)
+                DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD, false)
             q.setVisibility(if (hideQuickAdd) View.GONE else View.VISIBLE)
         }
     }

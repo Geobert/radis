@@ -35,7 +35,6 @@ import fr.geobert.radis.ui.OperationListFragment;
 import fr.geobert.radis.ui.adapter.InfoAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 

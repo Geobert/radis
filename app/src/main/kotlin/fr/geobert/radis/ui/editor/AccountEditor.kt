@@ -1,35 +1,26 @@
 package fr.geobert.radis.ui.editor
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
-import android.database.Cursor
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarActivity
 import android.view.MenuItem
-import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
-import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.ConfigFragment
-import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Arrays
-import java.util.Currency
-import java.util.Locale
 import kotlin.properties.Delegates
 
-public class AccountEditor : BaseActivity(), EditorToolbarTrait {
+public class AccountEditor : BaseActivity(), EditorToolbarTrait, SharedPreferences.OnSharedPreferenceChangeListener {
+    override fun onSharedPreferenceChanged(p0: SharedPreferences, p1: String) {
+        getConfigFrag().onSharedPreferenceChanged(p0, p1)
+    }
+
     private val mViewPager by Delegates.lazy { findViewById(R.id.pager) as ViewPager }
 
     private val mPagerAdapter = object : FragmentPagerAdapter(getSupportFragmentManager()) {

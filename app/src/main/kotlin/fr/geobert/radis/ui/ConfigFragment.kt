@@ -1,12 +1,13 @@
 package fr.geobert.radis.ui
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.preference.CheckBoxPreference
 import android.preference.EditTextPreference
 import android.preference.ListPreference
+import android.preference.PreferenceManager
 import android.support.v4.preference.PreferenceFragment
+import android.util.Log
 import android.view.View
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
@@ -17,7 +18,7 @@ import fr.geobert.radis.tools.map
 import fr.geobert.radis.ui.editor.AccountEditor
 import kotlin.properties.Delegates
 
-public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+public class ConfigFragment() : PreferenceFragment() {
     // only in global prefs, it is lazy so no crash in AccountEditor
     private val mAccountsChoice by Delegates.lazy { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
 
@@ -41,10 +42,6 @@ public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnShared
 
     private fun getPrefs(): DBPrefsManager {
         return DBPrefsManager.getInstance(getActivity())
-    }
-
-    fun getSharedPreferences(): SharedPreferences {
-        return getActivity().getSharedPreferences(DBPrefsManager.SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
 
     private fun notEmpty(s: String?): String? {
@@ -101,8 +98,13 @@ public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnShared
     override fun onResume() {
         super<PreferenceFragment>.onResume()
 
+        Log.d("PrefBug", "onResume set listener")
+        val act = getActivity()
+        PreferenceManager.getDefaultSharedPreferences(act).registerOnSharedPreferenceChangeListener(act as SharedPreferences.OnSharedPreferenceChangeListener)
+
         if (!isAccountEditor) {
             var value: String? = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE)
+            Log.d("PrefBug", "onResume $KEY_INSERTION_DATE = $value")
             val ep = findPreference(KEY_INSERTION_DATE) as EditTextPreference
             ep.getEditText().setText(value)
 
@@ -118,7 +120,6 @@ public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnShared
         }
 
         updateLabel(KEY_INSERTION_DATE)
-        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
     }
 
     public fun populateFields(account: Account) {
@@ -127,10 +128,14 @@ public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnShared
 
     override fun onPause() {
         super<PreferenceFragment>.onPause()
-        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        Log.d("PrefBug", "onPause remove listener")
+        val act = getActivity()
+        PreferenceManager.getDefaultSharedPreferences(act).unregisterOnSharedPreferenceChangeListener(act as SharedPreferences.OnSharedPreferenceChangeListener)
+        //        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(getActivity() as SharedPreferences.OnSharedPreferenceChangeListener)
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+        Log.d("PrefBug", "onSharedPreferenceChanged key: $key / isAccountEditor : $isAccountEditor")
         if (!isAccountEditor) {
             val p = findPreference(key)
             val value = if (p is EditTextPreference) {
@@ -144,7 +149,7 @@ public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnShared
             }
             getPrefs().put(key, value)
         }
-        updateLabel(key)
+        updateLabel(getKey(key))
     }
 
     companion object {

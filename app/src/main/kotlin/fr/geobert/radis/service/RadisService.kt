@@ -18,7 +18,7 @@ import kotlin.platform.platformStatic
 public class RadisService : android.app.IntentService(RadisService.TAG) {
 
     private fun consolidateDbAfterRestore() {
-        val prefs = fr.geobert.radis.tools.DBPrefsManager.getInstance(this)
+        val prefs = DBPrefsManager.getInstance(this)
         val needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false)
         android.util.Log.d(TAG, "needConsolidate : " + needConsolidate)
         if (needConsolidate!!) {
@@ -39,7 +39,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
 
     override fun onHandleIntent(intent: android.content.Intent) {
         try {
-            val prefs = fr.geobert.radis.tools.DBPrefsManager.getInstance(this)
+            val prefs = DBPrefsManager.getInstance(this)
             prefs.fillCache(this)
             processScheduledOps()
         } finally {

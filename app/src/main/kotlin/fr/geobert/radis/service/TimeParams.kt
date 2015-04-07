@@ -22,7 +22,7 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
             // manage February if insertionDayOfMonth is 29, 30 or 31
             val cfgInsertDay = if (account.overrideInsertDate) account.insertDate else
                 prefs.getInt(ConfigFragment.KEY_INSERTION_DATE, ConfigFragment.DEFAULT_INSERTION_DATE.toInt())
-            Log.d("TimeParams", "cfgInsertDay: $cfgInsertDay / maxDayOfCurMonth = $maxDayOfCurMonth")
+            Log.d("PrefBug", "cfgInsertDay: $cfgInsertDay / maxDayOfCurMonth = $maxDayOfCurMonth")
             val insertionDayOfMonth = if (cfgInsertDay > maxDayOfCurMonth) maxDayOfCurMonth else cfgInsertDay
             var insertionDate = DateTime.forDateOnly(today.getYear(), today.getMonth(), insertionDayOfMonth)
 

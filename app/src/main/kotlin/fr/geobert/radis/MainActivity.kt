@@ -417,13 +417,11 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
         mActiveFragmentId = savedInstanceState.getInt("activeFragId")
         mPrevFragmentId = savedInstanceState.getInt("prevFragId")
-        DBPrefsManager.getInstance(this).fillCache(this, object : Runnable {
-            override fun run() {
-                mActiveFragment?.onRestoreInstanceState(savedInstanceState)
-                initAccountStuff()
-                if (mAccountAdapter.isEmpty()) {
-                    updateDisplay(null)
-                }
+        DBPrefsManager.getInstance(this).fillCache(this, {
+            mActiveFragment?.onRestoreInstanceState(savedInstanceState)
+            initAccountStuff()
+            if (mAccountAdapter.isEmpty()) {
+                updateDisplay(null)
             }
         })
     }
