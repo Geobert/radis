@@ -12,7 +12,7 @@
             android:background="?attr/colorPrimary"/>
 
     <fragment
-            android:name="fr.geobert.radis.ui.editor.OperationEditFragment"
+            class="fr.geobert.radis.ui.editor.OperationEditFragment"
             android:id="@+id/main_edit_pane"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"/>

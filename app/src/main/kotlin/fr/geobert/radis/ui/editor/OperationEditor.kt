@@ -1,5 +1,6 @@
 package fr.geobert.radis.ui.editor
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
@@ -21,15 +22,19 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
-import android.app.Activity
+import kotlin.properties.Delegates
 
 public class OperationEditor : CommonOpEditor() {
     protected var mOriginalOp: Operation? = null
-    private var mEditFragment: OperationEditFragment? = null
+    private val mEditFragment by Delegates.lazy { getSupportFragmentManager().findFragmentById(R.id.main_edit_pane) as OperationEditFragment }
 
     override fun setView() {
         setContentView(R.layout.operation_edit)
-        mEditFragment = getSupportFragmentManager().findFragmentById(R.id.main_edit_pane) as OperationEditFragment
+    }
+
+    override fun onAllAccountsFetched() {
+        mEditFragment.onAllAccountFetched()
+        super<CommonOpEditor>.onAllAccountsFetched()
     }
 
     override fun fetchOrCreateCurrentOp() {
@@ -45,16 +50,14 @@ public class OperationEditor : CommonOpEditor() {
         }
     }
 
-    override fun populateFields() {
-        mEditFragment!!.populateCommonFields(mCurrentOp)
-    }
+    override fun populateFields() = mEditFragment.populateCommonFields(mCurrentOp as Operation)
 
     private fun onOkClicked() {
         val op = mCurrentOp
-        if (mRowId <= 0 || mOriginalOp != null && op != null) {
+        if ((mRowId <= 0 || mOriginalOp != null) && op != null) {
             val errMsg = StringBuilder()
-            if (mEditFragment!!.isFormValid(errMsg)) {
-                fillOperationWithInputs(op as Operation)
+            if (mEditFragment.isFormValid(errMsg)) {
+                fillOperationWithInputs(op)
                 saveOpAndExit()
             } else {
                 Tools.popError(this, errMsg.toString(), null)
@@ -93,7 +96,7 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun fillOperationWithInputs(operation: Operation) {
-        mEditFragment!!.fillOperationWithInputs(operation)
+        mEditFragment?.fillOperationWithInputs(operation)
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {

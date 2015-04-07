@@ -73,7 +73,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     override fun onResume() {
         super<BaseActivity>.onResume()
-        mAccountManager.fetchAllAccounts(this, false, { ->
+        mAccountManager.fetchAllAccounts(false, { ->
             mStatId = getIntent()?.getLongExtra(StatisticTable.KEY_STAT_ID, 0) as Long
             if (mStatId == 0L) {
                 if (null == mStat) {
@@ -216,7 +216,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     private fun fillAccountSpinner(): Unit {
         val adapter = ArrayAdapter<Account>(this, android.R.layout.simple_spinner_item)
-        val allAccCursor = mAccountManager.getAllAccountsCursor()
+        val allAccCursor = mAccountManager.allAccountsCursor
         if (allAccCursor != null) {
             allAccCursor.moveToPosition(-1)
             allAccCursor.forEach({ adapter.add(Account(it)) })

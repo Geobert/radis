@@ -5,15 +5,11 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.*
 
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
-import fr.geobert.radis.tools.formatDate
-import fr.geobert.radis.tools.formatShortDate
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.parseDate
 
 
 public fun Operation(op: Operation): Operation {
@@ -181,7 +177,7 @@ public open class Operation : Parcelable {
     }
 
     public fun setSumStr(sumStr: String) {
-        mSum = Tools.extractSumFromStr(sumStr)
+        mSum = sumStr.extractSumFromStr()
     }
 
     //    public fun setDateStr(dateStr: String) {

@@ -12,11 +12,13 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
+import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.adapter.InfoAdapter
 import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
@@ -28,6 +30,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     private val mQuickAddTextWatcher: QuickAddTextWatcher
     private val mCorrectCommaWatcher: CorrectCommaWatcher
     private val mLayout: LinearLayout
+
     private fun getCurAccountId() = mActivity.mAccountManager.getCurrentAccountId(mActivity)
 
     init {
@@ -63,7 +66,8 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     //    }
 
     public fun initViewBehavior() {
-        mQuickAddThirdParty.setAdapter<InfoAdapter>(InfoAdapter(mActivity, DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME, true))
+        mQuickAddThirdParty.setAdapter<InfoAdapter>(InfoAdapter(mActivity, DbContentProvider.THIRD_PARTY_URI,
+                InfoTables.KEY_THIRD_PARTY_NAME, true, mActivity.mAccountManager.getCurrentAccount() as Account))
 
         mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher)
 

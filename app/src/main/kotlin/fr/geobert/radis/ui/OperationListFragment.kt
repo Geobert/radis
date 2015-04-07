@@ -29,12 +29,10 @@ import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.UpdateDisplayInterface
-import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OperationsAdapter
 import fr.geobert.radis.ui.editor.OperationEditor
+import hirondelle.date4j.DateTime
 import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
@@ -51,20 +49,26 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private var mOperationsLoader: CursorLoader? = null
     private var mQuickAddController: QuickAddController? = null
     private var mOpListAdapter: OperationsAdapter? = null
-    private var mListView: RecyclerView by Delegates.notNull()
-    //    private val mStubView: ViewStub by Delegates.lazy { this.container.findViewById(android.R.id.empty) as ViewStub }
-    private val mEmptyView: View? by Delegates.lazy { this.container?.findViewById(R.id.empty_textview) }
-    private var startOpDate: GregorianCalendar? = null // start date of ops to get
+    //private var operation_list: RecyclerView by Delegates.notNull()
+    private var earliestOpDate: DateTime? = null // start date of ops to get
     private var mScrollLoader: OnOperationScrollLoader by Delegates.notNull()
     private var mLastSelectionId = -1L
     private var mLastSelectionPos = -1
     private var needRefreshSelection = false
-    private var container: LinearLayout? = null
+    private var container: LinearLayout by Delegates.notNull()
+
+    // TODO kotlinx.android
+    private var operation_list: RecyclerView by Delegates.notNull()
+    private var empty_textview: View by Delegates.notNull()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
         val c = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
         this.container = c
+
+        // TODO kotlinx
+        operation_list = c.findViewById (R.id.operation_list) as RecyclerView
+        empty_textview = c.findViewById (R.id.empty_textview)
 
         setMenu(R.menu.operations_list_menu)
         setIcon(R.drawable.radis_no_disc_48)
@@ -105,24 +109,21 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     private fun initQuickAdd() {
         val c = container
-        if (c != null) {
-            val q = QuickAddController(mActivity, c)
-            //            q.setAccount(mActivity.getCurrentAccountId())
-            q.initViewBehavior()
-            q.setAutoNegate(true)
-            q.clearFocus()
-            mQuickAddController = q;
-            setQuickAddVisibility()
-        }
+        val q = QuickAddController(mActivity, c)
+        q.initViewBehavior()
+        q.setAutoNegate(true)
+        q.clearFocus()
+        mQuickAddController = q;
+        setQuickAddVisibility()
     }
 
     private fun setQuickAddVisibility() {
         val q = mQuickAddController
         if (q != null) {
-            val hideQuickAdd = DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD)
-            val visibility = if (hideQuickAdd) View.GONE else View.VISIBLE
-
-            q.setVisibility(visibility)
+            val account = mAccountManager.getCurrentAccount()
+            val hideQuickAdd = if (account?.overrideHideQuickAdd ?: false) account?.hideQuickAdd ?: false else
+                DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD)
+            q.setVisibility(if (hideQuickAdd) View.GONE else View.VISIBLE)
         }
     }
 
@@ -139,18 +140,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun initOperationList() {
-        val c = container
-        if (c != null) {
-            mListView = c.findViewById(android.R.id.list) as RecyclerView
-            mListLayout = LinearLayoutManager(mActivity)
-            if (mListView.getLayoutManager() == null) {
-                mListView.setLayoutManager(mListLayout)
-            }
-            mListView.setItemAnimator(DefaultItemAnimator())
-            mListView.setHasFixedSize(true)
-            mScrollLoader = OnOperationScrollLoader(this)
-            mListView.setOnScrollListener(mScrollLoader)
-        }
+        mListLayout = LinearLayoutManager(mActivity)
+        operation_list.setLayoutManager(mListLayout)
+        operation_list.setItemAnimator(DefaultItemAnimator())
+        operation_list.setHasFixedSize(true)
+        mScrollLoader = OnOperationScrollLoader(this)
+        operation_list.setOnScrollListener(mScrollLoader)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -158,24 +153,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mQuickAddController?.onRestoreInstanceState(savedInstanceState)
     }
 
-    fun processAccountChanged(itemId: Long): Boolean {
+    fun processAccountChanged(itemId: Long) {
         mAccountManager.setCurrentAccountId(itemId)
-        //        val startDate = Tools.createClearedCalendar()
-        //        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-        startOpDate = null
+        earliestOpDate = null
         mOldChildCount = -1
         //        mScrollLoader.setStartDate(startDate)
         val q = mQuickAddController
-        if (q != null) {
-            //            q.setAccount(itemId)
-            getMoreOperations(null)// getOperationsList()
-            return true
-        } else {
+        if (q == null) {
             initQuickAdd()
-            getMoreOperations(null)// getOperationsList()
-            return false
         }
+        getMoreOperations(initialStartDate())
     }
+
+    fun initialStartDate() = DateTime.today(TIME_ZONE).minusMonth(1)
 
     override fun onAccountChanged(itemId: Long): Boolean {
         Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
@@ -186,32 +176,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         return false
     }
 
-    override fun onCreateLoader(i: Int, bundle: Bundle): Loader<Cursor>? =
-            when (i) {
-                GET_OPS -> {
-                    if (startOpDate == null) {
-                        val startDate = Tools.createClearedCalendar()
-                        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-                        startOpDate = startDate
-                    }
-                    mOperationsLoader = OperationTable.getOpsWithStartDateLoader(mActivity, startOpDate,
-                            mActivity.getCurrentAccountId())
-                    mOperationsLoader
-                }
-                else -> null
-            }
-
     fun setEmptyViewVisibility(visible: Boolean) {
-        val e = mEmptyView
-        if (e != null) {
-            if (visible) {
-                mListView.setVisibility(View.GONE)
-                Log.d(TAG, "mEmptyView parent : ${e.getParent()}")
-                e.setVisibility(View.VISIBLE)
-            } else {
-                mListView.setVisibility(View.VISIBLE)
-                e.setVisibility(View.GONE)
-            }
+        if (visible) {
+            operation_list.setVisibility(View.GONE)
+            Log.d(TAG, "mEmptyView parent : ${empty_textview.getParent()}")
+            empty_textview.setVisibility(View.VISIBLE)
+        } else {
+            operation_list.setVisibility(View.VISIBLE)
+            empty_textview.setVisibility(View.GONE)
         }
     }
 
@@ -225,31 +197,31 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     val a = OperationsAdapter(mActivity, this, cursor, checkingDashboard)
                     mOpListAdapter = a
                     refresh = true
-                    mListView.setAdapter(mOpListAdapter)
+                    operation_list.setAdapter(mOpListAdapter)
                 } else {
                     adapter.increaseCache(cursor)
                     Log.d("OperationListFragment", "onLoadFinished fresh $freshLoader")
-                    if (freshLoader)
-                        mListView.setAdapter(adapter)
+                    if (freshLoader) // TODO why this is needed?
+                        operation_list.setAdapter(adapter)
                 }
                 freshLoader = false
                 val itemCount = mOpListAdapter?.getItemCount()
                 Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount}")
                 setEmptyViewVisibility(itemCount == 0)
-                if (itemCount == 0) {
-                    startOpDate = null
-                }
+                //                if (itemCount == 0) {
+                //                    startOpDate = null
+                //                }
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
                 } else {
-                    mListView.post {
+                    operation_list.post {
                         val curChildCount = mListLayout.getChildCount()
                         //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
                         if (curChildCount > 0 && mOldChildCount != curChildCount &&
                                 curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
                             mOldChildCount = mListLayout.getChildCount()
-                            mScrollLoader.onScrolled(mListView, 0, 0)
+                            mScrollLoader.onScrolled(operation_list, 0, 0)
                         }
                     }
                 }
@@ -257,25 +229,70 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    companion object {
-        platformStatic public fun restart(ctx: Context) {
-            DbContentProvider.reinit(ctx)
-            val intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName())
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            intent.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
-            ctx.startActivity(intent)
-        }
-    }
+    override fun onCreateLoader(i: Int, bundle: Bundle): Loader<Cursor>? =
+            when (i) {
+                GET_OPS -> {
+                    //                    if (startOpDate == null) {
+                    //                        val startDate = Tools.createClearedCalendar()
+                    //                        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
+                    //                        startOpDate = startDate
+                    //                    }
+                    mOperationsLoader = OperationTable.getOpsWithStartDateLoader(mActivity, bundle.getLong("date"),
+                            mActivity.getCurrentAccountId())
+                    mOperationsLoader
+                }
+                else -> null
+            }
 
     /**
      * get the operations of current account, should be called after getAccountList
      */
     private fun getOperationsList() {
+        Log.d("getOperationsList", "earliestDate : $earliestOpDate")
+        val b = Bundle()
+        b.putLong("date", earliestOpDate!!.getMilliseconds(TIME_ZONE))
         if (mOperationsLoader == null) {
             freshLoader = true
-            getLoaderManager().initLoader<Cursor>(GET_OPS, Bundle(), this)
+            getLoaderManager().initLoader<Cursor>(GET_OPS, b, this)
         } else {
-            getLoaderManager().restartLoader<Cursor>(GET_OPS, Bundle(), this)
+            getLoaderManager().restartLoader<Cursor>(GET_OPS, b, this)
+        }
+    }
+
+    override fun getMoreOperations(startDate: DateTime?) {
+        Log.d("getMoreOperations", "startDate : " + startDate?.formatDate())
+        if (startDate != null) {
+            // date specified, use it
+            earliestOpDate = startDate
+            getOperationsList()
+        } else {
+            // no op found with cur month and month - 1, try if there is one
+            Log.d("getMoreOperations", "earliestOpDate : " + earliestOpDate?.formatDate())
+            val start = earliestOpDate
+            val c = if (null == start) {
+                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
+            } else {
+                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(),
+                        start.getMilliseconds(TIME_ZONE))
+            }
+            if (c != null) {
+                Log.d("getMoreOperations", "cursor count : " + c.getCount())
+                if (c.moveToFirst()) {
+                    val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
+                    Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
+                    val d = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
+                    Log.d(TAG, "last chance date verif : " + d.format("DD/MM/YYYY"))
+                    //mScrollLoader.setStartDate(d)
+                    earliestOpDate = d
+                    getOperationsList()
+                } else if (start == null) {
+                    earliestOpDate = DateTime.today(TIME_ZONE).getStartOfMonth()
+                    getOperationsList()
+                } else if (mOpListAdapter?.getItemCount() == 0) {
+                    setEmptyViewVisibility(true)
+                }
+                c.close()
+            }
         }
     }
 
@@ -295,7 +312,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun updateDisplay(intent: Intent?) {
-        getMoreOperations(null)// getOperationsList()
+        getMoreOperations(initialStartDate())
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -325,27 +342,27 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             if (mListLayout.findFirstCompletelyVisibleItemPosition() == position) {
                 if (position - half > 0) {
                     // scroll in order to see fully expanded op row
-                    mListView.smoothScrollToPosition(position - half)
+                    operation_list.smoothScrollToPosition(position - half)
                 } else {
-                    mScrollLoader.onScrolled(mListView, 0, 0);
+                    mScrollLoader.onScrolled(operation_list, 0, 0);
                 }
             } else {
                 if (position - 1 > 0) {
                     // scroll in order to see fully expanded op row
-                    mListView.smoothScrollToPosition(position - 1)
+                    operation_list.smoothScrollToPosition(position - 1)
                 } else {
-                    mScrollLoader.onScrolled(mListView, 0, 0);
+                    mScrollLoader.onScrolled(operation_list, 0, 0);
                 }
             }
         } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position ) {
             if (mListLayout.findLastCompletelyVisibleItemPosition() == position) {
                 if (position + 1 > mListLayout.getChildCount()) {
-                    mListView.smoothScrollToPosition(position + 1)
+                    operation_list.smoothScrollToPosition(position + 1)
                 } else {
-                    mScrollLoader.onScrolled(mListView, 0, 0);
+                    mScrollLoader.onScrolled(operation_list, 0, 0);
                 }
             } else {
-                mListView.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
+                operation_list.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
             }
         }
     }
@@ -358,7 +375,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 mLastSelectionPos = position
                 mLastSelectionId = adapter.operationAt(position).mRowId
 
-                mListView.post(object : Runnable {
+                operation_list.post(object : Runnable {
                     override fun run() {
                         adjustScroll(position)
                     }
@@ -366,45 +383,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 //, 400)
 
                 adapter.selectedPosition = position
-            }
-        }
-    }
-
-    override fun getMoreOperations(startDate: GregorianCalendar?) {
-        Log.d("getMoreOperations", "startDate : " + startDate?.getTime()?.formatDate())
-        if (startDate != null) {
-            startOpDate = startDate
-            getOperationsList()
-        } else {
-            // no op found with cur month and month - 1, try if there is one
-            Log.d("getMoreOperations", "startOpDate : " + startOpDate?.getTime()?.formatDate())
-            val start = startOpDate
-            val c = OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
-            //            if (null == start) {
-            //                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
-            //            } else {
-            //                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(), start.getTimeInMillis())
-            //            }
-            Log.d("getMoreOperations", "cursor count : " + c.getCount())
-            if (c != null) {
-                if (c.moveToFirst()) {
-                    val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
-                    Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
-                    val d = GregorianCalendar()
-                    d.setTimeInMillis(date)
-                    d.set(Calendar.DAY_OF_MONTH, d.getMinimum(Calendar.DAY_OF_MONTH))
-                    //                    mScrollLoader.setStartDate(d)
-                    startOpDate = d
-                    getOperationsList()
-                } else if (start == null) {
-                    val s = Tools.createClearedCalendar()
-                    s.set(Calendar.DAY_OF_MONTH, s.getActualMinimum(Calendar.DAY_OF_MONTH))
-                    startOpDate = s
-                    getOperationsList()
-                } else if (mOpListAdapter?.getItemCount() == 0) {
-                    setEmptyViewVisibility(true)
-                }
-                c.close()
             }
         }
     }
@@ -444,7 +422,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mLastSelectionId = -1L
         mLastSelectionPos = -1
         needRefreshSelection = true
-        getOperationsList() // TODO getMoreOperations(null)// getOperationsList() ?
+        getMoreOperations(initialStartDate())// getOperationsList() ?
         mActivity.updateAccountList()
     }
 
@@ -453,21 +431,31 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId)
             val date = data.getLongExtra("opDate", 0)
             if (date > 0) {
-                val opDate = GregorianCalendar()
-                opDate.setTimeInMillis(date)
-                opDate.set(Calendar.DAY_OF_MONTH, 1)
-                val today = Tools.createClearedCalendar()
-                if (today.get(Calendar.MONTH) > opDate.get(Calendar.MONTH)) {
-                    this.startOpDate = opDate
-                }
-                getOperationsList() // TODO getMoreOperations(null)// getOperationsList() ?
+                //                val opDate = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
+                //                val today = DateTime.today(TIME_ZONE)
+                //                if (today.getMonth() > opDate.getMonth()) {
+                //                    getMoreOperations(opDate)
+                //                } else {
+                //                    getMoreOperations(initialStartDate())
+                //                }
+                getMoreOperations(initialStartDate())
             }
         }
     }
 
     override fun getListLayoutManager(): LinearLayoutManager = mListLayout
 
-    override fun getRecyclerView(): RecyclerView = mListView
+    override fun getRecyclerView(): RecyclerView = operation_list
+
+    companion object {
+        platformStatic public fun restart(ctx: Context) {
+            DbContentProvider.reinit(ctx)
+            val intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName())
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            intent.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
+            ctx.startActivity(intent)
+        }
+    }
 
     public class DeleteOpConfirmationDialog : DialogFragment() {
         private var accountId: Long = 0

@@ -260,16 +260,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         super<BaseActivity>.onResume()
         handler.setActivity(this)
         handler.resume()
-        DBPrefsManager.getInstance(this).fillCache(this, object : Runnable {
-            override fun run() {
-                consolidateDbIfNeeded()
-                initAccountStuff()
-                mAccountManager.fetchAllAccounts(this@MainActivity, false, object : Runnable {
-                    override fun run() {
-                        processAccountList(true)
-                    }
-                })
-            }
+        DBPrefsManager.getInstance(this).fillCache(this, {
+            consolidateDbIfNeeded()
+            initAccountStuff()
+            mAccountManager.fetchAllAccounts(false, { processAccountList(true) })
         })
     }
 
@@ -280,14 +274,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     public fun onAccountEditFinished(result: Int) {
         if (result == Activity.RESULT_OK) {
-            mAccountManager.fetchAllAccounts(this@MainActivity, true, object : Runnable {
-                override fun run() {
-                    processAccountList(false)
-                }
-            })
+            mAccountManager.fetchAllAccounts(true, { processAccountList(false) })
         } else if (result == Activity.RESULT_CANCELED) {
             val accMan = mAccountManager
-            val allAccounts = accMan.getAllAccountsCursor()
+            val allAccounts = accMan.allAccountsCursor
             if (allAccounts == null || allAccounts.getCount() == 0) {
                 finish()
             }
@@ -296,7 +286,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     private fun processAccountList(resuming: Boolean) {
         val accMan = mAccountManager
-        val allAccounts = accMan.getAllAccountsCursor()
+        val allAccounts = accMan.allAccountsCursor
         if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
             AccountEditor.callMeForResult(this, AccountEditFragment.NO_ACCOUNT)
@@ -344,11 +334,11 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     private fun consolidateDbIfNeeded() {
         val prefs = DBPrefsManager.getInstance(this)
-        val needConsolidate = prefs.getBoolean(RadisService.CONSOLIDATE_DB, false)
+        val needConsolidate = prefs.getBoolean(fr.geobert.radis.service.RadisService.CONSOLIDATE_DB, false)
         Log.d(TAG, "needConsolidate : " + needConsolidate)
         if (needConsolidate!!) {
-            RadisService.acquireStaticLock(this)
-            this.startService(Intent(this, javaClass<RadisService>()))
+            fr.geobert.radis.service.RadisService.acquireStaticLock(this)
+            this.startService(Intent(this, javaClass<fr.geobert.radis.service.RadisService>()))
         }
     }
 
@@ -370,11 +360,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     public fun updateAccountList() {
         mAccountManager.setSimpleCursorAdapter(mAccountAdapter)
-        mAccountManager.fetchAllAccounts(this, true, object : Runnable {
-            override fun run() {
-                onFetchAllAccountCbk()
-            }
-        })
+        mAccountManager.fetchAllAccounts(true, { onFetchAllAccountCbk() })
     }
 
     private fun onFetchAllAccountCbk() {
@@ -416,7 +402,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             val i = Intent(this, javaClass<InstallRadisServiceReceiver>())
             i.setAction(Tools.INTENT_RADIS_STARTED)
             sendBroadcast(i)
-            RadisService.callMe(this)
+            fr.geobert.radis.service.RadisService.callMe(this)
             mFirstStart = false
         }
     }
@@ -447,12 +433,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun updateDisplay(intent: Intent?) {
-        mAccountManager.fetchAllAccounts(this, true, object : Runnable {
-            override fun run() {
-                val f = mActiveFragment
-                if (f != null && f.isAdded()) {
-                    f.updateDisplay(intent)
-                }
+        mAccountManager.fetchAllAccounts(true, {
+            val f = mActiveFragment
+            if (f != null && f.isAdded()) {
+                f.updateDisplay(intent)
             }
         })
     }

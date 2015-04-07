@@ -70,7 +70,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
         val v = inflater?.inflate(R.layout.statistics_list_fragment, container, false) as View
         mContainer = v
-        mList = v.findViewById(android.R.id.list) as RecyclerView
+        mList = v.findViewById(R.id.operation_list) as RecyclerView
         mList.setLayoutManager(android.support.v7.widget.LinearLayoutManager(getActivity()))
         mList.setHasFixedSize(true)
         mList.setItemAnimator(DefaultItemAnimator())

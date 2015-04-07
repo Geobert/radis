@@ -59,6 +59,8 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     fun getAccountFrag() = mPagerAdapter.getItem(0) as AccountEditFragment
     fun getConfigFrag() = mPagerAdapter.getItem(1) as ConfigFragment
 
+    fun getAccount(): Account = getAccountFrag().mAccount
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super<BaseActivity>.onCreate(savedInstanceState)
 

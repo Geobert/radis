@@ -240,8 +240,7 @@ public class OperationTable {
         return c;
     }
 
-    public static long createOp(Context ctx, final Operation op,
-                                final long accountId) {
+    public static long createOp(Context ctx, final Operation op, final long accountId) {
         return OperationTable.createOp(ctx, op, accountId, true);
     }
 
@@ -341,28 +340,23 @@ public class OperationTable {
     }
 
     @NotNull
-    public static CursorLoader getOpsWithStartDateLoader(Context ctx,
-                                                         final GregorianCalendar startOpDate,
-                                                         final long accountId) {
+    public static CursorLoader getOpsWithStartDateLoader(Context ctx, final Long earliestOpDate, final long accountId) {
         return new CursorLoader(ctx, DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ?",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId),
-                        Long.toString(startOpDate.getTimeInMillis())},
+                        Long.toString(earliestOpDate)},
                 OP_ORDERING
         );
     }
 
-    public static Cursor getOpsBetweenDate(Context ctx,
-                                           final Date startOpDate,
-                                           final Date endOpDate,
-                                           final long accountId) {
+    public static Cursor getOpsBetweenDate(Context ctx, final Date earliestOpDate, final Date latestOpDate, final long accountId) {
         return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT
                         + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId),
-                        Long.toString(startOpDate.getTime()),
-                        Long.toString(endOpDate.getTime())},
+                        Long.toString(earliestOpDate.getTime()),
+                        Long.toString(latestOpDate.getTime())},
                 OP_ORDERING
         );
     }

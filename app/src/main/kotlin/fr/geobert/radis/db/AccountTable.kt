@@ -134,15 +134,14 @@ public class AccountTable {
             db.execSQL(DATABASE_ACCOUNT_CREATE)
         }
 
-        throws(javaClass<ParseException>())
-        public fun createAccount(ctx: Context, account: Account): Long {
+        fun createValuesOf(account: Account): ContentValues {
             val values = ContentValues()
             values.put(KEY_ACCOUNT_NAME, account.name)
             values.put(KEY_ACCOUNT_DESC, account.description)
             values.put(KEY_ACCOUNT_START_SUM, account.startSum)
             values.put(KEY_ACCOUNT_CURRENCY, account.currency)
             values.put(KEY_ACCOUNT_PROJECTION_MODE, account.projMode)
-            values.put(KEY_ACCOUNT_PROJECTION_DATE, account.projDate?.formatDate())
+            values.put(KEY_ACCOUNT_PROJECTION_DATE, account.projDate)
             values.put(KEY_ACCOUNT_CHECKED_OP_SUM, 0)
             values.put(KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD, account.overrideHideQuickAdd)
             values.put(KEY_ACCOUNT_HIDE_QUICK_ADD, account.hideQuickAdd)
@@ -153,8 +152,13 @@ public class AccountTable {
             values.put(KEY_ACCOUNT_USE_WEIGHTED_INFO, account.useWeighedInfo)
             values.put(KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION, account.overrideInvertQuickAddComp)
             values.put(KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, account.invertQuickAddComp)
+            return values
+        }
 
-            setCurrentSumAndDate(ctx, 0, values, account.startSum, account.projMode, account.projDate?.formatDate()!!)
+        throws(javaClass<ParseException>())
+        public fun createAccount(ctx: Context, account: Account): Long {
+            val values = createValuesOf(account)
+            setCurrentSumAndDate(ctx, account, values)
             val res = ctx.getContentResolver().insert(DbContentProvider.ACCOUNT_URI, values)
             return lang.Long.parseLong(res.getLastPathSegment())
         }
@@ -167,13 +171,11 @@ public class AccountTable {
             var res = 0
             if (0L != accountId) {
                 val values = ContentValues()
-                val account = fetchAccount(ctx, accountId)
-                if (account.moveToFirst()) {
+                val accountCursor = fetchAccount(ctx, accountId)
+                if (accountCursor.moveToFirst()) {
                     try {
-                        setCurrentSumAndDate(ctx, accountId, values,
-                                account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM)),
-                                account.getInt(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
-                                account.getString(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)))
+                        val account = Account(accountCursor)
+                        setCurrentSumAndDate(ctx, account, values)
 
                         val allOps = OperationTable.fetchAllCheckedOps(ctx, accountId)
                         var sum: Long = 0
@@ -193,32 +195,32 @@ public class AccountTable {
                         }
                         Log.d(TAG, "consolidate checked sum : " + sum)
                         values.put(KEY_ACCOUNT_CHECKED_OP_SUM, sum)
-                        res = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), values, null, null)
+                        res = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"),
+                                values, null, null)
                     } catch (e: ParseException) {
                         e.printStackTrace()
                     }
 
                 }
-                account.close()
+                accountCursor.close()
             }
             return res
         }
 
         throws(javaClass<ParseException>())
-        private fun setCurrentSumAndDate(ctx: Context, accountId: Long, values: ContentValues, start_sum: Long,
-                                         projectionMode: Int, projectionDate: String) {
+        private fun setCurrentSumAndDate(ctx: Context, account: Account, values: ContentValues) {
             var date: Long = 0
             var opSum: Long = 0
-            Log.d(TAG, "setCurrentSumAndDate mAccountId = $accountId/ projectionMode : $projectionMode")
-            when (projectionMode) {
+            Log.d(TAG, "setCurrentSumAndDate mAccountId = ${account.id}/ projectionMode : ${account.projMode}")
+            when (account.projMode) {
                 PROJECTION_FURTHEST -> {
-                    if (accountId > 0) {
-                        val allOps = OperationTable.fetchAllOps(ctx, accountId)
+                    if (account.id > 0) {
+                        val allOps = OperationTable.fetchAllOps(ctx, account.id)
                         if (null != allOps) {
                             Log.d(TAG, "setCurrentSumAndDate allOps not null : ${allOps.getCount()}")
                             if (allOps.moveToFirst()) {
                                 date = allOps.getLong(allOps.getColumnIndex(OperationTable.KEY_OP_DATE))
-                                opSum = OperationTable.computeSumFromCursor(allOps, accountId)
+                                opSum = OperationTable.computeSumFromCursor(allOps, account.id)
                                 Log.d(TAG, "setCurrentSumAndDate allOps moved to first opSum = $opSum")
                             }
                             allOps.close()
@@ -227,16 +229,16 @@ public class AccountTable {
                 }
                 PROJECTION_DAY_OF_NEXT_MONTH -> {
                     val projDate = Tools.createClearedCalendar()
-                    if (projDate.get(Calendar.DAY_OF_MONTH) >= Integer.parseInt(projectionDate)) {
+                    if (projDate.get(Calendar.DAY_OF_MONTH) >= account.projDate?.toInt() ?: 0) {
                         projDate.add(Calendar.MONTH, 1)
                     }
-                    projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(projectionDate))
+                    projDate.set(Calendar.DAY_OF_MONTH, account.projDate?.toInt() ?: 1)
                     projDate.add(Calendar.DAY_OF_MONTH, 1) // for query
-                    val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, accountId)
+                    val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, account.id)
                     projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after query
                     if (null != op) {
                         if (op.moveToFirst()) {
-                            opSum = OperationTable.computeSumFromCursor(op, accountId)
+                            opSum = OperationTable.computeSumFromCursor(op, account.id)
                         }
                         op.close()
                     }
@@ -244,13 +246,13 @@ public class AccountTable {
                 }
                 PROJECTION_ABSOLUTE_DATE -> {
                     val projDate = Tools.createClearedCalendar()
-                    projDate.setTime(projectionDate.parseDate())
+                    projDate.setTime(account.projDate?.parseDate() as Date)
                     projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
-                    val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, accountId)
+                    val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, account.id)
                     projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
                     if (null != op) {
                         if (op.moveToFirst()) {
-                            opSum = OperationTable.computeSumFromCursor(op, accountId)
+                            opSum = OperationTable.computeSumFromCursor(op, account.id)
                         }
                         op.close()
                     }
@@ -259,9 +261,9 @@ public class AccountTable {
                 else -> {
                 }
             }
-            Log.d(TAG, "setCurrentSumAndDate opSum = $opSum/ startSum = $start_sum/ sum : ${start_sum + opSum}")
+            Log.d(TAG, "setCurrentSumAndDate opSum = $opSum/ startSum = $account.startSum/ sum : ${account.startSum + opSum}")
             values.put(KEY_ACCOUNT_OP_SUM, opSum)
-            values.put(KEY_ACCOUNT_CUR_SUM, start_sum + opSum)
+            values.put(KEY_ACCOUNT_CUR_SUM, account.startSum + opSum)
             Log.d(TAG, "setCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : ${Date(date).formatDate()}")
             values.put(KEY_ACCOUNT_CUR_SUM_DATE, date)
         }
@@ -294,6 +296,12 @@ public class AccountTable {
         //            Log.d(TAG, "checkNeedUpdateProjection : $res/mProjectionDate : ${Date(mProjectionDate).formatDate()}/opdate = ${Date(opDate).formatDate()}/projMode = $mProjectionMode")
         //            return res
         //        }
+
+        fun updateAccountLastInsertDate(ctx: Context, accountId: Long, date: Long) {
+            val values = ContentValues()
+            values.put(KEY_ACCOUNT_LAST_INSERTION_DATE, date)
+            updateAccount(ctx, accountId, values)
+        }
 
         platformStatic public fun initProjectionDate(c: Cursor?) {
             if (c != null) {
@@ -328,59 +336,59 @@ public class AccountTable {
             }
         }
 
-        throws(javaClass<ParseException>())
-        platformStatic public fun updateAccountProjectionDate(ctx: Context, accountId: Long, projectionController: ProjectionDateController): Boolean {
-            if (projectionController.hasChanged()) {
-                updateAccountProjectionDate(ctx, accountId, projectionController.getMode(), projectionController.getDate(), true)
+        //        throws(javaClass<ParseException>())
+        //        platformStatic public fun updateAccountProjectionDate(ctx: Context, accountId: Long, projectionController: ProjectionDateController): Boolean {
+        //            if (projectionController.hasChanged()) {
+        //                updateAccountProjectionDate(ctx, accountId, projectionController.getMode(), projectionController.getDate(), true)
+        //
+        //            }
+        //            return true
+        //        }
 
-            }
-            return true
-        }
+        //        throws(javaClass<ParseException>())
+        //        private fun updateAccountProjectionDate(ctx: Context, accountId: Long, projMode: Int, projDate: String,
+        //                                                updateSumAndDate: Boolean): Boolean {
+        //            val account = fetchAccount(ctx, accountId)
+        //            if (account.moveToFirst()) {
+        //                val args = ContentValues()
+        //                val start_sum = account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM))
+        //                account.close()
+        //                Log.d(TAG, "updateAccountProjectionDate, KEY_ACCOUNT_PROJECTION_DATE : $projDate")
+        //                args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode)
+        //                args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate)
+        //                if (updateSumAndDate) {
+        //                    setCurrentSumAndDate(ctx, accountId, args, start_sum, projMode, projDate)
+        //                }
+        //                return updateAccount(ctx, accountId, args) > 0
+        //            } else {
+        //                return false
+        //            }
+        //        }
 
-        throws(javaClass<ParseException>())
-        private fun updateAccountProjectionDate(ctx: Context, accountId: Long, projMode: Int, projDate: String,
-                                                updateSumAndDate: Boolean): Boolean {
-            val account = fetchAccount(ctx, accountId)
-            if (account.moveToFirst()) {
-                val args = ContentValues()
-                val start_sum = account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM))
-                account.close()
-                Log.d(TAG, "updateAccountProjectionDate, KEY_ACCOUNT_PROJECTION_DATE : $projDate")
-                args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode)
-                args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate)
-                if (updateSumAndDate) {
-                    setCurrentSumAndDate(ctx, accountId, args, start_sum, projMode, projDate)
-                }
-                return updateAccount(ctx, accountId, args) > 0
-            } else {
-                return false
-            }
-        }
+        //        throws(javaClass<ParseException>())
+        //        platformStatic public fun updateAccountProjectionDate(ctx: Context, accountId: Long): Boolean {
+        //            val c = fetchAccount(ctx, accountId)
+        //            try {
+        //                var res = true
+        //                if (null != c) {
+        //                    if (c.moveToFirst()) {
+        //                        res = updateAccountProjectionDate(ctx, accountId, c.getInt(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)), c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), true)
+        //                    }
+        //                    c.close()
+        //                }
+        //                return res
+        //            } catch (e: ParseException) {
+        //                c.close()
+        //                throw e
+        //            }
+        //
+        //        }
 
-        throws(javaClass<ParseException>())
-        public fun updateAccountProjectionDate(ctx: Context, accountId: Long): Boolean {
-            val c = fetchAccount(ctx, accountId)
-            try {
-                var res = true
-                if (null != c) {
-                    if (c.moveToFirst()) {
-                        res = updateAccountProjectionDate(ctx, accountId, c.getInt(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)), c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), true)
-                    }
-                    c.close()
-                }
-                return res
-            } catch (e: ParseException) {
-                c.close()
-                throw e
-            }
-
-        }
-
-        public fun updateAccountCurrency(ctx: Context, accountId: Long, currency: String): Boolean {
-            val args = ContentValues()
-            args.put(KEY_ACCOUNT_CURRENCY, currency)
-            return updateAccount(ctx, accountId, args) > 0
-        }
+        //        platformStatic public fun updateAccountCurrency(ctx: Context, accountId: Long, currency: String): Boolean {
+        //            val args = ContentValues()
+        //            args.put(KEY_ACCOUNT_CURRENCY, currency)
+        //            return updateAccount(ctx, accountId, args) > 0
+        //        }
 
         public fun updateAccount(ctx: Context, accountId: Long, values: ContentValues): Int {
             return ctx.getContentResolver().update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), values,
@@ -388,18 +396,10 @@ public class AccountTable {
         }
 
         throws(javaClass<ParseException>())
-        public fun updateAccount(ctx: Context, accountId: Long, name: String, desc: String, start_sum: Long,
-                                 currency: String, projectionController: ProjectionDateController): Boolean {
-            val args = ContentValues()
-            args.put(KEY_ACCOUNT_NAME, name)
-            args.put(KEY_ACCOUNT_DESC, desc)
-            args.put(KEY_ACCOUNT_START_SUM, start_sum)
-            args.put(KEY_ACCOUNT_CURRENCY, currency)
-            args.put(KEY_ACCOUNT_PROJECTION_MODE, projectionController.getMode())
-            args.put(KEY_ACCOUNT_PROJECTION_DATE, projectionController.getDate())
-            setCurrentSumAndDate(ctx, accountId, args, start_sum, projectionController.getMode(),
-                    projectionController.getDate())
-            return updateAccount(ctx, accountId, args) > 0
+        public fun updateAccount(ctx: Context, account: Account): Boolean {
+            val args = createValuesOf(account)
+            setCurrentSumAndDate(ctx, account, args)
+            return updateAccount(ctx, account.id, args) > 0
         }
 
 
@@ -702,5 +702,6 @@ public class AccountTable {
         platformStatic fun upgradeFromV4(db: SQLiteDatabase) {
             db.execSQL(ADD_CUR_DATE_COLUNM)
         }
+
     }
 }

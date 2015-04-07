@@ -56,7 +56,7 @@ public class ProjectionDateController(private val mActivity: Activity) {
     public fun populateFields(account: Account) {
         mAccountId = account.id
         mCurPos = account.projMode
-        mOrigProjDate = account.projDate?.formatDate()
+        mOrigProjDate = account.projDate
         setHint(mCurPos)
         mOrigProjMode = mCurPos
         mProjectionMode.setSelection(mCurPos)

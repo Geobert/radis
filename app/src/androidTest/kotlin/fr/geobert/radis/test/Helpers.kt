@@ -33,9 +33,11 @@ import android.widget.RelativeLayout
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
+import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.adapter.OpRowHolder
+import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
 import java.util.Calendar
@@ -169,9 +171,8 @@ class Helpers {
             addAccount()
             clickInDrawer(R.string.preferences)
             onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-            val today = Tools.createClearedCalendar()
-            today.add(Calendar.DAY_OF_MONTH, 1)
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.get(Calendar.DAY_OF_MONTH))))
+            val insertDay = DateTime.today(TIME_ZONE).plusDays(1)
+            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(insertDay.getDay())))
             Espresso.closeSoftKeyboard()
             pauseTest(2000) // needed to workaround espresso 2.0 bug
             clickOnDialogButton(R.string.ok)
@@ -187,9 +188,8 @@ class Helpers {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            val today = Tools.createClearedCalendar()
-            // +1 is because MONTH is 0 indexed
-            onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+            val today = DateTime.today(TIME_ZONE)
+            onView(withId(R.id.edit_op_date)).perform(setDate(today.getYear(), today.getMonth(), today.getDay()))
 
             fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
@@ -213,10 +213,12 @@ class Helpers {
             setUpSchOp()
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
-            val today = Tools.createClearedCalendar()
-            today.add(Calendar.DAY_OF_MONTH, -14)
-            onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1,
-                    today.get(Calendar.DAY_OF_MONTH)))
+            val today = DateTime.today(TIME_ZONE)
+            val schOpDate = today.minusDays(14)
+
+            println("scheduled op date: $schOpDate")
+
+            onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.getYear(), schOpDate.getMonth(), schOpDate.getDay()))
             fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             swipePagerLeft()
@@ -227,10 +229,16 @@ class Helpers {
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
 
             clickOnActionItemConfirm()
-            Espresso.pressBack()
+            Espresso.pressBack() // back to operations list
             Helpers.pauseTest(2000)
-            checkAccountSumIs((1000.5 - 3).formatSum())
-            return 3
+
+            val endOfMonth = today.getEndOfMonth()
+            val nbOp = endOfMonth.getWeekIndex(schOpDate)
+
+            Log.d("RadisTest", "nb op inserted: $nbOp")
+
+            checkAccountSumIs((1000.5 - nbOp).formatSum())
+            return nbOp
         }
 
         public fun swipePagerLeft() {
@@ -259,7 +267,7 @@ class Helpers {
                 isDisplayed()) as Matcher<View>).perform(click())
 
         fun clickOnRecyclerViewAtPos(pos: Int) =
-                onView(withId(android.R.id.list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+                onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
 
         fun checkAccountSumIs(text: String) =
                 onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))

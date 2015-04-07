@@ -30,11 +30,9 @@ import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.formatDate
-import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OpRowHolder
+import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
 import java.text.SimpleDateFormat
@@ -142,7 +140,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         TAG = "testEditOp"
         Helpers.addManyOps()
         Helpers.clickOnRecyclerViewAtPos(5)
-        onView(withId(android.R.id.list)).perform(scrollToPosition<OpRowHolder<Operation>>(6))
+        onView(withId(R.id.operation_list)).perform(scrollToPosition<OpRowHolder<Operation>>(6))
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.op_edition)
         onView(withId(R.id.edit_op_sum)).perform(scrollTo())
@@ -336,7 +334,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     // issue 50 test // TODO : stabilize
-    public fun _testAddInfoAndCreateOp() {
+    public fun testAddInfoAndCreateOp() {
         TAG = "testAddInfoAndCreateOp"
         Helpers.addAccount()
         onView(withId(R.id.create_operation)).perform(click())
@@ -436,7 +434,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
 
-        onView(withId(android.R.id.list)).perform(actionOnItemAtPosition <OpRowHolder <Operation>>(5, scrollTo()))
+        onView(withId(R.id.operation_list)).perform(actionOnItemAtPosition <OpRowHolder <Operation>>(5, scrollTo()))
         Helpers.clickOnRecyclerViewAtPos(5)
 
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
@@ -742,12 +740,12 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.addAccount2()
         Helpers.clickInDrawer(R.string.preferences)
         onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.DAY_OF_MONTH, -1)
-        onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.get(Calendar.DAY_OF_MONTH))))
+        val today = DateTime.today(TIME_ZONE).minusDays(1)
+        onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.getDay())))
         Espresso.closeSoftKeyboard()
         Helpers.pauseTest(2000) // needed to workaround espresso 2.0 bug
         Helpers.clickOnDialogButton(R.string.ok)
+        Helpers.pauseTest(2500) // needed to workaround espresso 2.0 bug
         Espresso.pressBack()
     }
 
@@ -796,14 +794,15 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(2000.50.formatSum())
     }
 
-    private fun addSchTransfertHebdo() {
+    private fun addSchTransfertHebdo(): Int {
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.DAY_OF_MONTH, -28)
-        Log.d(TAG, "date: ${today.getTime().formatDate()}")
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+        val today = DateTime.today(TIME_ZONE)
+        val schOpDate = today.minusDays(28)
+
+        Log.d(TAG, "date: ${schOpDate.formatDate()}")
+        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(schOpDate.getYear(),
+                schOpDate.getMonth(), schOpDate.getDay()))
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
         Helpers.pauseTest(700)
@@ -820,22 +819,27 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnActionItemConfirm()
 
         Espresso.pressBack()
-        val sum = 9 * 10.50
+        val endOfMonth = today.plusMonth(1).getEndOfMonth()
+        val nb = endOfMonth.getWeekIndex(schOpDate)
+        val sum = nb * 10.50
+        Log.e("RadisTest", "addSchTransfertHebdo nb ops inserted: $nb")
+
         Helpers.pauseTest(2000)
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
-        //        Log.d(TAG, "addSchTransfertHebdo sum = " + sum + " / nb = ")
-        //        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX : " + solo!!.getText(CUR_ACC_SUM_IDX).getText().toString())
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
-        //        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX 2 : " + solo!!.getText(CUR_ACC_SUM_IDX).getText().toString())
+
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
+
+        return nb
     }
 
-    public fun makeSchTransfertHebdoFromAccList() {
+    public fun makeSchTransfertHebdoFromAccList(): Int {
         setUpSchTransOp()
         Helpers.clickInDrawer(R.string.scheduled_ops)
-        addSchTransfertHebdo()
+        val nb = addSchTransfertHebdo()
+        return nb
     }
 
     public fun testDelSchTransfFromOpsList() {
@@ -867,12 +871,12 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
     public fun testDelFutureSchTransfFromOpsList() {
         TAG = "testDelFutureSchTransfFromOpsList"
-        makeSchTransfertHebdoFromAccList()
+        val nb = makeSchTransfertHebdoFromAccList()
         Helpers.clickOnRecyclerViewAtPos(2)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
         Helpers.clickOnDialogButton(R.string.del_all_following)
 
-        val sum = 6 * 10.50
+        val sum = nb * 10.50
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())

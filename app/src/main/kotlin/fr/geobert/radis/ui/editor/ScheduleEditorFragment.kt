@@ -40,23 +40,21 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
 
     public fun populateFields() {
         val op = mCurrentSchOp
-        mActivity.mCurrentOp = op
-        if (op != null) {
-            mCustomPeriodicityVal.setText(if (mCurrentSchOp?.mPeriodicity == 0)
-                ""
-            else
-                mCurrentSchOp?.mPeriodicity.toString())
-            populatePeriodicitySpinner()
-            populateCustomPeriodicitySpinner()
-            populateAccountSpinner((getActivity() as CommonOpEditor).mAccountManager.getAllAccountsCursor())
-            if (op.getEndDate() > 0) {
-                mEndDateCheck.setChecked(true)
-                mEndDatePicker.setEnabled(true)
-                mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth(), op.getEndDay())
-            } else {
-                mEndDateCheck.setChecked(false)
-                mEndDatePicker.setEnabled(false)
-            }
+        mActivity.mCurrentOp = op as Operation
+        mCustomPeriodicityVal.setText(if (mCurrentSchOp?.mPeriodicity == 0)
+            ""
+        else
+            mCurrentSchOp?.mPeriodicity.toString())
+        populatePeriodicitySpinner()
+        populateCustomPeriodicitySpinner()
+        populateAccountSpinner((getActivity() as CommonOpEditor).mAccountManager.allAccountsCursor!!)
+        if (op.getEndDate() > 0) {
+            mEndDateCheck.setChecked(true)
+            mEndDatePicker.setEnabled(true)
+            mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth(), op.getEndDay())
+        } else {
+            mEndDateCheck.setChecked(false)
+            mEndDatePicker.setEnabled(false)
         }
     }
 

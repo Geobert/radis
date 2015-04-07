@@ -33,7 +33,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     private val mCustomCurrency by Delegates.lazy { getActivity().findViewById(R.id.custom_currency) as EditText }
     private val mProjectionController by Delegates.lazy { ProjectionDateController(getActivity()) }
 
-    private var mAccount: Account by Delegates.notNull()
+    var mAccount: Account by Delegates.notNull()
     private var mRowId: Long = 0
     private var customCurrencyIdx = -1
     private var mOnRestore = false
@@ -119,7 +119,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
 
         }
         // check projection date format
-        if (mProjectionController.mProjectionDate.isEnabled()) {
+        if (mProjectionController.mProjectionDate.getVisibility() == View.VISIBLE) {
             //                && mProjectionController.getDate().trim().length() == 0) {
             try {
                 val format: SimpleDateFormat =
@@ -139,19 +139,20 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             }
 
         }
-        if (res) {
-            mAccount.name = name
-            mAccount.startSum = mAccountStartSumText.getText().toString().toLong()
-            mAccount.currency = if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
-                mCustomCurrency.getText().toString().trim().toUpperCase()
-            } else {
-                mAccountCurrency.getSelectedItem().toString()
-            }
-            mAccount.description = mAccountDescText.getText().toString()
-            mAccount.projMode = mProjectionController.getMode()
-            mAccount.projDate = mProjectionController.getDate().parseDate()
-            // TODO prefs
-        }
+        // done in saveState
+        //        if (res) {
+        //            mAccount.name = name
+        //            mAccount.startSum = mAccountStartSumText.getText().toString().extractSumFromStr()
+        //            mAccount.currency = if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
+        //                mCustomCurrency.getText().toString().trim().toUpperCase()
+        //            } else {
+        //                mAccountCurrency.getSelectedItem().toString()
+        //            }
+        //            mAccount.description = mAccountDescText.getText().toString()
+        //            mAccount.projMode = mProjectionController.getMode()
+        //            mAccount.projDate = mProjectionController.getDate()
+        //            // TODO prefs
+        //        }
         return res
     }
 
@@ -237,22 +238,21 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     }
 
     fun saveState() {
-        val name = mAccountNameText.getText().toString().trim()
-        val desc = mAccountDescText.getText().toString().trim()
+        mAccount.name = mAccountNameText.getText().toString().trim()
+        mAccount.description = mAccountDescText.getText().toString().trim()
         try {
-            val startSum = Tools.extractSumFromStr(mAccountStartSumText.getText().toString())
-            var currency: String
-            if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
-                currency = mCustomCurrency.getText().toString().trim().toUpperCase()
+            mAccount.startSum = mAccountStartSumText.getText().toString().extractSumFromStr()
+            mAccount.currency = if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
+                mCustomCurrency.getText().toString().trim().toUpperCase()
             } else {
-                currency = mAccountCurrency.getSelectedItem().toString()
+                mAccountCurrency.getSelectedItem().toString()
             }
+            // TODO prefs
             if (mRowId == NO_ACCOUNT) {
                 AccountTable.createAccount(getActivity(), mAccount)
             } else {
-                AccountTable.updateAccount(getActivity(), mRowId, name, desc, startSum, currency, mProjectionController)
+                AccountTable.updateAccount(getActivity(), mAccount)
             }
-            //            AccountList.refreshDisplay(this);
         } catch (e: ParseException) {
             e.printStackTrace()
         }
@@ -269,6 +269,8 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             AccountTable.initProjectionDate(data)
             mAccount = Account(data)
             populateFields(mAccount)
+            val act = getActivity() as AccountEditor
+            act.getConfigFrag().populateFields(mAccount) // TODO cleanup by moving cursor loader imp in AccountEditor
         }
     }
 

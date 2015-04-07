@@ -9,9 +9,10 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
-import fr.geobert.radis.ui.ConfigFragment;
+import fr.geobert.radis.data.Account;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.DBPrefsManager;
+import fr.geobert.radis.ui.ConfigFragment;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -168,7 +169,7 @@ public class InfoTables {
     }
 
     public static Cursor fetchMatchingInfo(Context ctx, Uri table, String colName, String constraint,
-                                           final boolean isQuickAdd) {
+                                           final boolean isQuickAdd, Account account) {
         String where;
         String[] params;
         if (null != constraint) {
@@ -179,10 +180,13 @@ public class InfoTables {
             params = null;
         }
         String ordering = colName + " asc";
-        if (DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true)) {
+        boolean useWeight = account.getOverrideUseWeighedInfo() ? account.getUseWeighedInfo() :
+                DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true);
+        if (useWeight) {
             String order;
-            if (isQuickAdd && DBPrefsManager.getInstance(ctx).
-                    getBoolean(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true)) {
+            boolean ascOrder = account.getOverrideInvertQuickAddComp() ? account.getInvertQuickAddComp() :
+                    DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true);
+            if (isQuickAdd && ascOrder) {
                 order = " asc, ";
             } else {
                 order = " desc, ";

@@ -7,10 +7,7 @@ import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.TargetSumWatcher
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.getSumSeparator
+import fr.geobert.radis.tools.*
 
 
 // TODO : useless in this current form, deactivated. see later if I can do something with it
@@ -33,9 +30,9 @@ public class CheckingOpDashboard(val activity: MainActivity, layout: LinearLayou
 
     fun updateDisplay() {
         val accountManager = activity.mAccountManager
-        val target = Tools.extractSumFromStr(targetedSumEdt.getText().toString())
+        val target = targetedSumEdt.getText().toString().extractSumFromStr()
         val checkedSum = accountManager.getCurrentAccountCheckedSum()
-        val total = accountManager.getCurrentAccountStartSum() - checkedSum
+        val total = accountManager.currentAccountStartSum - checkedSum
         val diff = target - total
         statusLbl.setText("%s\n%s".format((total / 100.0).formatSum(), (diff / 100.0).formatSum()))
     }

@@ -32,6 +32,7 @@ import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.ui.OperationListFragment;
+import fr.geobert.radis.ui.adapter.InfoAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.ParseException;
@@ -417,17 +418,6 @@ public class Tools {
         InputMethodManager inputManager = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(ctx.getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    public static long extractSumFromStr(String sumStr) {
-        sumStr = sumStr.replace('+', ' ').trim();
-        double d;
-        try {
-            d = ToolsPackage.parseSum(sumStr);
-        } catch (ParseException e) {
-            d = 0d;
-        }
-        return Math.round(d * 100);
     }
 }
 

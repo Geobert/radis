@@ -6,13 +6,14 @@ import android.os.Bundle
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.data.Operation
+import kotlin.properties.Delegates
 
 public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
     var mCurrentOp: Operation? = null
     protected var mRowId: Long = 0
     protected var mOnRestore: Boolean = false
-    protected var mPreviousSum: Long = 0
-    var mCurAccountId: Long? = null
+    var mPreviousSum: Long = 0
+    var mCurAccountId: Long by Delegates.notNull()
     var mCurrentInfoTable: Uri? = null
 
     // abstract methods
@@ -21,6 +22,15 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     protected abstract fun populateFields()
 
     protected abstract fun fetchOrCreateCurrentOp()
+
+    open protected fun onAllAccountsFetched() {
+        if (!mOnRestore) {
+            fetchOrCreateCurrentOp()
+        } else {
+            populateFields()
+            mOnRestore = false
+        }
+    }
 
     protected fun fetchOp(loaderId: Int) {
         showProgress()
@@ -35,10 +45,9 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<BaseActivity>.onCreate(savedInstanceState)
         val extras = getIntent().getExtras()
-        mCurAccountId = extras?.getLong(AccountEditFragment.PARAM_ACCOUNT_ID)
+        mCurAccountId = extras?.getLong(AccountEditFragment.PARAM_ACCOUNT_ID) as Long
         init(extras)
         setView()
-
         initToolbar(this)
     }
 
@@ -48,15 +57,8 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
 
     override fun onResume() {
         super<BaseActivity>.onResume()
-        mAccountManager.fetchAllAccounts(this, false, object : Runnable {
-            override fun run() {
-                if (!mOnRestore) {
-                    fetchOrCreateCurrentOp()
-                } else {
-                    populateFields()
-                    mOnRestore = false
-                }
-            }
+        mAccountManager.fetchAllAccounts(false, {
+            onAllAccountsFetched()
         })
     }
 

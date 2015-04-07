@@ -8,8 +8,8 @@ import android.preference.EditTextPreference
 import android.preference.ListPreference
 import android.support.v4.preference.PreferenceFragment
 import android.view.View
-import android.view.ViewGroup
 import fr.geobert.radis.R
+import fr.geobert.radis.data.Account
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.tools.DBPrefsManager
@@ -17,20 +17,25 @@ import fr.geobert.radis.tools.map
 import fr.geobert.radis.ui.editor.AccountEditor
 import kotlin.properties.Delegates
 
-public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
-    private val mAccountsChoice: ListPreference by Delegates.lazy { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
+public class ConfigFragment() : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener {
+    // only in global prefs, it is lazy so no crash in AccountEditor
+    private val mAccountsChoice by Delegates.lazy { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
+
+    //TODO lazy access to prefs in AccountEditor mode
+    private val mOverInsertDate by Delegates.lazy { findPreference(KEY_OVERRIDE_INSERT_DATE) as CheckBoxPreference }
+
     private val isAccountEditor by Delegates.lazy { getActivity() is AccountEditor }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<PreferenceFragment>.onCreate(savedInstanceState)
         addPreferencesFromResource(if (isAccountEditor) R.xml.account_prefs else R.xml.preferences)
-        if (!isAccountEditor)
+        if (!isAccountEditor) // do not call account spinner init, it does not exist
             initAccountChoices()
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super<PreferenceFragment>.onViewCreated(view, savedInstanceState)
-        if (isAccountEditor)
+        if (isAccountEditor) // change only in account editor, because de listView is not match_parent
             getListView().setBackgroundColor(getResources().getColor(R.color.normal_bg))
     }
 
@@ -52,41 +57,36 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     private fun initAccountChoices() {
         val accounts = getActivity().getContentResolver().query(DbContentProvider.ACCOUNT_URI,
                 AccountTable.ACCOUNT_COLS, null, null, null)
-        //        val entries = Array<CharSequence>(accounts.getCount())
-        //        val values = Array<CharSequence>()
         if (accounts.moveToFirst()) {
             val entries = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)) }.copyToArray()
             val values = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)) }.copyToArray()
             mAccountsChoice.setEntries(entries)
             mAccountsChoice.setEntryValues(values)
-
-            //            do {
-            //                entries.add(accounts.getString(accounts.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)))
-            //                values.add(String.valueOf(accounts.getLong(accounts.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID))))
-            //
-            //            } while (accounts.moveToNext())
-            //            mAccountsChoice!!.setEntries(entries.toArray<CharSequence>(arrayOfNulls<CharSequence>(entries.size())))
-            //            mAccountsChoice!!.setEntryValues(values.toArray<CharSequence>(arrayOfNulls<CharSequence>(entries.size())))
         }
         accounts.close()
     }
 
     private fun updateLabel(key: String) {
-        var summary: String? = null
-
-        if (KEY_INSERTION_DATE == key) {
-            val value = getPrefs().getString(getKey(key), DEFAULT_INSERTION_DATE)
-            val s = getString(R.string.prefs_insertion_date_text)
-            summary = s.format(value)
-        } else if (KEY_DEFAULT_ACCOUNT == key) {
-            // !isAccountEditor only
-            val l = findPreference(key) as ListPreference
-            val s = l.getEntry()
-            if (null != s) {
-                val value = s.toString()
-                summary = getString(R.string.default_account_desc, value)
+        val summary = when (key) {
+            getKey(KEY_INSERTION_DATE) -> {
+                val value = getPrefs().getString(getKey(key), DEFAULT_INSERTION_DATE)// TODO account's value
+                val s = getString(R.string.prefs_insertion_date_text)
+                s.format(value)
             }
+            KEY_DEFAULT_ACCOUNT -> {
+                // !isAccountEditor only
+                val l = findPreference(key) as ListPreference
+                val s = l.getEntry()
+                if (null != s) {
+                    val value = s.toString()
+                    getString(R.string.default_account_desc, value)
+                } else {
+                    null
+                }
+            }
+            else -> null
         }
+
         if (summary != null) {
             val ps = getPreferenceScreen()
             if (ps != null) {
@@ -118,32 +118,40 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         }
 
         updateLabel(KEY_INSERTION_DATE)
-        getPreferenceManager().getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+    }
+
+    public fun populateFields(account: Account) {
+        // TODO
     }
 
     override fun onPause() {
         super<PreferenceFragment>.onPause()
-        getPreferenceManager().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        var value: String? = ""
-        val p = findPreference(key)
-        if (p is EditTextPreference) {
-            value = notEmpty(sharedPreferences.getString(key, null))
-        } else if (p is ListPreference) {
-            val l = p
-            value = l.getValue()
-        } else if (p is CheckBoxPreference) {
-            val c = p
-            value = java.lang.Boolean.toString(c.isChecked())
+        if (!isAccountEditor) {
+            val p = findPreference(key)
+            val value = if (p is EditTextPreference) {
+                notEmpty(sharedPreferences.getString(key, null))
+            } else if (p is ListPreference) {
+                p.getValue()
+            } else if (p is CheckBoxPreference) {
+                java.lang.Boolean.toString(p.isChecked())
+            } else {
+                ""
+            }
+            getPrefs().put(key, value)
         }
-
-        getPrefs().put(key, value)
         updateLabel(key)
     }
 
     companion object {
+        public val KEY_OVERRIDE_INSERT_DATE: String = "override_insertion_date"
+        public val KEY_OVERRIDE_HIDE_QUICK_ADD: String = "override_hide_quickadd"
+        public val KEY_OVERRIDE_USE_WEIGHTED_INFO: String = "override_use_weighted_info"
+        public val KEY_OVERRIDE_INVERT_QUICKADD_COMPLETION: String = "override_invert_quickadd_completion"
         public val KEY_INSERTION_DATE: String = "insertion_date"
         public val KEY_LAST_INSERTION_DATE: String = "LAST_INSERT_DATE"
         public val KEY_DEFAULT_ACCOUNT: String = "quickadd_account"

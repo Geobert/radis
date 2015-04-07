@@ -1,8 +1,8 @@
 package fr.geobert.radis.ui
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
@@ -11,10 +11,11 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -29,17 +30,11 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.adapter.SchedOpAdapter
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
-
-import java.util.GregorianCalendar
+import hirondelle.date4j.DateTime
 import kotlin.properties.Delegates
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.DefaultItemAnimator
-import android.app.Activity
-import android.view.ViewStub
-import fr.geobert.radis.tools.formatSum
-import android.util.Log
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
     private var mContainer: LinearLayout by Delegates.notNull()
@@ -59,13 +54,13 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         setIcon(R.drawable.sched_48)
         setMenu(R.menu.scheduled_list_menu)
 
-        mListView = ll.findViewById(android.R.id.list) as RecyclerView
+        mListView = ll.findViewById(R.id.operation_list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
         mListView.setHasFixedSize(true)
         mListLayout = LinearLayoutManager(getActivity())
-        if (mListView.getLayoutManager() == null) {
-            mListView.setLayoutManager(mListLayout)
-        }
+        //        if (mListView.getLayoutManager() == null) {
+        mListView.setLayoutManager(mListLayout)
+        //        }
         mListView.setItemAnimator(DefaultItemAnimator())
         return ll
     }
@@ -97,11 +92,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun onResume() {
         super<BaseFragment>.onResume()
-        mAccountManager.fetchAllAccounts(mActivity, false, object : Runnable {
-            override fun run() {
-                fetchSchOpsOfAccount()
-            }
-        })
+        mAccountManager.fetchAllAccounts(false, { fetchSchOpsOfAccount() })
     }
 
     override fun onAccountChanged(itemId: Long): Boolean {
@@ -222,7 +213,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         mLoader = null
     }
 
-    override fun getMoreOperations(startDate: GregorianCalendar?) {
+    override fun getMoreOperations(startDate: DateTime?) {
         // not needed
     }
 
