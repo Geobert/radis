@@ -323,7 +323,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         // 3 following lines are hack because a bug of Espresso
         Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(2500)
+        Helpers.pauseTest(2800)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -367,8 +367,10 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
     private fun setUpProjTest1() {
         Helpers.addAccount()
-        var date = DateTime.today(TIME_ZONE).getEndOfMonth().minusMonth(2)
-        for (i in 0..6 - 1) {
+        val today = DateTime.today(TIME_ZONE)
+        val cleanUpDay = DateTime.forDateOnly(today.getYear(), today.getMonth(), Math.min(today.getDay(), 28))
+        var date = cleanUpDay.minusMonth(2)
+        for (i in 0..5) {
             addOpOnDate(date, i)
             Helpers.pauseTest(500)
             date = date.plusMonth(1)
@@ -378,55 +380,51 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     public fun testProjectionFromOpList() {
         TAG = "testProjectionFromOpList"
 
-        // test mode 0
+        // test mode 0 = furthest
         setUpProjTest1()
-        var today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        today.add(Calendar.MONTH, 3)
+        val today = DateTime.today(TIME_ZONE)
+        val cleanUpDay = DateTime.forDateOnly(today.getYear(), today.getMonth(), Math.min(today.getDay(), 28))
+        val later3Month = cleanUpDay.plusMonth(3)
         Helpers.pauseTest(1000)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
-        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
+        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(later3Month.formatDateLong()))))
 
         Helpers.clickOnRecyclerViewAtPos(0)
 
         Helpers.checkSelectedSumIs(994.50.formatSum())
 
-        // test mode 1
+        // test mode 1 = day of next month
         Helpers.callAccountEdit()
 
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 1)
 
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)))
+        Helpers.scrollThenTypeText(R.id.projection_date_value, cleanUpDay.getDay().toString())
         Helpers.clickOnActionItemConfirm()
 
-        today.add(Calendar.MONTH, 1)
-        Log.d(TAG, "1DATE : " + Tools.getDateStr(today))
+        val oneMonthLater = cleanUpDay.plusMonth(1)
+        Log.d(TAG, "1DATE : " + oneMonthLater)
 
-        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
+        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(oneMonthLater.formatDateLong()))))
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(996.50.formatSum()))))
 
         Helpers.clickOnRecyclerViewAtPos(0)
         Helpers.checkSelectedSumIs(994.50.formatSum())
 
-        // test mode 2
+        // test mode 2 = absolute date
         Helpers.callAccountEdit()
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 2)
 
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, 28)
-        today.add(Calendar.MONTH, +3)
+        val later3Month28th = DateTime.forDateOnly(later3Month.getYear(), later3Month.getMonth(), 28)
         val f = SimpleDateFormat("dd/MM/yyyy")
-        Helpers.scrollThenTypeText(R.id.projection_date_value, f.format(today.getTime()))
+        Helpers.scrollThenTypeText(R.id.projection_date_value, f.format(later3Month28th.getMilliseconds(TIME_ZONE)))
         Helpers.clickOnActionItemConfirm()
 
-        Log.d(TAG, "2DATE : " + f.format(today.getTime()))
-        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
+        Log.d(TAG, "2DATE : " + f.format(later3Month28th.getMilliseconds(TIME_ZONE)))
+        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(later3Month28th.formatDateLong()))))
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
 
@@ -440,10 +438,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         // test back to mode 0
         Helpers.callAccountEdit()
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 0)
-        onView(withId(R.id.projection_date_value)).check(matches(not(isEnabled())))
+        onView(withId(R.id.projection_date_value)).check(matches(not(isDisplayed())))
         Helpers.clickOnActionItemConfirm()
-
-        Log.d(TAG, "0DATE : " + Tools.getDateStr(today))
 
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
 
