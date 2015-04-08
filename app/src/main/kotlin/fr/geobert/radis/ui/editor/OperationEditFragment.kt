@@ -238,7 +238,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         Tools.setTextWithoutComplete(edit_op_third_party, op.mThirdParty)
         Tools.setTextWithoutComplete(edit_op_mode, op.mMode)
         Tools.setTextWithoutComplete(edit_op_tag, op.mTag)
-        edit_op_date.updateDate(op.getYear(), op.getMonth(), op.getDay())
+        edit_op_date.updateDate(op.getYear(), op.getMonth() - 1, op.getDay())
         mActivity.mPreviousSum = op.mSum
         edit_op_notes.setText(op.mNotes)
         Tools.setSumTextGravity(edit_op_sum)
@@ -325,7 +325,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         val dp = edit_op_date
         dp.clearChildFocus(mActivity.getCurrentFocus())
         op.setDay(dp.getDayOfMonth())
-        op.setMonth(dp.getMonth())
+        op.setMonth(dp.getMonth() + 1)
         op.setYear(dp.getYear())
         op.mIsChecked = is_checked.isChecked()
 

@@ -3,13 +3,12 @@ package fr.geobert.radis.data
 import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
+import android.util.Log
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
-
-import java.util.Calendar
+import hirondelle.date4j.DateTime
 import java.util.Date
-import java.util.GregorianCalendar
 
 
 public fun Operation(op: Operation): Operation {
@@ -29,7 +28,7 @@ public fun Operation(p: Parcel): Operation {
 }
 
 public open class Operation : Parcelable {
-    protected var mDate: GregorianCalendar = Tools.createClearedCalendar()
+    protected var mDate: DateTime = DateTime.today(TIME_ZONE)
     public var mThirdParty: String = ""
     public var mTag: String = ""
     public var mMode: String = ""
@@ -116,60 +115,59 @@ public open class Operation : Parcelable {
     }
 
     public fun getMonth(): Int {
-        return mDate.get(Calendar.MONTH)
+        return mDate.getMonth()
     }
 
     public fun setMonth(month: Int) {
-        this.mDate.set(Calendar.MONTH, month)
+        val d = Math.min(mDate.getDay(), DateTime.forDateOnly(mDate.getYear(), month, 1).getEndOfMonth().getDay())
+        mDate = DateTime.forDateOnly(mDate.getYear(), month, d)
     }
 
     public fun getDay(): Int {
-        return mDate.get(Calendar.DAY_OF_MONTH)
+        return mDate.getDay()
     }
 
     public fun setDay(day: Int) {
-        this.mDate.set(Calendar.DAY_OF_MONTH, day)
+        val d = Math.min(day, mDate.getEndOfMonth().getDay())
+        mDate = DateTime.forDateOnly(mDate.getYear(), mDate.getMonth(), d)
     }
 
     public fun getYear(): Int {
-        return mDate.get(Calendar.YEAR)
+        return mDate.getYear()
     }
 
     public fun setYear(year: Int) {
-        this.mDate.set(Calendar.YEAR, year)
+        // will throw exception if month = feb and day = 29 and year is not leap, adjust the day
+        val d = if (mDate.getMonth() == 2 && mDate.isLeapYear() && !DateTime.forDateOnly(year, 1, 1).isLeapYear())
+            Math.min(mDate.getDay(), 28)
+        else
+            mDate.getDay()
+        mDate = DateTime.forDateOnly(year, mDate.getMonth(), d)
     }
-    //
-    //    public fun getDateStr(): String {
-    //        return mDate.getTime().formatDate()
-    //    }
-    //
-    //    public fun getShortDateStr(): String {
-    //        return mDate.getTime().formatShortDate()
-    //    }
 
     public fun getDate(): Long {
-        return mDate.getTimeInMillis()
+        return mDate.getMilliseconds(TIME_ZONE)
     }
 
     public fun setDate(date: Long) {
-        mDate.setTimeInMillis(date)
-        Tools.clearTimeOfCalendar(mDate)
+        val d = DateTime.forInstant(date, TIME_ZONE)
+        mDate = DateTime.forDateOnly(d.getYear(), d.getMonth(), d.getDay())
     }
 
     public fun getDateObj(): Date {
-        return mDate.getTime()
+        return Date(mDate.getMilliseconds(TIME_ZONE))
     }
 
     public fun addDay(nbDays: Int) {
-        mDate.add(Calendar.DAY_OF_MONTH, nbDays)
+        mDate = mDate.plusDays(nbDays)
     }
 
     public fun addMonth(nbMonths: Int) {
-        mDate.add(Calendar.MONTH, nbMonths)
+        mDate = mDate.plusMonth(nbMonths)
     }
 
     public fun addYear(nbYears: Int) {
-        mDate.add(Calendar.YEAR, nbYears)
+        mDate.plus(nbYears, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
     }
 
     public fun getSumStr(): String {

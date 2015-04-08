@@ -730,8 +730,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.addAccount2()
         Helpers.clickInDrawer(R.string.preferences)
         onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-        val today = DateTime.today(TIME_ZONE).minusDays(1)
-        onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.getDay())))
+        val yesterday = DateTime.today(TIME_ZONE).minusDays(1)
+        onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(yesterday.getDay())))
         Espresso.closeSoftKeyboard()
         Helpers.pauseTest(2000) // needed to workaround espresso 2.0 bug
         Helpers.clickOnDialogButton(R.string.ok)
@@ -743,9 +743,9 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
 
-        val today = Tools.createClearedCalendar()
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+        val today = DateTime.today(TIME_ZONE)
+        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.getYear(),
+                today.getMonth(), today.getDay()))
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
         Helpers.pauseTest(700)
@@ -759,14 +759,18 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     public fun makeSchTransfertFromAccList() {
-        setUpSchTransOp()
+        setUpSchTransOp() // setup insert date to yesterday
         Helpers.clickInDrawer(R.string.scheduled_ops)
-        addSchTransfert()
+        addSchTransfert() // add sch op today
         Espresso.pressBack()
+        val today = DateTime.today(TIME_ZONE)
+
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
-        Helpers.checkAccountSumIs(990.00.formatSum())
+        val nb = if (today.getDay() == 1) 1 else 2 // if today is the first day of month, we get only 1 insertion, 2 otherwise, yes, this is shitty, need to configure date on the phone
+        val sum = nb * 10.50
+        Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
-        Helpers.checkAccountSumIs(2011.00.formatSum())
+        Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
     }
 
