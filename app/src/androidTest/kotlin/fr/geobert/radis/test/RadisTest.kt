@@ -994,10 +994,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnDialogButton(R.string.del_all_occurrences)
 
         // setup override
-        Helpers.clickInDrawer(R.string.account_edit)
-        Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
-        Espresso.closeSoftKeyboard()
-        Helpers.swipePagerLeft()
+        goToCurAccountOptionPanel()
         onView(withText(R.string.override_insert_date)).perform(click())
         val default = getActivity().getString(R.string.prefs_insertion_date_text).format(ConfigFragment.DEFAULT_INSERTION_DATE)
         onView(withText(default)).check(matches(isDisplayed()))
@@ -1015,13 +1012,59 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     public fun testOverrideHideQuickAdd() {
+        Helpers.addAccount()
 
+        fun checkQuickAddVisibilityAs(visible: Boolean) {
+            if (visible) {
+                onView(withId(R.id.quick_add_layout)).check(matches(isDisplayed()))
+            } else {
+                onView(withId(R.id.quick_add_layout)).check(matches(not(isDisplayed())))
+            }
+        }
+
+        // check global pref to false, override activated but let false as value = quick add visible
+        goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(true)
+
+        // check global pref to false, override activated, value to true = quick add hidden
+        goToCurAccountOptionPanel()
+        onView(withText(R.string.hide_ops_quick_add)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(false)
+
+        // check global pref to false, override deactivated, value to true = quick add visible
+        goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(true)
+
+        // GLOBAL PREF = true
+        Helpers.clickInDrawer(R.string.preferences)
+        onView(withText(R.string.hide_ops_quick_add)).perform(click())
+        Espresso.pressBack()
+
+        // check global pref to true, override activated, value to false = quick add visible
+        goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        onView(withText(R.string.hide_ops_quick_add)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(true)
+
+        // check global pref to true, override deactivate, value to false = quick add hidden
+        goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(false)
     }
 
-    public fun testOverrideUseWeight() {
-
+    private fun goToCurAccountOptionPanel() {
+        Helpers.clickInDrawer(R.string.account_edit)
+        Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
+        Espresso.closeSoftKeyboard()
+        Helpers.swipePagerLeft()
     }
-
 
     companion object {
         private val WAIT_DIALOG_TIME = 2000

@@ -137,10 +137,7 @@ public class ConfigFragment() : PreferenceFragment() {
         PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString(key, value)
     }
 
-    private var mAccount: Account? = null
-
     public fun populateFields(account: Account) {
-        this.mAccount = account
         setCheckBoxPrefState(KEY_OVERRIDE_INSERT_DATE, account.overrideInsertDate)
         setCheckBoxPrefState(KEY_OVERRIDE_HIDE_QUICK_ADD, account.overrideHideQuickAdd)
         setCheckBoxPrefState(KEY_OVERRIDE_USE_WEIGHTED_INFO, account.overrideUseWeighedInfo)

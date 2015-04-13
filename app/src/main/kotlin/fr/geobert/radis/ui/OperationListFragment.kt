@@ -117,7 +117,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         setQuickAddVisibility()
     }
 
-    private fun setQuickAddVisibility() {
+    fun setQuickAddVisibility() {
         val q = mQuickAddController
         if (q != null) {
             val account = mAccountManager.getCurrentAccount()

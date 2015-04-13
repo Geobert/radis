@@ -274,7 +274,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     public fun onAccountEditFinished(result: Int) {
         if (result == Activity.RESULT_OK) {
-            mAccountManager.fetchAllAccounts(true, { processAccountList(false) })
+            mAccountManager.fetchAllAccounts(true, {
+                val f = mActiveFragment
+                if (mActiveFragmentId == OP_LIST && f is OperationListFragment) {
+                    f.setQuickAddVisibility()
+                }
+                processAccountList(false)
+            })
         } else if (result == Activity.RESULT_CANCELED) {
             val accMan = mAccountManager
             val allAccounts = accMan.allAccountsCursor
