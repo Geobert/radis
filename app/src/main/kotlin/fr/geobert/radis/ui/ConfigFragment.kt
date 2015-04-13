@@ -63,10 +63,10 @@ public class ConfigFragment() : PreferenceFragment() {
         accounts.close()
     }
 
-    private fun updateLabel(key: String) {
+    fun updateLabel(key: String, account: Account? = null) {
         val summary = when (key) {
             getKey(KEY_INSERTION_DATE) -> {
-                val value = getPrefs().getString(getKey(key), DEFAULT_INSERTION_DATE)// TODO account's value
+                val value = if (account != null) account.insertDate.toString() else getPrefs().getString(key, DEFAULT_INSERTION_DATE)
                 val s = getString(R.string.prefs_insertion_date_text)
                 s.format(value)
             }
@@ -117,39 +117,88 @@ public class ConfigFragment() : PreferenceFragment() {
                 }
             }
             updateLabel(KEY_DEFAULT_ACCOUNT)
+            updateLabel(KEY_INSERTION_DATE)
+        } else if (act is AccountEditor) {
+            if (act.getAccountFrag().isNewAccount()) {
+                updateLabel(KEY_INSERTION_DATE)
+            }
         }
-
-        updateLabel(KEY_INSERTION_DATE)
     }
 
+    private fun setCheckBoxPrefState(key: String, value: Boolean) {
+        val checkbox = findPreference(key) as CheckBoxPreference
+        checkbox.setChecked(value)
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(key, value)
+    }
+
+    private fun setEditTextPrefValue(key: String, value: String) {
+        val edt = findPreference(key) as EditTextPreference
+        edt.getEditText().setText(value)
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString(key, value)
+    }
+
+    private var mAccount: Account? = null
+
     public fun populateFields(account: Account) {
-        // TODO
+        this.mAccount = account
+        setCheckBoxPrefState(KEY_OVERRIDE_INSERT_DATE, account.overrideInsertDate)
+        setCheckBoxPrefState(KEY_OVERRIDE_HIDE_QUICK_ADD, account.overrideHideQuickAdd)
+        setCheckBoxPrefState(KEY_OVERRIDE_USE_WEIGHTED_INFO, account.overrideUseWeighedInfo)
+        setCheckBoxPrefState(KEY_OVERRIDE_INVERT_QUICKADD_COMPLETION, account.overrideInvertQuickAddComp)
+        setEditTextPrefValue(getKey(KEY_INSERTION_DATE), account.insertDate.toString())
+        updateLabel(getKey(KEY_INSERTION_DATE), account)
+        setCheckBoxPrefState(getKey(KEY_HIDE_OPS_QUICK_ADD), account.hideQuickAdd)
+        setCheckBoxPrefState(getKey(KEY_USE_WEIGHTED_INFOS), account.useWeighedInfo)
+        setCheckBoxPrefState(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD), account.invertQuickAddComp)
+        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().commit()
+    }
+
+    private fun getCheckBoxPrefValue(key: String): Boolean {
+        val chk = findPreference(key) as CheckBoxPreference
+        val r = chk.isChecked()
+        Log.d("Bug", "getCheckBoxPrefValue $key = $r")
+        return r
+    }
+
+    private fun getEdtPrefValue(key: String): String {
+        val edt = findPreference(key) as EditTextPreference
+        val r = edt.getEditText().getText().toString()
+        Log.d("Bug", "getEdtPrefValue $key = $r")
+        return r
+    }
+
+    // called by AccountEditFragment.saveState
+    fun saveState(account: Account) {
+        account.overrideInsertDate = getCheckBoxPrefValue(KEY_OVERRIDE_INSERT_DATE)
+        val d = getEdtPrefValue(getKey(KEY_INSERTION_DATE))
+        account.insertDate = if (d.trim().length() > 0) d.toInt() else DEFAULT_INSERTION_DATE.toInt()
+        account.overrideHideQuickAdd = getCheckBoxPrefValue(KEY_OVERRIDE_HIDE_QUICK_ADD)
+        account.hideQuickAdd = getCheckBoxPrefValue(getKey(KEY_HIDE_OPS_QUICK_ADD))
+        account.overrideUseWeighedInfo = getCheckBoxPrefValue(KEY_OVERRIDE_USE_WEIGHTED_INFO)
+        account.useWeighedInfo = getCheckBoxPrefValue(getKey(KEY_USE_WEIGHTED_INFOS))
+        account.overrideInvertQuickAddComp = getCheckBoxPrefValue(KEY_OVERRIDE_INVERT_QUICKADD_COMPLETION)
+        account.invertQuickAddComp = getCheckBoxPrefValue(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD))
     }
 
     override fun onPause() {
         super<PreferenceFragment>.onPause()
-        Log.d("PrefBug", "onPause remove listener")
         val act = getActivity()
         PreferenceManager.getDefaultSharedPreferences(act).unregisterOnSharedPreferenceChangeListener(act as SharedPreferences.OnSharedPreferenceChangeListener)
-        //        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(getActivity() as SharedPreferences.OnSharedPreferenceChangeListener)
     }
 
     fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
-        Log.d("PrefBug", "onSharedPreferenceChanged key: $key / isAccountEditor : $isAccountEditor")
-        if (!isAccountEditor) {
-            val p = findPreference(key)
-            val value = if (p is EditTextPreference) {
-                notEmpty(sharedPreferences.getString(key, null))
-            } else if (p is ListPreference) {
-                p.getValue()
-            } else if (p is CheckBoxPreference) {
-                java.lang.Boolean.toString(p.isChecked())
-            } else {
-                ""
-            }
-            getPrefs().put(key, value)
+        val p = findPreference(key)
+        val value = if (p is EditTextPreference) {
+            notEmpty(sharedPreferences.getString(key, null))
+        } else if (p is ListPreference) {
+            p.getValue()
+        } else if (p is CheckBoxPreference) {
+            java.lang.Boolean.toString(p.isChecked())
+        } else {
+            ""
         }
-        updateLabel(getKey(key))
+        getPrefs().put(key, value) // put "_for_account" keys in cache for updateLabel
+        updateLabel(key)
     }
 
     companion object {
@@ -165,4 +214,5 @@ public class ConfigFragment() : PreferenceFragment() {
         public val KEY_INVERT_COMPLETION_IN_QUICK_ADD: String = "invert_completion_in_quick_add"
         public val DEFAULT_INSERTION_DATE: String = "25"
     }
+
 }

@@ -23,6 +23,7 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
             setAllAccCursor(value)
         }
         get() = _allAccountCursor
+
     private var mSimpleCursorAdapter: SimpleCursorAdapter? = null
     private var mCurAccountId: Long? = null
     public var currentAccountSum: Long = 0

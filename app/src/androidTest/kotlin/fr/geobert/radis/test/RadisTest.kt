@@ -31,13 +31,13 @@ import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.ConfigFragment
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.GregorianCalendar
 import java.util.HashSet
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicReference
@@ -157,7 +157,6 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
         onView(withId(R.id.quickadd_amount)).perform(typeText("-1"))
         onView(withId(R.id.quickadd_validate)).perform(click())
-        // TODO       assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
         Helpers.checkAccountSumIs(999.50.formatSum())
         onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
     }
@@ -182,7 +181,10 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
     public fun testEditScheduledOp() {
         TAG = "testEditScheduledOp"
-        Helpers.addScheduleOp()
+        Helpers.setUpSchOp()
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(991.0.formatSum())
 
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
@@ -288,6 +290,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Espresso.pressBack()
 
         // TODO assertEquals(3, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
+
         Helpers.clickInDrawer(R.string.scheduled_ops)
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
@@ -333,7 +336,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnDialogButton(R.string.ok)
     }
 
-    // issue 50 test // TODO : stabilize
+    // issue 50 test // TODO : debug
     public fun _testAddInfoAndCreateOp() {
         TAG = "testAddInfoAndCreateOp"
         Helpers.addAccount()
@@ -345,11 +348,17 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText("Atest"))
         Helpers.clickOnDialogButton(R.string.ok)
 
+        Helpers.pauseTest(1000)
+
         onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).check(has(1, javaClass<ListView>()))
 
         onData(iz(instanceOf(javaClass<Cursor>()))).inAdapterView(iz(instanceOf(javaClass<ListView>())) as Matcher<View>).atPosition(0).perform(click())
 
-        onView(withId(android.R.id.button1)).inRoot(DebugEspresso.isAlertDialog()).perform(click())
+        Helpers.pauseTest(1000)
+
+        // BUG here
+        //        Helpers.clickOnDialogButton(R.string.ok)
+        onView(allOf(isDisplayed(), withText("Ok")) as Matcher<View>).inRoot(DebugEspresso.isAlertDialog()).perform(click())
 
         Helpers.clickOnActionItemConfirm()
         onView(withId(R.id.create_operation)).perform(click())
@@ -626,7 +635,6 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(1001.50.formatSum())
         Helpers.checkSelectedSumIs(1003.50.formatSum())
         // Log.d(TAG, "editOpMode2 after two edit " + solo.getCurrentListViews().get(0).getCount());
-        // TODO assertEquals(3, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
     }
 
     public fun testDelOpMode2() {
@@ -963,6 +971,55 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.swipePagerRight()
         Helpers.swipePagerLeft()
         Helpers.clickOnActionItemConfirm()
+    }
+
+    // will not work if launched last day of month
+    public fun testOverrideInsertDate() {
+        Helpers.addAccount()
+
+        Helpers.clickInDrawer(R.string.preferences)
+        Helpers.setInsertDatePref(DateTime.today(TIME_ZONE).plusDays(1))
+        Espresso.pressBack()
+
+        // check adding a sch op today is not inserted
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(isDisplayed()))
+        Helpers.checkAccountSumIs(1000.50.formatSum())
+
+        // delete the sch op
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.clickOnRecyclerViewAtPos(0)
+        onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
+        Helpers.clickOnDialogButton(R.string.del_all_occurrences)
+
+        // setup override
+        Helpers.clickInDrawer(R.string.account_edit)
+        Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
+        Espresso.closeSoftKeyboard()
+        Helpers.swipePagerLeft()
+        onView(withText(R.string.override_insert_date)).perform(click())
+        val default = getActivity().getString(R.string.prefs_insertion_date_text).format(ConfigFragment.DEFAULT_INSERTION_DATE)
+        onView(withText(default)).check(matches(isDisplayed()))
+        val today = DateTime.today(TIME_ZONE)
+        Helpers.setInsertDatePref(today)
+        val str = getActivity().getString(R.string.prefs_insertion_date_text).format(today.getDay().toString())
+        onView(withText(str)).check(matches(isDisplayed()))
+        Helpers.clickOnActionItemConfirm()
+
+        // check adding a sch op today is inserted
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(991.00.formatSum())
+    }
+
+    public fun testOverrideHideQuickAdd() {
+
+    }
+
+    public fun testOverrideUseWeight() {
+
     }
 
 

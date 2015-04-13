@@ -1,5 +1,6 @@
 package fr.geobert.radis.ui.editor
 
+import android.app.Activity
 import android.content.Context
 import android.database.Cursor
 import android.os.Bundle
@@ -18,6 +19,7 @@ import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.ConfigFragment
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Arrays
@@ -56,7 +58,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             }
         }
         val act = getActivity() as BaseActivity
-        if (NO_ACCOUNT == mRowId) {
+        if (isNewAccount()) {
             mAccount = Account()
             act.setTitle(R.string.account_creation)
         } else {
@@ -75,6 +77,8 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         })
         fillCurrencySpinner()
     }
+
+    fun isNewAccount() = NO_ACCOUNT == mRowId
 
     private fun fillCurrencySpinner() {
         val mCurrAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.all_currencies, android.R.layout.simple_spinner_item)
@@ -222,17 +226,16 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
 
     override fun onResume() {
         super<Fragment>.onResume()
-        if (!mOnRestore && mRowId != NO_ACCOUNT) {
+        if (!mOnRestore && !isNewAccount()) {
             getActivity().getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNT, Bundle(), this)
         } else {
             mOnRestore = false
-            if (mRowId == NO_ACCOUNT) {
+            if (isNewAccount()) {
                 try {
                     initCurrencySpinner(Currency.getInstance(Locale.getDefault()).getCurrencyCode())
                 } catch (ex: IllegalArgumentException) {
                     initCurrencySpinner(Currency.getInstance(Locale("fr", "FR")).getCurrencyCode())
                 }
-
             }
         }
     }
@@ -250,9 +253,10 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             mAccount.projMode = mProjectionController.getMode()
             mAccount.projDate = mProjectionController.getDate()
 
-            // TODO prefs
+            val act = getActivity() as AccountEditor
+            act.getConfigFrag().saveState(mAccount) // TODO cleanup by moving saveState in AccountEditor
 
-            if (mRowId == NO_ACCOUNT) {
+            if (isNewAccount()) {
                 AccountTable.createAccount(getActivity(), mAccount)
             } else {
                 AccountTable.updateAccount(getActivity(), mAccount)

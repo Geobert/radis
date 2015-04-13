@@ -65,10 +65,11 @@ dependencies {
     compile "com.android.support:recyclerview-v7:$android_support"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "com.darwinsys:hirondelle-date4j:1.5.1"
-    
+
     //    androidTestCompile 'org.hamcrest:hamcrest-core:1.1'
     //    androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
     //    androidTestCompile 'org.hamcrest:hamcrest-integration:1.1'
+
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.0') {
         exclude group: 'com.android.support', module: 'support-v4'
         //      exclude group: 'org.hamcrest'

@@ -167,15 +167,20 @@ class Helpers {
             addOp(RadisTest.OP_TP, RadisTest.OP_AMOUNT, RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
         }
 
-        fun setUpSchOp() {
-            addAccount()
-            clickInDrawer(R.string.preferences)
+        fun setInsertDatePref(date: DateTime) {
+
             onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-            val insertDay = DateTime.today(TIME_ZONE).plusDays(1)
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(insertDay.getDay())))
+            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(date.getDay())))
             Espresso.closeSoftKeyboard()
             pauseTest(2000) // needed to workaround espresso 2.0 bug
             clickOnDialogButton(R.string.ok)
+        }
+
+        fun setUpSchOp() {
+            addAccount()
+
+            clickInDrawer(R.string.preferences)
+            setInsertDatePref(DateTime.today(TIME_ZONE).plusDays(1))
 
             Espresso.pressBack()
 
@@ -183,13 +188,12 @@ class Helpers {
             onView(withText(R.string.no_operation_sch)).check(matches(isDisplayed()))
         }
 
-        fun addScheduleOp() {
-            setUpSchOp()
+        // add a sch op today, 9.50, monthly
+        fun addScheduleOp(date: DateTime) {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            val today = DateTime.today(TIME_ZONE)
-            onView(withId(R.id.edit_op_date)).perform(setDate(today.getYear(), today.getMonth(), today.getDay()))
+            onView(withId(R.id.edit_op_date)).perform(setDate(date.getYear(), date.getMonth(), date.getDay()))
 
             fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
@@ -203,9 +207,6 @@ class Helpers {
             Espresso.pressBack()
 
             // TODO assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
-            //            onView(withText(R.string.no_operation)).check(doesNotExist())
-            onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
-            checkAccountSumIs(991.0.formatSum())
         }
 
 
