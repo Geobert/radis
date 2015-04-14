@@ -2,6 +2,7 @@ package fr.geobert.radis.data
 
 import android.database.Cursor
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.ui.ConfigFragment
 import java.util.Date
 
 
@@ -29,6 +30,8 @@ public fun Account(cursor: Cursor): Account {
     s.invertQuickAddComp = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION)) == 1
     s.insertDate = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_INSERT_DATE))
     s.lastInsertDate = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_LAST_INSERTION_DATE))
+    s.overrideNbMonthsAhead = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD)) == 1
+    s.nbMonthsAhead = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_NB_MONTH_AHEAD))
     return s
 }
 
@@ -52,6 +55,8 @@ public class Account(public var id: Long = 0, public var name: String = "") {
     public var insertDate: Int = 0
     public var lastInsertDate: Long = 0L
     public var useWeighedInfo: Boolean = true
+    public var overrideNbMonthsAhead: Boolean = false
+    public var nbMonthsAhead: Int = ConfigFragment.DEFAULT_NB_MONTH_AHEAD
 
 
     override fun equals(other: Any?): Boolean =

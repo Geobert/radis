@@ -68,6 +68,7 @@ class Helpers {
             onView(withId(R.id.confirm)).perform(click())
             pauseTest(1200)
             onView(withId(R.id.confirm)).check(doesNotExist())
+            pauseTest(500)
         }
 
         fun ACTIONBAR_TITLE_MATCHER(title: String): Matcher<View> {
@@ -167,13 +168,16 @@ class Helpers {
             addOp(RadisTest.OP_TP, RadisTest.OP_AMOUNT, RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
         }
 
-        fun setInsertDatePref(date: DateTime) {
-
-            onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(date.getDay())))
+        fun setEdtPrefValue(key: Int, value: String) {
+            onView(withText(key)).perform(click())
+            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(value))
             Espresso.closeSoftKeyboard()
             pauseTest(2000) // needed to workaround espresso 2.0 bug
             clickOnDialogButton(R.string.ok)
+        }
+
+        fun setInsertDatePref(date: DateTime) {
+            setEdtPrefValue(R.string.prefs_insertion_date_label, Integer.toString(date.getDay()))
         }
 
         fun setUpSchOp() {

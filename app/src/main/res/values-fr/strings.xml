@@ -256,4 +256,7 @@
     <string name="override_hide_quickadd">Supplanter masquer l\'ajout rapide</string>
     <string name="override_use_info">Supplanter la complétion pondérée</string>
     <string name="override_invert_quickadd_completion">Supplanter l\'invertion des propositions</string>
+    <string name="prefs_nb_month_ahead_title">Nombre de mois à insérer</string>
+    <string name="prefs_nb_month_ahead_text">Radis gardera %d mois d\'avance insérés</string>
+    <string name="override_nb_month_ahead">Supplanter le nombre de mois à insérer</string>
 </resources>

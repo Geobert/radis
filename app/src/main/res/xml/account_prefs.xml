@@ -4,7 +4,7 @@
     <CheckBoxPreference
             android:key="override_insertion_date"
             android:title="@string/override_insert_date"/>
-    <fr.geobert.radis.tools.ValidatedEditTextPreference
+    <fr.geobert.radis.tools.DayEditTextPreference
             android:dialogTitle="@string/prefs_insertion_date_title"
             android:positiveButtonText="@string/ok"
             android:negativeButtonText="@string/cancel"
@@ -14,6 +14,18 @@
             android:inputType="number"
             android:dependency="override_insertion_date"
             android:shouldDisableView="true"
+            android:persistent="true"/>
+    <CheckBoxPreference
+            android:key="override_nb_month_ahead"
+            android:title="@string/override_nb_month_ahead"/>
+    <EditTextPreference
+            android:dialogTitle="@string/prefs_nb_month_ahead_title"
+            android:positiveButtonText="@string/ok"
+            android:negativeButtonText="@string/cancel"
+            android:title="@string/prefs_nb_month_ahead_title"
+            android:summary="@string/prefs_nb_month_ahead_text"
+            android:key="nb_month_ahead_for_account"
+            android:inputType="number"
             android:persistent="true"/>
     <CheckBoxPreference
             android:key="override_hide_quickadd"

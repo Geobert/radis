@@ -7,13 +7,22 @@
     <PreferenceCategory
             android:title="@string/account_defaults"
             android:key="account_defaults">
-        <fr.geobert.radis.tools.ValidatedEditTextPreference
+        <fr.geobert.radis.tools.DayEditTextPreference
                 android:dialogTitle="@string/prefs_insertion_date_title"
                 android:positiveButtonText="@string/ok"
                 android:negativeButtonText="@string/cancel"
                 android:title="@string/prefs_insertion_date_label"
                 android:key="insertion_date"
                 android:summary="@string/prefs_insertion_date_text"
+                android:inputType="number"
+                android:persistent="true"/>
+        <EditTextPreference
+                android:dialogTitle="@string/prefs_nb_month_ahead_title"
+                android:positiveButtonText="@string/ok"
+                android:negativeButtonText="@string/cancel"
+                android:title="@string/prefs_nb_month_ahead_title"
+                android:summary="@string/prefs_nb_month_ahead_text"
+                android:key="nb_month_ahead"
                 android:inputType="number"
                 android:persistent="true"/>
         <CheckBoxPreference

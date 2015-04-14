@@ -10,13 +10,13 @@ import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.widget.Button;
 
-public class ValidatedEditTextPreference extends EditTextPreference {
-	public ValidatedEditTextPreference(Context ctx, AttributeSet attrs,
-			int defStyle) {
+public class DayEditTextPreference extends EditTextPreference {
+	public DayEditTextPreference(Context ctx, AttributeSet attrs,
+								 int defStyle) {
 		super(ctx, attrs, defStyle);
 	}
 
-	public ValidatedEditTextPreference(Context ctx, AttributeSet attrs) {
+	public DayEditTextPreference(Context ctx, AttributeSet attrs) {
 		super(ctx, attrs);
 	}
 

@@ -53,7 +53,7 @@ public class ConfigFragment() : PreferenceFragment() {
 
     private fun initAccountChoices() {
         val accounts = getActivity().getContentResolver().query(DbContentProvider.ACCOUNT_URI,
-                AccountTable.ACCOUNT_COLS, null, null, null)
+                AccountTable.ACCOUNT_ID_AND_NAME_COLS, null, null, null)
         if (accounts.moveToFirst()) {
             val entries = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)) }.copyToArray()
             val values = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)) }.copyToArray()
@@ -69,6 +69,10 @@ public class ConfigFragment() : PreferenceFragment() {
                 val value = if (account != null) account.insertDate.toString() else getPrefs().getString(key, DEFAULT_INSERTION_DATE)
                 val s = getString(R.string.prefs_insertion_date_text)
                 s.format(value)
+            }
+            getKey(KEY_NB_MONTH_AHEAD) -> {
+                val value = if (account != null) account.nbMonthsAhead else getPrefs().getInt(key, DEFAULT_NB_MONTH_AHEAD)
+                getString(R.string.prefs_nb_month_ahead_text).format(value)
             }
             KEY_DEFAULT_ACCOUNT -> {
                 // !isAccountEditor only
@@ -118,9 +122,11 @@ public class ConfigFragment() : PreferenceFragment() {
             }
             updateLabel(KEY_DEFAULT_ACCOUNT)
             updateLabel(KEY_INSERTION_DATE)
+            updateLabel(KEY_NB_MONTH_AHEAD)
         } else if (act is AccountEditor) {
             if (act.getAccountFrag().isNewAccount()) {
                 updateLabel(KEY_INSERTION_DATE)
+                updateLabel(KEY_NB_MONTH_AHEAD)
             }
         }
     }
@@ -142,8 +148,11 @@ public class ConfigFragment() : PreferenceFragment() {
         setCheckBoxPrefState(KEY_OVERRIDE_HIDE_QUICK_ADD, account.overrideHideQuickAdd)
         setCheckBoxPrefState(KEY_OVERRIDE_USE_WEIGHTED_INFO, account.overrideUseWeighedInfo)
         setCheckBoxPrefState(KEY_OVERRIDE_INVERT_QUICKADD_COMPLETION, account.overrideInvertQuickAddComp)
+        setCheckBoxPrefState(KEY_OVERRIDE_NB_MONTH_AHEAD, account.overrideNbMonthsAhead)
         setEditTextPrefValue(getKey(KEY_INSERTION_DATE), account.insertDate.toString())
+        setEditTextPrefValue(getKey(KEY_NB_MONTH_AHEAD), account.nbMonthsAhead.toString())
         updateLabel(getKey(KEY_INSERTION_DATE), account)
+        updateLabel(getKey(KEY_NB_MONTH_AHEAD), account)
         setCheckBoxPrefState(getKey(KEY_HIDE_OPS_QUICK_ADD), account.hideQuickAdd)
         setCheckBoxPrefState(getKey(KEY_USE_WEIGHTED_INFOS), account.useWeighedInfo)
         setCheckBoxPrefState(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD), account.invertQuickAddComp)
@@ -175,6 +184,11 @@ public class ConfigFragment() : PreferenceFragment() {
         account.useWeighedInfo = getCheckBoxPrefValue(getKey(KEY_USE_WEIGHTED_INFOS))
         account.overrideInvertQuickAddComp = getCheckBoxPrefValue(KEY_OVERRIDE_INVERT_QUICKADD_COMPLETION)
         account.invertQuickAddComp = getCheckBoxPrefValue(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD))
+        account.overrideNbMonthsAhead = getCheckBoxPrefValue(KEY_OVERRIDE_NB_MONTH_AHEAD)
+        Log.d("PrefBug", "saveState account.overrideNbMonthsAhead = ${account.overrideNbMonthsAhead}")
+        val m = getEdtPrefValue(getKey(KEY_NB_MONTH_AHEAD))
+        account.nbMonthsAhead = if (m.trim().length() > 0) m.toInt() else DEFAULT_NB_MONTH_AHEAD
+        Log.d("PrefBug", "saveState account.nbMonthsAhead = ${account.nbMonthsAhead}")
     }
 
     override fun onPause() {
@@ -209,7 +223,10 @@ public class ConfigFragment() : PreferenceFragment() {
         public val KEY_HIDE_OPS_QUICK_ADD: String = "hide_ops_quick_add"
         public val KEY_USE_WEIGHTED_INFOS: String = "use_weighted_infos"
         public val KEY_INVERT_COMPLETION_IN_QUICK_ADD: String = "invert_completion_in_quick_add"
+        public val KEY_OVERRIDE_NB_MONTH_AHEAD: String = "override_nb_month_ahead"
+        public val KEY_NB_MONTH_AHEAD: String = "nb_month_ahead"
         public val DEFAULT_INSERTION_DATE: String = "25"
+        public val DEFAULT_NB_MONTH_AHEAD: Int = 1
     }
 
 }

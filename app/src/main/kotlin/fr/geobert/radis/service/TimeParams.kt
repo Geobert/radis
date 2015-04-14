@@ -38,7 +38,10 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
                 insertionDate = insertionDate.plusMonth(1)
             }
 
-            val limitInsertDate = insertionDate.plusMonth(1).getEndOfMonth()
+            val nbMonthAhead = if (account.overrideNbMonthsAhead) account.nbMonthsAhead else
+                prefs.getInt(ConfigFragment.KEY_NB_MONTH_AHEAD, ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
+            Log.d("PrefBug", "nbMonthAhead = $nbMonthAhead / account.overrideNbMonthsAhead = ${account.overrideNbMonthsAhead}")
+            val limitInsertDate = insertionDate.plusMonth(nbMonthAhead).getEndOfMonth()
 
             return TimeParams(todayInMs, insertionDate.getMilliseconds(TIME_ZONE),
                     currentMonth.getMilliseconds(TIME_ZONE), limitInsertDate.getMilliseconds(TIME_ZONE))

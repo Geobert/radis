@@ -992,6 +992,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
         Helpers.clickOnDialogButton(R.string.del_all_occurrences)
+        Helpers.checkAccountSumIs(1000.50.formatSum())
 
         // setup override
         goToCurAccountOptionPanel()
@@ -1005,6 +1006,45 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnActionItemConfirm()
 
         // check adding a sch op today is inserted
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(991.00.formatSum())
+    }
+
+
+    public fun testNbMonthAheadAndOverride() {
+        Helpers.addAccount()
+        Helpers.clickInDrawer(R.string.preferences)
+        Helpers.setInsertDatePref(DateTime.today(TIME_ZONE))
+        Helpers.setEdtPrefValue(R.string.prefs_nb_month_ahead_title, "2")
+        Espresso.pressBack()
+
+        // check adding a sch op today inserted 2 months ahead
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(981.50.formatSum())
+
+        // delete all
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.clickOnRecyclerViewAtPos(0)
+        onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
+        Helpers.clickOnDialogButton(R.string.del_all_occurrences)
+        Espresso.pressBack()
+        Helpers.checkAccountSumIs(1000.50.formatSum())
+
+        // setup override
+        goToCurAccountOptionPanel()
+        onView(withText(R.string.override_nb_month_ahead)).perform(click())
+        val default = getActivity().getString(R.string.prefs_nb_month_ahead_text).format(ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
+        onView(withText(default)).check(matches(isDisplayed()))
+        Helpers.setEdtPrefValue(R.string.prefs_nb_month_ahead_title, "1")
+        val str = getActivity().getString(R.string.prefs_nb_month_ahead_text).format(1)
+        onView(withText(str)).check(matches(isDisplayed()))
+        Helpers.clickOnActionItemConfirm()
+
+        // check adding a sch op today inserted 1 month ahead
         Helpers.clickInDrawer(R.string.scheduled_ops)
         Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
         onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))

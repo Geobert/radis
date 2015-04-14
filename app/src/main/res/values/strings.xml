@@ -255,4 +255,7 @@
     <string name="override_hide_quickadd">Override hide quick add</string>
     <string name="override_use_info">Override use weighted completion</string>
     <string name="override_invert_quickadd_completion">Override invert quick add completion</string>
+    <string name="prefs_nb_month_ahead_title">Number of month ahead to insert</string>
+    <string name="prefs_nb_month_ahead_text">Radis will keep %d months inserted ahead</string>
+    <string name="override_nb_month_ahead">Override the number of month ahead</string>
 </resources>

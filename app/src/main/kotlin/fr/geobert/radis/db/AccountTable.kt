@@ -45,6 +45,7 @@ public class AccountTable {
         public val KEY_ACCOUNT_OVERRIDE_INSERT_DATE: String = "account_over_insert_date"
         public val KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION: String = "account_over_quickadd_completion"
         public val KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO: String = "account_over_use_weighted_info"
+        public val KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD: String = "account_over_nb_month_ahead"
 
         // values of preferences
         public val KEY_ACCOUNT_HIDE_QUICK_ADD: String = "account_hide_quick_add"
@@ -52,10 +53,10 @@ public class AccountTable {
         public val KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION: String = "account_quickadd_completion"
         public val KEY_ACCOUNT_USE_WEIGHTED_INFO: String = "account_use_weighted_info"
         public val KEY_ACCOUNT_LAST_INSERTION_DATE: String = "account_last_insertion_date"
+        public val KEY_ACCOUNT_NB_MONTH_AHEAD: String = "account_nb_month_ahead"
 
-        public val ACCOUNT_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
-                KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_PROJECTION_MODE,
-                KEY_ACCOUNT_PROJECTION_DATE, KEY_ACCOUNT_CHECKED_OP_SUM)
+        // light request for spinners
+        public val ACCOUNT_ID_AND_NAME_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME)
 
         public val ACCOUNT_FULL_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
                 KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_PROJECTION_MODE, KEY_ACCOUNT_PROJECTION_DATE,
@@ -63,7 +64,8 @@ public class AccountTable {
                 KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD, KEY_ACCOUNT_OVERRIDE_INSERT_DATE,
                 KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION, KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO,
                 KEY_ACCOUNT_HIDE_QUICK_ADD, KEY_ACCOUNT_INSERT_DATE,
-                KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, KEY_ACCOUNT_USE_WEIGHTED_INFO, KEY_ACCOUNT_LAST_INSERTION_DATE)
+                KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, KEY_ACCOUNT_USE_WEIGHTED_INFO, KEY_ACCOUNT_LAST_INSERTION_DATE,
+                KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD, KEY_ACCOUNT_NB_MONTH_AHEAD)
 
         private val DATABASE_ACCOUNT_CREATE_v7 = "create table $DATABASE_ACCOUNT_TABLE($KEY_ACCOUNT_ROWID integer primary key autoincrement, " +
                 "$KEY_ACCOUNT_NAME text not null, $KEY_ACCOUNT_DESC text not null, $KEY_ACCOUNT_START_SUM integer not null, " +
@@ -79,7 +81,7 @@ public class AccountTable {
                 "$KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION integer not null, $KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION integer not null, " +
                 "$KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO integer not null, $KEY_ACCOUNT_USE_WEIGHTED_INFO integer not null, " +
                 "$KEY_ACCOUNT_OVERRIDE_INSERT_DATE integer not null, $KEY_ACCOUNT_INSERT_DATE integer not null, " +
-                "$KEY_ACCOUNT_LAST_INSERTION_DATE integer not null);"
+                "$KEY_ACCOUNT_LAST_INSERTION_DATE integer not null, $KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD integer not null, $KEY_ACCOUNT_NB_MONTH_AHEAD integer not null);"
 
         protected val ADD_CUR_DATE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CUR_SUM_DATE integer not null DEFAULT 0"
 
@@ -107,6 +109,10 @@ public class AccountTable {
                 "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_INSERT_DATE integer not null DEFAULT 0"
         protected val ADD_LAST_INSERT_DATE_COLUMN: String =
                 "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_LAST_INSERTION_DATE integer not null DEFAULT 0"
+        protected val ADD_OVERRIDE_NB_MONTH_AHEAD_COLUMN: String =
+                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD integer not null DEFAULT 0"
+        protected val ADD_NB_MONTH_AHEAD_COLUMN: String =
+                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_NB_MONTH_AHEAD integer not null DEFAULT ${ConfigFragment.DEFAULT_NB_MONTH_AHEAD}"
 
         protected val TRIGGER_ON_DELETE_ACCOUNT: String = "CREATE TRIGGER on_delete_account AFTER DELETE ON $DATABASE_ACCOUNT_TABLE BEGIN " +
                 // if op is a transfert and was in deleted account, convert to an op in destination account
@@ -152,6 +158,8 @@ public class AccountTable {
             values.put(KEY_ACCOUNT_USE_WEIGHTED_INFO, account.useWeighedInfo)
             values.put(KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION, account.overrideInvertQuickAddComp)
             values.put(KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, account.invertQuickAddComp)
+            values.put(KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD, account.overrideNbMonthsAhead)
+            values.put(KEY_ACCOUNT_NB_MONTH_AHEAD, account.nbMonthsAhead)
             return values
         }
 
@@ -632,6 +640,8 @@ public class AccountTable {
             db.execSQL(ADD_OVERRIDE_INSERT_DATE_COLUMN)
             db.execSQL(ADD_INSERT_DATE_COLUMN)
             db.execSQL(ADD_LAST_INSERT_DATE_COLUMN)
+            db.execSQL(ADD_OVERRIDE_NB_MONTH_AHEAD_COLUMN)
+            db.execSQL(ADD_NB_MONTH_AHEAD_COLUMN)
             val values = ContentValues()
             val prefs = PreferenceTable.getAllPrefs(db)
 
