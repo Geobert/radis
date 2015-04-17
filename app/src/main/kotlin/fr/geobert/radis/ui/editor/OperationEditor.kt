@@ -44,7 +44,7 @@ public class OperationEditor : CommonOpEditor() {
         } else {
             setTitle(R.string.op_creation)
             val op = Operation()
-            op.mAccountId = mCurAccountId as Long
+            op.mAccountId = mCurAccountId
             mCurrentOp = op
             populateFields()
         }
@@ -96,7 +96,7 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun fillOperationWithInputs(operation: Operation) {
-        mEditFragment?.fillOperationWithInputs(operation)
+        mEditFragment.fillOperationWithInputs(operation)
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
@@ -142,7 +142,7 @@ public class OperationEditor : CommonOpEditor() {
                     mOriginalOp = Operation(data)
                 } else {
                     mCurrentOp = Operation()
-                    mCurrentOp!!.mAccountId = mCurAccountId as Long
+                    mCurrentOp!!.mAccountId = mCurAccountId
                 }
                 populateFields()
             }

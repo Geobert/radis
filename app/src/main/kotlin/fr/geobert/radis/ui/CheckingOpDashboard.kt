@@ -18,7 +18,7 @@ public class CheckingOpDashboard(val activity: MainActivity, layout: LinearLayou
 
     init {
         sumWatcher.setAutoNegate(false)
-        targetedSumEdt.setOnFocusChangeListener {(view, b) ->
+        targetedSumEdt.setOnFocusChangeListener { view, b ->
             if (b) {
                 sumWatcher.setAutoNegate(false)
                 (view as EditText).selectAll()

@@ -23,7 +23,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
         val prefs = DBPrefsManager.getInstance(this)
         val needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false)
         android.util.Log.d(TAG, "needConsolidate : " + needConsolidate)
-        if (needConsolidate!!) {
+        if (needConsolidate) {
             val cursor = fr.geobert.radis.db.AccountTable.Companion.fetchAllAccounts(this)
             prefs.put(CONSOLIDATE_DB, false)
             //            prefs.commit();

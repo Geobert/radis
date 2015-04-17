@@ -342,8 +342,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private fun consolidateDbIfNeeded() {
         val prefs = DBPrefsManager.getInstance(this)
         val needConsolidate = prefs.getBoolean(fr.geobert.radis.service.RadisService.CONSOLIDATE_DB, false)
-        Log.d(TAG, "needConsolidate : " + needConsolidate)
-        if (needConsolidate!!) {
+        if (needConsolidate) {
             fr.geobert.radis.service.RadisService.acquireStaticLock(this)
             this.startService(Intent(this, javaClass<fr.geobert.radis.service.RadisService>()))
         }

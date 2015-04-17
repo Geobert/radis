@@ -50,7 +50,7 @@ public fun alert(ctx: Context, titleId: Int, messageId: Int): Unit {
 public fun alert(ctx: Context, titleId: Int, messageId: Int, btnTxtId: Int?,
                  f: ((DialogInterface, Int) -> Unit)? = null) {
     val builder = createBuilder(ctx, titleId, messageId)
-    builder.setNeutralButton(btnTxtId ?: android.R.string.ok) {(d, i) -> if (f != null) f(d, i) }
+    builder.setNeutralButton(btnTxtId ?: android.R.string.ok) { d, i -> if (f != null) f(d, i) }
 }
 
 public inline fun Cursor?.forEach(f: (it: Cursor) -> Unit): Unit {

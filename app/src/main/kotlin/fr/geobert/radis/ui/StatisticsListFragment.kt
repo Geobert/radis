@@ -181,11 +181,11 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
      */
     private fun partFunc(stat: Statistic): (Operation) -> String =
             when (stat.filterType) {
-                Statistic.THIRD_PARTY -> {(o: Operation) -> o.mThirdParty ?: "" }
-                Statistic.TAGS -> {(o: Operation) -> o.mTag ?: "" }
-                Statistic.MODE -> {(o: Operation) -> o.mMode ?: "" }
+                Statistic.THIRD_PARTY -> { o: Operation -> o.mThirdParty ?: "" }
+                Statistic.TAGS -> { o: Operation -> o.mTag ?: "" }
+                Statistic.MODE -> { o: Operation -> o.mMode ?: "" }
                 else -> { // Statistic.NO_FILTER
-                    (o: Operation) ->
+                    o: Operation ->
                     val g = GregorianCalendar()
                     g.setTimeInMillis(o.getDate())
                     when (stat.timeScaleType) {
@@ -228,9 +228,9 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
     private fun sumPerFilter(stat: Statistic): Pair<Map<String, Long>, Map<String, Long>> {
         // partition the list according to filterType
-        fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) {(s: Long, o: Operation) -> s + o.mSum } }
+        fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) { s: Long, o: Operation -> s + o.mSum } }
 
-        fun sumMap(m: Map<String, Long>) = m.values().fold(0L) {(s: Long, l: Long) -> s + l }
+        fun sumMap(m: Map<String, Long>) = m.values().fold(0L) { s: Long, l: Long -> s + l }
         val (pos, neg) = partOps(stat)
         val sumP = sumMapOfList(pos)
         val sumN = sumMapOfList(neg)
@@ -305,7 +305,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                 val s = TimeSeries("")
                 fun construct(m: Map<String, List<Operation>>, colors: List<Int>) {
                     m.forEach {
-                        val v = Math.abs(it.value.fold(0L) {(i: Long, op: Operation) -> i + op.mSum }) + 0.0
+                        val v = Math.abs(it.value.fold(0L) { i: Long, op: Operation -> i + op.mSum }) + 0.0
                         renderer.setYAxisMax(Math.max(v + 1.0, renderer.getYAxisMax()))
                         renderer.addYTextLabel(v, v.formatSum())
                         s.add(it.value[0].getDateObj(), v)

@@ -116,12 +116,9 @@ public class PreferenceTable {
 
         fun createAccountPrefs(ctx: Context, config: AccountConfig, accountId: Long) {
             val values = createValuesOf(config)
-            //            Log.d("PrefBug", "createAccountPrefs values: $values")
             values.forEach {
                 it.put(KEY_PREFS_ACCOUNT, accountId)
-                //                Log.d("PrefBug", "createAccountPrefs before insert : $it")
-                val u = ctx.getContentResolver().insert(DbContentProvider.PREFS_URI, it)
-                //                Log.d("PrefBug", "createAccountPrefs after insert : $u")
+                ctx.getContentResolver().insert(DbContentProvider.PREFS_URI, it)
             }
         }
 

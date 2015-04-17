@@ -36,7 +36,7 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         configureCell(op, viewHolder, pos)
         viewHolder.isCheckedBox.setOnCheckedChangeListener(null)
         viewHolder.isCheckedBox.setChecked(op.mIsChecked)
-        viewHolder.isCheckedBox.setOnCheckedChangeListener {(compoundButton, b) ->
+        viewHolder.isCheckedBox.setOnCheckedChangeListener { compoundButton, b ->
             //            checkingOpDashboard?.onCheckedChanged(op, b)
             OperationTable.updateOpCheckedStatus(activity, op, b)
             op.mIsChecked = b

@@ -9,7 +9,6 @@ import android.support.v4.content.CursorLoader
 import android.util.Log
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
-import fr.geobert.radis.tools.ProjectionDateController
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.parseDate
@@ -19,6 +18,7 @@ import java.text.ParseException
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
+import java.util.HashMap
 import kotlin.platform.platformStatic
 
 public class AccountTable {
@@ -472,12 +472,10 @@ public class AccountTable {
         platformStatic public fun getCheckedSum(ctx: Context, accountId: Long?): Long {
             val c = fetchAccount(ctx, accountId!!)
             var res: Long = 0
-            if (c != null) {
-                if (c.moveToFirst()) {
-                    res = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM))
-                }
-                c.close()
+            if (c.moveToFirst()) {
+                res = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM))
             }
+            c.close()
             return res
         }
 
@@ -581,7 +579,22 @@ public class AccountTable {
         platformStatic fun upgradeFromV18(db: SQLiteDatabase) {
             db.execSQL(ADD_LAST_INSERT_DATE_COLUMN)
             val values = ContentValues()
-            val prefs = PreferenceTable.getAllPrefs(db)
+            fun getAllPrefs(db: SQLiteDatabase): HashMap<String, String> {
+                val res = HashMap<String, String>()
+                val c = db.query(PreferenceTable.DATABASE_PREFS_TABLE,
+                        array(PreferenceTable.KEY_PREFS_NAME, PreferenceTable.KEY_PREFS_VALUE), null, null, null, null, null)
+                if (null != c) {
+                    if (c.moveToFirst()) {
+                        do {
+                            res.put(c.getString(0), c.getString(1))
+                        } while (c.moveToNext())
+                    }
+                    c.close()
+                }
+                return res
+            }
+
+            val prefs = getAllPrefs(db)
             values.put(KEY_ACCOUNT_LAST_INSERTION_DATE, prefs.get(ConfigFragment.KEY_LAST_INSERTION_DATE)?.toLong() ?: 0L)
             db.update(DATABASE_ACCOUNT_TABLE, values, null, null)
         }
