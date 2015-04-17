@@ -1,15 +1,16 @@
 package fr.geobert.radis.ui
 
-import android.app.DatePickerDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import android.widget.*
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.AccountConfig
@@ -21,9 +22,9 @@ import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.InfoAdapter
 import hirondelle.date4j.DateTime
 import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
-import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
+import kotlin.properties.Delegates
 
 public class QuickAddController(private val mActivity: MainActivity, container: View) {
     private val mQuickAddThirdParty: MyAutoCompleteTextView
@@ -32,6 +33,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     private val mQuickAddTextWatcher: QuickAddTextWatcher
     private val mCorrectCommaWatcher: CorrectCommaWatcher
     private val mLayout: LinearLayout
+    private var invert: Boolean by Delegates.notNull()
 
     private fun getCurAccountId() = mActivity.mAccountManager.getCurrentAccountId(mActivity)
     private fun getCurConfig() = mActivity.mAccountManager.mCurAccountConfig
@@ -80,17 +82,16 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher)
         mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher)
         mQuickAddAmount.setOnEditorActionListener(object : TextView.OnEditorActionListener {
-            override fun onEditorAction(v: TextView, actionId: Int, event: KeyEvent): Boolean {
+            override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 try {
                     if (mQuickAddButton.isEnabled()) {
-                        quickAddOp()
+                        if (invert) showDatePicker() else quickAddOp()
                     } else {
                         Tools.popError(mActivity, mActivity.getString(R.string.quickadd_fields_not_filled), null)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
-
                 return true
             }
         })
@@ -106,14 +107,13 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
             }
         }
 
-
         val askDateAction = { v: View ->
             showDatePicker()
         }
         val c = getCurConfig()
         val prefs = DBPrefsManager.getInstance(mActivity).getInt(ConfigFragment.KEY_QUICKADD_ACTION, ConfigFragment.DEFAULT_QUICKADD_LONG_PRESS_ACTION)
 
-        val invert = (if (c != null && c.overrideQuickAddAction) c.quickAddAction else prefs) == 1
+        invert = (if (c != null && c.overrideQuickAddAction) c.quickAddAction else prefs) == 1
         Log.d("PrefBug", "setup quick add listeners : invert = $invert, prefs = $prefs")
         mQuickAddButton.setOnClickListener(if (invert) askDateAction else addTodayAction)
 
@@ -125,7 +125,6 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
                     askDateAction(v)
                 return true
             }
-
         })
     }
 
