@@ -39,21 +39,7 @@ public class AccountTable {
         public val KEY_ACCOUNT_PROJECTION_MODE: String = "account_projection_mode"
         public val KEY_ACCOUNT_PROJECTION_DATE: String = "account_projection_date"
         public val KEY_ACCOUNT_CHECKED_OP_SUM: String = "account_checked_op_sum"
-
-        // booleans
-        public val KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD: String = "account_over_hide_quick_add"
-        public val KEY_ACCOUNT_OVERRIDE_INSERT_DATE: String = "account_over_insert_date"
-        public val KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION: String = "account_over_quickadd_completion"
-        public val KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO: String = "account_over_use_weighted_info"
-        public val KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD: String = "account_over_nb_month_ahead"
-
-        // values of preferences
-        public val KEY_ACCOUNT_HIDE_QUICK_ADD: String = "account_hide_quick_add"
-        public val KEY_ACCOUNT_INSERT_DATE: String = "account_insert_date"
-        public val KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION: String = "account_quickadd_completion"
-        public val KEY_ACCOUNT_USE_WEIGHTED_INFO: String = "account_use_weighted_info"
         public val KEY_ACCOUNT_LAST_INSERTION_DATE: String = "account_last_insertion_date"
-        public val KEY_ACCOUNT_NB_MONTH_AHEAD: String = "account_nb_month_ahead"
 
         // light request for spinners
         public val ACCOUNT_ID_AND_NAME_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME)
@@ -61,11 +47,7 @@ public class AccountTable {
         public val ACCOUNT_FULL_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
                 KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_PROJECTION_MODE, KEY_ACCOUNT_PROJECTION_DATE,
                 KEY_ACCOUNT_DESC, KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_CHECKED_OP_SUM,
-                KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD, KEY_ACCOUNT_OVERRIDE_INSERT_DATE,
-                KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION, KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO,
-                KEY_ACCOUNT_HIDE_QUICK_ADD, KEY_ACCOUNT_INSERT_DATE,
-                KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, KEY_ACCOUNT_USE_WEIGHTED_INFO, KEY_ACCOUNT_LAST_INSERTION_DATE,
-                KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD, KEY_ACCOUNT_NB_MONTH_AHEAD)
+                KEY_ACCOUNT_LAST_INSERTION_DATE)
 
         private val DATABASE_ACCOUNT_CREATE_v7 = "create table $DATABASE_ACCOUNT_TABLE($KEY_ACCOUNT_ROWID integer primary key autoincrement, " +
                 "$KEY_ACCOUNT_NAME text not null, $KEY_ACCOUNT_DESC text not null, $KEY_ACCOUNT_START_SUM integer not null, " +
@@ -77,11 +59,7 @@ public class AccountTable {
                 "$KEY_ACCOUNT_OP_SUM integer not null, $KEY_ACCOUNT_CUR_SUM integer not null, $KEY_ACCOUNT_CUR_SUM_DATE integer not null, " +
                 "$KEY_ACCOUNT_CURRENCY text not null, $KEY_ACCOUNT_PROJECTION_MODE integer not null, " +
                 "$KEY_ACCOUNT_PROJECTION_DATE string, $KEY_ACCOUNT_CHECKED_OP_SUM integer not null, " +
-                "$KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD integer not null, $KEY_ACCOUNT_HIDE_QUICK_ADD integer not null, " +
-                "$KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION integer not null, $KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION integer not null, " +
-                "$KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO integer not null, $KEY_ACCOUNT_USE_WEIGHTED_INFO integer not null, " +
-                "$KEY_ACCOUNT_OVERRIDE_INSERT_DATE integer not null, $KEY_ACCOUNT_INSERT_DATE integer not null, " +
-                "$KEY_ACCOUNT_LAST_INSERTION_DATE integer not null, $KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD integer not null, $KEY_ACCOUNT_NB_MONTH_AHEAD integer not null);"
+                "$KEY_ACCOUNT_LAST_INSERTION_DATE integer not null);"
 
         protected val ADD_CUR_DATE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CUR_SUM_DATE integer not null DEFAULT 0"
 
@@ -90,29 +68,9 @@ public class AccountTable {
         protected val ADD_PROJECTION_MODE_DATE: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_DATE string"
 
         protected val ADD_CHECKED_SUM_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CHECKED_OP_SUM integer not null DEFAULT 0"
-
-        protected val ADD_OVERRIDE_HIDE_QUICK_ADD_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD integer not null DEFAULT 0"
-        protected val ADD_HIDE_QUICK_ADD_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_HIDE_QUICK_ADD integer not null DEFAULT 0"
-        protected val ADD_OVERRIDE_INVERT_QUiCKADD_COMPLETION_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION integer not null DEFAULT 0"
-        protected val ADD_INVERT_QUiCKADD_COMPLETION_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION integer not null DEFAULT 0"
-        protected val ADD_OVERRIDE_USE_WEIGHTED_INFO_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO integer not null DEFAULT 0"
-        protected val ADD_USE_WEIGHTED_INFO_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_USE_WEIGHTED_INFO integer not null DEFAULT 0"
-        protected val ADD_OVERRIDE_INSERT_DATE_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_OVERRIDE_INSERT_DATE integer not null DEFAULT 0"
-        protected val ADD_INSERT_DATE_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_INSERT_DATE integer not null DEFAULT 0"
         protected val ADD_LAST_INSERT_DATE_COLUMN: String =
                 "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_LAST_INSERTION_DATE integer not null DEFAULT 0"
-        protected val ADD_OVERRIDE_NB_MONTH_AHEAD_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD integer not null DEFAULT 0"
-        protected val ADD_NB_MONTH_AHEAD_COLUMN: String =
-                "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_NB_MONTH_AHEAD integer not null DEFAULT ${ConfigFragment.DEFAULT_NB_MONTH_AHEAD}"
+
 
         protected val TRIGGER_ON_DELETE_ACCOUNT: String = "CREATE TRIGGER on_delete_account AFTER DELETE ON $DATABASE_ACCOUNT_TABLE BEGIN " +
                 // if op is a transfert and was in deleted account, convert to an op in destination account
@@ -149,17 +107,7 @@ public class AccountTable {
             values.put(KEY_ACCOUNT_PROJECTION_MODE, account.projMode)
             values.put(KEY_ACCOUNT_PROJECTION_DATE, account.projDate)
             values.put(KEY_ACCOUNT_CHECKED_OP_SUM, 0)
-            values.put(KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD, account.overrideHideQuickAdd)
-            values.put(KEY_ACCOUNT_HIDE_QUICK_ADD, account.hideQuickAdd)
-            values.put(KEY_ACCOUNT_OVERRIDE_INSERT_DATE, account.overrideInsertDate)
-            values.put(KEY_ACCOUNT_INSERT_DATE, account.insertDate)
             values.put(KEY_ACCOUNT_LAST_INSERTION_DATE, account.lastInsertDate)
-            values.put(KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO, account.overrideUseWeighedInfo)
-            values.put(KEY_ACCOUNT_USE_WEIGHTED_INFO, account.useWeighedInfo)
-            values.put(KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION, account.overrideInvertQuickAddComp)
-            values.put(KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, account.invertQuickAddComp)
-            values.put(KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD, account.overrideNbMonthsAhead)
-            values.put(KEY_ACCOUNT_NB_MONTH_AHEAD, account.nbMonthsAhead)
             return values
         }
 
@@ -631,25 +579,10 @@ public class AccountTable {
         }
 
         platformStatic fun upgradeFromV18(db: SQLiteDatabase) {
-            db.execSQL(ADD_OVERRIDE_HIDE_QUICK_ADD_COLUMN)
-            db.execSQL(ADD_HIDE_QUICK_ADD_COLUMN)
-            db.execSQL(ADD_OVERRIDE_INVERT_QUiCKADD_COMPLETION_COLUMN)
-            db.execSQL(ADD_INVERT_QUiCKADD_COMPLETION_COLUMN)
-            db.execSQL(ADD_OVERRIDE_USE_WEIGHTED_INFO_COLUMN)
-            db.execSQL(ADD_USE_WEIGHTED_INFO_COLUMN)
-            db.execSQL(ADD_OVERRIDE_INSERT_DATE_COLUMN)
-            db.execSQL(ADD_INSERT_DATE_COLUMN)
             db.execSQL(ADD_LAST_INSERT_DATE_COLUMN)
-            db.execSQL(ADD_OVERRIDE_NB_MONTH_AHEAD_COLUMN)
-            db.execSQL(ADD_NB_MONTH_AHEAD_COLUMN)
             val values = ContentValues()
             val prefs = PreferenceTable.getAllPrefs(db)
-
-            values.put(KEY_ACCOUNT_HIDE_QUICK_ADD, prefs.get(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD)?.toInt() ?: 0)
-            values.put(KEY_ACCOUNT_INSERT_DATE, prefs.get(ConfigFragment.KEY_INSERTION_DATE)?.toInt() ?: ConfigFragment.DEFAULT_INSERTION_DATE.toInt())
             values.put(KEY_ACCOUNT_LAST_INSERTION_DATE, prefs.get(ConfigFragment.KEY_LAST_INSERTION_DATE)?.toLong() ?: 0L)
-            values.put(KEY_ACCOUNT_USE_WEIGHTED_INFO, prefs.get(ConfigFragment.KEY_USE_WEIGHTED_INFOS)?.toInt() ?: 0)
-            values.put(KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION, prefs.get(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD)?.toInt() ?: 1)
             db.update(DATABASE_ACCOUNT_TABLE, values, null, null)
         }
 

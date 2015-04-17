@@ -5,8 +5,10 @@ import android.content.Intent
 import android.os.PowerManager
 import android.util.Log
 import fr.geobert.radis.data.Account
+import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.DBPrefsManager
 import fr.geobert.radis.tools.Tools
@@ -77,6 +79,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                 var needUpdate = false
 
                 val accountCursor = AccountTable.fetchAccount(this, accountId)
+                val configCursor = PreferenceTable.fetchPrefForAccount(this, accountId)
                 if (!accountCursor.moveToFirst()) {
                     schOpsCursor.moveToNext()
                     continue
@@ -84,9 +87,12 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                     AccountTable.Companion.initProjectionDate(accountCursor)
                 }
                 val account = Account(accountCursor)
-                accountCursor.close()
+                val config = AccountConfig(configCursor)
 
-                val timeParams = TimeParams.computeTimeParams(this, account)
+                accountCursor.close()
+                configCursor.close()
+
+                val timeParams = TimeParams.computeTimeParams(this, account, config)
 
                 Log.d("RadisService", "after compute timeparams timeParams.today: ${timeParams.today.formatDate()} / timeParams.insertionDate: ${timeParams.insertionDate.formatDate()}")
 
@@ -127,7 +133,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                         keepGreatestDate(greatestDatePerAccount, transId, op.getDate())
                     }
                 }
-                if (account.overrideInsertDate) {
+                if (config.overrideInsertDate) {
                     updateAccountLastInsertDate(account.id, timeParams.today)
                 }
             } while (schOpsCursor.moveToNext())

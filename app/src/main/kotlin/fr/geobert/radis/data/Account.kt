@@ -5,7 +5,7 @@ import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.ui.ConfigFragment
 import java.util.Date
 
-
+// TODO refactor to 2nd constructor
 public fun Account(cursor: Cursor): Account {
     fun getIdx(s: String): Int = cursor.getColumnIndex(s)
 
@@ -21,17 +21,7 @@ public fun Account(cursor: Cursor): Account {
     s.opSum = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_OP_SUM))
     s.checkedSum = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_CHECKED_OP_SUM))
     s.description = cursor.getString(getIdx(AccountTable.KEY_ACCOUNT_DESC))
-    s.overrideHideQuickAdd = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_OVERRIDE_HIDE_QUICK_ADD)) == 1
-    s.overrideInsertDate = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_OVERRIDE_INSERT_DATE)) == 1
-    s.overrideInvertQuickAddComp = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_OVERRIDE_INVERT_QUICKADD_COMPLETION)) == 1
-    s.overrideUseWeighedInfo = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_OVERRIDE_USE_WEIGHTED_INFO)) == 1
-    s.hideQuickAdd = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_HIDE_QUICK_ADD)) == 1
-    s.useWeighedInfo = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_USE_WEIGHTED_INFO)) == 1
-    s.invertQuickAddComp = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_INVERT_QUICKADD_COMPLETION)) == 1
-    s.insertDate = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_INSERT_DATE))
     s.lastInsertDate = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_LAST_INSERTION_DATE))
-    s.overrideNbMonthsAhead = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_OVERRIDE_NB_MONTH_AHEAD)) == 1
-    s.nbMonthsAhead = cursor.getInt(getIdx(AccountTable.KEY_ACCOUNT_NB_MONTH_AHEAD))
     return s
 }
 
@@ -46,18 +36,7 @@ public class Account(public var id: Long = 0, public var name: String = "") {
     public var opSum: Long = 0
     public var checkedSum: Long = 0
     public var description: String = ""
-    public var overrideHideQuickAdd: Boolean = false
-    public var overrideInvertQuickAddComp: Boolean = false
-    public var overrideInsertDate: Boolean = false
-    public var overrideUseWeighedInfo: Boolean = false
-    public var hideQuickAdd: Boolean = false
-    public var invertQuickAddComp: Boolean = true
-    public var insertDate: Int = 0
     public var lastInsertDate: Long = 0L
-    public var useWeighedInfo: Boolean = true
-    public var overrideNbMonthsAhead: Boolean = false
-    public var nbMonthsAhead: Int = ConfigFragment.DEFAULT_NB_MONTH_AHEAD
-
 
     override fun equals(other: Any?): Boolean =
             when (other) {

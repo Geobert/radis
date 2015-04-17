@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
-import fr.geobert.radis.data.Account;
+import fr.geobert.radis.data.AccountConfig;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.DBPrefsManager;
 import fr.geobert.radis.ui.ConfigFragment;
@@ -169,7 +169,7 @@ public class InfoTables {
     }
 
     public static Cursor fetchMatchingInfo(Context ctx, Uri table, String colName, String constraint,
-                                           final boolean isQuickAdd, Account account) {
+                                           final boolean isQuickAdd, AccountConfig account) {
         String where;
         String[] params;
         if (null != constraint) {

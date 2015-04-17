@@ -1,12 +1,12 @@
 package fr.geobert.radis.ui.editor
 
-import android.app.Activity
 import android.content.Context
 import android.database.Cursor
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,12 +14,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
-import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.tools.*
-import fr.geobert.radis.ui.ConfigFragment
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Arrays
@@ -35,10 +33,11 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     private val mCustomCurrency by Delegates.lazy { getActivity().findViewById(R.id.custom_currency) as EditText }
     private val mProjectionController by Delegates.lazy { ProjectionDateController(getActivity()) }
 
-    var mAccount: Account by Delegates.notNull()
-    private var mRowId: Long = 0
     private var customCurrencyIdx = -1
-    private var mOnRestore = false
+    private var mOnRestore: Boolean = false
+
+    var mAccount: Account by Delegates.notNull()
+        private set
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.account_editor, container, false)
@@ -46,23 +45,10 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
         super<Fragment>.onViewCreated(view, savedInstanceState)
-        mProjectionController
-        mRowId = if (savedInstanceState != null) {
-            savedInstanceState.getSerializable(PARAM_ACCOUNT_ID) as Long
-        } else {
-            val extra = getActivity().getIntent().getExtras()
-            if (extra != null) {
-                extra.getLong(PARAM_ACCOUNT_ID)
-            } else {
-                NO_ACCOUNT
-            }
-        }
-        val act = getActivity() as BaseActivity
-        if (isNewAccount()) {
+        mProjectionController // trigger lazy access
+        val act = getActivity() as AccountEditor
+        if (act.isNewAccount()) {
             mAccount = Account()
-            act.setTitle(R.string.account_creation)
-        } else {
-            act.setTitle(R.string.account_edit_title)
         }
 
         val w = CorrectCommaWatcher(getSumSeparator(), mAccountStartSumText)
@@ -77,8 +63,6 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         })
         fillCurrencySpinner()
     }
-
-    fun isNewAccount() = NO_ACCOUNT == mRowId
 
     private fun fillCurrencySpinner() {
         val mCurrAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.all_currencies, android.R.layout.simple_spinner_item)
@@ -143,24 +127,10 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             }
 
         }
-        // done in saveState
-        //        if (res) {
-        //            mAccount.name = name
-        //            mAccount.startSum = mAccountStartSumText.getText().toString().extractSumFromStr()
-        //            mAccount.currency = if (mAccountCurrency.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
-        //                mCustomCurrency.getText().toString().trim().toUpperCase()
-        //            } else {
-        //                mAccountCurrency.getSelectedItem().toString()
-        //            }
-        //            mAccount.description = mAccountDescText.getText().toString()
-        //            mAccount.projMode = mProjectionController.getMode()
-        //            mAccount.projDate = mProjectionController.getDate()
-        //            // TODO prefs
-        //        }
         return res
     }
 
-    private fun populateFields(account: Account) {
+    fun populateFields(account: Account) {
         mAccountNameText.setText(account.name)
         mAccountDescText.setText(account.description)
         mAccountStartSumText.setText((account.startSum / 100.0).formatSum())
@@ -212,7 +182,29 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         mOnRestore = true
     }
 
-    private fun initCurrencySpinner(currencyStr: String) {
+    override fun onResume() {
+        super<Fragment>.onResume()
+        val act = getActivity() as AccountEditor
+        if (!mOnRestore && !act.isNewAccount()) {
+            Log.d("PrefBug", ">>>> AccountFragment onResume initLoader")
+            act.getSupportLoaderManager().initLoader<Cursor>(AccountEditor.GET_ACCOUNT, Bundle(), this)
+        } else {
+            mOnRestore = false
+        }
+        if ((getActivity() as AccountEditor).isNewAccount()) {
+            initCurrencySpinner()
+        }
+    }
+
+    fun initCurrencySpinner() {
+        try {
+            initCurrencySpinner(Currency.getInstance(Locale.getDefault()).getCurrencyCode())
+        } catch (ex: IllegalArgumentException) {
+            initCurrencySpinner(Currency.getInstance(Locale("fr", "FR")).getCurrencyCode())
+        }
+    }
+
+    protected fun initCurrencySpinner(currencyStr: String) {
         val allCurrencies = getResources().getStringArray(R.array.all_currencies)
         val pos = Arrays.binarySearch(allCurrencies, currencyStr)
         if (pos >= 0) {
@@ -224,23 +216,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         }
     }
 
-    override fun onResume() {
-        super<Fragment>.onResume()
-        if (!mOnRestore && !isNewAccount()) {
-            getActivity().getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNT, Bundle(), this)
-        } else {
-            mOnRestore = false
-            if (isNewAccount()) {
-                try {
-                    initCurrencySpinner(Currency.getInstance(Locale.getDefault()).getCurrencyCode())
-                } catch (ex: IllegalArgumentException) {
-                    initCurrencySpinner(Currency.getInstance(Locale("fr", "FR")).getCurrencyCode())
-                }
-            }
-        }
-    }
-
-    fun saveState() {
+    fun fillAccount(): Account {
         mAccount.name = mAccountNameText.getText().toString().trim()
         mAccount.description = mAccountDescText.getText().toString().trim()
         try {
@@ -252,43 +228,28 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             }
             mAccount.projMode = mProjectionController.getMode()
             mAccount.projDate = mProjectionController.getDate()
-
-            val act = getActivity() as AccountEditor
-            act.getConfigFrag().saveState(mAccount) // TODO cleanup by moving saveState in AccountEditor
-
-            if (isNewAccount()) {
-                AccountTable.createAccount(getActivity(), mAccount)
-            } else {
-                AccountTable.updateAccount(getActivity(), mAccount)
-            }
         } catch (e: ParseException) {
             e.printStackTrace()
         }
-
+        return mAccount
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor> {
-        val loader = AccountTable.getAccountLoader(getActivity(), mRowId)
-        return loader
+        val act = getActivity() as AccountEditor
+        return AccountTable.getAccountLoader(act, act.mRowId)
     }
 
     override fun onLoadFinished(arg0: Loader<Cursor>, data: Cursor) {
+        Log.d("PrefBug", "<<<< AccountFragment onLoadFinished")
         if (data.moveToFirst()) {
             AccountTable.initProjectionDate(data)
             mAccount = Account(data)
             populateFields(mAccount)
-            val act = getActivity() as AccountEditor
-            act.getConfigFrag().populateFields(mAccount) // TODO cleanup by moving cursor loader imp in AccountEditor
         }
     }
 
     override fun onLoaderReset(arg0: Loader<Cursor>) {
     }
 
-    companion object {
-        public val NO_ACCOUNT: Long = 0
-        public val ACCOUNT_EDITOR: Int = 1000
-        public val PARAM_ACCOUNT_ID: String = "account_id"
-        private val GET_ACCOUNT = 400
-    }
+
 }

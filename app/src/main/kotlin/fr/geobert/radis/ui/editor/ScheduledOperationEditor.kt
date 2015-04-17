@@ -329,7 +329,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
             } else {
                 i.putExtra(CommonOpEditor.PARAM_OP_ID, opId)
             }
-            i.putExtra(AccountEditFragment.PARAM_ACCOUNT_ID, mAccountId)
+            i.putExtra(AccountEditor.PARAM_ACCOUNT_ID, mAccountId)
             context.startActivityForResult(i, mode)
         }
     }

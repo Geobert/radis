@@ -57,7 +57,6 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public fun getString(key: String, defValue: String): String {
-        Log.d("PrefBug", "DBPref getString $key / default = $defValue / cache = $mCache")
         return mCache!!.get(key) ?: defValue
     }
 
@@ -95,7 +94,6 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
 
     public fun getInt(key: String, defValue: Int): Int {
         val v = mCache!!.get(key)
-        Log.d("PrefBug", "getInt: $v")
         try {
             return (if (v != null) Integer.valueOf(v) else null) ?: defValue
         } catch (e: Exception) {
@@ -127,14 +125,19 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
 
     public fun put(key: String, value: Any?) {
         Log.d("PrefBug", "DBPrefsManager put $key = $value")
-        val cr = mCurrentCtx!!.getContentResolver()
-        val values = ContentValues()
-        values.put(PreferenceTable.KEY_PREFS_NAME, key)
-        values.put(PreferenceTable.KEY_PREFS_VALUE, value.toString())
-        if (mCache!!.get(key) == null) {
-            cr.insert(DbContentProvider.PREFS_URI, values)
-        } else {
-            cr.update(DbContentProvider.PREFS_URI, values, PreferenceTable.KEY_PREFS_NAME + "=?", array(key))
+        if (!key.endsWith("_for_account") && !key.startsWith("override_")) {
+            val cr = mCurrentCtx!!.getContentResolver()
+            val values = ContentValues()
+            values.put(PreferenceTable.KEY_PREFS_NAME, key)
+            values.put(PreferenceTable.KEY_PREFS_VALUE, value.toString())
+            values.put(PreferenceTable.KEY_PREFS_ACCOUNT, 0)
+            values.put(PreferenceTable.KEY_PREFS_IS_ACTIVE, 1)
+
+            if (mCache!!.get(key) == null) {
+                cr.insert(DbContentProvider.PREFS_URI, values)
+            } else {
+                cr.update(DbContentProvider.PREFS_URI, values, PreferenceTable.KEY_PREFS_NAME + "=?", array(key))
+            }
         }
         mCache!!.put(key, value.toString())
     }
@@ -143,24 +146,15 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, PreferenceTable.KEY_PREFS_NAME + "=?", array(key))
     }
 
-    public fun clearAccountRelated() {
-        val editor = PreferenceManager.getDefaultSharedPreferences (mCurrentCtx!!).edit() //mCurrentCtx!!.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).edit()
-        editor.remove(ConfigFragment.KEY_DEFAULT_ACCOUNT)
-        editor.commit()
-        deletePref(ConfigFragment.KEY_DEFAULT_ACCOUNT)
-        if (mCache != null) {
-            mCache!!.remove(ConfigFragment.KEY_DEFAULT_ACCOUNT)
-        }
+    private fun deleteAllPrefs() {
+        val i = mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, null, null)
+        Log.d("PrefBug", "delete All Prefs : $i")
     }
 
     public fun resetAll() {
-        clearAccountRelated()
-        deletePref(ConfigFragment.KEY_INSERTION_DATE)
-        deletePref(ConfigFragment.KEY_LAST_INSERTION_DATE)
-        if (mCache != null) {
-            mCache!!.remove(ConfigFragment.KEY_INSERTION_DATE)
-            mCache!!.remove(ConfigFragment.KEY_LAST_INSERTION_DATE)
-        }
+        //clearAccountRelated()
+        deleteAllPrefs()
+        mCache?.clear()
         val editor = PreferenceManager.getDefaultSharedPreferences (mCurrentCtx!!).edit() //mCurrentCtx!!.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).edit()
         editor.clear()
         editor.commit()

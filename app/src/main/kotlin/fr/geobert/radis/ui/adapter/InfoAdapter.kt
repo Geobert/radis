@@ -10,12 +10,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import fr.geobert.radis.data.Account
+import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.tools.AsciiUtils
 
 public class InfoAdapter(private val mCtx: Activity, private val tableUri: Uri,
-                         private val colName: String, private val mIsQuickAdd: Boolean, val account: Account) :
+                         private val colName: String, private val mIsQuickAdd: Boolean, val account: AccountConfig) :
         CursorAdapter(mCtx, null, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER) {
     private var mCurrentConstraint: String? = null
 

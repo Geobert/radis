@@ -82,6 +82,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 StatisticTable.upgradeFromV17(db);
             case 18:
                 AccountTable.upgradeFromV18(db);
+                PreferenceTable.upgradeFromV18(db);
             default:
                 AccountTable.upgradeDefault(db);
         }

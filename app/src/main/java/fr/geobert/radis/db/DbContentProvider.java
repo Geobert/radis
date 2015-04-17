@@ -60,6 +60,7 @@ public class DbContentProvider extends ContentProvider {
     private static final int TAGS_ID = 55;
     private static final int MODES_ID = 65;
     private static final int STATS_ID = 85;
+    private static final int PREFS_ACCOUNT = 75;
     private static final UriMatcher sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     static {
@@ -83,6 +84,7 @@ public class DbContentProvider extends ContentProvider {
         sURIMatcher.addURI(AUTHORITY, TAGS_PATH + "/#", TAGS_ID);
         sURIMatcher.addURI(AUTHORITY, MODES_PATH + "/#", MODES_ID);
         sURIMatcher.addURI(AUTHORITY, STATS_PATH + "/#", STATS_ID);
+        sURIMatcher.addURI(AUTHORITY, PREFS_PATH + "/#", PREFS_ACCOUNT);
     }
 
     private static DbHelper mDbHelper = null;
@@ -150,6 +152,7 @@ public class DbContentProvider extends ContentProvider {
                 table = InfoTables.DATABASE_TAGS_TABLE;
                 break;
             case PREFS:
+            case PREFS_ACCOUNT:
                 table = PreferenceTable.DATABASE_PREFS_TABLE;
                 break;
             case STATS:
@@ -183,6 +186,8 @@ public class DbContentProvider extends ContentProvider {
             case SCHEDULED_JOINED_OP_ID:
                 queryBuilder.appendWhere("sch._id=" + uri.getLastPathSegment());
                 break;
+            case PREFS_ACCOUNT:
+                queryBuilder.appendWhere(PreferenceTable.KEY_PREFS_ACCOUNT + "=" + uri.getLastPathSegment());
             default:
                 break;
         }
@@ -211,6 +216,7 @@ public class DbContentProvider extends ContentProvider {
             case MODES_ID:
             case TAGS_ID:
             case STATS_ID:
+                // no need for PREFS_ACCOUNT, trigger takes care of it
                 id = uri.getLastPathSegment();
                 break;
             default:
@@ -297,7 +303,10 @@ public class DbContentProvider extends ContentProvider {
         int rowsUpdated = 0;
         String table = switchToTable(uri);
         String id = null;
+        String idKey = "_id";
         switch (uriType) {
+            case PREFS_ACCOUNT:
+                idKey = PreferenceTable.KEY_PREFS_ACCOUNT;
             case ACCOUNT_ID:
             case OPERATION_ID:
             case OPERATION_JOINED_ID:
@@ -315,7 +324,7 @@ public class DbContentProvider extends ContentProvider {
 
         if (id != null) {
             if (selection == null || selection.trim().length() == 0) {
-                rowsUpdated = db.update(table, values, "_id=?", new String[]{id});
+                rowsUpdated = db.update(table, values, idKey + "=?", new String[]{id});
             } else {
                 if (selectionArgs != null) {
                     List<String> args = new ArrayList<String>(selectionArgs.length + 1);
@@ -325,7 +334,8 @@ public class DbContentProvider extends ContentProvider {
                 } else {
                     selectionArgs = new String[]{id};
                 }
-                rowsUpdated = db.update(table, values, "_id=? and " + selection, selectionArgs);
+
+                rowsUpdated = db.update(table, values, idKey + "=? and " + selection, selectionArgs);
             }
         } else {
             rowsUpdated = db.update(table, values, selection, selectionArgs);

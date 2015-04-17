@@ -20,6 +20,7 @@ import android.support.test.runner.lifecycle.Stage
 import android.test.ActivityInstrumentationTestCase2
 import android.util.Log
 import android.view.View
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
@@ -337,7 +338,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     // issue 50 test // TODO : debug
-    public fun _testAddInfoAndCreateOp() {
+    public fun _estAddInfoAndCreateOp() {
         TAG = "testAddInfoAndCreateOp"
         Helpers.addAccount()
         onView(withId(R.id.create_operation)).perform(click())
@@ -995,7 +996,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(1000.50.formatSum())
 
         // setup override
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.override_insert_date)).perform(click())
         val default = getActivity().getString(R.string.prefs_insertion_date_text).format(ConfigFragment.DEFAULT_INSERTION_DATE)
         onView(withText(default)).check(matches(isDisplayed()))
@@ -1035,7 +1036,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(1000.50.formatSum())
 
         // setup override
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.override_nb_month_ahead)).perform(click())
         val default = getActivity().getString(R.string.prefs_nb_month_ahead_text).format(ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
         onView(withText(default)).check(matches(isDisplayed()))
@@ -1063,19 +1064,19 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         }
 
         // check global pref to false, override activated but let false as value = quick add visible
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.override_hide_quickadd)).perform(click())
         Helpers.clickOnActionItemConfirm()
         checkQuickAddVisibilityAs(true)
 
         // check global pref to false, override activated, value to true = quick add hidden
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.hide_ops_quick_add)).perform(click())
         Helpers.clickOnActionItemConfirm()
         checkQuickAddVisibilityAs(false)
 
         // check global pref to false, override deactivated, value to true = quick add visible
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.override_hide_quickadd)).perform(click())
         Helpers.clickOnActionItemConfirm()
         checkQuickAddVisibilityAs(true)
@@ -1086,24 +1087,55 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Espresso.pressBack()
 
         // check global pref to true, override activated, value to false = quick add visible
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.override_hide_quickadd)).perform(click())
         onView(withText(R.string.hide_ops_quick_add)).perform(click())
         Helpers.clickOnActionItemConfirm()
         checkQuickAddVisibilityAs(true)
 
         // check global pref to true, override deactivate, value to false = quick add hidden
-        goToCurAccountOptionPanel()
+        Helpers.goToCurAccountOptionPanel()
         onView(withText(R.string.override_hide_quickadd)).perform(click())
         Helpers.clickOnActionItemConfirm()
         checkQuickAddVisibilityAs(false)
     }
 
-    private fun goToCurAccountOptionPanel() {
-        Helpers.clickInDrawer(R.string.account_edit)
-        Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
-        Espresso.closeSoftKeyboard()
-        Helpers.swipePagerLeft()
+    fun testQuickAddActionOption() {
+        Helpers.addAccount()
+
+        // set long press to add today = simple click set to ask date
+        Helpers.clickInDrawer(R.string.preferences)
+        onView(withId(android.R.id.list)).perform(swipeUp())
+        onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
+        val addToday = getActivity().getResources().getStringArray(R.array.quickadd_actions)[1]
+        onView(withText(addToday)).perform(click())
+        Espresso.pressBack()
+
+        onView(withId(R.id.account_sum)).check(matches(withText(containsString(1000.50.formatSum()))))
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(typeText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(click())
+        onView(withText(R.string.op_date)).check(matches(isDisplayed()))
+        //Helpers.clickOnDialogButton(R.string.cancel) // click on "OK" makes the year doing +1, click on "Cancel" makes day goes +1, Espresso bug?
+        Espresso.pressBack() // hack because of the bug above
+
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(replaceText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(longClick())
+        Helpers.checkAccountSumIs(999.50.formatSum())
+
+        Helpers.goToCurAccountOptionPanel()
+        onView(withId(android.R.id.list)).perform(swipeUp())
+        onView(withText(R.string.override_quick_add_action)).perform(click())
+        onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
+        val askDate = getActivity().getResources().getStringArray(R.array.quickadd_actions)[0]
+        onView(withText(askDate)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(replaceText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(click())
+        Helpers.checkAccountSumIs(998.50.formatSum())
     }
 
     companion object {

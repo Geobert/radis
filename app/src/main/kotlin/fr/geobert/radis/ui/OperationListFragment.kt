@@ -89,7 +89,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val curDefaultAccId = accMan.mCurDefaultAccount
         if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(mActivity)) {
             accMan.mCurDefaultAccount = null
-            accMan.setCurrentAccountId(null)
+            accMan.setCurrentAccountId(null, mActivity)
             mLastSelectionId = (-1).toLong()
         }
 
@@ -97,7 +97,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (q != null) {
             q.setAutoNegate(true)
             q.clearFocus()
-            setQuickAddVisibility()
+            refreshQuickAdd()
         }
         checkingDashboard?.onResume()
     }
@@ -120,11 +120,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     fun setQuickAddVisibility() {
         val q = mQuickAddController
         if (q != null) {
-            val account = mAccountManager.getCurrentAccount()
-            val hideQuickAdd = if (account?.overrideHideQuickAdd ?: false) account?.hideQuickAdd ?: false else
+            val config = mAccountManager.mCurAccountConfig
+            val hideQuickAdd = if (config?.overrideHideQuickAdd ?: false) config?.hideQuickAdd ?: false else
                 DBPrefsManager.getInstance(mActivity).getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD, false)
             q.setVisibility(if (hideQuickAdd) View.GONE else View.VISIBLE)
         }
+    }
+
+    fun refreshQuickAdd() {
+        setQuickAddVisibility()
+        mQuickAddController?.setupListeners()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -154,7 +159,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     fun processAccountChanged(itemId: Long) {
-        mAccountManager.setCurrentAccountId(itemId)
+        mAccountManager.setCurrentAccountId(itemId, mActivity)
         earliestOpDate = null
         mOldChildCount = -1
         //        mScrollLoader.setStartDate(startDate)
@@ -565,16 +570,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         // attempt to fix Fatal Exception: java.lang.IllegalStateException
                         // couldn't move cursor to position 4
                         if (accountId == accMan.getCurrentAccountId(act)) {
-                            accMan.setCurrentAccountId(null)
+                            accMan.setCurrentAccountId(null, getActivity())
                         }
                         if (accountId == accMan.getDefaultAccountId(act)) {
                             accMan.mCurDefaultAccount = null
-                            accMan.setCurrentAccountId(null)
+                            accMan.setCurrentAccountId(null, getActivity())
                             DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
                         }
                         MainActivity.refreshAccountList(getActivity())
                     } else {
-                        (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null)
+                        (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null, getActivity())
                     }
                 }
             }, R.string.account_delete_confirmation)

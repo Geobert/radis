@@ -2,8 +2,14 @@ package fr.geobert.radis.db
 
 import android.content.ContentValues
 import android.content.Context
+import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.net.Uri
+import android.support.v4.content.CursorLoader
+import android.util.Log
+import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.tools.PrefsManager
+import fr.geobert.radis.ui.ConfigFragment
 import java.util.HashMap
 import kotlin.platform.platformStatic
 
@@ -18,16 +24,23 @@ public class PreferenceTable {
         public val KEY_PREFS_ROWID: String = "_id"
         public val KEY_PREFS_NAME: String = "pref_name"
         public val KEY_PREFS_VALUE: String = "pref_value"
+        public val KEY_PREFS_ACCOUNT: String = "account_id"
+        public val KEY_PREFS_IS_ACTIVE: String = "active"
 
         protected val DATABASE_PREFS_CREATE: String = "create table $DATABASE_PREFS_TABLE($KEY_PREFS_ROWID integer primary key autoincrement," +
-                "$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null);"
+                "$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null," +
+                "$KEY_PREFS_ACCOUNT integer not null, $KEY_PREFS_IS_ACTIVE integer not null);"
         public val PREFS_COLS: Array<String> = array(KEY_PREFS_NAME, KEY_PREFS_VALUE)
-        //private val CREATE_ACCOUNT_COL = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
-        //        private val CREATE_TRIGGER_ACCOUNT_DELETED = "CREATE TRIGGER IF NOT EXISTS on_account_deleted AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
-        //                "BEGIN DELETE FROM $DATABASE_PREFS_TABLE WHERE $KEY_PREFS_ACCOUNT = old._id ; END"
+        public val ACCOUNT_CONFIG_COLS: Array<String> = array(KEY_PREFS_NAME, KEY_PREFS_VALUE, KEY_PREFS_IS_ACTIVE)
+        protected val ADD_ACCOUNT_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
+        protected val ADD_IS_ACTIVE_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_IS_ACTIVE integer not null DEFAULT 1"
+
+        private val CREATE_TRIGGER_ACCOUNT_DELETED = "CREATE TRIGGER IF NOT EXISTS on_account_deleted AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
+                "BEGIN DELETE FROM $DATABASE_PREFS_TABLE WHERE $KEY_PREFS_ACCOUNT = old._id ; END"
 
         platformStatic fun onCreate(db: SQLiteDatabase) {
             db.execSQL(DATABASE_PREFS_CREATE)
+            db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)
         }
 
         fun setPref(db: SQLiteDatabase, key: String, value: String) {
@@ -45,7 +58,7 @@ public class PreferenceTable {
 
         fun getPref(db: SQLiteDatabase, key: String): String? {
             var res: String? = null
-            val c = db.query(DATABASE_PREFS_TABLE, array(KEY_PREFS_VALUE), KEY_PREFS_NAME + "='" + key + "'", null, null, null, null)
+            val c = db.query(DATABASE_PREFS_TABLE, array(KEY_PREFS_VALUE), "$KEY_PREFS_NAME='$key' AND $KEY_PREFS_ACCOUNT = 0", null, null, null, null)
             if (null != c) {
                 if (c.moveToFirst()) {
                     res = c.getString(0)
@@ -57,7 +70,7 @@ public class PreferenceTable {
 
         fun getAllPrefs(db: SQLiteDatabase): HashMap<String, String> {
             val res = HashMap<String, String>()
-            val c = db.query(DATABASE_PREFS_TABLE, array(KEY_PREFS_NAME, KEY_PREFS_VALUE), null, null, null, null, null)
+            val c = db.query(DATABASE_PREFS_TABLE, array(KEY_PREFS_NAME, KEY_PREFS_VALUE), "$KEY_PREFS_ACCOUNT = 0", null, null, null, null)
             if (null != c) {
                 if (c.moveToFirst()) {
                     do {
@@ -68,6 +81,66 @@ public class PreferenceTable {
             }
             return res
         }
+
+        public fun getAccountConfigLoader(ctx: Context, accountId: Long): CursorLoader {
+            return CursorLoader(ctx, Uri.parse("${DbContentProvider.PREFS_URI}/$accountId"), ACCOUNT_CONFIG_COLS, null, null, null)
+        }
+
+        public fun createValuesOf(config: AccountConfig): List<ContentValues> {
+            fun makeContentValues(k: String, v: Int, b: Boolean): ContentValues {
+                val c = ContentValues()
+                c.put(KEY_PREFS_NAME, k)
+                c.put(KEY_PREFS_VALUE, v)
+                c.put(KEY_PREFS_IS_ACTIVE, b)
+                return c
+            }
+
+            fun makeContentValues(k: String, v: Boolean, b: Boolean): ContentValues {
+                val c = ContentValues()
+                c.put(KEY_PREFS_NAME, k)
+                c.put(KEY_PREFS_VALUE, v)
+                c.put(KEY_PREFS_IS_ACTIVE, b)
+                return c
+            }
+
+            return listOf(
+                    makeContentValues(ConfigFragment.KEY_INSERTION_DATE, config.insertDate, config.overrideInsertDate),
+                    makeContentValues(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD, config.hideQuickAdd, config.overrideHideQuickAdd),
+                    makeContentValues(ConfigFragment.KEY_USE_WEIGHTED_INFOS, config.useWeighedInfo, config.overrideUseWeighedInfo),
+                    makeContentValues(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, config.invertQuickAddComp, config.overrideInvertQuickAddComp),
+                    makeContentValues(ConfigFragment.KEY_NB_MONTH_AHEAD, config.nbMonthsAhead, config.overrideNbMonthsAhead),
+                    makeContentValues(ConfigFragment.KEY_QUICKADD_ACTION, config.quickAddAction, config.overrideQuickAddAction)
+            )
+
+        }
+
+        fun createAccountPrefs(ctx: Context, config: AccountConfig, accountId: Long) {
+            val values = createValuesOf(config)
+            //            Log.d("PrefBug", "createAccountPrefs values: $values")
+            values.forEach {
+                it.put(KEY_PREFS_ACCOUNT, accountId)
+                //                Log.d("PrefBug", "createAccountPrefs before insert : $it")
+                val u = ctx.getContentResolver().insert(DbContentProvider.PREFS_URI, it)
+                //                Log.d("PrefBug", "createAccountPrefs after insert : $u")
+            }
+        }
+
+        fun updateAccountPrefs(ctx: Context, config: AccountConfig, id: Long) {
+            val values = createValuesOf(config)
+            Log.d("PrefBug", "updateAccountPrefs values: $values")
+            values.forEach {
+                val k = it.getAsString(KEY_PREFS_NAME)
+                it.remove(KEY_PREFS_NAME)
+                Log.d("PrefBug", "updateAccountPrefs before update : $it for key $k")
+                val u = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.PREFS_URI}/$id"), it, "$KEY_PREFS_NAME=?", array(k))
+                Log.d("PrefBug", "updateAccountPrefs after update : $u")
+            }
+        }
+
+        fun fetchPrefForAccount(ctx: Context, accountId: Long): Cursor {
+            return ctx.getContentResolver().query(Uri.parse("${DbContentProvider.PREFS_URI}/$accountId"), ACCOUNT_CONFIG_COLS, null, null, null)
+        }
+
 
         // UPGRADE
 
@@ -86,31 +159,12 @@ public class PreferenceTable {
             }
         }
 
-        //        platformStatic fun upgradeFrom18(ctx: Context, db: SQLiteDatabase) {
-        //            db.execSQL(CREATE_ACCOUNT_COL)
-        //            db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)
-        //            // duplicate current options for each accounts
-        //            val c = AccountTable.fetchAllAccounts(ctx)
-        //            if (c.moveToFirst()) {
-        //                do {
-        //                    val id = c.getLong(0)
-        //                    val values = ContentValues()
-        //                    val p = DBPrefsManager.getInstance(ctx)
-        //                    values.put(KEY_PREFS_ACCOUNT, id)
-        //                    values.put(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD,
-        //                            p.getBoolean(ConfigFragment.KEY_HIDE_OPS_QUICK_ADD, false))
-        //                    values.put(ConfigFragment.KEY_INSERTION_DATE, p.getInt(ConfigFragment.KEY_INSERTION_DATE,
-        //                            ConfigFragment.DEFAULT_INSERTION_DATE.toInt()))
-        //                    values.put(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD,
-        //                            p.getBoolean(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, false))
-        //                    values.put(ConfigFragment.KEY_USE_WEIGHTED_INFOS,
-        //                            p.getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true))
-        //                    values.put(ConfigFragment.KEY_LAST_INSERTION_DATE,
-        //                            p.getLong(ConfigFragment.KEY_LAST_INSERTION_DATE, 0))
-        //                    db.insert(DATABASE_PREFS_TABLE, null, values)
-        //                } while (c.moveToNext())
-        //                c.close()
-        //            }
-        //        }
+        platformStatic fun upgradeFromV18(db: SQLiteDatabase) {
+            db.execSQL(ADD_ACCOUNT_COL)
+            db.execSQL(ADD_IS_ACTIVE_COL)
+            db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)
+        }
+
+
     }
 }

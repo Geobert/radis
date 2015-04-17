@@ -12,13 +12,15 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
-import fr.geobert.radis.data.Account
+import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.InfoAdapter
+import hirondelle.date4j.DateTime
+import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
 import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
@@ -32,6 +34,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     private val mLayout: LinearLayout
 
     private fun getCurAccountId() = mActivity.mAccountManager.getCurrentAccountId(mActivity)
+    private fun getCurConfig() = mActivity.mAccountManager.mCurAccountConfig
 
     init {
         mLayout = container.findViewById(R.id.quick_add_layout) as LinearLayout
@@ -67,27 +70,12 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
 
     public fun initViewBehavior() {
         mQuickAddThirdParty.setAdapter<InfoAdapter>(InfoAdapter(mActivity, DbContentProvider.THIRD_PARTY_URI,
-                InfoTables.KEY_THIRD_PARTY_NAME, true, mActivity.mAccountManager.getCurrentAccount() as Account))
+                InfoTables.KEY_THIRD_PARTY_NAME, true, mActivity.mAccountManager.mCurAccountConfig as AccountConfig))
 
         mQuickAddAmount.addTextChangedListener(mCorrectCommaWatcher)
 
-        mQuickAddButton.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                try {
-                    quickAddOp()
-                } catch (e: Exception) {
-                    Tools.popError(mActivity, e.getMessage(), null)
-                    e.printStackTrace()
-                }
+        setupListeners()
 
-            }
-        })
-        mQuickAddButton.setOnLongClickListener(object : View.OnLongClickListener {
-            override fun onLongClick(view: View): Boolean {
-                showDatePicker()
-                return true
-            }
-        })
         setQuickAddButEnabled(mQuickAddButton, false)
         mQuickAddThirdParty.addTextChangedListener(mQuickAddTextWatcher)
         mQuickAddAmount.addTextChangedListener(mQuickAddTextWatcher)
@@ -108,30 +96,72 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         })
     }
 
-    private fun showDatePicker() {
-        val today = GregorianCalendar()
-        val dialog = DatePickerDialog(mActivity, object : DatePickerDialog.OnDateSetListener {
-            private var alreadyFired = 0
-
-            override fun onDateSet(datePicker: DatePicker, y: Int, m: Int, d: Int) {
-                Log.d("QuickAdd", "date set : " + y + "/" + m + "/" + d + " ///" + alreadyFired % 2)
-                // workaround known android bug
-                if (alreadyFired % 2 == 0) {
-                    val date = GregorianCalendar(y, m, d)
-                    try {
-                        quickAddOp(date)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-
-                }
-                alreadyFired++
+    public fun setupListeners() {
+        val addTodayAction = { v: View ->
+            try {
+                quickAddOp()
+            } catch (e: Exception) {
+                Tools.popError(mActivity, e.getMessage(), null)
+                e.printStackTrace()
             }
-        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH))
-        dialog.setTitle(R.string.op_date)
-        dialog.setButton(DialogInterface.BUTTON_NEGATIVE, mActivity.getString(android.R.string.cancel),
-                null as DialogInterface.OnClickListener)
-        dialog.show()
+        }
+
+
+        val askDateAction = { v: View ->
+            showDatePicker()
+        }
+        val c = getCurConfig()
+        val prefs = DBPrefsManager.getInstance(mActivity).getInt(ConfigFragment.KEY_QUICKADD_ACTION, ConfigFragment.DEFAULT_QUICKADD_LONG_PRESS_ACTION)
+
+        val invert = (if (c != null && c.overrideQuickAddAction) c.quickAddAction else prefs) == 1
+        Log.d("PrefBug", "setup quick add listeners : invert = $invert, prefs = $prefs")
+        mQuickAddButton.setOnClickListener(if (invert) askDateAction else addTodayAction)
+
+        mQuickAddButton.setOnLongClickListener(object : View.OnLongClickListener {
+            override fun onLongClick(v: View): Boolean {
+                if (invert)
+                    addTodayAction(v)
+                else
+                    askDateAction(v)
+                return true
+            }
+
+        })
+    }
+
+
+    private fun showDatePicker() {
+        val today = DateTime.today(TIME_ZONE)
+        val b = Bundle()
+        b.putInt(DatePickerDialogFragment.YEAR, today.getYear())
+        b.putInt(DatePickerDialogFragment.MONTH, today.getMonth() - 1)
+        b.putInt(DatePickerDialogFragment.DATE, today.getDay())
+        b.putInt(DatePickerDialogFragment.TITLE, R.string.op_date)
+        val dialog = DatePickerDialogFragment()
+        dialog.setArguments(b)
+        dialog.setOnDateSetListener { datePicker, y, m, d ->
+            val date = GregorianCalendar(y, m, d)
+            try {
+                quickAddOp(date)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        //        val dialog = DatePickerDialog(mActivity, object : DatePickerDialog.OnDateSetListener {
+        //            private var alreadyFired = 0
+        //
+        //            override fun onDateSet(datePicker: DatePicker, y: Int, m: Int, d: Int) {
+        //                Log.d("QuickAdd", "date set : " + y + "/" + m + "/" + d + " ///" + alreadyFired % 2)
+        //                // workaround known android bug
+        //                if (alreadyFired % 2 == 0) {
+        //
+        //
+        //                }
+        //                alreadyFired++
+        //            }
+        //        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH))
+        dialog.show(mActivity.getSupportFragmentManager(), "quick_add_op_date")
     }
 
     throws(javaClass<Exception>())

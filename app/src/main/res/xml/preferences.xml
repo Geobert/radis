@@ -39,5 +39,12 @@
                 android:title="@string/invert_completion_in_quick_add"
                 android:summary="@string/invert_completion_in_quick_add_details"
                 android:defaultValue="true"/>
+        <ListPreference
+                android:key="quick_add_long_press_action"
+                android:title="@string/quick_add_long_press_action_title"
+                android:summary="@string/quick_add_long_press_action_text"
+                android:entries="@array/quickadd_actions"
+                android:entryValues="@array/quickadd_actions_values"
+                android:defaultValue="0"/>
     </PreferenceCategory>
 </PreferenceScreen>

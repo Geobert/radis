@@ -106,3 +106,4 @@ public fun String?.extractSumFromStr(): Long {
     }
     return Math.round(d * 100)
 }
+

@@ -9,12 +9,13 @@ import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
 import android.support.v4.widget.SimpleCursorAdapter
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.DBPrefsManager
 import fr.geobert.radis.tools.getByFilter
-import fr.geobert.radis.tools.map
 import fr.geobert.radis.ui.ConfigFragment
 import java.util.ArrayList
 import java.util.Currency
+import kotlin.properties.Delegates
 
 public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCallbacks<Cursor> {
     private var _allAccountCursor: Cursor? = null
@@ -35,6 +36,9 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
     private var mAccountLoader: CursorLoader? = null
     private var mCurAccCurrencySymbol: String? = null
     public var currentAccountStartSum: Long = 0
+        private set
+
+    public var mCurAccountConfig: AccountConfig? = null
         private set
 
     throws(javaClass<IllegalStateException>())
@@ -76,14 +80,14 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
 
     public fun getCurrentAccountId(context: Context): Long {
         if (mCurAccountIdBackup != null) {
-            setCurrentAccountId(mCurAccountIdBackup)
+            setCurrentAccountId(mCurAccountIdBackup, context)
             clearBackup()
         } else if (mCurAccountId != null) {
             return mCurAccountId!!
         } else if (getDefaultAccountId(context) != null) {
-            setCurrentAccountId(getDefaultAccountId(context))
+            setCurrentAccountId(getDefaultAccountId(context), context)
         } else if (allAccountsCursor != null && allAccountsCursor?.getCount() ?: 0 > 0) {
-            setCurrentAccountId(allAccountsCursor!!.getLong(allAccountsCursor!!.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)))
+            setCurrentAccountId(allAccountsCursor!!.getLong(allAccountsCursor!!.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)), context)
         } else {
             throw RuntimeException("No current account!")
         }
@@ -125,15 +129,22 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         return pos
     }
 
-    public fun setCurrentAccountId(currentAccountId: Long?): Long {
+
+    public fun setCurrentAccountId(currentAccountId: Long?, ctx: Context): Long {
         mCurAccountId = currentAccountId
         if (currentAccountId == null) {
             mCurAccountPos = -1
+            mCurAccountConfig = null
             return (-1).toLong()
         } else {
+            refreshConfig(ctx, currentAccountId)
             mCurAccountPos = setCurrentAccountSum()
             return getCurrentAccountProjDate()
         }
+    }
+
+    public fun refreshConfig(ctx: Context, id: Long) {
+        mCurAccountConfig = AccountConfig(PreferenceTable.fetchPrefForAccount(ctx, id))
     }
 
     private fun getCurrentAccountProjDate(): Long {

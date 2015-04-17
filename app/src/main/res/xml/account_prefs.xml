@@ -26,6 +26,7 @@
             android:summary="@string/prefs_nb_month_ahead_text"
             android:key="nb_month_ahead_for_account"
             android:inputType="number"
+            android:dependency="override_nb_month_ahead"
             android:persistent="true"/>
     <CheckBoxPreference
             android:key="override_hide_quickadd"
@@ -56,4 +57,15 @@
             android:dependency="override_invert_quickadd_completion"
             android:shouldDisableView="true"
             android:defaultValue="true"/>
+    <CheckBoxPreference
+            android:key="override_quick_add_long_press_action"
+            android:title="@string/override_quick_add_action"/>
+    <ListPreference
+            android:key="quick_add_long_press_action_for_account"
+            android:title="@string/quick_add_long_press_action_title"
+            android:summary="@string/quick_add_long_press_action_text"
+            android:entries="@array/quickadd_actions"
+            android:entryValues="@array/quickadd_actions_values"
+            android:dependency="override_quick_add_long_press_action"
+            android:defaultValue="0"/>
 </PreferenceScreen>

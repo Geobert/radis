@@ -259,4 +259,7 @@
     <string name="prefs_nb_month_ahead_title">Nombre de mois à insérer</string>
     <string name="prefs_nb_month_ahead_text">Radis gardera %d mois d\'avance insérés</string>
     <string name="override_nb_month_ahead">Supplanter le nombre de mois à insérer</string>
+    <string name="quick_add_long_press_action_title">Action du tap long de l\'ajout rapide</string>
+    <string name="quick_add_long_press_action_text">Le tap long va %s</string>
+    <string name="override_quick_add_action">Supplanter l\'action du tap long sur ajout rapide</string>
 </resources>

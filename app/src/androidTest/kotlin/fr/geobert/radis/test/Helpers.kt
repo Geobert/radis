@@ -68,7 +68,7 @@ class Helpers {
             onView(withId(R.id.confirm)).perform(click())
             pauseTest(1200)
             onView(withId(R.id.confirm)).check(doesNotExist())
-            pauseTest(500)
+            pauseTest(1000)
         }
 
         fun ACTIONBAR_TITLE_MATCHER(title: String): Matcher<View> {
@@ -271,6 +271,9 @@ class Helpers {
         fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(textId),
                 isDisplayed()) as Matcher<View>).perform(click())
 
+        fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(text),
+                isDisplayed()) as Matcher<View>).perform(click())
+
         fun clickOnRecyclerViewAtPos(pos: Int) =
                 onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
 
@@ -311,6 +314,13 @@ class Helpers {
             scrollThenTypeText(R.id.edit_op_tag, tag)
             scrollThenTypeText(R.id.edit_op_mode, mode)
             scrollThenTypeText(R.id.edit_op_notes, desc)
+        }
+
+        fun goToCurAccountOptionPanel() {
+            Helpers.clickInDrawer(R.string.account_edit)
+            Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
+            Espresso.closeSoftKeyboard()
+            Helpers.swipePagerLeft()
         }
     }
 }

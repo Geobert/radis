@@ -136,7 +136,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 SCH_OP_LIST -> fragment = findOrCreateFragment(javaClass<ScheduledOpListFragment>(), message.what)
                 STATISTICS -> fragment = findOrCreateFragment(javaClass<StatisticsListFragment>(), message.what)
                 CREATE_ACCOUNT -> {
-                    AccountEditor.callMeForResult(activity, AccountEditFragment.NO_ACCOUNT)
+                    AccountEditor.callMeForResult(activity, AccountEditor.NO_ACCOUNT)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 EDIT_ACCOUNT -> {
@@ -275,9 +275,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     public fun onAccountEditFinished(result: Int) {
         if (result == Activity.RESULT_OK) {
             mAccountManager.fetchAllAccounts(true, {
+                mAccountManager.refreshConfig(this, mAccountManager.getCurrentAccountId(this)) // need to be done before setQuickAddVisibility
                 val f = mActiveFragment
                 if (mActiveFragmentId == OP_LIST && f is OperationListFragment) {
-                    f.setQuickAddVisibility()
+                    f.refreshQuickAdd()
                 }
                 processAccountList(false)
             })
@@ -295,7 +296,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         val allAccounts = accMan.allAccountsCursor
         if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
-            AccountEditor.callMeForResult(this, AccountEditFragment.NO_ACCOUNT)
+            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT)
         } else {
             //            if (mAccountAdapter == null) {
             //                initAccountStuff()
@@ -316,7 +317,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         //Log.d(TAG, "onActivityResult : " + requestCode);
         super<BaseActivity>.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            AccountEditFragment.ACCOUNT_EDITOR -> onAccountEditFinished(resultCode)
+            AccountEditor.ACCOUNT_EDITOR -> onAccountEditFinished(resultCode)
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> {
                 if (mActiveFragment == null) {

@@ -186,7 +186,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     protected fun initViewAdapters() {
-        val account = mActivity.mAccountManager.getCurrentAccount()
+        val account = mActivity.mAccountManager.mCurAccountConfig
         if (account != null) {
             edit_op_third_party.setAdapter<InfoAdapter>(InfoAdapter(mActivity, DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME, false, account))
             edit_op_mode.setAdapter<InfoAdapter>(InfoAdapter(mActivity, DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, false, account))

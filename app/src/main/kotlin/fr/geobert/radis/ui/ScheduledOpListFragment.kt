@@ -97,7 +97,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun onAccountChanged(itemId: Long): Boolean {
         if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
-            mAccountManager.setCurrentAccountId(itemId)
+            mAccountManager.setCurrentAccountId(itemId, getActivity())
             val req = if (mActivity.getCurrentAccountId() == 0L) {
                 GET_ALL_SCH_OPS
             } else {
