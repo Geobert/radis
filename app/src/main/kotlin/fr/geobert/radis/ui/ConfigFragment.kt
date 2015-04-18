@@ -47,6 +47,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         if (isAccountEditor) {
             // change only in account editor, because de listView is not match_parent
             getListView().setBackgroundColor(getResources().getColor(R.color.normal_bg))
+
             val act = getActivity() as AccountEditor
             if (act.isNewAccount()) {
                 mConfig = AccountConfig()
@@ -126,7 +127,6 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
 
         if (!isAccountEditor) {
             var value: String? = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE)
-            Log.d("PrefBug", "onResume $KEY_INSERTION_DATE = $value")
             val ep = findPreference(KEY_INSERTION_DATE) as EditTextPreference
             ep.getEditText().setText(value)
 
@@ -144,7 +144,6 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
             updateLabel(KEY_QUICKADD_ACTION)
         } else if (act is AccountEditor) {
             if (!mOnRestore && !act.isNewAccount()) {
-                Log.d("PrefBug", ">>>> ConfigFragment onResume, initLoader")
                 act.getSupportLoaderManager().initLoader<Cursor>(AccountEditor.GET_ACCOUNT_CONFIG, Bundle(), this)
             } else {
                 mOnRestore = false
@@ -168,8 +167,6 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     }
 
     private fun setCheckBoxPrefState(key: String, value: Boolean) {
-        //        if (key == "override_nb_month_ahead")
-        //            Log.d("PrefBug", "setCheckBoxPrefState $key to $value")
         val checkbox = findPreference(key) as CheckBoxPreference
         checkbox.setChecked(value)
         PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(key, value)
@@ -208,14 +205,12 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     private fun getCheckBoxPrefValue(key: String): Boolean {
         val chk = findPreference(key) as CheckBoxPreference
         val r = chk.isChecked()
-        Log.d("Bug", "getCheckBoxPrefValue $key = $r")
         return r
     }
 
     private fun getEdtPrefValue(key: String): String {
         val edt = findPreference(key) as EditTextPreference
         val r = edt.getEditText().getText().toString()
-        Log.d("Bug", "getEdtPrefValue $key = $r")
         return r
     }
 
@@ -271,7 +266,6 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
 
 
     override fun onLoadFinished(arg0: Loader<Cursor>, data: Cursor) {
-        Log.d("PrefBug", "<<<< ConfigFragment onLoadFinished")
         if (data.moveToFirst()) {
             mConfig = AccountConfig(data)
             populateFields(mConfig)
