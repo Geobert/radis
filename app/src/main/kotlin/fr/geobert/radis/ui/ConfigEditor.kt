@@ -1,8 +1,8 @@
 package fr.geobert.radis.ui
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.MenuItem
+import android.view.View
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.ui.editor.EditorToolbarTrait

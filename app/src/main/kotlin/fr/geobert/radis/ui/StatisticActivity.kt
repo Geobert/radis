@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui
 
 import android.os.Bundle
+import android.view.View
 import android.view.Window
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -27,7 +28,13 @@ class StatisticActivity : BaseActivity() {
         super<BaseActivity>.onCreate(savedInstanceState)
         setContentView(R.layout.statistic_activity)
 
-        setIcon(R.drawable.stat_48)
+        setIconOnClick(object : View.OnClickListener {
+            override fun onClick(view: View) {
+                onBackPressed()
+            }
+        })
+        mToolbar.getMenu().clear()
+        setIcon(R.drawable.ok_48)
 
         val extras = getIntent().getExtras()
         val title = extras.getString(ChartFactory.TITLE)
