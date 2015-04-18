@@ -33,6 +33,7 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun onAllAccountsFetched() {
+        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
         mEditFragment.onAllAccountFetched()
         super<CommonOpEditor>.onAllAccountsFetched()
     }

@@ -76,7 +76,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
 
     fun onAllAccountFetched() {
         mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
-        populateTransfertSpinner((getActivity() as CommonOpEditor).mAccountManager.allAccountsCursor)
+        populateTransfertSpinner(mActivity.mAccountManager.allAccountsCursor)
         initViewAdapters()
         initListeners()
         is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
@@ -200,10 +200,10 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
             val adapter2 = ArrayAdapter<Account>(mActivity, android.R.layout.simple_spinner_item)
             adapter.add(Account(0, getString(R.string.no_transfert)))
             adapter2.add(Account(0, getString(R.string.no_transfert)))
-            do {
+            c.forEach {
                 adapter.add(Account(c))
                 adapter2.add(Account(c))
-            } while (c.moveToNext())
+            }
 
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

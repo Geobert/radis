@@ -41,7 +41,7 @@ import kotlin.properties.Delegates
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var mOldChildCount: Int = -1
 
-    private var checkingDashboard: CheckingOpDashboard? = null
+    //    private var checkingDashboard: CheckingOpDashboard? = null
     private var freshLoader: Boolean = false
     private var mListLayout: LinearLayoutManager by Delegates.notNull()
     private val TAG = "OperationListFragment"
@@ -99,12 +99,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             q.clearFocus()
             refreshQuickAdd()
         }
-        checkingDashboard?.onResume()
+        //        checkingDashboard?.onResume()
     }
 
     override fun onPause() {
         super<BaseFragment>.onPause()
-        checkingDashboard?.onPause()
+        //        checkingDashboard?.onPause()
     }
 
     private fun initQuickAdd() {
@@ -199,7 +199,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 Log.d("OperationListFragment", "onLoadFinished $mOpListAdapter")
                 val adapter = mOpListAdapter
                 if (adapter == null) {
-                    val a = OperationsAdapter(mActivity, this, cursor, checkingDashboard)
+                    val a = OperationsAdapter(mActivity, this, cursor)
                     mOpListAdapter = a
                     refresh = true
                     operation_list.setAdapter(mOpListAdapter)

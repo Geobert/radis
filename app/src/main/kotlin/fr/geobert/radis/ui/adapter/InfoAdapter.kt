@@ -1,6 +1,5 @@
 package fr.geobert.radis.ui.adapter
 
-import android.R
 import android.app.Activity
 import android.content.Context
 import android.database.Cursor
@@ -10,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import fr.geobert.radis.R
 import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.tools.AsciiUtils
@@ -30,7 +30,7 @@ public class InfoAdapter(private val mCtx: Activity, private val tableUri: Uri,
 
     override fun newView(context: Context, cursor: Cursor, parent: ViewGroup): View {
         val inflater = LayoutInflater.from(context)
-        val view = inflater.inflate(R.layout.simple_dropdown_item_1line, parent, false)
+        val view = inflater.inflate(R.layout.completion_line, parent, false)
 
         return view
     }

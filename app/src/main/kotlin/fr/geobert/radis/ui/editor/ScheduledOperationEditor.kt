@@ -68,6 +68,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     override fun onAllAccountsFetched() {
+        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
         getOpFragment().onAllAccountFetched()
         super<CommonOpEditor>.onAllAccountsFetched()
     }

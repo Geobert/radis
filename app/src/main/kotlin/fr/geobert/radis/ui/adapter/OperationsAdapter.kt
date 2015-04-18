@@ -21,8 +21,7 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 import java.util.NoSuchElementException
 
-public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor,
-                               val checkingOpDashboard: CheckingOpDashboard?) :
+public class OperationsAdapter(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
         BaseOperationAdapter<Operation>(activity, opList, cursor) {
     var date1 = GregorianCalendar()
     var date2 = GregorianCalendar()
