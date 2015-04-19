@@ -265,38 +265,40 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun getMoreOperations(startDate: DateTime?) {
-        Log.d("getMoreOperations", "startDate : " + startDate?.formatDate())
-        if (startDate != null) {
-            // date specified, use it
-            earliestOpDate = startDate
-            getOperationsList()
-        } else {
-            // no op found with cur month and month - 1, try if there is one
-            Log.d("getMoreOperations", "earliestOpDate : " + earliestOpDate?.formatDate())
-            val start = earliestOpDate
-            val c = if (null == start) {
-                OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
+        if (isAdded()) {
+            Log.d("getMoreOperations", "startDate : " + startDate?.formatDate())
+            if (startDate != null) {
+                // date specified, use it
+                earliestOpDate = startDate
+                getOperationsList()
             } else {
-                OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(),
-                        start.getMilliseconds(TIME_ZONE))
-            }
-            if (c != null) {
-                Log.d("getMoreOperations", "cursor count : " + c.getCount())
-                if (c.moveToFirst()) {
-                    val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
-                    Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
-                    val d = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
-                    Log.d(TAG, "last chance date verif : " + d.format("DD/MM/YYYY"))
-                    //mScrollLoader.setStartDate(d)
-                    earliestOpDate = d
-                    getOperationsList()
-                } else if (start == null) {
-                    earliestOpDate = DateTime.today(TIME_ZONE).getStartOfMonth()
-                    getOperationsList()
-                } else if (mOpListAdapter?.getItemCount() == 0) {
-                    setEmptyViewVisibility(true)
+                // no op found with cur month and month - 1, try if there is one
+                Log.d("getMoreOperations", "earliestOpDate : " + earliestOpDate?.formatDate())
+                val start = earliestOpDate
+                val c = if (null == start) {
+                    OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
+                } else {
+                    OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(),
+                            start.getMilliseconds(TIME_ZONE))
                 }
-                c.close()
+                if (c != null) {
+                    Log.d("getMoreOperations", "cursor count : " + c.getCount())
+                    if (c.moveToFirst()) {
+                        val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
+                        Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
+                        val d = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
+                        Log.d(TAG, "last chance date verif : " + d.format("DD/MM/YYYY"))
+                        //mScrollLoader.setStartDate(d)
+                        earliestOpDate = d
+                        getOperationsList()
+                    } else if (start == null) {
+                        earliestOpDate = DateTime.today(TIME_ZONE).getStartOfMonth()
+                        getOperationsList()
+                    } else if (mOpListAdapter?.getItemCount() == 0) {
+                        setEmptyViewVisibility(true)
+                    }
+                    c.close()
+                }
             }
         }
     }

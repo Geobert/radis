@@ -2,6 +2,8 @@ package fr.geobert.radis;
 
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
+import com.crashlytics.android.Crashlytics;
+import io.fabric.sdk.android.Fabric;
 //import org.acra.ACRA;
 //import org.acra.ACRAConfiguration;
 //import org.acra.ReportingInteractionMode;
@@ -18,6 +20,7 @@ public class Radis extends Application {
     public void onCreate() {
         // The following line triggers the initialization of ACRA
         super.onCreate();
+        Fabric.with(this, new Crashlytics());
 
         boolean isDebuggable = (0 != (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE));
         if (!isDebuggable) {
