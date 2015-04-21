@@ -40,6 +40,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     private val mSumTextWatcher by Delegates.lazy { CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this) }
     private val mActivity by Delegates.lazy { getActivity() as CommonOpEditor }
     private var mWasInvertByTransfert: Boolean = false
+    private var isOkClicked: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.main_op_edit, container, false)
@@ -321,12 +322,11 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         op.mMode = edit_op_mode.getText().toString().trim()
         op.mTag = edit_op_tag.getText().toString().trim()
         op.mNotes = edit_op_notes.getText().toString().trim()
+        mActivity.getCurrentFocus().clearFocus()
         op.setSumStr(edit_op_sum.getText().toString())
-        val dp = edit_op_date
-        dp.clearChildFocus(mActivity.getCurrentFocus())
-        op.setDay(dp.getDayOfMonth())
-        op.setMonth(dp.getMonth() + 1)
-        op.setYear(dp.getYear())
+        op.setDay(edit_op_date.getDayOfMonth())
+        op.setMonth(edit_op_date.getMonth() + 1)
+        op.setYear(edit_op_date.getYear())
         op.mIsChecked = is_checked.isChecked()
 
         if (is_transfert.isChecked()) {
@@ -359,7 +359,8 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
                 mActivity.mCurrentOp = ScheduledOperation(mActivity.mCurAccountId)
             }
         }
-        fillOperationWithInputs(mActivity.mCurrentOp as Operation)
+        if (!isOkClicked)
+            fillOperationWithInputs(mActivity.mCurrentOp as Operation)
     }
 
     public fun setCheckedEditVisibility(visibility: Int) {
