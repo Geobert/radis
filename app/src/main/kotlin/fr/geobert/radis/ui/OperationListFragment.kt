@@ -90,7 +90,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(mActivity)) {
             accMan.mCurDefaultAccount = null
             accMan.setCurrentAccountId(null, mActivity)
-            mLastSelectionId = (-1).toLong()
+            mLastSelectionId = -1L
         }
 
         val q = mQuickAddController
@@ -174,6 +174,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onAccountChanged(itemId: Long): Boolean {
         Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
+        needRefreshSelection = true
+        mLastSelectionId = -1L
         if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
             getLoaderManager().destroyLoader(GET_OPS)
             processAccountChanged(itemId)
