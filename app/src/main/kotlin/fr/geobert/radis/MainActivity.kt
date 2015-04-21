@@ -51,7 +51,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         SimpleCursorAdapter(this, R.layout.account_row, null, from, to, 0)
     }
     private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
-    private val mOnInsertionIntentFilter by Delegates.lazy { IntentFilter(Tools.INTENT_REFRESH_NEEDED) }
     private val redColor: Int by Delegates.lazy { getResources().getColor(R.color.op_alert) }
     private val greenColor: Int by Delegates.lazy { getResources().getColor(R.color.positiveSum) }
     private val handler: FragmentHandler by Delegates.lazy { FragmentHandler(this) }
@@ -196,7 +195,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         mToolbar.setTitle("")
         mAccountSpinner.setAdapter(mAccountAdapter)
 
-        registerReceiver(mOnRefreshReceiver, mOnInsertionIntentFilter)
+        registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_NEEDED))
         registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_ACC_LIST))
         registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_OP_LIST))
 
