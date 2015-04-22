@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:radis="http://schemas.android.com/apk/res-auto">
+    <!--<item-->
+            <!--android:icon="@drawable/op_checking_48"-->
+            <!--android:title="@string/op_checking"-->
+            <!--android:id="@+id/checking_op"-->
+            <!--radis:showAsAction="ifRoom|collapseActionView"-->
+            <!--radis:actionLayout="@layout/checking_dashboard"/>-->
+    <item
+            android:icon="@drawable/plus_48"
+            android:title="@string/new_op"
+            android:id="@+id/create_operation"
+            radis:showAsAction="ifRoom"/>
+</menu>

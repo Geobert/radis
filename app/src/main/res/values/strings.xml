@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Radis</string>
+    <string name="no_account">No account. Press "menu" to create one.</string>
+    <string name="create_account">Create account</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+    <string name="start_sum">Start amount</string>
+    <string name="create">Create</string>
+    <string name="cancel">Cancel</string>
+    <string name="accounts_list">Account list</string>
+    <string name="currency">Currency</string>
+    <string name="delete">Delete</string>
+    <string name="account_prompt">Select a currency</string>
+
+    <string-array name="all_currencies">
+        <item>CAD</item>
+        <item>EUR</item>
+        <item>GBP</item>
+        <item>JPY</item>
+        <item>USD</item>
+        <item>Custom</item>
+    </string-array>
+
+    <string name="custom_currency_hint">Enter ISO 4217 currency code</string>
+    <string name="edit">Edit</string>
+    <string name="ok">@android:string/ok</string>
+    <string name="third_party">Third party</string>
+    <string name="sum">Amount</string>
+    <string name="tag">Category</string>
+    <string name="date">Date</string>
+    <string name="op_date">Transaction\'s date</string>
+    <string name="mode">Payment method</string>
+    <string name="credit">Credit</string>
+    <string name="debit">Debit</string>
+    <string name="current_sum">Balance : </string>
+    <string name="sum_at">At %1$s = %2$s</string>
+    <string name="allowed_sum_digits">0123456789+-.,</string>
+    <string name="date_chars">0123456789/</string>
+    <string name="no_operation_sch">No scheduled transaction. Press the top right "plus" button to create one.</string>
+    <string name="no_operation">No transaction. Press the top right "plus" button or use quick add at bottom to create one.
+    </string>
+    <string name="new_op">New transaction</string>
+    <string name="tp_account_name">Account %s</string>
+    <string name="account_edit">Account edition</string>
+    <string name="account_edit_title">Account edition</string>
+    <string name="account_creation">Account creation</string>
+    <string name="op_edition">Transaction edition</string>
+    <string name="future_sum_at">Future balance at %1$s = %2$s</string>
+    <string name="sum_at_selection">Balance at selection</string>
+    <string name="list_of">List of %s</string>
+    <string name="tags">Tags</string>
+    <string name="modes">Payment method</string>
+    <string name="third_parties">Third party</string>
+    <string name="get_more_op">Previous month…</string>
+    <string name="delete_confirmation">Really delete?</string>
+    <string name="account_delete_confirmation">Delete account will also delete all scheduled transaction attached to it.
+        \nReally delete?
+    </string>
+    <string name="yes">Yes</string>
+    <string name="advanced">Advanced actions</string>
+    <string name="backup_db">Backup database</string>
+    <string name="restore_db">Restore database</string>
+    <string name="restore_confirm">Restore will override current data! This can\'t be
+        undone.
+    </string>
+    <string name="backup_confirm">Backup will override last backup if it exists!</string>
+    <string name="to_continue">Continue</string>
+    <string name="backup_success">Backup successed!</string>
+    <string name="backup_failed">Backup failed.</string>
+    <string name="restore_success">Restoration successed!</string>
+    <string name="restore_failed">Restoration failed.</string>
+    <string name="restarting">Restarting…</string>
+    <string name="will_restart">Application will be restart.</string>
+    <string name="no_more_ops">No more transaction</string>
+    <string name="no_start_amount">Start amount is empty</string>
+    <string name="invalid_amount">Amount is invalid</string>
+    <string name="misc">Misc</string>
+    <string name="notes">Notes</string>
+    <string name="balance_at">at %s : </string>
+    <string name="crash_notif_ticker_text">Unexpected error, please send a report…</string>
+    <string name="crash_notif_title">Radis has crashed…</string>
+    <string name="crash_notif_text">Please click here to help fix the issue.</string>
+    <string name="crash_dialog_title">Radis has crashed</string>
+    <string name="crash_dialog_text">An unexpected error occurred forcing the
+        application to stop. Please help us fix this by sending us error data,
+        all you have to do is click \'OK\'.
+    </string>
+    <string name="crash_dialog_comment_prompt">You might add your comments about the problem
+        below:
+    </string>
+    <string name="crash_dialog_ok_toast">Thank you !</string>
+    <string name="empty_amount">Amount is empty</string>
+    <string name="empty_third_party">Third party is empty</string>
+    <string name="item_exists">Item already exists</string>
+
+    <string-array name="periodicity_choices">
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+        <item>Custom</item>
+    </string-array>
+    <string-array name="periodicity_custom_choices">
+        <item>Days</item>
+        <item>Weeks</item>
+        <item>Monthes</item>
+        <item>Years</item>
+    </string-array>
+    <string-array name="periodicity_labels">
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+        <item>Every %d days</item>
+        <item>Every %d weeks</item>
+        <item>Every %d months</item>
+        <item>Every %d years</item>
+    </string-array>
+
+    <string name="every">Every</string>
+    <string name="every_fem">Every</string>
+    <string name="no_end_date">Forever</string>
+    <string name="scheduling">Scheduling</string>
+    <string name="basics">Transaction</string>
+    <string name="end_date">End date</string>
+    <string name="scheduled_ops">Schedule</string>
+    <string name="account">Account</string>
+    <string name="periodicity">Periodicity</string>
+    <string name="end_date_incorrect">End date is before start date</string>
+    <string name="periodicity_must_be_greater_0">Periodicity must be greater than zero</string>
+    <string name="periodicity_must_be_num">Periodicity must be a number</string>
+    <string name="ask_delete_occurrences">Do you want to delete this scheduled transaction
+        and all occurrences of this scheduled operation?
+    </string>
+    <string name="del_all_occurrences">All</string>
+    <string name="cancel_delete_occurrences">This</string>
+    <string name="cancel_sch_deletion">None</string>
+    <string name="prefs_insertion_date_text">Scheduled transaction insertion day of month: %s</string>
+    <string name="prefs_insertion_date_title">Enter day of month</string>
+    <string name="prefs_insertion_date_label">Insertion date</string>
+    <string name="preferences">Preferences</string>
+    <string name="ask_update_occurrences">Do you want to update all occurrences?\nIf not,
+        existing occurrences will be disconnected from this scheduling.
+    </string>
+    <string name="no">No</string>
+    <string name="update">Update</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="ask_update_scheduling">This transaction is from a scheduled one. Do you
+        want to update the scheduled transaction and all its occurrences? If
+        not, current transaction will be disconnected from the scheduled one.
+    </string>
+    <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
+    <string name="edit_scheduling">Edit scheduled transaction</string>
+    <string name="process_scheduled_transactions">Process scheduled transactions</string>
+    <string name="must_be_day_of_month">ou must input a day of month between 1 and 31</string>
+    <string name="error_on_write_prefs">Error while writing preferences</string>
+    <string name="quickadd_target">Add transaction to: %s</string>
+    <string name="quickadd_target_to_configure">Do to preferences to choose default account</string>
+    <string name="quickadd_target_no_account">Create account to enable</string>
+    <string name="quickadd_fields_not_filled">Fill correctly all the quick add fields</string>
+    <string name="projection_date">Projection date</string>
+    <string name="projection_day_of_month">Day of Month</string>
+    <string name="projection_full_date">dd/MM/yyyy</string>
+    <string name="projection_date_mode">Projection mode</string>
+
+    <string-array name="projection_modes">
+        <item>To farest transaction</item>
+        <item>Day of next month</item>
+        <item>Absolute date</item>
+    </string-array>
+
+    <string name="bad_format_for_date">Date is not valid</string>
+    <string name="recompute_account_sums">Recompute account</string>
+    <string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your
+        currency code)
+    </string>
+    <string name="short_date_format">dd/MM</string>
+    <string name="all_accounts">All accounts</string>
+    <string name="delete_recurring_op">Would you like to delete only this transaction, all transactions in the series or
+        this and all future transactions in the series? (Press back button to cancel)
+    </string>
+    <string name="del_all_following">Future</string>
+    <string name="del_only_current">Current</string>
+    <string name="hide_ops_quick_add">Hide quick add</string>
+    <string name="hide_ops_quick_add_details">Hide the quick add on the transactions\' list</string>
+
+    <string name="rarr">→</string>
+    <string name="no_transfert">No transfert</string>
+    <string name="err_transfert_no_src">Transfert has no source</string>
+    <string name="err_transfert_no_dst">Transfert has no destination</string>
+    <string name="err_transfert_same_acc">Transfert\'s source and destination cannot be equals</string>
+
+    <string name="transfert">Transfert</string>
+    <string name="sch_no_choosen_account">Please choose an account on planification page</string>
+    <string name="choose_account">Choose an account</string>
+    <string name="defined_by_transfert">Defined by transfert</string>
+
+    <string name="loading">Loading…</string>
+    <string name="sched_op_total_sum">Total credit : %1$s — Total debit : %2$"s\nBalance : %3$s</string>
+    <string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
+    <string name="sch_edition">Scheduled transaction edition</string>
+    <string name="delete_account">Delete account</string>
+    <string name="debug">Debug</string>
+    <string name="use_weighted_infos">Use weighted completion</string>
+    <string name="use_weighted_infos_details">Most used informations are suggested first</string>
+    <string name="no_unchecked_operation">No unchecked transaction available</string>
+    <string name="targeted_sum">Targeted\nsum: </string>
+    <string name="checked_ops_sums_title"><![CDATA[Checked:\nLeft:]]></string>
+    <string name="op_checking">Checking</string>
+    <string name="checked">Checked</string>
+    <string name="error">Error</string>
+    <string name="targeted_sum_reached">You\'ve reached the targeted sum!</string>
+    <string name="auto_checking">Auto checking</string>
+    <string name="with_nb_ops">Number of transactions to use:</string>
+    <string name="left_zero_if_unknown">(keep 0 if you don\'t know)</string>
+    <string name="do_check">Do checking</string>
+    <string name="checking_max_date"><![CDATA[Use transactions until:]]></string>
+    <string name="missing_ops">The target sum can\'t be reached. Radis found %1$s by checking transactions. You have to find the %2$s left :)</string>
+    <string name="invert_completion_in_quick_add">Invert quick add completion order</string>
+    <string name="invert_completion_in_quick_add_details">Invert the display of completion in quick add to have the most used near the text field</string>
+    <string name="op_list">Opérations</string>
+    <string name="operations">Opérations</string>
+    <string name="accounts">Comptes</string>
+    <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
+    <string name="navigation_drawer_close">Ferme le menu de navigation</string>
+    <string name="statistics">Statistics</string>
+    <string name="no_statistic"><![CDATA[No configured statistic. Please press the "plus" button to create one.]]></string>
+    <string name="new_stat">Create a statistic</string>
+    <string name="stat_name_hint">Chart\'s name</string>
+    <string name="stat_editor_title">Chart\'s editor</string>
+    <string name="no_filter">Time</string>
+    <string name="account_for_stat">Account to see</string>
+    <string name="filter_for_stat">Calculus filter</string>
+    <string name="period_for_stat">Time scale</string>
+    <string name="graph_type_for_stat">Graphic type</string>
+    <string name="days">Days</string>
+    <string name="monthes">Monthes</string>
+    <string name="years">Years</string>
+    <string name="absolute">Absolute</string>
+    <string name="last_male">last</string>
+    <string name="last_female">last</string>
+    <string name="empty_account_name">Account\'s name empty</string>
+    <string name="empty_stat_name">Chart\'s name empty</string>
+    <string name="xlast_invalid">The value of %1$s %2$s must be a positive number</string>
+    <string name="invalid_date_range">The time scale range is invalid</string>
+    <string name="err_db_stat">An error occurred while saving the chart</string>
+    <string name="time">Time</string>
+    <string name="no_lbl">[None]</string>
+    <string name="misc_chart_cat">Misc</string>
+    <string name="op_creation">Transaction creation</string>
+    <string name="default_account">Default account</string>
+    <string name="account_defaults">Account\'s default values</string>
+    <string name="default_account_desc">Opened account on start: %s</string>
+    <string name="override_insert_date">Override insertion date</string>
+    <string name="override_hide_quickadd">Override hide quick add</string>
+    <string name="override_use_info">Override use weighted completion</string>
+    <string name="override_invert_quickadd_completion">Override invert quick add completion</string>
+    <string name="prefs_nb_month_ahead_title">Number of month ahead to insert</string>
+    <string name="prefs_nb_month_ahead_text">Radis will keep %d months inserted ahead</string>
+    <string name="override_nb_month_ahead">Override the number of month ahead</string>
+    <string name="quick_add_long_press_action_title">Action on quick add long press</string>
+    <string name="quick_add_long_press_action_text">Long press will %s</string>
+    <string name="override_quick_add_action">Override quick add long press action</string>
+</resources>

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--suppress AndroidLintNewApi -->
+<resources>
+
+    <style name="EditorTextView" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="EditorBaseButton" parent="@android:style/Widget.Button">
+        <item name="android:layout_weight">0</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="EditorImageButton">
+        <item name="android:layout_weight">0</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="EditorEditText" parent="@android:style/Widget.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="EditorEditText.Date">
+        <item name="android:digits">@string/date_chars</item>
+        <!-- <item name="android:inputType">date</item>-->
+    </style>
+
+    <style name="EditorBaseButton.DateButton">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="EditorEditText.Sum">
+        <item name="android:digits">@string/allowed_sum_digits</item>
+        <item name="android:inputType">number|numberSigned|numberDecimal</item>
+    </style>
+
+    <style name="EditorHorizontalLinearLayout">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">left|center_vertical</item>
+    </style>
+
+    <style name="EditorHorizontalLinearLayout.FormButton">
+        <item name="android:paddingTop">5px</item>
+        <item name="android:gravity">center_horizontal</item>
+    </style>
+
+    <style name="DescEditText" parent="@android:style/Widget.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">top|left</item>
+    </style>
+
+    <style name="FormButton" parent="@android:style/Widget.Button">
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="OpLine">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="StatListView" parent="@android:style/Widget.ListView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:divider">#4b4b4b</item>
+        <item name="android:dividerHeight">1px</item>
+    </style>
+
+    <style name="OpListView" parent="@android:style/Widget.ListView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:divider">#4b4b4b</item>
+        <item name="android:dividerHeight">1px</item>
+        <item name="android:cacheColorHint">@android:color/transparent</item>
+        <item name="android:listSelector">@android:color/transparent</item>
+    </style>
+
+    <style name="SumsTextView" parent="@android:style/Widget.TextView">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:padding">3dip</item>
+        <item name="android:textSize">11.5sp</item>
+    </style>
+
+    <style name="SumsHeaderButton" parent="@android:style/Widget.Button">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:padding">3dip</item>
+        <item name="android:layout_marginRight">3dip</item>
+        <item name="android:layout_marginBottom">3dip</item>
+        <item name="android:textSize">11.5sp</item>
+        <item name="android:textColor">#cccccc</item>
+        <item name="android:background">@drawable/header_button_selector</item>
+    </style>
+
+    <style name="SumsLayout">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">5px</item>
+        <item name="android:gravity">right</item>
+        <item name="android:clickable">true</item>
+        <item name="android:drawable">@drawable/fake_listview_line</item>
+    </style>
+
+    <style name="OpRowTextView" parent="@android:style/Widget.TextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/text_color</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="OpRowTextView.Infos">
+        <item name="android:gravity">right</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="OpRowTextView.Sums">
+        <item name="android:minWidth">60sp</item>
+        <item name="android:gravity">right|center_vertical</item>
+        <item name="android:layout_weight">0</item>
+    </style>
+
+    <style name="QuickAddLayout">
+        <item name="android:orientation">horizontal</item>
+        <item name="android:layout_weight">0</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingTop">5px</item>
+    </style>
+
+    <style name="QuickAddBaseButton">
+        <item name="android:layout_weight">0</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:src">@drawable/quickadd_but</item>
+    </style>
+
+    <style name="QuickAddEditText" parent="@android:style/Widget.EditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:lines">1</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="QuickAddEditText.Sum">
+        <item name="android:digits">@string/allowed_sum_digits</item>
+        <item name="android:inputType">number|numberSigned|numberDecimal</item>
+        <item name="android:imeOptions">actionDone</item>
+    </style>
+
+    <style name="RadisTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:actionOverflowButtonStyle">@style/OverFlow</item>
+        <item name="android:actionButtonStyle">@style/MyActionButtonStyle</item>
+        <item name="android:actionBarStyle">@style/MyActionBarStyle</item>
+        <item name="android:imageButtonStyle">@style/RadisButton</item>
+    </style>
+
+    <style name="RadisButton" parent="@android:style/Widget.ImageButton">
+        <item name="android:background">@drawable/radistheme_btn_default</item>
+    </style>
+
+    <style name="OverFlow" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:minWidth">32dip</item>
+        <item name="android:padding">0dip</item>
+        <item name="android:src">@drawable/overflow_40</item>
+    </style>
+
+    <style name="MyActionButtonStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:minWidth">40dip</item>
+        <item name="android:paddingLeft">10dip</item>
+        <item name="android:paddingRight">10dip</item>
+        <item name="android:layout_marginLeft">5dip</item>
+        <item name="android:layout_marginRight">5dip</item>
+    </style>
+
+    <style name="MyActionBarStyle" parent="@style/Widget.AppCompat.ActionBar">
+        <item name="android:titleTextStyle">@style/RadisTheme.TitleStyle</item>
+        <item name="android:icon">@drawable/radis_no_disc_48</item>
+    </style>
+
+    <style name="RadisTheme.TitleStyle" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textSize">15dp</item>
+    </style>
+</resources>
