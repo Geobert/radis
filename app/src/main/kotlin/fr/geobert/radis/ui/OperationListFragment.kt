@@ -174,8 +174,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onAccountChanged(itemId: Long): Boolean {
         Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
-        needRefreshSelection = true
-        mLastSelectionId = -1L
         if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
             getLoaderManager().destroyLoader(GET_OPS)
             processAccountChanged(itemId)
@@ -215,9 +213,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 val itemCount = mOpListAdapter?.getItemCount()
                 Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount}")
                 setEmptyViewVisibility(itemCount == 0)
-                //                if (itemCount == 0) {
-                //                    startOpDate = null
-                //                }
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
@@ -239,11 +234,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun onCreateLoader(i: Int, bundle: Bundle): Loader<Cursor>? =
             when (i) {
                 GET_OPS -> {
-                    //                    if (startOpDate == null) {
-                    //                        val startDate = Tools.createClearedCalendar()
-                    //                        startDate.set(Calendar.DAY_OF_MONTH, startDate.getActualMinimum(Calendar.DAY_OF_MONTH))
-                    //                        startOpDate = startDate
-                    //                    }
                     mOperationsLoader = OperationTable.getOpsWithStartDateLoader(mActivity, bundle.getLong("date"),
                             mActivity.getCurrentAccountId())
                     mOperationsLoader
@@ -311,6 +301,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             when (cursorLoader.getId()) {
                 GET_OPS -> {
                     Log.d("OperationListFragment", "onLoaderReset doing reset")
+                    needRefreshSelection = true
+                    mLastSelectionId = -1L
+                    mLastSelectionPos = -1
                     mOpListAdapter?.reset()
                     mOperationsLoader = null
                 }
