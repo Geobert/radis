@@ -1,132 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/edit_op_root"
-              android:layout_width="fill_parent"
-              android:layout_height="wrap_content"
-              android:orientation="vertical">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:id="@+id/main_content"
+            android:fillViewport="true"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/normal_bg">
 
-    <DatePicker
-            android:id="@+id/edit_op_date"
+    <LinearLayout
+            android:id="@+id/edit_op_root"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:calendarViewShown="false"
-            android:datePickerMode="spinner"
-            android:paddingBottom="0dp"
-            android:paddingTop="0dp"
-            android:layout_marginTop="0dp"
-            android:layout_marginBottom="0dp"/>
+            android:orientation="vertical">
 
-    <LinearLayout
-            style="@style/EditorHorizontalLinearLayout"
-            android:layout_marginTop="0dp">
-
-        <CheckBox
-                android:id="@+id/is_transfert"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_weight="1"
-                android:text="@string/transfert"/>
-
-        <CheckBox
-                android:id="@+id/is_checked"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:layout_weight="1"
-                android:text="@string/checked"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-            android:id="@+id/transfert_cont"
-            android:layout_margin="0dp"
-            style="@style/EditorHorizontalLinearLayout">
-
-        <Spinner
-                android:id="@+id/trans_src_account"
+        <DatePicker
+                android:id="@+id/edit_op_date"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:calendarViewShown="false"
+                android:datePickerMode="spinner"
+                android:paddingBottom="0dp"
+                android:paddingTop="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginBottom="0dp"/>
 
-        <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+        <LinearLayout
+                style="@style/EditorHorizontalLinearLayout"
+                android:layout_marginTop="0dp">
+
+            <CheckBox
+                    android:id="@+id/is_transfert"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/transfert"/>
+
+            <CheckBox
+                    android:id="@+id/is_checked"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/checked"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/transfert_cont"
                 android:layout_margin="0dp"
-                android:text="@string/rarr"
-                android:textSize="20dp"/>
+                style="@style/EditorHorizontalLinearLayout">
 
-        <Spinner
-                android:id="@+id/trans_dst_account"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
-    </LinearLayout>
+            <Spinner
+                    android:id="@+id/trans_src_account"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
 
-    <LinearLayout
-            android:id="@+id/third_party_cont"
-            style="@style/EditorHorizontalLinearLayout">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="0dp"
+                    android:text="@string/rarr"
+                    android:textSize="20dp"/>
 
-        <fr.geobert.radis.tools.MyAutoCompleteTextView
-                android:id="@+id/edit_op_third_party"
-                style="@style/EditorEditText"
-                android:completionThreshold="1"
-                android:hint="@string/third_party"/>
+            <Spinner
+                    android:id="@+id/trans_dst_account"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+        </LinearLayout>
 
-        <ImageButton
-                android:id="@+id/edit_op_third_parties_list"
-                android:contentDescription="@string/third_parties"
-                style="@style/EditorImageButton"
-                android:src="@drawable/list_48"/>
-    </LinearLayout>
+        <LinearLayout
+                android:id="@+id/third_party_cont"
+                style="@style/EditorHorizontalLinearLayout">
 
-    <LinearLayout style="@style/EditorHorizontalLinearLayout">
+            <fr.geobert.radis.tools.MyAutoCompleteTextView
+                    android:id="@+id/edit_op_third_party"
+                    style="@style/EditorEditText"
+                    android:completionThreshold="1"
+                    android:hint="@string/third_party"/>
+
+            <ImageButton
+                    android:id="@+id/edit_op_third_parties_list"
+                    android:contentDescription="@string/third_parties"
+                    style="@style/EditorImageButton"
+                    android:src="@drawable/list_48"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/EditorHorizontalLinearLayout">
+
+            <EditText
+                    android:id="@+id/edit_op_sum"
+                    style="@style/EditorEditText.Sum"
+                    android:hint="@string/sum"/>
+
+            <ImageButton
+                    android:id="@+id/edit_op_sign"
+                    android:contentDescription=""
+                    style="@style/EditorImageButton"
+                    android:src="@drawable/invert_sign_48"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/EditorHorizontalLinearLayout">
+
+            <fr.geobert.radis.tools.MyAutoCompleteTextView
+                    android:id="@+id/edit_op_tag"
+                    style="@style/EditorEditText"
+                    android:completionThreshold="1"
+                    android:hint="@string/tag"/>
+
+            <ImageButton
+                    android:id="@+id/edit_op_tags_list"
+                    android:contentDescription=""
+                    style="@style/EditorImageButton"
+                    android:src="@drawable/list_48"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/EditorHorizontalLinearLayout">
+
+            <fr.geobert.radis.tools.MyAutoCompleteTextView
+                    android:id="@+id/edit_op_mode"
+                    style="@style/EditorEditText"
+                    android:completionThreshold="1"
+                    android:hint="@string/mode"/>
+
+            <ImageButton
+                    android:id="@+id/edit_op_modes_list"
+                    android:contentDescription=""
+                    android:src="@drawable/list_48"
+                    style="@style/EditorImageButton"/>
+        </LinearLayout>
 
         <EditText
-                android:id="@+id/edit_op_sum"
-                style="@style/EditorEditText.Sum"
-                android:hint="@string/sum"/>
+                android:id="@+id/edit_op_notes"
+                style="@style/DescEditText"
+                android:hint="@string/notes"/>
 
-        <ImageButton
-                android:id="@+id/edit_op_sign"
-                android:contentDescription=""
-                style="@style/EditorImageButton"
-                android:src="@drawable/invert_sign_48"/>
     </LinearLayout>
-
-    <LinearLayout style="@style/EditorHorizontalLinearLayout">
-
-        <fr.geobert.radis.tools.MyAutoCompleteTextView
-                android:id="@+id/edit_op_tag"
-                style="@style/EditorEditText"
-                android:completionThreshold="1"
-                android:hint="@string/tag"/>
-
-        <ImageButton
-                android:id="@+id/edit_op_tags_list"
-                android:contentDescription=""
-                style="@style/EditorImageButton"
-                android:src="@drawable/list_48"/>
-    </LinearLayout>
-
-    <LinearLayout style="@style/EditorHorizontalLinearLayout">
-
-        <fr.geobert.radis.tools.MyAutoCompleteTextView
-                android:id="@+id/edit_op_mode"
-                style="@style/EditorEditText"
-                android:completionThreshold="1"
-                android:hint="@string/mode"/>
-
-        <ImageButton
-                android:id="@+id/edit_op_modes_list"
-                android:contentDescription=""
-                android:src="@drawable/list_48"
-                style="@style/EditorImageButton"/>
-    </LinearLayout>
-
-    <EditText
-            android:id="@+id/edit_op_notes"
-            style="@style/DescEditText"
-            android:hint="@string/notes"/>
-
-</LinearLayout>
+</ScrollView>

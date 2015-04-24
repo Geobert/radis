@@ -1,22 +1,24 @@
 package fr.geobert.radis.ui
 
-import fr.geobert.radis.BaseActivity
-import kotlin.properties.Delegates
-import fr.geobert.radis.R
-import android.widget.TextView
 import android.os.Bundle
+import android.view.View
+import android.view.Window
+import android.widget.LinearLayout
+import android.widget.TextView
+import fr.geobert.radis.BaseActivity
+import fr.geobert.radis.R
 import org.achartengine.ChartFactory
 import org.achartengine.GraphicalView
 import org.achartengine.chart.AbstractChart
-import android.widget.LinearLayout
-import android.view.Window
+import kotlin.properties.Delegates
 
 class StatisticActivity : BaseActivity() {
-    class object {
+    companion object {
         val ACCOUNT_NAME = "account_name"
         val FILTER = "filter"
         val TIME_SCALE = "time_scale"
     }
+
     val accountNameLbl: TextView by Delegates.lazy { findViewById(R.id.chart_account_name) as TextView }
     val filterLbl: TextView by Delegates.lazy { findViewById(R.id.filter_lbl) as TextView }
     val timeScaleLbl: TextView by Delegates.lazy { findViewById(R.id.time_scale_lbl) as TextView }
@@ -26,9 +28,13 @@ class StatisticActivity : BaseActivity() {
         super<BaseActivity>.onCreate(savedInstanceState)
         setContentView(R.layout.statistic_activity)
 
-        val actionBar = getSupportActionBar()
-        actionBar.setIcon(R.drawable.stat_48)
-        actionBar.setDisplayHomeAsUpEnabled(true)
+        setIconOnClick(object : View.OnClickListener {
+            override fun onClick(view: View) {
+                onBackPressed()
+            }
+        })
+        mToolbar.getMenu().clear()
+        setIcon(R.drawable.ok_48)
 
         val extras = getIntent().getExtras()
         val title = extras.getString(ChartFactory.TITLE)

@@ -1,45 +1,47 @@
 package fr.geobert.radis.test
 
+import android.app.Activity
+import android.app.Instrumentation
 import android.content.Intent
-import android.test.ActivityInstrumentationTestCase2
-import fr.geobert.radis.R
-import fr.geobert.radis.tools.*
-
-import android.support.test.espresso.contrib.RecyclerViewActions.*
-import android.support.test.espresso.action.ViewActions.*
-import android.support.test.espresso.Espresso.*
-import android.support.test.espresso.matcher.ViewMatchers.*
-import android.support.test.espresso.assertion.ViewAssertions.*
-import org.hamcrest.Matchers.*
-
-import fr.geobert.radis.ui.adapter.OpRowHolder
-import fr.geobert.radis.data.Operation
-import fr.geobert.radis.MainActivity
-import fr.geobert.radis.db.DbContentProvider
-import android.support.test.espresso.ViewAction
-import android.view.View
-import org.hamcrest.Matcher
-import android.support.test.espresso.UiController
-import android.widget.TextView
-import java.util.Calendar
-import android.support.test.espresso.contrib.PickerActions
+import android.database.Cursor
 import android.support.test.espresso.Espresso
+import android.support.test.espresso.Espresso.onData
+import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.UiController
+import android.support.test.espresso.ViewAction
+import android.support.test.espresso.action.ViewActions.*
+import android.support.test.espresso.assertion.ViewAssertions.matches
+import android.support.test.espresso.contrib.PickerActions
+import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
+import android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition
+import android.support.test.espresso.matcher.ViewMatchers.*
+import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry
+import android.support.test.runner.lifecycle.Stage
+import android.test.ActivityInstrumentationTestCase2
 import android.util.Log
+import android.view.View
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ListView
-import android.database.Cursor
-import java.util.GregorianCalendar
-import java.text.SimpleDateFormat
-import fr.geobert.espresso.DebugEspresso
-import android.app.Instrumentation
-import java.util.concurrent.atomic.AtomicReference
+import android.widget.TextView
 import com.android.support.test.deps.guava.base.Throwables
-import android.app.Activity
-import android.support.test.runner.lifecycle.Stage
 import com.android.support.test.deps.guava.collect.Sets
-import android.support.test.internal.runner.lifecycle.ActivityLifecycleMonitorRegistry
-import java.util.concurrent.Callable
+import fr.geobert.espresso.DebugEspresso
+import fr.geobert.radis.MainActivity
+import fr.geobert.radis.R
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.db.DbContentProvider
+import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.ConfigFragment
+import fr.geobert.radis.ui.adapter.OpRowHolder
+import hirondelle.date4j.DateTime
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers.*
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.HashSet
+import java.util.concurrent.Callable
+import java.util.concurrent.atomic.AtomicReference
 
 public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
 
@@ -139,7 +141,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         TAG = "testEditOp"
         Helpers.addManyOps()
         Helpers.clickOnRecyclerViewAtPos(5)
-        onView(withId(android.R.id.list)).perform(scrollToPosition<OpRowHolder<Operation>>(6))
+        onView(withId(R.id.operation_list)).perform(scrollToPosition<OpRowHolder<Operation>>(6))
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.op_edition)
         onView(withId(R.id.edit_op_sum)).perform(scrollTo())
@@ -156,7 +158,6 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
         onView(withId(R.id.quickadd_amount)).perform(typeText("-1"))
         onView(withId(R.id.quickadd_validate)).perform(click())
-        // TODO       assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
         Helpers.checkAccountSumIs(999.50.formatSum())
         onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
     }
@@ -181,7 +182,10 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
     public fun testEditScheduledOp() {
         TAG = "testEditScheduledOp"
-        Helpers.addScheduleOp()
+        Helpers.setUpSchOp()
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(991.0.formatSum())
 
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
@@ -276,7 +280,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
 
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerLeft()
 
         onView(withId(R.id.periodicity_choice)).perform(scrollTo())
         onView(withId(R.id.periodicity_choice)).perform(click())
@@ -287,6 +291,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Espresso.pressBack()
 
         // TODO assertEquals(3, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
+
         Helpers.clickInDrawer(R.string.scheduled_ops)
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
@@ -319,9 +324,10 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).check(has(1, javaClass<ListView>()))
 
-        // 2 following lines are hack because a bug of Espresso
+        // 3 following lines are hack because a bug of Espresso
+        Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(1500)
+        Helpers.pauseTest(3000)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -331,8 +337,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnDialogButton(R.string.ok)
     }
 
-    // issue 50 test // TODO : stabilize
-    public fun _testAddInfoAndCreateOp() {
+    // issue 50 test // TODO : debug
+    public fun _estAddInfoAndCreateOp() {
         TAG = "testAddInfoAndCreateOp"
         Helpers.addAccount()
         onView(withId(R.id.create_operation)).perform(click())
@@ -343,11 +349,17 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText("Atest"))
         Helpers.clickOnDialogButton(R.string.ok)
 
+        Helpers.pauseTest(1000)
+
         onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).check(has(1, javaClass<ListView>()))
 
         onData(iz(instanceOf(javaClass<Cursor>()))).inAdapterView(iz(instanceOf(javaClass<ListView>())) as Matcher<View>).atPosition(0).perform(click())
 
-        onView(withId(android.R.id.button1)).inRoot(DebugEspresso.isAlertDialog()).perform(click())
+        Helpers.pauseTest(1000)
+
+        // BUG here
+        //        Helpers.clickOnDialogButton(R.string.ok)
+        onView(allOf(isDisplayed(), withText("Ok")) as Matcher<View>).inRoot(DebugEspresso.isAlertDialog()).perform(click())
 
         Helpers.clickOnActionItemConfirm()
         onView(withId(R.id.create_operation)).perform(click())
@@ -355,11 +367,9 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).check(has(1, javaClass<ListView>()))
     }
 
-    private fun addOpOnDate(t: GregorianCalendar, idx: Int) {
+    private fun addOpOnDate(t: DateTime, idx: Int) {
         onView(withId(R.id.create_operation)).perform(click())
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(
-                t.get(Calendar.YEAR), t.get(Calendar.MONTH) + 1, t.get(Calendar.DAY_OF_MONTH)
-        ))
+        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(t.getYear(), t.getMonth(), t.getDay()))
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, "$OP_TP/$idx")
         Helpers.scrollThenTypeText(R.id.edit_op_sum, "1")
         Helpers.clickOnActionItemConfirm()
@@ -367,72 +377,68 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
     private fun setUpProjTest1() {
         Helpers.addAccount()
-        val today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        today.add(Calendar.MONTH, -2)
-        for (i in 0..6 - 1) {
-            addOpOnDate(today, i)
+        val today = DateTime.today(TIME_ZONE)
+        val cleanUpDay = DateTime.forDateOnly(today.getYear(), today.getMonth(), Math.min(today.getDay(), 28))
+        var date = cleanUpDay.minusMonth(2)
+        for (i in 0..5) {
+            addOpOnDate(date, i)
             Helpers.pauseTest(500)
-            today.add(Calendar.MONTH, +1)
+            date = date.plusMonth(1)
         }
     }
 
     public fun testProjectionFromOpList() {
         TAG = "testProjectionFromOpList"
 
-        // test mode 0
+        // test mode 0 = furthest
         setUpProjTest1()
-        var today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        today.add(Calendar.MONTH, 3)
+        val today = DateTime.today(TIME_ZONE)
+        val cleanUpDay = DateTime.forDateOnly(today.getYear(), today.getMonth(), Math.min(today.getDay(), 28))
+        val later3Month = cleanUpDay.plusMonth(3)
         Helpers.pauseTest(1000)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
-        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
+        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(later3Month.formatDateLong()))))
 
         Helpers.clickOnRecyclerViewAtPos(0)
 
         Helpers.checkSelectedSumIs(994.50.formatSum())
 
-        // test mode 1
+        // test mode 1 = day of next month
         Helpers.callAccountEdit()
 
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 1)
 
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)))
+        Helpers.scrollThenTypeText(R.id.projection_date_value, cleanUpDay.getDay().toString())
         Helpers.clickOnActionItemConfirm()
 
-        today.add(Calendar.MONTH, 1)
-        Log.d(TAG, "1DATE : " + Tools.getDateStr(today))
+        val oneMonthLater = cleanUpDay.plusMonth(1)
+        Log.d(TAG, "1DATE : " + oneMonthLater)
 
-        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
+        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(oneMonthLater.formatDateLong()))))
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(996.50.formatSum()))))
 
         Helpers.clickOnRecyclerViewAtPos(0)
         Helpers.checkSelectedSumIs(994.50.formatSum())
 
-        // test mode 2
+        // test mode 2 = absolute date
         Helpers.callAccountEdit()
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 2)
 
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, 28)
-        today.add(Calendar.MONTH, +3)
+        val later3Month28th = DateTime.forDateOnly(later3Month.getYear(), later3Month.getMonth(), 28)
         val f = SimpleDateFormat("dd/MM/yyyy")
-        Helpers.scrollThenTypeText(R.id.projection_date_value, f.format(today.getTime()))
+        Helpers.scrollThenTypeText(R.id.projection_date_value, f.format(later3Month28th.getMilliseconds(TIME_ZONE)))
         Helpers.clickOnActionItemConfirm()
 
-        Log.d(TAG, "2DATE : " + f.format(today.getTime()))
-        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(Tools.getDateStr(today)))))
+        Log.d(TAG, "2DATE : " + f.format(later3Month28th.getMilliseconds(TIME_ZONE)))
+        onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(later3Month28th.formatDateLong()))))
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
 
-        onView(withId(android.R.id.list)).perform(actionOnItemAtPosition <OpRowHolder <Operation>>(5, scrollTo()))
+        onView(withId(R.id.operation_list)).perform(actionOnItemAtPosition <OpRowHolder <Operation>>(5, scrollTo()))
         Helpers.clickOnRecyclerViewAtPos(5)
 
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
@@ -442,10 +448,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         // test back to mode 0
         Helpers.callAccountEdit()
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 0)
-        onView(withId(R.id.projection_date_value)).check(matches(not(isEnabled())))
+        onView(withId(R.id.projection_date_value)).check(matches(not(isDisplayed())))
         Helpers.clickOnActionItemConfirm()
-
-        Log.d(TAG, "0DATE : " + Tools.getDateStr(today))
 
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
 
@@ -458,46 +462,40 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_account_name, ACCOUNT_NAME)
         Helpers.scrollThenTypeText(R.id.edit_account_start_sum, ACCOUNT_START_SUM)
         Helpers.scrollThenTypeText(R.id.edit_account_desc, ACCOUNT_DESC)
-
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 1)
-
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.DAY_OF_MONTH, 1)
+        // set projection to a day of next month
+        val tomorrow = DateTime.today(TIME_ZONE).plusDays(1)
+        Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(tomorrow.getDay()))
 
-        Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(today.get(Calendar.DAY_OF_MONTH)))
+        Helpers.pauseTest(10000)
+
         Helpers.clickOnActionItemConfirm()
 
         onView(withText(R.string.no_operation)).check(matches(isDisplayed()))
         Helpers.checkAccountSumIs(1000.50.formatSum())
 
-        //        Log.d(TAG, "addOpMode1 before add " + solo.getCurrentViews(ListView.class).get(0).getCount());
-        today.add(Calendar.DAY_OF_MONTH, -1)
+        // add an op today, should change the account sum
+        val today = DateTime.today(TIME_ZONE)
         addOpOnDate(today, 0)
-
         Helpers.pauseTest(1000)
-
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
         Helpers.checkAccountSumIs(999.50.formatSum())
-
         Helpers.clickOnRecyclerViewAtPos(0)
         Helpers.checkSelectedSumIs(999.50.formatSum())
 
-        //        Log.d(TAG, "addOpMode1 after one add " + solo.getCurrentViews(ListView.class).get(0).getCount());
-        // add op after X
-        today.add(Calendar.MONTH, +1)
-        addOpOnDate(today, 1)
 
+        // add op after proj date, should not change account sum
+        val nextMonth = tomorrow.plusMonth(1).plusDays(1)
+        addOpOnDate(nextMonth, 1)
         Helpers.clickOnRecyclerViewAtPos(0)
-
         Helpers.checkAccountSumIs(999.50.formatSum())
         Helpers.checkSelectedSumIs(998.50.formatSum())
 
-        //        Log.d(TAG, "addOpMode1 after two add " + solo.getCurrentViews(ListView.class).get(0).getCount());
         // add op before X of next month, should update the current sum
-        today.add(Calendar.MONTH, -2)
-        addOpOnDate(today, 2)
+        val prevMonth = today.minusMonth(1)
+        addOpOnDate(prevMonth, 2)
         // Log.d(TAG, "addOpMode1 after three add " +
         // solo.getCurrentListViews().get(0).getCount());
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -575,15 +573,15 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.DAY_OF_MONTH, 1)
+        val today = DateTime.today(TIME_ZONE)
+        val tomorrow = today.plusDays(1)
+
         Helpers.scrollThenTypeText(R.id.projection_date_value,
-                "${Integer.toString(today.get(Calendar.DAY_OF_MONTH))}/${Integer.toString(today.get(Calendar.MONTH) + 1)}/${Integer.toString(today.get(Calendar.YEAR))}")
+                "${Integer.toString(tomorrow.getDay())}/${Integer.toString(tomorrow.getMonth())}/${Integer.toString(tomorrow.getYear())}")
         Helpers.clickOnActionItemConfirm()
-        Helpers.pauseTest(1000)
+        Helpers.pauseTest(1500)
         Helpers.checkAccountSumIs(1000.50.formatSum())
 
-        today.add(Calendar.DAY_OF_MONTH, -1)
         addOpOnDate(today, 0)
         // Log.d(TAG, "addOpMode2 after one add " + solo.getCurrentListViews().get(0).getCount());
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -592,8 +590,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
 
         // add op after X
-        today.add(Calendar.MONTH, +1)
-        addOpOnDate(today, 1)
+        val nextMonth = today.plusMonth(1)
+        addOpOnDate(nextMonth, 1)
         // Log.d(TAG, "addOpMode2 after two add " +
         // solo.getCurrentListViews().get(0).getCount());
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -601,8 +599,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkSelectedSumIs(998.50.formatSum())
 
         // add op before X of next month, should update the current sum
-        today.add(Calendar.MONTH, -2)
-        addOpOnDate(today, 2)
+        val prevMonth = today.minusMonth(1)
+        addOpOnDate(prevMonth, 2)
         // Log.d(TAG, "addOpMode2 after three add " +
         // solo.getCurrentListViews().get(0).getCount());
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -638,7 +636,6 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(1001.50.formatSum())
         Helpers.checkSelectedSumIs(1003.50.formatSum())
         // Log.d(TAG, "editOpMode2 after two edit " + solo.getCurrentListViews().get(0).getCount());
-        // TODO assertEquals(3, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
     }
 
     public fun testDelOpMode2() {
@@ -738,12 +735,12 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.addAccount2()
         Helpers.clickInDrawer(R.string.preferences)
         onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.DAY_OF_MONTH, -1)
-        onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.get(Calendar.DAY_OF_MONTH))))
+        val yesterday = DateTime.today(TIME_ZONE).minusDays(1)
+        onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(yesterday.getDay())))
         Espresso.closeSoftKeyboard()
         Helpers.pauseTest(2000) // needed to workaround espresso 2.0 bug
         Helpers.clickOnDialogButton(R.string.ok)
+        Helpers.pauseTest(2000) // needed to workaround espresso 2.0 bug
         Espresso.pressBack()
     }
 
@@ -751,9 +748,9 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
 
-        val today = Tools.createClearedCalendar()
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+        val today = DateTime.today(TIME_ZONE)
+        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.getYear(),
+                today.getMonth(), today.getDay()))
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
         Helpers.pauseTest(700)
@@ -767,14 +764,18 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     public fun makeSchTransfertFromAccList() {
-        setUpSchTransOp()
+        setUpSchTransOp() // setup insert date to yesterday
         Helpers.clickInDrawer(R.string.scheduled_ops)
-        addSchTransfert()
+        addSchTransfert() // add sch op today
         Espresso.pressBack()
+        val today = DateTime.today(TIME_ZONE)
+
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
-        Helpers.checkAccountSumIs(990.00.formatSum())
+        val nb = if (today.getDay() == 1) 1 else 2 // if today is the first day of month, we get only 1 insertion, 2 otherwise, yes, this is shitty, need to configure date on the phone
+        val sum = nb * 10.50
+        Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
-        Helpers.checkAccountSumIs(2011.00.formatSum())
+        Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
     }
 
@@ -792,14 +793,15 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(2000.50.formatSum())
     }
 
-    private fun addSchTransfertHebdo() {
+    private fun addSchTransfertHebdo(): Int {
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.DAY_OF_MONTH, -28)
-        Log.d(TAG, "date: ${today.getTime().formatDate()}")
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+        val today = DateTime.today(TIME_ZONE)
+        val schOpDate = today.minusDays(28)
+
+        Log.d(TAG, "date: ${schOpDate.formatDate()}")
+        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(schOpDate.getYear(),
+                schOpDate.getMonth(), schOpDate.getDay()))
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
         Helpers.pauseTest(700)
@@ -810,38 +812,43 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_mode, OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, OP_DESC)
 
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerLeft()
 
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 0)
         Helpers.clickOnActionItemConfirm()
 
         Espresso.pressBack()
-        val sum = 9 * 10.50
+        val endOfMonth = today.plusMonth(1).getEndOfMonth()
+        val nb = endOfMonth.getWeekIndex(schOpDate)
+        val sum = nb * 10.50
+        Log.e("RadisTest", "addSchTransfertHebdo nb ops inserted: $nb")
+
         Helpers.pauseTest(2000)
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
-        //        Log.d(TAG, "addSchTransfertHebdo sum = " + sum + " / nb = ")
-        //        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX : " + solo!!.getText(CUR_ACC_SUM_IDX).getText().toString())
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
-        //        Log.d(TAG, "addSchTransfertHebdo CUR_ACC_SUM_IDX 2 : " + solo!!.getText(CUR_ACC_SUM_IDX).getText().toString())
+
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
+
+        return nb
     }
 
-    public fun makeSchTransfertHebdoFromAccList() {
+    public fun makeSchTransfertHebdoFromAccList(): Int {
         setUpSchTransOp()
         Helpers.clickInDrawer(R.string.scheduled_ops)
-        addSchTransfertHebdo()
+        val nb = addSchTransfertHebdo()
+        return nb
     }
 
     public fun testDelSchTransfFromOpsList() {
         TAG = "testDelSchTransfFromOpsList"
-        makeSchTransfertHebdoFromAccList()
+        val nb = makeSchTransfertHebdoFromAccList()
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
         Helpers.clickOnDialogButton(R.string.del_only_current)
 
-        val sum = 8 * 10.50
+        val sum = (nb - 1) * 10.50
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
@@ -863,12 +870,12 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
 
     public fun testDelFutureSchTransfFromOpsList() {
         TAG = "testDelFutureSchTransfFromOpsList"
-        makeSchTransfertHebdoFromAccList()
+        val nb = makeSchTransfertHebdoFromAccList()
         Helpers.clickOnRecyclerViewAtPos(2)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
         Helpers.clickOnDialogButton(R.string.del_all_following)
 
-        val sum = 6 * 10.50
+        val sum = (nb - 3) * 10.50
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
@@ -892,12 +899,12 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     // issue #30 on github
     public fun testSumAtSelectionOnOthersAccount() {
         Helpers.addAccount()
-        var today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        today.add(Calendar.MONTH, -1)
+        val today = DateTime.today(TIME_ZONE)
+        var date = today.getEndOfMonth().minusMonth(1)
+
         for (i in 0..2) {
-            addOpOnDate(today, i)
-            today.add(Calendar.MONTH, +1)
+            addOpOnDate(date, i)
+            date = date.plusMonth(1)
         }
         Helpers.clickInDrawer(R.string.account_edit)
         Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
@@ -905,9 +912,8 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 1)
         onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
 
-        today = Tools.createClearedCalendar()
-        today.set(Calendar.DAY_OF_MONTH, Math.min(today.get(Calendar.DAY_OF_MONTH), 28))
-        Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(Math.min(today.get(Calendar.DAY_OF_MONTH), 28)))
+        date = today.getEndOfMonth()
+        Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(Math.min(date.getDay(), 28)))
 
         Helpers.clickOnActionItemConfirm()
         Helpers.clickOnRecyclerViewAtPos(1)
@@ -957,19 +963,182 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, OP_AMOUNT)
 
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerLeft()
 
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 3)
         onView(withId(R.id.custom_periodicity_value)).check(matches(isEnabled()))
         onView(withId(R.id.custom_periodicity_value)).perform(typeText(".2"))
 
-        onView(withText(R.string.basics)).perform(click())
-        onView(withText(R.string.scheduling)).perform(click())
+        Helpers.swipePagerRight()
+        Helpers.swipePagerLeft()
         Helpers.clickOnActionItemConfirm()
     }
 
+    // will not work if launched last day of month
+    public fun testOverrideInsertDate() {
+        Helpers.addAccount()
 
-    class object {
+        Helpers.clickInDrawer(R.string.preferences)
+        Helpers.setInsertDatePref(DateTime.today(TIME_ZONE).plusDays(1))
+        Espresso.pressBack()
+
+        // check adding a sch op today is not inserted
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(isDisplayed()))
+        Helpers.checkAccountSumIs(1000.50.formatSum())
+
+        // delete the sch op
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.clickOnRecyclerViewAtPos(0)
+        onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
+        Helpers.clickOnDialogButton(R.string.del_all_occurrences)
+        Helpers.checkAccountSumIs(1000.50.formatSum())
+
+        // setup override
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.override_insert_date)).perform(click())
+        val default = getActivity().getString(R.string.prefs_insertion_date_text).format(ConfigFragment.DEFAULT_INSERTION_DATE)
+        onView(withText(default)).check(matches(isDisplayed()))
+        val today = DateTime.today(TIME_ZONE)
+        Helpers.setInsertDatePref(today)
+        val str = getActivity().getString(R.string.prefs_insertion_date_text).format(today.getDay().toString())
+        onView(withText(str)).check(matches(isDisplayed()))
+        Helpers.clickOnActionItemConfirm()
+
+        // check adding a sch op today is inserted
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(991.00.formatSum())
+    }
+
+
+    public fun testNbMonthAheadAndOverride() {
+        Helpers.addAccount()
+        Helpers.clickInDrawer(R.string.preferences)
+        Helpers.setInsertDatePref(DateTime.today(TIME_ZONE))
+        Helpers.setEdtPrefValue(R.string.prefs_nb_month_ahead_title, "2")
+        Espresso.pressBack()
+
+        // check adding a sch op today inserted 2 months ahead
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(981.50.formatSum())
+
+        // delete all
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.clickOnRecyclerViewAtPos(0)
+        onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
+        Helpers.clickOnDialogButton(R.string.del_all_occurrences)
+        Espresso.pressBack()
+        Helpers.checkAccountSumIs(1000.50.formatSum())
+
+        // setup override
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.override_nb_month_ahead)).perform(click())
+        val default = getActivity().getString(R.string.prefs_nb_month_ahead_text).format(ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
+        onView(withText(default)).check(matches(isDisplayed()))
+        Helpers.setEdtPrefValue(R.string.prefs_nb_month_ahead_title, "1")
+        val str = getActivity().getString(R.string.prefs_nb_month_ahead_text).format(1)
+        onView(withText(str)).check(matches(isDisplayed()))
+        Helpers.clickOnActionItemConfirm()
+
+        // check adding a sch op today inserted 1 month ahead
+        Helpers.clickInDrawer(R.string.scheduled_ops)
+        Helpers.addScheduleOp(DateTime.today(TIME_ZONE).plusMonth(1))
+        onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
+        Helpers.checkAccountSumIs(991.00.formatSum())
+    }
+
+    public fun testOverrideHideQuickAdd() {
+        Helpers.addAccount()
+
+        fun checkQuickAddVisibilityAs(visible: Boolean) {
+            if (visible) {
+                onView(withId(R.id.quick_add_layout)).check(matches(isDisplayed()))
+            } else {
+                onView(withId(R.id.quick_add_layout)).check(matches(not(isDisplayed())))
+            }
+        }
+
+        // check global pref to false, override activated but let false as value = quick add visible
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(true)
+
+        // check global pref to false, override activated, value to true = quick add hidden
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.hide_ops_quick_add)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(false)
+
+        // check global pref to false, override deactivated, value to true = quick add visible
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(true)
+
+        // GLOBAL PREF = true
+        Helpers.clickInDrawer(R.string.preferences)
+        onView(withText(R.string.hide_ops_quick_add)).perform(click())
+        Espresso.pressBack()
+
+        // check global pref to true, override activated, value to false = quick add visible
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        onView(withText(R.string.hide_ops_quick_add)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(true)
+
+        // check global pref to true, override deactivate, value to false = quick add hidden
+        Helpers.goToCurAccountOptionPanel()
+        onView(withText(R.string.override_hide_quickadd)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+        checkQuickAddVisibilityAs(false)
+    }
+
+    fun testQuickAddActionOption() {
+        Helpers.addAccount()
+
+        // set long press to add today = simple click set to ask date
+        Helpers.clickInDrawer(R.string.preferences)
+        onView(withId(android.R.id.list)).perform(swipeUp())
+        onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
+        val addToday = getActivity().getResources().getStringArray(R.array.quickadd_actions)[1]
+        onView(withText(addToday)).perform(click())
+        Espresso.pressBack()
+
+        onView(withId(R.id.account_sum)).check(matches(withText(containsString(1000.50.formatSum()))))
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(typeText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(click())
+        onView(withText(R.string.op_date)).check(matches(isDisplayed()))
+        //Helpers.clickOnDialogButton(R.string.cancel) // click on "OK" makes the year doing +1, click on "Cancel" makes day goes +1, Espresso bug?
+        Espresso.pressBack() // hack because of the bug above
+
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(replaceText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(longClick())
+        Helpers.checkAccountSumIs(999.50.formatSum())
+
+        Helpers.goToCurAccountOptionPanel()
+        onView(withId(android.R.id.list)).perform(swipeUp())
+        onView(withText(R.string.override_quick_add_action)).perform(click())
+        onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
+        val askDate = getActivity().getResources().getStringArray(R.array.quickadd_actions)[0]
+        onView(withText(askDate)).perform(click())
+        Helpers.clickOnActionItemConfirm()
+
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(replaceText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(click())
+        Helpers.checkAccountSumIs(998.50.formatSum())
+    }
+
+    companion object {
         private val WAIT_DIALOG_TIME = 2000
 
         var TAG = "RadisRobotium"

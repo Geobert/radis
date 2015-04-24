@@ -32,9 +32,9 @@ import fr.geobert.radis.db.DbHelper;
 import fr.geobert.radis.service.InstallRadisServiceReceiver;
 import fr.geobert.radis.service.RadisService;
 import fr.geobert.radis.ui.OperationListFragment;
+import fr.geobert.radis.ui.adapter.InfoAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -134,24 +134,6 @@ public class Tools {
     public static boolean onDefaultOptionItemSelected(MainActivity ctx, MenuItem item) {
         mActivity = ctx;
         switch (item.getItemId()) {
-//            case R.id.restore:
-//                AdvancedDialog.newInstance(R.id.restore).show(ctx.getSupportFragmentManager(), "restore");
-//                return true;
-//            case R.id.backup:
-//                AdvancedDialog.newInstance(R.id.backup).show(ctx.getSupportFragmentManager(), "backup");
-//                return true;
-//            case R.id.go_to_preferences:
-//                Intent i = new Intent(ctx, RadisConfiguration.class);
-//                ctx.startActivity(i);
-//                return true;
-//            case R.id.process_scheduling:
-//                AdvancedDialog.newInstance(R.id.process_scheduling).show(ctx.getSupportFragmentManager(),
-//                        "process_scheduling");
-//                return true;
-//            case R.id.recompute_account:
-//                AccountTable.consolidateSums(ctx, ctx.getAccountManager().getCurrentAccountId(ctx));
-//                MainActivity.refreshAccountList(ctx);
-//                break;
             case R.id.debug:
                 Tools.showDebugDialog(ctx);
                 return true;
@@ -435,17 +417,6 @@ public class Tools {
         InputMethodManager inputManager = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
         inputManager.hideSoftInputFromWindow(ctx.getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    public static long extractSumFromStr(String sumStr) {
-        sumStr = sumStr.replace('+', ' ').trim();
-        double d;
-        try {
-            d = ToolsPackage.parseSum(sumStr);
-        } catch (ParseException e) {
-            d = 0d;
-        }
-        return Math.round(d * 100);
     }
 }
 

@@ -27,7 +27,7 @@ class DeleteStatConfirmationDiag : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         super.onCreate(savedInstanceState)
-        val args: Bundle = getArguments() as Bundle
+        val args: Bundle = getArguments() : Bundle
         statId = args.getLong("statId")
         return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
             override fun onClick(p0: DialogInterface, p1: Int) {

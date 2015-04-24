@@ -1,44 +1,32 @@
 package fr.geobert.radis.ui.editor
 
-import fr.geobert.radis.db.StatisticTable
-import fr.geobert.radis.BaseActivity
-import android.support.v4.app.LoaderManager.LoaderCallbacks
-import android.database.Cursor
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.LinearLayout
-import android.widget.TextView
-import android.widget.Button
-import fr.geobert.radis.tools.ToggleImageButton
-import fr.geobert.radis.data.Statistic
-import kotlin.properties.Delegates
-import fr.geobert.radis.R
-import android.os.Bundle
-import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.Adapter
-import android.widget.AdapterView
-import java.util.GregorianCalendar
-import android.widget.DatePicker
+import android.app.Activity
 import android.app.DatePickerDialog
+import android.content.DialogInterface
+import android.content.Intent
+import android.database.Cursor
+import android.os.Bundle
+import android.os.Message
+import android.support.v4.app.LoaderManager.LoaderCallbacks
+import android.support.v4.content.Loader
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.widget.*
+import android.widget.AdapterView.OnItemSelectedListener
+import fr.geobert.radis.BaseActivity
+import fr.geobert.radis.R
+import fr.geobert.radis.data.Account
+import fr.geobert.radis.data.Statistic
+import fr.geobert.radis.db.StatisticTable
+import fr.geobert.radis.tools.*
 import java.util.Calendar
 import java.util.Date
-import android.content.DialogInterface
-import fr.geobert.radis.data.Account
-import fr.geobert.radis.tools.forEach
-import android.view.MenuInflater
-import android.view.Menu
-import android.app.Activity
-import fr.geobert.radis.tools.alert
-import android.view.MenuItem
-import android.support.v4.content.Loader
-import android.os.Message
-import android.content.Intent
-import fr.geobert.radis.tools.formatDate
-import fr.geobert.radis.tools.parseDate
+import java.util.GregorianCalendar
+import kotlin.properties.Delegates
 
-public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
+public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
     private val mNameEdt: EditText by Delegates.lazy { findViewById(R.id.stat_name_edt) as EditText }
     private val mAccountSpin: Spinner by Delegates.lazy { findViewById(R.id.stat_account_spinner) as Spinner }
     private val mFilterSpin: Spinner by Delegates.lazy { findViewById(R.id.stat_filter_spinner) as Spinner }
@@ -60,7 +48,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
 
     private val GET_STAT = 700
 
-    class object {
+    companion object {
         public val ACTIVITY_STAT_CREATE: Int = 4000;
         public val ACTIVITY_STAT_EDIT: Int = 4001;
 
@@ -78,18 +66,14 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
     override protected fun onCreate(savedInstanceState: Bundle?): Unit {
         super<BaseActivity>.onCreate(savedInstanceState)
         setContentView(R.layout.statistics_editor_fragment)
-
-        val bar = getSupportActionBar()
-        bar.setTitle(R.string.stat_editor_title)
-        bar.setDisplayHomeAsUpEnabled(true)
-        bar.setHomeAsUpIndicator(R.drawable.cancel_48);
-
+        setTitle(R.string.stat_editor_title)
+        initToolbar(this)
         setupChartTypeButtons()
     }
 
     override fun onResume() {
         super<BaseActivity>.onResume()
-        mAccountManager?.fetchAllAccounts(this, false, {() ->
+        mAccountManager.fetchAllAccounts(false, { ->
             mStatId = getIntent()?.getLongExtra(StatisticTable.KEY_STAT_ID, 0) as Long
             if (mStatId == 0L) {
                 if (null == mStat) {
@@ -104,7 +88,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
                 initInfoSpinner()
                 initChartTypeButtons()
             } else {
-                getSupportLoaderManager()?.initLoader(GET_STAT, null, this)
+                getSupportLoaderManager()?.initLoader(GET_STAT, Bundle(), this)
             }
         })
     }
@@ -198,7 +182,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
     fun showDatePicker(button: Button): Unit {
         val date = GregorianCalendar()
         date.setTime(button.getText().toString().parseDate())
-        val datePicker = DatePickerDialog(this, {(v: DatePicker?, y: Int, m: Int, d: Int) ->
+        val datePicker = DatePickerDialog(this, { v: DatePicker?, y: Int, m: Int, d: Int ->
             val dt = GregorianCalendar(y, m, d).getTime()
             val stat = mStat
             if (stat != null) // TODO check https://youtrack.jetbrains.com/issue/KT-1213
@@ -232,7 +216,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
 
     private fun fillAccountSpinner(): Unit {
         val adapter = ArrayAdapter<Account>(this, android.R.layout.simple_spinner_item)
-        val allAccCursor = mAccountManager?.getAllAccountsCursor()
+        val allAccCursor = mAccountManager.allAccountsCursor
         if (allAccCursor != null) {
             allAccCursor.moveToPosition(-1)
             allAccCursor.forEach({ adapter.add(Account(it)) })
@@ -279,19 +263,19 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
         }
 
         mPieBtn.setOnCheckedChangeListener {
-            (view: ToggleImageButton?, checked: Boolean) ->
+            view: ToggleImageButton?, checked: Boolean ->
             if (view != null)
                 onCheckedChanged(view, checked, Statistic.CHART_PIE)
         }
 
         mBarBtn.setOnCheckedChangeListener {
-            (view: ToggleImageButton?, checked: Boolean) ->
+            view: ToggleImageButton?, checked: Boolean ->
             if (view != null)
                 onCheckedChanged(view, checked, Statistic.CHART_BAR)
         }
 
         mLineBtn.setOnCheckedChangeListener {
-            (view: ToggleImageButton?, checked: Boolean) ->
+            view: ToggleImageButton?, checked: Boolean ->
             if (view != null)
                 onCheckedChanged(view, checked, Statistic.CHART_LINE)
         }
@@ -303,14 +287,9 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
         return true
     }
 
-    private fun onCancelPressed() {
-        setResult(Activity.RESULT_CANCELED)
-        finish()
-    }
-
     private fun formErrorMessage(): String? {
         val builder = StringBuilder()
-        if (mNameEdt.getText().toString().trim().length <= 0) {
+        if (mNameEdt.getText().toString().trim().length() <= 0) {
             builder.append("- ":CharSequence).append(getString(R.string.empty_stat_name):CharSequence).append('\n')
         }
         when (mStat?.timeScaleType) {
@@ -334,11 +313,11 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
                 }
         }
 
-        return if (builder.length > 0) builder.toString() else null
+        return if (builder.length() > 0) builder.toString() else null
     }
 
     private fun fillStat() {
-        // filling missing infos
+        // filling missing info
         val stat = mStat
         if (stat != null) {
             stat.name = mNameEdt.getText().toString().trim()
@@ -378,16 +357,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor> {
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
-            when (item?.getItemId()) {
-                android.R.id.home -> {
-                    onBackPressed()
-                    true
-                }
-            //                R.id.cancel -> {
-            //                    onCancelPressed()
-            //                    true
-            //                }
+    override fun onMenuItemClick(item: MenuItem): Boolean =
+            when (item.getItemId()) {
                 R.id.confirm -> {
                     onConfirmPressed()
                     true

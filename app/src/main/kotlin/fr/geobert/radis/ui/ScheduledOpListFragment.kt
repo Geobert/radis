@@ -1,8 +1,8 @@
 package fr.geobert.radis.ui
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.database.Cursor
@@ -11,10 +11,11 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
@@ -29,17 +30,11 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.adapter.SchedOpAdapter
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
-
-import java.util.GregorianCalendar
+import hirondelle.date4j.DateTime
 import kotlin.properties.Delegates
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.DefaultItemAnimator
-import android.app.Activity
-import android.view.ViewStub
-import fr.geobert.radis.tools.formatSum
-import android.util.Log
 
 public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, IOperationList {
     private var mContainer: LinearLayout by Delegates.notNull()
@@ -53,31 +48,30 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
 
-        setHasOptionsMenu(true)
-
         val ll = inflater.inflate(R.layout.scheduled_list, container, false) as LinearLayout
         mContainer = ll
-        val actionbar = mActivity.getSupportActionBar()
-        actionbar.setIcon(R.drawable.sched_48)
 
-        mListView = ll.findViewById(android.R.id.list) as RecyclerView
+        setIcon(R.drawable.sched_48)
+        setMenu(R.menu.scheduled_list_menu)
+
+        mListView = ll.findViewById(R.id.operation_list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
         mListView.setHasFixedSize(true)
         mListLayout = LinearLayoutManager(getActivity())
-        if (mListView.getLayoutManager() == null) {
-            mListView.setLayoutManager(mListLayout)
-        }
+        //        if (mListView.getLayoutManager() == null) {
+        mListView.setLayoutManager(mListLayout)
+        //        }
         mListView.setItemAnimator(DefaultItemAnimator())
         return ll
     }
 
-    private fun selectOpAndAdjustOffset(position: Int) {
-        val adapter = mAdapter
-        if (adapter != null) {
-            adapter.selectedPosition = position
-            mListView.smoothScrollToPosition(position + 2) // scroll in order to see fully expanded op row
-        }
-    }
+    //    private fun selectOpAndAdjustOffset(position: Int) {
+    //        val adapter = mAdapter
+    //        if (adapter != null) {
+    //            adapter.selectedPosition = position
+    //            mListView.smoothScrollToPosition(position + 2) // scroll in order to see fully expanded op row
+    //        }
+    //    }
 
     private fun fetchSchOpsOfAccount() {
         if (mLoader == null) {
@@ -87,7 +81,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         // nothing ?
     }
 
@@ -98,16 +92,12 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun onResume() {
         super<BaseFragment>.onResume()
-        mAccountManager.fetchAllAccounts(mActivity, false, object : Runnable {
-            override fun run() {
-                fetchSchOpsOfAccount()
-            }
-        })
+        mAccountManager.fetchAllAccounts(false, { fetchSchOpsOfAccount() })
     }
 
     override fun onAccountChanged(itemId: Long): Boolean {
         if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
-            mAccountManager.setCurrentAccountId(itemId)
+            mAccountManager.setCurrentAccountId(itemId, getActivity())
             val req = if (mActivity.getCurrentAccountId() == 0L) {
                 GET_ALL_SCH_OPS
             } else {
@@ -148,7 +138,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    override fun onMenuItemClick(item: MenuItem): Boolean {
         when (item.getItemId()) {
             R.id.create_operation -> {
                 ScheduledOperationEditor.callMeForResult(mActivity, 0,
@@ -157,10 +147,6 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             }
             else -> return Tools.onDefaultOptionItemSelected(mActivity, item)
         }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.scheduled_list_menu, menu)
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor>? {
@@ -227,7 +213,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         mLoader = null
     }
 
-    override fun getMoreOperations(startDate: GregorianCalendar?) {
+    override fun getMoreOperations(startDate: DateTime?) {
         // not needed
     }
 
@@ -274,7 +260,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             return builder.create()
         }
 
-        class object {
+        companion object {
             var parentFrag: ScheduledOpListFragment by Delegates.notNull()
 
             public fun newInstance(opId: Long, parentFrag: ScheduledOpListFragment): DeleteOpConfirmationDialog {
@@ -289,18 +275,12 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     }
 
-    class object {
-        public val CURRENT_ACCOUNT: String = "accountId"
-        private val TAG = "ScheduleOpList"
+    companion object {
+        //        public val CURRENT_ACCOUNT: String = "accountId"
+        //        private val TAG = "ScheduleOpList"
 
         // dialog ids
         private val GET_ALL_SCH_OPS = 900
         private val GET_SCH_OPS_OF_ACCOUNT = 910
-
-        public fun callMe(ctx: Context, currentAccountId: Long) {
-            val i = Intent(ctx, javaClass<ScheduledOpListFragment>())
-            i.putExtra(CURRENT_ACCOUNT, currentAccountId)
-            ctx.startActivity(i)
-        }
     }
 }

@@ -139,14 +139,14 @@
     <string name="prefs_insertion_date_title">Enter day of month</string>
     <string name="prefs_insertion_date_label">Insertion date</string>
     <string name="preferences">Preferences</string>
-    <string name="ask_update_occurences">Do you want to update all occurrences?\nIf not,
-        existing occurences will be disconnected from this scheduling.
+    <string name="ask_update_occurrences">Do you want to update all occurrences?\nIf not,
+        existing occurrences will be disconnected from this scheduling.
     </string>
     <string name="no">No</string>
     <string name="update">Update</string>
     <string name="disconnect">Disconnect</string>
     <string name="ask_update_scheduling">This transaction is from a scheduled one. Do you
-        want to update the scheduled transaction and all its occurences? If
+        want to update the scheduled transaction and all its occurrences? If
         not, current transaction will be disconnected from the scheduled one.
     </string>
     <string name="convert_into_scheduling">Convert into a scheduled transaction</string>
@@ -154,8 +154,6 @@
     <string name="process_scheduled_transactions">Process scheduled transactions</string>
     <string name="must_be_day_of_month">ou must input a day of month between 1 and 31</string>
     <string name="error_on_write_prefs">Error while writing preferences</string>
-    <string name="quickadd_account">Target account for quick add</string>
-    <string name="quickadd_account_desc">arget account for homescreen quick add: %s</string>
     <string name="quickadd_target">Add transaction to: %s</string>
     <string name="quickadd_target_to_configure">Do to preferences to choose default account</string>
     <string name="quickadd_target_no_account">Create account to enable</string>
@@ -176,7 +174,7 @@
     <string name="bad_format_for_currency">Currency must be an ISO 4217 code (check Wikipedia if you don\'t know your
         currency code)
     </string>
-    <string name="short_date_format">MM/dd</string>
+    <string name="short_date_format">dd/MM</string>
     <string name="all_accounts">All accounts</string>
     <string name="delete_recurring_op">Would you like to delete only this transaction, all transactions in the series or
         this and all future transactions in the series? (Press back button to cancel)
@@ -219,7 +217,7 @@
     <string name="checking_max_date"><![CDATA[Use transactions until:]]></string>
     <string name="missing_ops">The target sum can\'t be reached. Radis found %1$s by checking transactions. You have to find the %2$s left :)</string>
     <string name="invert_completion_in_quick_add">Invert quick add completion order</string>
-    <string name="invert_completion_in_quick_add_details">Invest the display of completion in quick add to have the most used near the text field</string>
+    <string name="invert_completion_in_quick_add_details">Invert the display of completion in quick add to have the most used near the text field</string>
     <string name="op_list">Opérations</string>
     <string name="operations">Opérations</string>
     <string name="accounts">Comptes</string>
@@ -250,4 +248,17 @@
     <string name="no_lbl">[None]</string>
     <string name="misc_chart_cat">Misc</string>
     <string name="op_creation">Transaction creation</string>
+    <string name="default_account">Default account</string>
+    <string name="account_defaults">Account\'s default values</string>
+    <string name="default_account_desc">Opened account on start: %s</string>
+    <string name="override_insert_date">Override insertion date</string>
+    <string name="override_hide_quickadd">Override hide quick add</string>
+    <string name="override_use_info">Override use weighted completion</string>
+    <string name="override_invert_quickadd_completion">Override invert quick add completion</string>
+    <string name="prefs_nb_month_ahead_title">Number of month ahead to insert</string>
+    <string name="prefs_nb_month_ahead_text">Radis will keep %d months inserted ahead</string>
+    <string name="override_nb_month_ahead">Override the number of month ahead</string>
+    <string name="quick_add_long_press_action_title">Action on quick add long press</string>
+    <string name="quick_add_long_press_action_text">Long press will %s</string>
+    <string name="override_quick_add_action">Override quick add long press action</string>
 </resources>

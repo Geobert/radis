@@ -39,19 +39,22 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     protected abstract fun operationFactory(c: Cursor): T
 
     protected var prevExpandedPos: Int = -1
-    var selectedPosition: Int = -1
+    private var _selectedPosition: Int = -1
+    var selectedPosition: Int
         set(value) {
             val tmpOldPos = selectedPosition
-            if ($selectedPosition != -1) {
-                prevExpandedPos = $selectedPosition
+            if (_selectedPosition != -1) {
+                prevExpandedPos = _selectedPosition
             }
-            $selectedPosition = value
-
+            _selectedPosition = value
             if (value != -1) justClicked = true
             notifyItemChanged(value)
             if (tmpOldPos != -1) {
                 notifyItemChanged(tmpOldPos)
             }
+        }
+        get() {
+            return _selectedPosition
         }
     val resources = activity.getResources()
 
@@ -133,6 +136,8 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     }
 
     fun reset() {
+        prevExpandedPos = -1
+        _selectedPosition = -1
         operations.clear()
         mCellStates = arrayOfNulls(0)
     }

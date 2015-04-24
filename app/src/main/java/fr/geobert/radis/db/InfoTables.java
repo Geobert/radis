@@ -9,9 +9,10 @@ import android.database.sqlite.SQLiteException;
 import android.net.Uri;
 import android.support.v4.content.CursorLoader;
 import android.util.Log;
-import fr.geobert.radis.RadisConfiguration;
+import fr.geobert.radis.data.AccountConfig;
 import fr.geobert.radis.tools.AsciiUtils;
 import fr.geobert.radis.tools.DBPrefsManager;
+import fr.geobert.radis.ui.ConfigFragment;
 
 import java.util.HashMap;
 import java.util.Vector;
@@ -102,12 +103,11 @@ public class InfoTables {
 
     private static Cursor getInfoByKey(Context ctx, String key, Uri table, String col) throws SQLException {
         key = AsciiUtils.convertNonAscii(key).trim().toLowerCase();
-        if (key == null || key.length() == 0) {
+        if (key.length() == 0) {
             return null;
         }
-        Cursor c = ctx.getContentResolver().query(table, new String[]{"_id", KEY_WEIGHT},
+        return ctx.getContentResolver().query(table, new String[]{"_id", KEY_WEIGHT},
                 mColNameNormName.get(col) + "= ?", new String[]{key}, null);
-        return c;
     }
 
     private static long createKeyId(Context ctx, String key, Uri table, String col) throws SQLException {
@@ -169,7 +169,7 @@ public class InfoTables {
     }
 
     public static Cursor fetchMatchingInfo(Context ctx, Uri table, String colName, String constraint,
-                                           final boolean isQuickAdd) {
+                                           final boolean isQuickAdd, AccountConfig account) {
         String where;
         String[] params;
         if (null != constraint) {
@@ -180,10 +180,13 @@ public class InfoTables {
             params = null;
         }
         String ordering = colName + " asc";
-        if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true)) {
+        boolean useWeight = account.getOverrideUseWeighedInfo() ? account.getUseWeighedInfo() :
+                DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true);
+        if (useWeight) {
             String order;
-            if (isQuickAdd && DBPrefsManager.getInstance(ctx).
-                    getBoolean(RadisConfiguration.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true)) {
+            boolean ascOrder = account.getOverrideInvertQuickAddComp() ? account.getInvertQuickAddComp() :
+                    DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_INVERT_COMPLETION_IN_QUICK_ADD, true);
+            if (isQuickAdd && ascOrder) {
                 order = " asc, ";
             } else {
                 order = " desc, ";
@@ -209,7 +212,7 @@ public class InfoTables {
             params = null;
         }
         String ordering = colName + " asc";
-        if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true)) {
+        if (DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true)) {
             ordering = KEY_WEIGHT + " desc, " + ordering;
         }
         CursorLoader loader = new CursorLoader(ctx, table, new String[]{"_id", colName, KEY_WEIGHT}, where, params,
@@ -271,7 +274,7 @@ public class InfoTables {
         }
 
         if (id != -1) {
-            if (DBPrefsManager.getInstance(ctx).getBoolean(RadisConfiguration.KEY_USE_WEIGHTED_INFOS, true) &&
+            if (DBPrefsManager.getInstance(ctx).getBoolean(ConfigFragment.KEY_USE_WEIGHTED_INFOS, true) &&
                     !isUpdate && !justCreated) { // update of weight
                 Cursor maxWeightInf = fetchMaxWeight(ctx, keyTableName);
                 if (maxWeightInf != null) {

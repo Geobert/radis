@@ -67,26 +67,20 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
-        setHasOptionsMenu(true)
+
         val v = inflater?.inflate(R.layout.statistics_list_fragment, container, false) as View
         mContainer = v
-        mList = v.findViewById(android.R.id.list) as RecyclerView
+        mList = v.findViewById(R.id.operation_list) as RecyclerView
         mList.setLayoutManager(android.support.v7.widget.LinearLayoutManager(getActivity()))
         mList.setHasFixedSize(true)
         mList.setItemAnimator(DefaultItemAnimator())
 
-        val actionbar: ActionBar = mActivity?.getSupportActionBar() as ActionBar
-        actionbar.setDisplayHomeAsUpEnabled(true)
-        actionbar.setIcon(R.drawable.stat_48)
+        setIcon(R.drawable.stat_48)
+        setMenu(R.menu.operations_list_menu)
         return v
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?): Unit {
-        super<BaseFragment>.onCreateOptionsMenu(menu, inflater)
-        inflater?.inflate(R.menu.operations_list_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean =
+    override fun onMenuItemClick(item: MenuItem?): Boolean =
             when (item?.getItemId()) {
                 R.id.create_operation -> {
                     StatisticEditor.callMeForResult(ctx)
@@ -101,7 +95,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         fetchStats()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
         super<BaseFragment>.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             fetchStats()
@@ -115,13 +109,13 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun fetchStats() {
         when (mLoader) {
             null ->
-                ctx.getSupportLoaderManager()?.initLoader(2000, null, this)
+                ctx.getSupportLoaderManager()?.initLoader(2000, Bundle(), this)
             else ->
-                ctx.getSupportLoaderManager()?.restartLoader(2000, null, this)
+                ctx.getSupportLoaderManager()?.restartLoader(2000, Bundle(), this)
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     }
 
 
@@ -187,11 +181,11 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
      */
     private fun partFunc(stat: Statistic): (Operation) -> String =
             when (stat.filterType) {
-                Statistic.THIRD_PARTY -> {(o: Operation) -> o.mThirdParty ?: "" }
-                Statistic.TAGS -> {(o: Operation) -> o.mTag ?: "" }
-                Statistic.MODE -> {(o: Operation) -> o.mMode ?: "" }
+                Statistic.THIRD_PARTY -> { o: Operation -> o.mThirdParty ?: "" }
+                Statistic.TAGS -> { o: Operation -> o.mTag ?: "" }
+                Statistic.MODE -> { o: Operation -> o.mMode ?: "" }
                 else -> { // Statistic.NO_FILTER
-                    (o: Operation) ->
+                    o: Operation ->
                     val g = GregorianCalendar()
                     g.setTimeInMillis(o.getDate())
                     when (stat.timeScaleType) {
@@ -234,9 +228,9 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
     private fun sumPerFilter(stat: Statistic): Pair<Map<String, Long>, Map<String, Long>> {
         // partition the list according to filterType
-        fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) {(s: Long, o: Operation) -> s + o.mSum } }
+        fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) { s: Long, o: Operation -> s + o.mSum } }
 
-        fun sumMap(m: Map<String, Long>) = m.values().fold(0L) {(s: Long, l: Long) -> s + l }
+        fun sumMap(m: Map<String, Long>) = m.values().fold(0L) { s: Long, l: Long -> s + l }
         val (pos, neg) = partOps(stat)
         val sumP = sumMapOfList(pos)
         val sumN = sumMapOfList(neg)
@@ -311,7 +305,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                 val s = TimeSeries("")
                 fun construct(m: Map<String, List<Operation>>, colors: List<Int>) {
                     m.forEach {
-                        val v = Math.abs(it.value.fold(0L) {(i: Long, op: Operation) -> i + op.mSum }) + 0.0
+                        val v = Math.abs(it.value.fold(0L) { i: Long, op: Operation -> i + op.mSum }) + 0.0
                         renderer.setYAxisMax(Math.max(v + 1.0, renderer.getYAxisMax()))
                         renderer.addYTextLabel(v, v.formatSum())
                         s.add(it.value[0].getDateObj(), v)

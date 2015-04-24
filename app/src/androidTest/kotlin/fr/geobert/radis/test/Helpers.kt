@@ -1,43 +1,52 @@
 package fr.geobert.radis.test
 
-import fr.geobert.radis.R
-
-import android.support.test.espresso.Espresso.*
-import android.support.test.espresso.matcher.ViewMatchers.*
-import android.support.test.espresso.assertion.ViewAssertions.*
-import android.support.test.espresso.action.ViewActions.*
-import android.support.test.espresso.contrib.DrawerActions.*
-import android.support.test.espresso.contrib.DrawerMatchers.*
-import android.support.test.espresso.contrib.PickerActions.*
-import org.hamcrest.Matchers.*
-import android.util.Log
-import fr.geobert.radis.ui.drawer.NavDrawerItem
 import android.app.Activity
-import kotlin.properties.Delegates
-import android.view.KeyEvent
-import fr.geobert.radis.tools.formatSum
-import org.hamcrest.Matcher
-import android.view.View
-import fr.geobert.radis.tools.Tools
-import java.util.Calendar
 import android.support.test.espresso.Espresso
-import android.widget.EditText
-import android.widget.Button
+import android.support.test.espresso.Espresso.onData
+import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.ViewAction
+import android.support.test.espresso.action.ViewActions
+import android.support.test.espresso.action.ViewActions.click
+import android.support.test.espresso.action.ViewActions.replaceText
+import android.support.test.espresso.action.ViewActions.scrollTo
+import android.support.test.espresso.action.ViewActions.typeText
+import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
+import android.support.test.espresso.assertion.ViewAssertions.matches
+import android.support.test.espresso.contrib.DrawerActions.openDrawer
+import android.support.test.espresso.contrib.DrawerMatchers.isOpen
+import android.support.test.espresso.contrib.PickerActions
+import android.support.test.espresso.contrib.PickerActions.setDate
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
-import fr.geobert.radis.ui.adapter.OpRowHolder
-import fr.geobert.radis.data.Operation
 import android.support.test.espresso.matcher.RootMatchers
+import android.support.test.espresso.matcher.ViewMatchers.hasFocus
+import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
+import android.support.test.espresso.matcher.ViewMatchers.withId
+import android.support.test.espresso.matcher.ViewMatchers.withText
+import android.test.ActivityInstrumentationTestCase2
+import android.util.Log
+import android.view.KeyEvent
+import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ListView
 import android.widget.RelativeLayout
-import android.test.ActivityInstrumentationTestCase2
 import fr.geobert.radis.MainActivity
+import fr.geobert.radis.R
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.tools.TIME_ZONE
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.ui.adapter.OpRowHolder
+import hirondelle.date4j.DateTime
+import org.hamcrest.Matcher
+import org.hamcrest.Matchers.*
+import java.util.Calendar
 import java.util.GregorianCalendar
-import android.support.test.espresso.contrib.PickerActions
+import kotlin.properties.Delegates
 
 class Helpers {
 
-    class object {
+    companion object {
         var instrumentationTest: ActivityInstrumentationTestCase2<MainActivity> by Delegates.notNull()
         var activity: Activity by Delegates.notNull()
 
@@ -59,6 +68,7 @@ class Helpers {
             onView(withId(R.id.confirm)).perform(click())
             pauseTest(1200)
             onView(withId(R.id.confirm)).check(doesNotExist())
+            pauseTest(1000)
         }
 
         fun ACTIONBAR_TITLE_MATCHER(title: String): Matcher<View> {
@@ -77,7 +87,7 @@ class Helpers {
             openDrawer(R.id.drawer_layout)
             pauseTest(100)
             onView(withId(R.id.drawer_layout)).check(matches(isOpen()))
-            onData(allOf(iz(instanceOf(javaClass<NavDrawerItem>())), withNavDrawerItem(str))).perform(click())
+            onData(withNavDrawerItem(str)).inAdapterView(withId(R.id.left_drawer)).perform(click())
         }
 
         fun callAccountCreation() {
@@ -110,7 +120,7 @@ class Helpers {
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC_2)
             clickOnActionItemConfirm()
 
-            onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
             onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(2, javaClass<RelativeLayout>()))
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
@@ -123,7 +133,7 @@ class Helpers {
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
 
-            onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
             onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(3, javaClass<RelativeLayout>()))
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
@@ -158,16 +168,23 @@ class Helpers {
             addOp(RadisTest.OP_TP, RadisTest.OP_AMOUNT, RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
         }
 
-        fun setUpSchOp() {
-            addAccount()
-            clickInDrawer(R.string.preferences)
-            onView(withText(R.string.prefs_insertion_date_label)).perform(click())
-            val today = Tools.createClearedCalendar()
-            today.add(Calendar.DAY_OF_MONTH, 1)
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(Integer.toString(today.get(Calendar.DAY_OF_MONTH))))
+        fun setEdtPrefValue(key: Int, value: String) {
+            onView(withText(key)).perform(click())
+            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(value))
             Espresso.closeSoftKeyboard()
             pauseTest(2000) // needed to workaround espresso 2.0 bug
             clickOnDialogButton(R.string.ok)
+        }
+
+        fun setInsertDatePref(date: DateTime) {
+            setEdtPrefValue(R.string.prefs_insertion_date_label, Integer.toString(date.getDay()))
+        }
+
+        fun setUpSchOp() {
+            addAccount()
+
+            clickInDrawer(R.string.preferences)
+            setInsertDatePref(DateTime.today(TIME_ZONE).plusDays(1))
 
             Espresso.pressBack()
 
@@ -175,18 +192,16 @@ class Helpers {
             onView(withText(R.string.no_operation_sch)).check(matches(isDisplayed()))
         }
 
-        fun addScheduleOp() {
-            setUpSchOp()
+        // add a sch op today, 9.50, monthly
+        fun addScheduleOp(date: DateTime) {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            val today = Tools.createClearedCalendar()
-            // +1 is because MONTH is 0 indexed
-            onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+            onView(withId(R.id.edit_op_date)).perform(setDate(date.getYear(), date.getMonth(), date.getDay()))
 
             fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
-            onView(withText(R.string.scheduling)).perform(click())
+            swipePagerLeft()
 
             clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 1)
             clickOnActionItemConfirm()
@@ -196,9 +211,6 @@ class Helpers {
             Espresso.pressBack()
 
             // TODO assertEquals(1, solo!!.getCurrentViews(javaClass<ListView>()).get(0).getCount())
-            //            onView(withText(R.string.no_operation)).check(doesNotExist())
-            onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
-            checkAccountSumIs(991.0.formatSum())
         }
 
 
@@ -206,14 +218,15 @@ class Helpers {
             setUpSchOp()
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
-            val today = Tools.createClearedCalendar()
-            today.add(Calendar.DAY_OF_MONTH, -14)
-            onView(withId(R.id.edit_op_date)).perform(setDate(today.get(Calendar.YEAR), today.get(Calendar.MONTH) + 1,
-                    today.get(Calendar.DAY_OF_MONTH)))
+            val today = DateTime.today(TIME_ZONE)
+            val schOpDate = today.minusDays(14)
 
+            println("scheduled op date: $schOpDate")
+
+            onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.getYear(), schOpDate.getMonth(), schOpDate.getDay()))
             fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
-            onView(withText(R.string.scheduling)).perform(click())
+            swipePagerLeft()
 
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())
@@ -221,10 +234,26 @@ class Helpers {
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
 
             clickOnActionItemConfirm()
-            Espresso.pressBack()
+            Espresso.pressBack() // back to operations list
             Helpers.pauseTest(2000)
-            checkAccountSumIs((1000.5 - 3).formatSum())
-            return 3
+
+            val endOfMonth = today.getEndOfMonth()
+            val nbOp = endOfMonth.getWeekIndex(schOpDate)
+
+            Log.d("RadisTest", "nb op inserted: $nbOp")
+
+            checkAccountSumIs((1000.5 - nbOp).formatSum())
+            return nbOp
+        }
+
+        public fun swipePagerLeft() {
+            onView(withId(R.id.pager)).perform(ViewActions.swipeLeft())
+            Espresso.closeSoftKeyboard()
+        }
+
+        public fun swipePagerRight() {
+            onView(withId(R.id.pager)).perform(ViewActions.swipeRight())
+            Espresso.closeSoftKeyboard()
         }
 
         fun pauseTest(t: Long) {
@@ -242,13 +271,19 @@ class Helpers {
         fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(textId),
                 isDisplayed()) as Matcher<View>).perform(click())
 
+        fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(text),
+                isDisplayed()) as Matcher<View>).perform(click())
+
         fun clickOnRecyclerViewAtPos(pos: Int) =
-                onView(withId(android.R.id.list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+                onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
 
         fun checkAccountSumIs(text: String) =
                 onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))
 
-        fun scrollThenTypeText(edtId: Int, str: String) = onView(withId(edtId)).perform(scrollTo()).perform(typeText(str))
+        fun scrollThenTypeText(edtId: Int, str: String) {
+
+            onView(withId(edtId)).perform(scrollTo()).perform(typeText(str))
+        }
 
         fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {
             onView(withId(spinnerId)).perform(scrollTo())
@@ -264,7 +299,7 @@ class Helpers {
         }
 
         fun clickOnAccountSpinner(accName: String) {
-            onView(allOf(isActionBarSpinner(), isDisplayed())).perform(click())
+            onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
             pauseTest(500)
             onView(withText(accName)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
@@ -279,6 +314,13 @@ class Helpers {
             scrollThenTypeText(R.id.edit_op_tag, tag)
             scrollThenTypeText(R.id.edit_op_mode, mode)
             scrollThenTypeText(R.id.edit_op_notes, desc)
+        }
+
+        fun goToCurAccountOptionPanel() {
+            Helpers.clickInDrawer(R.string.account_edit)
+            Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
+            Espresso.closeSoftKeyboard()
+            Helpers.swipePagerLeft()
         }
     }
 }

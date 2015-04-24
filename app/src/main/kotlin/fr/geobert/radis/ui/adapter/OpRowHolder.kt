@@ -30,7 +30,7 @@ public class OpRowHolder<T : Operation>(val view: View, val adapter: BaseOperati
     public var opDate: TextView = view.findViewById(R.id.op_date) as TextView
     public var tag: TextView = view.findViewById(R.id.op_infos) as TextView
 
-    {
+    init {
         view.setOnClickListener(this)
     }
 

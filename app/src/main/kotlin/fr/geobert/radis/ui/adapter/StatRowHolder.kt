@@ -20,7 +20,7 @@ class StatRowHolder(val v: View,
     val filterName: TextView = v.findViewById(R.id.filter_lbl) as TextView
     var stat: Statistic? = null
 
-    {
+    init {
         v.setOnClickListener(this)
     }
 

@@ -1,11 +1,21 @@
 package fr.geobert.radis.tools
 
+import android.app.AlertDialog
 import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
-import android.app.AlertDialog
 import android.database.Cursor
+import hirondelle.date4j.DateTime
+import java.text.ParseException
 import java.util.LinkedList
+import java.util.TimeZone
+
+//public val UNIX_DATE: DateTime = DateTime(1970, 1, 1, 0, 0, 0, 0)
+public val TIME_ZONE: TimeZone = TimeZone.getDefault()
+
+public fun DateTime.plusMonth(nb: Int): DateTime = this.plus(0, nb, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
+public fun DateTime.minusMonth(nb: Int): DateTime = this.minus(0, nb, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
+
 
 public fun fillContentValuesWith(args: ContentValues, key: String, value: Any) {
     when (value) {
@@ -40,7 +50,7 @@ public fun alert(ctx: Context, titleId: Int, messageId: Int): Unit {
 public fun alert(ctx: Context, titleId: Int, messageId: Int, btnTxtId: Int?,
                  f: ((DialogInterface, Int) -> Unit)? = null) {
     val builder = createBuilder(ctx, titleId, messageId)
-    builder.setNeutralButton(btnTxtId ?: android.R.string.ok) {(d, i) -> if (f != null) f(d, i) }
+    builder.setNeutralButton(btnTxtId ?: android.R.string.ok) { d, i -> if (f != null) f(d, i) }
 }
 
 public inline fun Cursor?.forEach(f: (it: Cursor) -> Unit): Unit {
@@ -74,3 +84,26 @@ public inline fun <T> Cursor?.mapAndClose(create: (it: Cursor) -> T): Collection
         this?.close()
     }
 }
+
+public fun <T> Cursor?.getByFilter(filter: (it: Cursor) -> Boolean, create: (it: Cursor) -> T): T {
+    var result: T = null
+    this.forEach {
+        if (filter(it)) {
+            result = create(it)
+            return@forEach
+        }
+    }
+    return result
+}
+
+public fun String?.extractSumFromStr(): Long {
+    val s = this?.replace('+', ' ')?.trim() as String
+    val d: Double
+    try {
+        d = s.parseSum()
+    } catch (e: ParseException) {
+        d = 0.0
+    }
+    return Math.round(d * 100)
+}
+
