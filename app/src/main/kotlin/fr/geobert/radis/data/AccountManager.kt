@@ -163,9 +163,9 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         if (force || allAccountsCursor == null || allAccountsCursor?.getCount() == 0 || allAccountsCursor?.isClosed() ?: false) {
             this.mCallbacks.add(cbk)
             if (mAccountLoader == null) {
-                ctx.getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNTS, null, this)
+                ctx.getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
             } else {
-                ctx.getSupportLoaderManager().restartLoader<Cursor>(GET_ACCOUNTS, null, this)
+                ctx.getSupportLoaderManager().restartLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
             }
         } else {
             cbk()
