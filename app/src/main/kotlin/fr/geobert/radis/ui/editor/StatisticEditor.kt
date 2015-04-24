@@ -88,7 +88,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 initInfoSpinner()
                 initChartTypeButtons()
             } else {
-                getSupportLoaderManager()?.initLoader(GET_STAT, null, this)
+                getSupportLoaderManager()?.initLoader(GET_STAT, Bundle(), this)
             }
         })
     }

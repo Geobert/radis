@@ -579,7 +579,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.scrollThenTypeText(R.id.projection_date_value,
                 "${Integer.toString(tomorrow.getDay())}/${Integer.toString(tomorrow.getMonth())}/${Integer.toString(tomorrow.getYear())}")
         Helpers.clickOnActionItemConfirm()
-        Helpers.pauseTest(1000)
+        Helpers.pauseTest(1500)
         Helpers.checkAccountSumIs(1000.50.formatSum())
 
         addOpOnDate(today, 0)

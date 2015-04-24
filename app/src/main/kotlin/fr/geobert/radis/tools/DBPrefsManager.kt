@@ -30,7 +30,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     public fun fillCache(ctx: FragmentActivity, cbk: () -> Unit) {
         if (mCache == null) {
             mCbk = cbk
-            ctx.getSupportLoaderManager().initLoader<Cursor>(FILL_CACHE, null, this)
+            ctx.getSupportLoaderManager().initLoader<Cursor>(FILL_CACHE, Bundle(), this)
         } else {
             cbk()
         }

@@ -1,3 +1,11 @@
+Version 1.1 - 24/04/2015
+- option pour configurer le nombre de mois à insérer
+- option pour choisir l'action du tap long de l'ajout rapide
+- chaque compte peut définir ses propres options
+- fix de crash
+- fix de bugs variés
+- encore plus de Kotlin
+
 Version 1.0 - 21/01/2015
 - graphiques !
 - navigation par panneau latéral

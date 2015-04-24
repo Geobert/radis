@@ -109,9 +109,9 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun fetchStats() {
         when (mLoader) {
             null ->
-                ctx.getSupportLoaderManager()?.initLoader(2000, null, this)
+                ctx.getSupportLoaderManager()?.initLoader(2000, Bundle(), this)
             else ->
-                ctx.getSupportLoaderManager()?.restartLoader(2000, null, this)
+                ctx.getSupportLoaderManager()?.restartLoader(2000, Bundle(), this)
         }
     }
 
