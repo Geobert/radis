@@ -13,61 +13,40 @@ import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
 
-
-public fun ScheduledOperation(op: Operation, accountId: Long): ScheduledOperation = ScheduledOperation.new(op, accountId)
-
-public fun ScheduledOperation(op: Cursor, accountId: Long): ScheduledOperation = ScheduledOperation.new(op, accountId)
-
-public fun ScheduledOperation(op: Cursor): ScheduledOperation = ScheduledOperation.new(op)
-
-public fun ScheduledOperation(accountId: Long): ScheduledOperation = ScheduledOperation.new(accountId)
-
-public fun ScheduledOperation(parcel: Parcel): ScheduledOperation = ScheduledOperation.new(parcel)
-
-public class ScheduledOperation : Operation() {
+public class ScheduledOperation() : Operation() {
     public var mPeriodicity: Int = 0
     public var mPeriodicityUnit: Int = 1
     public var mEndDate: GregorianCalendar = Tools.createClearedCalendar()
 
+    constructor(op: Operation, accountId: Long) : this() {
+        initWithOperation(op)
+        mAccountId = accountId
+    }
+
+    constructor(c: Cursor, accountId: Long) : this() {
+        initWithCursor(c)
+        mAccountId = accountId
+    }
+
+    constructor(c: Cursor) : this() {
+        initWithCursor(c)
+        mAccountId = c.getLong(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID))
+        mEndDate.setTimeInMillis(c.getLong(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_END_DATE)))
+        Tools.clearTimeOfCalendar(mEndDate)
+        mPeriodicity = c.getInt(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY))
+        mPeriodicityUnit = c.getInt(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY_UNIT))
+    }
+
+    constructor(accountId: Long) : this() {
+        mAccountId = accountId
+        mEndDate.setTimeInMillis(0)
+    }
+
+    constructor(p: Parcel) : this() {
+        readFromParcel(p)
+    }
+
     companion object {
-        fun new(op: Operation, accountId: Long): ScheduledOperation {
-            val __ = ScheduledOperation()
-            __.initWithOperation(op)
-            __.mAccountId = accountId
-            return __
-        }
-
-        fun new(op: Cursor, accountId: Long): ScheduledOperation {
-            val __ = ScheduledOperation()
-            __.initWithCursor(op)
-            __.mAccountId = accountId
-            return __
-        }
-
-        fun new(op: Cursor): ScheduledOperation {
-            val __ = ScheduledOperation()
-            __.initWithCursor(op)
-            __.mAccountId = op.getLong(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID))
-            __.mEndDate.setTimeInMillis(op.getLong(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_END_DATE)))
-            Tools.clearTimeOfCalendar(__.mEndDate)
-            __.mPeriodicity = op.getInt(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY))
-            __.mPeriodicityUnit = op.getInt(op.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY_UNIT))
-            return __
-        }
-
-        fun new(accountId: Long): ScheduledOperation {
-            val __ = ScheduledOperation()
-            __.mAccountId = accountId
-            __.mEndDate.setTimeInMillis(0)
-            return __
-        }
-
-        fun new(p: Parcel): ScheduledOperation {
-            val __ = ScheduledOperation()
-            __.readFromParcel(p)
-            return __
-        }
-
         public val WEEKLY_PERIOD: Int = 0
         public val MONTHLY_PERIOD: Int = 1
         public val YEARLY_PERIOD: Int = 2
@@ -86,7 +65,7 @@ public class ScheduledOperation : Operation() {
             return null
         }
 
-        public val CREATOR: Parcelable.Creator<ScheduledOperation> = object : Parcelable.Creator<ScheduledOperation> {
+        platformStatic public val CREATOR: Parcelable.Creator<ScheduledOperation> = object : Parcelable.Creator<ScheduledOperation> {
             override fun createFromParcel(`in`: Parcel): ScheduledOperation {
                 return ScheduledOperation(`in`)
             }

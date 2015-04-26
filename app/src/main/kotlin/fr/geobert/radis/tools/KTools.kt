@@ -5,6 +5,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
 import android.database.Cursor
+import android.os.Parcel
 import hirondelle.date4j.DateTime
 import java.text.ParseException
 import java.util.LinkedList
@@ -107,3 +108,11 @@ public fun String?.extractSumFromStr(): Long {
     return Math.round(d * 100)
 }
 
+public fun Parcel.writeBoolean(b: Boolean) {
+    this.writeByte(if (b) 1 else 0)
+}
+
+public fun Parcel.readBoolean(): Boolean = this.readByte() != 0.toByte()
+public fun <T> List<T>.forMutableEach(): Unit {
+
+}

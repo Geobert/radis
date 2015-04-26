@@ -3,12 +3,12 @@ package fr.geobert.radis.data
 import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
 import hirondelle.date4j.DateTime
 import java.util.Date
+import kotlin.platform.platformStatic
 
 public open class Operation() : Parcelable {
     protected var mDate: DateTime = DateTime.today(TIME_ZONE)
@@ -40,7 +40,7 @@ public open class Operation() : Parcelable {
     }
 
     companion object {
-        public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
+        platformStatic public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
             override fun createFromParcel(p: Parcel): Operation {
                 return Operation(p)
             }
@@ -178,7 +178,7 @@ public open class Operation() : Parcelable {
         dst.writeLong(mSum)
         dst.writeLong(mScheduledId)
         dst.writeLong(mTransferAccountId)
-        dst.writeInt(if (mIsChecked) 1 else 0)
+        dst.writeBoolean(mIsChecked)
     }
 
     protected open fun readFromParcel(p: Parcel) {
@@ -193,7 +193,7 @@ public open class Operation() : Parcelable {
         mSum = p.readLong()
         mScheduledId = p.readLong()
         mTransferAccountId = p.readLong()
-        mIsChecked = p.readInt() == 1
+        mIsChecked = p.readBoolean()
     }
 
     public open fun equals(op: Operation?): Boolean {
