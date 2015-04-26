@@ -10,24 +10,7 @@ import fr.geobert.radis.tools.*
 import hirondelle.date4j.DateTime
 import java.util.Date
 
-
-public fun Operation(op: Operation): Operation {
-    val __ = Operation()
-    __.initWithOperation(op)
-    return __
-}
-
-public fun Operation(op: Cursor): Operation {
-    val __ = Operation()
-    __.initWithCursor(op)
-    return __
-}
-
-public fun Operation(p: Parcel): Operation {
-    return Operation.new(p)
-}
-
-public open class Operation : Parcelable {
+public open class Operation() : Parcelable {
     protected var mDate: DateTime = DateTime.today(TIME_ZONE)
     public var mThirdParty: String = ""
     public var mTag: String = ""
@@ -44,21 +27,19 @@ public open class Operation : Parcelable {
     public var mTransferAccountId: Long = 0
     public var mAccountId: Long = 0
 
+    constructor(op: Operation) : this() {
+        initWithOperation(op)
+    }
+
+    constructor(c: Cursor) : this() {
+        initWithCursor(c)
+    }
+
+    constructor(p: Parcel) : this() {
+        readFromParcel(p)
+    }
+
     companion object {
-        fun new(p: Parcel): Operation {
-            val __ = Operation()
-            __.readFromParcel(p)
-            return __
-        }
-
-        fun new(c: Cursor): Operation {
-            return Operation(c)
-        }
-
-        fun new(op: Operation): Operation {
-            return Operation(op)
-        }
-
         public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
             override fun createFromParcel(p: Parcel): Operation {
                 return Operation(p)
