@@ -9,18 +9,32 @@ import fr.geobert.radis.tools.*
 import hirondelle.date4j.DateTime
 import java.util.Date
 import kotlin.platform.platformStatic
+import kotlin.properties.Delegates
 
-public open class Operation() : Parcelable {
+public open class Operation() : ImplParcelable {
+    override val parcels = hashMapOf<String, Any?>()
     protected var mDate: DateTime = DateTime.today(TIME_ZONE)
-    public var mThirdParty: String = ""
-    public var mTag: String = ""
-    public var mMode: String = ""
-    public var mNotes: String = ""
-    public var mSum: Long = 0
-    public var mScheduledId: Long = 0
-    public var mRowId: Long = 0
-    public var mTransSrcAccName: String = ""
-    public var mIsChecked: Boolean = false
+    public var mThirdParty: String by Delegates.mapVar(parcels)
+    public var mTag: String by Delegates.mapVar(parcels)
+    public var mMode: String by Delegates.mapVar(parcels)
+    public var mNotes: String by Delegates.mapVar(parcels)
+    public var mSum: Long by Delegates.mapVar(parcels)
+    public var mScheduledId: Long by Delegates.mapVar(parcels)
+    public var mRowId: Long by Delegates.mapVar(parcels)
+    public var mTransSrcAccName: String by Delegates.mapVar(parcels)
+    public var mIsChecked: Boolean by Delegates.mapVar(parcels)
+
+    init {
+        mThirdParty = ""
+        mTag = ""
+        mMode = ""
+        mNotes = ""
+        mSum = 0L
+        mScheduledId = 0
+        mRowId = 0
+        mTransSrcAccName = ""
+        mIsChecked = false
+    }
 
     // if these value are != 0, it is a transfert operation between 2 accounts
     // mTransferAccountId is the other account
@@ -167,33 +181,18 @@ public open class Operation() : Parcelable {
         return 0
     }
 
-    override fun writeToParcel(dst: Parcel, flags: Int) {
-        dst.writeInt(getDay())
-        dst.writeInt(getMonth())
-        dst.writeInt(getYear())
-        dst.writeString(mThirdParty)
-        dst.writeString(mTag)
-        dst.writeString(mMode)
-        dst.writeString(mNotes)
-        dst.writeLong(mSum)
-        dst.writeLong(mScheduledId)
-        dst.writeLong(mTransferAccountId)
-        dst.writeBoolean(mIsChecked)
+    override fun writeToParcel(p: Parcel, flags: Int) {
+        super<ImplParcelable>.writeToParcel(p, flags)
+        p.writeInt(getDay())
+        p.writeInt(getMonth())
+        p.writeInt(getYear())
     }
 
-    protected open fun readFromParcel(p: Parcel) {
+    override fun readFromParcel(p: Parcel) {
+        super<ImplParcelable>.readFromParcel(p)
         setDay(p.readInt())
         setMonth(p.readInt())
         setYear(p.readInt())
-
-        mThirdParty = p.readString()
-        mTag = p.readString()
-        mMode = p.readString()
-        mNotes = p.readString()
-        mSum = p.readLong()
-        mScheduledId = p.readLong()
-        mTransferAccountId = p.readLong()
-        mIsChecked = p.readBoolean()
     }
 
     public open fun equals(op: Operation?): Boolean {

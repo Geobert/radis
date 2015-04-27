@@ -1,25 +1,39 @@
 package fr.geobert.radis.data
 
 import android.database.Cursor
-import android.os.Parcel
-import android.os.Parcelable
 import fr.geobert.radis.db.AccountTable
 import java.util.Date
+import kotlin.properties.Delegates
 
-public class Account(public var id: Long = 0, public var name: String = "") : ImplParcelable {
-    private var _startSum: MLong = MLong(0)
-    private var _curSum: MLong = MLong(0)
-    private var _currency: MString = MString("")
-    private var _projMode: MInt = MInt(0)
-    private var _projDate: MString = MString("") // TODO better type for this, it is use as MInt for day of month projection or as jj/mm/yyyy for absolute projection
-    private var _opSum: MLong = MLong(0)
-    private var _checkedSum: MLong = MLong(0)
-    private var _description: MString = MString("")
-    private var _lastInsertDate: MLong = MLong(0)
+public class Account(accountId: Long = 0, accountName: String = "") : ImplParcelable {
+    override val parcels = hashMapOf<String, Any?>()
+    public var id: Long by Delegates.mapVar(parcels)
+    public var name: String by Delegates.mapVar(parcels)
+    public var startSum: Long by Delegates.mapVar(parcels)
+    public var curSum: Long by Delegates.mapVar(parcels)
+    public var currency: String by Delegates.mapVar(parcels)
+    public var projMode: Int by Delegates.mapVar(parcels)
+    public var projDate: String by Delegates.mapVar(parcels) // TODO better type for this, it is use as MInt for day of month projection or as jj/mm/yyyy for absolute projection
+    public var opSum: Long by Delegates.mapVar(parcels)
+    public var checkedSum: Long by Delegates.mapVar(parcels)
+    public var description: String by Delegates.mapVar(parcels)
+    public var lastInsertDate: Long by Delegates.mapVar(parcels)
+
+    init {
+        id = accountId
+        name = accountName
+        startSum = 0
+        curSum = 0
+        currency = ""
+        projMode = 0
+        projDate = ""
+        opSum = 0
+        checkedSum = 0
+        description = ""
+        lastInsertDate = 0
+    }
 
     public var curSumDate: Date? = null
-
-    override val parcels = listOf(_startSum, _curSum, _currency, _projMode, _projDate, _opSum, _checkedSum, _description, _lastInsertDate)
 
     constructor(cursor: Cursor) : this() {
         fun getIdx(s: String): Int = cursor.getColumnIndex(s)
@@ -45,33 +59,4 @@ public class Account(public var id: Long = 0, public var name: String = "") : Im
             }
 
     override fun toString(): String = name
-
-
-    public var startSum: Long
-        get() = _startSum.get()
-        set(v) = _startSum.set(v)
-    public var curSum: Long
-        get() = _curSum.get()
-        set(v) = _curSum.set(v)
-    public var currency: String
-        get() = _currency.get()
-        set(v) = _currency.set(v)
-    public var projMode: Int
-        get() = _projMode.get()
-        set(v) = _projMode.set(v)
-    public var projDate: String
-        get() = _projDate.get()
-        set(v) = _projDate.set(v)
-    public var opSum: Long
-        get() = _opSum.get()
-        set(v) = _opSum.set(v)
-    public var checkedSum: Long
-        get() = _checkedSum.get()
-        set(v) = _checkedSum.set(v)
-    public var description: String
-        get() = _description.get()
-        set(v) = _description.set(v)
-    public var lastInsertDate: Long
-        get() = _lastInsertDate.get()
-        set(v) = _lastInsertDate.set(v)
 }

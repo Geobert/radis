@@ -5,32 +5,30 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.forEach
-import fr.geobert.radis.tools.readBoolean
-import fr.geobert.radis.tools.writeBoolean
 import fr.geobert.radis.ui.ConfigFragment
 import kotlin.platform.platformStatic
+import kotlin.properties.Delegates
 
 public class AccountConfig() : ImplParcelable {
     val NB_PREFS = 6 // number of couples of prefs
+    override val parcels = hashMapOf<String, Any?>()
+    public var overrideInsertDate: Boolean by Delegates.mapVar(parcels)
+    public var overrideHideQuickAdd: Boolean by Delegates.mapVar(parcels)
+    public var overrideInvertQuickAddComp: Boolean by Delegates.mapVar(parcels)
+    public var overrideUseWeighedInfo: Boolean by Delegates.mapVar(parcels)
+    public var overrideNbMonthsAhead: Boolean by Delegates.mapVar(parcels)
+    public var overrideQuickAddAction: Boolean by Delegates.mapVar(parcels)
+    public var hideQuickAdd: Boolean by Delegates.mapVar(parcels)
+    public var invertQuickAddComp: Boolean by Delegates.mapVar(parcels)
+    public var useWeighedInfo: Boolean by Delegates.mapVar(parcels)
+    public var insertDate: Int by Delegates.mapVar(parcels)
+    public var nbMonthsAhead: Int by Delegates.mapVar(parcels)
+    public var quickAddAction: Int by Delegates.mapVar(parcels)
 
-    // internal properties, exposed outside by properties at the end of the class
-    // MType are for Parcelable simplification
-    private var _overrideInsertDate: MBoolean = MBoolean(false)
-    private var _overrideHideQuickAdd: MBoolean = MBoolean(false)
-    private var _overrideInvertQuickAddComp: MBoolean = MBoolean(false)
-    private var _overrideUseWeighedInfo: MBoolean = MBoolean(false)
-    private var _overrideNbMonthsAhead: MBoolean = MBoolean(false)
-    private var _overrideQuickAddAction: MBoolean = MBoolean(false)
-    private var _hideQuickAdd: MBoolean = MBoolean(false)
-    private var _invertQuickAddComp: MBoolean = MBoolean(true)
-    private var _useWeighedInfo: MBoolean = MBoolean(true)
-    private var _insertDate: MInt = MInt(ConfigFragment.DEFAULT_INSERTION_DATE.toInt())
-    private var _nbMonthsAhead: MInt = MInt(ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
-    private var _quickAddAction: MInt = MInt(ConfigFragment.DEFAULT_QUICKADD_LONG_PRESS_ACTION)
-
-    override val parcels = listOf(_overrideInsertDate, _overrideHideQuickAdd, _overrideInvertQuickAddComp,
-            _overrideUseWeighedInfo, _overrideNbMonthsAhead, _overrideQuickAddAction, _hideQuickAdd, _invertQuickAddComp,
-            _useWeighedInfo, _insertDate, _nbMonthsAhead, _quickAddAction)
+    init {
+        nbMonthsAhead = ConfigFragment.DEFAULT_NB_MONTH_AHEAD
+        quickAddAction = ConfigFragment.DEFAULT_QUICKADD_LONG_PRESS_ACTION
+    }
 
     constructor(cursor: Cursor) : this() {
         fun getIdx(s: String): Int = cursor.getColumnIndex(s)
@@ -89,43 +87,4 @@ public class AccountConfig() : ImplParcelable {
             }
         }
     }
-
-    // exposed interface to properties
-    public var overrideInsertDate: Boolean
-        get() = _overrideInsertDate.get()
-        set(value) = _overrideInsertDate.set(value)
-    public var overrideHideQuickAdd: Boolean
-        get() = _overrideHideQuickAdd.get()
-        set(value) = _overrideHideQuickAdd.set(value)
-    public var overrideInvertQuickAddComp: Boolean
-        get() = _overrideInvertQuickAddComp.get()
-        set(value) = _overrideInvertQuickAddComp.set(value)
-    public var overrideUseWeighedInfo: Boolean
-        get() = _overrideUseWeighedInfo.get()
-        set(value) = _overrideUseWeighedInfo.set(value)
-    public var overrideNbMonthsAhead: Boolean
-        get() = _overrideNbMonthsAhead.get()
-        set(value) = _overrideNbMonthsAhead.set(value)
-    public var overrideQuickAddAction: Boolean
-        get() = _overrideQuickAddAction.get()
-        set(value) = _overrideQuickAddAction.set(value)
-    public var hideQuickAdd: Boolean
-        get() = _hideQuickAdd.get()
-        set(value) = _hideQuickAdd.set(value)
-    public var invertQuickAddComp: Boolean
-        get() = _invertQuickAddComp.get()
-        set(value) = _invertQuickAddComp.set(value)
-    public var useWeighedInfo: Boolean
-        get() = _useWeighedInfo.get()
-        set(value) = _useWeighedInfo.set(value)
-    public var insertDate: Int
-        get() = _insertDate.get()
-        set(value) = _insertDate.set(value)
-    public var nbMonthsAhead: Int
-        get() = _nbMonthsAhead.get()
-        set(value) = _nbMonthsAhead.set(value)
-    public var quickAddAction: Int
-        get() = _quickAddAction.get()
-        set(value) = _quickAddAction.set(value)
-
 }
