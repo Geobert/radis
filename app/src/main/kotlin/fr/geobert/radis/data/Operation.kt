@@ -3,31 +3,14 @@ package fr.geobert.radis.data
 import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
 import hirondelle.date4j.DateTime
 import java.util.Date
+import kotlin.platform.platformStatic
 
-
-public fun Operation(op: Operation): Operation {
-    val __ = Operation()
-    __.initWithOperation(op)
-    return __
-}
-
-public fun Operation(op: Cursor): Operation {
-    val __ = Operation()
-    __.initWithCursor(op)
-    return __
-}
-
-public fun Operation(p: Parcel): Operation {
-    return Operation.new(p)
-}
-
-public open class Operation : Parcelable {
+public open class Operation() : Parcelable {
     protected var mDate: DateTime = DateTime.today(TIME_ZONE)
     public var mThirdParty: String = ""
     public var mTag: String = ""
@@ -44,22 +27,20 @@ public open class Operation : Parcelable {
     public var mTransferAccountId: Long = 0
     public var mAccountId: Long = 0
 
+    constructor(op: Operation) : this() {
+        initWithOperation(op)
+    }
+
+    constructor(c: Cursor) : this() {
+        initWithCursor(c)
+    }
+
+    constructor(p: Parcel) : this() {
+        readFromParcel(p)
+    }
+
     companion object {
-        fun new(p: Parcel): Operation {
-            val __ = Operation()
-            __.readFromParcel(p)
-            return __
-        }
-
-        fun new(c: Cursor): Operation {
-            return Operation(c)
-        }
-
-        fun new(op: Operation): Operation {
-            return Operation(op)
-        }
-
-        public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
+        platformStatic public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
             override fun createFromParcel(p: Parcel): Operation {
                 return Operation(p)
             }
@@ -197,7 +178,7 @@ public open class Operation : Parcelable {
         dst.writeLong(mSum)
         dst.writeLong(mScheduledId)
         dst.writeLong(mTransferAccountId)
-        dst.writeInt(if (mIsChecked) 1 else 0)
+        dst.writeBoolean(mIsChecked)
     }
 
     protected open fun readFromParcel(p: Parcel) {
@@ -212,7 +193,7 @@ public open class Operation : Parcelable {
         mSum = p.readLong()
         mScheduledId = p.readLong()
         mTransferAccountId = p.readLong()
-        mIsChecked = p.readInt() == 1
+        mIsChecked = p.readBoolean()
     }
 
     public open fun equals(op: Operation?): Boolean {

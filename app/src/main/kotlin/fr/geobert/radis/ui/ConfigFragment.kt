@@ -157,13 +157,15 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         }
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super<PreferenceFragment>.onSaveInstanceState(outState)
+        outState.putParcelable("mConfig", mConfig)
         mOnRestore = true
     }
 
     fun onRestoreInstanceState(state: Bundle) {
         mOnRestore = true
+        mConfig = state.getParcelable<AccountConfig>("mConfig")
     }
 
     private fun setCheckBoxPrefState(key: String, value: Boolean) {

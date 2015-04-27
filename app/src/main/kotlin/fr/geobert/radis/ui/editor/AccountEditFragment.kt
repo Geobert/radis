@@ -163,6 +163,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         }
         outState.putString("desc", mAccountDescText.getText().toString())
         mProjectionController.onSaveInstanceState(outState)
+        outState.putParcelable("mAccount", mAccount)
         mOnRestore = true
     }
 
@@ -179,6 +180,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         }
         mAccountDescText.setText(state.getString("desc"))
         mProjectionController.onRestoreInstanceState(state)
+        mAccount = state.getParcelable("mAccount")
         mOnRestore = true
     }
 
