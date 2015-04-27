@@ -322,7 +322,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         op.mMode = edit_op_mode.getText().toString().trim()
         op.mTag = edit_op_tag.getText().toString().trim()
         op.mNotes = edit_op_notes.getText().toString().trim()
-        mActivity.getCurrentFocus().clearFocus()
+        mActivity.getCurrentFocus()?.clearFocus()
         op.setSumStr(edit_op_sum.getText().toString())
         op.setDay(edit_op_date.getDayOfMonth())
         op.setMonth(edit_op_date.getMonth() + 1)
