@@ -170,7 +170,7 @@ public class OperationEditor : CommonOpEditor() {
                 override fun onClick(dialog: DialogInterface, which: Int) {
                     val op = ScheduledOperation(currentOp, currentOp.mAccountId)
                     if (ScheduledOperationTable.updateScheduledOp(act, currentOp.mScheduledId, op, true)) {
-                        AccountTable.updateProjection(act, act.mCurAccountId!!, op.mSum, previousSum, op.getDate(), (-1).toLong())
+                        AccountTable.updateProjection(act, act.mCurAccountId, op.mSum, previousSum, op.getDate(), -1L)
                     }
                     ScheduledOperationTable.updateAllOccurences(getActivity(), op, previousSum, currentOp.mScheduledId)
                     act.setResAndExit()

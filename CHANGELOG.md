@@ -1,3 +1,6 @@
+Version 1.1.1 - 27/04/2015
+- fix de crash
+
 Version 1.1 - 24/04/2015
 - option pour configurer le nombre de mois à insérer
 - option pour choisir l'action du tap long de l'ajout rapide
