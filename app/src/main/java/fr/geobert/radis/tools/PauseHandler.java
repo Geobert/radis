@@ -1,73 +1,72 @@
 package fr.geobert.radis.tools;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Message;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
+/**
+ * Message Handler class that supports buffering up of messages when the activity is paused i.e. in the background.
+ */
 public abstract class PauseHandler extends Handler {
+
     /**
      * Message Queue Buffer
      */
-    final Vector<Message> messageQueueBuffer = new Vector<Message>();
+    private final List<Message> messageQueueBuffer = Collections.synchronizedList(new ArrayList<Message>());
 
     /**
      * Flag indicating the pause state
      */
-    private boolean paused;
+    private Activity activity;
 
     /**
-     * Resume the handler
+     * Resume the handler.
      */
-    final public void resume() {
-        paused = false;
+    public final synchronized void resume(Activity activity) {
+        this.activity = activity;
 
         while (messageQueueBuffer.size() > 0) {
-            final Message msg = messageQueueBuffer.elementAt(0);
-            messageQueueBuffer.removeElementAt(0);
+            final Message msg = messageQueueBuffer.get(0);
+            messageQueueBuffer.remove(0);
             sendMessage(msg);
         }
     }
 
     /**
-     * Pause the handler
+     * Pause the handler.
      */
-    final public void pause() {
-        paused = true;
+    public final synchronized void pause() {
+        activity = null;
     }
 
     /**
-     * Notification that the message is about to be stored as the operationList is
-     * paused. If not handled the message will be saved and replayed when the
-     * operationList resumes.
+     * Store the message if we have been paused, otherwise handle it now.
      *
-     * @param message the message which optional can be handled
-     * @return true if the message is to be stored
+     * @param msg Message to handle.
      */
-    protected abstract boolean storeMessage(Message message);
+    @Override
+    public final synchronized void handleMessage(Message msg) {
+        if (activity == null) {
+            final Message msgCopy = new Message();
+            msgCopy.copyFrom(msg);
+            messageQueueBuffer.add(msgCopy);
+        } else {
+            processMessage(activity, msg);
+        }
+    }
 
     /**
      * Notification message to be processed. This will either be directly from
-     * handleMessage or played back from a saved message when the operationList was
+     * handleMessage or played back from a saved message when the activity was
      * paused.
      *
-     * @param message the message to be handled
+     * @param act     Activity owning this Handler that isn't currently paused.
+     * @param message Message to be handled
      */
-    protected abstract void processMessage(Message message);
+    protected abstract void processMessage(Activity act, Message message);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    final public void handleMessage(Message msg) {
-        if (paused) {
-            if (storeMessage(msg)) {
-                Message msgCopy = new Message();
-                msgCopy.copyFrom(msg);
-                messageQueueBuffer.add(msgCopy);
-            }
-        } else {
-            processMessage(msg);
-        }
-    }
 }

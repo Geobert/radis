@@ -4,28 +4,29 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.tools.readBoolean
 import fr.geobert.radis.tools.writeBoolean
-import kotlin.platform.platformStatic
+import java.util.HashMap
 
 public trait ImplParcelable : Parcelable {
-    val parcels: List<MType<*>>
-    override fun writeToParcel(p: Parcel, p1: Int) {
+    val parcels: HashMap<String, Any?>
+    override fun writeToParcel(p: Parcel, flags: Int) {
         parcels.forEach {
-            when (it) {
-                is MLong -> p.writeLong(it.get())
-                is MInt -> p.writeInt(it.get())
-                is MString -> p.writeString(it.get())
-                is MBoolean -> p.writeBoolean(it.get())
+            when (it.value) {
+                is Boolean -> p.writeBoolean(it.value as Boolean)
+                is Long -> p.writeLong(it.value as Long)
+                is Int -> p.writeInt(it.value as Int)
+                is String -> p.writeString(it.value as String)
+                else -> throw RuntimeException()
             }
         }
     }
 
-    fun readFromParcel(p: Parcel) {
+    open fun readFromParcel(p: Parcel) {
         parcels.forEach {
-            when (it) {
-                is MBoolean -> it.set(p.readBoolean())
-                is MInt -> it.set(p.readInt())
-                is MLong -> it.set(p.readLong())
-                is MString -> it.set(p.readString())
+            when (it.value) {
+                is Boolean -> parcels[it.key] = p.readBoolean()
+                is Long -> parcels[it.key] = p.readLong()
+                is Int -> parcels[it.key] = p.readInt()
+                is String -> parcels[it.key] = p.readString()
             }
         }
     }

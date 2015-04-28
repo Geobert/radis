@@ -4,19 +4,23 @@ import android.app.Activity
 import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
-import android.util.Log
 import fr.geobert.radis.R
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
-
 import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
+import kotlin.properties.Delegates
 
 public class ScheduledOperation() : Operation() {
-    public var mPeriodicity: Int = 0
-    public var mPeriodicityUnit: Int = 1
+    public var mPeriodicity: Int by Delegates.mapVar(parcels)
+    public var mPeriodicityUnit: Int by Delegates.mapVar(parcels)
     public var mEndDate: GregorianCalendar = Tools.createClearedCalendar()
+
+    init {
+        mPeriodicity = 0
+        mPeriodicityUnit = 1
+    }
 
     constructor(op: Operation, accountId: Long) : this() {
         initWithOperation(op)
@@ -118,20 +122,13 @@ public class ScheduledOperation() : Operation() {
 
     override fun writeToParcel(dst: Parcel, flags: Int) {
         super.writeToParcel(dst, flags)
-        dst.writeInt(mPeriodicity)
-        dst.writeInt(mPeriodicityUnit)
-        dst.writeLong(mAccountId)
         dst.writeInt(getEndDay())
         dst.writeInt(getEndMonth())
         dst.writeInt(getEndYear())
     }
 
     override fun readFromParcel(p: Parcel) {
-        Log.d("Radis", "schedule operation readFromParcel")
         super.readFromParcel(p)
-        mPeriodicity = p.readInt()
-        mPeriodicityUnit = p.readInt()
-        mAccountId = p.readLong()
         mEndDate = GregorianCalendar()
         mEndDate.clear()
         setEndDay(p.readInt())
