@@ -249,10 +249,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     override fun onResume() {
         super<BaseActivity>.onResume()
-        handler.resume(this)
         DBPrefsManager.getInstance(this).fillCache(this, {
             consolidateDbIfNeeded()
             initAccountStuff()
+            handler.resume(this)
             mAccountManager.fetchAllAccounts(false, { processAccountList(true) })
         })
     }
