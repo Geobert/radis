@@ -26,6 +26,16 @@ public class AccountConfig() : ImplParcelable {
     public var quickAddAction: Int by Delegates.mapVar(parcels)
 
     init {
+        overrideInsertDate = false
+        overrideHideQuickAdd = false
+        overrideInvertQuickAddComp = false
+        overrideUseWeighedInfo = false
+        overrideNbMonthsAhead = false
+        overrideQuickAddAction = false
+        hideQuickAdd = false
+        invertQuickAddComp = true
+        useWeighedInfo = true
+        insertDate = ConfigFragment.DEFAULT_INSERTION_DATE.toInt()
         nbMonthsAhead = ConfigFragment.DEFAULT_NB_MONTH_AHEAD
         quickAddAction = ConfigFragment.DEFAULT_QUICKADD_LONG_PRESS_ACTION
     }
