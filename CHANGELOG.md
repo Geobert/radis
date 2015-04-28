@@ -1,3 +1,6 @@
+Version 1.1.2 - 28/04/2015
+- tentative de fix de crash difficile (pas d'info précise sur comment ça arrive :( ) 
+
 Version 1.1.1 - 27/04/2015
 - fix de crash
 
