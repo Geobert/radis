@@ -119,15 +119,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     private inner class FragmentHandler(private var activity: MainActivity) : PauseHandler() {
 
-        public fun setActivity(activity: MainActivity) {
-            this.activity = activity
-        }
-
-        override fun storeMessage(message: Message): Boolean {
-            return true
-        }
-
-        override fun processMessage(message: Message) {
+        override fun processMessage(act: Activity, message: Message) {
             var fragment: Fragment? = null
             val fragmentManager = activity.getSupportFragmentManager()
             when (message.what) {
@@ -257,8 +249,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     override fun onResume() {
         super<BaseActivity>.onResume()
-        handler.setActivity(this)
-        handler.resume()
+        handler.resume(this)
         DBPrefsManager.getInstance(this).fillCache(this, {
             consolidateDbIfNeeded()
             initAccountStuff()
