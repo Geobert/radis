@@ -63,15 +63,11 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
         setContentView(R.layout.multipane_editor)
         initToolbar(this)
 
-        mRowId = if (savedInstanceState != null) {
-            savedInstanceState.getSerializable(PARAM_ACCOUNT_ID) as Long
+        val extra = getIntent().getExtras()
+        mRowId = if (extra != null) {
+            extra.getLong(PARAM_ACCOUNT_ID)
         } else {
-            val extra = getIntent().getExtras()
-            if (extra != null) {
-                extra.getLong(PARAM_ACCOUNT_ID)
-            } else {
-                NO_ACCOUNT
-            }
+            NO_ACCOUNT
         }
 
         if (isNewAccount()) {
@@ -85,8 +81,14 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
+        mRowId = savedInstanceState.getLong("mRowId")
         getAccountFrag().onRestoreInstanceState(savedInstanceState) // not managed by Android
         getConfigFrag().onRestoreInstanceState(savedInstanceState)  // not managed by Android
+    }
+
+    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle?) {
+        super<BaseActivity>.onSaveInstanceState(outState, outPersistentState)
+        outState.putLong("mRowId", mRowId)
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
