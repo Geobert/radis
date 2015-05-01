@@ -2,22 +2,15 @@ package fr.geobert.radis.ui.editor
 
 import android.app.Activity
 import android.content.Intent
-import android.content.SharedPreferences
-import android.database.Cursor
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentPagerAdapter
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarActivity
-import android.util.Log
 import android.view.MenuItem
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
-import fr.geobert.radis.data.Account
-import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.Tools
@@ -30,7 +23,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
 
     private val mViewPager by Delegates.lazy { findViewById(R.id.pager) as ViewPager }
 
-    private val mPagerAdapter = object : FragmentPagerAdapter(getSupportFragmentManager()) {
+    private val mPagerAdapter = object : FragmentStatePagerAdapter(getSupportFragmentManager()) {
         private val fragmentsList: Array<Fragment?> = arrayOfNulls(getCount())
         override fun getItem(position: Int): Fragment? {
             val f = fragmentsList.get(position)
