@@ -90,28 +90,26 @@ public class DbContentProvider extends ContentProvider {
     private static DbHelper mDbHelper = null;
 
     public static void reinit(Context ctx) {
-        close();
-        mDbHelper = new DbHelper(ctx);
-    }
-
-    public static void close() {
-        if (mDbHelper != null) {
-            mDbHelper.close();
-        }
+        mDbHelper = DbHelper.getInstance(ctx);
     }
 
     @Override
     public boolean onCreate() {
         Log.d(TAG, "onCreate DbContentProvider in context : " + getContext().getClass().toString());
-        mDbHelper = new DbHelper(getContext());
+        mDbHelper = DbHelper.getInstance(getContext());
         return false;
+    }
+
+
+    public static void close() {
+        DbHelper.delete();
     }
 
     public void deleteDatabase(Context ctx) {
         Log.d(TAG, "deleteDatabase from ContentProvider");
-        mDbHelper.close();
+        DbHelper.delete();
         ctx.deleteDatabase(DbHelper.DATABASE_NAME);
-        mDbHelper = new DbHelper(ctx);
+        mDbHelper = DbHelper.getInstance(ctx);
     }
 
     private String switchToTable(Uri uri) {
