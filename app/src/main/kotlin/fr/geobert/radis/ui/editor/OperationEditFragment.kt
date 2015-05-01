@@ -76,23 +76,25 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     fun onAllAccountFetched() {
-        mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
-        populateTransfertSpinner(mActivity.mAccountManager.allAccountsCursor)
-        initViewAdapters()
-        initListeners()
-        is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
-            onTransfertCheckedChanged(arg1)
-        }
+        if (isAdded()) {
+            mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
+            populateTransfertSpinner(mActivity.mAccountManager.allAccountsCursor)
+            initViewAdapters()
+            initListeners()
+            is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
+                onTransfertCheckedChanged(arg1)
+            }
 
-        configThirdPartyTransfertCont(is_transfert.isChecked())
-        edit_op_third_party.clearFocus()
-        edit_op_sum.clearFocus()
-        edit_op_mode.clearFocus()
-        edit_op_tag.clearFocus()
-        edit_op_notes.clearFocus()
+            configThirdPartyTransfertCont(is_transfert.isChecked())
+            edit_op_third_party.clearFocus()
+            edit_op_sum.clearFocus()
+            edit_op_mode.clearFocus()
+            edit_op_tag.clearFocus()
+            edit_op_notes.clearFocus()
 
-        if (mActivity.getCurrentFocus() != null) {
-            Tools.hideKeyboard(mActivity)
+            if (mActivity.getCurrentFocus() != null) {
+                Tools.hideKeyboard(mActivity)
+            }
         }
     }
 
