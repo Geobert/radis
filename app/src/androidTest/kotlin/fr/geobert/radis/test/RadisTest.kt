@@ -730,7 +730,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
 
-    private fun setUpSchTransOp() {
+    private fun setUpSchTransOp(): DateTime {
         Helpers.addAccount()
         Helpers.addAccount2()
         Helpers.clickInDrawer(R.string.preferences)
@@ -742,6 +742,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnDialogButton(R.string.ok)
         Helpers.pauseTest(2000) // needed to workaround espresso 2.0 bug
         Espresso.pressBack()
+        return yesterday
     }
 
     private fun addSchTransfert() {
@@ -793,13 +794,13 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(2000.50.formatSum())
     }
 
-    private fun addSchTransfertHebdo(): Int {
+    private fun addSchTransfertHebdo(dayOfMonthForInsertion: DateTime): Int {
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
         val today = DateTime.today(TIME_ZONE)
         val schOpDate = today.minusDays(28)
 
-        Log.d(TAG, "date: ${schOpDate.formatDate()}")
+        Log.e(TAG, "date: ${schOpDate.formatDate()}")
         onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(schOpDate.getYear(),
                 schOpDate.getMonth(), schOpDate.getDay()))
 
@@ -818,12 +819,12 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.clickOnActionItemConfirm()
 
         Espresso.pressBack()
-        val endOfMonth = today.plusMonth(1).getEndOfMonth()
+        val d = if (today.getDay() >= dayOfMonthForInsertion.getDay()) today else schOpDate
+        val endOfMonth = d.plusMonth(1).getEndOfMonth()
         val nb = endOfMonth.getWeekIndex(schOpDate)
         val sum = nb * 10.50
-        Log.e("RadisTest", "addSchTransfertHebdo nb ops inserted: $nb")
+        Log.e(TAG, "addSchTransfertHebdo nb ops inserted: $nb")
 
-        Helpers.pauseTest(2000)
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
         Helpers.checkAccountSumIs((1000.50 - sum).formatSum())
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME_2)
@@ -835,9 +836,9 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     public fun makeSchTransfertHebdoFromAccList(): Int {
-        setUpSchTransOp()
+        val yesterday = setUpSchTransOp()
         Helpers.clickInDrawer(R.string.scheduled_ops)
-        val nb = addSchTransfertHebdo()
+        val nb = addSchTransfertHebdo(yesterday)
         return nb
     }
 

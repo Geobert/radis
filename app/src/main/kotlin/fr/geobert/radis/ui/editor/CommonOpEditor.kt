@@ -45,7 +45,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<BaseActivity>.onCreate(savedInstanceState)
         val extras = getIntent().getExtras()
-        mCurAccountId = extras?.getLong(AccountEditor.PARAM_ACCOUNT_ID) as Long
+        mCurAccountId = extras?.getLong(AccountEditor.PARAM_ACCOUNT_ID) ?: 0
         init(extras)
         setView()
         initToolbar(this)
