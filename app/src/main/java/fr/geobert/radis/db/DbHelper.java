@@ -20,9 +20,18 @@ public class DbHelper extends SQLiteOpenHelper {
 
     private Context mCtx;
 
-    public DbHelper(Context context) {
+    private DbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         mCtx = context;
+    }
+
+    public static DbHelper instance = null;
+
+    public static synchronized DbHelper getInstance(Context ctx) {
+        if (instance == null) {
+            instance = new DbHelper(ctx);
+        }
+        return instance;
     }
 
     @Override
@@ -145,6 +154,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 dst.close();
                 srcFIS.close();
                 dstFOS.close();
+                DbContentProvider.reinit(ctx);
                 DBPrefsManager.getInstance(ctx).put(RadisService.CONSOLIDATE_DB, true);
 //                PrefsManager.getInstance(ctx).commit();
                 return true;
@@ -155,4 +165,7 @@ public class DbHelper extends SQLiteOpenHelper {
         return false;
     }
 
+    public static void delete() {
+        instance = null;
+    }
 }

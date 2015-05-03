@@ -1,3 +1,6 @@
+Version 1.1.4 - 02/05/2015
+- stabilisation
+
 Version 1.1.3 - 29/04/2015
 - fix d'un autre crash
 

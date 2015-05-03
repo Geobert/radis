@@ -10,7 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentPagerAdapter
+import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
 import android.support.v4.view.ViewPager
@@ -25,7 +25,6 @@ import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
-import fr.geobert.radis.service.RadisService
 import fr.geobert.radis.tools.Tools
 import kotlin.properties.Delegates
 
@@ -35,7 +34,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
     private val mViewPager by Delegates.lazy { findViewById(R.id.pager) as ViewPager }
 
-    private val mPagerAdapter = object : FragmentPagerAdapter(getSupportFragmentManager()) {
+    private val mPagerAdapter = object : FragmentStatePagerAdapter(getSupportFragmentManager()) {
         private val fragmentsList: Array<Fragment?> = arrayOfNulls(getCount())
         override fun getItem(position: Int): Fragment? {
             val f = fragmentsList.get(position)
