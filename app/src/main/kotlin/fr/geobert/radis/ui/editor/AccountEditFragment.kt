@@ -62,6 +62,8 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             }
         })
         fillCurrencySpinner()
+        if (savedInstanceState != null)
+            onRestoreInstanceState(savedInstanceState)
     }
 
     private fun fillCurrencySpinner() {
@@ -167,7 +169,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         mOnRestore = true
     }
 
-    fun onRestoreInstanceState(state: Bundle) {
+    private fun onRestoreInstanceState(state: Bundle) {
         mAccountNameText.setText(state.getString("name"))
         mAccountStartSumText.setText(state.getString("startSum"))
         mAccountCurrency.setSelection(state.getInt("currency"))

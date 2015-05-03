@@ -69,7 +69,7 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
             this.mCurDefaultAccount = DBPrefsManager.getInstance(context).getLong(ConfigFragment.KEY_DEFAULT_ACCOUNT)
             if (mCurDefaultAccount == null) {
                 // no pref set, take the first account, set it as default
-                if (this.allAccountsCursor!!.moveToFirst()) {
+                if (allAccountsCursor?.moveToFirst() ?: false) {
                     this.mCurDefaultAccount = this.allAccountsCursor!!.getLong(0)
                     DBPrefsManager.getInstance(context).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount)
                 }
