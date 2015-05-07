@@ -1,6 +1,8 @@
 package fr.geobert.radis.data
 
 import android.database.Cursor
+import android.os.Parcel
+import android.os.Parcelable
 import fr.geobert.radis.R
 import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.tools.TIME_ZONE
@@ -9,7 +11,7 @@ import fr.geobert.radis.tools.minusMonth
 import hirondelle.date4j.DateTime
 import java.util.Calendar
 import java.util.Date
-import java.util.GregorianCalendar
+import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
 public class Statistic() : ImplParcelable {
@@ -30,6 +32,16 @@ public class Statistic() : ImplParcelable {
         val TAGS = 1
         val MODE = 2
         val NO_FILTER = 3
+
+        platformStatic public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
+            override fun createFromParcel(p: Parcel): Statistic {
+                return Statistic(p)
+            }
+
+            override fun newArray(size: Int): Array<Statistic?> {
+                return arrayOfNulls(size)
+            }
+        }
     }
 
     var id: Long by Delegates.mapVar(parcels)
@@ -73,6 +85,10 @@ public class Statistic() : ImplParcelable {
         } else {
             xLast = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_X_LAST))
         }
+    }
+
+    constructor(p: Parcel) : this() {
+        readFromParcel(p)
     }
 
     fun getValue(value: String) =
