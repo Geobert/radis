@@ -21,6 +21,7 @@ import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Statistic
 import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.tools.*
+import hirondelle.date4j.DateTime
 import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
@@ -94,15 +95,15 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putSerializable("mStat", mStat)
-        outState.putSerializable("mOrigStat", mOrigStat)
+        outState.putParcelable("mStat", mStat)
+        outState.putParcelable("mOrigStat", mOrigStat)
         outState.putCharSequence("xLast", mxLastEdt.getText())
         outState.putCharSequence("name", mNameEdt.getText())
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        mStat = savedInstanceState.getSerializable("mStat") as Statistic
-        mOrigStat = savedInstanceState.getSerializable("mOrigStat") as Statistic
+        mStat = savedInstanceState.getParcelable<Statistic>("mStat")
+        mOrigStat = savedInstanceState.getParcelable<Statistic>("mOrigStat")
         mxLastEdt.setText(savedInstanceState.getCharSequence("xLast"))
         mNameEdt.setText(savedInstanceState.getCharSequence("name"))
     }
@@ -183,7 +184,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         val date = GregorianCalendar()
         date.setTime(button.getText().toString().parseDate())
         val datePicker = DatePickerDialog(this, { v: DatePicker?, y: Int, m: Int, d: Int ->
-            val dt = GregorianCalendar(y, m, d).getTime()
+            val dt = DateTime.forDateOnly(y, m + 1, d)
             val stat = mStat
             if (stat != null) // TODO check https://youtrack.jetbrains.com/issue/KT-1213
                 when (button.getId()) {
@@ -308,7 +309,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 }
             }
             Statistic.PERIOD_ABSOLUTE ->
-                if (mStat?.startDate?.compareTo(mStat?.endDate as Date) as Int >= 0) {
+                if (mStat?.startDate?.compareTo(mStat?.endDate) as Int >= 0) {
                     builder.append("- ":CharSequence).append(getString(R.string.invalid_date_range):CharSequence)
                 }
         }

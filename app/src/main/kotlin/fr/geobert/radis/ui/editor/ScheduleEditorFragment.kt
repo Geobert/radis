@@ -41,8 +41,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     public fun populateFields() {
         val op = mCurrentSchOp
         mActivity.mCurrentOp = op as Operation
-        mCustomPeriodicityVal.setText(if (mCurrentSchOp?.mPeriodicity == 0)
-            ""
+        mCustomPeriodicityVal.setText(if (mCurrentSchOp?.mPeriodicity == 0) ""
         else
             mCurrentSchOp?.mPeriodicity.toString())
         populatePeriodicitySpinner()
@@ -51,7 +50,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
         if (op.getEndDate() > 0) {
             mEndDateCheck.setChecked(true)
             mEndDatePicker.setEnabled(true)
-            mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth(), op.getEndDay())
+            mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth() - 1, op.getEndDay())
         } else {
             mEndDateCheck.setChecked(false)
             mEndDatePicker.setEnabled(false)
@@ -205,10 +204,10 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
             val dp = mEndDatePicker
             dp.clearChildFocus(mActivity.getCurrentFocus())
             op.setEndDay(dp.getDayOfMonth())
-            op.setEndMonth(dp.getMonth())
+            op.setEndMonth(dp.getMonth() + 1)
             op.setEndYear(dp.getYear())
         } else {
-            op.mEndDate.clear()
+            op.clearEndDate()
         }
     }
 
