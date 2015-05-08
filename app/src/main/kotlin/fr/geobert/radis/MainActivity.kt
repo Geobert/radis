@@ -247,8 +247,8 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         handler.pause()
     }
 
-    override fun onResume() {
-        super<BaseActivity>.onResume()
+    override fun onResumeFragments() {
+        super<BaseActivity>.onResumeFragments()
         DBPrefsManager.getInstance(this).fillCache(this, {
             consolidateDbIfNeeded()
             initAccountStuff()
