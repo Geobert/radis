@@ -345,7 +345,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                         StatisticTable.updateStatistic(stat, this) > 0L
                     }
 
-                    if (success ) {
+                    if (success) {
                         setResult(Activity.RESULT_OK)
                         finish()
                     } else {

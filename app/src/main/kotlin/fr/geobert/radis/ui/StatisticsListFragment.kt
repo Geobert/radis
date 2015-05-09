@@ -1,59 +1,59 @@
 package fr.geobert.radis.ui
 
+import android.app.Activity
+import android.content.Intent
+import android.content.IntentFilter
 import android.database.Cursor
+import android.graphics.Color
+import android.graphics.Paint
+import android.os.Build
+import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager.LoaderCallbacks
-import android.support.v7.app.ActionBar
-import fr.geobert.radis.db.DbContentProvider
-import fr.geobert.radis.db.StatisticTable
-import fr.geobert.radis.ui.editor.StatisticEditor
+import android.support.v4.content.CursorLoader
+import android.support.v4.content.Loader
+import android.support.v4.util.SimpleArrayMap
+import android.support.v7.widget.DefaultItemAnimator
+import android.support.v7.widget.RecyclerView
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import fr.geobert.radis.BaseFragment
 import fr.geobert.radis.R
-import kotlin.properties.Delegates
-import android.support.v4.content.Loader
-import android.view.LayoutInflater
-import android.view.ViewGroup
-import android.os.Bundle
-import android.view.View
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.content.Intent
-import android.support.v4.content.CursorLoader
-import fr.geobert.radis.data.Statistic
-import fr.geobert.radis.data.Operation
-import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.map
-import java.util.GregorianCalendar
-import android.os.Build
-import java.util.Calendar
-import java.util.Locale
-import java.text.DateFormatSymbols
-import java.text.NumberFormat
-import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.data.Account
-import java.util.Currency
-import org.achartengine.model.CategorySeries
-import org.achartengine.renderer.DefaultRenderer
-import android.graphics.Color
-import org.achartengine.renderer.SimpleSeriesRenderer
-import org.achartengine.model.XYMultipleSeriesDataset
-import org.achartengine.renderer.XYMultipleSeriesRenderer
-import org.achartengine.renderer.XYSeriesRenderer
-import org.achartengine.chart.PointStyle
-import org.achartengine.model.TimeSeries
-import android.graphics.Paint
-import android.support.v4.util.SimpleArrayMap
-import org.achartengine.model.XYSeries
-import org.achartengine.ChartFactory
-import org.achartengine.chart.BarChart.Type
-import android.util.Log
-import android.app.Activity
-import android.support.v7.widget.RecyclerView
-import fr.geobert.radis.ui.adapter.StatisticAdapter
-import android.support.v7.widget.DefaultItemAnimator
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.data.Statistic
+import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.DbContentProvider
+import fr.geobert.radis.db.OperationTable
+import fr.geobert.radis.db.StatisticTable
+import fr.geobert.radis.service.OnRefreshReceiver
+import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.map
+import fr.geobert.radis.ui.adapter.StatisticAdapter
+import fr.geobert.radis.ui.editor.StatisticEditor
+import org.achartengine.ChartFactory
+import org.achartengine.chart.BarChart.Type
+import org.achartengine.chart.PointStyle
+import org.achartengine.model.CategorySeries
+import org.achartengine.model.TimeSeries
+import org.achartengine.model.XYMultipleSeriesDataset
+import org.achartengine.model.XYSeries
+import org.achartengine.renderer.DefaultRenderer
+import org.achartengine.renderer.SimpleSeriesRenderer
+import org.achartengine.renderer.XYMultipleSeriesRenderer
+import org.achartengine.renderer.XYSeriesRenderer
+import java.text.DateFormatSymbols
+import java.text.NumberFormat
+import java.util.Calendar
+import java.util.Currency
+import java.util.GregorianCalendar
+import java.util.Locale
+import kotlin.properties.Delegates
 
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     val ctx: FragmentActivity by Delegates.lazy { getActivity() }
@@ -64,6 +64,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private var mAdapter: StatisticAdapter? = null
     private var mLoader: Loader<Cursor>? = null
     private val ZOOM_ENABLED = true
+    private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
@@ -77,7 +78,14 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
         setIcon(R.drawable.stat_48)
         setMenu(R.menu.operations_list_menu)
+
+        mActivity.registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_STAT ))
         return v
+    }
+
+    override fun onDestroyView() {
+        super<BaseFragment>.onDestroyView()
+        mActivity.unregisterReceiver(mOnRefreshReceiver)
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean =
@@ -103,7 +111,9 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     }
 
     override fun onOperationEditorResult(resultCode: Int, data: Intent?) {
-        // nothing
+        if (resultCode == Activity.RESULT_OK) {
+            fetchStats()
+        }
     }
 
     private fun fetchStats() {
@@ -148,10 +158,6 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             mList.setVisibility(View.VISIBLE)
             mEmptyView.setVisibility(View.GONE)
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle?): Unit {
-
     }
 
     // generate chart data

@@ -189,7 +189,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
         registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_NEEDED))
         registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_ACC_LIST))
-        registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_OP_LIST))
+        //registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_OP_LIST))
 
         initDrawer()
         installRadisTimer()
