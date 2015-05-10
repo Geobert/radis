@@ -130,8 +130,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             if (show) {
                 mxLastCont.setVisibility(View.GONE)
                 mAbsDateCont.setVisibility(View.VISIBLE)
-                mStartDate.setText(mStat?.startDate?.formatDate())
-                mEndDate.setText(mStat?.endDate?.formatDate())
+                mStartDate.setText(mStat?.startDate?.formatDateLong())
+                mEndDate.setText(mStat?.endDate?.formatDateLong())
             } else {
                 mxLastCont.setVisibility(View.VISIBLE)
                 mAbsDateCont.setVisibility(View.GONE)
@@ -191,7 +191,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                     R.id.start_date_btn -> stat.startDate = dt
                     R.id.end_date_btn -> stat.endDate = dt
                 }
-            button.setText(dt.formatDate())
+            button.setText(dt.formatDateLong())
         }, date[Calendar.YEAR], date[Calendar.MONTH], date[Calendar.DAY_OF_MONTH])
         datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(android.R.string.cancel), null:Message?)
         datePicker.show()

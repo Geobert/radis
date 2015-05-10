@@ -30,10 +30,7 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.service.OnRefreshReceiver
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.formatDate
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.map
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.StatisticAdapter
 import fr.geobert.radis.ui.editor.StatisticEditor
 import org.achartengine.ChartFactory
@@ -79,7 +76,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         setIcon(R.drawable.stat_48)
         setMenu(R.menu.operations_list_menu)
 
-        mActivity.registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_STAT ))
+        mActivity.registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_STAT))
         return v
     }
 
@@ -409,7 +406,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         fun construct(m: Map<String, Long>, isPos: Boolean) {
             val s2 = XYSeries("")
             m.forEach {
-                val lbl = if (it.key.length == 0) ctx.getString(R.string.no_lbl) else it.key
+                val lbl = if (it.key.length() == 0) ctx.getString(R.string.no_lbl) else it.key
                 val v: Double = Math.abs(it.value / 100.0)
                 renderer.setYAxisMax(Math.max(v, renderer.getYAxisMax()))
 
@@ -465,7 +462,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         intent.putExtra(StatisticActivity.ACCOUNT_NAME, stat.accountName)
         intent.putExtra(StatisticActivity.FILTER, ctx.getString(stat.getFilterStr()))
         val (start, end) = stat.createTimeRange()
-        val time = "${start.formatDate()} ${ctx.getString(R.string.rarr)} ${end.formatDate()}"
+        val time = "${start.formatDateLong()} ${ctx.getString(R.string.rarr)} ${end.formatDateLong()}"
         intent.putExtra(StatisticActivity.TIME_SCALE, time)
         return intent
     }

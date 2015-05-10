@@ -8,6 +8,7 @@ import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.minusMonth
+import fr.geobert.radis.tools.minusYear
 import hirondelle.date4j.DateTime
 import java.util.Calendar
 import java.util.Date
@@ -100,8 +101,8 @@ public class Statistic() : ImplParcelable {
                 StatisticTable.KEY_STAT_FILTER -> filterType
                 StatisticTable.KEY_STAT_PERIOD_TYPE -> timeScaleType
                 StatisticTable.KEY_STAT_X_LAST -> xLast
-                StatisticTable.KEY_STAT_START_DATE -> Date(startDate.getMilliseconds(TIME_ZONE))
-                StatisticTable.KEY_STAT_END_DATE -> Date(endDate.getMilliseconds(TIME_ZONE))
+                StatisticTable.KEY_STAT_START_DATE -> startDate.getMilliseconds(TIME_ZONE)
+                StatisticTable.KEY_STAT_END_DATE -> endDate.getMilliseconds(TIME_ZONE)
                 else -> {
                     throw NoSuchFieldException()
                 }
@@ -130,22 +131,21 @@ public class Statistic() : ImplParcelable {
      * create a time range according to statistic's configuration
      * @return (startDate, endDate)
      */
-    fun createTimeRange(): Pair<Date, Date> {
-        fun createXLastRange(field: Int): Pair<Date, Date> {
-            val endDate = Tools.createClearedCalendar()
-            val startDate = Tools.createClearedCalendar()
-            startDate.add(field, -this.xLast)
-            return Pair(startDate.getTime(), endDate.getTime())
+    fun createTimeRange(): Pair<DateTime, DateTime> {
+        fun createXLastRange(): Pair<DateTime, DateTime> {
+            val today = DateTime.today(TIME_ZONE)
+            val startDate = when (this.timeScaleType) {
+                Statistic.PERIOD_DAYS -> today.minusDays(this.xLast)
+                Statistic.PERIOD_MONTHES -> today.minusMonth(this.xLast)
+                Statistic.PERIOD_YEARS -> today.minusYear(this.xLast)
+                else -> throw NoWhenBranchMatchedException()
+            }
+            return Pair(startDate, today)
         }
 
         return when (this.timeScaleType) {
-            Statistic.PERIOD_DAYS -> createXLastRange(Calendar.DAY_OF_MONTH)
-            Statistic.PERIOD_MONTHES -> createXLastRange(Calendar.MONTH)
-            Statistic.PERIOD_YEARS -> createXLastRange(Calendar.YEAR)
-            Statistic.PERIOD_ABSOLUTE -> Pair(Date(startDate.getMilliseconds(TIME_ZONE)), Date(endDate.getMilliseconds(TIME_ZONE)))
-            else -> {
-                throw NoWhenBranchMatchedException()
-            }
+            Statistic.PERIOD_ABSOLUTE -> Pair(startDate, endDate)
+            else -> createXLastRange()
         }
     }
 

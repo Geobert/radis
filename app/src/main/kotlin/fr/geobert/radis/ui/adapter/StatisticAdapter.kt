@@ -11,6 +11,7 @@ import fr.geobert.radis.R
 import fr.geobert.radis.ui.editor.StatisticEditor
 import fr.geobert.radis.ui.StatisticsListFragment
 import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.tools.formatDateLong
 
 public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) : RecyclerView.Adapter<StatRowHolder>() {
     var statistics = cursor.map<Statistic> { Statistic(it) }
@@ -41,7 +42,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
         holder.filterName.setText(stat.getFilterStr())
 
         val (start, end) = stat.createTimeRange()
-        holder.timeScale.setText("${start.formatDate()} ${ctx.getString(R.string.rarr)} ${end.formatDate()}")
+        holder.timeScale.setText("${start.formatDateLong()} ${ctx.getString(R.string.rarr)} ${end.formatDateLong()}")
         holder.stat = stat
     }
 
