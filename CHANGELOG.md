@@ -1,3 +1,7 @@
+Version 1.1.5 - 12/05/2015
+- stabilisation
+- fix de bug sur les statistics (dates incorrectes)
+
 Version 1.1.4 - 02/05/2015
 - stabilisation
 
