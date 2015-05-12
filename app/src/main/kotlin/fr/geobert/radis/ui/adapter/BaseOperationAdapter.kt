@@ -42,15 +42,17 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     private var _selectedPosition: Int = -1
     var selectedPosition: Int
         set(value) {
-            val tmpOldPos = selectedPosition
-            if (_selectedPosition != -1) {
-                prevExpandedPos = _selectedPosition
-            }
-            _selectedPosition = value
-            if (value != -1) justClicked = true
-            notifyItemChanged(value)
-            if (tmpOldPos != -1) {
-                notifyItemChanged(tmpOldPos)
+            if (value != _selectedPosition) {
+                val tmpOldPos = selectedPosition
+                if (_selectedPosition != -1) {
+                    prevExpandedPos = _selectedPosition
+                }
+                _selectedPosition = value
+                if (value != -1) justClicked = true
+                notifyItemChanged(value)
+                if (tmpOldPos != -1) {
+                    notifyItemChanged(tmpOldPos)
+                }
             }
         }
         get() {
