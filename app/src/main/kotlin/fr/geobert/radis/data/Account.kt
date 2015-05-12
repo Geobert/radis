@@ -1,8 +1,11 @@
 package fr.geobert.radis.data
 
 import android.database.Cursor
+import android.os.Parcel
+import android.os.Parcelable
 import fr.geobert.radis.db.AccountTable
 import java.util.Date
+import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
 public class Account(accountId: Long = 0, accountName: String = "") : ImplParcelable {
@@ -52,6 +55,10 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
         lastInsertDate = cursor.getLong(getIdx(AccountTable.KEY_ACCOUNT_LAST_INSERTION_DATE))
     }
 
+    constructor(p: Parcel) : this() {
+        readFromParcel(p)
+    }
+
     override fun equals(other: Any?): Boolean =
             when (other) {
                 is Account -> id == other.id
@@ -59,4 +66,16 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
             }
 
     override fun toString(): String = name
+
+    companion object {
+        platformStatic public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
+            override fun createFromParcel(p: Parcel): Account {
+                return Account(p)
+            }
+
+            override fun newArray(size: Int): Array<Account?> {
+                return arrayOfNulls(size)
+            }
+        }
+    }
 }

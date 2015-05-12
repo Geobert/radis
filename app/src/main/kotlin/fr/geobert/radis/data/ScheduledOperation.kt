@@ -6,7 +6,9 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.R
 import fr.geobert.radis.db.ScheduledOperationTable
+import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
+import hirondelle.date4j.DateTime
 import java.util.Calendar
 import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
@@ -15,11 +17,12 @@ import kotlin.properties.Delegates
 public class ScheduledOperation() : Operation() {
     public var mPeriodicity: Int by Delegates.mapVar(parcels)
     public var mPeriodicityUnit: Int by Delegates.mapVar(parcels)
-    public var mEndDate: GregorianCalendar = Tools.createClearedCalendar()
+    public var mEndDate: DateTime by Delegates.mapVar(parcels)
 
     init {
         mPeriodicity = 0
         mPeriodicityUnit = 1
+        mEndDate = DateTime.today(TIME_ZONE)
     }
 
     constructor(op: Operation, accountId: Long) : this() {
@@ -35,15 +38,14 @@ public class ScheduledOperation() : Operation() {
     constructor(c: Cursor) : this() {
         initWithCursor(c)
         mAccountId = c.getLong(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID))
-        mEndDate.setTimeInMillis(c.getLong(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_END_DATE)))
-        Tools.clearTimeOfCalendar(mEndDate)
+        mEndDate = DateTime.forInstant(c.getLong(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_END_DATE)), TIME_ZONE)
         mPeriodicity = c.getInt(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY))
         mPeriodicityUnit = c.getInt(c.getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_PERIODICITY_UNIT))
     }
 
     constructor(accountId: Long) : this() {
         mAccountId = accountId
-        mEndDate.setTimeInMillis(0)
+        mEndDate = DateTime.forInstant(0, TIME_ZONE)
     }
 
     constructor(p: Parcel) : this() {
@@ -93,47 +95,31 @@ public class ScheduledOperation() : Operation() {
     }
 
     public fun getEndMonth(): Int {
-        return mEndDate.get(Calendar.MONTH)
+        return mEndDate.getMonth()
     }
 
     public fun setEndMonth(month: Int) {
-        this.mEndDate.set(Calendar.MONTH, month)
+        mEndDate = DateTime.forDateOnly(mEndDate.getYear(), month, mEndDate.getDay())
     }
 
     public fun getEndDay(): Int {
-        return mEndDate.get(Calendar.DAY_OF_MONTH)
+        return mEndDate.getDay()
     }
 
     public fun setEndDay(day: Int) {
-        this.mEndDate.set(Calendar.DAY_OF_MONTH, day)
+        this.mEndDate = DateTime.forDateOnly(mEndDate.getYear(), mEndDate.getMonth(), day)
     }
 
     public fun getEndYear(): Int {
-        return mEndDate.get(Calendar.YEAR)
+        return mEndDate.getYear()
     }
 
     public fun setEndYear(year: Int) {
-        this.mEndDate.set(Calendar.YEAR, year)
+        this.mEndDate = DateTime.forDateOnly(year, mEndDate.getMonth(), mEndDate.getDay())
     }
 
     public fun getEndDate(): Long {
-        return mEndDate.getTimeInMillis()
-    }
-
-    override fun writeToParcel(dst: Parcel, flags: Int) {
-        super.writeToParcel(dst, flags)
-        dst.writeInt(getEndDay())
-        dst.writeInt(getEndMonth())
-        dst.writeInt(getEndYear())
-    }
-
-    override fun readFromParcel(p: Parcel) {
-        super.readFromParcel(p)
-        mEndDate = GregorianCalendar()
-        mEndDate.clear()
-        setEndDay(p.readInt())
-        setEndMonth(p.readInt())
-        setEndYear(p.readInt())
+        return mEndDate.getMilliseconds(TIME_ZONE)
     }
 
     public fun isObsolete(): Boolean {
@@ -150,5 +136,9 @@ public class ScheduledOperation() : Operation() {
 
     public fun periodicityEquals(schOp: ScheduledOperation): Boolean {
         return mPeriodicity == schOp.mPeriodicity && mPeriodicityUnit == schOp.mPeriodicityUnit
+    }
+
+    fun clearEndDate() {
+        mEndDate = DateTime.forInstant(0, TIME_ZONE)
     }
 }

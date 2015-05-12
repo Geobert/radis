@@ -16,7 +16,7 @@ import java.nio.channels.FileChannel;
 
 public class DbHelper extends SQLiteOpenHelper {
     protected static final String DATABASE_NAME = "radisDb";
-    protected static final int DATABASE_VERSION = 19;
+    protected static final int DATABASE_VERSION = 20;
 
     private Context mCtx;
 
@@ -92,6 +92,8 @@ public class DbHelper extends SQLiteOpenHelper {
             case 18:
                 AccountTable.upgradeFromV18(db);
                 PreferenceTable.upgradeFromV18(db);
+            case 19:
+                StatisticTable.upgradeFromV19(db);
             default:
                 AccountTable.upgradeDefault(db);
         }

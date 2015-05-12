@@ -16,6 +16,8 @@ public val TIME_ZONE: TimeZone = TimeZone.getDefault()
 
 public fun DateTime.plusMonth(nb: Int): DateTime = this.plus(0, nb, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
 public fun DateTime.minusMonth(nb: Int): DateTime = this.minus(0, nb, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
+public fun DateTime.plusYear(nb: Int): DateTime = this.plus(nb, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
+public fun DateTime.minusYear(nb: Int): DateTime = this.minus(nb, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
 
 
 public fun fillContentValuesWith(args: ContentValues, key: String, value: Any) {

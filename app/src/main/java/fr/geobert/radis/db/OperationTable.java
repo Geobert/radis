@@ -9,10 +9,11 @@ import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Tools;
+import hirondelle.date4j.DateTime;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 public class OperationTable {
     public static final String DATABASE_OPERATIONS_TABLE = "operations";
@@ -350,13 +351,13 @@ public class OperationTable {
         );
     }
 
-    public static Cursor getOpsBetweenDate(Context ctx, final Date earliestOpDate, final Date latestOpDate, final long accountId) {
+    public static Cursor getOpsBetweenDate(Context ctx, final DateTime earliestOpDate, final DateTime latestOpDate, final long accountId) {
         return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT
                         + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId),
-                        Long.toString(earliestOpDate.getTime()),
-                        Long.toString(latestOpDate.getTime())},
+                        Long.toString(earliestOpDate.getMilliseconds(TimeZone.getDefault())), // TODO once converted to Kotlin, use TIME_ZONE
+                        Long.toString(latestOpDate.getMilliseconds(TimeZone.getDefault()))},
                 OP_ORDERING
         );
     }

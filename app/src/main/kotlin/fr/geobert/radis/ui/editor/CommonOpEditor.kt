@@ -32,6 +32,17 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
         }
     }
 
+    override fun onResume() {
+        super<BaseActivity>.onResume()
+    }
+
+    override fun onResumeFragments() {
+        super<BaseActivity>.onResumeFragments()
+        mAccountManager.fetchAllAccounts(false, {
+            onAllAccountsFetched()
+        })
+    }
+
     protected fun fetchOp(loaderId: Int) {
         showProgress()
         getSupportLoaderManager().initLoader<Cursor>(loaderId, Bundle(), this)
@@ -53,13 +64,6 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
 
     protected open fun init(extras: Bundle?) {
         mRowId = if (extras != null) extras.getLong(PARAM_OP_ID) else 0
-    }
-
-    override fun onResume() {
-        super<BaseActivity>.onResume()
-        mAccountManager.fetchAllAccounts(false, {
-            onAllAccountsFetched()
-        })
     }
 
     override fun onDestroy() {

@@ -9,6 +9,7 @@ import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.R
+import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.formatDate
 
 public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor) :
@@ -26,8 +27,8 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
         val endDate = op.mEndDate
         b.append(ScheduledOperation.getUnitStr(activity, periodicityUnit, periodicity));
         b.append(" - ");
-        if (endDate.getTimeInMillis() > 0L) {
-            b.append(endDate.getTime().formatDate());
+        if (endDate.getMilliseconds(TIME_ZONE) > 0L) {
+            b.append(endDate.formatDate());
         } else {
             b.append(activity.getString(R.string.no_end_date));
         }
