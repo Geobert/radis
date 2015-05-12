@@ -32,6 +32,10 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
         }
     }
 
+    override fun onResume() {
+        super<BaseActivity>.onResume()
+    }
+
     override fun onResumeFragments() {
         super<BaseActivity>.onResumeFragments()
         mAccountManager.fetchAllAccounts(false, {

@@ -35,7 +35,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 21
         versionCode 54
-        versionName "1.1.4"
+        versionName "1.1.5rc1"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -83,7 +83,7 @@ dependencies {
         exclude module: 'recyclerview-v7'
         //  exclude group: 'org.hamcrest'
     }
-    compile('com.crashlytics.sdk.android:crashlytics:2.2.3@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.2.4@aar') {
         transitive = true;
     }
 }

@@ -184,9 +184,9 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
      */
     private fun partFunc(stat: Statistic): (Operation) -> String =
             when (stat.filterType) {
-                Statistic.THIRD_PARTY -> { o: Operation -> o.mThirdParty ?: "" }
-                Statistic.TAGS -> { o: Operation -> o.mTag ?: "" }
-                Statistic.MODE -> { o: Operation -> o.mMode ?: "" }
+                Statistic.THIRD_PARTY -> { o: Operation -> o.mThirdParty }
+                Statistic.TAGS -> { o: Operation -> o.mTag }
+                Statistic.MODE -> { o: Operation -> o.mMode }
                 else -> { // Statistic.NO_FILTER
                     o: Operation ->
                     val g = GregorianCalendar()
@@ -214,7 +214,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         val result: MutableMap<String, Long> = hashMapOf()
         val miscKey = ctx.getString(R.string.misc_chart_cat)
         m.forEach {
-            Log.d("StatisticListFragment", "key: ${it.key} / value: ${it.value} / limit: $limit / total: $total / m.size: ${m.size}")
+            Log.d("StatisticListFragment", "key: ${it.key} / value: ${it.value} / limit: $limit / total: $total / m.size: ${m.size()}")
             if (Math.abs(it.value) < limit) {
                 val p = result[miscKey]
                 if (p != null) {
