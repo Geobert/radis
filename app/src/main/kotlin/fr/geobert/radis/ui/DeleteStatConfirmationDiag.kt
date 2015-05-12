@@ -32,7 +32,7 @@ class DeleteStatConfirmationDiag : DialogFragment() {
         return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
             override fun onClick(p0: DialogInterface, p1: Int) {
                 if (StatisticTable.deleteStatistic(statId, ctx)) {
-                    getActivity().sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_NEEDED), null)
+                    getActivity().sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_STAT), null)
                 }
             }
         })

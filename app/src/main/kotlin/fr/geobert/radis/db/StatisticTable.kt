@@ -33,12 +33,20 @@ public object StatisticTable {
             "$KEY_STAT_TYPE  integer not null, $KEY_STAT_X_LAST  integer, $KEY_STAT_START_DATE  integer," +
             "$KEY_STAT_END_DATE  integer, $KEY_STAT_ACCOUNT_NAME  string not null)"
 
+    private val CREATE_TRIGGER_ON_STAT_DELETE = "CREATE TRIGGER IF NOT EXISTS on_account_deleted_for_stat AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
+            "BEGIN DELETE FROM $STAT_TABLE WHERE $KEY_STAT_ACCOUNT = old._id ; END"
+
     platformStatic fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_TABLE)
+        db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 
     platformStatic fun upgradeFromV17(db: SQLiteDatabase) {
         onCreate(db)
+    }
+
+    platformStatic fun upgradeFromV19(db: SQLiteDatabase) {
+        db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 
     private fun fillContentValues(stat: Statistic): ContentValues {

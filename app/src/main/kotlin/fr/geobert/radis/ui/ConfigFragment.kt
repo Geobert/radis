@@ -53,6 +53,8 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
                 mConfig = AccountConfig()
             }
         }
+        if (savedInstanceState != null)
+            onRestoreInstanceState(savedInstanceState)
     }
 
     private fun getPrefs(): DBPrefsManager {
@@ -164,7 +166,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         mOnRestore = true
     }
 
-    fun onRestoreInstanceState(state: Bundle) {
+    private fun onRestoreInstanceState(state: Bundle) {
         mOnRestore = true
         if (isAccountEditor)
             mConfig = state.getParcelable<AccountConfig>("mConfig")

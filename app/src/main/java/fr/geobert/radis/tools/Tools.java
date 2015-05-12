@@ -42,6 +42,8 @@ public class Tools {
     // Intents actions
     public final static String INTENT_RADIS_STARTED = "fr.geobert.radis.STARTED";
     public final static String INTENT_REFRESH_NEEDED = "fr.geobert.radis.REFRESH_NEEDED";
+    public final static String INTENT_REFRESH_STAT = "fr.geobert.radis.REFRESH_STAT";
+
     public static final int DEBUG_DIALOG = 9876;
     // debug mode stuff
     public static boolean DEBUG_MODE = true;

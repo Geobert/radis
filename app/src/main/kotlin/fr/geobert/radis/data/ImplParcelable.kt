@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.tools.readBoolean
 import fr.geobert.radis.tools.writeBoolean
+import hirondelle.date4j.DateTime
 import java.util.HashMap
 
 public trait ImplParcelable : Parcelable {
@@ -15,6 +16,12 @@ public trait ImplParcelable : Parcelable {
                 is Long -> p.writeLong(it.value as Long)
                 is Int -> p.writeInt(it.value as Int)
                 is String -> p.writeString(it.value as String)
+                is DateTime -> {
+                    val d = it.value as DateTime
+                    p.writeInt(d.getYear())
+                    p.writeInt(d.getMonth())
+                    p.writeInt(d.getDay())
+                }
                 else -> throw RuntimeException()
             }
         }
@@ -27,6 +34,7 @@ public trait ImplParcelable : Parcelable {
                 is Long -> parcels[it.key] = p.readLong()
                 is Int -> parcels[it.key] = p.readInt()
                 is String -> parcels[it.key] = p.readString()
+                is DateTime -> parcels[it.key] = DateTime.forDateOnly(p.readInt(), p.readInt(), p.readInt())
             }
         }
     }

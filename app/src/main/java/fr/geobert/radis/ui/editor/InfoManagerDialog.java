@@ -30,6 +30,7 @@ public class InfoManagerDialog extends DialogFragment {
     private int mMode = -1;
 
     public static void resetInfoManager() {
+        mInfoManagerDialogMap.clear();
         mInfoManagersMap.clear();
     }
 

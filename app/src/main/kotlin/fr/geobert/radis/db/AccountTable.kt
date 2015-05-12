@@ -185,10 +185,10 @@ public class AccountTable {
                 }
                 PROJECTION_DAY_OF_NEXT_MONTH -> {
                     val projDate = Tools.createClearedCalendar()
-                    if (projDate.get(Calendar.DAY_OF_MONTH) >= account.projDate?.toInt() ?: 0) {
+                    if (projDate.get(Calendar.DAY_OF_MONTH) >= account.projDate.toInt()) {
                         projDate.add(Calendar.MONTH, 1)
                     }
-                    projDate.set(Calendar.DAY_OF_MONTH, account.projDate?.toInt() ?: 1)
+                    projDate.set(Calendar.DAY_OF_MONTH, account.projDate.toInt())
                     projDate.add(Calendar.DAY_OF_MONTH, 1) // for query
                     val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, account.id)
                     projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after query
@@ -202,7 +202,7 @@ public class AccountTable {
                 }
                 PROJECTION_ABSOLUTE_DATE -> {
                     val projDate = Tools.createClearedCalendar()
-                    projDate.setTime(account.projDate?.parseDate() as Date)
+                    projDate.setTime(account.projDate.parseDate())
                     projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
                     val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, account.id)
                     projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after

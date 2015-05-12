@@ -258,14 +258,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun getMoreOperations(startDate: DateTime?) {
         if (isAdded()) {
-            Log.d("getMoreOperations", "startDate : " + startDate?.formatDate())
+            Log.d("getMoreOperations", "startDate : " + startDate?.formatDateLong())
             if (startDate != null) {
                 // date specified, use it
                 earliestOpDate = startDate
                 getOperationsList()
             } else {
                 // no op found with cur month and month - 1, try if there is one
-                Log.d("getMoreOperations", "earliestOpDate : " + earliestOpDate?.formatDate())
+                Log.d("getMoreOperations", "earliestOpDate : " + earliestOpDate?.formatDateLong())
                 val start = earliestOpDate
                 val c = if (null == start) {
                     OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())

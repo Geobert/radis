@@ -13,7 +13,7 @@ import kotlin.properties.Delegates
 
 public open class Operation() : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
-    protected var mDate: DateTime = DateTime.today(TIME_ZONE)
+    protected var mDate: DateTime by Delegates.mapVar(parcels)
     public var mThirdParty: String by Delegates.mapVar(parcels)
     public var mTag: String by Delegates.mapVar(parcels)
     public var mMode: String by Delegates.mapVar(parcels)
@@ -24,7 +24,13 @@ public open class Operation() : ImplParcelable {
     public var mTransSrcAccName: String by Delegates.mapVar(parcels)
     public var mIsChecked: Boolean by Delegates.mapVar(parcels)
 
+    // if these value are != 0, it is a transfert operation between 2 accounts
+    // mTransferAccountId is the other account
+    public var mTransferAccountId: Long by Delegates.mapVar(parcels)
+    public var mAccountId: Long by Delegates.mapVar(parcels)
+
     init {
+        mDate = DateTime.today(TIME_ZONE)
         mThirdParty = ""
         mTag = ""
         mMode = ""
@@ -34,12 +40,10 @@ public open class Operation() : ImplParcelable {
         mRowId = 0
         mTransSrcAccName = ""
         mIsChecked = false
+        mTransferAccountId = 0L
+        mAccountId = 0L
     }
 
-    // if these value are != 0, it is a transfert operation between 2 accounts
-    // mTransferAccountId is the other account
-    public var mTransferAccountId: Long = 0
-    public var mAccountId: Long = 0
 
     constructor(op: Operation) : this() {
         initWithOperation(op)
@@ -179,20 +183,6 @@ public open class Operation() : ImplParcelable {
 
     override fun describeContents(): Int {
         return 0
-    }
-
-    override fun writeToParcel(p: Parcel, flags: Int) {
-        super<ImplParcelable>.writeToParcel(p, flags)
-        p.writeInt(getDay())
-        p.writeInt(getMonth())
-        p.writeInt(getYear())
-    }
-
-    override fun readFromParcel(p: Parcel) {
-        super<ImplParcelable>.readFromParcel(p)
-        setDay(p.readInt())
-        setMonth(p.readInt())
-        setYear(p.readInt())
     }
 
     public open fun equals(op: Operation?): Boolean {

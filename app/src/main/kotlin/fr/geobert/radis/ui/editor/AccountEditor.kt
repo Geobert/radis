@@ -75,8 +75,8 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
         mRowId = savedInstanceState.getLong("mRowId")
-        getAccountFrag().onRestoreInstanceState(savedInstanceState) // not managed by Android
-        getConfigFrag().onRestoreInstanceState(savedInstanceState)  // not managed by Android
+        //        getAccountFrag().onRestoreInstanceState(savedInstanceState) // not managed by Android
+        //        getConfigFrag().onRestoreInstanceState(savedInstanceState)  // not managed by Android
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle?) {
