@@ -247,6 +247,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         handler.pause()
     }
 
+    // nothing to do here, required by Android
     override fun onResume() {
         super<BaseActivity>.onResume()
     }
@@ -401,8 +402,8 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         if (mFirstStart) {
             val i = Intent(this, javaClass<InstallRadisServiceReceiver>())
             i.setAction(Tools.INTENT_RADIS_STARTED)
-            sendBroadcast(i)
-            fr.geobert.radis.service.RadisService.callMe(this)
+            sendBroadcast(i) // install radis timer
+            fr.geobert.radis.service.RadisService.callMe(this) // call service once
             mFirstStart = false
         }
     }

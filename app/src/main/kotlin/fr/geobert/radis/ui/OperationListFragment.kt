@@ -217,15 +217,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     needRefreshSelection = false
                     refreshSelection()
                 }
-                operation_list.post {
-                    val curChildCount = mListLayout.getChildCount()
-                    //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
-                    if (curChildCount > 0 && mOldChildCount != curChildCount &&
-                            curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition()) {
-                        mOldChildCount = mListLayout.getChildCount()
-                        mScrollLoader.onScrolled(operation_list, 0, 0)
-                    }
+                //                mActivity.runOnUiThread {
+                val curChildCount = mListLayout.getChildCount()
+                //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
+                if (itemCount == 0 || (curChildCount > 0 && mOldChildCount != curChildCount &&
+                        curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition())) {
+                    mOldChildCount = mListLayout.getChildCount()
+                    needRefreshSelection = true
+                    mScrollLoader.onScrolled(operation_list, 0, 0)
                 }
+                //                }
 
             }
         }
