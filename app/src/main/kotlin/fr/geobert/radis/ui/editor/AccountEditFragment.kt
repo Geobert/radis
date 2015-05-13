@@ -72,11 +72,11 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         mAccountCurrency.setAdapter(mCurrAdapter)
         mAccountCurrency.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
 
-            override fun onItemSelected(arg0: AdapterView<*>, arg1: View, pos: Int, id: Long) {
+            override fun onItemSelected(arg0: AdapterView<*>?, arg1: View?, pos: Int, id: Long) {
                 mCustomCurrency.setEnabled(pos == getCustomCurrencyIdx(getActivity()))
             }
 
-            override fun onNothingSelected(arg0: AdapterView<*>) {
+            override fun onNothingSelected(arg0: AdapterView<*>?) {
             }
 
         })
