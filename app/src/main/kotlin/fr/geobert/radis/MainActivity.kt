@@ -409,9 +409,9 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
+        super<BaseActivity>.onSaveInstanceState(outState)
         outState.putInt("activeFragId", mActiveFragmentId)
         outState.putInt("prevFragId", mPrevFragmentId)
-        //mActiveFragment?.onSaveInstanceState(outState) // managed by Android
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -419,7 +419,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         mActiveFragmentId = savedInstanceState.getInt("activeFragId")
         mPrevFragmentId = savedInstanceState.getInt("prevFragId")
         DBPrefsManager.getInstance(this).fillCache(this, {
-            mActiveFragment?.onRestoreInstanceState(savedInstanceState) // not managed by Android
+            //            mActiveFragment?.onRestoreInstanceState(savedInstanceState)
             initAccountStuff()
             if (mAccountAdapter.isEmpty()) {
                 updateDisplay(null)

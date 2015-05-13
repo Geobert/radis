@@ -55,11 +55,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private var mLastSelectionId = -1L
     private var mLastSelectionPos = -1
     private var needRefreshSelection = false
-    private var container: LinearLayout by Delegates.notNull()
+
 
     // TODO kotlinx.android
     private var operation_list: RecyclerView by Delegates.notNull()
     private var empty_textview: View by Delegates.notNull()
+    private var container: LinearLayout by Delegates.notNull()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
@@ -78,6 +79,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         //        checkingDashboard?.onResume()
         initOperationList()
         initQuickAdd()
+        if (savedInstanceState != null) {
+            mQuickAddController?.onRestoreInstanceState(savedInstanceState)
+        }
         processAccountChanged(mActivity.getCurrentAccountId())
         return c
     }
@@ -153,10 +157,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         operation_list.setOnScrollListener(mScrollLoader)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        initQuickAdd()
-        mQuickAddController?.onRestoreInstanceState(savedInstanceState)
-    }
+    //    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    //        initQuickAdd()
+    //        mQuickAddController?.onRestoreInstanceState(savedInstanceState)
+    //    }
 
     fun processAccountChanged(itemId: Long) {
         mAccountManager.setCurrentAccountId(itemId, mActivity)
