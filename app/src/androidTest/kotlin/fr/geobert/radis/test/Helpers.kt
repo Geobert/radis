@@ -101,6 +101,7 @@ class Helpers {
         }
 
         fun addAccount() {
+            Helpers.pauseTest(1000)
             checkTitleBarDisplayed(R.string.account_creation)
             onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME))
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
