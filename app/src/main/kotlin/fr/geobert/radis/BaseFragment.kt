@@ -12,7 +12,7 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
     protected val mActivity: MainActivity by Delegates.lazy { getActivity() as MainActivity }
     protected val mAccountManager: AccountManager by Delegates.lazy { mActivity.mAccountManager }
 
-    public abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
+    //    public abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
 
     public abstract fun onOperationEditorResult(resultCode: Int, data: Intent?)
 

@@ -1,3 +1,7 @@
+Version 1.1.6 - 14/05/2015
+- stabilisation
+- fix affichage quand un compte n'a que des opération de 3 mois ou plus
+
 Version 1.1.5 - 12/05/2015
 - stabilisation
 - fix de bug sur les statistics (dates incorrectes, suppression de stat quand le compte concerné est supprimé)

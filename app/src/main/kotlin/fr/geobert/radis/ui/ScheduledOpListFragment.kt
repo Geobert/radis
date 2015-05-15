@@ -81,9 +81,9 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         }
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        // nothing ?
-    }
+//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    //        // nothing ?
+    //    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super<BaseFragment>.onSaveInstanceState(outState)
