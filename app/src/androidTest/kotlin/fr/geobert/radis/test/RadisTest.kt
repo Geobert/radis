@@ -327,7 +327,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         // 3 following lines are hack because a bug of Espresso
         Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(3000)
+        Helpers.pauseTest(3500)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -1101,7 +1101,7 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         checkQuickAddVisibilityAs(false)
     }
 
-    fun testQuickAddActionOption() {
+    public fun testQuickAddActionOption() {
         Helpers.addAccount()
 
         // set long press to add today = simple click set to ask date
@@ -1140,11 +1140,31 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
     }
 
     // test bug where only transaction older than 3 months exist in the account
-    fun testOnlyOldOps() {
+    public fun testOnlyOldOps() {
         Helpers.addAccount()
         val oldDate = DateTime.today(TIME_ZONE).minusMonth(3)
         Helpers.addOp(oldDate, "Toto", "-1", "", "", "")
         Helpers.checkSelectedSumIs(999.50.formatSum())
+    }
+
+    public fun testOldOps() {
+        Helpers.addAccount()
+        val today = DateTime.today(TIME_ZONE)
+        Helpers.addOp(today, "Toto", "-1", "", "", "")
+        Helpers.checkSelectedSumIs(999.50.formatSum())
+
+        fun addOpAndCheck(d: DateTime, pos: Int) {
+            Helpers.addOp(d, "Toto", "-1", "", "", "")
+            Helpers.scrollRecyclerViewToPos(pos)
+            Helpers.pauseTest(800)
+            Helpers.clickOnRecyclerViewAtPos(pos)
+            Helpers.checkSelectedSumIs(999.50.formatSum())
+        }
+
+        for (i in 1..15) {
+            val d = today.minusMonth(i)
+            addOpAndCheck(d, i)
+        }
     }
 
     companion object {

@@ -16,6 +16,7 @@ import android.support.test.espresso.contrib.DrawerActions.openDrawer
 import android.support.test.espresso.contrib.DrawerMatchers.isOpen
 import android.support.test.espresso.contrib.PickerActions
 import android.support.test.espresso.contrib.PickerActions.setDate
+import android.support.test.espresso.contrib.RecyclerViewActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.matcher.RootMatchers
 import android.support.test.espresso.matcher.ViewMatchers.hasFocus
@@ -34,14 +35,11 @@ import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
-import java.util.Calendar
-import java.util.GregorianCalendar
 import kotlin.properties.Delegates
 
 class Helpers {
@@ -274,8 +272,13 @@ class Helpers {
         fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(text),
                 isDisplayed()) as Matcher<View>).perform(click())
 
-        fun clickOnRecyclerViewAtPos(pos: Int) =
-                onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+        fun scrollRecyclerViewToPos(pos: Int) {
+            onView(withId(R.id.operation_list)).perform(RecyclerViewActions.scrollToPosition<OpRowHolder<Operation>>(pos))
+        }
+
+        fun clickOnRecyclerViewAtPos(pos: Int) {
+            onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+        }
 
         fun checkAccountSumIs(text: String) =
                 onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))
