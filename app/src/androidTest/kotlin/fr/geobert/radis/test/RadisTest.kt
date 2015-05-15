@@ -1139,6 +1139,14 @@ public class RadisTest : ActivityInstrumentationTestCase2<MainActivity>(javaClas
         Helpers.checkAccountSumIs(998.50.formatSum())
     }
 
+    // test bug where only transaction older than 3 months exist in the account
+    fun testOnlyOldOps() {
+        Helpers.addAccount()
+        val oldDate = DateTime.today(TIME_ZONE).minusMonth(3)
+        Helpers.addOp(oldDate, "Toto", "-1", "", "", "")
+        Helpers.checkSelectedSumIs(999.50.formatSum())
+    }
+
     companion object {
         private val WAIT_DIALOG_TIME = 2000
 

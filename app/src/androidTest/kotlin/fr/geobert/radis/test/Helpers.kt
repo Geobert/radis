@@ -101,6 +101,7 @@ class Helpers {
         }
 
         fun addAccount() {
+            Helpers.pauseTest(1000)
             checkTitleBarDisplayed(R.string.account_creation)
             onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME))
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
@@ -138,11 +139,10 @@ class Helpers {
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
-        fun addOp(date: GregorianCalendar, third: String, amount: String, tag: String, mode: String, desc: String) {
+        fun addOp(date: DateTime, third: String, amount: String, tag: String, mode: String, desc: String) {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
-            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.get(Calendar.YEAR),
-                    date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
+            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.getYear(), date.getMonth(), date.getDay()))
             fillOpForm(third, amount, tag, mode, desc)
             clickOnActionItemConfirm()
         }
