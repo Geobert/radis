@@ -1,6 +1,6 @@
 package fr.geobert.radis.test
 
-import android.app.Activity
+import android.support.test.InstrumentationRegistry
 import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onData
 import android.support.test.espresso.Espresso.onView
@@ -23,15 +23,12 @@ import android.support.test.espresso.matcher.ViewMatchers.hasFocus
 import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
 import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.support.test.espresso.matcher.ViewMatchers.withText
-import android.test.ActivityInstrumentationTestCase2
 import android.util.Log
-import android.view.KeyEvent
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.RelativeLayout
-import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.tools.TIME_ZONE
@@ -40,26 +37,11 @@ import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.*
-import kotlin.properties.Delegates
 
 class Helpers {
 
     companion object {
-        var instrumentationTest: ActivityInstrumentationTestCase2<MainActivity> by Delegates.notNull()
-        var activity: Activity by Delegates.notNull()
-
-        fun backOutToHome() {
-            var more = true
-            while (more) {
-                try {
-                    instrumentationTest.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-                } catch (e: SecurityException) {
-                    // Done, at Home.
-                    more = false
-                }
-
-            }
-        }
+        fun getContext() = InstrumentationRegistry.getTargetContext()
 
         fun clickOnActionItemConfirm() {
             pauseTest(1000)
@@ -70,17 +52,17 @@ class Helpers {
         }
 
         fun ACTIONBAR_TITLE_MATCHER(title: String): Matcher<View> {
-            val actionBarId = instrumentationTest.getInstrumentation().getTargetContext().getResources().getIdentifier("action_bar_container", "id", "android");
+            //            val actionBarId = instrumentationTest.getInstrumentation().getTargetContext().getResources().getIdentifier("action_bar_container", "id", "android");
             // isDescendantOfA(withId(actionBarId)),
             return allOf(withText(title))
         }
 
         fun checkTitleBarDisplayed(title: Int) =
-                onView(ACTIONBAR_TITLE_MATCHER(activity.getString(title))).check(matches(isDisplayed()))
+                onView(ACTIONBAR_TITLE_MATCHER(getContext().getString(title))).check(matches(isDisplayed()))
 
 
         fun clickInDrawer(text: Int) {
-            val str = activity.getString(text)
+            val str = getContext().getString(text)
             Log.d("clickInDrawer", "wanted text : " + str)
             openDrawer(R.id.drawer_layout)
             pauseTest(100)
@@ -105,7 +87,7 @@ class Helpers {
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
-            onView(withText(equalTo(activity.getString(R.string.no_operation)))).check(matches(isDisplayed()))
+            onView(withText(equalTo(getContext().getString(R.string.no_operation)))).check(matches(isDisplayed()))
             onView(withId(android.R.id.text1)).check(matches(withText(equalTo(RadisTest.ACCOUNT_NAME))))
             onView(withId(R.id.account_sum)).check(matches(withText(equalTo(RadisTest.ACCOUNT_START_SUM_FORMATED_ON_LIST))))
             // TODO test if only one entry once converted the actionbar to Toolbar
@@ -228,7 +210,7 @@ class Helpers {
 
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())
-            val strs = activity.getResources().getStringArray(R.array.periodicity_choices).get(0)
+            val strs = getContext().getResources().getStringArray(R.array.periodicity_choices).get(0)
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
 
             clickOnActionItemConfirm()
@@ -291,7 +273,7 @@ class Helpers {
         fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {
             onView(withId(spinnerId)).perform(scrollTo())
             onView(withId(spinnerId)).perform(click())
-            val strs = activity.getResources().getStringArray(arrayResId).get(pos)
+            val strs = getContext().getResources().getStringArray(arrayResId).get(pos)
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
         }
 
