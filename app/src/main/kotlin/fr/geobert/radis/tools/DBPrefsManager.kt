@@ -52,16 +52,16 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         }
     }
 
-    public fun getString(key: String): String {
-        return mCache!!.get(key)
+    public fun getString(key: String): String? {
+        return mCache?.get(key)
     }
 
     public fun getString(key: String, defValue: String): String {
-        return mCache!!.get(key) ?: defValue
+        return mCache?.get(key) ?: defValue
     }
 
     public fun getBoolean(key: String): Boolean? {
-        val v = mCache!!.get(key)
+        val v = mCache?.get(key)
         try {
             val b = lang.Boolean.valueOf(v)
             return b
@@ -72,7 +72,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public fun getBoolean(key: String, defValue: Boolean): Boolean {
-        val v = mCache!!.get(key)
+        val v = mCache?.get(key)
         try {
             return (if (v != null) lang.Boolean.valueOf(v) else null) ?: defValue
         } catch (e: Exception) {
@@ -82,39 +82,44 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public fun getInt(key: String): Int? {
-        val v = mCache!!.get(key)
-        try {
-            val b = Integer.valueOf(v)
-            return b
-        } catch (e: Exception) {
+        val v = mCache?.get(key)
+        if (v != null) {
+            try {
+                val b = Integer.valueOf(v)
+                return b
+            } catch (e: Exception) {
+                return null
+            }
+        } else {
             return null
         }
-
     }
 
     public fun getInt(key: String, defValue: Int): Int {
-        val v = mCache!!.get(key)
+        val v = mCache?.get(key)
         try {
             return (if (v != null) Integer.valueOf(v) else null) ?: defValue
         } catch (e: Exception) {
             return defValue
         }
-
     }
 
     public fun getLong(key: String): Long? {
-        val v = mCache!!.get(key)
-        try {
-            val b = lang.Long.valueOf(v)
-            return b
-        } catch (e: Exception) {
+        val v = mCache?.get(key)
+        if (v != null) {
+            try {
+                val b = lang.Long.valueOf(v)
+                return b
+            } catch (e: Exception) {
+                return null
+            }
+        } else {
             return null
         }
-
     }
 
     public fun getLong(key: String, defValue: Long): Long {
-        val v = mCache!!.get(key)
+        val v = mCache?.get(key)
         try {
             return (if (v != null) lang.Long.valueOf(v) else null) ?: defValue
         } catch (e: Exception) {

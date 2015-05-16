@@ -34,8 +34,8 @@ public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaCla
         provider.deleteDatabase(appCtx)
         client.release()
 
-        Helpers.instrumentationTest = this
-        Helpers.activity = getActivity()
+        //        Helpers.instrumentationTest = this
+        //        Helpers.activity = getActivity()
     }
 
     public fun testZFillForScreenshots() {

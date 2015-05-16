@@ -21,22 +21,22 @@ import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.InfoAdapter
 import java.text.ParseException
 import kotlin.properties.Delegates
+import kotlinx.android.synthetic.main_op_edit.*
 
 public class OperationEditFragment() : Fragment(), TextWatcher {
-    // TODO kotlinx.android when v4.app.Fragment are supported
-    private val edit_op_sum by Delegates.lazy { mActivity.findViewById(R.id.edit_op_sum) as EditText }
-    private val edit_op_third_party by Delegates.lazy { mActivity.findViewById(R.id.edit_op_third_party) as MyAutoCompleteTextView }
-    private val edit_op_tag by Delegates.lazy { mActivity.findViewById(R.id.edit_op_tag) as MyAutoCompleteTextView }
-    private val edit_op_mode by Delegates.lazy { mActivity.findViewById(R.id.edit_op_mode) as MyAutoCompleteTextView }
-    private val edit_op_notes by Delegates.lazy { mActivity.findViewById(R.id.edit_op_notes) as EditText }
-    private val edit_op_date by Delegates.lazy { mActivity.findViewById(R.id.edit_op_date) as DatePicker }
-    private val third_party_cont by Delegates.lazy { mActivity.findViewById(R.id.third_party_cont) as LinearLayout }
-    private val transfert_cont by Delegates.lazy { mActivity.findViewById(R.id.transfert_cont) as LinearLayout }
-    private val is_transfert by Delegates.lazy { mActivity.findViewById(R.id.is_transfert) as CheckBox }
-    private val is_checked by Delegates.lazy { mActivity.findViewById(R.id.is_checked) as CheckBox }
-    private val edit_op_sign by Delegates.lazy { mActivity.findViewById(R.id.edit_op_sign) as ImageButton }
-    private val trans_src_account by Delegates.lazy { mActivity.findViewById(R.id.trans_src_account) as Spinner }
-    private val trans_dst_account by Delegates.lazy { mActivity.findViewById(R.id.trans_dst_account) as Spinner }
+    private val edit_op_sum by Delegates.lazy { getActivity().edit_op_sum }
+    private val edit_op_third_party by Delegates.lazy { getActivity().edit_op_third_party }
+    private val edit_op_tag by Delegates.lazy { getActivity().edit_op_tag }
+    private val edit_op_mode by Delegates.lazy { getActivity().edit_op_mode }
+    private val edit_op_notes by Delegates.lazy { getActivity().edit_op_notes }
+    private val edit_op_date by Delegates.lazy { getActivity().edit_op_date }
+    private val third_party_cont by Delegates.lazy { getActivity().third_party_cont }
+    private val transfert_cont by Delegates.lazy { getActivity().transfert_cont }
+    private val is_transfert by Delegates.lazy { getActivity().is_transfert }
+    private val is_checked by Delegates.lazy { getActivity().is_checked }
+    private val edit_op_sign by Delegates.lazy { getActivity().edit_op_sign }
+    private val trans_src_account by Delegates.lazy { getActivity().trans_src_account }
+    private val trans_dst_account by Delegates.lazy { getActivity().trans_dst_account }
     private val mSumTextWatcher by Delegates.lazy { CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this) }
     private val mActivity by Delegates.lazy { getActivity() as CommonOpEditor }
     private var mWasInvertByTransfert: Boolean = false
