@@ -1,3 +1,7 @@
+Version 1.1.7 - 16/05/2015
+- stabilisation
+- fix affichage d'opération
+
 Version 1.1.6 - 14/05/2015
 - stabilisation
 - fix affichage quand un compte n'a que des opération de 3 mois ou plus

@@ -74,9 +74,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         setMenu(R.menu.operations_list_menu)
         setIcon(R.drawable.radis_no_disc_48)
         mActivity.mAccountSpinner.setSelection(mActivity.mAccountManager.getCurrentAccountPosition(mActivity))
-        // TODO : useless in actual form
-        //        checkingDashboard = CheckingOpDashboard(getActivity() as MainActivity, l)
-        //        checkingDashboard?.onResume()
         initOperationList()
         initQuickAdd()
         if (savedInstanceState != null) {
@@ -174,7 +171,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         getMoreOperations(initialStartDate())
     }
 
-    fun initialStartDate() = DateTime.today(TIME_ZONE).minusMonth(1)
+    fun initialStartDate() = DateTime.today(TIME_ZONE).minusMonth(1).getStartOfMonth()
 
     override fun onAccountChanged(itemId: Long): Boolean {
         Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
@@ -221,16 +218,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     needRefreshSelection = false
                     refreshSelection()
                 }
-                //                mActivity.runOnUiThread {
-                val curChildCount = mListLayout.getChildCount()
-                //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = ${mListLayout.findLastCompletelyVisibleItemPosition()}")
-                if (itemCount == 0 || (curChildCount > 0 && mOldChildCount != curChildCount &&
-                        curChildCount - 1 == mListLayout.findLastCompletelyVisibleItemPosition())) {
-                    mOldChildCount = mListLayout.getChildCount()
-                    needRefreshSelection = true
-                    mScrollLoader.onScrolled(operation_list, 0, 0)
+                operation_list.post {
+                    val curChildCount = mListLayout.getChildCount()
+                    val lastVisibleItemPos = mListLayout.findLastCompletelyVisibleItemPosition()
+                    Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = $lastVisibleItemPos")
+                    if (itemCount == 0 || (mOldChildCount != curChildCount && curChildCount - 1 == lastVisibleItemPos)) {
+                        mOldChildCount = curChildCount
+                        needRefreshSelection = true
+                        mScrollLoader.onScrolled(operation_list, 0, 0)
+                    }
                 }
-                //                }
 
             }
         }
@@ -250,7 +247,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
      * get the operations of current account, should be called after getAccountList
      */
     private fun getOperationsList() {
-        Log.d("getOperationsList", "earliestDate : $earliestOpDate")
+        Log.d("getOperationsList", "earliestDate : $earliestOpDate / mOperationsLoader : $mOperationsLoader ")
         val b = Bundle()
         b.putLong("date", earliestOpDate!!.getMilliseconds(TIME_ZONE))
         if (mOperationsLoader == null) {
@@ -279,7 +276,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                             start.getMilliseconds(TIME_ZONE))
                 }
                 if (c != null) {
-                    Log.d("getMoreOperations", "cursor count : " + c.getCount())
+                    Log.d("getMoreOperations", "cursor count : ${c.getCount()} / mOpListAdapter?.getItemCount():${mOpListAdapter?.getItemCount()}")
                     if (c.moveToFirst()) {
                         val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
                         Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
@@ -293,6 +290,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         getOperationsList()
                     } else if (mOpListAdapter?.getItemCount() == 0) {
                         setEmptyViewVisibility(true)
+                    } else {
+                        getOperationsList()
                     }
                     c.close()
                 }
@@ -397,9 +396,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private fun refreshSelection() {
         val adapter = mOpListAdapter
         if (adapter != null) {
+            Log.d(TAG, "refreshSelection, mLastSelectionId: $mLastSelectionId")
             if (mLastSelectionId == -1L) {
                 val today = Tools.createClearedCalendar()
                 val pos = adapter.findLastOpBeforeDatePos(today)
+                Log.d(TAG, "refreshSelection, pos: $pos")
                 selectOpAndAdjustOffset(pos)
             } else {
                 selectOpAndAdjustOffset(findOpPosition(mLastSelectionId))
@@ -435,17 +436,18 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data != null) {
-            this.mLastSelectionId = data.getLongExtra("opId", this.mLastSelectionId)
+            mLastSelectionId = data.getLongExtra("opId", mLastSelectionId)
             val date = data.getLongExtra("opDate", 0)
+            Log.d(TAG, "onOperationEditorResult, mLastSelectionId:$mLastSelectionId / date:${date.formatDate()}")
             if (date > 0) {
-                //                val opDate = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
-                //                val today = DateTime.today(TIME_ZONE)
-                //                if (today.getMonth() > opDate.getMonth()) {
-                //                    getMoreOperations(opDate)
-                //                } else {
-                //                    getMoreOperations(initialStartDate())
-                //                }
-                getMoreOperations(initialStartDate())
+                val opDate = DateTime.forInstant(date, TIME_ZONE)
+                Log.d(TAG, "onOperationEditorResult, opDate:$opDate")
+                val today = DateTime.today(TIME_ZONE)
+                if (today.gt(opDate)) {
+                    getMoreOperations(opDate)
+                } else {
+                    getMoreOperations(earliestOpDate)
+                }
             }
         }
     }
