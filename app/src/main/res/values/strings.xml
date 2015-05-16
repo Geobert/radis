@@ -67,9 +67,9 @@
     </string>
     <string name="backup_confirm">Backup will override last backup if it exists!</string>
     <string name="to_continue">Continue</string>
-    <string name="backup_success">Backup successed!</string>
+    <string name="backup_success">Backup succeeded!</string>
     <string name="backup_failed">Backup failed.</string>
-    <string name="restore_success">Restoration successed!</string>
+    <string name="restore_success">Restoration succeeded!</string>
     <string name="restore_failed">Restoration failed.</string>
     <string name="restarting">Restarting…</string>
     <string name="will_restart">Application will be restart.</string>
