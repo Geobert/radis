@@ -102,7 +102,6 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         } catch (e: Exception) {
             return defValue
         }
-
     }
 
     public fun getLong(key: String): Long? {

@@ -34,8 +34,8 @@ android {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
         targetSdkVersion 21
-        versionCode 56
-        versionName "1.1.7rc2"
+        versionCode 57
+        versionName "1.1.7"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
