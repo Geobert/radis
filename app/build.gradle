@@ -1,6 +1,6 @@
 buildscript {
-    ext.kotlin_version = '0.11.91.1'
-    ext.android_support = '22.1.1'
+    ext.kotlin_version = '0.11.91.4'
+    ext.android_support = '21.0.3'
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
@@ -8,7 +8,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.1.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
         classpath 'io.fabric.tools:gradle:1.15.2'
     }
 }
@@ -33,9 +33,9 @@ android {
     defaultConfig {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
-        targetSdkVersion 22
-        versionCode 55
-        versionName "1.1.5"
+        targetSdkVersion 21
+        versionCode 57
+        versionName "1.1.7"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -58,6 +58,10 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy.force 'com.android.support:support-annotations:21.0.3'
+}
+
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile "com.android.support:appcompat-v7:$android_support"
@@ -66,23 +70,23 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "com.darwinsys:hirondelle-date4j:1.5.1"
 
-    //    androidTestCompile 'org.hamcrest:hamcrest-core:1.1'
-    //    androidTestCompile 'org.hamcrest:hamcrest-library:1.1'
-    //    androidTestCompile 'org.hamcrest:hamcrest-integration:1.1'
+    androidTestCompile 'com.android.support.test:runner:0.2'
+    androidTestCompile('com.android.support.test:rules:0.2') {
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.1') {
+        exclude group: 'com.android.support', module: 'support-v4'
+    }
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.1') {
+        exclude group: 'com.android.support', module: 'support-v4'
+        exclude group: 'com.android.support', module: 'recyclerview-v7'
+    }
 
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.0') {
-        exclude group: 'com.android.support', module: 'support-v4'
-        //      exclude group: 'org.hamcrest'
-    }
-    androidTestCompile('com.android.support.test:testing-support-lib:0.1') {
-        exclude group: 'com.android.support', module: 'support-v4'
-        //    exclude group: 'org.hamcrest'
-    }
-    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.0') {
-        exclude group: 'com.android.support', module: 'support-v4'
-        exclude module: 'recyclerview-v7'
-        //  exclude group: 'org.hamcrest'
-    }
+//    androidTestCompile('com.android.support.test:testing-support-lib:0.1') {
+//        exclude group: 'com.android.support', module: 'support-v4'
+//        //    exclude group: 'org.hamcrest'
+//    }
+
     compile('com.crashlytics.sdk.android:crashlytics:2.2.4@aar') {
         transitive = true;
     }

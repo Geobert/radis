@@ -1,19 +1,22 @@
 package fr.geobert.radis.test
 
 import android.content.Intent
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.db.DbContentProvider
+import android.support.test.espresso.Espresso
+import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.action.ViewActions.click
+import android.support.test.espresso.action.ViewActions.typeText
+import android.support.test.espresso.contrib.PickerActions.setDate
+import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.test.ActivityInstrumentationTestCase2
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
-import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.action.ViewActions.typeText
+import fr.geobert.radis.db.DbContentProvider
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.minusMonth
+import hirondelle.date4j.DateTime
 import java.util.Calendar
-import android.support.test.espresso.action.ViewActions.click
-import android.support.test.espresso.contrib.PickerActions.setDate
-import android.support.test.espresso.Espresso
 
 public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
 
@@ -31,8 +34,8 @@ public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaCla
         provider.deleteDatabase(appCtx)
         client.release()
 
-        Helpers.instrumentationTest = this
-        Helpers.activity = getActivity()
+        //        Helpers.instrumentationTest = this
+        //        Helpers.activity = getActivity()
     }
 
     public fun testZFillForScreenshots() {
@@ -77,17 +80,24 @@ public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaCla
 
         Espresso.pressBack()
 
-        date = Tools.createClearedCalendar()
-        date.set(Calendar.DAY_OF_MONTH, 22)
-        Helpers.addOp(date, "Boucherie", "45.00", "Alimentaire", "CB", "")
-        date.set(Calendar.DAY_OF_MONTH, 26)
-        date.add(Calendar.MONTH, -1)
-        Helpers.addOp(date, "Mutuelle", "+35.00", "Sante", "Virement", "")
-        date.set(Calendar.DAY_OF_MONTH, 22)
-        Helpers.addOp(date, "Boulangerie", "8.00", "Alimentaire", "Espece", "")
-        date.set(Calendar.DAY_OF_MONTH, 19)
-        Helpers.addOp(date, "Disquaire", "17.00", "Loisir", "CB", "")
-        date.set(Calendar.DAY_OF_MONTH, 28)
-        Helpers.addOp(date, "Restaurant", "43.32", "Sortie", "CB", "")
+        //        date = Tools.createClearedCalendar()
+        //        date.set(Calendar.DAY_OF_MONTH, 22)
+
+        val t = DateTime.today(TIME_ZONE)
+        var d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 22)
+        Helpers.addOp(d, "Boucherie", "45.00", "Alimentaire", "CB", "")
+        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 26).minusMonth(1)
+        //        date.set(Calendar.DAY_OF_MONTH, 26)
+        //        date.add(Calendar.MONTH, -1)
+        Helpers.addOp(d, "Mutuelle", "+35.00", "Sante", "Virement", "")
+        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 22)
+        //date.set(Calendar.DAY_OF_MONTH, 22)
+        Helpers.addOp(d, "Boulangerie", "8.00", "Alimentaire", "Espece", "")
+        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 19)
+        //        date.set(Calendar.DAY_OF_MONTH, 19)
+        Helpers.addOp(d, "Disquaire", "17.00", "Loisir", "CB", "")
+        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 28)
+        //date.set(Calendar.DAY_OF_MONTH, 28)
+        Helpers.addOp(d, "Restaurant", "43.32", "Sortie", "CB", "")
     }
 }

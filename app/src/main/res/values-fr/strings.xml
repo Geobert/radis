@@ -52,8 +52,8 @@
     </string>
     <string name="yes">Oui</string>
     <string name="advanced">Actions avancées</string>
-    <string name="backup_db">Sauver les comptes</string>
-    <string name="restore_db">Restaurer les comptes</string>
+    <string name="backup_db">Sauver les données</string>
+    <string name="restore_db">Restaurer les données</string>
     <string name="restore_confirm">La restauration va écraser vos données actuelles !
         Cette opération est irréversible.
     </string>
