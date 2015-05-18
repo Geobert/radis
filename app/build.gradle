@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = '0.11.91.4'
-    ext.android_support = '21.0.3'
+    ext.android_support = '22.1.1'
     repositories {
         mavenCentral()
         maven { url 'https://maven.fabric.io/public' }
@@ -33,7 +33,7 @@ android {
     defaultConfig {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode 57
         versionName "1.1.7"
         testApplicationId "fr.geobert.radis.test"
