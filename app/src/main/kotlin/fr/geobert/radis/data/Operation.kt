@@ -5,15 +5,19 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.TIME_ZONE
+import fr.geobert.radis.tools.extractSumFromStr
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.plusMonth
+import fr.geobert.radis.ui.adapter.CellState
 import hirondelle.date4j.DateTime
 import java.util.Date
 import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
-public open class Operation() : ImplParcelable {
+public open class Operation() : ImplParcelable, Comparable<Operation> {
     override val parcels = hashMapOf<String, Any?>()
-    protected var mDate: DateTime by Delegates.mapVar(parcels)
+    public var mDate: DateTime by Delegates.mapVar(parcels)
     public var mThirdParty: String by Delegates.mapVar(parcels)
     public var mTag: String by Delegates.mapVar(parcels)
     public var mMode: String by Delegates.mapVar(parcels)
@@ -28,6 +32,11 @@ public open class Operation() : ImplParcelable {
     // mTransferAccountId is the other account
     public var mTransferAccountId: Long by Delegates.mapVar(parcels)
     public var mAccountId: Long by Delegates.mapVar(parcels)
+
+    // properties used only for ui
+    public var isSelected: Boolean = false
+    public var state: CellState = CellState.STATE_REGULAR_CELL
+
 
     init {
         mDate = DateTime.today(TIME_ZONE)
@@ -200,4 +209,20 @@ public open class Operation() : ImplParcelable {
                 mSum == op.mSum && mScheduledId == op.mScheduledId && mTransferAccountId == op.mTransferAccountId &&
                 mIsChecked == op.mIsChecked
     }
+
+    // comparator for sorting purpose
+    override fun compareTo(other: Operation): Int {
+        return if (mDate.gt(other.mDate)) {
+            1
+        } else if (mDate.equals(other.mDate)) {
+            if (mRowId >= other.mRowId) {
+                1
+            } else {
+                -1
+            }
+        } else {
+            -1
+        }
+    }
+
 }

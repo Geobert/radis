@@ -68,9 +68,14 @@ public class OperationEditor : CommonOpEditor() {
 
     private fun setResAndExit() {
         val res = Intent()
-        res.putExtra("opId", mRowId)
-        res.putExtra("opDate", mCurrentOp!!.getDate())
-        setResult(Activity.RESULT_OK, res)
+        val op = mCurrentOp
+        if (op != null) {
+            mCurrentOp?.mRowId = mRowId
+            res.putExtra("operation", op)
+            setResult(Activity.RESULT_OK, res)
+        } else {
+            setResult(Activity.RESULT_CANCELED)
+        }
         finish()
     }
 

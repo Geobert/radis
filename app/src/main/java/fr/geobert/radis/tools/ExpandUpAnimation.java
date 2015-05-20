@@ -31,11 +31,11 @@ public class ExpandUpAnimation extends Animation {
     }
 
     private void setTheVisibility() {
-        if (mIsVisibleAfter) {
-            mAnimatedView.setVisibility(View.GONE);
-        } else {
-            mAnimatedView.setVisibility(View.VISIBLE);
-        }
+//        if (mIsVisibleAfter) {
+//            mAnimatedView.setVisibility(View.GONE);
+//        } else {
+        mAnimatedView.setVisibility(View.VISIBLE);
+//        }
     }
 
     /**
@@ -54,10 +54,10 @@ public class ExpandUpAnimation extends Animation {
         mViewLayoutParams = (LayoutParams) view.getLayoutParams();
 
         // decide to show or hide the view
-        mIsVisibleAfter = !expand;
+        mIsVisibleAfter = expand;
 
         mMarginStart = mViewLayoutParams.bottomMargin;
-        mMarginEnd = (mMarginStart == 0 ? 0 - view.getHeight() : 0);
+        mMarginEnd = (mMarginStart == 0 ? -37 : 0);
 
         mHeightStart = mAnimatedView.getHeight();
         mHeightEnd = (mHeightStart == 0 ? 37 : 0);
@@ -87,7 +87,7 @@ public class ExpandUpAnimation extends Animation {
             mViewLayoutParams.bottomMargin = mMarginEnd;
             mAnimatedView.requestLayout();
 
-            if (mIsVisibleAfter) {
+            if (!mIsVisibleAfter) {
                 mAnimatedView.setVisibility(View.GONE);
             } else {
                 mAnimatedView.setVisibility(View.VISIBLE);

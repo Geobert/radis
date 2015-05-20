@@ -44,6 +44,7 @@ class Helpers {
         fun getContext() = InstrumentationRegistry.getTargetContext()
 
         fun clickOnActionItemConfirm() {
+            Espresso.closeSoftKeyboard()
             pauseTest(1000)
             onView(withId(R.id.confirm)).perform(click())
             pauseTest(1200)

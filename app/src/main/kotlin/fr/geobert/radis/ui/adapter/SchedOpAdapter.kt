@@ -5,7 +5,7 @@ import fr.geobert.radis.ui.IOperationList
 import android.database.Cursor
 import fr.geobert.radis.data.ScheduledOperation
 import android.view.View
-import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
+import fr.geobert.radis.ui.adapter.CellState
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.R
@@ -46,7 +46,7 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
     private fun configureCell(op: ScheduledOperation, h: OpRowHolder<ScheduledOperation>, position: Int) {
         val needInfos = position == selectedPosition
         h.scheduledImg.setVisibility(View.GONE)
-        mCellStates[position] = if (needInfos) {
+        op.state = if (needInfos) {
             CellState.STATE_INFOS_CELL
         } else {
             CellState.STATE_REGULAR_CELL
