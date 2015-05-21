@@ -25,6 +25,7 @@ import fr.geobert.radis.BaseFragment
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
+import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
@@ -76,12 +77,10 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     private fun fetchSchOpsOfAccount() {
         if (mLoader == null) {
             getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
-        } else {
-            getLoaderManager().restartLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
         }
     }
 
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    //    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
     //        // nothing ?
     //    }
 
@@ -92,6 +91,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun onResume() {
         super<BaseFragment>.onResume()
+        Log.d("ScheduledOpListFragment", "onResume")
         mAccountManager.fetchAllAccounts(false, { fetchSchOpsOfAccount() })
     }
 
@@ -116,22 +116,19 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         if (delAllOccurrences) {
             ScheduledOperationTable.deleteAllOccurences(mActivity, opId)
             needRefresh = true
+            mAdapter?.reset()
             MainActivity.refreshAccountList(mActivity)
+            if (mLoader != null) {
+                getLoaderManager().restartLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
+            } else {
+                getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
+            }
         }
         if (ScheduledOperationTable.deleteScheduledOp(mActivity, opId)) {
             needRefresh = true
+            mAdapter?.delOp(opId)
         }
         if (needRefresh) {
-            val req = if (mActivity.getCurrentAccountId() == 0L) {
-                GET_ALL_SCH_OPS
-            } else {
-                GET_SCH_OPS_OF_ACCOUNT
-            }
-            if (mLoader != null) {
-                getLoaderManager().restartLoader<Cursor>(req, Bundle(), this)
-            } else {
-                getLoaderManager().initLoader<Cursor>(req, Bundle(), this)
-            }
             if (transId > 0) {
                 AccountTable.consolidateSums(mActivity, transId)
             }
@@ -225,9 +222,21 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         fetchSchOpsOfAccount()
     }
 
-    override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            fetchSchOpsOfAccount()
+    override public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("ScheduledOpListFragment", "onOperationEditorResult req:$requestCode, result:$resultCode, adapter:$mAdapter")
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            val op: ScheduledOperation = data.getParcelableExtra("operation")
+            when (requestCode) {
+                ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE -> {
+                    Log.d("ScheduledOpListFragment", "onOperationEditorResult ADD")
+                    mAdapter?.addOp(op)
+                }
+                ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT -> {
+                    Log.d("ScheduledOpListFragment", "onOperationEditorResult UPDATE")
+                    mAdapter?.updateOp(op)
+                }
+                else -> Log.d("ScheduledOpListFragment", "onOperationEditorResult ELSE:$requestCode")
+            }
         }
     }
 

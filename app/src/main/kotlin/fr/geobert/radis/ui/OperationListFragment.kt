@@ -460,11 +460,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mActivity.updateAccountList()
     }
 
-    override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+    override public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data != null) {
             val op: Operation = data.getParcelableExtra("operation")
             mLastSelectionId = op.mRowId
-            mOpListAdapter?.addOp(op)
+            when (requestCode) {
+                OperationEditor.OPERATION_CREATOR -> {
+                    mOpListAdapter?.addOp(op)
+                }
+                OperationEditor.OPERATION_EDITOR -> {
+                    mOpListAdapter?.updateOp(op)
+                }
+            }
+
             //            val date = data.getLongExtra("opDate", 0)
             //            Log.d(TAG, "onOperationEditorResult, mLastSelectionId:$mLastSelectionId / date:${date.formatDate()}")
             //            if (date > 0) {

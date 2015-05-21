@@ -139,8 +139,9 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         fr.geobert.radis.service.RadisService.acquireStaticLock(this)
         this.startService(Intent(this, javaClass<fr.geobert.radis.service.RadisService>()))
         val res = Intent()
+        getSchFragment().mCurrentSchOp!!.mRowId = mRowId
+        res.putExtra("operation", getSchFragment().mCurrentSchOp!!)
         if (mOpIdSource > 0) {
-            res.putExtra("schOperationId", mRowId)
             res.putExtra("opIdSource", mOpIdSource)
         }
         setResult(Activity.RESULT_OK, res)
@@ -152,8 +153,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         if (op != null) {
             if (mRowId <= 0) {
                 if (mOpIdSource > 0) {
-                    // is converting a transaction into a
-                    // schedule
+                    // is converting a transaction into a schedule
                     if ((op.getDate() != mOriginalSchOp!!.getDate())) {
                         // change the date of the source transaction
                         OperationTable.updateOp(this, mOpIdSource, op, mOriginalSchOp)
@@ -162,7 +162,6 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                     ScheduledOperation.addPeriodicityToDate(op)
                 }
                 val id = ScheduledOperationTable.createScheduledOp(this, op)
-                Log.d("SCHEDULED_OP_EDITOR", "created sch op id : " + id)
                 if (id > 0) {
                     mRowId = id
                 }
@@ -173,6 +172,8 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                 } else {
                     // nothing to update
                     val res = Intent()
+                    getSchFragment().mCurrentSchOp!!.mRowId = mRowId
+                    res.putExtra("operation", getSchFragment().mCurrentSchOp!!)
                     setResult(Activity.RESULT_OK, res)
                     finish()
                 }

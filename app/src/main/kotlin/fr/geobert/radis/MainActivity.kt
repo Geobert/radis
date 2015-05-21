@@ -319,13 +319,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     findOrCreateFragment(if (mActiveFragmentId == OP_LIST) javaClass<OperationListFragment>() else
                         javaClass<ScheduledOpListFragment>(), mActiveFragmentId)
                 }
-                mActiveFragment?.onOperationEditorResult(resultCode, data)
+                mActiveFragment?.onOperationEditorResult(requestCode, resultCode, data)
             }
-            OperationEditor.OPERATION_EDITOR -> {
+            OperationEditor.OPERATION_EDITOR, OperationEditor.OPERATION_CREATOR -> {
                 if (mActiveFragment == null) {
                     findOrCreateFragment(javaClass<OperationListFragment>(), OP_LIST)
                 }
-                mActiveFragment?.onOperationEditorResult(resultCode, data)
+                mActiveFragment?.onOperationEditorResult(requestCode, resultCode, data)
                 mAccountManager.backupCurAccountId()
                 updateAccountList()
             }
