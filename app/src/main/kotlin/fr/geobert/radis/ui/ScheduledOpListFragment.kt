@@ -75,14 +75,11 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     //    }
 
     private fun fetchSchOpsOfAccount() {
+        Log.d("ScheduledOpListFragment", "fetchSchOpsOfAccount mLoader:$mLoader")
         if (mLoader == null) {
             getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
         }
     }
-
-    //    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-    //        // nothing ?
-    //    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super<BaseFragment>.onSaveInstanceState(outState)
@@ -115,18 +112,13 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         var needRefresh = false
         if (delAllOccurrences) {
             ScheduledOperationTable.deleteAllOccurences(mActivity, opId)
-            needRefresh = true
-            mAdapter?.reset()
             MainActivity.refreshAccountList(mActivity)
-            if (mLoader != null) {
-                getLoaderManager().restartLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
-            } else {
-                getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
-            }
+            needRefresh = true
         }
         if (ScheduledOperationTable.deleteScheduledOp(mActivity, opId)) {
             needRefresh = true
             mAdapter?.delOp(opId)
+            setupListVisibility()
         }
         if (needRefresh) {
             if (transId > 0) {
@@ -172,6 +164,11 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         } else {
             adapter.increaseCache(data)
         }
+        setupListVisibility()
+        computeTotal(data)
+    }
+
+    private fun setupListVisibility() {
         if (mAdapter?.getItemCount() == 0) {
             mListView.setVisibility(View.GONE)
             mEmptyView.setVisibility(View.VISIBLE)
@@ -179,7 +176,6 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             mListView.setVisibility(View.VISIBLE)
             mEmptyView.setVisibility(View.GONE)
         }
-        computeTotal(data)
     }
 
     private fun computeTotal(data: Cursor?) {
@@ -230,6 +226,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
                 ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE -> {
                     Log.d("ScheduledOpListFragment", "onOperationEditorResult ADD")
                     mAdapter?.addOp(op)
+                    setupListVisibility()
                 }
                 ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT -> {
                     Log.d("ScheduledOpListFragment", "onOperationEditorResult UPDATE")

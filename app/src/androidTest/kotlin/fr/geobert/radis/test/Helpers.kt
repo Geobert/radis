@@ -4,6 +4,7 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onData
 import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.UiController
 import android.support.test.espresso.ViewAction
 import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.action.ViewActions.click
@@ -25,10 +26,7 @@ import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.support.test.espresso.matcher.ViewMatchers.withText
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.RelativeLayout
+import android.widget.*
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.tools.TIME_ZONE
@@ -307,6 +305,28 @@ class Helpers {
             Helpers.checkTitleBarDisplayed(R.string.account_edit_title)
             Espresso.closeSoftKeyboard()
             Helpers.swipePagerLeft()
+        }
+
+        fun getTextFrom(id: Int): CharSequence? {
+            var res: CharSequence? = null
+
+            onView(allOf(withId(id), isDisplayed())).perform(object : ViewAction {
+                override fun getConstraints(): Matcher<View> {
+                    return allOf(isDisplayed(), iz(instanceOf(javaClass<TextView>()))) as Matcher<View>
+                }
+
+                override fun getDescription(): String {
+                    return "get date from text view"
+                }
+
+                override fun perform(p0: UiController?, p1: View?) {
+                    val textView = p1 as TextView
+                    res = textView.getText()
+                }
+
+            })
+
+            return res
         }
     }
 }

@@ -467,10 +467,8 @@ public class OperationTable {
                                                  final long transfertId) {
         int nbDel = ctx.getContentResolver().delete(
                 DbContentProvider.OPERATION_URI,
-                KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND "
-                        + KEY_OP_DATE + ">=?",
-                new String[]{Long.toString(accountId),
-                        Long.toString(schOpId), Long.toString(date)}
+                KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND " + KEY_OP_DATE + ">=?",
+                new String[]{Long.toString(accountId), Long.toString(schOpId), Long.toString(date)}
         );
         if (nbDel > 0) {
             AccountTable.consolidateSums(ctx, accountId);

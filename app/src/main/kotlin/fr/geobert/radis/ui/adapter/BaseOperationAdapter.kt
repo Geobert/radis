@@ -151,8 +151,8 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
                         val l = operationsList.getListLayoutManager()
                         val firstIdx = l.findFirstVisibleItemPosition()
                         val lastIdx = l.findLastVisibleItemPosition()
-                        Log.d(TAG, "firstIdx:$firstIdx, lastIdx:$lastIdx, prev:$prevExpandedPos")
-                        if (prevExpandedPos != -1 && (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx)) {
+                        Log.d(TAG, "firstIdx:$firstIdx, lastIdx:$lastIdx, prev:$prevExpandedPos, count:${getItemCount()}")
+                        if (prevExpandedPos != -1 && prevExpandedPos < getItemCount () && (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx)) {
                             operationAt(prevExpandedPos).isSelected = false
                             prevExpandedPos = -1
                         }
@@ -282,7 +282,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     public fun addOp(op: T): Int {
         var idx = findOpPosBy { o -> op.compareTo(o) > 0 }
-        Log.d(TAG, "addOp, idx:$idx")
+        Log.d(TAG, "addOp, idx:$idx, opCount:${operations.count()}")
         operations.add(idx, op)
         notifyItemInserted(idx)
         return idx
