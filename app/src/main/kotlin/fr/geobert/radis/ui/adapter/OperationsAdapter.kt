@@ -14,7 +14,7 @@ import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.CheckingOpDashboard
 import fr.geobert.radis.ui.IOperationList
-import fr.geobert.radis.ui.adapter.BaseOperationAdapter.CellState
+import fr.geobert.radis.ui.adapter.CellState
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import java.util.Calendar
@@ -82,14 +82,14 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
             }
         }
 
-        if (needInfos && needMonth) {
-            mCellStates[position] = CellState.STATE_MONTH_INFOS_CELL
+        operation.state = if (needInfos && needMonth) {
+            CellState.STATE_MONTH_INFOS_CELL
         } else if (needInfos) {
-            mCellStates[position] = CellState.STATE_INFOS_CELL
+            CellState.STATE_INFOS_CELL
         } else if (needMonth) {
-            mCellStates[position] = CellState.STATE_MONTH_CELL
+            CellState.STATE_MONTH_CELL
         } else {
-            mCellStates[position] = CellState.STATE_REGULAR_CELL
+            CellState.STATE_REGULAR_CELL
         }
 
         h.month.setText(if (needMonth) DateFormat.format("MMMM", date1) else

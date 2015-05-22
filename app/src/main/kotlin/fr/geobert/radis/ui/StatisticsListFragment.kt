@@ -107,7 +107,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         }
     }
 
-    override fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+    override fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             fetchStats()
         }
@@ -122,8 +122,8 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         }
     }
 
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-//    }
+    //    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    //    }
 
 
     override fun onAccountChanged(itemId: Long): Boolean = false

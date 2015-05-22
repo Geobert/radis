@@ -1,6 +1,7 @@
 package fr.geobert.radis.ui
 
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -179,7 +180,9 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         op.setSumStr(mQuickAddAmount.getText().toString())
         Log.d("QuickAdd", "cur accountId = ${getCurAccountId()}")
         if (OperationTable.createOp(mActivity, op, getCurAccountId()) > -1) {
-            mActivity.updateDisplay(null)
+            val i = Intent()
+            i.putExtra("operation", op)
+            mActivity.updateDisplay(i)
         }
 
         mQuickAddAmount.setText("")

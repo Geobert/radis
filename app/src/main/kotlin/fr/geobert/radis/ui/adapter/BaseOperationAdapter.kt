@@ -1,23 +1,19 @@
 package fr.geobert.radis.ui.adapter
 
-import android.support.v7.widget.RecyclerView
-import fr.geobert.radis.data.Operation
 import android.database.Cursor
-import fr.geobert.radis.tools.map
-import android.view.View
-import fr.geobert.radis.R
-import fr.geobert.radis.MainActivity
-import fr.geobert.radis.ui.IOperationList
-import android.view.ViewGroup
-import android.view.LayoutInflater
-import fr.geobert.radis.tools.ExpandUpAnimation
-import android.widget.LinearLayout
-import fr.geobert.radis.tools.ExpandAnimation
-import fr.geobert.radis.tools.Tools
+import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.LinearLayout
+import fr.geobert.radis.MainActivity
+import fr.geobert.radis.R
+import fr.geobert.radis.data.Operation
+import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.IOperationList
 import fr.geobert.radis.ui.OperationListFragment
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.formatShortDate
+import java.util.LinkedList
 
 public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
         RecyclerView.Adapter<OpRowHolder<T>>() {
@@ -25,16 +21,10 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     val operationsList = opList
     val activity: MainActivity = activity
-    protected var operations: MutableCollection<T> = cursor.map<T>({ operationFactory(it) })
-    var mCellStates: Array<CellState?> = arrayOfNulls(operations.count())
+    protected var operations: MutableList<T> = cursor.map<T>({ operationFactory(it) })
+    //    var mCellStates: Array<CellState?> = arrayOfNulls(operations.count())
     val needSeparator = opList is OperationListFragment
 
-    enum class CellState {
-        STATE_MONTH_CELL
-        STATE_REGULAR_CELL
-        STATE_INFOS_CELL
-        STATE_MONTH_INFOS_CELL
-    }
 
     protected abstract fun operationFactory(c: Cursor): T
 
@@ -42,15 +32,17 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     private var _selectedPosition: Int = -1
     var selectedPosition: Int
         set(value) {
-            val tmpOldPos = selectedPosition
-            if (_selectedPosition != -1) {
-                prevExpandedPos = _selectedPosition
-            }
-            _selectedPosition = value
-            if (value != -1) justClicked = true
-            notifyItemChanged(value)
-            if (tmpOldPos != -1) {
-                notifyItemChanged(tmpOldPos)
+            if (value != _selectedPosition) {
+                val tmpOldPos = selectedPosition
+                if (_selectedPosition != -1) {
+                    prevExpandedPos = _selectedPosition
+                }
+                _selectedPosition = value
+                justClicked = value != -1
+                notifyItemChanged(value)
+                if (tmpOldPos != -1) {
+                    notifyItemChanged(tmpOldPos)
+                }
             }
         }
         get() {
@@ -60,7 +52,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     override fun onCreateViewHolder(view: ViewGroup, viewType: Int): OpRowHolder<T> {
         val l = LayoutInflater.from(view.getContext()).inflate(fr.geobert.radis.R.layout.operation_row, view, false)
-        val h = OpRowHolder<T>(l, this)
+        val h = OpRowHolder(l, this)
         // HACK to workaround a glitch at the end of animation
         ExpandUpAnimation.mBg = h.separator.getBackground();
         Tools.setViewBg(h.separator, null);
@@ -126,12 +118,12 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     }
 
     public fun increaseCache(c: Cursor) {
-        val tmp = mCellStates
-        operations = c.map { operationFactory(it) }
-        mCellStates = arrayOfNulls(operations.count())
-        if (tmp.count() <= mCellStates.count()) {
-            System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())
-        }
+        //        val tmp = mCellStates
+        operations.addAll(c.map { operationFactory(it) })
+        //        mCellStates = arrayOfNulls(operations.count())
+        //        if (tmp.count() <= mCellStates.count()) {
+        //            System.arraycopy(tmp, 0, mCellStates, 0, tmp.count())
+        //        }
         notifyDataSetChanged()
     }
 
@@ -139,72 +131,80 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
         prevExpandedPos = -1
         _selectedPosition = -1
         operations.clear()
-        mCellStates = arrayOfNulls(0)
+        //        mCellStates = arrayOfNulls(0)
     }
 
     // animations
     private fun animateSelectedPos(viewHolder: OpRowHolder<T>, pos: Int) {
-        if (selectedPosition != prevExpandedPos) {
-            viewHolder.view.setBackgroundResource(R.drawable.line_selected_gradient)
-            when (mCellStates[pos]) {
-                CellState.STATE_MONTH_CELL ->
-                    expandSeparatorNoAnim(viewHolder)
-                CellState.STATE_INFOS_CELL ->
-                    if (justClicked) {
-                        justClicked = false
-                        animateSeparator(viewHolder, true)
-                        animateToolbar(viewHolder, true)
-                        operationsList.getRecyclerView().post {
-                            val l = operationsList.getListLayoutManager()
-                            val firstIdx = l.findFirstVisibleItemPosition()
-                            val lastIdx = l.findLastVisibleItemPosition()
-                            if (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx) {
-                                prevExpandedPos = -1
-                            }
+        val op = operationAt(pos)
+        viewHolder.view.setBackgroundResource(R.drawable.line_selected_gradient)
+        //        Log.d(TAG, "animateSelectedPos: ${viewHolder.opDate.getText()}, pos:$pos, selected:$selectedPosition, selected:${op.isSelected}, prevPos:$prevExpandedPos")
+        when (op.state) {
+            CellState.STATE_MONTH_CELL ->
+                expandSeparatorNoAnim(viewHolder)
+            CellState.STATE_INFOS_CELL, CellState.STATE_MONTH_INFOS_CELL ->
+                if (justClicked) {
+                    justClicked = false
+                    animateSeparator(viewHolder, true)
+                    animateToolbar(viewHolder, true)
+                    operationsList.getRecyclerView().post {
+                        val l = operationsList.getListLayoutManager()
+                        val firstIdx = l.findFirstVisibleItemPosition()
+                        val lastIdx = l.findLastVisibleItemPosition()
+                        Log.d(TAG, "firstIdx:$firstIdx, lastIdx:$lastIdx, prev:$prevExpandedPos, count:${getItemCount()}")
+                        if (prevExpandedPos != -1 && prevExpandedPos < getItemCount () && (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx)) {
+                            operationAt(prevExpandedPos).isSelected = false
+                            prevExpandedPos = -1
                         }
-                    } else {
-                        expandToolbarNoAnim(viewHolder)
-                        expandSeparatorNoAnim(viewHolder)
                     }
-                CellState.STATE_MONTH_INFOS_CELL -> {
+                } else {
+                    expandToolbarNoAnim(viewHolder)
                     expandSeparatorNoAnim(viewHolder)
-                    if (justClicked) {
-                        justClicked = false
-                        animateToolbar(viewHolder, true)
-                    } else {
-                        expandToolbarNoAnim(viewHolder)
-                    }
                 }
-            }
+        //            CellState.STATE_MONTH_INFOS_CELL -> {
+        //                expandSeparatorNoAnim(viewHolder)
+        //                if (justClicked) {
+        //                    justClicked = false
+        //                    animateToolbar(viewHolder, true)
+        //                } else {
+        //                    expandToolbarNoAnim(viewHolder)
+        //                }
+        //            }
         }
+        op.isSelected = true
     }
 
     private fun animateNotSelectedPos(viewHolder: OpRowHolder<T>, pos: Int) {
+        val op = operationAt(pos)
         viewHolder.view.setBackgroundResource(R.drawable.op_line)
-        when (mCellStates[pos]) {
+
+        //        Log.d(TAG, "animateNotSelectedPos: ${viewHolder.opDate.getText()}, pos:$pos, selected:${op.isSelected}")//, prevPos:$prevExpandedPos")
+        when (op.state) {
             CellState.STATE_MONTH_CELL -> {
                 expandSeparatorNoAnim(viewHolder)
-                if (pos == prevExpandedPos) {
+                if (op.isSelected) {
                     animateToolbar(viewHolder, false)
-                    prevExpandedPos = -1
                 } else {
                     collapseToolbarNoAnim(viewHolder)
                 }
             }
             CellState.STATE_REGULAR_CELL -> {
-                if (pos == prevExpandedPos) {
+                if (op.isSelected) {
                     animateSeparator(viewHolder, false)
                     animateToolbar(viewHolder, false)
-                    prevExpandedPos = -1
                 } else {
                     collapseSeparatorNoAnim(viewHolder)
                     collapseToolbarNoAnim(viewHolder)
                 }
             }
         }
+        op.isSelected = false
+
     }
 
+    private val TAG = "BaseOperationAdapter"
     protected fun doAnimations(viewHolder: OpRowHolder<T>, pos: Int) {
+        //        Log.d(TAG, "doAnimations: ${viewHolder.opDate.getText()}, pos:$pos")
         if (selectedPosition == pos) {
             animateSelectedPos(viewHolder, pos)
         } else {
@@ -213,6 +213,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     }
 
     private fun animateSeparator(h: OpRowHolder<T>, expand: Boolean) {
+        //        Log.d(TAG, "animateSeparator: ${h.opDate.getText()}, expand:$expand")
         if (needSeparator) {
             h.separator.clearAnimation()
             (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
@@ -221,13 +222,19 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
         }
     }
 
-    private fun animateToolbar(h: OpRowHolder<T>, expand: Boolean) {
+    private fun toolbarClearAnim(h: OpRowHolder<T>) {
         h.actionsCont.clearAnimation()
+    }
+
+    private fun animateToolbar(h: OpRowHolder<T>, expand: Boolean) {
+        //        Log.d(TAG, "animateToolbar: ${h.opDate.getText()}, expand:$expand")
+        toolbarClearAnim(h)
         val anim = ExpandAnimation(h.actionsCont, 300, expand)
         h.actionsCont.startAnimation(anim)
     }
 
     private fun collapseSeparatorNoAnim(h: OpRowHolder<T>) {
+        //        Log.d(TAG, "collapseSeparatorNoAnim: ${h.opDate.getText()}")
         if (needSeparator) {
             h.separator.clearAnimation()
             (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -50
@@ -236,12 +243,14 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     }
 
     private fun collapseToolbarNoAnim(h: OpRowHolder<T>) {
-        h.actionsCont.clearAnimation()
-        (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
+        //        Log.d(TAG, "collapseToolbarNoAnim: ${h.opDate.getText()}")
+        toolbarClearAnim(h)
+        (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -84
         h.actionsCont.setVisibility(View.GONE)
     }
 
     private fun expandSeparatorNoAnim(h: OpRowHolder<T>) {
+        //        Log.d(TAG, "expandSeparatorNoAnim: ${h.opDate.getText()}")
         if (needSeparator) {
             h.separator.clearAnimation()
             (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
@@ -252,8 +261,46 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     }
 
     private fun expandToolbarNoAnim(h: OpRowHolder<T>) {
-        h.actionsCont.clearAnimation()
+        //        Log.d(TAG, "expandToolbarNoAnim: ${h.opDate.getText()}")
+        toolbarClearAnim(h)
         (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
         h.actionsCont.setVisibility(View.VISIBLE)
+    }
+
+    private fun findOpPosBy(predicate: (op: T) -> Boolean): Int {
+        var idx = 0
+        operations.forEach {
+            Log.d(TAG, "findOpPosBy, it.mRowId:${it.mRowId}")
+            if (predicate(it)) {
+                return idx
+            } else {
+                idx++
+            }
+        }
+        return idx
+    }
+
+    public fun addOp(op: T): Int {
+        var idx = findOpPosBy { o -> op.compareTo(o) > 0 }
+        Log.d(TAG, "addOp, idx:$idx, opCount:${operations.count()}")
+        operations.add(idx, op)
+        notifyItemInserted(idx)
+        return idx
+    }
+
+    fun delOp(opId: Long) {
+        var idx = findOpPosBy { o -> o.mRowId == opId }
+        Log.d(TAG, "delOp, idx:$idx, opCount:${operations.count()}")
+        operations.remove(idx)
+        notifyItemRemoved(idx)
+
+    }
+
+    fun updateOp(op: T) {
+        val idx = findOpPosBy { o -> o.mRowId == op.mRowId }
+        Log.d(TAG, "updateOp, idx:$idx, op.mRowId:${op.mRowId}")
+        operations.remove(idx)
+        operations.add(idx, op)
+        notifyItemChanged(idx)
     }
 }

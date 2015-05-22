@@ -14,7 +14,7 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
 
     //    public abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
 
-    public abstract fun onOperationEditorResult(resultCode: Int, data: Intent?)
+    public abstract fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?)
 
     public abstract fun onAccountChanged(itemId: Long): Boolean
 
