@@ -46,13 +46,15 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     private var mLoader: CursorLoader? = null
     private var mTotalLbl: TextView by Delegates.notNull()
 
+    override fun setupIcon() = setIcon(R.drawable.sched_48)
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
 
         val ll = inflater.inflate(R.layout.scheduled_list, container, false) as LinearLayout
         mContainer = ll
 
-        setIcon(R.drawable.sched_48)
+        setupIcon()
         setMenu(R.menu.scheduled_list_menu)
 
         mListView = ll.findViewById(R.id.operation_list) as RecyclerView
