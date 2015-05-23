@@ -10,7 +10,6 @@ import android.util.Log;
 import fr.geobert.radis.data.Operation;
 import fr.geobert.radis.tools.Tools;
 import hirondelle.date4j.DateTime;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -340,7 +339,6 @@ public class OperationTable {
         return c;
     }
 
-    @NotNull
     public static CursorLoader getOpsWithStartDateLoader(Context ctx, final Long earliestOpDate, final long accountId) {
         return new CursorLoader(ctx, DbContentProvider.OPERATION_JOINED_URI,
                 OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ?",
@@ -351,13 +349,26 @@ public class OperationTable {
         );
     }
 
+    public static CursorLoader getOpsBetweenDateLoader(Context ctx, final long earliestOpDate, final long latestOpDate, final long accountId) {
+        return new CursorLoader(ctx, DbContentProvider.OPERATION_JOINED_URI,
+                OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " < ?",
+                new String[]{Long.toString(accountId),
+                        Long.toString(accountId),
+                        Long.toString(earliestOpDate),
+                        Long.toString(latestOpDate)
+                },
+                OP_ORDERING
+        );
+    }
+
     public static Cursor getOpsBetweenDate(Context ctx, final DateTime earliestOpDate, final DateTime latestOpDate, final long accountId) {
+        TimeZone tz = TimeZone.getDefault();
         return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT
                         + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?",
                 new String[]{Long.toString(accountId),
                         Long.toString(accountId),
-                        Long.toString(earliestOpDate.getMilliseconds(TimeZone.getDefault())), // TODO once converted to Kotlin, use TIME_ZONE
-                        Long.toString(latestOpDate.getMilliseconds(TimeZone.getDefault()))},
+                        Long.toString(earliestOpDate.getMilliseconds(tz)), // TODO once converted to Kotlin, use TIME_ZONE
+                        Long.toString(latestOpDate.getMilliseconds(tz))},
                 OP_ORDERING
         );
     }
@@ -456,10 +467,8 @@ public class OperationTable {
                                                  final long transfertId) {
         int nbDel = ctx.getContentResolver().delete(
                 DbContentProvider.OPERATION_URI,
-                KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND "
-                        + KEY_OP_DATE + ">=?",
-                new String[]{Long.toString(accountId),
-                        Long.toString(schOpId), Long.toString(date)}
+                KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND " + KEY_OP_DATE + ">=?",
+                new String[]{Long.toString(accountId), Long.toString(schOpId), Long.toString(date)}
         );
         if (nbDel > 0) {
             AccountTable.consolidateSums(ctx, accountId);

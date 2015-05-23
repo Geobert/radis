@@ -241,23 +241,7 @@ public class RadisTest {
         Helpers.setupDelOccFromOps()
         Helpers.clickInDrawer(R.string.scheduled_ops)
 
-        var date: CharSequence? = null
-
-        onView(allOf(withId(R.id.op_date), isDisplayed())).perform(object : ViewAction {
-            override fun getConstraints(): Matcher<View> {
-                return allOf(isDisplayed(), iz(instanceOf(javaClass<TextView>()))) as Matcher<View>
-            }
-
-            override fun getDescription(): String {
-                return "get date from text view"
-            }
-
-            override fun perform(p0: UiController?, p1: View?) {
-                val textView = p1 as TextView
-                date = textView.getText()
-            }
-
-        })
+        var date: CharSequence? = Helpers.getTextFrom(R.id.op_date)
 
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
@@ -830,6 +814,9 @@ public class RadisTest {
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 0)
         Helpers.clickOnActionItemConfirm()
 
+        val date = Helpers.getTextFrom (R.id.op_date)
+        onView(allOf(withId(R.id.op_date), isDisplayed())).check(matches(withText(equalTo(date.toString()))))
+
         Espresso.pressBack()
         val d = if (today.getDay() >= dayOfMonthForInsertion.getDay()) today else schOpDate
         val endOfMonth = d.plusMonth(1).getEndOfMonth()
@@ -900,6 +887,7 @@ public class RadisTest {
         Helpers.clickInDrawer(R.string.scheduled_ops)
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.delete_op), isDisplayed())).perform(click())
+        Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.del_all_occurrences)
 
         Espresso.pressBack()

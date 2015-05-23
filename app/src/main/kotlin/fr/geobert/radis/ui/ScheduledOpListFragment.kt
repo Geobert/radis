@@ -25,6 +25,7 @@ import fr.geobert.radis.BaseFragment
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
+import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
@@ -45,13 +46,15 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     private var mLoader: CursorLoader? = null
     private var mTotalLbl: TextView by Delegates.notNull()
 
+    override fun setupIcon() = setIcon(R.drawable.sched_48)
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
 
         val ll = inflater.inflate(R.layout.scheduled_list, container, false) as LinearLayout
         mContainer = ll
 
-        setIcon(R.drawable.sched_48)
+        setupIcon()
         setMenu(R.menu.scheduled_list_menu)
 
         mListView = ll.findViewById(R.id.operation_list) as RecyclerView
@@ -74,16 +77,11 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     //    }
 
     private fun fetchSchOpsOfAccount() {
+        Log.d("ScheduledOpListFragment", "fetchSchOpsOfAccount mLoader:$mLoader")
         if (mLoader == null) {
             getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
-        } else {
-            getLoaderManager().restartLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
         }
     }
-
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-    //        // nothing ?
-    //    }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super<BaseFragment>.onSaveInstanceState(outState)
@@ -92,6 +90,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun onResume() {
         super<BaseFragment>.onResume()
+        Log.d("ScheduledOpListFragment", "onResume")
         mAccountManager.fetchAllAccounts(false, { fetchSchOpsOfAccount() })
     }
 
@@ -115,23 +114,15 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         var needRefresh = false
         if (delAllOccurrences) {
             ScheduledOperationTable.deleteAllOccurences(mActivity, opId)
-            needRefresh = true
             MainActivity.refreshAccountList(mActivity)
+            needRefresh = true
         }
         if (ScheduledOperationTable.deleteScheduledOp(mActivity, opId)) {
             needRefresh = true
+            mAdapter?.delOp(opId)
+            setupListVisibility()
         }
         if (needRefresh) {
-            val req = if (mActivity.getCurrentAccountId() == 0L) {
-                GET_ALL_SCH_OPS
-            } else {
-                GET_SCH_OPS_OF_ACCOUNT
-            }
-            if (mLoader != null) {
-                getLoaderManager().restartLoader<Cursor>(req, Bundle(), this)
-            } else {
-                getLoaderManager().initLoader<Cursor>(req, Bundle(), this)
-            }
             if (transId > 0) {
                 AccountTable.consolidateSums(mActivity, transId)
             }
@@ -175,6 +166,11 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         } else {
             adapter.increaseCache(data)
         }
+        setupListVisibility()
+        computeTotal(data)
+    }
+
+    private fun setupListVisibility() {
         if (mAdapter?.getItemCount() == 0) {
             mListView.setVisibility(View.GONE)
             mEmptyView.setVisibility(View.VISIBLE)
@@ -182,7 +178,6 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             mListView.setVisibility(View.VISIBLE)
             mEmptyView.setVisibility(View.GONE)
         }
-        computeTotal(data)
     }
 
     private fun computeTotal(data: Cursor?) {
@@ -225,9 +220,22 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         fetchSchOpsOfAccount()
     }
 
-    override public fun onOperationEditorResult(resultCode: Int, data: Intent?) {
-        if (resultCode == Activity.RESULT_OK) {
-            fetchSchOpsOfAccount()
+    override public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        Log.d("ScheduledOpListFragment", "onOperationEditorResult req:$requestCode, result:$resultCode, adapter:$mAdapter")
+        if (resultCode == Activity.RESULT_OK && data != null) {
+            val op: ScheduledOperation = data.getParcelableExtra("operation")
+            when (requestCode) {
+                ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE -> {
+                    Log.d("ScheduledOpListFragment", "onOperationEditorResult ADD")
+                    mAdapter?.addOp(op)
+                    setupListVisibility()
+                }
+                ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT -> {
+                    Log.d("ScheduledOpListFragment", "onOperationEditorResult UPDATE")
+                    mAdapter?.updateOp(op)
+                }
+                else -> Log.d("ScheduledOpListFragment", "onOperationEditorResult ELSE:$requestCode")
+            }
         }
     }
 

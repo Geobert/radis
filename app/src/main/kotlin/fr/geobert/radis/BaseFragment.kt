@@ -1,12 +1,12 @@
 package fr.geobert.radis
 
 import android.content.Intent
-import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.widget.Toolbar
+import android.util.Log
 import fr.geobert.radis.data.AccountManager
 import fr.geobert.radis.tools.UpdateDisplayInterface
 import kotlin.properties.Delegates
-import android.support.v7.widget.Toolbar
 
 public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar.OnMenuItemClickListener {
     protected val mActivity: MainActivity by Delegates.lazy { getActivity() as MainActivity }
@@ -14,7 +14,7 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
 
     //    public abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
 
-    public abstract fun onOperationEditorResult(resultCode: Int, data: Intent?)
+    public abstract fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?)
 
     public abstract fun onAccountChanged(itemId: Long): Boolean
 
@@ -23,7 +23,7 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
     }
 
     protected fun setIcon(id: Int) {
-        mActivity.mToolbar.setNavigationIcon(id)
+        mActivity.mToolbar.post { mActivity.mToolbar.setNavigationIcon(id) }
     }
 
     protected fun setMenu(id: Int) {
@@ -31,4 +31,6 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
         mActivity.mToolbar.inflateMenu(id)
         mActivity.mToolbar.setOnMenuItemClickListener(this)
     }
+
+    public abstract fun setupIcon();
 }

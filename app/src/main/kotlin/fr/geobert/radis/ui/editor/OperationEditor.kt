@@ -68,9 +68,14 @@ public class OperationEditor : CommonOpEditor() {
 
     private fun setResAndExit() {
         val res = Intent()
-        res.putExtra("opId", mRowId)
-        res.putExtra("opDate", mCurrentOp!!.getDate())
-        setResult(Activity.RESULT_OK, res)
+        val op = mCurrentOp
+        if (op != null) {
+            mCurrentOp?.mRowId = mRowId
+            res.putExtra("operation", op)
+            setResult(Activity.RESULT_OK, res)
+        } else {
+            setResult(Activity.RESULT_CANCELED)
+        }
         finish()
     }
 
@@ -205,6 +210,7 @@ public class OperationEditor : CommonOpEditor() {
     companion object {
         public val NO_OPERATION: Long = 0
         public val OPERATION_EDITOR: Int = 2000
+        public val OPERATION_CREATOR: Int = 2001
         private val TAG = "OperationEditor"
         private val GET_OP = 610
 
@@ -212,7 +218,7 @@ public class OperationEditor : CommonOpEditor() {
             val intent = Intent(context, javaClass<OperationEditor>())
             intent.putExtra(CommonOpEditor.PARAM_OP_ID, opId)
             intent.putExtra(AccountEditor.PARAM_ACCOUNT_ID, accountId)
-            context.startActivityForResult(intent, OPERATION_EDITOR)
+            context.startActivityForResult(intent, if (opId == NO_OPERATION) OPERATION_CREATOR else OPERATION_EDITOR)
         }
     }
 }

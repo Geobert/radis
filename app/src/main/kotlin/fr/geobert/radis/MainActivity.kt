@@ -250,15 +250,22 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     // nothing to do here, required by Android
     override fun onResume() {
         super<BaseActivity>.onResume()
+        Log.d(TAG, "onResume: mactiveFrag:$mActiveFragment")
     }
 
     override fun onResumeFragments() {
         super<BaseActivity>.onResumeFragments()
+        Log.d(TAG, "onResumeFragments:$mActiveFragment")
+        mActiveFragment?.setupIcon()
         DBPrefsManager.getInstance(this).fillCache(this, {
+            Log.d(TAG, "pref cache ok")
             consolidateDbIfNeeded()
             initAccountStuff()
             handler.resume(this)
-            mAccountManager.fetchAllAccounts(false, { processAccountList(true) })
+            mAccountManager.fetchAllAccounts(false, {
+                Log.d(TAG, "all accounts fetched")
+                processAccountList(true)
+            })
         })
     }
 
@@ -299,12 +306,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             //            } else {
             val old = mAccountAdapter.swapCursor(allAccounts)
             old?.close()
-            //            }
             if (mActiveFragmentId == -1) {
                 displayFragment(OP_LIST, (-1).toLong())
-            } else if (resuming) {
+            } else {
                 displayFragment(mActiveFragmentId, getCurrentAccountId())
             }
+            //            }
+
         }
     }
 
@@ -319,13 +327,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     findOrCreateFragment(if (mActiveFragmentId == OP_LIST) javaClass<OperationListFragment>() else
                         javaClass<ScheduledOpListFragment>(), mActiveFragmentId)
                 }
-                mActiveFragment?.onOperationEditorResult(resultCode, data)
+                mActiveFragment?.onOperationEditorResult(requestCode, resultCode, data)
             }
-            OperationEditor.OPERATION_EDITOR -> {
+            OperationEditor.OPERATION_EDITOR, OperationEditor.OPERATION_CREATOR -> {
                 if (mActiveFragment == null) {
                     findOrCreateFragment(javaClass<OperationListFragment>(), OP_LIST)
                 }
-                mActiveFragment?.onOperationEditorResult(resultCode, data)
+                mActiveFragment?.onOperationEditorResult(requestCode, resultCode, data)
                 mAccountManager.backupCurAccountId()
                 updateAccountList()
             }

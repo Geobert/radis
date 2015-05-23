@@ -35,7 +35,7 @@ public class OpRowHolder<T : Operation>(val view: View, val adapter: BaseOperati
     }
 
     override fun onClick(p0: View) {
-        adapter.selectedPosition = getPosition()
+        adapter.selectedPosition = getAdapterPosition()
     }
 
 }

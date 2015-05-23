@@ -63,6 +63,8 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private val ZOOM_ENABLED = true
     private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
 
+    override fun setupIcon() = setIcon(R.drawable.stat_48)
+
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
 
@@ -73,7 +75,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         mList.setHasFixedSize(true)
         mList.setItemAnimator(DefaultItemAnimator())
 
-        setIcon(R.drawable.stat_48)
+        setupIcon()
         setMenu(R.menu.operations_list_menu)
 
         mActivity.registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_STAT))
@@ -107,7 +109,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         }
     }
 
-    override fun onOperationEditorResult(resultCode: Int, data: Intent?) {
+    override fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK) {
             fetchStats()
         }
@@ -122,8 +124,8 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         }
     }
 
-//    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-//    }
+    //    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+    //    }
 
 
     override fun onAccountChanged(itemId: Long): Boolean = false

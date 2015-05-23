@@ -25,7 +25,7 @@ public class ExpandAnimation extends Animation {
      * @param view     The layout we want to animate
      * @param duration The duration of the animation, in ms
      */
-    public ExpandAnimation(View view, int duration, boolean expand) {
+    public ExpandAnimation(final View view, int duration, boolean expand) {
 
         setDuration(duration);
         setFillEnabled(true);
@@ -35,10 +35,14 @@ public class ExpandAnimation extends Animation {
         mViewLayoutParams = (LayoutParams) view.getLayoutParams();
 
         // decide to show or hide the view
-        mIsVisibleAfter = !expand;
+        mIsVisibleAfter = expand;
+        if (expand) {
+            mMarginStart = -84;
+        } else {
+            mMarginStart = 0;
+        }
 
-        mMarginStart = mViewLayoutParams.bottomMargin;
-        mMarginEnd = (mMarginStart == 0 ? (0 - view.getHeight()) : 0);
+        mMarginEnd = (mMarginStart == 0 ? -84 : 0);
 
         view.setVisibility(View.VISIBLE);
 
@@ -50,8 +54,8 @@ public class ExpandAnimation extends Animation {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                if (mIsVisibleAfter) {
-                    mViewLayoutParams.bottomMargin = -37;
+                if (!mIsVisibleAfter) {
+                    mViewLayoutParams.bottomMargin = -view.getMeasuredHeight(); // -55
                     mAnimatedView.setVisibility(View.GONE);
                 } else {
                     mViewLayoutParams.bottomMargin = 0;
@@ -83,7 +87,7 @@ public class ExpandAnimation extends Animation {
             mViewLayoutParams.bottomMargin = mMarginEnd;
             mAnimatedView.requestLayout();
 
-            if (mIsVisibleAfter) {
+            if (!mIsVisibleAfter) {
                 mAnimatedView.setVisibility(View.GONE);
             }
             mWasEndedAlready = true;

@@ -13,7 +13,7 @@
 
     <fragment
             android:name="fr.geobert.radis.ui.ConfigFragment"
-            android:id="@+id/main_edit_pane"
+            android:id="@android:id/list"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"/>
 </LinearLayout>
