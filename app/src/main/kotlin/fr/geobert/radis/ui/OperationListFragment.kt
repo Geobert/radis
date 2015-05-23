@@ -64,6 +64,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
+        Log.d(TAG, "onCreateView, act:${getActivity()}, mAct:$mActivity")
         val c = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
         this.container = c
 
@@ -71,22 +72,29 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         operation_list = c.findViewById (R.id.operation_list) as RecyclerView
         empty_textview = c.findViewById (R.id.empty_textview)
 
+        setupIcon()
         setMenu(R.menu.operations_list_menu)
-        setIcon(R.drawable.radis_no_disc_48)
-        mActivity.mAccountSpinner.setSelection(mActivity.mAccountManager.getCurrentAccountPosition(mActivity))
+
         initOperationList()
-        initQuickAdd()
         if (savedInstanceState != null) {
             mQuickAddController?.onRestoreInstanceState(savedInstanceState)
         }
-        processAccountChanged(mActivity.getCurrentAccountId())
         return c
     }
 
+    override fun setupIcon() = setIcon(R.drawable.radis_no_disc_48)
+
     override fun onResume() {
         super<BaseFragment>.onResume()
+        Log.d(TAG, "onResume")
+
         mOldChildCount = -1
         val accMan = mActivity.mAccountManager
+
+        mActivity.mAccountSpinner.setSelection(mActivity.mAccountManager.getCurrentAccountPosition(mActivity))
+        initQuickAdd()
+        processAccountChanged(mActivity.getCurrentAccountId())
+
         val curDefaultAccId = accMan.mCurDefaultAccount
         if (curDefaultAccId != null && curDefaultAccId != accMan.getDefaultAccountId(mActivity)) {
             accMan.mCurDefaultAccount = null
@@ -109,13 +117,15 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun initQuickAdd() {
-        val c = container
-        val q = QuickAddController(mActivity, c)
-        q.initViewBehavior()
-        q.setAutoNegate(true)
-        q.clearFocus()
-        mQuickAddController = q;
-        setQuickAddVisibility()
+        if (mQuickAddController == null) {
+            val c = container
+            val q = QuickAddController(mActivity, c)
+            q.initViewBehavior()
+            q.setAutoNegate(true)
+            q.clearFocus()
+            mQuickAddController = q;
+            setQuickAddVisibility()
+        }
     }
 
     fun setQuickAddVisibility() {
@@ -197,7 +207,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         when (cursorLoader.getId()) {
             GET_OPS -> {
                 var refresh = false
-                Log.d("OperationListFragment", "onLoadFinished $mOpListAdapter")
                 val adapter = mOpListAdapter
                 if (adapter == null) {
                     val a = OperationsAdapter(mActivity, this, cursor)
@@ -206,13 +215,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     operation_list.setAdapter(mOpListAdapter)
                 } else {
                     adapter.increaseCache(cursor)
-                    Log.d("OperationListFragment", "onLoadFinished fresh $freshLoader")
                     if (freshLoader) // TODO why this is needed?
                         operation_list.setAdapter(adapter)
                 }
                 freshLoader = false
                 val itemCount = mOpListAdapter?.getItemCount()
-                Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.getCount()}")
+                //Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.getCount()}")
                 setupEmptyViewVisibility(itemCount == 0)
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
@@ -221,7 +229,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 operation_list.post {
                     val curChildCount = mListLayout.getChildCount()
                     val lastVisibleItemPos = mListLayout.findLastCompletelyVisibleItemPosition()
-                    Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = $lastVisibleItemPos")
+                    //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = $lastVisibleItemPos")
                     if (itemCount == 0 || (mOldChildCount != curChildCount && curChildCount - 1 == lastVisibleItemPos)) {
                         mOldChildCount = curChildCount
                         needRefreshSelection = true
@@ -253,7 +261,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
      * get the operations of current account, should be called after getAccountList
      */
     private fun getOperationsList() {
-        Log.d("getOperationsList", "earliestDate : $earliestOpDate / mOperationsLoader : $mOperationsLoader ")
+        //        Log.d("getOperationsList", "earliestDate : $earliestOpDate / mOperationsLoader : $mOperationsLoader ")
         val b = Bundle()
         b.putLong("earliestDate", earliestOpDate!!.getMilliseconds(TIME_ZONE))
         val a = mOpListAdapter
