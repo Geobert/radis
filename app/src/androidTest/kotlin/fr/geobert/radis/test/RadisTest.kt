@@ -1130,6 +1130,7 @@ public class RadisTest {
         onView(withText(R.string.override_quick_add_action)).perform(click())
         onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
         val askDate = getActivity().getResources().getStringArray(R.array.quickadd_actions)[0]
+        Helpers.pauseTest(500)
         onView(withText(askDate)).perform(click())
         Helpers.clickOnActionItemConfirm()
 
