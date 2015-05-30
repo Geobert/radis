@@ -115,7 +115,6 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         val prefs = DBPrefsManager.getInstance(mActivity).getInt(ConfigFragment.KEY_QUICKADD_ACTION, ConfigFragment.DEFAULT_QUICKADD_LONG_PRESS_ACTION)
 
         invert = (if (c != null && c.overrideQuickAddAction) c.quickAddAction else prefs) == 1
-        Log.d("PrefBug", "setup quick add listeners : invert = $invert, prefs = $prefs")
         mQuickAddButton.setOnClickListener(if (invert) askDateAction else addTodayAction)
 
         mQuickAddButton.setOnLongClickListener(object : View.OnLongClickListener {
@@ -164,12 +163,12 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         dialog.show(mActivity.getSupportFragmentManager(), "quick_add_op_date")
     }
 
-    throws(javaClass<Exception>())
+    throws(Exception::class)
     private fun quickAddOp() {
         quickAddOp(null)
     }
 
-    throws(javaClass<Exception>())
+    throws(Exception::class)
     private fun quickAddOp(date: GregorianCalendar?) {
         val op = Operation()
         if (date != null) {

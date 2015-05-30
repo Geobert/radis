@@ -20,7 +20,7 @@ import java.util.Calendar
 
 public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
 
-    throws(javaClass<Exception>())
+    throws(Exception::class)
     override fun setUp() {
         super.setUp()
         val i = Intent()

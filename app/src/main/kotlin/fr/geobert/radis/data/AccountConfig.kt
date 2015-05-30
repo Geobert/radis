@@ -48,11 +48,9 @@ public class AccountConfig() : ImplParcelable {
 
         fun getBoolean(c: Cursor) = c.getInt(valIdx) == 1
 
-        //Log.d("PrefBug", "construct AccountConfig from cursor")
         cursor.forEach {
             val k = it.getString(keyIdx)
             val active = it.getInt(activeIdx) == 1
-            //Log.d("PrefBug", "$k is $active")
             when (k) {
                 ConfigFragment.KEY_INSERTION_DATE -> {
                     overrideInsertDate = active

@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView
 import fr.geobert.radis.data.Operation
 import hirondelle.date4j.DateTime
 
-public trait IOperationList {
+public interface IOperationList {
     public fun getMoreOperations(startDate: DateTime?)
 
     public fun getDeleteConfirmationDialog(op: Operation): DialogFragment

@@ -5,7 +5,7 @@ import android.view.View
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
 
-public trait EditorToolbarTrait : Toolbar.OnMenuItemClickListener {
+public interface EditorToolbarTrait : Toolbar.OnMenuItemClickListener {
     fun initToolbar(activity: BaseActivity) {
         activity.setIcon(R.drawable.cancel_48)
         activity.setIconOnClick(object : View.OnClickListener {

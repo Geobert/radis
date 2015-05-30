@@ -150,7 +150,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             GET_SCH_OPS_OF_ACCOUNT -> mLoader = CursorLoader(mActivity, DbContentProvider.SCHEDULED_JOINED_OP_URI,
                     ScheduledOperationTable.SCHEDULED_OP_COLS_QUERY,
                     "sch.${ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID} = ? OR sch.${OperationTable.KEY_OP_TRANSFERT_ACC_ID} = ?",
-                    array(java.lang.Long.toString(currentAccountId), java.lang.Long.toString(currentAccountId)),
+                    arrayOf(java.lang.Long.toString(currentAccountId), java.lang.Long.toString(currentAccountId)),
                     ScheduledOperationTable.SCHEDULED_OP_ORDERING)
             else -> {
             }
