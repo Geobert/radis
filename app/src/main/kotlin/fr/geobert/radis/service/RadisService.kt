@@ -8,6 +8,7 @@ import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.DBPrefsManager
@@ -101,7 +102,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                     Log.d("RadisService", "insert past sch op until current month, op: ${op.getDate().formatDate()} / limit: ${timeParams.currentMonth.formatDate()}")
                     val opSum = insertSchOp(op, OP_ROW_ID)
                     if (opSum != 0L) {
-                        sum = sum + opSum
+                        sum += opSum
                         needUpdate = true
                     }
                 }
@@ -116,7 +117,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                         }
                         val opSum = insertSchOp(op, OP_ROW_ID)
                         if (opSum != 0L) {
-                            sum = sum + opSum
+                            sum += opSum
                             needUpdate = true
                         }
                     }
@@ -156,8 +157,8 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
     private fun insertSchOp(op: fr.geobert.radis.data.ScheduledOperation, opRowId: Long): Long {
         val accountId = op.mAccountId
         op.mScheduledId = opRowId
-        val needUpdate = fr.geobert.radis.db.OperationTable.createOp(this, op, accountId, false) > -1
-        fr.geobert.radis.data.ScheduledOperation.Companion.addPeriodicityToDate(op)
+        val needUpdate = OperationTable.createOp(this, op, accountId, false) > -1
+        ScheduledOperation.Companion.addPeriodicityToDate(op)
         return if (needUpdate) op.mSum else 0
     }
 
