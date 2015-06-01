@@ -80,7 +80,7 @@ public class RadisTest {
         closeAllActivities(InstrumentationRegistry.getInstrumentation())
     }
 
-    throws(javaClass<Exception>())
+    throws(Exception::class)
     public fun closeAllActivities(instrumentation: Instrumentation) {
         val NUMBER_OF_RETRIES = 100
         var i = 0
@@ -92,7 +92,7 @@ public class RadisTest {
         }
     }
 
-    throws(javaClass<Exception>())
+    throws(Exception::class)
     public fun <X> callOnMainSync(instrumentation: Instrumentation, callable: Callable<X>): X {
         val retAtomic = AtomicReference<X>()
         val exceptionAtomic = AtomicReference<Throwable>()
@@ -108,7 +108,7 @@ public class RadisTest {
         })
         val exception = exceptionAtomic.get()
         if (exception != null) {
-            Throwables.propagateIfInstanceOf(exception, javaClass<Exception>())
+            //Throwables.propagateIfInstanceOf(exception, Exception::class.javaClass)
             Throwables.propagate(exception)
         }
         return retAtomic.get()
@@ -126,10 +126,10 @@ public class RadisTest {
         return activities
     }
 
-    throws(javaClass<Exception>())
+    throws(Exception::class)
     private fun closeActivity(instrumentation: Instrumentation): Boolean {
         val activityClosed = callOnMainSync(instrumentation, object : Callable<Boolean> {
-            throws(javaClass<Exception>())
+            throws(Exception::class)
             override public fun call(): Boolean {
                 val activities = getActivitiesInStages(Stage.RESUMED, Stage.STARTED, Stage.PAUSED, Stage.STOPPED, Stage.CREATED)
                 activities.removeAll(getActivitiesInStages(Stage.DESTROYED))
@@ -1129,6 +1129,7 @@ public class RadisTest {
         onView(withId(android.R.id.list)).perform(swipeUp())
         onView(withText(R.string.override_quick_add_action)).perform(click())
         onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
+        Helpers.pauseTest(800)
         val askDate = getActivity().getResources().getStringArray(R.array.quickadd_actions)[0]
         onView(withText(askDate)).perform(click())
         Helpers.clickOnActionItemConfirm()

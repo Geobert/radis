@@ -40,46 +40,39 @@ import kotlin.properties.Delegates
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
     private var mOldChildCount: Int = -1
-
-    //    private var checkingDashboard: CheckingOpDashboard? = null
     private var freshLoader: Boolean = false
-    private var mListLayout: LinearLayoutManager by Delegates.notNull()
+    private var mListLayout: LinearLayoutManager? = null
     private val TAG = "OperationListFragment"
     private val GET_OPS = 300
     private var mOperationsLoader: CursorLoader? = null
     private var mQuickAddController: QuickAddController? = null
     private var mOpListAdapter: OperationsAdapter? = null
-    //private var operation_list: RecyclerView by Delegates.notNull()
     private var earliestOpDate: DateTime? = null // start date of ops to get
     private var mScrollLoader: OnOperationScrollLoader by Delegates.notNull()
     private var mLastSelectionId = -1L
     private var mLastSelectionPos = -1
     private var needRefreshSelection = false
 
-
-    // TODO kotlinx.android
     private var operation_list: RecyclerView by Delegates.notNull()
     private var empty_textview: View by Delegates.notNull()
     private var container: LinearLayout by Delegates.notNull()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
         super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
-        Log.d(TAG, "onCreateView, act:${getActivity()}, mAct:$mActivity")
-        val c = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
-        this.container = c
+        this.container = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
+        operation_list = this.container.findViewById(R.id.operation_list) as RecyclerView
+        empty_textview = this.container.findViewById(R.id.empty_textview)
+        return this.container
+    }
 
-        // TODO kotlinx
-        operation_list = c.findViewById (R.id.operation_list) as RecyclerView
-        empty_textview = c.findViewById (R.id.empty_textview)
-
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super<BaseFragment>.onActivityCreated(savedInstanceState)
         setupIcon()
         setMenu(R.menu.operations_list_menu)
-
         initOperationList()
         if (savedInstanceState != null) {
             mQuickAddController?.onRestoreInstanceState(savedInstanceState)
         }
-        return c
     }
 
     override fun setupIcon() = setIcon(R.drawable.radis_no_disc_48)
@@ -88,9 +81,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         super<BaseFragment>.onResume()
         Log.d(TAG, "onResume")
 
+        initOperationList()
+
         mOldChildCount = -1
         val accMan = mActivity.mAccountManager
 
+        // fix crash if radis is killed by android and back
         mActivity.mAccountSpinner.setSelection(mActivity.mAccountManager.getCurrentAccountPosition(mActivity))
         initQuickAdd()
         processAccountChanged(mActivity.getCurrentAccountId())
@@ -156,12 +152,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun initOperationList() {
+        Log.d(TAG, "initOperationList, mListLayout:$mListLayout, opListLayMan:${operation_list.getLayoutManager()}, oplist:${operation_list}")
+        //        if (mListLayout == null) {
         mListLayout = LinearLayoutManager(mActivity)
         operation_list.setLayoutManager(mListLayout)
         operation_list.setItemAnimator(DefaultItemAnimator())
         operation_list.setHasFixedSize(true)
         mScrollLoader = OnOperationScrollLoader(this)
-        operation_list.setOnScrollListener(mScrollLoader)
+        operation_list.clearOnScrollListeners()
+        operation_list.addOnScrollListener(mScrollLoader)
+        //        }
     }
 
     //    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -170,6 +170,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     //    }
 
     fun processAccountChanged(itemId: Long) {
+        Log.d(TAG, "processAccountChanged to $itemId", Exception())
         mAccountManager.setCurrentAccountId(itemId, mActivity)
         earliestOpDate = null
         mOldChildCount = -1
@@ -208,6 +209,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             GET_OPS -> {
                 var refresh = false
                 val adapter = mOpListAdapter
+                Log.d("OperationListFragment", "onLoadFinished feshLoader:$freshLoader, adapter:$adapter, layout:$mListLayout")
                 if (adapter == null) {
                     val a = OperationsAdapter(mActivity, this, cursor)
                     mOpListAdapter = a
@@ -215,21 +217,25 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     operation_list.setAdapter(mOpListAdapter)
                 } else {
                     adapter.increaseCache(cursor)
-                    if (freshLoader) // TODO why this is needed?
+                    if (freshLoader) {
+                        // TODO why this is needed?
                         operation_list.setAdapter(adapter)
+                        operation_list.setLayoutManager(mListLayout)
+                        adapter.notifyDataSetChanged()
+                    }
                 }
                 freshLoader = false
                 val itemCount = mOpListAdapter?.getItemCount()
-                //Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.getCount()}")
+                Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.getCount()}")
                 setupEmptyViewVisibility(itemCount == 0)
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
                 }
                 operation_list.post {
-                    val curChildCount = mListLayout.getChildCount()
-                    val lastVisibleItemPos = mListLayout.findLastCompletelyVisibleItemPosition()
-                    //Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = $lastVisibleItemPos")
+                    val curChildCount = mListLayout?.getChildCount() ?: 0
+                    val lastVisibleItemPos = mListLayout?.findLastCompletelyVisibleItemPosition()
+                    Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = $lastVisibleItemPos")
                     if (itemCount == 0 || (mOldChildCount != curChildCount && curChildCount - 1 == lastVisibleItemPos)) {
                         mOldChildCount = curChildCount
                         needRefreshSelection = true
@@ -279,14 +285,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun getMoreOperations(startDate: DateTime?) {
         if (isAdded()) {
-            Log.d("getMoreOperations", "startDate : " + startDate?.formatDateLong())
+            Log.d(TAG, "startDate : " + startDate?.formatDateLong())
             if (startDate != null) {
                 // date specified, use it
                 earliestOpDate = startDate
                 getOperationsList()
             } else {
                 // no op found with cur month and month - 1, try if there is one
-                Log.d("getMoreOperations", "earliestOpDate : " + earliestOpDate?.formatDateLong())
+                Log.d(TAG, "earliestOpDate : " + earliestOpDate?.formatDateLong())
                 val start = earliestOpDate
                 val c = if (null == start) {
                     OperationTable.fetchLastOp(mActivity, mActivity.getCurrentAccountId())
@@ -295,7 +301,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                             start.getMilliseconds(TIME_ZONE))
                 }
                 if (c != null) {
-                    Log.d("getMoreOperations", "cursor count : ${c.getCount()} / mOpListAdapter?.getItemCount():${mOpListAdapter?.getItemCount()}")
+                    Log.d(TAG, "cursor count : ${c.getCount()} / mOpListAdapter?.getItemCount():${mOpListAdapter?.getItemCount()}")
                     if (c.moveToFirst()) {
                         val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
                         Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
@@ -375,33 +381,36 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun adjustScroll(position: Int) {
-        val half = mListLayout.getChildCount() / 2
-        Log.d("adjustScroll", "half: $half, pos: $position, first: ${mListLayout.findFirstCompletelyVisibleItemPosition()}, last: ${mListLayout.findLastCompletelyVisibleItemPosition()}")
-        if (mListLayout.findFirstCompletelyVisibleItemPosition() >= position) {
-            if (mListLayout.findFirstCompletelyVisibleItemPosition() == position) {
-                if (position - half > 0) {
-                    // scroll in order to see fully expanded op row
-                    operation_list.smoothScrollToPosition(position - half)
+        val l = mListLayout
+        if (l != null) {
+            val half = l.getChildCount() / 2
+            Log.d("adjustScroll", "half: $half, pos: $position, first: ${l.findFirstCompletelyVisibleItemPosition()}, last: ${l.findLastCompletelyVisibleItemPosition()}")
+            if (l.findFirstCompletelyVisibleItemPosition() >= position) {
+                if (l.findFirstCompletelyVisibleItemPosition() == position) {
+                    if (position - half > 0) {
+                        // scroll in order to see fully expanded op row
+                        operation_list.smoothScrollToPosition(position - half)
+                    } else {
+                        mScrollLoader.onScrolled(operation_list, 0, 0);
+                    }
                 } else {
-                    mScrollLoader.onScrolled(operation_list, 0, 0);
+                    if (position - 1 > 0) {
+                        // scroll in order to see fully expanded op row
+                        operation_list.smoothScrollToPosition(position - 1)
+                    } else {
+                        mScrollLoader.onScrolled(operation_list, 0, 0);
+                    }
                 }
-            } else {
-                if (position - 1 > 0) {
-                    // scroll in order to see fully expanded op row
-                    operation_list.smoothScrollToPosition(position - 1)
+            } else if (l.findLastCompletelyVisibleItemPosition() <= position ) {
+                if (l.findLastCompletelyVisibleItemPosition() == position) {
+                    if (position + 1 > l.getChildCount()) {
+                        operation_list.smoothScrollToPosition(position + 1)
+                    } else {
+                        mScrollLoader.onScrolled(operation_list, 0, 0);
+                    }
                 } else {
-                    mScrollLoader.onScrolled(operation_list, 0, 0);
+                    operation_list.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
                 }
-            }
-        } else if (mListLayout.findLastCompletelyVisibleItemPosition() <= position ) {
-            if (mListLayout.findLastCompletelyVisibleItemPosition() == position) {
-                if (position + 1 > mListLayout.getChildCount()) {
-                    operation_list.smoothScrollToPosition(position + 1)
-                } else {
-                    mScrollLoader.onScrolled(operation_list, 0, 0);
-                }
-            } else {
-                operation_list.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
             }
         }
     }
@@ -461,12 +470,16 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mLastSelectionPos = -1
         needRefreshSelection = true
         val adapter = mOpListAdapter
+        Log.d(TAG, "afterDelUpdateSelection, adapter:$adapter, opId:$opId")
         if (adapter != null) {
             if (opId > 0) {
+                //                mAccountManager.setCurrentAccountSum()
                 adapter.selectedPosition = -1
                 adapter.delOp(opId)
                 setupEmptyViewVisibility(adapter.getItemCount() == 0)
-                operation_list.post { refreshSelection() }
+                operation_list.post {
+                    refreshSelection()
+                }
             } else {
                 adapter.reset()
                 getMoreOperations(initialStartDate())
@@ -482,11 +495,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             when (requestCode) {
                 OperationEditor.OPERATION_CREATOR -> {
                     mOpListAdapter?.addOp(op)
+                    mAccountManager.refreshCurrentAccount()
                     refreshSelection()
                     setupEmptyViewVisibility(mOpListAdapter?.getItemCount() == 0)
                 }
                 OperationEditor.OPERATION_EDITOR -> {
                     mOpListAdapter?.updateOp(op)
+                    mAccountManager.refreshCurrentAccount()
+                    refreshSelection()
                 }
             }
 
@@ -505,7 +521,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    override fun getListLayoutManager(): LinearLayoutManager = mListLayout
+    override fun getListLayoutManager(): LinearLayoutManager = mListLayout!!
 
     override fun getRecyclerView(): RecyclerView = operation_list
 

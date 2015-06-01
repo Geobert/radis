@@ -1,6 +1,5 @@
 package fr.geobert.radis.ui.editor
 
-import android.database.Cursor
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -18,25 +17,25 @@ import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.adapter.AccountAdapter
 import fr.geobert.radis.ui.adapter.InfoAdapter
 import java.text.ParseException
 import kotlin.properties.Delegates
-import kotlinx.android.synthetic.main_op_edit.*
 
 public class OperationEditFragment() : Fragment(), TextWatcher {
-    private val edit_op_sum by Delegates.lazy { getActivity().edit_op_sum }
-    private val edit_op_third_party by Delegates.lazy { getActivity().edit_op_third_party }
-    private val edit_op_tag by Delegates.lazy { getActivity().edit_op_tag }
-    private val edit_op_mode by Delegates.lazy { getActivity().edit_op_mode }
-    private val edit_op_notes by Delegates.lazy { getActivity().edit_op_notes }
-    private val edit_op_date by Delegates.lazy { getActivity().edit_op_date }
-    private val third_party_cont by Delegates.lazy { getActivity().third_party_cont }
-    private val transfert_cont by Delegates.lazy { getActivity().transfert_cont }
-    private val is_transfert by Delegates.lazy { getActivity().is_transfert }
-    private val is_checked by Delegates.lazy { getActivity().is_checked }
-    private val edit_op_sign by Delegates.lazy { getActivity().edit_op_sign }
-    private val trans_src_account by Delegates.lazy { getActivity().trans_src_account }
-    private val trans_dst_account by Delegates.lazy { getActivity().trans_dst_account }
+    private val edit_op_sum by Delegates.lazy { getActivity().findViewById(R.id.edit_op_sum) as EditText }
+    private val edit_op_third_party by Delegates.lazy { getActivity().findViewById(R.id.edit_op_third_party) as MyAutoCompleteTextView }
+    private val edit_op_tag by Delegates.lazy { getActivity().findViewById(R.id.edit_op_tag) as MyAutoCompleteTextView }
+    private val edit_op_mode by Delegates.lazy { getActivity().findViewById(R.id.edit_op_mode) as MyAutoCompleteTextView }
+    private val edit_op_notes by Delegates.lazy { getActivity().findViewById(R.id.edit_op_notes) as EditText }
+    private val edit_op_date by Delegates.lazy { getActivity().findViewById(R.id.edit_op_date) as DatePicker }
+    private val third_party_cont by Delegates.lazy { getActivity().findViewById(R.id.third_party_cont) as LinearLayout }
+    private val transfert_cont by Delegates.lazy { getActivity().findViewById(R.id.transfert_cont) as LinearLayout }
+    private val is_transfert by Delegates.lazy { getActivity().findViewById(R.id.is_transfert) as CheckBox }
+    private val is_checked by Delegates.lazy { getActivity().findViewById(R.id.is_checked) as CheckBox }
+    private val edit_op_sign by Delegates.lazy { getActivity().findViewById(R.id.edit_op_sign) as ImageButton }
+    private val trans_src_account by Delegates.lazy { getActivity().findViewById(R.id.trans_src_account) as Spinner }
+    private val trans_dst_account by Delegates.lazy { getActivity().findViewById(R.id.trans_dst_account) as Spinner }
     private val mSumTextWatcher by Delegates.lazy { CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this) }
     private val mActivity by Delegates.lazy { getActivity() as CommonOpEditor }
     private var mWasInvertByTransfert: Boolean = false
@@ -66,7 +65,6 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
             params.height = third_party_cont.getMeasuredHeight()
             transfert_cont.setLayoutParams(params)
             if (Build.VERSION.SDK_INT < 11) {
-                // TODO kotlinx.android when support.v4 is supported
                 adjustImageButton(mActivity.findViewById(R.id.edit_op_third_parties_list) as ImageButton)
                 adjustImageButton(mActivity.findViewById(R.id.edit_op_tags_list) as ImageButton)
                 adjustImageButton(mActivity.findViewById(R.id.edit_op_modes_list) as ImageButton)
@@ -78,7 +76,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     fun onAllAccountFetched() {
         if (isAdded()) {
             mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
-            populateTransfertSpinner(mActivity.mAccountManager.allAccountsCursor)
+            populateTransfertSpinner(mActivity.mAccountManager.mAccountAdapter)
             initViewAdapters()
             initListeners()
             is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
@@ -197,15 +195,15 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         }
     }
 
-    protected fun populateTransfertSpinner(c: Cursor?) {
-        if (c != null && c.moveToFirst()) {
+    protected fun populateTransfertSpinner(c: AccountAdapter?) {
+        if (c != null && c.getCount() > 0) {
             val adapter = ArrayAdapter<Account>(mActivity, android.R.layout.simple_spinner_item)
             val adapter2 = ArrayAdapter<Account>(mActivity, android.R.layout.simple_spinner_item)
             adapter.add(Account(0, getString(R.string.no_transfert)))
             adapter2.add(Account(0, getString(R.string.no_transfert)))
             c.forEach {
-                adapter.add(Account(c))
-                adapter2.add(Account(c))
+                adapter.add(it)
+                adapter2.add(it)
             }
 
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -256,10 +254,10 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
             }
         }
         is_checked.setChecked(op.mIsChecked)
-        populateTransfertSpinner((getActivity() as CommonOpEditor).mAccountManager.allAccountsCursor)
+        populateTransfertSpinner((getActivity() as CommonOpEditor).mAccountManager.mAccountAdapter)
     }
 
-    throws(javaClass<ParseException>())
+    throws(ParseException::class)
     private fun invertSign() {
         mSumTextWatcher.setAutoNegate(false)
         val sum: Double? = edit_op_sum.getText().toString().parseSum()
