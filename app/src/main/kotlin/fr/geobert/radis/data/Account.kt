@@ -1,9 +1,11 @@
 package fr.geobert.radis.data
 
+import android.content.Context
 import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.db.AccountTable
+import java.util.Currency
 import java.util.Date
 import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
@@ -67,6 +69,19 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
 
     override fun toString(): String = name
 
+    fun getCurrencySymbol(ctx: Context): String {
+        fun cleanupSymbols(str: String, symb: Array<String>): String {
+            return symb.fold(str, { str, symb -> if (str.contains(symb)) symb else str })
+        }
+
+        return try {
+            val c = Currency.getInstance(currency).getSymbol()
+            cleanupSymbols(c, arrayOf("£", "$"))
+        } catch (ex: IllegalArgumentException) {
+            Currency.getInstance(ctx.getResources().getConfiguration().locale).getSymbol()
+        }
+    }
+
     companion object {
         platformStatic public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
             override fun createFromParcel(p: Parcel): Account {
@@ -78,4 +93,5 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
             }
         }
     }
+
 }

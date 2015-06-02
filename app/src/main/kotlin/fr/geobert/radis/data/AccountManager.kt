@@ -8,24 +8,25 @@ import android.support.v4.app.LoaderManager
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
 import android.support.v4.widget.SimpleCursorAdapter
+import android.util.Log
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.getByFilter
+import fr.geobert.radis.tools.map
 import fr.geobert.radis.ui.ConfigFragment
+import fr.geobert.radis.ui.adapter.AccountAdapter
 import java.util.ArrayList
 import java.util.Currency
-import kotlin.properties.Delegates
 
 public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCallbacks<Cursor> {
-    private var _allAccountCursor: Cursor? = null
-    public var allAccountsCursor: Cursor?
-        public set(value) {
-            setAllAccCursor(value)
-        }
-        get() = _allAccountCursor
+    //    private var _allAccountCursor: Cursor? = null
+    //    public var allAccountsCursor: Cursor?
+    //        public set(value) {
+    //            setAllAccCursor(value)
+    //        }
+    //        get() = _allAccountCursor
 
-    private var mSimpleCursorAdapter: SimpleCursorAdapter? = null
+    //private var mSimpleCursorAdapter: SimpleCursorAdapter? = null
     private var mCurAccountId: Long? = null
     public var currentAccountSum: Long = 0
         protected set
@@ -38,95 +39,98 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
     public var currentAccountStartSum: Long = 0
         private set
 
+    public var mAccountAdapter: AccountAdapter = AccountAdapter(ctx)
+        private set
+
     public var mCurAccountConfig: AccountConfig? = null
         private set
 
-    throws(javaClass<IllegalStateException>())
-    private fun setAllAccCursor(cursor: Cursor?) {
-        val c = this.allAccountsCursor
-        if (c != null && c != cursor) {
-            c.close()
-        }
+    private var isFetching = false
 
-        if (cursor != null && cursor.moveToFirst()) {
-            _allAccountCursor = cursor
-            mSimpleCursorAdapter?.changeCursor(cursor)
-            if (mCurAccountId != null) {
-                setCurrentAccountSum()
-            }
-        } else {
-            _allAccountCursor = null
-            this.mSimpleCursorAdapter?.changeCursor(null)
-        }
-    }
+    //    private fun setAllAccCursor(cursor: Cursor?) {
+    //        val c = this.allAccountsCursor
+    //        if (c != null && c != cursor) {
+    //            c.close()
+    //        }
+    //
+    //        if (cursor != null && cursor.moveToFirst()) {
+    //            _allAccountCursor = cursor
+    //            mSimpleCursorAdapter?.changeCursor(cursor)
+    //            if (mCurAccountId != null) {
+    //                setCurrentAccountSum()
+    //            }
+    //        } else {
+    //            _allAccountCursor = null
+    //            this.mSimpleCursorAdapter?.changeCursor(null)
+    //        }
+    //    }
 
-    public fun setSimpleCursorAdapter(adapter: SimpleCursorAdapter) {
-        this.mSimpleCursorAdapter = adapter
-    }
+    //    public fun setSimpleCursorAdapter(adapter: SimpleCursorAdapter) {
+    //        this.mSimpleCursorAdapter = adapter
+    //    }
 
     public fun getDefaultAccountId(context: Context): Long? {
+        //        Log.d(TAG, "--->getDefaultAccountId, curDefAcc:$mCurDefaultAccount")
         if (this.mCurDefaultAccount == null) {
             this.mCurDefaultAccount = DBPrefsManager.getInstance(context).getLong(ConfigFragment.KEY_DEFAULT_ACCOUNT)
             if (mCurDefaultAccount == null) {
+                //                Log.d(TAG, "getDefaultAccountId, no pref for def account")
                 // no pref set, take the first account, set it as default
-                if (allAccountsCursor?.moveToFirst() ?: false) {
-                    this.mCurDefaultAccount = this.allAccountsCursor?.getLong(0)
+                if (mAccountAdapter.getCount() > 0) {
+                    this.mCurDefaultAccount = mAccountAdapter.getAccount(0).id
                     DBPrefsManager.getInstance(context).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount)
                 }
             }
         }
+        //        Log.d(TAG, "<---getDefaultAccountId, curDefAcc:$mCurDefaultAccount")
         return this.mCurDefaultAccount
     }
 
     public fun getCurrentAccountId(context: Context): Long {
+        Log.d(TAG, "--->getCurrentAccountId, backup:$mCurAccountIdBackup, curAccId:$mCurAccountId, accCursor:${mAccountAdapter?.getCount()}")
         if (mCurAccountIdBackup != null) {
             setCurrentAccountId(mCurAccountIdBackup, context)
             clearBackup()
         } else if (mCurAccountId != null) {
+            Log.d(TAG, "<---getCurrentAccountId, curAcc:$mCurAccountId")
             return mCurAccountId!!
         } else if (getDefaultAccountId(context) != null) {
             setCurrentAccountId(getDefaultAccountId(context), context)
-        } else if (allAccountsCursor != null && allAccountsCursor?.getCount() ?: 0 > 0) {
-            setCurrentAccountId(allAccountsCursor!!.getLong(allAccountsCursor!!.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)), context)
+        } else if (mAccountAdapter.getCount() > 0) {
+            setCurrentAccountId(mAccountAdapter.getAccount(0).id, context)
         } else {
             throw RuntimeException("No current account!")
         }
+        Log.d(TAG, "<---getCurrentAccountId, curAcc:$mCurAccountId")
         return mCurAccountId!!
     }
 
     public fun getCurrentAccountPosition(ctx: Context): Int {
+        //        Log.d(TAG, "--->getCurrentAccountPosition, mCurAccountPos:$mCurAccountPos")
         if (mCurAccountPos == -1) {
             getCurrentAccountId(ctx)
         }
+        //        Log.d(TAG, "<---getCurrentAccountPosition, mCurAccountPos:$mCurAccountPos")
         return mCurAccountPos
     }
 
 
-    private fun setCurrentAccountSum(): Int {
+    public fun setCurrentAccountSum() {
         var pos = 0
-        if (allAccountsCursor != null) {
-            allAccountsCursor!!.moveToFirst()
-            do {
-                if (mCurAccountId == allAccountsCursor!!.getLong(0)) {
-                    val curSumIdx = allAccountsCursor!!.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM)
-                    val currencyIdx = allAccountsCursor!!.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY)
-                    AccountTable.initProjectionDate(allAccountsCursor)
-                    currentAccountSum = allAccountsCursor!!.getLong(curSumIdx)
-                    val curStr = allAccountsCursor!!.getString(currencyIdx)
-                    try {
-                        mCurAccCurrencySymbol = Currency.getInstance(curStr).getSymbol()
-                    } catch (e: IllegalArgumentException) {
-                        mCurAccCurrencySymbol = Currency.getInstance(ctx.getResources().getConfiguration().locale).getSymbol()
-                    }
-
-                    currentAccountStartSum = allAccountsCursor!!.getLong(allAccountsCursor!!.getColumnIndex(AccountTable.KEY_ACCOUNT_START_SUM))
+        val curId = mCurAccountId
+        if (curId != null && curId > 0) {
+            for (acc in mAccountAdapter) {
+                if (curId == acc.id) {
+                    AccountTable.initProjectionDate(acc)
+                    currentAccountSum = acc.curSum
+                    mCurAccCurrencySymbol = acc.getCurrencySymbol(ctx)
+                    currentAccountStartSum = acc.startSum
                     break
                 }
                 pos++
-            } while (allAccountsCursor!!.moveToNext())
-            allAccountsCursor!!.moveToFirst()
+            }
         }
-        return pos
+        mCurAccountPos = pos
     }
 
 
@@ -138,12 +142,13 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
             return (-1).toLong()
         } else {
             refreshConfig(ctx, currentAccountId)
-            mCurAccountPos = setCurrentAccountSum()
+            setCurrentAccountSum()
             return getCurrentAccountProjDate()
         }
     }
 
     public fun refreshConfig(ctx: Context, id: Long) {
+        Log.d(TAG, "refreshConfig, acc id:$id")
         mCurAccountConfig = AccountConfig(PreferenceTable.fetchPrefForAccount(ctx, id))
     }
 
@@ -159,22 +164,35 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         this.mCurAccountIdBackup = null
     }
 
-    synchronized public fun fetchAllAccounts(force: Boolean, cbk: () -> Any?) {
-        if (force || allAccountsCursor == null || allAccountsCursor?.getCount() == 0 || allAccountsCursor?.isClosed() ?: false) {
-            this.mCallbacks.add(cbk)
-            if (mAccountLoader == null) {
-                ctx.getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
-            } else {
-                ctx.getSupportLoaderManager().restartLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
-            }
-        } else {
-            cbk()
+    fun refreshCurrentAccount() {
+        val cursor = AccountTable.fetchAccount(ctx, getCurrentAccountId(ctx))
+        if (cursor.moveToFirst()) {
+            updateAccount(Account(cursor))
         }
     }
 
-    public fun getCurrentAccount(): Account? {
-        return allAccountsCursor?.getByFilter({ it.getLong(0) == getCurrentAccountId(ctx) }, { Account(it) })
+    public fun fetchAllAccounts(force: Boolean, cbk: () -> Any?) {
+        Log.d(TAG, ">>>fetchAllAccounts:$force")
+        this.mCallbacks.add(cbk)
+        if (!isFetching) {
+            isFetching = true
+            if (force || mAccountAdapter.isEmpty()) {
+                if (mAccountLoader == null) {
+                    ctx.getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
+                } else {
+                    ctx.getSupportLoaderManager().restartLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
+                }
+            } else {
+                Log.d(TAG, "<<<fetchAllAccounts:$force")
+                execCbks()
+                isFetching = false
+            }
+        }
     }
+
+    //    public fun getCurrentAccount(): Account? {
+    //        return allAccountsCursor?.getByFilter({ it.getLong(0) == getCurrentAccountId(ctx) }, { Account(it) })
+    //    }
 
     override fun onCreateLoader(i: Int, bundle: Bundle?): Loader<Cursor> {
         val loader = AccountTable.getAllAccountsLoader(ctx)
@@ -182,14 +200,45 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         return loader
     }
 
+    fun execCbks() {
+        val cbks = ArrayList(mCallbacks)
+        for (r in cbks) {
+            r()
+        }
+        mCallbacks.clear()
+    }
+
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, cursor: Cursor) {
-        if (cursorLoader.getId() == GET_ACCOUNTS) {
-            allAccountsCursor = cursor
-            val cbks = ArrayList(mCallbacks)
-            for (r in cbks) {
-                r()
+        when (cursorLoader.getId()) {
+            GET_ACCOUNTS -> {
+                mAccountAdapter.swapCursor(cursor)
+                if (mCurAccountId != null) {
+                    setCurrentAccountSum()
+                }
+                Log.d(TAG, "onLoadFinished: cursor:${cursor.getCount()}, count:${mAccountAdapter.getCount()}")
+                execCbks()
+                isFetching = false
             }
-            mCallbacks.clear()
+        }
+    }
+
+    private fun updateAccount(a: Account) {
+        for (acc in mAccountAdapter) {
+            if (acc.id == a.id) {
+                acc.curSumDate = a.curSumDate
+                acc.curSum = a.curSum
+                acc.checkedSum = a.checkedSum
+                acc.currency = a.currency
+                acc.lastInsertDate = a.lastInsertDate
+                acc.opSum = a.opSum
+                acc.name = a.name
+                acc.description = a.description
+                acc.startSum = a.startSum
+                acc.projMode = a.projMode
+                acc.projDate = a.projDate
+                mAccountAdapter.notifyDataSetChanged()
+                return
+            }
         }
     }
 
@@ -202,6 +251,9 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
 
     companion object {
         private val GET_ACCOUNTS = 200
+        private val GET_ONE_ACCOUNT = 210
+        private val TAG = "AccountManager"
     }
+
 
 }

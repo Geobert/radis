@@ -23,16 +23,16 @@ private var SHORT_DATE_FORMAT: SimpleDateFormat by Delegates.notNull()
 
 public fun getSumSeparator(): Char = SUM_FORMAT.getDecimalFormatSymbols().getDecimalSeparator()
 public fun Double.formatSum(): String = SUM_FORMAT.format(this)
-[throws(javaClass<ParseException>())] public fun String.parseSum(): Double = SUM_FORMAT.parse(this).toDouble()
+public fun String.parseSum(): Double = SUM_FORMAT.parse(this).toDouble()
 public fun Date.formatDate(): String = DATE_FORMAT.format(this)
 
 public fun DateTime.formatDate(): String = this.format("DD/MM")
 public fun DateTime.formatDateLong(): String = this.format("DD/MM/YY")
 
 public fun Long.formatDate(): String = DATE_FORMAT.format(this)
-[throws(javaClass<ParseException>())] public fun String.parseDate(): Date = DATE_FORMAT.parse(this)
+public fun String.parseDate(): Date = DATE_FORMAT.parse(this)
 public fun Date.formatShortDate(): String = SHORT_DATE_FORMAT.format(this)
-[throws(javaClass<ParseException>())] public fun String.parseShortDate(): Date = SHORT_DATE_FORMAT.parse(this)
+public fun String.parseShortDate(): Date = SHORT_DATE_FORMAT.parse(this)
 public fun initShortDate(c: Context) {
     SHORT_DATE_FORMAT = SimpleDateFormat(c.getResources().getString(R.string.short_date_format))
 }

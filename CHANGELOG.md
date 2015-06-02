@@ -1,4 +1,8 @@
-Version 1.1.7 - 16/05/2015
+Version 1.1.9 - 02/06/2015
+- stabilisation
+- fix de bug d'affichage à l'ajout d'operation
+
+Version 1.1.8 - 23/05/2015
 - fix crash quand Radis est rappelé après un certain temps en background
 - update des lib android support et optimisation du rafraichissement de la liste des opérations
 

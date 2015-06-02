@@ -158,7 +158,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     private fun fillTimeScaleSpinner(): Unit {
-        val values = array(getString(R.string.days), getString(R.string.monthes), getString(R.string.years),
+        val values = arrayOf(getString(R.string.days), getString(R.string.monthes), getString(R.string.years),
                 getString(R.string.absolute))
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -169,8 +169,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             }
 
             override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p: Int, id: Long) {
-                val stat = mStat
-                if (stat != null) stat.timeScaleType = p // TODO check https://youtrack.jetbrains.com/issue/KT-1213
+                mStat?.timeScaleType = p
                 refreshTimeScaleCont()
             }
         })
@@ -185,12 +184,10 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         date.setTime(button.getText().toString().parseDate())
         val datePicker = DatePickerDialog(this, { v: DatePicker?, y: Int, m: Int, d: Int ->
             val dt = DateTime.forDateOnly(y, m + 1, d)
-            val stat = mStat
-            if (stat != null) // TODO check https://youtrack.jetbrains.com/issue/KT-1213
-                when (button.getId()) {
-                    R.id.start_date_btn -> stat.startDate = dt
-                    R.id.end_date_btn -> stat.endDate = dt
-                }
+            when (button.getId()) {
+                R.id.start_date_btn -> mStat?.startDate = dt
+                R.id.end_date_btn -> mStat?.endDate = dt
+            }
             button.setText(dt.formatDateLong())
         }, date[Calendar.YEAR], date[Calendar.MONTH], date[Calendar.DAY_OF_MONTH])
         datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(android.R.string.cancel), null:Message?)
@@ -198,7 +195,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     private fun fillInfoSpinner(): Unit {
-        val values = array(getString(R.string.third_party), getString(R.string.tag), getString(R.string.mode),
+        val values = arrayOf(getString(R.string.third_party), getString(R.string.tag), getString(R.string.mode),
                 getString(R.string.no_filter))
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -217,28 +214,22 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     private fun fillAccountSpinner(): Unit {
         val adapter = ArrayAdapter<Account>(this, android.R.layout.simple_spinner_item)
-        val allAccCursor = mAccountManager.allAccountsCursor
-        if (allAccCursor != null) {
-            allAccCursor.moveToPosition(-1)
-            allAccCursor.forEach({ adapter.add(Account(it)) })
-            mAccountSpinAdapter = adapter
-            mAccountSpin.setAdapter(adapter)
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            mAccountSpin.setOnItemSelectedListener(object : OnItemSelectedListener {
-                override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p2: Int, p3: Long) {
-                    val stat = mStat
-                    if (stat != null) {
-                        // TODO https://youtrack.jetbrains.com/issue/KT-1213
-                        stat.accountId = (a?.getSelectedItem() as Account).id
-                        stat.accountName = (v as TextView).getText().toString()
-                    }
-                }
+        val allAccCursor = mAccountManager.mAccountAdapter
 
-                override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
-                    // nothing
-                }
-            })
-        }
+        allAccCursor.forEach({ adapter.add(it) })
+        mAccountSpinAdapter = adapter
+        mAccountSpin.setAdapter(adapter)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        mAccountSpin.setOnItemSelectedListener(object : OnItemSelectedListener {
+            override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p2: Int, p3: Long) {
+                mStat?.accountId = (a?.getSelectedItem() as Account).id
+                mStat?.accountName = (v as TextView).getText().toString()
+            }
+
+            override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
+                // nothing
+            }
+        })
     }
 
     private fun initAccountSpinner(): Unit {
@@ -252,8 +243,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         fun onCheckedChanged(view: ToggleImageButton, checked: Boolean, chartType: Int) {
             when (checked) {
                 true -> if (mStat?.chartType != chartType) {
-                    val stat = mStat // TODO https://youtrack.jetbrains.com/issue/KT-1213
-                    if (stat != null) stat.chartType = chartType
+                    mStat?.chartType = chartType
                     mPieBtn.setChecked(false)
                     mBarBtn.setChecked(false)
                     mLineBtn.setChecked(false)
@@ -291,7 +281,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     private fun formErrorMessage(): String? {
         val builder = StringBuilder()
         if (mNameEdt.getText().toString().trim().length() <= 0) {
-            builder.append("- ":CharSequence).append(getString(R.string.empty_stat_name):CharSequence).append('\n')
+            builder.append("- ").append(getString(R.string.empty_stat_name)).append('\n')
         }
         when (mStat?.timeScaleType) {
             Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS -> {
@@ -304,13 +294,13 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                             else
                                 getString(R.string.last_male)
 
-                    builder.append("- ":CharSequence).append(getString(R.string.xlast_invalid).format(last(),
-                            mTimeScaleSpin.getSelectedItem().toString().toLowerCase()):CharSequence)
+                    builder.append("- ").append(getString(R.string.xlast_invalid).format(last(),
+                            mTimeScaleSpin.getSelectedItem().toString().toLowerCase()))
                 }
             }
             Statistic.PERIOD_ABSOLUTE ->
                 if (mStat?.startDate?.compareTo(mStat?.endDate) as Int >= 0) {
-                    builder.append("- ":CharSequence).append(getString(R.string.invalid_date_range):CharSequence)
+                    builder.append("- ").append(getString(R.string.invalid_date_range))
                 }
         }
 

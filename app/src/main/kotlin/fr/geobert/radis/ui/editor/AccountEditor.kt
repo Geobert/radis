@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarActivity
+import android.util.Log
 import android.view.MenuItem
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
@@ -107,7 +108,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
                 AccountTable.updateAccount(this, account)
                 PreferenceTable.updateAccountPrefs(this, config, mRowId)
             }
-
+            Log.d("AccountEditor", "onOkClicked")
             finish()
             this.overridePendingTransition(R.anim.enter_from_right, 0)
         } else {
@@ -116,14 +117,15 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     }
 
     companion object {
-        public fun callMeForResult(context: ActionBarActivity, accountId: Long) {
+        public fun callMeForResult(context: ActionBarActivity, accountId: Long, firstAccount:Boolean = false) {
             val intent = Intent(context, javaClass<AccountEditor>())
             intent.putExtra(PARAM_ACCOUNT_ID, accountId)
-            context.startActivityForResult(intent, ACCOUNT_EDITOR)
+            context.startActivityForResult(intent, if (firstAccount) ACCOUNT_CREATOR else ACCOUNT_EDITOR)
         }
 
         public val NO_ACCOUNT: Long = 0
         public val ACCOUNT_EDITOR: Int = 1000
+        public val ACCOUNT_CREATOR: Int = 1100
         public val PARAM_ACCOUNT_ID: String = "account_id"
         public val GET_ACCOUNT: Int = 400
         public val GET_ACCOUNT_CONFIG: Int = 410

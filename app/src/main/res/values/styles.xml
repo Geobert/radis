@@ -72,7 +72,7 @@
         <item name="android:orientation">horizontal</item>
     </style>
 
-    <style name="StatListView" parent="@android:style/Widget.ListView">
+    <style name="StatListView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_weight">1</item>
@@ -80,7 +80,7 @@
         <item name="android:dividerHeight">1px</item>
     </style>
 
-    <style name="OpListView" parent="@android:style/Widget.ListView">
+    <style name="OpListView">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:layout_weight">1</item>

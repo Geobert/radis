@@ -14,6 +14,7 @@ import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.ui.adapter.AccountAdapter
 import kotlin.properties.Delegates
 
 public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListener {
@@ -46,7 +47,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
             mCurrentSchOp?.mPeriodicity.toString())
         populatePeriodicitySpinner()
         populateCustomPeriodicitySpinner()
-        populateAccountSpinner((getActivity() as CommonOpEditor).mAccountManager.allAccountsCursor!!)
+        populateAccountSpinner((getActivity() as CommonOpEditor).mAccountManager.mAccountAdapter)
         if (op.getEndDate() > 0) {
             mEndDateCheck.setChecked(true)
             mEndDatePicker.setEnabled(true)
@@ -133,13 +134,12 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
         }
     }
 
-    private fun populateAccountSpinner(c: Cursor) {
-        if (c.moveToFirst()) {
-            val adapter = SimpleCursorAdapter(mActivity, android.R.layout.simple_spinner_item, c,
-                    array(AccountTable.KEY_ACCOUNT_NAME), intArray(android.R.id.text1),
-                    CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER)
+    private fun populateAccountSpinner(c: AccountAdapter?) {
+        if (c != null && c.getCount() > 0) {
+            val adapter = ArrayAdapter(mActivity, android.R.layout.simple_spinner_item, android.R.id.text1, c.toArrayList())
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             mAccountSpinner.setAdapter(adapter)
+
             val schOp = mCurrentSchOp
             if (schOp != null && (schOp.mAccountId != 0L || mActivity.mCurAccountId != 0L)) {
                 var pos = 1
@@ -167,10 +167,8 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
             //val c = mAccountSpinner.getSelectedItem() as Cursor
             val o = mAccountSpinner.getSelectedItem()
             if (o != null) {
-                val c = o as Cursor
-                //            op.mAccountId = c.getLong(0)
-                val id = c.getLong(0) //mAccountSpinner.getSelectedItemId()
-                op.mAccountId = id
+                val c = o as Account
+                op.mAccountId = c.id
             }
         }
         Log.d("ScheduleEditorFragment", "selected accountId = ${op.mAccountId}")
@@ -245,8 +243,8 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
             }
         }
         if (!mActivity.isTransfertChecked()) {
-            val cursor = mAccountSpinner.getSelectedItem() as Cursor
-            val accountId = cursor.getLong(0)
+            val account = mAccountSpinner.getSelectedItem() as Account
+            val accountId = account.id
             if (accountId == 0L) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n")

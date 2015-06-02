@@ -42,9 +42,9 @@ public class AccountTable {
         public val KEY_ACCOUNT_LAST_INSERTION_DATE: String = "account_last_insertion_date"
 
         // light request for spinners
-        public val ACCOUNT_ID_AND_NAME_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME)
+        public val ACCOUNT_ID_AND_NAME_COLS: Array<String> = arrayOf(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME)
 
-        public val ACCOUNT_FULL_COLS: Array<String> = array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
+        public val ACCOUNT_FULL_COLS: Array<String> = arrayOf(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM,
                 KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_PROJECTION_MODE, KEY_ACCOUNT_PROJECTION_DATE,
                 KEY_ACCOUNT_DESC, KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_CHECKED_OP_SUM,
                 KEY_ACCOUNT_LAST_INSERTION_DATE)
@@ -111,7 +111,6 @@ public class AccountTable {
             return values
         }
 
-        throws(javaClass<ParseException>())
         public fun createAccount(ctx: Context, account: Account): Long {
             val values = createValuesOf(account)
             setCurrentSumAndDate(ctx, account, values)
@@ -163,7 +162,6 @@ public class AccountTable {
             return res
         }
 
-        throws(javaClass<ParseException>())
         private fun setCurrentSumAndDate(ctx: Context, account: Account, values: ContentValues) {
             var date: Long = 0
             var opSum: Long = 0
@@ -259,105 +257,49 @@ public class AccountTable {
             updateAccount(ctx, accountId, values)
         }
 
-        platformStatic public fun initProjectionDate(c: Cursor?) {
-            if (c != null) {
-                mProjectionMode = c.getInt(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE))
-                when (mProjectionMode) {
-                    PROJECTION_FURTHEST -> mProjectionDate = c.getLong(c.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE))
-                    PROJECTION_DAY_OF_NEXT_MONTH -> {
-                        val projDate = Tools.createClearedCalendar()
-                        projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE))))
-                        val today = Tools.createClearedCalendar()
-                        if (projDate.compareTo(today) <= 0) {
-                            projDate.add(Calendar.MONTH, 1)
-                        }
-                        mProjectionDate = projDate.getTimeInMillis()
-                    }
-                    PROJECTION_ABSOLUTE_DATE -> try {
-                        val projDate = c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)).parseDate()
-                        val cal = GregorianCalendar()
-                        cal.setTime(projDate)
-                        cal.set(Calendar.HOUR, 0)
-                        cal.set(Calendar.MINUTE, 0)
-                        cal.set(Calendar.SECOND, 0)
-                        mProjectionDate = cal.getTimeInMillis()
-                    } catch (e: ParseException) {
-                        //ACRA.getErrorReporter().handleSilentException(e);
-                        e.printStackTrace()
-                    }
+        platformStatic public fun initProjectionDate(cursor: Cursor) {
+            initProjectionDate(Account(cursor))
+        }
 
-                    else -> {
+        public fun initProjectionDate(acc: Account) {
+            mProjectionMode = acc.projMode
+            when (mProjectionMode) {
+                PROJECTION_FURTHEST -> mProjectionDate = acc.curSumDate?.getTime() ?: 0
+                PROJECTION_DAY_OF_NEXT_MONTH -> {
+                    val projDate = Tools.createClearedCalendar()
+                    projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(acc.projDate))
+                    val today = Tools.createClearedCalendar()
+                    if (projDate.compareTo(today) <= 0) {
+                        projDate.add(Calendar.MONTH, 1)
                     }
+                    mProjectionDate = projDate.getTimeInMillis()
+                }
+                PROJECTION_ABSOLUTE_DATE -> try {
+                    val projDate = acc.projDate.parseDate()
+                    val cal = GregorianCalendar()
+                    cal.setTime(projDate)
+                    cal.set(Calendar.HOUR, 0)
+                    cal.set(Calendar.MINUTE, 0)
+                    cal.set(Calendar.SECOND, 0)
+                    mProjectionDate = cal.getTimeInMillis()
+                } catch (e: ParseException) {
+                    e.printStackTrace()
+                }
+                else -> {
                 }
             }
         }
-
-        //        throws(javaClass<ParseException>())
-        //        platformStatic public fun updateAccountProjectionDate(ctx: Context, accountId: Long, projectionController: ProjectionDateController): Boolean {
-        //            if (projectionController.hasChanged()) {
-        //                updateAccountProjectionDate(ctx, accountId, projectionController.getMode(), projectionController.getDate(), true)
-        //
-        //            }
-        //            return true
-        //        }
-
-        //        throws(javaClass<ParseException>())
-        //        private fun updateAccountProjectionDate(ctx: Context, accountId: Long, projMode: Int, projDate: String,
-        //                                                updateSumAndDate: Boolean): Boolean {
-        //            val account = fetchAccount(ctx, accountId)
-        //            if (account.moveToFirst()) {
-        //                val args = ContentValues()
-        //                val start_sum = account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM))
-        //                account.close()
-        //                Log.d(TAG, "updateAccountProjectionDate, KEY_ACCOUNT_PROJECTION_DATE : $projDate")
-        //                args.put(KEY_ACCOUNT_PROJECTION_MODE, projMode)
-        //                args.put(KEY_ACCOUNT_PROJECTION_DATE, projDate)
-        //                if (updateSumAndDate) {
-        //                    setCurrentSumAndDate(ctx, accountId, args, start_sum, projMode, projDate)
-        //                }
-        //                return updateAccount(ctx, accountId, args) > 0
-        //            } else {
-        //                return false
-        //            }
-        //        }
-
-        //        throws(javaClass<ParseException>())
-        //        platformStatic public fun updateAccountProjectionDate(ctx: Context, accountId: Long): Boolean {
-        //            val c = fetchAccount(ctx, accountId)
-        //            try {
-        //                var res = true
-        //                if (null != c) {
-        //                    if (c.moveToFirst()) {
-        //                        res = updateAccountProjectionDate(ctx, accountId, c.getInt(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)), c.getString(c.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)), true)
-        //                    }
-        //                    c.close()
-        //                }
-        //                return res
-        //            } catch (e: ParseException) {
-        //                c.close()
-        //                throw e
-        //            }
-        //
-        //        }
-
-        //        platformStatic public fun updateAccountCurrency(ctx: Context, accountId: Long, currency: String): Boolean {
-        //            val args = ContentValues()
-        //            args.put(KEY_ACCOUNT_CURRENCY, currency)
-        //            return updateAccount(ctx, accountId, args) > 0
-        //        }
 
         public fun updateAccount(ctx: Context, accountId: Long, values: ContentValues): Int {
             return ctx.getContentResolver().update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), values,
                     null, null)
         }
 
-        throws(javaClass<ParseException>())
         public fun updateAccount(ctx: Context, account: Account): Boolean {
             val args = createValuesOf(account)
             setCurrentSumAndDate(ctx, account, args)
             return updateAccount(ctx, account.id, args) > 0
         }
-
 
         platformStatic public fun updateProjection(ctx: Context, accountId: Long, opSum: Long, oldOpSum: Long, opDate: Long,
                                                    origOpDate: Long) {
@@ -428,30 +370,23 @@ public class AccountTable {
         }
 
         platformStatic public fun updateCheckedOpSum(ctx: Context, sum: Long, accountId: Long, transAccountId: Long, b: Boolean) {
-            var acc: Cursor? = fetchAccount(ctx, accountId)
-            if (acc != null) {
-                if (acc!!.moveToFirst()) {
-                    val values = ContentValues()
-                    values.put(KEY_ACCOUNT_CHECKED_OP_SUM, acc!!.getLong(acc!!.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (if (b) sum else -sum))
-                    updateAccount(ctx, accountId, values)
-
-                    if (transAccountId > 0) {
-                        values.clear()
-                        acc!!.close()
-                        acc = fetchAccount(ctx, transAccountId)
-                        if (acc != null) {
-                            if (acc!!.moveToFirst()) {
-                                values.put(KEY_ACCOUNT_CHECKED_OP_SUM, acc!!.getLong(acc!!.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (if (b) -sum else sum))
-                                updateAccount(ctx, transAccountId, values)
-                            }
-                            acc!!.close()
-                        }
-                    } else {
-                        acc!!.close()
+            val acc: Cursor = fetchAccount(ctx, accountId)
+            if (acc.moveToFirst()) {
+                val values = ContentValues()
+                values.put(KEY_ACCOUNT_CHECKED_OP_SUM, acc.getLong(acc.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (if (b) sum else -sum))
+                updateAccount(ctx, accountId, values)
+                acc.close()
+                if (transAccountId > 0) {
+                    values.clear()
+                    val acc2 = fetchAccount(ctx, transAccountId)
+                    if (acc2.moveToFirst()) {
+                        values.put(KEY_ACCOUNT_CHECKED_OP_SUM, acc2.getLong(acc2.getColumnIndex(KEY_ACCOUNT_CHECKED_OP_SUM)) + (if (b) -sum else sum))
+                        updateAccount(ctx, transAccountId, values)
                     }
-                } else {
-                    acc!!.close()
+                    acc2.close()
                 }
+            } else {
+                acc.close()
             }
         }
 
@@ -481,7 +416,6 @@ public class AccountTable {
 
 
         // UPGRADE FUNCTIONS
-        throws(javaClass<ParseException>())
         private fun rawSetCurrentSumAndDate(db: SQLiteDatabase, accountId: Long, values: ContentValues, start_sum: Long, projectionMode: Int, projectionDate: String) {
             var date: Long = 0
             var opSum: Long = 0
@@ -489,7 +423,7 @@ public class AccountTable {
             when (projectionMode) {
                 0 -> {
                     if (accountId > 0) {
-                        val allOps = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT, array(lang.Long.toString(accountId), lang.Long.toString(accountId)), null, null, OperationTable.OP_ORDERING, null)
+                        val allOps = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT, arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId)), null, null, OperationTable.OP_ORDERING, null)
                         if (null != allOps) {
                             Log.d(TAG, "raw setCurrentSumAndDate allOps not null : " + allOps.getCount())
                             if (allOps.moveToFirst()) {
@@ -508,7 +442,7 @@ public class AccountTable {
                     }
                     projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(projectionDate))
                     projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
-                    val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", array(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.getTimeInMillis())), null, null, OperationTable.OP_ORDERING)
+                    val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.getTimeInMillis())), null, null, OperationTable.OP_ORDERING)
                     projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
                     // query
                     if (null != op) {
@@ -523,7 +457,7 @@ public class AccountTable {
                     val projDate = Tools.createClearedCalendar()
                     projDate.setTime(projectionDate.parseDate())
                     projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
-                    val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", array(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.getTimeInMillis())), null, null, OperationTable.OP_ORDERING)
+                    val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.getTimeInMillis())), null, null, OperationTable.OP_ORDERING)
                     projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
                     // query
                     if (null != op) {
@@ -546,7 +480,7 @@ public class AccountTable {
         private fun rawConsolidateSums(db: SQLiteDatabase, accountId: Long) {
             val values = ContentValues()
             val account = db.query(DATABASE_ACCOUNT_TABLE, ACCOUNT_FULL_COLS, "_id=?",
-                    array(lang.Long.toString(accountId)), null, null, null)
+                    arrayOf(lang.Long.toString(accountId)), null, null, null)
             if (account != null) {
                 if (account.moveToFirst()) {
                     try {
@@ -554,7 +488,7 @@ public class AccountTable {
                                 account.getLong(account.getColumnIndex(KEY_ACCOUNT_START_SUM)),
                                 account.getInt(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_MODE)),
                                 account.getString(account.getColumnIndex(KEY_ACCOUNT_PROJECTION_DATE)))
-                        db.update(DATABASE_ACCOUNT_TABLE, values, "_id=?", array(lang.Long.toString(accountId)))
+                        db.update(DATABASE_ACCOUNT_TABLE, values, "_id=?", arrayOf(lang.Long.toString(accountId)))
                     } catch (e: ParseException) {
                         e.printStackTrace()
                     }
@@ -565,7 +499,7 @@ public class AccountTable {
         }
 
         platformStatic fun upgradeDefault(db: SQLiteDatabase) {
-            val c = db.query(DATABASE_ACCOUNT_TABLE, array(KEY_ACCOUNT_ROWID), null, null, null, null, null)
+            val c = db.query(DATABASE_ACCOUNT_TABLE, arrayOf(KEY_ACCOUNT_ROWID), null, null, null, null, null)
             if (null != c) {
                 if (c.moveToFirst()) {
                     do {
@@ -582,7 +516,7 @@ public class AccountTable {
             fun getAllPrefs(db: SQLiteDatabase): HashMap<String, String> {
                 val res = HashMap<String, String>()
                 val c = db.query(PreferenceTable.DATABASE_PREFS_TABLE,
-                        array(PreferenceTable.KEY_PREFS_NAME, PreferenceTable.KEY_PREFS_VALUE), null, null, null, null, null)
+                        arrayOf(PreferenceTable.KEY_PREFS_NAME, PreferenceTable.KEY_PREFS_VALUE), null, null, null, null, null)
                 if (null != c) {
                     if (c.moveToFirst()) {
                         do {
@@ -606,7 +540,7 @@ public class AccountTable {
         platformStatic fun upgradeFromV9(db: SQLiteDatabase) {
             db.execSQL(ADD_PROJECTION_MODE_COLUNM)
             db.execSQL(ADD_PROJECTION_MODE_DATE)
-            val c = db.query(DATABASE_ACCOUNT_TABLE, array<String>(), null, null, null, null, null)
+            val c = db.query(DATABASE_ACCOUNT_TABLE, arrayOf(), null, null, null, null, null)
             if (null != c) {
                 if (c.moveToFirst()) {
                     do {
@@ -623,7 +557,7 @@ public class AccountTable {
             db.execSQL("DROP TRIGGER on_delete_tag")
             db.execSQL("ALTER TABLE accounts RENAME TO accounts_old;")
             db.execSQL(DATABASE_ACCOUNT_CREATE_v7)
-            val c = db.query("accounts_old", array(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_DESC, KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_START_SUM), null, null, null, null, null)
+            val c = db.query("accounts_old", arrayOf(KEY_ACCOUNT_ROWID, KEY_ACCOUNT_NAME, KEY_ACCOUNT_CUR_SUM, KEY_ACCOUNT_CURRENCY, KEY_ACCOUNT_CUR_SUM_DATE, KEY_ACCOUNT_DESC, KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_START_SUM), null, null, null, null, null)
             if (null != c && c.moveToFirst()) {
                 do {
                     var initialValues = ContentValues()

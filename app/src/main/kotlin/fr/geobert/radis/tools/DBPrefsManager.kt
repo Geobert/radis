@@ -129,7 +129,6 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public fun put(key: String, value: Any?) {
-        Log.d("PrefBug", "DBPrefsManager put $key = $value")
         if (!key.endsWith("_for_account") && !key.startsWith("override_")) {
             val cr = mCurrentCtx!!.getContentResolver()
             val values = ContentValues()
@@ -141,19 +140,18 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
             if (mCache!!.get(key) == null) {
                 cr.insert(DbContentProvider.PREFS_URI, values)
             } else {
-                cr.update(DbContentProvider.PREFS_URI, values, PreferenceTable.KEY_PREFS_NAME + "=?", array(key))
+                cr.update(DbContentProvider.PREFS_URI, values, PreferenceTable.KEY_PREFS_NAME + "=?", arrayOf(key))
             }
         }
         mCache!!.put(key, value.toString())
     }
 
     private fun deletePref(key: String) {
-        mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, PreferenceTable.KEY_PREFS_NAME + "=?", array(key))
+        mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, PreferenceTable.KEY_PREFS_NAME + "=?", arrayOf(key))
     }
 
     private fun deleteAllPrefs() {
         val i = mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, null, null)
-        Log.d("PrefBug", "delete All Prefs : $i")
     }
 
     public fun resetAll() {

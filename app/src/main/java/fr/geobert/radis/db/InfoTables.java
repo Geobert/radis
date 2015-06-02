@@ -111,7 +111,7 @@ public class InfoTables {
     }
 
     private static long createKeyId(Context ctx, String key, Uri table, String col) throws SQLException {
-        String origKey = key.toString();
+        String origKey = key;
         key = AsciiUtils.convertNonAscii(key).trim().toLowerCase();
         ContentValues initialValues = new ContentValues();
         initialValues.put(col, origKey);
@@ -120,8 +120,7 @@ public class InfoTables {
         Uri res = ctx.getContentResolver().insert(table, initialValues);
         long id = Long.parseLong(res.getLastPathSegment());
         if (id == -1) {
-            throw new SQLException("Database insertion error : " + key
-                    + " in " + table);
+            throw new SQLException("Database insertion error : " + key + " in " + table);
         }
         return id;
     }
@@ -239,7 +238,6 @@ public class InfoTables {
     private static String[] weightProj = new String[]{"_id", KEY_WEIGHT};
 
     private static Cursor fetchMaxWeight(Context ctx, Uri keyTableName) {
-
         Cursor c = ctx.getContentResolver().query(keyTableName, weightProj,
                 KEY_WEIGHT + " = (SELECT max(i2." + KEY_WEIGHT + ") FROM " + mInfoUriMap.get(keyTableName) + " i2) ",
                 null, null);
@@ -278,7 +276,7 @@ public class InfoTables {
                     !isUpdate && !justCreated) { // update of weight
                 Cursor maxWeightInf = fetchMaxWeight(ctx, keyTableName);
                 if (maxWeightInf != null) {
-                    if (maxWeightInf.getLong(0) != id) {
+                    if (maxWeightInf.getCount() == 0 || maxWeightInf.getLong(0) != id) {
                         updateInfo(ctx, keyTableName, id, null, weight + 1);
                     }
                     maxWeightInf.close();
