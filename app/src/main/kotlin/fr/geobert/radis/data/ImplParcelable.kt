@@ -7,7 +7,7 @@ import fr.geobert.radis.tools.writeBoolean
 import hirondelle.date4j.DateTime
 import java.util.HashMap
 
-public trait ImplParcelable : Parcelable {
+public interface ImplParcelable : Parcelable {
     val parcels: HashMap<String, Any?>
     override fun writeToParcel(p: Parcel, flags: Int) {
         parcels.forEach {

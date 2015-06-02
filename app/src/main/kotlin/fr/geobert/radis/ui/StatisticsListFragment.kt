@@ -360,7 +360,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         renderer.setLabelsTextSize(18f)
         renderer.setMarginsColor(ctx.getResources()?.getColor(android.R.color.transparent) ?: 0)
         renderer.setYAxisMin(0.0)
-        renderer.setMargins(intArray(0, 0, 0, 0)) // top, left, bottom, right
+        renderer.setMargins(intArrayOf(0, 0, 0, 0)) // top, left, bottom, right
         renderer.setInScroll(false)
         renderer.setPanEnabled(true, false)
         renderer.setZoomButtonsVisible(ZOOM_ENABLED)

@@ -118,7 +118,7 @@ class Helpers {
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
-        fun addOp(date: DateTime, third: String, amount: String, tag: String, mode: String, desc: String) {
+        fun addOp(date: DateTime, third: String = "Toto", amount: String = "-1", tag: String = "", mode: String = "", desc: String = "") {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
             onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.getYear(), date.getMonth(), date.getDay()))
@@ -200,8 +200,6 @@ class Helpers {
             val today = DateTime.today(TIME_ZONE)
             val schOpDate = today.minusDays(14)
 
-            println("scheduled op date: $schOpDate")
-
             onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.getYear(), schOpDate.getMonth(), schOpDate.getDay()))
             fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
@@ -211,11 +209,10 @@ class Helpers {
             onView(withId(R.id.periodicity_choice)).perform(click())
             val strs = getContext().getResources().getStringArray(R.array.periodicity_choices).get(0)
             onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
-
             clickOnActionItemConfirm()
+
             Espresso.pressBack() // back to operations list
             Helpers.pauseTest(2000)
-
             val endOfMonth = today.getEndOfMonth()
             val nbOp = endOfMonth.getWeekIndex(schOpDate)
 
@@ -238,9 +235,7 @@ class Helpers {
         fun pauseTest(t: Long) {
             try {
                 Thread.sleep(t)
-
             } catch (e: Exception) {
-
             }
         }
 

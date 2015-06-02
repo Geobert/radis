@@ -2,6 +2,7 @@ package fr.geobert.radis.ui.adapter
 
 import android.database.Cursor
 import android.text.format.DateFormat
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -12,9 +13,7 @@ import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.ui.CheckingOpDashboard
 import fr.geobert.radis.ui.IOperationList
-import fr.geobert.radis.ui.adapter.CellState
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import java.util.Calendar
@@ -53,7 +52,7 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
         }
         b.append(" / ")
         s = op.mMode
-        if (null != s && s.isNotEmpty()) {
+        if (s.isNotEmpty()) {
             b.append(s)
         } else {
             b.append('−')
@@ -68,6 +67,7 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
     }
 
     private fun configureCell(operation: Operation, h: OpRowHolder<Operation>, position: Int) {
+        Log.d("OperationAdapter", "configureCell, pos:$position")
         val schedId = setSchedImg(operation, h.scheduledImg)
         val needInfos = position == selectedPosition
         var needMonth = false

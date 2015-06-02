@@ -30,8 +30,8 @@ public class PreferenceTable {
         protected val DATABASE_PREFS_CREATE: String = "create table $DATABASE_PREFS_TABLE($KEY_PREFS_ROWID integer primary key autoincrement," +
                 "$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null," +
                 "$KEY_PREFS_ACCOUNT integer not null, $KEY_PREFS_IS_ACTIVE integer not null);"
-        public val PREFS_COLS: Array<String> = array(KEY_PREFS_NAME, KEY_PREFS_VALUE)
-        public val ACCOUNT_CONFIG_COLS: Array<String> = array(KEY_PREFS_NAME, KEY_PREFS_VALUE, KEY_PREFS_IS_ACTIVE)
+        public val PREFS_COLS: Array<String> = arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE)
+        public val ACCOUNT_CONFIG_COLS: Array<String> = arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE, KEY_PREFS_IS_ACTIVE)
         protected val ADD_ACCOUNT_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
         protected val ADD_IS_ACTIVE_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_IS_ACTIVE integer not null DEFAULT 1"
 
@@ -58,7 +58,7 @@ public class PreferenceTable {
 
         fun getPref(db: SQLiteDatabase, key: String): String? {
             var res: String? = null
-            val c = db.query(DATABASE_PREFS_TABLE, array(KEY_PREFS_VALUE), "$KEY_PREFS_NAME='$key' AND $KEY_PREFS_ACCOUNT = 0", null, null, null, null)
+            val c = db.query(DATABASE_PREFS_TABLE, arrayOf(KEY_PREFS_VALUE), "$KEY_PREFS_NAME='$key' AND $KEY_PREFS_ACCOUNT = 0", null, null, null, null)
             if (null != c) {
                 if (c.moveToFirst()) {
                     res = c.getString(0)
@@ -70,7 +70,7 @@ public class PreferenceTable {
 
         fun getAllPrefs(db: SQLiteDatabase): HashMap<String, String> {
             val res = HashMap<String, String>()
-            val c = db.query(DATABASE_PREFS_TABLE, array(KEY_PREFS_NAME, KEY_PREFS_VALUE), "$KEY_PREFS_ACCOUNT = 0", null, null, null, null)
+            val c = db.query(DATABASE_PREFS_TABLE, arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE), "$KEY_PREFS_ACCOUNT = 0", null, null, null, null)
             if (null != c) {
                 if (c.moveToFirst()) {
                     do {
@@ -124,13 +124,10 @@ public class PreferenceTable {
 
         fun updateAccountPrefs(ctx: Context, config: AccountConfig, id: Long) {
             val values = createValuesOf(config)
-            Log.d("PrefBug", "updateAccountPrefs values: $values")
             values.forEach {
                 val k = it.getAsString(KEY_PREFS_NAME)
                 it.remove(KEY_PREFS_NAME)
-                Log.d("PrefBug", "updateAccountPrefs before update : $it for key $k")
-                val u = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.PREFS_URI}/$id"), it, "$KEY_PREFS_NAME=?", array(k))
-                Log.d("PrefBug", "updateAccountPrefs after update : $u")
+                val u = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.PREFS_URI}/$id"), it, "$KEY_PREFS_NAME=?", arrayOf(k))
             }
         }
 

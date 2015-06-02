@@ -5,17 +5,18 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.database.Cursor
 import android.os.Bundle
 import android.os.Message
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
-import android.support.v4.widget.SimpleCursorAdapter
 import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.Adapter
+import android.widget.AdapterView
+import android.widget.ListView
+import android.widget.Spinner
 import com.crashlytics.android.Crashlytics
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.service.InstallRadisServiceReceiver
@@ -25,34 +26,29 @@ import fr.geobert.radis.ui.ConfigEditor
 import fr.geobert.radis.ui.OperationListFragment
 import fr.geobert.radis.ui.ScheduledOpListFragment
 import fr.geobert.radis.ui.StatisticsListFragment
+import fr.geobert.radis.ui.adapter.AccountAdapter
 import fr.geobert.radis.ui.drawer.NavDrawerItem
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter
-import fr.geobert.radis.ui.editor.AccountEditFragment
 import fr.geobert.radis.ui.editor.AccountEditor
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
-import hirondelle.date4j.DateTime
 import io.fabric.sdk.android.Fabric
 import java.util.ArrayList
-import java.util.Currency
-import java.util.Date
 import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
 public class MainActivity : BaseActivity(), UpdateDisplayInterface {
-    //    private static final int RESUMING = 1;
-
     private val mDrawerLayout by Delegates.lazy { findViewById(R.id.drawer_layout) as DrawerLayout }
     private val mDrawerList by Delegates.lazy { findViewById(R.id.left_drawer) as ListView }
-    private val mAccountAdapter: SimpleCursorAdapter by Delegates.lazy {
-        val from = array(AccountTable.KEY_ACCOUNT_NAME, AccountTable.KEY_ACCOUNT_CUR_SUM,
-                AccountTable.KEY_ACCOUNT_CUR_SUM_DATE, AccountTable.KEY_ACCOUNT_CURRENCY)
-        val to = intArray(android.R.id.text1, R.id.account_sum, R.id.account_balance_at)
-        SimpleCursorAdapter(this, R.layout.account_row, null, from, to, 0)
-    }
+    //    private val mAccountAdapter: SimpleCursorAdapter by Delegates.lazy {
+    //        val from = arrayOf(AccountTable.KEY_ACCOUNT_NAME, AccountTable.KEY_ACCOUNT_CUR_SUM,
+    //                AccountTable.KEY_ACCOUNT_CUR_SUM_DATE, AccountTable.KEY_ACCOUNT_CURRENCY)
+    //        val to = intArrayOf(android.R.id.text1, R.id.account_sum, R.id.account_balance_at)
+    //        val res = SimpleCursorAdapter(this, R.layout.account_row, null, from, to, 0)
+    //        mAccountSpinner.setAdapter(res)
+    //        res
+    //    }
     private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
-    private val redColor: Int by Delegates.lazy { getResources().getColor(R.color.op_alert) }
-    private val greenColor: Int by Delegates.lazy { getResources().getColor(R.color.positiveSum) }
     private val handler: FragmentHandler by Delegates.lazy { FragmentHandler(this) }
     public val mAccountSpinner: Spinner by Delegates.lazy { findViewById(R.id.account_spinner) as Spinner }
 
@@ -185,12 +181,11 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         Tools.checkDebugMode(this)
 
         mToolbar.setTitle("")
-        mAccountSpinner.setAdapter(mAccountAdapter)
 
         registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_NEEDED))
         registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_ACC_LIST))
         //registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_OP_LIST))
-
+        initAccountStuff()
         initDrawer()
         installRadisTimer()
     }
@@ -260,12 +255,11 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         DBPrefsManager.getInstance(this).fillCache(this, {
             Log.d(TAG, "pref cache ok")
             consolidateDbIfNeeded()
-            initAccountStuff()
-            handler.resume(this)
             mAccountManager.fetchAllAccounts(false, {
                 Log.d(TAG, "all accounts fetched")
                 processAccountList(true)
             })
+            handler.resume(this)
         })
     }
 
@@ -274,7 +268,8 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         unregisterReceiver(mOnRefreshReceiver)
     }
 
-    public fun onAccountEditFinished(result: Int) {
+    public fun onAccountEditFinished(requestCode: Int, result: Int) {
+        Log.d(TAG, "onAccountEditFinished: $result")
         if (result == Activity.RESULT_OK) {
             mAccountManager.fetchAllAccounts(true, {
                 mAccountManager.refreshConfig(this, mAccountManager.getCurrentAccountId(this)) // need to be done before setQuickAddVisibility
@@ -282,45 +277,38 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 if (mActiveFragmentId == OP_LIST && f is OperationListFragment) {
                     f.refreshQuickAdd()
                 }
-                processAccountList(false)
+                processAccountList(requestCode == AccountEditor.ACCOUNT_CREATOR)
             })
         } else if (result == Activity.RESULT_CANCELED) {
             val accMan = mAccountManager
-            val allAccounts = accMan.allAccountsCursor
+            val allAccounts = accMan.mAccountAdapter
             if (allAccounts == null || allAccounts.getCount() == 0) {
                 finish()
             }
         }
     }
 
-    private fun processAccountList(resuming: Boolean) {
+    private fun processAccountList(create: Boolean) {
         val accMan = mAccountManager
-        val allAccounts = accMan.allAccountsCursor
+        val allAccounts = accMan.mAccountAdapter
+        Log.d(TAG, "processAccountList: count:${allAccounts?.getCount()}, create:$create", Exception())
         if (allAccounts == null || allAccounts.getCount() == 0) {
             // no account, open create account
-            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT)
+            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT, true)
         } else {
-            //            if (mAccountAdapter == null) {
-            //                initAccountStuff()
-            //                mAccountManager.setAllAccountsCursor(allAccounts)
-            //            } else {
-            val old = mAccountAdapter.swapCursor(allAccounts)
-            old?.close()
             if (mActiveFragmentId == -1) {
                 displayFragment(OP_LIST, (-1).toLong())
             } else {
                 displayFragment(mActiveFragmentId, getCurrentAccountId())
             }
-            //            }
-
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        //Log.d(TAG, "onActivityResult : " + requestCode);
+        Log.d(TAG, "onActivityResult : " + requestCode);
         super<BaseActivity>.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            AccountEditor.ACCOUNT_EDITOR -> onAccountEditFinished(resultCode)
+            AccountEditor.ACCOUNT_EDITOR, AccountEditor.ACCOUNT_CREATOR -> onAccountEditFinished(requestCode, resultCode)
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> {
                 if (mActiveFragment == null) {
@@ -352,8 +340,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     private fun initAccountStuff() {
-        mAccountAdapter.setViewBinder(SimpleAccountViewBinder())
-        mAccountManager.setSimpleCursorAdapter(mAccountAdapter)
+        mAccountSpinner.setAdapter(mAccountManager.mAccountAdapter)
         this.setActionBarListNavCbk(object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<out Adapter>?) {
             }
@@ -368,8 +355,9 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     public fun updateAccountList() {
-        mAccountManager.setSimpleCursorAdapter(mAccountAdapter)
-        mAccountManager.fetchAllAccounts(true, { onFetchAllAccountCbk() })
+        mAccountManager.fetchAllAccounts(true, {
+            onFetchAllAccountCbk()
+        })
     }
 
     private fun onFetchAllAccountCbk() {
@@ -427,20 +415,21 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         mActiveFragmentId = savedInstanceState.getInt("activeFragId")
         mPrevFragmentId = savedInstanceState.getInt("prevFragId")
         DBPrefsManager.getInstance(this).fillCache(this, {
-            //            mActiveFragment?.onRestoreInstanceState(savedInstanceState)
             initAccountStuff()
-            if (mAccountAdapter.isEmpty()) {
+            if (mAccountManager.mAccountAdapter.isEmpty()) {
                 updateDisplay(null)
             }
         })
     }
 
-    public fun setActionBarListNavCbk(callback: AdapterView.OnItemSelectedListener) {
+    public fun setActionBarListNavCbk(callback: AdapterView.OnItemSelectedListener?) {
         mAccountSpinner.setOnItemSelectedListener(callback)
     }
 
     override fun updateDisplay(intent: Intent?) {
+        Log.d(TAG, "updateDisplay")
         mAccountManager.fetchAllAccounts(true, {
+            processAccountList(true)
             val f = mActiveFragment
             if (f != null && f.isAdded()) {
                 f.updateDisplay(intent)
@@ -453,68 +442,68 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     // for accounts list
-    private inner class SimpleAccountViewBinder() : android.support.v4.widget.SimpleCursorAdapter.ViewBinder {
-        private var ACCOUNT_NAME_COL = -1
-        private var ACCOUNT_CUR_SUM: Int = 0
-        private var ACCOUNT_CUR_SUM_DATE: Int = 0
-        private var ACCOUNT_CURRENCY: Int = 0
-        private var currencySymbol: String? = null
-
-        fun cleanupSymbol(s: String, c: String): String {
-            return if (s.contains(c)) c else s
-        }
-
-        override fun setViewValue(view: View, cursor: Cursor, i: Int): Boolean {
-            if (ACCOUNT_NAME_COL == -1) {
-                ACCOUNT_NAME_COL = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)
-                ACCOUNT_CUR_SUM = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM)
-                ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE)
-                ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY)
-            }
-
-            try {
-                val c = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol()
-                currencySymbol = cleanupSymbol(c, "£")
-                currencySymbol = cleanupSymbol(c, "$")
-            } catch (ex: IllegalArgumentException) {
-                currencySymbol = ""
-            }
-
-            val res: Boolean
-            if (i == ACCOUNT_NAME_COL) {
-                val textView = view as TextView
-                textView.setText(cursor.getString(i))
-                res = true
-            } else if (i == ACCOUNT_CUR_SUM) {
-                val textView = view as TextView
-                val stringBuilder = StringBuilder()
-                val sum = cursor.getLong(i)
-                if (sum < 0) {
-                    textView.setTextColor(redColor)
-                } else {
-                    textView.setTextColor(greenColor)
-                }
-                stringBuilder.append((sum.toDouble() / 100.0).formatSum())
-                stringBuilder.append(' ').append(currencySymbol)
-                textView.setText(stringBuilder)
-                res = true
-            } else if (i == ACCOUNT_CUR_SUM_DATE) {
-                val textView = view as TextView
-                val dateLong = cursor.getLong(i)
-                val stringBuilder = StringBuilder()
-                if (dateLong > 0) {
-                    stringBuilder.append(getString(R.string.balance_at).format(Date(dateLong).formatDate()))
-                } else {
-                    stringBuilder.append(getString(R.string.current_sum))
-                }
-                textView.setText(stringBuilder)
-                res = true
-            } else {
-                res = false
-            }
-            return res
-        }
-    }
+    //    private inner class SimpleAccountViewBinder() : android.support.v4.widget.SimpleCursorAdapter.ViewBinder {
+    //        private var ACCOUNT_NAME_COL = -1
+    //        private var ACCOUNT_CUR_SUM: Int = 0
+    //        private var ACCOUNT_CUR_SUM_DATE: Int = 0
+    //        private var ACCOUNT_CURRENCY: Int = 0
+    //        private var currencySymbol: String? = null
+    //
+    //        fun cleanupSymbol(s: String, c: String): String {
+    //            return if (s.contains(c)) c else s
+    //        }
+    //
+    //        override fun setViewValue(view: View, cursor: Cursor, i: Int): Boolean {
+    //            if (ACCOUNT_NAME_COL == -1) {
+    //                ACCOUNT_NAME_COL = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)
+    //                ACCOUNT_CUR_SUM = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM)
+    //                ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE)
+    //                ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY)
+    //            }
+    //
+    //            try {
+    //                val c = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol()
+    //                currencySymbol = cleanupSymbol(c, "£")
+    //                currencySymbol = cleanupSymbol(c, "$")
+    //            } catch (ex: IllegalArgumentException) {
+    //                currencySymbol = ""
+    //            }
+    //
+    //            val res: Boolean
+    //            if (i == ACCOUNT_NAME_COL) {
+    //                val textView = view as TextView
+    //                textView.setText(cursor.getString(i))
+    //                res = true
+    //            } else if (i == ACCOUNT_CUR_SUM) {
+    //                val textView = view as TextView
+    //                val stringBuilder = StringBuilder()
+    //                val sum = cursor.getLong(i)
+    //                if (sum < 0) {
+    //                    textView.setTextColor(redColor)
+    //                } else {
+    //                    textView.setTextColor(greenColor)
+    //                }
+    //                stringBuilder.append((sum.toDouble() / 100.0).formatSum())
+    //                stringBuilder.append(' ').append(currencySymbol)
+    //                textView.setText(stringBuilder)
+    //                res = true
+    //            } else if (i == ACCOUNT_CUR_SUM_DATE) {
+    //                val textView = view as TextView
+    //                val dateLong = cursor.getLong(i)
+    //                val stringBuilder = StringBuilder()
+    //                if (dateLong > 0) {
+    //                    stringBuilder.append(getString(R.string.balance_at).format(Date(dateLong).formatDate()))
+    //                } else {
+    //                    stringBuilder.append(getString(R.string.current_sum))
+    //                }
+    //                textView.setText(stringBuilder)
+    //                res = true
+    //            } else {
+    //                res = false
+    //            }
+    //            return res
+    //        }
+    //    }
 
     private val TAG = "MainActivity"
 

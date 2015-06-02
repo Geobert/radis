@@ -190,7 +190,6 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         super<Fragment>.onResume()
         val act = getActivity() as AccountEditor
         if (!mOnRestore && !act.isNewAccount()) {
-            Log.d("PrefBug", ">>>> AccountFragment onResume initLoader")
             act.getSupportLoaderManager().initLoader<Cursor>(AccountEditor.GET_ACCOUNT, Bundle(), this)
         } else {
             mOnRestore = false
@@ -244,7 +243,6 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     }
 
     override fun onLoadFinished(arg0: Loader<Cursor>, data: Cursor) {
-        Log.d("PrefBug", "<<<< AccountFragment onLoadFinished")
         if (data.moveToFirst()) {
             AccountTable.initProjectionDate(data)
             mAccount = Account(data)
