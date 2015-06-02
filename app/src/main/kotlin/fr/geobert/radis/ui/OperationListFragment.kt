@@ -354,8 +354,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             Log.d(TAG, "updateDisplay pos:$pos, last:$last, count:${a.getItemCount()}")
             mLastSelectionPos = -1
             mLastSelectionId = op.mRowId
+            a.notifyItemChanged(last + if (pos <= last) 1 else 0)
+            if (pos > 0) a.notifyItemChanged(pos - 1)
+            if (pos < a.getItemCount() - 1) a.notifyItemChanged(pos + 1)
             refreshSelection()
-            a.notifyItemChanged(last + if (pos >= last) 1 else -1)
             adjustScroll(pos)
         }
     }

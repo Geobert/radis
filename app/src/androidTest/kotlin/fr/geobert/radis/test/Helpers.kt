@@ -118,7 +118,7 @@ class Helpers {
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
-        fun addOp(date: DateTime, third: String, amount: String, tag: String, mode: String, desc: String) {
+        fun addOp(date: DateTime, third: String = "Toto", amount: String = "-1", tag: String = "", mode: String = "", desc: String = "") {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
             onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.getYear(), date.getMonth(), date.getDay()))

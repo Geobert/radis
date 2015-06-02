@@ -8,13 +8,13 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onData
 import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.UiController
-import android.support.test.espresso.ViewAction
+import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.action.ViewActions.*
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.contrib.PickerActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition
+import android.support.test.espresso.matcher.RootMatchers
 import android.support.test.espresso.matcher.ViewMatchers.*
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
@@ -23,9 +23,7 @@ import android.support.test.runner.lifecycle.Stage
 import android.test.suitebuilder.annotation.LargeTest
 import android.util.Log
 import android.view.View
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.TextView
+import android.widget.*
 import com.google.android.apps.common.testing.deps.guava.base.Throwables
 import com.google.android.apps.common.testing.deps.guava.collect.Sets
 import fr.geobert.espresso.DebugEspresso
@@ -47,6 +45,7 @@ import org.junit.runner.RunWith
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.HashSet
+import java.util.Locale
 import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicReference
 
@@ -1166,6 +1165,42 @@ public class RadisTest {
             val d = today.minusMonth(i)
             addOpAndCheck(d, i)
         }
+    }
+
+
+    // Espresso bug on DatePickerDialog prevent this to work
+    public fun testOpUpdateDisplay() {
+        Helpers.addAccount()
+        val today = DateTime.today(TIME_ZONE)
+        fun add5ops(d: DateTime) {
+            for (i in 0..2) {
+                Helpers.addOp(d)
+            }
+        }
+
+        add5ops(today.minusMonth(1).getEndOfMonth().minusDays(1))
+        add5ops(today.plusMonth(1).getEndOfMonth().minusDays(1))
+        add5ops(today.getEndOfMonth().minusDays(1))
+
+        onView(withId(R.id.operation_list)).perform(ViewActions.swipeUp())
+
+        onView(withId(R.id.quickadd_third_party)).perform(typeText("Toto"))
+        onView(withId(R.id.quickadd_amount)).perform(typeText("-1"))
+        onView(withId(R.id.quickadd_validate)).perform(longClick())
+
+
+        val date = today.minusMonth(1).getEndOfMonth()
+        // -1 on year to work around Espresso bug
+        onView(iz(instanceOf(javaClass<DatePicker>())) as Matcher<View>).perform(PickerActions.setDate(date.getYear() - 1, date.getMonth(), date.getDay()))
+        //Helpers.clickOnDialogButton("zumbala")
+        onView(allOf(iz(instanceOf(javaClass<Button>())), withText("OK"),
+                isDisplayed()) as Matcher<View>).perform(click())
+
+        Helpers.pauseTest(30000)
+
+        val monthStr = today.minusMonth(1).format("MMMM", Locale.getDefault())
+        val m = monthStr.substring(0, 1).capitalize().concat(monthStr.substring(1))
+        onView(allOf(withText(m), isDisplayed())).check(matches(isDisplayed()))
     }
 
     companion object {
