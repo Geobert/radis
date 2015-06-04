@@ -37,7 +37,7 @@ class StatisticActivity : BaseActivity() {
         setIcon(R.drawable.ok_48)
 
         val extras = getIntent().getExtras()
-        val title = extras.getString(ChartFactory.TITLE)
+        val title = extras?.getString(ChartFactory.TITLE)
         if (title != null) {
             setTitle(title)
         } else {
