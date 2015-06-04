@@ -87,12 +87,12 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
     }
 
     public fun getCurrentAccountId(context: Context): Long {
-        Log.d(TAG, "--->getCurrentAccountId, backup:$mCurAccountIdBackup, curAccId:$mCurAccountId, accCursor:${mAccountAdapter?.getCount()}")
+        //        Log.d(TAG, "--->getCurrentAccountId, backup:$mCurAccountIdBackup, curAccId:$mCurAccountId, accCursor:${mAccountAdapter?.getCount()}")
         if (mCurAccountIdBackup != null) {
             setCurrentAccountId(mCurAccountIdBackup, context)
             clearBackup()
         } else if (mCurAccountId != null) {
-            Log.d(TAG, "<---getCurrentAccountId, curAcc:$mCurAccountId")
+            //            Log.d(TAG, "<---getCurrentAccountId, curAcc:$mCurAccountId")
             return mCurAccountId!!
         } else if (getDefaultAccountId(context) != null) {
             setCurrentAccountId(getDefaultAccountId(context), context)
@@ -101,7 +101,7 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         } else {
             throw RuntimeException("No current account!")
         }
-        Log.d(TAG, "<---getCurrentAccountId, curAcc:$mCurAccountId")
+        //        Log.d(TAG, "<---getCurrentAccountId, curAcc:$mCurAccountId")
         return mCurAccountId!!
     }
 
@@ -172,7 +172,7 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
     }
 
     public fun fetchAllAccounts(force: Boolean, cbk: () -> Any?) {
-        Log.d(TAG, ">>>fetchAllAccounts:$force")
+        Log.d(TAG, ">>>fetchAllAccounts:$force, fetching:$isFetching, empty:${mAccountAdapter.isEmpty()} ")
         this.mCallbacks.add(cbk)
         if (!isFetching) {
             isFetching = true

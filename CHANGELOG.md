@@ -1,3 +1,6 @@
+Version 1.1.10 - 04/06/2015
+- stabilisation
+
 Version 1.1.9 - 02/06/2015
 - stabilisation
 - fix de bug d'affichage à l'ajout d'operation

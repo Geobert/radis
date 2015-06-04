@@ -86,6 +86,7 @@ class Helpers {
             onView(withId(R.id.edit_account_start_sum)).perform(typeText(RadisTest.ACCOUNT_START_SUM))
             scrollThenTypeText(R.id.edit_account_desc, RadisTest.ACCOUNT_DESC)
             clickOnActionItemConfirm()
+            Helpers.pauseTest(500)
             onView(withText(equalTo(getContext().getString(R.string.no_operation)))).check(matches(isDisplayed()))
             onView(withId(android.R.id.text1)).check(matches(withText(equalTo(RadisTest.ACCOUNT_NAME))))
             onView(withId(R.id.account_sum)).check(matches(withText(equalTo(RadisTest.ACCOUNT_START_SUM_FORMATED_ON_LIST))))

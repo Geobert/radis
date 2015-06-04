@@ -249,7 +249,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun onResumeFragments() {
-        super<BaseActivity>.onResumeFragments()
         Log.d(TAG, "onResumeFragments:$mActiveFragment")
         mActiveFragment?.setupIcon()
         DBPrefsManager.getInstance(this).fillCache(this, {
@@ -258,6 +257,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             mAccountManager.fetchAllAccounts(false, {
                 Log.d(TAG, "all accounts fetched")
                 processAccountList(true)
+                super<BaseActivity>.onResumeFragments()
             })
             handler.resume(this)
         })
@@ -280,19 +280,15 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 processAccountList(requestCode == AccountEditor.ACCOUNT_CREATOR)
             })
         } else if (result == Activity.RESULT_CANCELED) {
-            val accMan = mAccountManager
-            val allAccounts = accMan.mAccountAdapter
-            if (allAccounts == null || allAccounts.getCount() == 0) {
+            if (mAccountManager.mAccountAdapter.getCount() == 0) {
                 finish()
             }
         }
     }
 
     private fun processAccountList(create: Boolean) {
-        val accMan = mAccountManager
-        val allAccounts = accMan.mAccountAdapter
-        Log.d(TAG, "processAccountList: count:${allAccounts?.getCount()}, create:$create", Exception())
-        if (allAccounts == null || allAccounts.getCount() == 0) {
+        Log.d(TAG, "processAccountList: count:${mAccountManager.mAccountAdapter.getCount()}, create:$create")
+        if (mAccountManager.mAccountAdapter.getCount() == 0) {
             // no account, open create account
             AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT, true)
         } else {
