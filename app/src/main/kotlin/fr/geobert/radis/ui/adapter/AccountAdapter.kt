@@ -2,6 +2,7 @@ package fr.geobert.radis.ui.adapter
 
 import android.database.Cursor
 import android.support.v4.app.FragmentActivity
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -10,7 +11,8 @@ import fr.geobert.radis.data.Account
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.tools.map
-import java.util.*
+import java.util.Date
+import java.util.LinkedList
 import kotlin.properties.Delegates
 
 public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Iterable<Account> {
@@ -63,6 +65,7 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
     }
 
     override fun getItemId(p0: Int): Long {
+        Log.d(TAG, "getItemId:$p0")
         return accountsList.get(p0).id
     }
 
@@ -78,4 +81,13 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
     override fun iterator(): Iterator<Account> {
         return accountsList.iterator()
     }
+
+    override fun isEmpty(): Boolean {
+        return getCount() == 0
+    }
+
+    companion object {
+        val TAG = "AccountAdapter"
+    }
 }
+
