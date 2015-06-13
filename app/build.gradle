@@ -2,7 +2,7 @@ buildscript {
     ext.kotlin_version = '0.12.412'
     ext.android_support = '22.1.1'
     repositories {
-        mavenCentral()
+        jcenter()
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
@@ -17,7 +17,7 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 
 repositories {
-    mavenCentral()
+    jcenter()
     maven { url 'https://maven.fabric.io/public' }
     maven {
         url 'http://oss.sonatype.org/content/repositories/snapshots'
