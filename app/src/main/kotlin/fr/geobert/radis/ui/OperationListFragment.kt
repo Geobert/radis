@@ -494,32 +494,26 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (resultCode == Activity.RESULT_OK && data != null) {
             val op: Operation = data.getParcelableExtra("operation")
             mLastSelectionId = op.mRowId
-            when (requestCode) {
-                OperationEditor.OPERATION_CREATOR -> {
-                    mOpListAdapter?.addOp(op)
-                    mAccountManager.refreshCurrentAccount()
-                    refreshSelection()
-                    setupEmptyViewVisibility(mOpListAdapter?.getItemCount() == 0)
-                }
-                OperationEditor.OPERATION_EDITOR -> {
-                    mOpListAdapter?.updateOp(op)
-                    mAccountManager.refreshCurrentAccount()
-                    refreshSelection()
+            val adap = mOpListAdapter
+            if (adap == null) {
+                mAccountManager.refreshCurrentAccount()
+                getMoreOperations(initialStartDate())
+            } else {
+                when (requestCode) {
+                    OperationEditor.OPERATION_CREATOR -> {
+                        adap.addOp(op)
+                        mAccountManager.refreshCurrentAccount()
+                        refreshSelection()
+                        setupEmptyViewVisibility(adap.getItemCount() == 0)
+                    }
+                    OperationEditor.OPERATION_EDITOR -> {
+                        adap.updateOp(op)
+                        mAccountManager.refreshCurrentAccount()
+                        refreshSelection()
+                    }
                 }
             }
 
-            //            val date = data.getLongExtra("opDate", 0)
-            //            Log.d(TAG, "onOperationEditorResult, mLastSelectionId:$mLastSelectionId / date:${date.formatDate()}")
-            //            if (date > 0) {
-            //                val opDate = DateTime.forInstant(date, TIME_ZONE)
-            //                Log.d(TAG, "onOperationEditorResult, opDate:$opDate")
-            //                val today = DateTime.today(TIME_ZONE)
-            //                if (today.gt(opDate)) {
-            //                    getMoreOperations(opDate)
-            //                } else {
-            //                    getMoreOperations(earliestOpDate)
-            //                }
-            //            }
         }
     }
 
