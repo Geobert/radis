@@ -37,9 +37,9 @@ public class DbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(@NotNull SQLiteDatabase db) {
         AccountTable.onCreate(db);
-        OperationTable.onCreate(db);
+        OperationTable.INSTANCE$.onCreate(db);
         InfoTables.onCreate(db);
-        OperationTable.createMeta(db);
+        OperationTable.INSTANCE$.createMeta(db);
         PreferenceTable.onCreate(db);
         ScheduledOperationTable.onCreate(db);
         StatisticTable.onCreate(db);
@@ -50,20 +50,20 @@ public class DbHelper extends SQLiteOpenHelper {
         Log.d("DbHelper", "onUpgrade " + oldVersion + " -> " + newVersion);
         switch (oldVersion) {
             case 1:
-                OperationTable.upgradeFromV1(db, oldVersion, newVersion );
+                OperationTable.INSTANCE$.upgradeFromV1(db, oldVersion, newVersion);
             case 2:
-                OperationTable.upgradeFromV2(db, oldVersion, newVersion);
+                OperationTable.INSTANCE$.upgradeFromV2(db, oldVersion, newVersion);
             case 3:
-                OperationTable.upgradeFromV3(db, oldVersion, newVersion);
+                OperationTable.INSTANCE$.upgradeFromV3(db, oldVersion, newVersion);
             case 4:
                 AccountTable.upgradeFromV4(db);
             case 5:
                 ScheduledOperationTable.upgradeFromV5(db, oldVersion, newVersion);
-                OperationTable.upgradeFromV5(db, oldVersion, newVersion);
+                OperationTable.INSTANCE$.upgradeFromV5(db, oldVersion, newVersion);
             case 6:
                 AccountTable.upgradeFromV6(db);
                 ScheduledOperationTable.upgradeFromV6(db, oldVersion, newVersion);
-                OperationTable.upgradeFromV6(db, oldVersion, newVersion);
+                OperationTable.INSTANCE$.upgradeFromV6(db, oldVersion, newVersion);
             case 7:
                 InfoTables.upgradeFromV7(db, oldVersion, newVersion);
             case 8:
@@ -73,7 +73,7 @@ public class DbHelper extends SQLiteOpenHelper {
             case 10:
                 PreferenceTable.upgradeFromV10(mCtx, db);
             case 11:
-                OperationTable.upgradeFromV11(db, oldVersion, newVersion);
+                OperationTable.INSTANCE$.upgradeFromV11(db, oldVersion, newVersion);
                 ScheduledOperationTable.upgradeFromV11(db, oldVersion, newVersion);
             case 12:
                 ScheduledOperationTable.upgradeFromV12(db, oldVersion, newVersion);
@@ -86,7 +86,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 InfoTables.upgradeFromV15(db, oldVersion, newVersion);
             case 16:
                 InfoTables.upgradeFromV16(db, oldVersion, newVersion);
-                OperationTable.upgradeFromV16(db, oldVersion, newVersion);
+                OperationTable.INSTANCE$.upgradeFromV16(db, oldVersion, newVersion);
                 AccountTable.upgradeFromV16(db);
             case 17:
                 StatisticTable.upgradeFromV17(db);

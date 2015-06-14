@@ -40,14 +40,6 @@ import kotlin.properties.Delegates
 public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private val mDrawerLayout by Delegates.lazy { findViewById(R.id.drawer_layout) as DrawerLayout }
     private val mDrawerList by Delegates.lazy { findViewById(R.id.left_drawer) as ListView }
-    //    private val mAccountAdapter: SimpleCursorAdapter by Delegates.lazy {
-    //        val from = arrayOf(AccountTable.KEY_ACCOUNT_NAME, AccountTable.KEY_ACCOUNT_CUR_SUM,
-    //                AccountTable.KEY_ACCOUNT_CUR_SUM_DATE, AccountTable.KEY_ACCOUNT_CURRENCY)
-    //        val to = intArrayOf(android.R.id.text1, R.id.account_sum, R.id.account_balance_at)
-    //        val res = SimpleCursorAdapter(this, R.layout.account_row, null, from, to, 0)
-    //        mAccountSpinner.setAdapter(res)
-    //        res
-    //    }
     private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
     private val handler: FragmentHandler by Delegates.lazy { FragmentHandler(this) }
     public val mAccountSpinner: Spinner by Delegates.lazy { findViewById(R.id.account_spinner) as Spinner }
@@ -95,7 +87,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 return null
             }
             else -> {
-                updateFragmentRefs(fragment!!, fragmentId)
+                updateFragmentRefs(fragment, fragmentId)
                 mDrawerLayout.closeDrawer(mDrawerList)
                 fragmentManager.popBackStack(c.getName(), 0)
                 return null
@@ -436,70 +428,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     public fun getCurrentAccountId(): Long {
         return mAccountManager.getCurrentAccountId(this)
     }
-
-    // for accounts list
-    //    private inner class SimpleAccountViewBinder() : android.support.v4.widget.SimpleCursorAdapter.ViewBinder {
-    //        private var ACCOUNT_NAME_COL = -1
-    //        private var ACCOUNT_CUR_SUM: Int = 0
-    //        private var ACCOUNT_CUR_SUM_DATE: Int = 0
-    //        private var ACCOUNT_CURRENCY: Int = 0
-    //        private var currencySymbol: String? = null
-    //
-    //        fun cleanupSymbol(s: String, c: String): String {
-    //            return if (s.contains(c)) c else s
-    //        }
-    //
-    //        override fun setViewValue(view: View, cursor: Cursor, i: Int): Boolean {
-    //            if (ACCOUNT_NAME_COL == -1) {
-    //                ACCOUNT_NAME_COL = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)
-    //                ACCOUNT_CUR_SUM = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM)
-    //                ACCOUNT_CUR_SUM_DATE = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CUR_SUM_DATE)
-    //                ACCOUNT_CURRENCY = cursor.getColumnIndex(AccountTable.KEY_ACCOUNT_CURRENCY)
-    //            }
-    //
-    //            try {
-    //                val c = Currency.getInstance(cursor.getString(ACCOUNT_CURRENCY)).getSymbol()
-    //                currencySymbol = cleanupSymbol(c, "£")
-    //                currencySymbol = cleanupSymbol(c, "$")
-    //            } catch (ex: IllegalArgumentException) {
-    //                currencySymbol = ""
-    //            }
-    //
-    //            val res: Boolean
-    //            if (i == ACCOUNT_NAME_COL) {
-    //                val textView = view as TextView
-    //                textView.setText(cursor.getString(i))
-    //                res = true
-    //            } else if (i == ACCOUNT_CUR_SUM) {
-    //                val textView = view as TextView
-    //                val stringBuilder = StringBuilder()
-    //                val sum = cursor.getLong(i)
-    //                if (sum < 0) {
-    //                    textView.setTextColor(redColor)
-    //                } else {
-    //                    textView.setTextColor(greenColor)
-    //                }
-    //                stringBuilder.append((sum.toDouble() / 100.0).formatSum())
-    //                stringBuilder.append(' ').append(currencySymbol)
-    //                textView.setText(stringBuilder)
-    //                res = true
-    //            } else if (i == ACCOUNT_CUR_SUM_DATE) {
-    //                val textView = view as TextView
-    //                val dateLong = cursor.getLong(i)
-    //                val stringBuilder = StringBuilder()
-    //                if (dateLong > 0) {
-    //                    stringBuilder.append(getString(R.string.balance_at).format(Date(dateLong).formatDate()))
-    //                } else {
-    //                    stringBuilder.append(getString(R.string.current_sum))
-    //                }
-    //                textView.setText(stringBuilder)
-    //                res = true
-    //            } else {
-    //                res = false
-    //            }
-    //            return res
-    //        }
-    //    }
 
     private val TAG = "MainActivity"
 
