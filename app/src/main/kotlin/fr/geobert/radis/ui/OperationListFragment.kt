@@ -170,7 +170,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     //    }
 
     fun processAccountChanged(itemId: Long) {
-        Log.d(TAG, "processAccountChanged to $itemId", Exception())
+        Log.d(TAG, "processAccountChanged to $itemId")
         mAccountManager.setCurrentAccountId(itemId, mActivity)
         earliestOpDate = null
         mOldChildCount = -1

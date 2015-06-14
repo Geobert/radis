@@ -1,12 +1,17 @@
 package fr.geobert.radis
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Message
+import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -18,7 +23,10 @@ import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.Spinner
 import com.crashlytics.android.Crashlytics
+import fr.geobert.radis.data.Account
+import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
 import fr.geobert.radis.tools.*
@@ -26,13 +34,17 @@ import fr.geobert.radis.ui.ConfigEditor
 import fr.geobert.radis.ui.OperationListFragment
 import fr.geobert.radis.ui.ScheduledOpListFragment
 import fr.geobert.radis.ui.StatisticsListFragment
-import fr.geobert.radis.ui.adapter.AccountAdapter
 import fr.geobert.radis.ui.drawer.NavDrawerItem
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter
 import fr.geobert.radis.ui.editor.AccountEditor
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
+import hirondelle.date4j.DateTime
 import io.fabric.sdk.android.Fabric
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.Writer
 import java.util.ArrayList
 import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
@@ -148,6 +160,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     MainActivity.refreshAccountList(activity)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
+                EXPORT_CSV -> {
+                    exportCSV()
+                    mDrawerList.setItemChecked(mActiveFragmentId, true)
+                }
                 else -> Log.d(TAG, "Undeclared fragment")
             }
 
@@ -176,7 +192,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
         registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_NEEDED))
         registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_ACC_LIST))
-        //registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_OP_LIST))
         initAccountStuff()
         initDrawer()
         installRadisTimer()
@@ -234,10 +249,9 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         handler.pause()
     }
 
-    // nothing to do here, required by Android
     override fun onResume() {
         super<BaseActivity>.onResume()
-        Log.d(TAG, "onResume: mactiveFrag:$mActiveFragment")
+        // nothing to do here, required by Android
     }
 
     override fun onResumeFragments() {
@@ -373,6 +387,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         navDrawerItems.add(NavDrawerItem(getString(R.string.restore_db), 0))
         navDrawerItems.add(NavDrawerItem(getString(R.string.process_scheduled_transactions), 0))
         navDrawerItems.add(NavDrawerItem(getString(R.string.recompute_account_sums), 0))
+        navDrawerItems.add(NavDrawerItem(getString(R.string.export_csv), 0))
 
         mDrawerList.setAdapter(NavDrawerListAdapter(getApplicationContext(), navDrawerItems))
         mDrawerList.setOnItemClickListener(object : AdapterView.OnItemClickListener {
@@ -429,6 +444,74 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         return mAccountManager.getCurrentAccountId(this)
     }
 
+    private fun exportCSV() {
+        val today = DateTime.now(TIME_ZONE)
+        val filename = "${today.format("YYYYMMDD|_|ssmmhh")}_radis.csv"
+        var writer: BufferedWriter? = null
+        try {
+            val sd = Environment.getExternalStorageDirectory()
+            if (sd.canWrite()) {
+                val backupDBDir = "/radis/"
+                val backupDir = File(sd, backupDBDir)
+                backupDir.mkdirs()
+                val file = File(sd, "$backupDBDir$filename")
+                writer = BufferedWriter(FileWriter(file))
+                processExportCSV(writer)
+                val path = file.getAbsolutePath()
+                ExportCSVSucceedDialog.newInstance(path.substring(0, path.lastIndexOf(File.separator) + 1)).
+                        show(getSupportFragmentManager(), "csv_export")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            writer?.close()
+        }
+    }
+
+    private fun processExportCSV(writer: Writer) {
+        val accountsCursor = AccountTable.fetchAllAccounts(this)
+        val accounts = accountsCursor.map { Account(it) }
+        accountsCursor.close()
+        writer.write("account;date;third party;amount;tag;mode;notes\n")
+        accounts.forEach {
+            val opCursor = OperationTable.fetchAllOps(this, it.id)
+            val operations = opCursor.map { Operation(it) }
+            val accountName = it.name
+            operations.forEach {
+                writer.write("${accountName};${it.getDate().formatDate()};${it.mThirdParty};${it.getSumStr()};${it.mTag};${it.mMode};${it.mNotes}\n")
+            }
+        }
+        writer.flush()
+    }
+
+    public class ExportCSVSucceedDialog : DialogFragment() {
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            super.onCreateDialog(savedInstanceState)
+            val builder = AlertDialog.Builder(getActivity())
+            val path = getArguments().getString("path")
+            builder.setMessage(R.string.export_csv_success).setCancelable(false).
+                    setPositiveButton(R.string.open, { d, i ->
+                        val intent = Intent(Intent.ACTION_GET_CONTENT)
+                        intent.setDataAndType(Uri.parse(path), "text/csv")
+                        startActivity(intent)
+                    }).
+                    setNegativeButton(R.string.ok, { d, i ->
+
+                    })
+            return builder.create()
+        }
+
+        companion object {
+            public fun newInstance(path: String): ExportCSVSucceedDialog {
+                val f = ExportCSVSucceedDialog()
+                val args = Bundle()
+                args.putString("path", path)
+                f.setArguments(args)
+                return f
+            }
+        }
+    }
+
     private val TAG = "MainActivity"
 
     companion object {
@@ -449,6 +532,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         public val RESTORE_ACCOUNT: Int = 11
         public val PROCESS_SCH: Int = 12
         public val RECOMPUTE_ACCOUNT: Int = 13
+        public val EXPORT_CSV: Int = 14
 
         platformStatic public fun refreshAccountList(ctx: Context) {
             val intent = Intent(INTENT_UPDATE_ACC_LIST)

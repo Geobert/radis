@@ -261,4 +261,6 @@
     <string name="quick_add_long_press_action_title">Action on quick add long press</string>
     <string name="quick_add_long_press_action_text">Long press will %s</string>
     <string name="override_quick_add_action">Override quick add long press action</string>
+    <string name="export_csv">Export to CSV</string>
+    <string name="export_csv_success">Export to CSV succeed</string>
 </resources>

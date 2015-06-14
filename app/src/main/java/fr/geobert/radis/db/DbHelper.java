@@ -117,7 +117,6 @@ public class DbHelper extends SQLiteOpenHelper {
                 File backupDir = new File(sd, backupDBDir);
                 backupDir.mkdirs();
                 File backupDB = new File(sd, backupDBPath);
-
                 if (currentDB.exists()) {
                     FileInputStream srcFIS = new FileInputStream(currentDB);
                     FileOutputStream dstFOS = new FileOutputStream(backupDB);
@@ -131,6 +130,7 @@ public class DbHelper extends SQLiteOpenHelper {
                 }
                 return true;
             }
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
         }
