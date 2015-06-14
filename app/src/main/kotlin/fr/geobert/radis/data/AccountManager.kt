@@ -19,14 +19,6 @@ import java.util.ArrayList
 import java.util.Currency
 
 public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCallbacks<Cursor> {
-    //    private var _allAccountCursor: Cursor? = null
-    //    public var allAccountsCursor: Cursor?
-    //        public set(value) {
-    //            setAllAccCursor(value)
-    //        }
-    //        get() = _allAccountCursor
-
-    //private var mSimpleCursorAdapter: SimpleCursorAdapter? = null
     private var mCurAccountId: Long? = null
     public var currentAccountSum: Long = 0
         protected set
@@ -46,28 +38,6 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         private set
 
     private var isFetching = false
-
-    //    private fun setAllAccCursor(cursor: Cursor?) {
-    //        val c = this.allAccountsCursor
-    //        if (c != null && c != cursor) {
-    //            c.close()
-    //        }
-    //
-    //        if (cursor != null && cursor.moveToFirst()) {
-    //            _allAccountCursor = cursor
-    //            mSimpleCursorAdapter?.changeCursor(cursor)
-    //            if (mCurAccountId != null) {
-    //                setCurrentAccountSum()
-    //            }
-    //        } else {
-    //            _allAccountCursor = null
-    //            this.mSimpleCursorAdapter?.changeCursor(null)
-    //        }
-    //    }
-
-    //    public fun setSimpleCursorAdapter(adapter: SimpleCursorAdapter) {
-    //        this.mSimpleCursorAdapter = adapter
-    //    }
 
     public fun getDefaultAccountId(context: Context): Long? {
         //        Log.d(TAG, "--->getDefaultAccountId, curDefAcc:$mCurDefaultAccount")
