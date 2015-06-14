@@ -79,6 +79,8 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
                 if (mAccountAdapter.getCount() > 0) {
                     this.mCurDefaultAccount = mAccountAdapter.getAccount(0).id
                     DBPrefsManager.getInstance(context).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount)
+                } else {
+                    this.mCurDefaultAccount = 1 // fallback, should not happen
                 }
             }
         }
