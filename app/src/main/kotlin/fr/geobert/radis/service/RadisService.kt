@@ -25,13 +25,13 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
         val needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false)
         android.util.Log.d(TAG, "needConsolidate : " + needConsolidate)
         if (needConsolidate) {
-            val cursor = fr.geobert.radis.db.AccountTable.Companion.fetchAllAccounts(this)
+            val cursor = fr.geobert.radis.db.AccountTable.fetchAllAccounts(this)
             prefs.put(CONSOLIDATE_DB, false)
             //            prefs.commit();
             if (cursor.moveToFirst()) {
                 do {
                     android.util.Log.d(TAG, "CONSOLIDATE ON consolidateDB set to true : " + cursor.getLong(0))
-                    fr.geobert.radis.db.AccountTable.Companion.consolidateSums(this, cursor.getLong(0))
+                    fr.geobert.radis.db.AccountTable.consolidateSums(this, cursor.getLong(0))
                 } while (cursor.moveToNext())
             }
             cursor.close()
@@ -85,7 +85,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                     schOpsCursor.moveToNext()
                     continue
                 } else {
-                    AccountTable.Companion.initProjectionDate(accountCursor)
+                    AccountTable.initProjectionDate(accountCursor)
                 }
                 val account = Account(accountCursor)
                 val config = AccountConfig(configCursor)
