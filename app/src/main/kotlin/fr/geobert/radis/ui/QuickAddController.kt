@@ -103,7 +103,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
             try {
                 quickAddOp()
             } catch (e: Exception) {
-                Tools.popError(mActivity, e.getMessage(), null)
+                Tools.popError(mActivity, e.getMessage() ?: "internal error", null)
                 e.printStackTrace()
             }
         }

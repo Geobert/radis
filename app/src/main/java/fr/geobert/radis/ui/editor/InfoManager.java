@@ -156,7 +156,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
     protected void infoSelected() {
         ListView lv = mListDialog.getListView();
         if (mCursor != null && lv != null && mCursor.moveToPosition(lv.getCheckedItemPosition())) {
-            Tools.setTextWithoutComplete(mInfoText, mCursor.getString(mCursor
+            Tools.INSTANCE$.setTextWithoutComplete(mInfoText, mCursor.getString(mCursor
                     .getColumnIndex(mInfo.getString("colName"))));
         }
     }
@@ -196,7 +196,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
     private void onDeleteClicked() {
         // TODO
 //        mContext.mCurrentInfoTable = (Uri) mInfo.getParcelable("table");
-        InfoManagerDialog.createInfoDeleteDialog(mDeleteId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
+        InfoManagerDialog.Companion.createInfoDeleteDialog(mDeleteId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
     }
 
     public void deleteInfo() {
@@ -214,7 +214,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         info.remove("rowId");
         // TODO
 //        mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
-        InfoManagerDialog.createInfoEditDialog(mEditId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
+        InfoManagerDialog.Companion.createInfoEditDialog(mEditId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
     }
 
     private void onEditClicked() {
@@ -226,7 +226,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         info.putLong("rowId", mCursor.getLong(mCursor.getColumnIndex("_id")));
         // TODO
 //        mContext.mCurrentInfoTable = (Uri) info.getParcelable("table");
-        InfoManagerDialog.createInfoEditDialog(mEditId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
+        InfoManagerDialog.Companion.createInfoEditDialog(mEditId, mContext).show(mContext.getSupportFragmentManager(), "dialog");
     }
 
     public void initEditDialog(final Dialog dialog) {
@@ -291,7 +291,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         } else { // create
             long id = InfoTables.getKeyIdIfExistsOrCreate(ctx, value, (Uri) mInfo.getParcelable("table"));
             if (id > 0) { // already existing value, update
-                Tools.popError(mContext,
+                Tools.INSTANCE$.popError(mContext,
                         mContext.getString(R.string.item_exists), null);
             }
         }

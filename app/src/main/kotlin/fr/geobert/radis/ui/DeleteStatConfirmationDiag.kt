@@ -29,7 +29,7 @@ class DeleteStatConfirmationDiag : DialogFragment() {
         super.onCreate(savedInstanceState)
         val args: Bundle = getArguments()
         statId = args.getLong("statId")
-        return Tools.createDeleteConfirmationDialog(getActivity(), { d, i ->
+        return Tools.createDeleteConfirmationDialog(getActivity(), { d: DialogInterface, i: Int ->
             if (StatisticTable.deleteStatistic(statId, ctx)) {
                 getActivity().sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_STAT), null)
             }

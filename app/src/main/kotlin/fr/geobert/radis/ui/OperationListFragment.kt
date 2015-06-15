@@ -540,12 +540,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val args = getArguments()
             this.accountId = args.getLong("accountId")
             this.operationId = args.getLong("opId")
-            return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
-                override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                    if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
-                        parentFrag.afterDelUpdateSelection(operationId)
-                    }
-
+            return Tools.createDeleteConfirmationDialog(getActivity(), { d, i ->
+                if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+                    parentFrag.afterDelUpdateSelection(operationId)
                 }
             })
         }
