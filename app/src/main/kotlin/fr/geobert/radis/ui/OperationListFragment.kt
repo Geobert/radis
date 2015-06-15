@@ -631,34 +631,37 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             val args = getArguments()
             this.accountId = args.getLong("accountId")
-            return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
-                override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                    if (AccountTable.deleteAccount(getActivity(), accountId)) {
-                        val act = getActivity() as MainActivity
-                        val accMan = act.mAccountManager
-                        // attempt to fix Fatal Exception: java.lang.IllegalStateException
-                        // couldn't move cursor to position 4
-                        if (accountId == accMan.getCurrentAccountId(act)) {
-                            accMan.setCurrentAccountId(null, getActivity())
+            val accountName = args.getString("accountName")
+            return Tools.createDeleteConfirmationDialog(getActivity(),
+                    getActivity().getString(R.string.account_delete_confirmation).format(accountName),
+                    getString(R.string.delete_account_title).format(accountName),
+                    { d, i ->
+                        if (AccountTable.deleteAccount(getActivity(), accountId)) {
+                            val act = getActivity() as MainActivity
+                            val accMan = act.mAccountManager
+                            // attempt to fix Fatal Exception: java.lang.IllegalStateException
+                            // couldn't move cursor to position 4
+                            if (accountId == accMan.getCurrentAccountId(act)) {
+                                accMan.setCurrentAccountId(null, getActivity())
+                            }
+                            if (accountId == accMan.getDefaultAccountId(act)) {
+                                accMan.mCurDefaultAccount = null
+                                accMan.setCurrentAccountId(null, getActivity())
+                                DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
+                            }
+                            MainActivity.refreshAccountList(getActivity())
+                        } else {
+                            (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null, getActivity())
                         }
-                        if (accountId == accMan.getDefaultAccountId(act)) {
-                            accMan.mCurDefaultAccount = null
-                            accMan.setCurrentAccountId(null, getActivity())
-                            DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
-                        }
-                        MainActivity.refreshAccountList(getActivity())
-                    } else {
-                        (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null, getActivity())
-                    }
-                }
-            }, R.string.account_delete_confirmation)
+                    })
         }
 
         companion object {
-            platformStatic public fun newInstance(accountId: Long): DeleteAccountConfirmationDialog {
+            platformStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()
                 args.putLong("accountId", accountId)
+                args.putString("accountName", accountName)
                 frag.setArguments(args)
                 return frag
             }

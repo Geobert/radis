@@ -86,6 +86,9 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         return mCurAccountPos
     }
 
+    public fun getCurrentAccount(ctx: Context): Account {
+        return mAccountAdapter.getAccount(getCurrentAccountPosition(ctx))
+    }
 
     public fun setCurrentAccountSum() {
         var pos = 0

@@ -135,7 +135,9 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 DELETE_ACCOUNT -> {
-                    OperationListFragment.DeleteAccountConfirmationDialog.newInstance(getCurrentAccountId()).show(fragmentManager, "delAccount")
+                    val account = mAccountManager.getCurrentAccount(activity)
+                    OperationListFragment.DeleteAccountConfirmationDialog.newInstance(account.id, account.name).
+                            show(fragmentManager, "delAccount")
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 PREFERENCES -> {

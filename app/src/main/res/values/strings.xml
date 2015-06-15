@@ -55,7 +55,7 @@
     <string name="third_parties">Third party</string>
     <string name="get_more_op">Previous month…</string>
     <string name="delete_confirmation">Really delete?</string>
-    <string name="account_delete_confirmation">Delete account will also delete all scheduled transaction attached to it.
+    <string name="account_delete_confirmation">Deleting account \"%s\" will also delete all scheduled transaction attached to it.
         \nReally delete?
     </string>
     <string name="yes">Yes</string>
@@ -200,6 +200,7 @@
     <string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
     <string name="sch_edition">Scheduled transaction edition</string>
     <string name="delete_account">Delete account</string>
+    <string name="delete_account_title">Delete account \"%s\"</string>
     <string name="debug">Debug</string>
     <string name="use_weighted_infos">Use weighted completion</string>
     <string name="use_weighted_infos_details">Most used informations are suggested first</string>

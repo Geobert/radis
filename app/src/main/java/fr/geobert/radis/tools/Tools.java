@@ -95,6 +95,7 @@ public class Tools {
         Tools.popMessage(ctx, msg, R.string.error, ctx.getString(R.string.ok), onClick);
     }
 
+    @SuppressWarnings("ConstantConditions")
     public static void setTextWithoutComplete(AutoCompleteTextView v,
                                               String text) {
         InfoAdapter adapter = (InfoAdapter) v.getAdapter();
@@ -106,13 +107,16 @@ public class Tools {
     @NotNull
     public static Dialog createDeleteConfirmationDialog(Context ctx,
                                                         DialogInterface.OnClickListener onClick) {
-        return Tools.createDeleteConfirmationDialog(ctx, onClick, R.string.delete_confirmation);
+        return Tools.createDeleteConfirmationDialog(ctx, ctx.getString(R.string.delete_confirmation),
+                ctx.getString(R.string.delete),
+                onClick);
     }
 
     public static Dialog createDeleteConfirmationDialog(Context ctx,
-                                                        DialogInterface.OnClickListener onClick, final int msgId) {
+                                                        final String msg, final String title,
+                                                        DialogInterface.OnClickListener onClick) {
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
-        builder.setMessage(msgId)
+        builder.setMessage(msg).setTitle(title)
                 .setCancelable(false)
                 .setPositiveButton(R.string.yes, onClick)
                 .setNegativeButton(R.string.cancel,

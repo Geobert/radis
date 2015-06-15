@@ -47,7 +47,7 @@
     <string name="third_parties">Tiers</string>
     <string name="get_more_op">Mois précédent…</string>
     <string name="delete_confirmation">Confirmer la suppression ?</string>
-    <string name="account_delete_confirmation">Supprimer un compte va aussi supprimer les échéances associées.
+    <string name="account_delete_confirmation">Supprimer le compte \"%s\" va aussi supprimer les échéances associées.
         \nConfirmer la suppression ?
     </string>
     <string name="yes">Oui</string>
@@ -203,6 +203,7 @@
     <string name="sched_op_total_choose_account">Choisir un compte pour avoir son total des échéances</string>
     <string name="sch_edition">Saisie d\'échéance</string>
     <string name="delete_account">Supprimer le compte</string>
+    <string name="delete_account_title">Supprimer le compte \"%s\"</string>
     <string name="debug">Debug</string>
     <string name="use_weighted_infos">Utiliser la complétion pondérée</string>
     <string name="use_weighted_infos_details">Les informations les plus utilisées seront proposées en tête</string>
