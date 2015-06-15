@@ -52,14 +52,6 @@ public class Tools {
 
     public static void checkDebugMode(Activity ctx) {
         // See if we're a debug or a release build
-//        if (Build.VERSION.SDK_INT >= 13) {
-//            Point p = new Point();
-//            ctx.getWindowManager().getDefaultDisplay().getSize(p);
-//            SCREEN_HEIGHT = p.y;
-//        } else {
-//            //noinspection deprecation
-//            SCREEN_HEIGHT = ctx.getWindowManager().getDefaultDisplay().getHeight();
-//        }
         try {
             PackageInfo packageInfo = ctx.getPackageManager().getPackageInfo(
                     ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS);
@@ -173,7 +165,7 @@ public class Tools {
                             new BooleanResultNoParamFct() {
                                 @Override
                                 public boolean run() {
-                                    return DbHelper.backupDatabase();
+                                    return DbHelper.Companion.backupDatabase();
                                 }
                             }, R.string.backup_success,
                             R.string.backup_failed
@@ -184,7 +176,7 @@ public class Tools {
                             new BooleanResultNoParamFct() {
                                 @Override
                                 public boolean run() {
-                                    return DbHelper.restoreDatabase(ctx);
+                                    return DbHelper.Companion.restoreDatabase(ctx);
                                 }
                             }, R.string.restore_success,
                             R.string.restore_failed
