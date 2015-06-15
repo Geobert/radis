@@ -262,7 +262,7 @@
     <string name="quick_add_long_press_action_text">Long press will %s</string>
     <string name="override_quick_add_action">Override quick add long press action</string>
     <string name="export_csv">Export to CSV</string>
-    <string name="export_csv_success">Export to CSV succeed</string>
+    <string name="export_csv_success">CSV exported to\n%s</string>
     <string name="open">Open file</string>
     <string name="csv_header"><![CDATA[\"Account\",\"Date\",\"Third party\",\"Amount\",\"Tag\",\"Mode\",\"Notes\"]]></string>
 </resources>

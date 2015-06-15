@@ -458,8 +458,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 writer = BufferedWriter(FileWriter(file))
                 processExportCSV(writer)
                 val path = file.getAbsolutePath()
-                ExportCSVSucceedDialog.newInstance(path).//.substring(0, path.lastIndexOf(File.separator) + 1)).
-                        show(getSupportFragmentManager(), "csv_export")
+                ExportCSVSucceedDialog.newInstance(path).show(getSupportFragmentManager(), "csv_export")
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -489,7 +488,8 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             super.onCreateDialog(savedInstanceState)
             val builder = AlertDialog.Builder(getActivity())
             val path = getArguments().getString("path")
-            builder.setMessage(R.string.export_csv_success).setCancelable(false).
+            val msg = getString(R.string.export_csv_success).format(path.substring(0, path.lastIndexOf(File.separator) + 1))
+            builder.setTitle(R.string.export_csv).setMessage(msg).setCancelable(false).
                     setPositiveButton(R.string.open, { d, i ->
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.setDataAndType(Uri.parse("file://$path"), "text/csv")
