@@ -264,6 +264,6 @@
     <string name="override_quick_add_action">Supplanter l\'action du tap long sur ajout rapide</string>
     <string name="export_csv">Exporter en CSV</string>
     <string name="export_csv_success">CSV exporté dans\n%s</string>
-    <string name="open">Voir le fichier</string>
+    <string name="open">Envoyer le fichier</string>
     <string name="csv_header"><![CDATA[\"Compte\",\"Date\",\"Tiers\",\"Montant\",\"Catégorie\",\"Mode\",\"Notes\"]]></string>
 </resources>

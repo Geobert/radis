@@ -490,9 +490,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             val msg = getString(R.string.export_csv_success).format(path.substring(0, path.lastIndexOf(File.separator) + 1))
             builder.setTitle(R.string.export_csv).setMessage(msg).setCancelable(false).
                     setPositiveButton(R.string.open, { d, i ->
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.setDataAndType(Uri.parse("file://$path"), "text/csv")
-                        startActivity(intent)
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.setType("text/plain")
+                        intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://$path"))
+                        startActivity(Intent.createChooser(intent, getString(R.string.open)))
                     }).
                     setNegativeButton(R.string.ok, { d, i ->
 
