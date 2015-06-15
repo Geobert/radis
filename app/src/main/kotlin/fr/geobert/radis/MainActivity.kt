@@ -445,8 +445,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     private fun exportCSV() {
-        val today = DateTime.now(TIME_ZONE)
-        val filename = "${today.format("YYYYMMDD|_|ssmmhh")}_radis.csv"
+        val filename = "${filenameTimetag()}_radis.csv"
         var writer: BufferedWriter? = null
         try {
             val sd = Environment.getExternalStorageDirectory()
