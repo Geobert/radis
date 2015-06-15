@@ -458,7 +458,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 writer = BufferedWriter(FileWriter(file))
                 processExportCSV(writer)
                 val path = file.getAbsolutePath()
-                ExportCSVSucceedDialog.newInstance(path.substring(0, path.lastIndexOf(File.separator) + 1)).
+                ExportCSVSucceedDialog.newInstance(path).//.substring(0, path.lastIndexOf(File.separator) + 1)).
                         show(getSupportFragmentManager(), "csv_export")
             }
         } catch (e: Exception) {
@@ -472,13 +472,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         val accountsCursor = AccountTable.fetchAllAccounts(this)
         val accounts = accountsCursor.map { Account(it) }
         accountsCursor.close()
-        writer.write("account;date;third party;amount;tag;mode;notes\n")
+        writer.write("${getString(R.string.csv_header)}\n")
         accounts.forEach {
             val opCursor = OperationTable.fetchAllOps(this, it.id)
             val operations = opCursor.map { Operation(it) }
             val accountName = it.name
             operations.forEach {
-                writer.write("${accountName};${it.getDate().formatDate()};${it.mThirdParty};${it.getSumStr()};${it.mTag};${it.mMode};${it.mNotes}\n")
+                writer.write("\"${accountName}\",\"${it.getDate().formatDate()}\",\"${it.mThirdParty}\",\"${it.getSumStr()}\",\"${it.mTag}\",\"${it.mMode}\",\"${it.mNotes}\"\n")
             }
         }
         writer.flush()
@@ -491,8 +491,8 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             val path = getArguments().getString("path")
             builder.setMessage(R.string.export_csv_success).setCancelable(false).
                     setPositiveButton(R.string.open, { d, i ->
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                        intent.setDataAndType(Uri.parse(path), "text/csv")
+                        val intent = Intent(Intent.ACTION_VIEW)
+                        intent.setDataAndType(Uri.parse("file://$path"), "text/csv")
                         startActivity(intent)
                     }).
                     setNegativeButton(R.string.ok, { d, i ->

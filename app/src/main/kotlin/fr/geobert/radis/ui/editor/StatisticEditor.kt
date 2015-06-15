@@ -287,7 +287,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS -> {
                 val valid = "([0-9]+)"
                 val x = mxLastEdt.getText().toString()
-                if (!x.matches(valid)) {
+                if (!x.matches(valid.toRegex())) {
                     fun last(): String =
                             if (mStat?.timeScaleType == Statistic.PERIOD_YEARS)
                                 getString(R.string.last_female)

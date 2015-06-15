@@ -35,7 +35,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 22
         versionCode 60
-        versionName "1.1.10"
+        versionName "1.1.11rc2"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
