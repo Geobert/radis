@@ -447,8 +447,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     private fun exportCSV() {
-        val today = DateTime.now(TIME_ZONE)
-        val filename = "${today.format("YYYYMMDD|_|ssmmhh")}_radis.csv"
+        val filename = "${filenameTimetag()}_radis.csv"
         var writer: BufferedWriter? = null
         try {
             val sd = Environment.getExternalStorageDirectory()
@@ -460,8 +459,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 writer = BufferedWriter(FileWriter(file))
                 processExportCSV(writer)
                 val path = file.getAbsolutePath()
-                ExportCSVSucceedDialog.newInstance(path.substring(0, path.lastIndexOf(File.separator) + 1)).
-                        show(getSupportFragmentManager(), "csv_export")
+                ExportCSVSucceedDialog.newInstance(path).show(getSupportFragmentManager(), "csv_export")
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -474,13 +472,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         val accountsCursor = AccountTable.fetchAllAccounts(this)
         val accounts = accountsCursor.map { Account(it) }
         accountsCursor.close()
-        writer.write("account;date;third party;amount;tag;mode;notes\n")
+        writer.write("${getString(R.string.csv_header)}\n")
         accounts.forEach {
             val opCursor = OperationTable.fetchAllOps(this, it.id)
             val operations = opCursor.map { Operation(it) }
             val accountName = it.name
             operations.forEach {
-                writer.write("${accountName};${it.getDate().formatDate()};${it.mThirdParty};${it.getSumStr()};${it.mTag};${it.mMode};${it.mNotes}\n")
+                writer.write("\"${accountName}\",\"${it.getDate().formatDate()}\",\"${it.mThirdParty}\",\"${it.getSumStr()}\",\"${it.mTag}\",\"${it.mMode}\",\"${it.mNotes}\"\n")
             }
         }
         writer.flush()
@@ -491,11 +489,13 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             super.onCreateDialog(savedInstanceState)
             val builder = AlertDialog.Builder(getActivity())
             val path = getArguments().getString("path")
-            builder.setMessage(R.string.export_csv_success).setCancelable(false).
+            val msg = getString(R.string.export_csv_success).format(path.substring(0, path.lastIndexOf(File.separator) + 1))
+            builder.setTitle(R.string.export_csv).setMessage(msg).setCancelable(false).
                     setPositiveButton(R.string.open, { d, i ->
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                        intent.setDataAndType(Uri.parse(path), "text/csv")
-                        startActivity(intent)
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.setType("text/plain")
+                        intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://$path"))
+                        startActivity(Intent.createChooser(intent, getString(R.string.open)))
                     }).
                     setNegativeButton(R.string.ok, { d, i ->
 

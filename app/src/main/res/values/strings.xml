@@ -263,5 +263,19 @@
     <string name="quick_add_long_press_action_text">Long press will %s</string>
     <string name="override_quick_add_action">Override quick add long press action</string>
     <string name="export_csv">Export to CSV</string>
-    <string name="export_csv_success">Export to CSV succeed</string>
+    <string name="export_csv_success">CSV exported to\n%s</string>
+    <string name="open">Send the file</string>
+    <string-array name="csv_header_item">
+        <item>Account</item>
+        <item>Date</item>
+        <item>Third party</item>
+        <item>Amount</item>
+        <item>Tag</item>
+        <item>Mode</item>
+        <item>Notes</item>
+    </string-array>
+    <string name="file_name">File\'s name</string>
+    <string name="cols_to_export">Colonnes à exporter</string>
+    <string name="one_file_per_account">Makes one file per account</string>
+    <string name="export">Export</string>
 </resources>
