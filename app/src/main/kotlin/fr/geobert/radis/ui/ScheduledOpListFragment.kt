@@ -68,14 +68,6 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         return ll
     }
 
-    //    private fun selectOpAndAdjustOffset(position: Int) {
-    //        val adapter = mAdapter
-    //        if (adapter != null) {
-    //            adapter.selectedPosition = position
-    //            mListView.smoothScrollToPosition(position + 2) // scroll in order to see fully expanded op row
-    //        }
-    //    }
-
     private fun fetchSchOpsOfAccount() {
         Log.d("ScheduledOpListFragment", "fetchSchOpsOfAccount mLoader:$mLoader")
         if (mLoader == null) {

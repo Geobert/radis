@@ -12,11 +12,10 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
     protected val mActivity: MainActivity by Delegates.lazy { getActivity() as MainActivity }
     protected val mAccountManager: AccountManager by Delegates.lazy { mActivity.mAccountManager }
 
-    //    public abstract fun onRestoreInstanceState(savedInstanceState: Bundle)
+    open public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    }
 
-    public abstract fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?)
-
-    public abstract fun onAccountChanged(itemId: Long): Boolean
+    open public fun onAccountChanged(itemId: Long): Boolean = false
 
     public fun getName(): String {
         return this.javaClass.getName()

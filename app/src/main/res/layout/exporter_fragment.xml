@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <TextView
+            android:layout_marginLeft="7dp"
+            android:layout_alignTop="@+id/filename_edt"
+            android:layout_alignBottom="@+id/filename_edt"
+            android:id="@+id/filename_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="@string/file_name"/>
+
+    <EditText
+            android:layout_marginTop="10dp"
+            android:layout_toRightOf="@+id/filename_txt"
+            android:id="@+id/filename_edt"
+            android:inputType="text"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_height="wrap_content"/>
+
+    <CheckBox
+            android:id="@+id/one_file_per_account_chk"
+            android:layout_below="@+id/filename_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/one_file_per_account"/>
+
+    <TextView
+            android:layout_below="@+id/one_file_per_account_chk"
+            android:layout_marginLeft="7dp"
+            android:layout_marginTop="10dp"
+            android:id="@+id/cols_to_export_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cols_to_export"/>
+
+    <android.support.v7.widget.RecyclerView
+            android:id="@+id/cols_to_export_list"
+            android:layout_margin="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@+id/cols_to_export_txt"
+            android:layout_toLeftOf="@+id/move_buttons_cont"
+            android:layout_above="@+id/export_btn"/>
+
+    <LinearLayout
+            android:id="@+id/move_buttons_cont"
+            android:layout_alignTop="@id/cols_to_export_list"
+            android:layout_alignBottom="@id/cols_to_export_list"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+        <ImageButton
+                android:id="@+id/move_up"
+                android:src="@drawable/ic_action_navigate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"/>
+
+        <ImageButton
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_action_navigate_down"
+                android:id="@+id/move_down"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+    <Button
+            android:text="@string/export"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginBottom="8dp"
+            android:id="@+id/export_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+</RelativeLayout>

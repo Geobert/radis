@@ -31,14 +31,14 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OperationsAdapter
+import fr.geobert.radis.ui.editor.EditorResultDependent
 import fr.geobert.radis.ui.editor.OperationEditor
 import hirondelle.date4j.DateTime
-import java.util.Calendar
-import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
-public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
+public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>,
+        IOperationList {
     private var mOldChildCount: Int = -1
     private var freshLoader: Boolean = false
     private var mListLayout: LinearLayoutManager? = null
