@@ -215,14 +215,15 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     override public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d("ScheduledOpListFragment", "onOperationEditorResult req:$requestCode, result:$resultCode, adapter:$mAdapter")
         if (resultCode == Activity.RESULT_OK && data != null) {
-            val op: ScheduledOperation = data.getParcelableExtra("operation")
             when (requestCode) {
                 ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE -> {
+                    val op: ScheduledOperation = data.getParcelableExtra("operation")
                     Log.d("ScheduledOpListFragment", "onOperationEditorResult ADD")
                     mAdapter?.addOp(op)
                     setupListVisibility()
                 }
                 ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT -> {
+                    val op: ScheduledOperation = data.getParcelableExtra("operation")
                     Log.d("ScheduledOpListFragment", "onOperationEditorResult UPDATE")
                     mAdapter?.updateOp(op)
                 }
