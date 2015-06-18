@@ -329,7 +329,7 @@ public object Tools {
         return getDateStr(cal.getTimeInMillis())
     }
 
-    private interface BooleanResultNoParamFct {
+    public  interface BooleanResultNoParamFct {
         public fun run(): Boolean
     }
 
