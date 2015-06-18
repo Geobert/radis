@@ -148,7 +148,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 sb
             })
             if (stringbuilder.length() > 0) {
-                stringbuilder.deleteCharAt(stringbuilder.length() - 1)
+                stringbuilder.replace(stringbuilder.length() - 1, stringbuilder.length(), "\n")
                 writer.write(stringbuilder.toString())
             } else {
                 Tools.popError(this, getString(R.string.no_column_selected), null)

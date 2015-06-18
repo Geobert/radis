@@ -12,7 +12,7 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
     override fun iterator(): Iterator<ExportCol> = columns.iterator()
 
     private val columns: MutableList<ExportCol> = linkedListOf()
-    private var selectedPos = -1
+    public var selectedPos: Int = -1
 
     init {
         columns.addAll(cols)
@@ -26,23 +26,13 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
         holder.label.setText(item.label)
         holder.toExport.setChecked(item.toExport)
 
-        holder.toExport.setOnCheckedChangeListener { b, checked ->
-            item.toExport = checked
-        }
         holder.view.setBackgroundResource(if (position == selectedPos) R.drawable.line_selected_gradient
         else R.color.normal_bg)
-
-        holder.view.setOnClickListener { v ->
-            val old = selectedPos
-            selectedPos = position
-            notifyItemChanged(position)
-            notifyItemChanged(old)
-        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ExportColRowHolder? {
         val l = LayoutInflater.from(ctx).inflate(R.layout.export_col_row, parent, false)
-        return ExportColRowHolder(l)
+        return ExportColRowHolder(l, this)
     }
 
     public fun moveItem(offset: Int) {
@@ -57,5 +47,9 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
         columns.add(newPos, item)
         notifyItemMoved(from, newPos)
         selectedPos += offset
+    }
+
+    fun getItem(position: Int): ExportCol {
+        return columns.get(position)
     }
 }
