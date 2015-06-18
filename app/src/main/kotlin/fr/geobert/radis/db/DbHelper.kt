@@ -138,7 +138,7 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
     }
 
     companion object {
-        protected val DATABASE_NAME: String = "radisDb"
+        public  val DATABASE_NAME: String = "radisDb"
         protected val DATABASE_VERSION: Int = 20
 
         public var instance: DbHelper? = null

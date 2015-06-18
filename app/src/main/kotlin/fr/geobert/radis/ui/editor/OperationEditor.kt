@@ -143,7 +143,6 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        hideProgress()
         when (loader.getId()) {
             GET_OP -> {
                 if (data.moveToFirst()) {

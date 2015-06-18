@@ -197,8 +197,7 @@
     <string name="sch_no_choosen_account">Veuillez choisir un compte sur le volet planification</string>
     <string name="choose_account">Sélectionnez un compte</string>
     <string name="defined_by_transfert">Défini par le transfert</string>
-
-    <string name="loading">Chargement…</string>
+    <string name="please_wait">Patientez…</string>
     <string name="sched_op_total_sum">Total crédit : %1$s — Total débit : %2$"s\nBalance : %3$s</string>
     <string name="sched_op_total_choose_account">Choisir un compte pour avoir son total des échéances</string>
     <string name="sch_edition">Saisie d\'échéance</string>
@@ -264,7 +263,7 @@
     <string name="quick_add_long_press_action_text">Le tap long va %s</string>
     <string name="override_quick_add_action">Supplanter l\'action du tap long sur ajout rapide</string>
     <string name="export_csv">Exporter en CSV</string>
-    <string name="export_csv_success">CSV exporté dans\n%s</string>
+    <string name="export_csv_success">CSV exporté(s) dans\n%s</string>
     <string name="open">Envoyer le fichier</string>
     <string-array name="csv_header_item">
         <item>Compte</item>
@@ -279,4 +278,5 @@
     <string name="cols_to_export">Colonnes à exporter</string>
     <string name="one_file_per_account">Faire un fichier par compte</string>
     <string name="export">Exporter</string>
+    <string name="no_column_selected">Aucune colonne sélectionnée. Il faut au moins une colonne à exporter.</string>
 </resources>

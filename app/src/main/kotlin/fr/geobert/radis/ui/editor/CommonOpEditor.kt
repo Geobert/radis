@@ -44,8 +44,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     protected fun fetchOp(loaderId: Int) {
-        showProgress()
-        getSupportLoaderManager().initLoader<Cursor>(loaderId, Bundle(), this)
+        getSupportLoaderManager().initLoader(loaderId, Bundle(), this)
     }
 
     // default and common behaviors

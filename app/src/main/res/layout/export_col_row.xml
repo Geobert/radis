@@ -3,16 +3,15 @@
               android:orientation="horizontal"
               android:padding="8dp"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="38dp">
 
     <TextView
             android:id="@+id/col_name"
             android:layout_width="0dp"
-            android:layout_marginTop="3dp"
             android:gravity="center_vertical"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="20sp"/>
+            android:textSize="16sp"/>
 
     <CheckBox
             android:id="@+id/col_is_to_export_chk"

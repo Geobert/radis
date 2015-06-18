@@ -30,16 +30,12 @@ import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
 import fr.geobert.radis.tools.*
-import fr.geobert.radis.ui.ConfigEditor
-import fr.geobert.radis.ui.OperationListFragment
-import fr.geobert.radis.ui.ScheduledOpListFragment
-import fr.geobert.radis.ui.StatisticsListFragment
+import fr.geobert.radis.ui.*
 import fr.geobert.radis.ui.drawer.NavDrawerItem
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter
 import fr.geobert.radis.ui.editor.AccountEditor
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
-import hirondelle.date4j.DateTime
 import io.fabric.sdk.android.Fabric
 import java.io.BufferedWriter
 import java.io.File
@@ -163,7 +159,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 EXPORT_CSV -> {
-                    exportCSV()
+                    ExporterActivity.callMe(activity)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 else -> Log.d(TAG, "Undeclared fragment")
@@ -444,74 +440,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     public fun getCurrentAccountId(): Long {
         return mAccountManager.getCurrentAccountId(this)
-    }
-
-    private fun exportCSV() {
-        val filename = "${filenameTimetag()}_radis.csv"
-        var writer: BufferedWriter? = null
-        try {
-            val sd = Environment.getExternalStorageDirectory()
-            if (sd.canWrite()) {
-                val backupDBDir = "/radis/"
-                val backupDir = File(sd, backupDBDir)
-                backupDir.mkdirs()
-                val file = File(sd, "$backupDBDir$filename")
-                writer = BufferedWriter(FileWriter(file))
-                processExportCSV(writer)
-                val path = file.getAbsolutePath()
-                ExportCSVSucceedDialog.newInstance(path).show(getSupportFragmentManager(), "csv_export")
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            writer?.close()
-        }
-    }
-
-    private fun processExportCSV(writer: Writer) {
-        val accountsCursor = AccountTable.fetchAllAccounts(this)
-        val accounts = accountsCursor.map { Account(it) }
-        accountsCursor.close()
-        writer.write("${getString(R.string.csv_header)}\n")
-        accounts.forEach {
-            val opCursor = OperationTable.fetchAllOps(this, it.id)
-            val operations = opCursor.map { Operation(it) }
-            val accountName = it.name
-            operations.forEach {
-                writer.write("\"${accountName}\",\"${it.getDate().formatDate()}\",\"${it.mThirdParty}\",\"${it.getSumStr()}\",\"${it.mTag}\",\"${it.mMode}\",\"${it.mNotes}\"\n")
-            }
-        }
-        writer.flush()
-    }
-
-    public class ExportCSVSucceedDialog : DialogFragment() {
-        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            super.onCreateDialog(savedInstanceState)
-            val builder = AlertDialog.Builder(getActivity())
-            val path = getArguments().getString("path")
-            val msg = getString(R.string.export_csv_success).format(path.substring(0, path.lastIndexOf(File.separator) + 1))
-            builder.setTitle(R.string.export_csv).setMessage(msg).setCancelable(false).
-                    setPositiveButton(R.string.open, { d, i ->
-                        val intent = Intent(Intent.ACTION_SEND)
-                        intent.setType("text/plain")
-                        intent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file://$path"))
-                        startActivity(Intent.createChooser(intent, getString(R.string.open)))
-                    }).
-                    setNegativeButton(R.string.ok, { d, i ->
-
-                    })
-            return builder.create()
-        }
-
-        companion object {
-            public fun newInstance(path: String): ExportCSVSucceedDialog {
-                val f = ExportCSVSucceedDialog()
-                val args = Bundle()
-                args.putString("path", path)
-                f.setArguments(args)
-                return f
-            }
-        }
     }
 
     private val TAG = "MainActivity"

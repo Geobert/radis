@@ -31,7 +31,6 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OperationsAdapter
-import fr.geobert.radis.ui.editor.EditorResultDependent
 import fr.geobert.radis.ui.editor.OperationEditor
 import hirondelle.date4j.DateTime
 import kotlin.platform.platformStatic

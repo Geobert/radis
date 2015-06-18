@@ -273,7 +273,6 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        hideProgress()
         when (loader.getId()) {
             GET_SCH_OP -> if (data.getCount() > 0 && data.moveToFirst()) {
                 getSchFragment().mCurrentSchOp = ScheduledOperation(data)
