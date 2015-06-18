@@ -68,14 +68,21 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
         if (savedInstanceState != null) onRestoreInstanceState(savedInstanceState)
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
+    override fun onSaveInstanceState(outState: Bundle) {
         super<BaseActivity>.onSaveInstanceState(outState)
-        // tODO
+        outState.putBoolean("oneFilePerAccount", oneFilePerAccountChk.isChecked())
+        outState.putParcelableArray("columns", adapter.toArray())
+        outState.putInt("selected", adapter.selectedPos)
     }
 
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
-        // TODO
+        oneFilePerAccountChk.setChecked(savedInstanceState.getBoolean("oneFilePerAccount"))
+        adapter.fromArray(savedInstanceState.getParcelableArray("columns"))
+        adapter.selectedPos = savedInstanceState.getInt("selected")
+        if (adapter.selectedPos > -1) {
+            adapter.notifyItemChanged(adapter.selectedPos)
+        }
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {

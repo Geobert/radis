@@ -1,5 +1,6 @@
 package fr.geobert.radis.ui.adapter
 
+import android.os.Parcelable
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -51,5 +52,14 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
 
     fun getItem(position: Int): ExportCol {
         return columns.get(position)
+    }
+
+    fun toArray(): Array<ExportCol> {
+        return columns.toTypedArray()
+    }
+
+    fun fromArray(cols: Array<Parcelable>) {
+        columns.clear()
+        cols.forEach { columns.add(it as ExportCol) }
     }
 }

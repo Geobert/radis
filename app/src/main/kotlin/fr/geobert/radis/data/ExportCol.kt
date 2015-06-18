@@ -1,6 +1,20 @@
 package fr.geobert.radis.data
 
-public class ExportCol(s: String) {
-    var label: String = s
-    var toExport: Boolean = true
+import android.os.Parcel
+import kotlin.properties.Delegates
+
+public class ExportCol(s: String = "") : ImplParcelable {
+    override val parcels = hashMapOf<String, Any?>()
+
+    var label: String by Delegates.mapVar(parcels)
+    var toExport: Boolean by Delegates.mapVar(parcels)
+
+    constructor(p: Parcel) : this() {
+        readFromParcel(p)
+    }
+
+    init {
+        label = s
+        toExport = true
+    }
 }
