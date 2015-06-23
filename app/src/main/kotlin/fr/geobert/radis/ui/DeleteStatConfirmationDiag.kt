@@ -27,13 +27,11 @@ class DeleteStatConfirmationDiag : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         super.onCreate(savedInstanceState)
-        val args: Bundle = getArguments() : Bundle
+        val args: Bundle = getArguments()
         statId = args.getLong("statId")
-        return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
-            override fun onClick(p0: DialogInterface, p1: Int) {
-                if (StatisticTable.deleteStatistic(statId, ctx)) {
-                    getActivity().sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_STAT), null)
-                }
+        return Tools.createDeleteConfirmationDialog(getActivity(), { d: DialogInterface, i: Int ->
+            if (StatisticTable.deleteStatistic(statId, ctx)) {
+                getActivity().sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_STAT), null)
             }
         })
     }

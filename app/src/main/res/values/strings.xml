@@ -55,7 +55,7 @@
     <string name="third_parties">Third party</string>
     <string name="get_more_op">Previous month…</string>
     <string name="delete_confirmation">Really delete?</string>
-    <string name="account_delete_confirmation">Delete account will also delete all scheduled transaction attached to it.
+    <string name="account_delete_confirmation">Deleting account \"%s\" will also delete all scheduled transaction attached to it.
         \nReally delete?
     </string>
     <string name="yes">Yes</string>
@@ -194,12 +194,12 @@
     <string name="sch_no_choosen_account">Please choose an account on planification page</string>
     <string name="choose_account">Choose an account</string>
     <string name="defined_by_transfert">Defined by transfert</string>
-
-    <string name="loading">Loading…</string>
+    <string name="please_wait">Please wait...</string>
     <string name="sched_op_total_sum">Total credit : %1$s — Total debit : %2$"s\nBalance : %3$s</string>
     <string name="sched_op_total_choose_account">Choose an account to get its scheduled transactions total</string>
     <string name="sch_edition">Scheduled transaction edition</string>
     <string name="delete_account">Delete account</string>
+    <string name="delete_account_title">Delete account \"%s\"</string>
     <string name="debug">Debug</string>
     <string name="use_weighted_infos">Use weighted completion</string>
     <string name="use_weighted_infos_details">Most used informations are suggested first</string>
@@ -261,4 +261,21 @@
     <string name="quick_add_long_press_action_title">Action on quick add long press</string>
     <string name="quick_add_long_press_action_text">Long press will %s</string>
     <string name="override_quick_add_action">Override quick add long press action</string>
+    <string name="export_csv">Export to CSV</string>
+    <string name="export_csv_success">CSV exported to\n%s</string>
+    <string name="open">Send the file</string>
+    <string-array name="csv_header_item">
+        <item>Account</item>
+        <item>Date</item>
+        <item>Third party</item>
+        <item>Amount</item>
+        <item>Tag</item>
+        <item>Mode</item>
+        <item>Notes</item>
+    </string-array>
+    <string name="file_name">File\'s name</string>
+    <string name="cols_to_export">Colonnes à exporter</string>
+    <string name="one_file_per_account">Makes one file per account</string>
+    <string name="export">Export</string>
+    <string name="no_column_selected">No selected column. At least one column has to be selected.</string>
 </resources>

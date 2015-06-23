@@ -23,31 +23,46 @@ import java.text.ParseException
 import kotlin.properties.Delegates
 
 public class OperationEditFragment() : Fragment(), TextWatcher {
-    private val edit_op_sum by Delegates.lazy { getActivity().findViewById(R.id.edit_op_sum) as EditText }
-    private val edit_op_third_party by Delegates.lazy { getActivity().findViewById(R.id.edit_op_third_party) as MyAutoCompleteTextView }
-    private val edit_op_tag by Delegates.lazy { getActivity().findViewById(R.id.edit_op_tag) as MyAutoCompleteTextView }
-    private val edit_op_mode by Delegates.lazy { getActivity().findViewById(R.id.edit_op_mode) as MyAutoCompleteTextView }
-    private val edit_op_notes by Delegates.lazy { getActivity().findViewById(R.id.edit_op_notes) as EditText }
-    private val edit_op_date by Delegates.lazy { getActivity().findViewById(R.id.edit_op_date) as DatePicker }
-    private val third_party_cont by Delegates.lazy { getActivity().findViewById(R.id.third_party_cont) as LinearLayout }
-    private val transfert_cont by Delegates.lazy { getActivity().findViewById(R.id.transfert_cont) as LinearLayout }
-    private val is_transfert by Delegates.lazy { getActivity().findViewById(R.id.is_transfert) as CheckBox }
-    private val is_checked by Delegates.lazy { getActivity().findViewById(R.id.is_checked) as CheckBox }
-    private val edit_op_sign by Delegates.lazy { getActivity().findViewById(R.id.edit_op_sign) as ImageButton }
-    private val trans_src_account by Delegates.lazy { getActivity().findViewById(R.id.trans_src_account) as Spinner }
-    private val trans_dst_account by Delegates.lazy { getActivity().findViewById(R.id.trans_dst_account) as Spinner }
-    private val mSumTextWatcher by Delegates.lazy { CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this) }
-    private val mActivity by Delegates.lazy { getActivity() as CommonOpEditor }
+    private var edit_op_sum: EditText by Delegates.notNull()
+    private var edit_op_third_party: MyAutoCompleteTextView by Delegates.notNull()
+    private var edit_op_tag: MyAutoCompleteTextView by Delegates.notNull()
+    private var edit_op_mode: MyAutoCompleteTextView by Delegates.notNull()
+    private var edit_op_notes: EditText by Delegates.notNull()
+    private var edit_op_date: DatePicker by Delegates.notNull()
+    private var third_party_cont: LinearLayout by Delegates.notNull()
+    private var transfert_cont: LinearLayout by Delegates.notNull()
+    private var is_transfert: CheckBox by Delegates.notNull()
+    private var is_checked: CheckBox by Delegates.notNull()
+    private var edit_op_sign: ImageButton by Delegates.notNull()
+    private var trans_src_account: Spinner by Delegates.notNull()
+    private var trans_dst_account: Spinner by Delegates.notNull()
+    private var mSumTextWatcher: CorrectCommaWatcher by Delegates.notNull()
+    private var mActivity: CommonOpEditor by Delegates.notNull()
     private var mWasInvertByTransfert: Boolean = false
     private var isOkClicked: Boolean = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.main_op_edit, container, false)
+        val l = inflater.inflate(R.layout.main_op_edit, container, false)
+        edit_op_sum = l.findViewById(R.id.edit_op_sum) as EditText
+        edit_op_third_party = l.findViewById(R.id.edit_op_third_party) as MyAutoCompleteTextView
+        edit_op_tag = l.findViewById(R.id.edit_op_tag) as MyAutoCompleteTextView
+        edit_op_mode = l.findViewById(R.id.edit_op_mode) as MyAutoCompleteTextView
+        edit_op_notes = l.findViewById(R.id.edit_op_notes) as EditText
+        edit_op_date = l.findViewById(R.id.edit_op_date) as DatePicker
+        third_party_cont = l.findViewById(R.id.third_party_cont) as LinearLayout
+        transfert_cont = l.findViewById(R.id.transfert_cont) as LinearLayout
+        is_transfert = l.findViewById(R.id.is_transfert) as CheckBox
+        is_checked = l.findViewById(R.id.is_checked) as CheckBox
+        edit_op_sign = l.findViewById(R.id.edit_op_sign) as ImageButton
+        trans_src_account = l.findViewById(R.id.trans_src_account) as Spinner
+        trans_dst_account = l.findViewById(R.id.trans_dst_account) as Spinner
+        mSumTextWatcher = CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this)
+        return l
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super<Fragment>.onActivityCreated(savedInstanceState)
-
+        mActivity = getActivity() as CommonOpEditor
         edit_op_third_party.setNextFocusDownId(R.id.edit_op_sum)
         edit_op_sum.setNextFocusDownId(R.id.edit_op_tag)
         edit_op_tag.setNextFocusDownId(R.id.edit_op_mode)

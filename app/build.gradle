@@ -1,8 +1,8 @@
 buildscript {
-    ext.kotlin_version = '0.12.200'
-    ext.android_support = '22.1.1'
+    ext.kotlin_version = '0.12.412'
+    ext.android_support = '22.2.0'
     repositories {
-        mavenCentral()
+        jcenter()
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
@@ -17,7 +17,7 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 
 repositories {
-    mavenCentral()
+    jcenter()
     maven { url 'https://maven.fabric.io/public' }
     maven {
         url 'http://oss.sonatype.org/content/repositories/snapshots'
@@ -34,8 +34,8 @@ android {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
         targetSdkVersion 22
-        versionCode 60
-        versionName "1.1.10"
+        versionCode 61
+        versionName "1.2"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }

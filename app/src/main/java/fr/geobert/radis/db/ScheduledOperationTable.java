@@ -144,7 +144,7 @@ public class ScheduledOperationTable {
                                            final ScheduledOperation op, final long prevSum, final long rowId) {
         Log.d(TAG, "updateAllOccurences");
         final long accountId = op.getmAccountId();
-        OperationTable.updateAllOccurrences(ctx, accountId, rowId, op);
+        OperationTable.INSTANCE$.updateAllOccurrences(ctx, accountId, rowId, op);
         AccountTable.consolidateSums(ctx, accountId);
     }
 
@@ -154,7 +154,7 @@ public class ScheduledOperationTable {
                 .getLong(schOp
                         .getColumnIndex(ScheduledOperationTable.KEY_SCHEDULED_ACCOUNT_ID));
         final long transfertId = schOp.getLong(schOp.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID));
-        OperationTable.deleteAllOccurrences(ctx, accountId, schOpId, transfertId);
+        OperationTable.INSTANCE$.deleteAllOccurrences(ctx, accountId, schOpId, transfertId);
         AccountTable.consolidateSums(ctx, accountId);
         if (null != schOp) {
             schOp.close();

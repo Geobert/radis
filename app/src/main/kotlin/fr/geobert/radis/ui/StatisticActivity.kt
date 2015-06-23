@@ -26,7 +26,16 @@ class StatisticActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<BaseActivity>.onCreate(savedInstanceState)
-        setContentView(R.layout.statistic_activity)
+        val extras = getIntent().getExtras()
+        val title = extras?.getString(ChartFactory.TITLE)
+        // setContentView need different timing according to the need of title
+        if (title != null) {
+            setContentView(R.layout.statistic_activity)
+            setTitle(title)
+        } else {
+            requestWindowFeature(Window.FEATURE_NO_TITLE)
+            setContentView(R.layout.statistic_activity)
+        }
 
         setIconOnClick(object : View.OnClickListener {
             override fun onClick(view: View) {
@@ -36,13 +45,6 @@ class StatisticActivity : BaseActivity() {
         mToolbar.getMenu().clear()
         setIcon(R.drawable.ok_48)
 
-        val extras = getIntent().getExtras()
-        val title = extras?.getString(ChartFactory.TITLE)
-        if (title != null) {
-            setTitle(title)
-        } else {
-            requestWindowFeature(Window.FEATURE_NO_TITLE)
-        }
 
         accountNameLbl.setText(extras.getString(ACCOUNT_NAME))
         filterLbl.setText(extras.getString(FILTER))

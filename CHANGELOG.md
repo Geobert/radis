@@ -1,3 +1,7 @@
+Version 1.2 - 23/06/2015
+- export vers CSV
+- stabilisation
+
 Version 1.1.10 - 04/06/2015
 - stabilisation
 

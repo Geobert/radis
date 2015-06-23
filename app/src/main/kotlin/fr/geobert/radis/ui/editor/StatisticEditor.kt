@@ -45,7 +45,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     private var mStatId: Long = 0
     private var mStat: Statistic? = null
-    private var mOrigStat: Statistic by Delegates.notNull()
+    private var mOrigStat: Statistic = Statistic()
 
     private val GET_STAT = 700
 
@@ -79,7 +79,6 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             if (mStatId == 0L) {
                 if (null == mStat) {
                     mStat = Statistic()
-                    mOrigStat = Statistic()
                 }
                 fillInfoSpinner()
                 fillTimeScaleSpinner()
@@ -190,7 +189,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             }
             button.setText(dt.formatDateLong())
         }, date[Calendar.YEAR], date[Calendar.MONTH], date[Calendar.DAY_OF_MONTH])
-        datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(android.R.string.cancel), null:Message?)
+        datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(android.R.string.cancel), null as Message?)
         datePicker.show()
     }
 
@@ -287,7 +286,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS -> {
                 val valid = "([0-9]+)"
                 val x = mxLastEdt.getText().toString()
-                if (!x.matches(valid)) {
+                if (!x.matches(valid.toRegex())) {
                     fun last(): String =
                             if (mStat?.timeScaleType == Statistic.PERIOD_YEARS)
                                 getString(R.string.last_female)

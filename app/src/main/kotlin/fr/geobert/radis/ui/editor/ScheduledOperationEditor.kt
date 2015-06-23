@@ -150,13 +150,14 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
     override fun saveOpAndExit() {
         val op = getSchFragment().mCurrentSchOp
+        val origOp = mOriginalSchOp
         if (op != null) {
             if (mRowId <= 0) {
-                if (mOpIdSource > 0) {
+                if (mOpIdSource > 0 && origOp != null) {
                     // is converting a transaction into a schedule
-                    if ((op.getDate() != mOriginalSchOp!!.getDate())) {
+                    if ((op.getDate() != origOp.getDate())) {
                         // change the date of the source transaction
-                        OperationTable.updateOp(this, mOpIdSource, op, mOriginalSchOp)
+                        OperationTable.updateOp(this, mOpIdSource, op, origOp)
                     }
                     // do not insert another occurrence with same date
                     ScheduledOperation.addPeriodicityToDate(op)
@@ -167,13 +168,13 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                 }
                 startInsertionServiceAndExit()
             } else {
-                if (!op.equals(mOriginalSchOp)) {
+                if (!op.equals(origOp)) {
                     UpdateOccurencesDialog.newInstance().show(getSupportFragmentManager(), "askOnDiff")
                 } else {
                     // nothing to update
                     val res = Intent()
-                    getSchFragment().mCurrentSchOp!!.mRowId = mRowId
-                    res.putExtra("operation", getSchFragment().mCurrentSchOp!!)
+                    op.mRowId = mRowId
+                    res.putExtra("operation", op)
                     setResult(Activity.RESULT_OK, res)
                     finish()
                 }
@@ -272,7 +273,6 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        hideProgress()
         when (loader.getId()) {
             GET_SCH_OP -> if (data.getCount() > 0 && data.moveToFirst()) {
                 getSchFragment().mCurrentSchOp = ScheduledOperation(data)

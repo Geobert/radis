@@ -87,14 +87,17 @@ public class OperationEditor : CommonOpEditor() {
                 mRowId = OperationTable.createOp(this, op, op.mAccountId)
                 setResAndExit()
             } else {
-                if (op.equals(mOriginalOp)) {
-                    setResAndExit()
-                } else {
-                    if (op.mScheduledId > 0 && !op.equalsButDate(mOriginalOp)) {
-                        UpdateScheduledOp.newInstance(op, mPreviousSum, mRowId).show(getSupportFragmentManager(), "dialog")
-                    } else {
-                        OperationTable.updateOp(this, mRowId, op, mOriginalOp)
+                val origOp = mOriginalOp
+                if (origOp != null) {
+                    if (op.equals(origOp)) {
                         setResAndExit()
+                    } else {
+                        if (op.mScheduledId > 0 && !op.equalsButDate(origOp)) {
+                            UpdateScheduledOp.newInstance(op, mPreviousSum, mRowId).show(getSupportFragmentManager(), "dialog")
+                        } else {
+                            OperationTable.updateOp(this, mRowId, op, origOp)
+                            setResAndExit()
+                        }
                     }
                 }
             }
@@ -140,7 +143,6 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        hideProgress()
         when (loader.getId()) {
             GET_OP -> {
                 if (data.moveToFirst()) {
@@ -183,7 +185,7 @@ public class OperationEditor : CommonOpEditor() {
             }).setNeutralButton(R.string.disconnect, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface, id: Int) {
                     currentOp.mScheduledId = 0
-                    OperationTable.updateOp(act, rowId, currentOp, act.mOriginalOp)
+                    OperationTable.updateOp(act, rowId, currentOp, act.mOriginalOp!!)
                     act.setResAndExit()
                 }
             }).setNegativeButton(R.string.cancel, object : DialogInterface.OnClickListener {

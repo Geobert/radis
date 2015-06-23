@@ -17,7 +17,7 @@ public abstract class BaseActivity : ActionBarActivity() {
     protected fun showProgress() {
         mProgressCount++
         if (mProgress == null) {
-            mProgress = ProgressDialog.show(this, "", getString(R.string.loading))
+            mProgress = ProgressDialog.show(this, "", getString(R.string.please_wait))
         } else {
             mProgress!!.show()
         }

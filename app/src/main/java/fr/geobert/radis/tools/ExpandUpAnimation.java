@@ -66,7 +66,7 @@ public class ExpandUpAnimation extends Animation {
         if (mBg == null) {
             mBg = view.getBackground();
         }
-        Tools.setViewBg(view, null);
+        Tools.INSTANCE$.setViewBg(view, null);
         ExpandUpAnimation.setChildrenVisibility(mAnimatedView, View.INVISIBLE);
     }
 
@@ -92,7 +92,7 @@ public class ExpandUpAnimation extends Animation {
             } else {
                 mAnimatedView.setVisibility(View.VISIBLE);
                 ExpandUpAnimation.setChildrenVisibility(mAnimatedView, View.VISIBLE);
-                Tools.setViewBg(mAnimatedView, mBg);
+                Tools.INSTANCE$.setViewBg(mAnimatedView, mBg);
             }
             mWasEndedAlready = true;
         }

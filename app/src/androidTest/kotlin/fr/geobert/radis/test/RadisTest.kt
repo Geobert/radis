@@ -1130,6 +1130,7 @@ public class RadisTest {
         onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
         Helpers.pauseTest(800)
         val askDate = getActivity().getResources().getStringArray(R.array.quickadd_actions)[0]
+        Helpers.pauseTest(500)
         onView(withText(askDate)).perform(click())
         Helpers.clickOnActionItemConfirm()
 
@@ -1192,11 +1193,7 @@ public class RadisTest {
         val date = today.minusMonth(1).getEndOfMonth()
         // -1 on year to work around Espresso bug
         onView(iz(instanceOf(javaClass<DatePicker>())) as Matcher<View>).perform(PickerActions.setDate(date.getYear() - 1, date.getMonth(), date.getDay()))
-        //Helpers.clickOnDialogButton("zumbala")
-        onView(allOf(iz(instanceOf(javaClass<Button>())), withText("OK"),
-                isDisplayed()) as Matcher<View>).perform(click())
-
-        Helpers.pauseTest(30000)
+        onView(withId(android.R.id.button1)).perform(click())
 
         val monthStr = today.minusMonth(1).format("MMMM", Locale.getDefault())
         val m = monthStr.substring(0, 1).capitalize().concat(monthStr.substring(1))

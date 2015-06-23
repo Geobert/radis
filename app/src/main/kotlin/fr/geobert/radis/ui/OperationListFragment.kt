@@ -33,12 +33,11 @@ import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OperationsAdapter
 import fr.geobert.radis.ui.editor.OperationEditor
 import hirondelle.date4j.DateTime
-import java.util.Calendar
-import java.util.GregorianCalendar
 import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
-public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>, IOperationList {
+public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>,
+        IOperationList {
     private var mOldChildCount: Int = -1
     private var freshLoader: Boolean = false
     private var mListLayout: LinearLayoutManager? = null
@@ -170,7 +169,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     //    }
 
     fun processAccountChanged(itemId: Long) {
-        Log.d(TAG, "processAccountChanged to $itemId", Exception())
+        Log.d(TAG, "processAccountChanged to $itemId")
         mAccountManager.setCurrentAccountId(itemId, mActivity)
         earliestOpDate = null
         mOldChildCount = -1
@@ -494,32 +493,26 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         if (resultCode == Activity.RESULT_OK && data != null) {
             val op: Operation = data.getParcelableExtra("operation")
             mLastSelectionId = op.mRowId
-            when (requestCode) {
-                OperationEditor.OPERATION_CREATOR -> {
-                    mOpListAdapter?.addOp(op)
-                    mAccountManager.refreshCurrentAccount()
-                    refreshSelection()
-                    setupEmptyViewVisibility(mOpListAdapter?.getItemCount() == 0)
-                }
-                OperationEditor.OPERATION_EDITOR -> {
-                    mOpListAdapter?.updateOp(op)
-                    mAccountManager.refreshCurrentAccount()
-                    refreshSelection()
+            val adap = mOpListAdapter
+            if (adap == null) {
+                mAccountManager.refreshCurrentAccount()
+                getMoreOperations(initialStartDate())
+            } else {
+                when (requestCode) {
+                    OperationEditor.OPERATION_CREATOR -> {
+                        adap.addOp(op)
+                        mAccountManager.refreshCurrentAccount()
+                        refreshSelection()
+                        setupEmptyViewVisibility(adap.getItemCount() == 0)
+                    }
+                    OperationEditor.OPERATION_EDITOR -> {
+                        adap.updateOp(op)
+                        mAccountManager.refreshCurrentAccount()
+                        refreshSelection()
+                    }
                 }
             }
 
-            //            val date = data.getLongExtra("opDate", 0)
-            //            Log.d(TAG, "onOperationEditorResult, mLastSelectionId:$mLastSelectionId / date:${date.formatDate()}")
-            //            if (date > 0) {
-            //                val opDate = DateTime.forInstant(date, TIME_ZONE)
-            //                Log.d(TAG, "onOperationEditorResult, opDate:$opDate")
-            //                val today = DateTime.today(TIME_ZONE)
-            //                if (today.gt(opDate)) {
-            //                    getMoreOperations(opDate)
-            //                } else {
-            //                    getMoreOperations(earliestOpDate)
-            //                }
-            //            }
         }
     }
 
@@ -546,12 +539,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val args = getArguments()
             this.accountId = args.getLong("accountId")
             this.operationId = args.getLong("opId")
-            return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
-                override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                    if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
-                        parentFrag.afterDelUpdateSelection(operationId)
-                    }
-
+            return Tools.createDeleteConfirmationDialog(getActivity(), { d, i ->
+                if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+                    parentFrag.afterDelUpdateSelection(operationId)
                 }
             })
         }
@@ -637,34 +627,37 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             val args = getArguments()
             this.accountId = args.getLong("accountId")
-            return Tools.createDeleteConfirmationDialog(getActivity(), object : DialogInterface.OnClickListener {
-                override fun onClick(dialogInterface: DialogInterface, i: Int) {
-                    if (AccountTable.deleteAccount(getActivity(), accountId)) {
-                        val act = getActivity() as MainActivity
-                        val accMan = act.mAccountManager
-                        // attempt to fix Fatal Exception: java.lang.IllegalStateException
-                        // couldn't move cursor to position 4
-                        if (accountId == accMan.getCurrentAccountId(act)) {
-                            accMan.setCurrentAccountId(null, getActivity())
+            val accountName = args.getString("accountName")
+            return Tools.createDeleteConfirmationDialog(getActivity(),
+                    getActivity().getString(R.string.account_delete_confirmation).format(accountName),
+                    getString(R.string.delete_account_title).format(accountName),
+                    { d, i ->
+                        if (AccountTable.deleteAccount(getActivity(), accountId)) {
+                            val act = getActivity() as MainActivity
+                            val accMan = act.mAccountManager
+                            // attempt to fix Fatal Exception: java.lang.IllegalStateException
+                            // couldn't move cursor to position 4
+                            if (accountId == accMan.getCurrentAccountId(act)) {
+                                accMan.setCurrentAccountId(null, getActivity())
+                            }
+                            if (accountId == accMan.getDefaultAccountId(act)) {
+                                accMan.mCurDefaultAccount = null
+                                accMan.setCurrentAccountId(null, getActivity())
+                                DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
+                            }
+                            MainActivity.refreshAccountList(getActivity())
+                        } else {
+                            (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null, getActivity())
                         }
-                        if (accountId == accMan.getDefaultAccountId(act)) {
-                            accMan.mCurDefaultAccount = null
-                            accMan.setCurrentAccountId(null, getActivity())
-                            DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
-                        }
-                        MainActivity.refreshAccountList(getActivity())
-                    } else {
-                        (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null, getActivity())
-                    }
-                }
-            }, R.string.account_delete_confirmation)
+                    })
         }
 
         companion object {
-            platformStatic public fun newInstance(accountId: Long): DeleteAccountConfirmationDialog {
+            platformStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()
                 args.putLong("accountId", accountId)
+                args.putString("accountName", accountName)
                 frag.setArguments(args)
                 return frag
             }

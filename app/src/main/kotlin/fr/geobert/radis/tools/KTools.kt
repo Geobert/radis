@@ -118,3 +118,8 @@ public fun Parcel.readBoolean(): Boolean = this.readByte() != 0.toByte()
 public fun <T> List<T>.forMutableEach(): Unit {
 
 }
+
+public fun filenameTimetag(): String {
+    val today = DateTime.now(TIME_ZONE)
+    return today.format("YYYYMMDD|_|ssmmhh")
+}

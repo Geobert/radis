@@ -43,8 +43,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
         val op = mCurrentSchOp
         mActivity.mCurrentOp = op as Operation
         mCustomPeriodicityVal.setText(if (mCurrentSchOp?.mPeriodicity == 0) ""
-        else
-            mCurrentSchOp?.mPeriodicity.toString())
+        else mCurrentSchOp?.mPeriodicity.toString())
         populatePeriodicitySpinner()
         populateCustomPeriodicitySpinner()
         populateAccountSpinner((getActivity() as CommonOpEditor).mAccountManager.mAccountAdapter)
@@ -172,7 +171,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
             }
         }
         Log.d("ScheduleEditorFragment", "selected accountId = ${op.mAccountId}")
-        val isCustom = mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner.getAdapter().getCount() - 1)
+        val isCustom = mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner.getAdapter()?.getCount() ?: 0 - 1)
         if (!isCustom) {
             op.mPeriodicity = 1
             op.mPeriodicityUnit = mPeriodicitySpinner.getSelectedItemPosition()
