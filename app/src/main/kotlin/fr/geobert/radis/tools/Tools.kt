@@ -127,11 +127,6 @@ public object Tools {
         return false
     }
 
-    public fun showKeyboard(ctx: Activity) {
-        val inputManager = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputManager.showSoftInput(ctx.getCurrentFocus(), InputMethodManager.SHOW_IMPLICIT)
-    }
-
     public class AdvancedDialog : DialogFragment() {
         private var mId: Int = 0
 
@@ -141,17 +136,9 @@ public object Tools {
             val ctx = getActivity()
             val listener: DialogInterface.OnClickListener? = when (mId) {
                 MainActivity.SAVE_ACCOUNT -> createRestoreOrBackupClickListener(R.string.backup_success,
-                        R.string.backup_failed, object : BooleanResultNoParamFct {
-                    override fun run(): Boolean {
-                        return DbHelper.backupDatabase()
-                    }
-                })
+                        R.string.backup_failed, { -> DbHelper.backupDatabase() })
                 MainActivity.RESTORE_ACCOUNT -> createRestoreOrBackupClickListener(R.string.restore_success,
-                        R.string.restore_failed, object : BooleanResultNoParamFct {
-                    override fun run(): Boolean {
-                        return DbHelper.restoreDatabase(ctx)
-                    }
-                })
+                        R.string.restore_failed, { -> DbHelper.restoreDatabase(ctx) })
                 MainActivity.PROCESS_SCH -> object : DialogInterface.OnClickListener {
                     override fun onClick(dialog: DialogInterface, which: Int) {
                         RadisService.acquireStaticLock(ctx)
@@ -187,11 +174,8 @@ public object Tools {
             }
         }
         val builder = AlertDialog.Builder(ctx)
-        builder.setMessage(msgId).setCancelable(false).setPositiveButton(R.string.to_continue, onClick).setNegativeButton(R.string.cancel, object : DialogInterface.OnClickListener {
-            override fun onClick(dialog: DialogInterface, id: Int) {
-                dialog.cancel()
-            }
-        })
+        builder.setMessage(msgId).setCancelable(false).setPositiveButton(R.string.to_continue, onClick)
+                .setNegativeButton(R.string.cancel, { d, i -> d.cancel() })
         return builder.create()
     }
 
@@ -227,11 +211,11 @@ public object Tools {
     }
 
     private fun createRestoreOrBackupClickListener(successTextId: Int, failureTextId: Int,
-                                                   action: BooleanResultNoParamFct): DialogInterface.OnClickListener {
+                                                   action: () -> Boolean): DialogInterface.OnClickListener {
         return object : DialogInterface.OnClickListener {
             override fun onClick(dialog: DialogInterface, id: Int) {
                 val ctx = mActivity
-                if (action.run() && ctx != null) {
+                if (action() && ctx != null) {
                     val msg = StringBuilder()
                     msg.append(ctx.getString(successTextId)).append('\n').append(ctx.getString(R.string.restarting))
                     Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
@@ -329,10 +313,6 @@ public object Tools {
         return getDateStr(cal.getTimeInMillis())
     }
 
-    public  interface BooleanResultNoParamFct {
-        public fun run(): Boolean
-    }
-
     public fun createTooltip(stringId: Int): View.OnLongClickListener {
         return object : View.OnLongClickListener {
             override fun onLongClick(v: View): Boolean {
@@ -343,7 +323,8 @@ public object Tools {
                 val screenWidth = ctx.getResources().getDisplayMetrics().widthPixels
                 v.getWindowVisibleDisplayFrame(displayFrame)
                 v.getLocationInWindow(screenPos)
-                t.setGravity(Gravity.RIGHT or Gravity.TOP, screenWidth - screenPos[0], screenPos[1] - v.getHeight() - v.getHeight() / 2)
+                t.setGravity(Gravity.RIGHT or Gravity.TOP, screenWidth - screenPos[0],
+                        screenPos[1] - v.getHeight() - v.getHeight() / 2)
                 t.show()
                 return true
             }
@@ -352,7 +333,14 @@ public object Tools {
 
     public fun hideKeyboard(ctx: Activity) {
         val inputManager = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputManager.hideSoftInputFromWindow(ctx.getCurrentFocus()!!.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS)
+        inputManager.hideSoftInputFromWindow(ctx.getCurrentFocus()!!.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS)
+    }
+
+
+    public fun showKeyboard(ctx: Activity) {
+        val inputManager = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputManager.showSoftInput(ctx.getCurrentFocus(), InputMethodManager.SHOW_IMPLICIT)
     }
 }
 
