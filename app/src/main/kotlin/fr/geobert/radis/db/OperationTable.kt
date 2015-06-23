@@ -28,6 +28,7 @@ public object OperationTable {
     public val KEY_OP_TRANSFERT_ACC_ID: String = "transfert_acc_id"
     public val KEY_OP_TRANSFERT_ACC_NAME: String = "transfert_acc_src_name"
     public val KEY_OP_CHECKED: String = "checked"
+
     public val OP_ORDERING: String = "ops." + KEY_OP_DATE + " desc, ops." + KEY_OP_ROWID + " desc"
     public val DATABASE_OP_TABLE_JOINTURE: String = DATABASE_OPERATIONS_TABLE + " ops LEFT OUTER JOIN " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp." + InfoTables.KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN " + InfoTables.DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode." + InfoTables.KEY_MODE_ROWID + " LEFT OUTER JOIN " + InfoTables.DATABASE_TAGS_TABLE + " tag ON ops." + KEY_OP_TAG + " = tag." + InfoTables.KEY_TAG_ROWID
     public val OP_COLS_QUERY: Array<String> = arrayOf("ops." + KEY_OP_ROWID, // 0
