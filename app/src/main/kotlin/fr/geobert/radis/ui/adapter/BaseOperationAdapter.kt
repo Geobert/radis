@@ -270,7 +270,6 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     private fun findOpPosBy(predicate: (op: T) -> Boolean): Int {
         var idx = 0
         operations.forEach {
-            Log.d(TAG, "findOpPosBy, it.mRowId:${it.mRowId}")
             if (predicate(it)) {
                 return idx
             } else {
