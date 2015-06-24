@@ -390,14 +390,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 if (l.findFirstCompletelyVisibleItemPosition() == position) {
                     if (position - half > 0) {
                         // scroll in order to see fully expanded op row
-                        operation_list.smoothScrollToPosition(position - half)
+                        operation_list.post { operation_list.smoothScrollToPosition(position - half) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
                     }
                 } else {
                     if (position - 1 > 0) {
                         // scroll in order to see fully expanded op row
-                        operation_list.smoothScrollToPosition(position - 1)
+                        operation_list.post { operation_list.smoothScrollToPosition(position - 1) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
                     }
@@ -405,12 +405,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             } else if (l.findLastCompletelyVisibleItemPosition() <= position ) {
                 if (l.findLastCompletelyVisibleItemPosition() == position) {
                     if (position + 1 > l.getChildCount()) {
-                        operation_list.smoothScrollToPosition(position + 1)
+                        operation_list.post { operation_list.smoothScrollToPosition(position + 1) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
                     }
                 } else {
-                    operation_list.smoothScrollToPosition(position + half) // scroll in order to see fully expanded op row
+                    operation_list.post { operation_list.smoothScrollToPosition(position + half) } // scroll in order to see fully expanded op row
                 }
             }
         }
@@ -423,15 +423,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             if (position != mLastSelectionPos) {
                 mLastSelectionPos = position
                 mLastSelectionId = adapter.operationAt(position).mRowId
-
-                operation_list.post(object : Runnable {
-                    override fun run() {
-                        adjustScroll(position)
-                    }
-                })
-                //, 400)
-
+                Log.d("selectOpAndAdjustOffset", "new id: $mLastSelectionId")
                 adapter.selectedPosition = position
+                //                operation_list.postDelayed({ adjustScroll(position) }, 400)
+                operation_list.post({ adjustScroll(position) })
             }
         }
     }
@@ -478,9 +473,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 adapter.selectedPosition = -1
                 adapter.delOp(opId)
                 setupEmptyViewVisibility(adapter.getItemCount() == 0)
-                operation_list.post {
-                    refreshSelection()
-                }
+                operation_list.post { refreshSelection() }
             } else {
                 adapter.reset()
                 getMoreOperations(initialStartDate())
@@ -494,6 +487,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val op: Operation = data.getParcelableExtra("operation")
             mLastSelectionId = op.mRowId
             val adap = mOpListAdapter
+            Log.d(TAG, "adap : $adap")
             if (adap == null) {
                 mAccountManager.refreshCurrentAccount()
                 getMoreOperations(initialStartDate())
@@ -501,14 +495,15 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 when (requestCode) {
                     OperationEditor.OPERATION_CREATOR -> {
                         adap.addOp(op)
+                        mLastSelectionPos = -1
+                        needRefreshSelection = true
                         mAccountManager.refreshCurrentAccount()
-                        refreshSelection()
                         setupEmptyViewVisibility(adap.getItemCount() == 0)
                     }
                     OperationEditor.OPERATION_EDITOR -> {
                         adap.updateOp(op)
+                        needRefreshSelection = true
                         mAccountManager.refreshCurrentAccount()
-                        refreshSelection()
                     }
                 }
             }

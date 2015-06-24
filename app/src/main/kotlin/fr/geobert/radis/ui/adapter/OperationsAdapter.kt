@@ -67,7 +67,6 @@ public class OperationsAdapter(activity: MainActivity, opList: IOperationList, c
     }
 
     private fun configureCell(operation: Operation, h: OpRowHolder<Operation>, position: Int) {
-        Log.d("OperationAdapter", "configureCell, pos:$position")
         val schedId = setSchedImg(operation, h.scheduledImg)
         val needInfos = position == selectedPosition
         var needMonth = false
