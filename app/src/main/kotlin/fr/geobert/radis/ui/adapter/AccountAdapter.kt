@@ -65,7 +65,6 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
     }
 
     override fun getItemId(p0: Int): Long {
-        Log.d(TAG, "getItemId:$p0")
         return accountsList.get(p0).id
     }
 

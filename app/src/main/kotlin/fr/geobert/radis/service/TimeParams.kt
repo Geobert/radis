@@ -41,7 +41,7 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
             val nbMonthAhead = if (config.overrideNbMonthsAhead) config.nbMonthsAhead else
                 prefs.getInt(ConfigFragment.KEY_NB_MONTH_AHEAD, ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
             val limitInsertDate = insertionDate.plusMonth(nbMonthAhead).getEndOfMonth()
-
+            Log.d("ProcessSched", "limit date : $limitInsertDate")
             return TimeParams(todayInMs, insertionDate.getMilliseconds(TIME_ZONE),
                     currentMonth.getMilliseconds(TIME_ZONE), limitInsertDate.getMilliseconds(TIME_ZONE))
         }

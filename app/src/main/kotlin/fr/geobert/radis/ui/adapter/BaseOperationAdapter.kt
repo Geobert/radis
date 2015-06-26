@@ -270,7 +270,6 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     private fun findOpPosBy(predicate: (op: T) -> Boolean): Int {
         var idx = 0
         operations.forEach {
-            Log.d(TAG, "findOpPosBy, it.mRowId:${it.mRowId}")
             if (predicate(it)) {
                 return idx
             } else {
@@ -282,15 +281,17 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     public fun addOp(op: T): Int {
         var idx = findOpPosBy { o -> op.compareTo(o) > 0 }
-        Log.d(TAG, "addOp, idx:$idx, opCount:${operations.count()}")
-        operations.add(idx, op)
+        if (idx >= operations.size()) {
+            operations.add(op)
+        } else {
+            operations.add(idx, op)
+        }
         notifyItemInserted(idx)
         return idx
     }
 
     fun delOp(opId: Long) {
         var idx = findOpPosBy { o -> o.mRowId == opId }
-        Log.d(TAG, "delOp, idx:$idx, opCount:${operations.count()}")
         operations.remove(idx)
         notifyItemRemoved(idx)
 
@@ -298,9 +299,19 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     fun updateOp(op: T) {
         val idx = findOpPosBy { o -> o.mRowId == op.mRowId }
-        Log.d(TAG, "updateOp, idx:$idx, op.mRowId:${op.mRowId}")
+        var newIdx = findOpPosBy { o -> op.compareTo(o) > 0 }
         operations.remove(idx)
-        operations.add(idx, op)
-        notifyItemChanged(idx)
+        if (idx < newIdx) newIdx--
+        if (newIdx >= operations.size()) {
+            operations.add(op)
+        } else {
+            operations.add(newIdx, op)
+        }
+        if (idx == newIdx) {
+            notifyItemChanged(idx)
+        } else {
+            notifyItemRemoved(idx)
+            notifyItemInserted(newIdx)
+        }
     }
 }

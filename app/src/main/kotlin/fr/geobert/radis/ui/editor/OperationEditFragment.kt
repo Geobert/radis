@@ -89,7 +89,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     fun onAllAccountFetched() {
-        if (isAdded()) {
+        if (isResumed()) {
             mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
             populateTransfertSpinner(mActivity.mAccountManager.mAccountAdapter)
             initViewAdapters()
