@@ -345,6 +345,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun updateDisplay(intent: Intent?) {
         val op: Operation? = intent?.getParcelableExtra("operation")
         val a = mOpListAdapter
+        mLastSelectionPos = -1
+        needRefreshSelection = true
         if (op == null || a == null) {
             getMoreOperations(initialStartDate())
         } else {
@@ -352,7 +354,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val pos = a.addOp(op)
             setupEmptyViewVisibility(a.getItemCount() == 0)
             Log.d(TAG, "updateDisplay pos:$pos, last:$last, count:${a.getItemCount()}")
-            mLastSelectionPos = -1
+            //            mLastSelectionPos = -1
             mLastSelectionId = op.mRowId
             a.notifyItemChanged(last + if (pos <= last) 1 else 0)
             if (pos > 0) a.notifyItemChanged(pos - 1)
@@ -385,8 +387,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private fun adjustScroll(position: Int) {
         val l = mListLayout
         if (l != null) {
+            fun getRowHeight(): Int {
+                return l.getChildAt(0)?.getHeight() ?: 35
+            }
+
             val half = (l.getChildCount() / 2) - 1
-            val offset = half * l.getChildAt(0).getHeight()
+            val offset = half * getRowHeight()
             Log.d("adjustScroll", "offset: $offset, pos: $position, first: ${l.findFirstCompletelyVisibleItemPosition()}, last: ${l.findLastCompletelyVisibleItemPosition()}")
             if (l.findFirstCompletelyVisibleItemPosition() >= position) {
                 if (l.findFirstCompletelyVisibleItemPosition() == position) {
