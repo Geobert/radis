@@ -1,3 +1,8 @@
+Version 1.2.1 - 26/06/2015
+- fix de l'affichage après ajout d'opération
+- fix de l'affichage après édition d'opération
+- stabilisation
+
 Version 1.2 - 23/06/2015
 - export vers CSV
 - stabilisation
