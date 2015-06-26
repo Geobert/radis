@@ -17,6 +17,7 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -344,6 +345,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun updateDisplay(intent: Intent?) {
         val op: Operation? = intent?.getParcelableExtra("operation")
         val a = mOpListAdapter
+        mLastSelectionPos = -1
+        needRefreshSelection = true
         if (op == null || a == null) {
             getMoreOperations(initialStartDate())
         } else {
@@ -351,7 +354,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             val pos = a.addOp(op)
             setupEmptyViewVisibility(a.getItemCount() == 0)
             Log.d(TAG, "updateDisplay pos:$pos, last:$last, count:${a.getItemCount()}")
-            mLastSelectionPos = -1
+            //            mLastSelectionPos = -1
             mLastSelectionId = op.mRowId
             a.notifyItemChanged(last + if (pos <= last) 1 else 0)
             if (pos > 0) a.notifyItemChanged(pos - 1)
@@ -384,20 +387,25 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private fun adjustScroll(position: Int) {
         val l = mListLayout
         if (l != null) {
-            val half = l.getChildCount() / 2
-            Log.d("adjustScroll", "half: $half, pos: $position, first: ${l.findFirstCompletelyVisibleItemPosition()}, last: ${l.findLastCompletelyVisibleItemPosition()}")
+            fun getRowHeight(): Int {
+                return l.getChildAt(0)?.getHeight() ?: 35
+            }
+
+            val half = (l.getChildCount() / 2) - 1
+            val offset = half * getRowHeight()
+            Log.d("adjustScroll", "offset: $offset, pos: $position, first: ${l.findFirstCompletelyVisibleItemPosition()}, last: ${l.findLastCompletelyVisibleItemPosition()}")
             if (l.findFirstCompletelyVisibleItemPosition() >= position) {
                 if (l.findFirstCompletelyVisibleItemPosition() == position) {
                     if (position - half > 0) {
                         // scroll in order to see fully expanded op row
-                        operation_list.post { operation_list.smoothScrollToPosition(position - half) }
+                        operation_list.post { l.scrollToPositionWithOffset(position, offset) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
                     }
                 } else {
                     if (position - 1 > 0) {
                         // scroll in order to see fully expanded op row
-                        operation_list.post { operation_list.smoothScrollToPosition(position - 1) }
+                        operation_list.post { l.scrollToPositionWithOffset(position, offset) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
                     }
@@ -405,12 +413,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
             } else if (l.findLastCompletelyVisibleItemPosition() <= position ) {
                 if (l.findLastCompletelyVisibleItemPosition() == position) {
                     if (position + 1 > l.getChildCount()) {
-                        operation_list.post { operation_list.smoothScrollToPosition(position + 1) }
+                        operation_list.post { l.scrollToPositionWithOffset(position, offset) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
                     }
                 } else {
-                    operation_list.post { operation_list.smoothScrollToPosition(position + half) } // scroll in order to see fully expanded op row
+                    operation_list.post { l.scrollToPositionWithOffset(position, offset) } // scroll in order to see fully expanded op row
                 }
             }
         }

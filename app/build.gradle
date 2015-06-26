@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '0.12.412'
+    ext.kotlin_version = '0.12.613'
     ext.android_support = '22.2.0'
     repositories {
         jcenter()
@@ -34,8 +34,8 @@ android {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
         targetSdkVersion 22
-        versionCode 61
-        versionName "1.2"
+        versionCode 62
+        versionName "1.2.1"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -59,7 +59,7 @@ android {
 }
 
 configurations.all {
-    resolutionStrategy.force 'com.android.support:support-annotations:21.0.3'
+    resolutionStrategy.force 'com.android.support:support-annotations:22.2.0'
 }
 
 dependencies {
@@ -82,12 +82,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'recyclerview-v7'
     }
 
-//    androidTestCompile('com.android.support.test:testing-support-lib:0.1') {
-//        exclude group: 'com.android.support', module: 'support-v4'
-//        //    exclude group: 'org.hamcrest'
-//    }
-
-    compile('com.crashlytics.sdk.android:crashlytics:2.3.2@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
         transitive = true;
     }
 }

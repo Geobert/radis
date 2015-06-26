@@ -138,7 +138,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 }
                 PREFERENCES -> {
                     val i = Intent(activity, javaClass<ConfigEditor>())
-                    activity.startActivity(i)
+                    activity.startActivityForResult(i, 70)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 SAVE_ACCOUNT -> {
@@ -326,6 +326,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 updateAccountList()
             }
             else -> {
+                updateDisplay(null)
             }
         }
     }

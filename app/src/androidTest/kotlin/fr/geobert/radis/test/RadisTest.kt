@@ -322,7 +322,7 @@ public class RadisTest {
         // 3 following lines are hack because a bug of Espresso
         Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(3500)
+        Helpers.pauseTest(3800)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
@@ -1130,7 +1130,7 @@ public class RadisTest {
         onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
         Helpers.pauseTest(800)
         val askDate = getActivity().getResources().getStringArray(R.array.quickadd_actions)[0]
-        Helpers.pauseTest(500)
+        Helpers.pauseTest(800)
         onView(withText(askDate)).perform(click())
         Helpers.clickOnActionItemConfirm()
 
@@ -1190,11 +1190,11 @@ public class RadisTest {
         onView(withId(R.id.quickadd_validate)).perform(longClick())
 
 
-        val date = today.minusMonth(1).getEndOfMonth()
+        //val date = today.minusMonth(1).getEndOfMonth()
         // -1 on year to work around Espresso bug
-        onView(iz(instanceOf(javaClass<DatePicker>())) as Matcher<View>).perform(PickerActions.setDate(date.getYear() - 1, date.getMonth(), date.getDay()))
-        onView(withId(android.R.id.button1)).perform(click())
-
+        //onView(iz(instanceOf(javaClass<DatePicker>())) as Matcher<View>).perform(PickerActions.setDate(date.getYear() - 1, date.getMonth(), date.getDay()))
+        onView(withText(android.R.string.ok)).perform(click())
+        Helpers.pauseTest(30000)
         val monthStr = today.minusMonth(1).format("MMMM", Locale.getDefault())
         val m = monthStr.substring(0, 1).capitalize().concat(monthStr.substring(1))
         onView(allOf(withText(m), isDisplayed())).check(matches(isDisplayed()))
