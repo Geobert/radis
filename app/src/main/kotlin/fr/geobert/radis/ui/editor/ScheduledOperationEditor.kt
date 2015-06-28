@@ -66,11 +66,11 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         mViewPager.setAdapter(mPagerAdapter)
     }
 
-    override fun onAllAccountsFetched() {
-        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
-        getOpFragment().onAllAccountFetched()
-        super<CommonOpEditor>.onAllAccountsFetched()
-    }
+    //    fun onAllAccountsFetched() {
+    //        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
+    //        //getOpFragment().onAllAccountFetched()
+    //        //super<CommonOpEditor>.onAllAccountsFetched()
+    //    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         val inflater = getMenuInflater()
@@ -107,32 +107,35 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     //        mOpIdSource = extras.getLong(PARAM_SRC_OP_TO_CONVERT)
     //    }
 
-    private fun onOpNotFound(): Boolean {
+    private fun onOpNotFound(cbk: (Operation) -> Unit): Boolean {
         if (mOpIdSource > 0) {
             getSupportLoaderManager().initLoader<Cursor>(GET_SCH_OP_SRC, getIntent().getExtras(), this)
             return false
         } else {
-            getSchFragment().mCurrentSchOp = ScheduledOperation(mCurAccountId)
-            mCurrentOp = getSchFragment().mCurrentSchOp as Operation
-            populateFields()
+            val op = ScheduledOperation(mCurAccountId)
+            getSchFragment().mCurrentSchOp = op
+            mCurrentOp = op
+            cbk(op)
             return true
         }
     }
 
-    override fun fetchOrCreateCurrentOp() {
+    override fun fetchOrCreateCurrentOp(cbk: (Operation) -> Unit) {
         setTitle(R.string.sch_edition)
         if (mRowId > 0) {
+            onOpFetchedCbks.add(cbk)
             fetchOp(GET_SCH_OP)
         } else {
-            onOpNotFound()
+            onOpNotFound(cbk)
         }
     }
 
-    override fun populateFields() {
-        getOpFragment().populateCommonFields(mCurrentOp!!)
-        getOpFragment().setCheckedEditVisibility(View.GONE)
-        getSchFragment().populateFields()
-    }
+    //    override fun populateFields() {
+    //        // TODO do not populate from Activity, let the fragments independently ask for an op then populate themselves
+    //        getOpFragment().populateCommonFields(mCurrentOp!!)
+    //        getOpFragment().setCheckedEditVisibility(View.GONE)
+    //        getSchFragment().populateFields()
+    //    }
 
     private fun startInsertionServiceAndExit() {
         Log.d("Radis", "startInsertionServiceAndExit")
@@ -275,25 +278,30 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
         when (loader.getId()) {
             GET_SCH_OP -> if (data.getCount() > 0 && data.moveToFirst()) {
-                getSchFragment().mCurrentSchOp = ScheduledOperation(data)
                 mOriginalSchOp = ScheduledOperation(data)
                 mCurrentOp = ScheduledOperation(data)
-                populateFields()
+                val op = ScheduledOperation(data)
+                onOpFetchedCbks.forEach { it(op) }
             } else {
-                if (!onOpNotFound()) {
-                    mOpIdSource = 0
-                    populateFields()
+                onOpFetchedCbks.forEach {
+                    if (!onOpNotFound(it)) {
+                        mOpIdSource = 0
+                        //                        populateFields()
+                    }
                 }
             }
             GET_SCH_OP_SRC -> if (data.getCount() > 0 && data.moveToFirst()) {
-                mCurrentOp = ScheduledOperation(data, mCurAccountId)
+                val op = ScheduledOperation(data, mCurAccountId)
+                mCurrentOp = op
                 getSchFragment().mCurrentSchOp = mCurrentOp as ScheduledOperation
                 mOriginalSchOp = ScheduledOperation(data, mCurAccountId)
-                populateFields()
+                onOpFetchedCbks.forEach { it(op) }
             } else {
-                if (!onOpNotFound()) {
-                    mOpIdSource = 0
-                    populateFields()
+                onOpFetchedCbks.forEach {
+                    if (!onOpNotFound(it)) {
+                        mOpIdSource = 0
+                        //                        populateFields()
+                    }
                 }
             }
             else -> {

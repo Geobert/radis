@@ -88,27 +88,38 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         }
     }
 
+    override fun onResume() {
+        super<Fragment>.onResume()
+        mActivity.mAccountManager.fetchAllAccounts(false, {
+            mActivity.onAllAccountsFetched()
+            onAllAccountFetched()
+            mActivity.getOpThenPopulate { op ->
+                populateCommonFields(op)
+            }
+        })
+    }
+
     fun onAllAccountFetched() {
-        if (isResumed()) {
-            mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
-            populateTransfertSpinner(mActivity.mAccountManager.mAccountAdapter)
-            initViewAdapters()
-            initListeners()
-            is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
-                onTransfertCheckedChanged(arg1)
-            }
-
-            configThirdPartyTransfertCont(is_transfert.isChecked())
-            edit_op_third_party.clearFocus()
-            edit_op_sum.clearFocus()
-            edit_op_mode.clearFocus()
-            edit_op_tag.clearFocus()
-            edit_op_notes.clearFocus()
-
-            if (mActivity.getCurrentFocus() != null) {
-                Tools.hideKeyboard(mActivity)
-            }
+        //        if (isResumed()) {
+        mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
+        populateTransfertSpinner(mActivity.mAccountManager.mAccountAdapter)
+        initViewAdapters()
+        initListeners()
+        is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
+            onTransfertCheckedChanged(arg1)
         }
+
+        configThirdPartyTransfertCont(is_transfert.isChecked())
+        edit_op_third_party.clearFocus()
+        edit_op_sum.clearFocus()
+        edit_op_mode.clearFocus()
+        edit_op_tag.clearFocus()
+        edit_op_notes.clearFocus()
+
+        if (mActivity.getCurrentFocus() != null) {
+            Tools.hideKeyboard(mActivity)
+        }
+        //        }
     }
 
     protected fun initListeners() {

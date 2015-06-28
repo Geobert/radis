@@ -57,6 +57,17 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
         }
     }
 
+    override fun onResume() {
+        super<Fragment>.onResume()
+        mActivity.mAccountManager.fetchAllAccounts(false, {
+            mActivity.onAllAccountsFetched()
+            mActivity.getOpThenPopulate { op ->
+                mCurrentSchOp = op as ScheduledOperation
+                populateFields()
+            }
+        })
+    }
+
     private fun initViewBehavior() {
         mCustomPeriodicityVal.setOnFocusChangeListener(object : View.OnFocusChangeListener {
             override fun onFocusChange(v: View, hasFocus: Boolean) {
