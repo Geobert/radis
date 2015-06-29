@@ -17,7 +17,6 @@ import android.support.v4.view.ViewPager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.data.ScheduledOperation
@@ -26,6 +25,7 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
+import java.util.*
 import kotlin.properties.Delegates
 
 public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor {
@@ -109,6 +109,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
     private fun onOpNotFound(cbk: (Operation) -> Unit): Boolean {
         if (mOpIdSource > 0) {
+            onOpFetchedCbks.add(cbk)
             getSupportLoaderManager().initLoader<Cursor>(GET_SCH_OP_SRC, getIntent().getExtras(), this)
             return false
         } else {
@@ -283,7 +284,9 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                 val op = ScheduledOperation(data)
                 onOpFetchedCbks.forEach { it(op) }
             } else {
-                onOpFetchedCbks.forEach {
+                val cbks = LinkedList<(Operation) -> Unit>(onOpFetchedCbks)
+                onOpFetchedCbks.clear()
+                cbks.forEach {
                     if (!onOpNotFound(it)) {
                         mOpIdSource = 0
                         //                        populateFields()
@@ -297,7 +300,9 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                 mOriginalSchOp = ScheduledOperation(data, mCurAccountId)
                 onOpFetchedCbks.forEach { it(op) }
             } else {
-                onOpFetchedCbks.forEach {
+                val cbks = LinkedList<(Operation) -> Unit>(onOpFetchedCbks)
+                onOpFetchedCbks.clear()
+                cbks.forEach {
                     if (!onOpNotFound(it)) {
                         mOpIdSource = 0
                         //                        populateFields()

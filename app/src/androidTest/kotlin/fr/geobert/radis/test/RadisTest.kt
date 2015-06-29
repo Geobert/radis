@@ -322,7 +322,7 @@ public class RadisTest {
         // 3 following lines are hack because a bug of Espresso
         Helpers.pauseTest(1000)
         Helpers.clickOnDialogButton(R.string.cancel)
-        Helpers.pauseTest(3800)
+        Helpers.pauseTest(1000)
         onView(withId(R.id.edit_op_third_parties_list)).perform(scrollTo()).perform(click())
 
         Helpers.clickOnDialogButton(R.string.create)
