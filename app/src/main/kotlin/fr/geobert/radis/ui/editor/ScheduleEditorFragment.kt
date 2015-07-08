@@ -20,16 +20,24 @@ import kotlin.properties.Delegates
 public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListener {
     private val mActivity by Delegates.lazy { getActivity() as ScheduledOperationEditor }
     var mCurrentSchOp: ScheduledOperation? = null
-    private val mEndDatePicker by Delegates.lazy { mActivity.findViewById(R.id.edit_end_date) as DatePicker }
-    private val mAccountSpinner  by Delegates.lazy { mActivity.findViewById(R.id.account_choice) as Spinner }
-    private val mPeriodicitySpinner by Delegates.lazy { mActivity.findViewById(R.id.periodicity_choice) as Spinner }
-    private val mCustomPeriodicityVal by Delegates.lazy { mActivity.findViewById(R.id.custom_periodicity_value) as EditText }
-    private val mCustomPeriodicityUnit by Delegates.lazy { mActivity.findViewById(R.id.custom_periodicity_choice) as Spinner }
-    private val mCustomPeriodicityCont by Delegates.lazy { mActivity.findViewById(R.id.custom_periodicity) }
-    private val mEndDateCheck by Delegates.lazy { mActivity.findViewById(R.id.end_date_check) as CheckBox }
+    private var mEndDatePicker: DatePicker by Delegates.notNull()
+    private var mAccountSpinner: Spinner by Delegates.notNull()
+    private var mPeriodicitySpinner: Spinner by Delegates.notNull()
+    private var mCustomPeriodicityVal: EditText by Delegates.notNull()
+    private var mCustomPeriodicityUnit: Spinner by Delegates.notNull()
+    private var mCustomPeriodicityCont: View by Delegates.notNull()
+    private var mEndDateCheck: CheckBox by Delegates.notNull()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        return inflater.inflate(R.layout.scheduling_edit, container, false)
+        val l = inflater.inflate(R.layout.scheduling_edit, container, false)
+        mEndDatePicker = l.findViewById(R.id.edit_end_date) as DatePicker
+        mAccountSpinner = l.findViewById(R.id.account_choice) as Spinner
+        mPeriodicitySpinner = l.findViewById(R.id.periodicity_choice) as Spinner
+        mCustomPeriodicityVal = l.findViewById(R.id.custom_periodicity_value) as EditText
+        mCustomPeriodicityUnit = l.findViewById(R.id.custom_periodicity_choice) as Spinner
+        mCustomPeriodicityCont = l.findViewById(R.id.custom_periodicity)
+        mEndDateCheck = l.findViewById(R.id.end_date_check) as CheckBox
+        return l
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -86,6 +94,8 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
             }
         })
         mEndDateCheck.setChecked(false)
+
+
     }
 
     private fun populateCustomPeriodicitySpinner() {
@@ -103,7 +113,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     }
 
     private fun setCustomPeriodicityVisibility(isVisible: Boolean) {
-        mCustomPeriodicityCont!!.setVisibility(if (isVisible)
+        mCustomPeriodicityCont.setVisibility(if (isVisible)
             View.VISIBLE
         else
             View.GONE)
@@ -152,9 +162,9 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
 
             val schOp = mCurrentSchOp
             if (schOp != null && (schOp.mAccountId != 0L || mActivity.mCurAccountId != 0L)) {
-                var pos = 1
+                var pos = 0
                 while (pos < adapter.getCount()) {
-                    val id = adapter.getItemId(pos)
+                    val id = adapter.getItem(pos).id
                     if (id == schOp.mAccountId || id == mActivity.mCurAccountId) {
                         mAccountSpinner.setSelection(pos)
                         break
