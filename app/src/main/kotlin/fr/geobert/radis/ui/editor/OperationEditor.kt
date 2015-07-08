@@ -32,26 +32,27 @@ public class OperationEditor : CommonOpEditor() {
         setContentView(R.layout.operation_edit)
     }
 
-    override fun onAllAccountsFetched() {
-        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
-        mEditFragment.onAllAccountFetched()
-        super<CommonOpEditor>.onAllAccountsFetched()
-    }
+    //     fun onAllAccountsFetched() {
+    //        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
+    //        //mEditFragment.onAllAccountFetched()
+    //        //super<CommonOpEditor>.onAllAccountsFetched()
+    //    }
 
-    override fun fetchOrCreateCurrentOp() {
+    override fun fetchOrCreateCurrentOp(cbk: (Operation) -> Unit) {
         if (mRowId > 0) {
             setTitle(R.string.op_edition)
+            onOpFetchedCbks.add(cbk)
             fetchOp(GET_OP)
         } else {
             setTitle(R.string.op_creation)
             val op = Operation()
             op.mAccountId = mCurAccountId
             mCurrentOp = op
-            populateFields()
+            cbk(op)
         }
     }
 
-    override fun populateFields() = mEditFragment.populateCommonFields(mCurrentOp as Operation)
+    //    override fun populateFields() = mEditFragment.populateCommonFields(mCurrentOp as Operation)
 
     private fun onOkClicked() {
         val op = mCurrentOp
@@ -145,14 +146,16 @@ public class OperationEditor : CommonOpEditor() {
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
         when (loader.getId()) {
             GET_OP -> {
-                if (data.moveToFirst()) {
-                    mCurrentOp = Operation(data)
+                val op = if (data.moveToFirst()) {
                     mOriginalOp = Operation(data)
+                    Operation(data)
                 } else {
-                    mCurrentOp = Operation()
-                    mCurrentOp!!.mAccountId = mCurAccountId
+                    val o = Operation()
+                    o.mAccountId = mCurAccountId
+                    o
                 }
-                populateFields()
+                mCurrentOp = op
+                onOpFetchedCbks.forEach { it(op) }
             }
             else -> {
             }

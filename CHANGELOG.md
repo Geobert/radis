@@ -1,3 +1,7 @@
+Version 1.2.2 - 08/07/2015
+- fix de la préselection du compte dans l'éditeur d'échéance
+- stabilisation
+
 Version 1.2.1 - 26/06/2015
 - fix de l'affichage après ajout d'opération
 - fix de l'affichage après édition d'opération
