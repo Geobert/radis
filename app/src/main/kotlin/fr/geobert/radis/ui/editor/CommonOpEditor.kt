@@ -6,9 +6,11 @@ import android.os.Bundle
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.data.Operation
+import java.util.*
 import kotlin.properties.Delegates
 
 public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
+    val onOpFetchedCbks: LinkedList<(Operation) -> Unit> = LinkedList()
     var mCurrentOp: Operation? = null
     protected var mRowId: Long = 0
     protected var mOnRestore: Boolean = false
@@ -19,28 +21,43 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     // abstract methods
     protected abstract fun setView()
 
-    protected abstract fun populateFields()
+    //    protected abstract fun populateFields()
 
-    protected abstract fun fetchOrCreateCurrentOp()
+    protected abstract fun fetchOrCreateCurrentOp(cbk: (Operation) -> Unit)
 
-    open protected fun onAllAccountsFetched() {
-        if (!mOnRestore) {
-            fetchOrCreateCurrentOp()
+    //    open public fun onAllAccountsFetched() {
+    //        if (!mOnRestore) {
+    //            fetchOrCreateCurrentOp()
+    //        } else {
+    //            populateFields()
+    //            mOnRestore = false
+    //        }
+    //    }
+
+    public fun getOpThenPopulate(cbk: (Operation) -> Unit) {
+        val op = mCurrentOp
+        if (!mOnRestore || op == null) {
+            fetchOrCreateCurrentOp(cbk)
         } else {
-            populateFields()
+            cbk(op)
             mOnRestore = false
         }
     }
 
+    // nothing to do, needed by Android
     override fun onResume() {
         super<BaseActivity>.onResume()
     }
 
-    override fun onResumeFragments() {
-        super<BaseActivity>.onResumeFragments()
-        mAccountManager.fetchAllAccounts(false, {
-            onAllAccountsFetched()
-        })
+    //    override fun onResumeFragments() {
+    //        super<BaseActivity>.onResumeFragments()
+    //        mAccountManager.fetchAllAccounts(false, {
+    //            onAllAccountsFetched()
+    //        })
+    //    }
+
+    fun onAllAccountsFetched() {
+        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
     }
 
     protected fun fetchOp(loaderId: Int) {
