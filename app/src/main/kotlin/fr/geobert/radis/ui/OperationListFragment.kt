@@ -113,15 +113,14 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun initQuickAdd() {
-        if (mQuickAddController == null) {
-            val c = container
-            val q = QuickAddController(mActivity, c)
-            q.initViewBehavior()
-            q.setAutoNegate(true)
-            q.clearFocus()
-            mQuickAddController = q;
-            setQuickAddVisibility()
-        }
+        Log.d(TAG, "initQuickAdd: $mQuickAddController")
+        val c = container
+        val q = QuickAddController(mActivity, c)
+        q.initViewBehavior()
+        q.setAutoNegate(true)
+        q.clearFocus()
+        mQuickAddController = q;
+        setQuickAddVisibility()
     }
 
     fun setQuickAddVisibility() {
