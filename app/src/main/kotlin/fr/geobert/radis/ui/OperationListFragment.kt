@@ -87,7 +87,6 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val accMan = mActivity.mAccountManager
 
         // fix crash if radis is killed by android and back
-        mActivity.mAccountSpinner.setSelection(mActivity.mAccountManager.getCurrentAccountPosition(mActivity))
         initQuickAdd()
         processAccountChanged(mActivity.getCurrentAccountId())
 
@@ -299,26 +298,25 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     OperationTable.fetchLastOpSince(mActivity, mActivity.getCurrentAccountId(),
                             start.getMilliseconds(TIME_ZONE))
                 }
-                if (c != null) {
-                    Log.d(TAG, "cursor count : ${c.getCount()} / mOpListAdapter?.getItemCount():${mOpListAdapter?.getItemCount()}")
-                    if (c.moveToFirst()) {
-                        val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
-                        Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
-                        val d = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
-                        Log.d(TAG, "last chance date verif : " + d.format("DD/MM/YYYY"))
-                        //mScrollLoader.setStartDate(d)
-                        earliestOpDate = d
-                        getOperationsList()
-                    } else if (start == null) {
-                        earliestOpDate = DateTime.today(TIME_ZONE).getStartOfMonth()
-                        getOperationsList()
-                    } else if (mOpListAdapter?.getItemCount() == 0) {
-                        setupEmptyViewVisibility(true)
-                    } else {
-                        getOperationsList()
-                    }
-                    c.close()
+
+                Log.d(TAG, "cursor count : ${c.getCount()} / mOpListAdapter?.getItemCount():${mOpListAdapter?.getItemCount()}")
+                if (c.moveToFirst()) {
+                    val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
+                    Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
+                    val d = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
+                    Log.d(TAG, "last chance date verif : " + d.format("DD/MM/YYYY"))
+                    //mScrollLoader.setStartDate(d)
+                    earliestOpDate = d
+                    getOperationsList()
+                } else if (start == null) {
+                    earliestOpDate = DateTime.today(TIME_ZONE).getStartOfMonth()
+                    getOperationsList()
+                } else if (mOpListAdapter?.getItemCount() == 0) {
+                    setupEmptyViewVisibility(true)
+                } else {
+                    getOperationsList()
                 }
+                c.close()
             }
         }
     }
