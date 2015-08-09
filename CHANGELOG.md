@@ -1,3 +1,7 @@
+Version 1.2.3 - 09/08/2015
+- le quick add perdait parfois la complétion
+- stabilisation
+
 Version 1.2.2 - 08/07/2015
 - fix de la préselection du compte dans l'éditeur d'échéance
 - stabilisation
