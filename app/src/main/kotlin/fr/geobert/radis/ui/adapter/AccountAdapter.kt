@@ -65,7 +65,7 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
     }
 
     override fun getItemId(p0: Int): Long {
-        return accountsList.get(p0).id
+        return if (p0 < getCount()) accountsList.get(p0).id else 0
     }
 
     override fun getCount(): Int {

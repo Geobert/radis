@@ -49,13 +49,6 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
         super<BaseActivity>.onResume()
     }
 
-    //    override fun onResumeFragments() {
-    //        super<BaseActivity>.onResumeFragments()
-    //        mAccountManager.fetchAllAccounts(false, {
-    //            onAllAccountsFetched()
-    //        })
-    //    }
-
     fun onAllAccountsFetched() {
         mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
     }
