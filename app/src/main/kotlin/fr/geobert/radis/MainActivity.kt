@@ -261,6 +261,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             mAccountManager.fetchAllAccounts(false, {
                 Log.d(TAG, "all accounts fetched")
                 processAccountList(true)
+                mAccountSpinner.setSelection(mAccountManager.getCurrentAccountPosition(this))
                 super<BaseActivity>.onResumeFragments()
             })
             handler.resume(this)
