@@ -9,8 +9,8 @@ import fr.geobert.radis.tools.UpdateDisplayInterface
 import kotlin.properties.Delegates
 
 public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar.OnMenuItemClickListener {
-    protected val mActivity: MainActivity by Delegates.lazy { getActivity() as MainActivity }
-    protected val mAccountManager: AccountManager by Delegates.lazy { mActivity.mAccountManager }
+    protected val mActivity: MainActivity by lazy(LazyThreadSafetyMode.NONE) { getActivity() as MainActivity }
+    protected val mAccountManager: AccountManager by lazy(LazyThreadSafetyMode.NONE) { mActivity.mAccountManager }
 
     open public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
     }

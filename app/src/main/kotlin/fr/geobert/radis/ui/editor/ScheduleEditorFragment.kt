@@ -1,9 +1,7 @@
 package fr.geobert.radis.ui.editor
 
-import android.database.Cursor
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.widget.SimpleCursorAdapter
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,12 +11,11 @@ import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.data.ScheduledOperation
-import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.ui.adapter.AccountAdapter
 import kotlin.properties.Delegates
 
 public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListener {
-    private val mActivity by Delegates.lazy { getActivity() as ScheduledOperationEditor }
+    private val mActivity by lazy(LazyThreadSafetyMode.NONE) { getActivity() as ScheduledOperationEditor }
     var mCurrentSchOp: ScheduledOperation? = null
     private var mEndDatePicker: DatePicker by Delegates.notNull()
     private var mAccountSpinner: Spinner by Delegates.notNull()

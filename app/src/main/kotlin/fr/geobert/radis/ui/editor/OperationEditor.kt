@@ -26,7 +26,7 @@ import kotlin.properties.Delegates
 
 public class OperationEditor : CommonOpEditor() {
     protected var mOriginalOp: Operation? = null
-    private val mEditFragment by Delegates.lazy { getSupportFragmentManager().findFragmentById(R.id.main_edit_pane) as OperationEditFragment }
+    private val mEditFragment by lazy(LazyThreadSafetyMode.NONE) { getSupportFragmentManager().findFragmentById(R.id.main_edit_pane) as OperationEditFragment }
 
     override fun setView() {
         setContentView(R.layout.operation_edit)
@@ -220,7 +220,7 @@ public class OperationEditor : CommonOpEditor() {
         private val GET_OP = 610
 
         public fun callMeForResult(context: BaseActivity, opId: Long, accountId: Long) {
-            val intent = Intent(context, javaClass<OperationEditor>())
+            val intent = Intent(context, OperationEditor::class.java)
             intent.putExtra(CommonOpEditor.PARAM_OP_ID, opId)
             intent.putExtra(AccountEditor.PARAM_ACCOUNT_ID, accountId)
             context.startActivityForResult(intent, if (opId == NO_OPERATION) OPERATION_CREATOR else OPERATION_EDITOR)

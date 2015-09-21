@@ -11,8 +11,8 @@ import kotlin.properties.Delegates
 public abstract class BaseActivity : ActionBarActivity() {
     protected var mProgress: ProgressDialog? = null
     private var mProgressCount = 0
-    public val mAccountManager: AccountManager by Delegates.lazy { AccountManager(this) }
-    public val mToolbar: Toolbar by Delegates.lazy { findViewById(R.id.my_toolbar) as Toolbar }
+    public val mAccountManager: AccountManager by lazy(LazyThreadSafetyMode.NONE) { AccountManager(this) }
+    public val mToolbar: Toolbar by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.my_toolbar) as Toolbar }
 
     protected fun showProgress() {
         mProgressCount++

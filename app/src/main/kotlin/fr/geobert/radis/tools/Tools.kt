@@ -142,7 +142,7 @@ public object Tools {
                 MainActivity.PROCESS_SCH -> object : DialogInterface.OnClickListener {
                     override fun onClick(dialog: DialogInterface, which: Int) {
                         RadisService.acquireStaticLock(ctx)
-                        ctx.startService(Intent(ctx, javaClass<RadisService>()))
+                        ctx.startService(Intent(ctx, RadisService::class.java))
                     }
                 }
                 else -> {
@@ -274,7 +274,7 @@ public object Tools {
                         }
                         1 -> Tools.restartApp(context)
                         2 -> {
-                            val i = Intent(context, javaClass<InstallRadisServiceReceiver>())
+                            val i = Intent(context, InstallRadisServiceReceiver::class.java)
                             i.setAction(Tools.INTENT_RADIS_STARTED)
                             context.sendBroadcast(i)
                         }

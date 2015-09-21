@@ -28,19 +28,19 @@ import java.util.GregorianCalendar
 import kotlin.properties.Delegates
 
 public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
-    private val mNameEdt: EditText by Delegates.lazy { findViewById(R.id.stat_name_edt) as EditText }
-    private val mAccountSpin: Spinner by Delegates.lazy { findViewById(R.id.stat_account_spinner) as Spinner }
-    private val mFilterSpin: Spinner by Delegates.lazy { findViewById(R.id.stat_filter_spinner) as Spinner }
-    private val mTimeScaleSpin: Spinner by Delegates.lazy { findViewById(R.id.stat_period_spinner) as Spinner }
-    private val mxLastCont: LinearLayout by Delegates.lazy { findViewById(R.id.x_last_cont) as LinearLayout }
-    private val mxLastEdt: EditText by Delegates.lazy { findViewById(R.id.x_last_edt) as EditText }
-    private val mxLastSuffixLbl: TextView by Delegates.lazy { findViewById(R.id.x_last_suffix) as TextView }
-    private val mAbsDateCont: LinearLayout by Delegates.lazy { findViewById(R.id.absolute_date_cont) as LinearLayout }
-    private val mStartDate: Button by Delegates.lazy { findViewById(R.id.start_date_btn) as Button }
-    private val mEndDate: Button by Delegates.lazy { findViewById(R.id.end_date_btn) as Button }
-    private val mPieBtn: ToggleImageButton by Delegates.lazy { findViewById(R.id.pie_btn) as ToggleImageButton }
-    private val mBarBtn: ToggleImageButton by Delegates.lazy { findViewById(R.id.bar_btn) as ToggleImageButton }
-    private val mLineBtn: ToggleImageButton by Delegates.lazy { findViewById(R.id.line_btn) as ToggleImageButton }
+    private val mNameEdt: EditText by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_name_edt) as EditText }
+    private val mAccountSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_account_spinner) as Spinner }
+    private val mFilterSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_filter_spinner) as Spinner }
+    private val mTimeScaleSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_period_spinner) as Spinner }
+    private val mxLastCont: LinearLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.x_last_cont) as LinearLayout }
+    private val mxLastEdt: EditText by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.x_last_edt) as EditText }
+    private val mxLastSuffixLbl: TextView by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.x_last_suffix) as TextView }
+    private val mAbsDateCont: LinearLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.absolute_date_cont) as LinearLayout }
+    private val mStartDate: Button by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.start_date_btn) as Button }
+    private val mEndDate: Button by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.end_date_btn) as Button }
+    private val mPieBtn: ToggleImageButton by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.pie_btn) as ToggleImageButton }
+    private val mBarBtn: ToggleImageButton by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.bar_btn) as ToggleImageButton }
+    private val mLineBtn: ToggleImageButton by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.line_btn) as ToggleImageButton }
     private var mAccountSpinAdapter: ArrayAdapter<Account> by Delegates.notNull()
 
     private var mStatId: Long = 0
@@ -54,11 +54,11 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         public val ACTIVITY_STAT_EDIT: Int = 4001;
 
         public fun callMeForResult(ctx: Activity) {
-            ctx.startActivityForResult(Intent(ctx, javaClass<StatisticEditor>()), ACTIVITY_STAT_CREATE)
+            ctx.startActivityForResult(Intent(ctx, StatisticEditor::class.java), ACTIVITY_STAT_CREATE)
         }
 
         public fun callMeForResult(ctx: Activity, statId: Long) {
-            val i = Intent(ctx, javaClass<StatisticEditor>())
+            val i = Intent(ctx, StatisticEditor::class.java)
             i.putExtra(StatisticTable.KEY_STAT_ID, statId)
             ctx.startActivityForResult(i, ACTIVITY_STAT_EDIT)
         }

@@ -18,7 +18,7 @@ import fr.geobert.radis.tools.minusMonth
 import hirondelle.date4j.DateTime
 import java.util.Calendar
 
-public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
+public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(MainActivity::class.java) {
 
     throws(Exception::class)
     override fun setUp() {

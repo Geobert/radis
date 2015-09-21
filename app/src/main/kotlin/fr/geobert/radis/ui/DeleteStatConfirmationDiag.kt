@@ -22,7 +22,7 @@ public fun DeleteStatConfirmationDiag(statId: Long): DeleteStatConfirmationDiag 
 
 
 class DeleteStatConfirmationDiag : DialogFragment() {
-    val ctx: Context by Delegates.lazy { getActivity() }
+    val ctx: Context by lazy(LazyThreadSafetyMode.NONE) { getActivity() }
     var statId: Long = 0L
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

@@ -31,7 +31,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     private var edit_account_desc: EditText by Delegates.notNull()
     private var currency_spinner: Spinner by Delegates.notNull()
     private var custom_currency: EditText by Delegates.notNull()
-    private val mProjectionController by Delegates.lazy { ProjectionDateController(getActivity()) }
+    private val mProjectionController by lazy(LazyThreadSafetyMode.NONE) { ProjectionDateController(getActivity()) }
 
     private var customCurrencyIdx = -1
     private var mOnRestore: Boolean = false

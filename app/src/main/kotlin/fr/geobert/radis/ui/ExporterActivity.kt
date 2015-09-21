@@ -247,7 +247,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
 
     companion object {
         public fun callMe(ctx: BaseActivity) {
-            val i = Intent(ctx, javaClass<ExporterActivity>())
+            val i = Intent(ctx, ExporterActivity::class.java)
             ctx.startActivityForResult(i, 90)
         }
     }

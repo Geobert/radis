@@ -12,8 +12,8 @@ import fr.geobert.radis.data.Account
 import kotlin.properties.Delegates
 
 public class ProjectionDateController(private val mActivity: Activity) {
-    private val mProjectionMode: Spinner by Delegates.lazy { mActivity.findViewById(R.id.projection_date_spinner) as Spinner }
-    public val mProjectionDate: EditText by Delegates.lazy { mActivity.findViewById(R.id.projection_date_value) as EditText }
+    private val mProjectionMode: Spinner by lazy(LazyThreadSafetyMode.NONE) { mActivity.findViewById(R.id.projection_date_spinner) as Spinner }
+    public val mProjectionDate: EditText by lazy(LazyThreadSafetyMode.NONE) { mActivity.findViewById(R.id.projection_date_value) as EditText }
     private var mAccountId: Long = 0
     private var mOrigProjMode: Int = 0
     private var mOrigProjDate: String? = null

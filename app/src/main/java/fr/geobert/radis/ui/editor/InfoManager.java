@@ -201,7 +201,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 
     public void deleteInfo() {
         mCursor.moveToPosition(mSelectedInfo);
-        InfoTables.deleteInfo(mContext, (Uri) mInfo.getParcelable("table"),
+        InfoTables.INSTANCE$.deleteInfo(mContext, (Uri) mInfo.getParcelable("table"),
                 mCursor.getLong(mCursor.getColumnIndex("_id")));
         mSelectedInfo = -1;
         refresh();
@@ -286,10 +286,10 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
         String value = t.getText().toString().trim();
         long rowId = mInfo.getLong("rowId");
         if (rowId != 0) { // update
-            InfoTables.updateInfo(mContext, (Uri) mInfo.getParcelable("table"),
+            InfoTables.INSTANCE$.updateInfo(mContext, (Uri) mInfo.getParcelable("table"),
                     rowId, value, null);
         } else { // create
-            long id = InfoTables.getKeyIdIfExistsOrCreate(ctx, value, (Uri) mInfo.getParcelable("table"));
+            long id = InfoTables.INSTANCE$.getKeyIdIfExistsOrCreate(ctx, value, (Uri) mInfo.getParcelable("table"));
             if (id > 0) { // already existing value, update
                 Tools.INSTANCE$.popError(mContext,
                         mContext.getString(R.string.item_exists), null);
@@ -304,7 +304,7 @@ public class InfoManager implements LoaderCallbacks<Cursor> {
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        return InfoTables.getMatchingInfoLoader(mContext,
+        return InfoTables.INSTANCE$.getMatchingInfoLoader(mContext,
                 (Uri) args.getParcelable("table"), args.getString("colName"),
                 null);
     }

@@ -46,15 +46,15 @@ import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
 public class MainActivity : BaseActivity(), UpdateDisplayInterface {
-    private val mDrawerLayout by Delegates.lazy { findViewById(R.id.drawer_layout) as DrawerLayout }
-    private val mDrawerList by Delegates.lazy { findViewById(R.id.left_drawer) as ListView }
-    private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
-    private val handler: FragmentHandler by Delegates.lazy { FragmentHandler(this) }
-    public val mAccountSpinner: Spinner by Delegates.lazy { findViewById(R.id.account_spinner) as Spinner }
+    private val mDrawerLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.drawer_layout) as DrawerLayout }
+    private val mDrawerList by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.left_drawer) as ListView }
+    private val mOnRefreshReceiver by lazy(LazyThreadSafetyMode.NONE) { OnRefreshReceiver(this) }
+    private val handler: FragmentHandler by lazy(LazyThreadSafetyMode.NONE) { FragmentHandler(this) }
+    public val mAccountSpinner: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.account_spinner) as Spinner }
 
     // ActionBarDrawerToggle ties together the the proper interactions
     // between the navigation drawer and the action bar app icon.
-    private val mDrawerToggle: ActionBarDrawerToggle by Delegates.lazy {
+    private val mDrawerToggle: ActionBarDrawerToggle by lazy(LazyThreadSafetyMode.NONE) {
         object : ActionBarDrawerToggle(this, /* host Activity */
                 mDrawerLayout, /* DrawerLayout object */
                 mToolbar,
@@ -119,9 +119,9 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             var fragment: Fragment? = null
             val fragmentManager = activity.getSupportFragmentManager()
             when (message.what) {
-                OP_LIST -> fragment = findOrCreateFragment(javaClass<OperationListFragment>(), message.what)
-                SCH_OP_LIST -> fragment = findOrCreateFragment(javaClass<ScheduledOpListFragment>(), message.what)
-                STATISTICS -> fragment = findOrCreateFragment(javaClass<StatisticsListFragment>(), message.what)
+                OP_LIST -> fragment = findOrCreateFragment(OperationListFragment::class.java, message.what)
+                SCH_OP_LIST -> fragment = findOrCreateFragment(ScheduledOpListFragment::class.java, message.what)
+                STATISTICS -> fragment = findOrCreateFragment(StatisticsListFragment::class.java, message.what)
                 CREATE_ACCOUNT -> {
                     AccountEditor.callMeForResult(activity, AccountEditor.NO_ACCOUNT)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
@@ -137,7 +137,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
                 PREFERENCES -> {
-                    val i = Intent(activity, javaClass<ConfigEditor>())
+                    val i = Intent(activity, ConfigEditor::class.java)
                     activity.startActivityForResult(i, 70)
                     mDrawerList.setItemChecked(mActiveFragmentId, true)
                 }
@@ -313,14 +313,14 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CONVERT -> {
                 if (mActiveFragment == null) {
-                    findOrCreateFragment(if (mActiveFragmentId == OP_LIST) javaClass<OperationListFragment>() else
-                        javaClass<ScheduledOpListFragment>(), mActiveFragmentId)
+                    findOrCreateFragment(if (mActiveFragmentId == OP_LIST) OperationListFragment::class.java else
+                        ScheduledOpListFragment::class.java, mActiveFragmentId)
                 }
                 mActiveFragment?.onOperationEditorResult(requestCode, resultCode, data)
             }
             OperationEditor.OPERATION_EDITOR, OperationEditor.OPERATION_CREATOR -> {
                 if (mActiveFragment == null) {
-                    findOrCreateFragment(javaClass<OperationListFragment>(), OP_LIST)
+                    findOrCreateFragment(OperationListFragment::class.java, OP_LIST)
                 }
                 mActiveFragment?.onOperationEditorResult(requestCode, resultCode, data)
                 mAccountManager.backupCurAccountId()
@@ -337,7 +337,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         val needConsolidate = prefs.getBoolean(fr.geobert.radis.service.RadisService.CONSOLIDATE_DB, false)
         if (needConsolidate) {
             fr.geobert.radis.service.RadisService.acquireStaticLock(this)
-            this.startService(Intent(this, javaClass<fr.geobert.radis.service.RadisService>()))
+            this.startService(Intent(this, fr.geobert.radis.service.RadisService::class.java))
         }
     }
 
@@ -399,7 +399,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     private fun installRadisTimer() {
         if (mFirstStart) {
-            val i = Intent(this, javaClass<InstallRadisServiceReceiver>())
+            val i = Intent(this, InstallRadisServiceReceiver::class.java)
             i.setAction(Tools.INTENT_RADIS_STARTED)
             sendBroadcast(i) // install radis timer
             fr.geobert.radis.service.RadisService.callMe(this) // call service once

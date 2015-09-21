@@ -22,7 +22,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     public var mRowId: Long = 0
         private set
 
-    private val mViewPager by Delegates.lazy { findViewById(R.id.pager) as ViewPager }
+    private val mViewPager by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.pager) as ViewPager }
 
     private val mPagerAdapter = object : FragmentStatePagerAdapter(getSupportFragmentManager()) {
         private val fragmentsList: Array<Fragment?> = arrayOfNulls(getCount())
@@ -118,7 +118,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
 
     companion object {
         public fun callMeForResult(context: ActionBarActivity, accountId: Long, firstAccount:Boolean = false) {
-            val intent = Intent(context, javaClass<AccountEditor>())
+            val intent = Intent(context, AccountEditor::class.java)
             intent.putExtra(PARAM_ACCOUNT_ID, accountId)
             context.startActivityForResult(intent, if (firstAccount) ACCOUNT_CREATOR else ACCOUNT_EDITOR)
         }

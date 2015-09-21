@@ -102,7 +102,7 @@ class Helpers {
             clickOnActionItemConfirm()
 
             onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(2, javaClass<RelativeLayout>()))
+            onView(allOf(iz(instanceOf(ListView::class.java)), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(2, RelativeLayout::class.java))
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
@@ -115,7 +115,7 @@ class Helpers {
             clickOnActionItemConfirm()
 
             onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(3, javaClass<RelativeLayout>()))
+            onView(allOf(iz(instanceOf(ListView::class.java)), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(3, RelativeLayout::class.java))
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
@@ -150,7 +150,7 @@ class Helpers {
 
         fun setEdtPrefValue(key: Int, value: String) {
             onView(withText(key)).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(value))
+            onView(allOf(iz(instanceOf(EditText::class.java)), hasFocus()) as Matcher<View>).perform(replaceText(value))
             Espresso.closeSoftKeyboard()
             pauseTest(2000) // needed to workaround espresso 2.0 bug
             clickOnDialogButton(R.string.ok)
@@ -209,7 +209,7 @@ class Helpers {
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())
             val strs = getContext().getResources().getStringArray(R.array.periodicity_choices).get(0)
-            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+            onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
             clickOnActionItemConfirm()
 
             Espresso.pressBack() // back to operations list
@@ -243,10 +243,10 @@ class Helpers {
         fun actionOnOpListAtPosition(pos: Int, viewAction: ViewAction) =
                 actionOnItemAtPosition<OpRowHolder<Operation>>(pos, viewAction)
 
-        fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(textId),
+        fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(Button::class.java)), withText(textId),
                 isDisplayed()) as Matcher<View>).perform(click())
 
-        fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(text),
+        fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(Button::class.java)), withText(text),
                 isDisplayed()) as Matcher<View>).perform(click())
 
         fun scrollRecyclerViewToPos(pos: Int) {
@@ -269,7 +269,7 @@ class Helpers {
             onView(withId(spinnerId)).perform(scrollTo())
             onView(withId(spinnerId)).perform(click())
             val strs = getContext().getResources().getStringArray(arrayResId).get(pos)
-            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+            onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
         }
 
         fun clickOnSpinner(spinnerId: Int, text: String) {
@@ -308,7 +308,7 @@ class Helpers {
 
             onView(allOf(withId(id), isDisplayed())).perform(object : ViewAction {
                 override fun getConstraints(): Matcher<View> {
-                    return allOf(isDisplayed(), iz(instanceOf(javaClass<TextView>()))) as Matcher<View>
+                    return allOf(isDisplayed(), iz(instanceOf(TextView::class.java))) as Matcher<View>
                 }
 
                 override fun getDescription(): String {

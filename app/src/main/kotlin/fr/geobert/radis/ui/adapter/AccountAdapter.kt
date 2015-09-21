@@ -18,8 +18,8 @@ import kotlin.properties.Delegates
 public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Iterable<Account> {
 
     private var accountsList: MutableList<Account> = LinkedList()
-    private val redColor: Int by Delegates.lazy { activity.getResources().getColor(R.color.op_alert) }
-    private val greenColor: Int by Delegates.lazy { activity.getResources().getColor(R.color.positiveSum) }
+    private val redColor: Int by lazy(LazyThreadSafetyMode.NONE) { activity.getResources().getColor(R.color.op_alert) }
+    private val greenColor: Int by lazy(LazyThreadSafetyMode.NONE) { activity.getResources().getColor(R.color.positiveSum) }
 
     override fun getView(p0: Int, p1: View?, p2: ViewGroup): View? {
         val h: AccountRowHolder = if (p1 == null) {

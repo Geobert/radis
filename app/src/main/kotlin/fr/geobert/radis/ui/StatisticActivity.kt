@@ -19,10 +19,10 @@ class StatisticActivity : BaseActivity() {
         val TIME_SCALE = "time_scale"
     }
 
-    val accountNameLbl: TextView by Delegates.lazy { findViewById(R.id.chart_account_name) as TextView }
-    val filterLbl: TextView by Delegates.lazy { findViewById(R.id.filter_lbl) as TextView }
-    val timeScaleLbl: TextView by Delegates.lazy { findViewById(R.id.time_scale_lbl) as TextView }
-    val chartCont: LinearLayout by Delegates.lazy { findViewById(R.id.chart) as LinearLayout }
+    val accountNameLbl: TextView by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.chart_account_name) as TextView }
+    val filterLbl: TextView by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.filter_lbl) as TextView }
+    val timeScaleLbl: TextView by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.time_scale_lbl) as TextView }
+    val chartCont: LinearLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.chart) as LinearLayout }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super<BaseActivity>.onCreate(savedInstanceState)

@@ -15,7 +15,7 @@ import fr.geobert.radis.tools.DBPrefsManager
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.ui.ConfigFragment
-import java.util.LinkedHashMap
+import java.util.*
 import kotlin.platform.platformStatic
 
 public class RadisService : android.app.IntentService(RadisService.TAG) {
@@ -23,14 +23,14 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
     private fun consolidateDbAfterRestore() {
         val prefs = DBPrefsManager.getInstance(this)
         val needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false)
-        android.util.Log.d(TAG, "needConsolidate : " + needConsolidate)
+        android.util.Log.d(TAG, "needConsolidate :ï¿½" + needConsolidate)
         if (needConsolidate) {
             val cursor = fr.geobert.radis.db.AccountTable.fetchAllAccounts(this)
             prefs.put(CONSOLIDATE_DB, false)
             //            prefs.commit();
             if (cursor.moveToFirst()) {
                 do {
-                    android.util.Log.d(TAG, "CONSOLIDATE ON consolidateDB set to true : " + cursor.getLong(0))
+                    android.util.Log.d(TAG, "CONSOLIDATEï¿½ON consolidateDB set to true : " + cursor.getLong(0))
                     fr.geobert.radis.db.AccountTable.consolidateSums(this, cursor.getLong(0))
                 } while (cursor.moveToNext())
             }
@@ -140,7 +140,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
             } while (schOpsCursor.moveToNext())
 
             sumsPerAccount.entrySet().forEach {
-                updateAccountSum(it.getValue(), 0, it.getKey(), greatestDatePerAccount.get(it.getKey()))
+                updateAccountSum(it.getValue(), 0, it.getKey(), greatestDatePerAccount.get(it.getKey()) as Long)
             }
 
             if (sumsPerAccount.entrySet().count() > 0) {
@@ -178,7 +178,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
 
         public fun callMe(context: android.content.Context) {
             RadisService.acquireStaticLock(context)
-            context.startService(android.content.Intent(context, javaClass<RadisService>()))
+            context.startService(android.content.Intent(context, RadisService::class.java))
         }
 
         platformStatic public fun acquireStaticLock(context: android.content.Context) {

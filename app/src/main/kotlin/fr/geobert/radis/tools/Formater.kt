@@ -10,9 +10,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import kotlin.properties.Delegates
 
-private val DATE_FORMAT: DateFormat by Delegates.lazy { DateFormat.getDateInstance(DateFormat.SHORT) }
+private val DATE_FORMAT: DateFormat by lazy(LazyThreadSafetyMode.NONE) { DateFormat.getDateInstance(DateFormat.SHORT) }
 
-private val SUM_FORMAT: DecimalFormat by Delegates.lazy {
+private val SUM_FORMAT: DecimalFormat by lazy(LazyThreadSafetyMode.NONE) {
     val d = DecimalFormat()
     d.setMaximumFractionDigits(2)
     d.setMinimumFractionDigits(2)

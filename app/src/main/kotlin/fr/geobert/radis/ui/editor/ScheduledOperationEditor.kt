@@ -26,16 +26,15 @@ import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
 import java.util.*
-import kotlin.properties.Delegates
 
 public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor {
     private var mOriginalSchOp: ScheduledOperation? = null
     private var mOpIdSource: Long = 0
 
-    private val mViewPager by Delegates.lazy { findViewById(R.id.pager) as ViewPager }
+    private val mViewPager by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.pager) as ViewPager }
 
-    private val mPagerAdapter = object : FragmentStatePagerAdapter(getSupportFragmentManager()) {
-        private val fragmentsList: Array<Fragment?> = arrayOfNulls(getCount())
+    private val mPagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+        private val fragmentsList: Array<Fragment?> = arrayOfNulls(count)
         override fun getItem(position: Int): Fragment? {
             val f = fragmentsList.get(position)
             return if (null == f) {
@@ -63,7 +62,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
     override fun setView() {
         setContentView(R.layout.multipane_editor)
-        mViewPager.setAdapter(mPagerAdapter)
+        mViewPager.adapter = mPagerAdapter
     }
 
     //    fun onAllAccountsFetched() {
@@ -73,13 +72,13 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     //    }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater = getMenuInflater()
+        val inflater = menuInflater
         inflater.inflate(R.menu.confirm_cancel_menu, menu)
         return true
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.confirm -> {
                 onOkClicked()
                 return true
@@ -110,7 +109,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     private fun onOpNotFound(cbk: (Operation) -> Unit): Boolean {
         if (mOpIdSource > 0) {
             onOpFetchedCbks.add(cbk)
-            getSupportLoaderManager().initLoader<Cursor>(GET_SCH_OP_SRC, getIntent().getExtras(), this)
+            supportLoaderManager.initLoader<Cursor>(GET_SCH_OP_SRC, intent.extras, this)
             return false
         } else {
             val op = ScheduledOperation(mCurAccountId)
@@ -141,7 +140,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     private fun startInsertionServiceAndExit() {
         Log.d("Radis", "startInsertionServiceAndExit")
         fr.geobert.radis.service.RadisService.acquireStaticLock(this)
-        this.startService(Intent(this, javaClass<fr.geobert.radis.service.RadisService>()))
+        this.startService(Intent(this, fr.geobert.radis.service.RadisService::class.java))
         val res = Intent()
         getSchFragment().mCurrentSchOp!!.mRowId = mRowId
         res.putExtra("operation", getSchFragment().mCurrentSchOp!!)
@@ -173,7 +172,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                 startInsertionServiceAndExit()
             } else {
                 if (!op.equals(origOp)) {
-                    UpdateOccurencesDialog.newInstance().show(getSupportFragmentManager(), "askOnDiff")
+                    UpdateOccurencesDialog.newInstance().show(supportFragmentManager, "askOnDiff")
                 } else {
                     // nothing to update
                     val res = Intent()
@@ -189,7 +188,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     public class UpdateOccurencesDialog : DialogFragment() {
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val context = getActivity() as ScheduledOperationEditor
+            val context = activity as ScheduledOperationEditor
             val builder = AlertDialog.Builder(context)
             builder.setMessage(R.string.ask_update_occurrences).setCancelable(false).setPositiveButton(R.string.update, object : DialogInterface.OnClickListener {
                 override fun onClick(dialog: DialogInterface, which: Int) {
@@ -228,17 +227,19 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     private fun onUpdateAllOccurrenceClicked() {
-        ScheduledOperationTable.updateScheduledOp(this, mRowId, getSchFragment().mCurrentSchOp, false)
-        val orig = mOriginalSchOp
         val schOp = getSchFragment().mCurrentSchOp
-        if (orig != null && schOp != null) {
-            if (schOp.periodicityEquals(orig)) {
-                ScheduledOperationTable.updateAllOccurences(this, getSchFragment().mCurrentSchOp, mPreviousSum, mRowId)
-                AccountTable.consolidateSums(this, mCurrentOp!!.mAccountId)
-            } else {
-                ScheduledOperationTable.deleteAllOccurences(this, mRowId)
+        if (schOp != null) {
+            ScheduledOperationTable.updateScheduledOp(this, mRowId, schOp, false)
+            val orig = mOriginalSchOp
+            if (orig != null) {
+                if (schOp.periodicityEquals(orig)) {
+                    ScheduledOperationTable.updateAllOccurences(this, schOp, mPreviousSum, mRowId)
+                    AccountTable.consolidateSums(this, mCurrentOp!!.mAccountId)
+                } else {
+                    ScheduledOperationTable.deleteAllOccurences(this, mRowId)
+                }
+                startInsertionServiceAndExit()
             }
-            startInsertionServiceAndExit()
         }
     }
 
@@ -253,13 +254,13 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable("originalOp", mOriginalSchOp)
         outState.putParcelable("currentSchOp", getSchFragment().mCurrentSchOp)
-        super<CommonOpEditor>.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         getSchFragment().mCurrentSchOp = savedInstanceState.getParcelable<ScheduledOperation>("currentSchOp")
         mOriginalSchOp = savedInstanceState.getParcelable<ScheduledOperation>("originalOp")
-        super<CommonOpEditor>.onRestoreInstanceState(savedInstanceState)
+        super.onRestoreInstanceState(savedInstanceState)
     }
 
     override fun fillOperationWithInputs(operation: Operation) {
@@ -277,8 +278,8 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
 
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        when (loader.getId()) {
-            GET_SCH_OP -> if (data.getCount() > 0 && data.moveToFirst()) {
+        when (loader.id) {
+            GET_SCH_OP -> if (data.count > 0 && data.moveToFirst()) {
                 mOriginalSchOp = ScheduledOperation(data)
                 mCurrentOp = ScheduledOperation(data)
                 val op = ScheduledOperation(data)
@@ -293,7 +294,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                     }
                 }
             }
-            GET_SCH_OP_SRC -> if (data.getCount() > 0 && data.moveToFirst()) {
+            GET_SCH_OP_SRC -> if (data.count > 0 && data.moveToFirst()) {
                 val op = ScheduledOperation(data, mCurAccountId)
                 mCurrentOp = op
                 getSchFragment().mCurrentSchOp = mCurrentOp as ScheduledOperation
@@ -337,7 +338,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
         private val GET_SCH_OP_SRC = 630
 
         public fun callMeForResult(context: Activity, opId: Long, mAccountId: Long, mode: Int) {
-            val i = Intent(context, javaClass<ScheduledOperationEditor>())
+            val i = Intent(context, ScheduledOperationEditor::class.java)
             if (mode == ACTIVITY_SCH_OP_CONVERT) {
                 i.putExtra(PARAM_SRC_OP_TO_CONVERT, opId)
             } else {

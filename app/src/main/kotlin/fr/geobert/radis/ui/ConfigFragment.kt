@@ -24,12 +24,12 @@ import kotlin.properties.Delegates
 
 public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
     // only in global prefs, it is lazy so no crash in AccountEditor
-    private val mAccountsChoice by Delegates.lazy { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
+    private val mAccountsChoice by lazy(LazyThreadSafetyMode.NONE) { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
 
     //TODO lazy access to prefs in AccountEditor mode
-    private val mOverInsertDate by Delegates.lazy { findPreference(KEY_OVERRIDE_INSERT_DATE) as CheckBoxPreference }
+    private val mOverInsertDate by lazy(LazyThreadSafetyMode.NONE) { findPreference(KEY_OVERRIDE_INSERT_DATE) as CheckBoxPreference }
 
-    private val isAccountEditor by Delegates.lazy { getActivity() is AccountEditor }
+    private val isAccountEditor by lazy(LazyThreadSafetyMode.NONE) { getActivity() is AccountEditor }
     private var mOnRestore: Boolean = false
 
     var mConfig: AccountConfig by Delegates.notNull()

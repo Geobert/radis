@@ -297,7 +297,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
 
     fun isFormValid(errMsg: StringBuilder): Boolean {
         var res = true
-        val str: String
+        var str: String
         if (is_transfert.isChecked()) {
             val srcAccount = trans_src_account.getSelectedItem() as Account
             val dstAccount = trans_dst_account.getSelectedItem() as Account

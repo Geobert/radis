@@ -53,15 +53,15 @@ import java.util.Locale
 import kotlin.properties.Delegates
 
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
-    val ctx: FragmentActivity by Delegates.lazy { getActivity() }
+    val ctx: FragmentActivity by lazy(LazyThreadSafetyMode.NONE) { getActivity() }
     private val STAT_LOADER = 2000
     private var mContainer: View by Delegates.notNull()
     private var mList: RecyclerView by Delegates.notNull()
-    private val mEmptyView: View by Delegates.lazy { mContainer.findViewById(R.id.empty_textview) }
+    private val mEmptyView: View by lazy(LazyThreadSafetyMode.NONE) { mContainer.findViewById(R.id.empty_textview) }
     private var mAdapter: StatisticAdapter? = null
     private var mLoader: Loader<Cursor>? = null
     private val ZOOM_ENABLED = true
-    private val mOnRefreshReceiver by Delegates.lazy { OnRefreshReceiver(this) }
+    private val mOnRefreshReceiver by lazy(LazyThreadSafetyMode.NONE) { OnRefreshReceiver(this) }
 
     override fun setupIcon() = setIcon(R.drawable.stat_48)
 
@@ -158,8 +158,8 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun getColorsArray(id: Int): List<Int> =
             ctx.getResources()?.getStringArray(id)?.map({ Color.parseColor(it) }) as List<Int>
 
-    private val pos_colors: List<Int> by Delegates.lazy { getColorsArray(R.array.positive_colors) }
-    private val neg_colors: List<Int> by Delegates.lazy { getColorsArray(R.array.negative_colors) }
+    private val pos_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) { getColorsArray(R.array.positive_colors) }
+    private val neg_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) { getColorsArray(R.array.negative_colors) }
 
     /**
      * get the ops list according to the time range, split by sum sign and group each by partFunc
@@ -438,11 +438,11 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             Statistic.CHART_PIE -> {
                 val (dataSet, renderer) = createCategorySeries(stat)
                 //                    ChartFactory.getPieChartView(ctx, dataSet, renderer) as GraphicalView
-                ChartFactory.getPieChartIntent(ctx, dataSet, renderer, stat.name).setClass(ctx, javaClass<StatisticActivity>())
+                ChartFactory.getPieChartIntent(ctx, dataSet, renderer, stat.name).setClass(ctx, StatisticActivity::class.java)
             }
             Statistic.CHART_BAR -> {
                 val (dataSet, renderer) = createBarXYDataSet(stat)
-                ChartFactory.getBarChartIntent(ctx, dataSet, renderer, Type.STACKED, stat.name).setClass(ctx, javaClass<StatisticActivity>())
+                ChartFactory.getBarChartIntent(ctx, dataSet, renderer, Type.STACKED, stat.name).setClass(ctx, StatisticActivity::class.java)
             }
             else -> {
                 //Statistic.CHART_LINE
@@ -452,7 +452,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                     Statistic.PERIOD_MONTHES -> "MM/yy"
                     else -> "yy"
                 }
-                ChartFactory.getTimeChartIntent(ctx, dataSet, renderer, format, stat.name).setClass(ctx, javaClass<StatisticActivity>())
+                ChartFactory.getTimeChartIntent(ctx, dataSet, renderer, format, stat.name).setClass(ctx, StatisticActivity::class.java)
             }
         }
         intent.putExtra(StatisticActivity.ACCOUNT_NAME, stat.accountName)
