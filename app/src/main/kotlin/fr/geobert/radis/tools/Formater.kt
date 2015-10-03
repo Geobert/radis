@@ -14,14 +14,14 @@ private val DATE_FORMAT: DateFormat by lazy(LazyThreadSafetyMode.NONE) { DateFor
 
 private val SUM_FORMAT: DecimalFormat by lazy(LazyThreadSafetyMode.NONE) {
     val d = DecimalFormat()
-    d.setMaximumFractionDigits(2)
-    d.setMinimumFractionDigits(2)
+    d.maximumFractionDigits = 2
+    d.minimumFractionDigits = 2
     d
 }
 
 private var SHORT_DATE_FORMAT: SimpleDateFormat by Delegates.notNull()
 
-public fun getSumSeparator(): Char = SUM_FORMAT.getDecimalFormatSymbols().getDecimalSeparator()
+public fun getSumSeparator(): Char = SUM_FORMAT.decimalFormatSymbols.decimalSeparator
 public fun Double.formatSum(): String = SUM_FORMAT.format(this)
 public fun String.parseSum(): Double = SUM_FORMAT.parse(this).toDouble()
 public fun Date.formatDate(): String = DATE_FORMAT.format(this)
@@ -34,5 +34,5 @@ public fun String.parseDate(): Date = DATE_FORMAT.parse(this)
 public fun Date.formatShortDate(): String = SHORT_DATE_FORMAT.format(this)
 public fun String.parseShortDate(): Date = SHORT_DATE_FORMAT.parse(this)
 public fun initShortDate(c: Context) {
-    SHORT_DATE_FORMAT = SimpleDateFormat(c.getResources().getString(R.string.short_date_format))
+    SHORT_DATE_FORMAT = SimpleDateFormat(c.resources.getString(R.string.short_date_format))
 }

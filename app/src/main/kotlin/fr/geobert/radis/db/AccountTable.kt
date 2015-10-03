@@ -19,7 +19,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.GregorianCalendar
 import java.util.HashMap
-import kotlin.platform.platformStatic
 
 public object AccountTable {
     private val TAG = "AccountTable"
@@ -93,7 +92,7 @@ public object AccountTable {
     private var mProjectionMode = -1
     private var mProjectionDate: Long = 0
 
-    platformStatic fun onCreate(db: SQLiteDatabase) {
+    JvmStatic fun onCreate(db: SQLiteDatabase) {
         db.execSQL(DATABASE_ACCOUNT_CREATE)
     }
 
@@ -113,15 +112,15 @@ public object AccountTable {
     public fun createAccount(ctx: Context, account: Account): Long {
         val values = createValuesOf(account)
         setCurrentSumAndDate(ctx, account, values)
-        val res = ctx.getContentResolver().insert(DbContentProvider.ACCOUNT_URI, values)
-        return lang.Long.parseLong(res.getLastPathSegment())
+        val res = ctx.contentResolver.insert(DbContentProvider.ACCOUNT_URI, values)
+        return lang.Long.parseLong(res.lastPathSegment)
     }
 
     public fun deleteAccount(ctx: Context, accountId: Long): Boolean {
-        return ctx.getContentResolver().delete(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), null, null) > 0
+        return ctx.contentResolver.delete(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), null, null) > 0
     }
 
-    platformStatic public fun consolidateSums(ctx: Context, accountId: Long): Int {
+    JvmStatic public fun consolidateSums(ctx: Context, accountId: Long): Int {
         var res = 0
         if (0L != accountId) {
             val values = ContentValues()
@@ -149,7 +148,7 @@ public object AccountTable {
                     }
                     Log.d(TAG, "consolidate checked sum : " + sum)
                     values.put(KEY_ACCOUNT_CHECKED_OP_SUM, sum)
-                    res = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"),
+                    res = ctx.contentResolver.update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"),
                             values, null, null)
                 } catch (e: ParseException) {
                     e.printStackTrace()
@@ -164,13 +163,13 @@ public object AccountTable {
     private fun setCurrentSumAndDate(ctx: Context, account: Account, values: ContentValues) {
         var date: Long = 0
         var opSum: Long = 0
-        Log.d(TAG, "setCurrentSumAndDate mAccountId = ${account.id}/ projectionMode : ${account.projMode}")
+        Log.d(TAG, "setCurrentSumAndDate mAccountId = ${account.id}/ projectionMode :ï¿½${account.projMode}")
         when (account.projMode) {
             PROJECTION_FURTHEST -> {
                 if (account.id > 0) {
                     val allOps = OperationTable.fetchAllOps(ctx, account.id)
                     if (null != allOps) {
-                        Log.d(TAG, "setCurrentSumAndDate allOps not null : ${allOps.getCount()}")
+                        Log.d(TAG, "setCurrentSumAndDate allOps not null : ${allOps.count}")
                         if (allOps.moveToFirst()) {
                             date = allOps.getLong(allOps.getColumnIndex(OperationTable.KEY_OP_DATE))
                             opSum = OperationTable.computeSumFromCursor(allOps, account.id)
@@ -187,7 +186,7 @@ public object AccountTable {
                 }
                 projDate.set(Calendar.DAY_OF_MONTH, account.projDate.toInt())
                 projDate.add(Calendar.DAY_OF_MONTH, 1) // for query
-                val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, account.id)
+                val op = OperationTable.fetchOpEarlierThan(ctx, projDate.timeInMillis, 0, account.id)
                 projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after query
                 if (null != op) {
                     if (op.moveToFirst()) {
@@ -195,13 +194,13 @@ public object AccountTable {
                     }
                     op.close()
                 }
-                date = projDate.getTimeInMillis()
+                date = projDate.timeInMillis
             }
             PROJECTION_ABSOLUTE_DATE -> {
                 val projDate = Tools.createClearedCalendar()
-                projDate.setTime(account.projDate.parseDate())
+                projDate.time = account.projDate.parseDate()
                 projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
-                val op = OperationTable.fetchOpEarlierThan(ctx, projDate.getTimeInMillis(), 0, account.id)
+                val op = OperationTable.fetchOpEarlierThan(ctx, projDate.timeInMillis, 0, account.id)
                 projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
                 if (null != op) {
                     if (op.moveToFirst()) {
@@ -209,31 +208,31 @@ public object AccountTable {
                     }
                     op.close()
                 }
-                date = projDate.getTimeInMillis()
+                date = projDate.timeInMillis
             }
             else -> {
             }
         }
-        Log.d(TAG, "setCurrentSumAndDate opSum = $opSum/ startSum = $account.startSum/ sum : ${account.startSum + opSum}")
+        Log.d(TAG, "setCurrentSumAndDate opSum = $opSum/ startSum = $account.startSum/ sum :ï¿½${account.startSum + opSum}")
         values.put(KEY_ACCOUNT_OP_SUM, opSum)
         values.put(KEY_ACCOUNT_CUR_SUM, account.startSum + opSum)
         Log.d(TAG, "setCurrentSumAndDate, KEY_ACCOUNT_CUR_SUM_DATE : ${Date(date).formatDate()}")
         values.put(KEY_ACCOUNT_CUR_SUM_DATE, date)
     }
 
-    platformStatic public fun fetchAccount(ctx: Context, accountId: Long): Cursor {
-        return ctx.getContentResolver().query(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), ACCOUNT_FULL_COLS, null, null, null)
+    JvmStatic public fun fetchAccount(ctx: Context, accountId: Long): Cursor {
+        return ctx.contentResolver.query(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), ACCOUNT_FULL_COLS, null, null, null)
     }
 
     public fun getAccountLoader(ctx: Context, accountId: Long): CursorLoader {
         return CursorLoader(ctx, Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), ACCOUNT_FULL_COLS, null, null, null)
     }
 
-    platformStatic public fun fetchAllAccounts(ctx: Context): Cursor {
-        return ctx.getContentResolver().query(DbContentProvider.ACCOUNT_URI, ACCOUNT_FULL_COLS, null, null, null)
+    JvmStatic public fun fetchAllAccounts(ctx: Context): Cursor {
+        return ctx.contentResolver.query(DbContentProvider.ACCOUNT_URI, ACCOUNT_FULL_COLS, null, null, null)
     }
 
-    platformStatic public fun getAllAccountsLoader(ctx: Context): CursorLoader {
+    JvmStatic public fun getAllAccountsLoader(ctx: Context): CursorLoader {
         return CursorLoader(ctx, DbContentProvider.ACCOUNT_URI, ACCOUNT_FULL_COLS, null, null, null)
     }
 
@@ -256,14 +255,14 @@ public object AccountTable {
         updateAccount(ctx, accountId, values)
     }
 
-    platformStatic public fun initProjectionDate(cursor: Cursor) {
+    JvmStatic public fun initProjectionDate(cursor: Cursor) {
         initProjectionDate(Account(cursor))
     }
 
     public fun initProjectionDate(acc: Account) {
         mProjectionMode = acc.projMode
         when (mProjectionMode) {
-            PROJECTION_FURTHEST -> mProjectionDate = acc.curSumDate?.getTime() ?: 0
+            PROJECTION_FURTHEST -> mProjectionDate = acc.curSumDate?.time ?: 0
             PROJECTION_DAY_OF_NEXT_MONTH -> {
                 val projDate = Tools.createClearedCalendar()
                 projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(acc.projDate))
@@ -271,16 +270,16 @@ public object AccountTable {
                 if (projDate.compareTo(today) <= 0) {
                     projDate.add(Calendar.MONTH, 1)
                 }
-                mProjectionDate = projDate.getTimeInMillis()
+                mProjectionDate = projDate.timeInMillis
             }
             PROJECTION_ABSOLUTE_DATE -> try {
                 val projDate = acc.projDate.parseDate()
                 val cal = GregorianCalendar()
-                cal.setTime(projDate)
+                cal.time = projDate
                 cal.set(Calendar.HOUR, 0)
                 cal.set(Calendar.MINUTE, 0)
                 cal.set(Calendar.SECOND, 0)
-                mProjectionDate = cal.getTimeInMillis()
+                mProjectionDate = cal.timeInMillis
             } catch (e: ParseException) {
                 e.printStackTrace()
             }
@@ -290,7 +289,7 @@ public object AccountTable {
     }
 
     public fun updateAccount(ctx: Context, accountId: Long, values: ContentValues): Int {
-        return ctx.getContentResolver().update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), values,
+        return ctx.contentResolver.update(Uri.parse("${DbContentProvider.ACCOUNT_URI}/$accountId"), values,
                 null, null)
     }
 
@@ -300,8 +299,8 @@ public object AccountTable {
         return updateAccount(ctx, account.id, args) > 0
     }
 
-    platformStatic public fun updateProjection(ctx: Context, accountId: Long, opSum: Long, oldOpSum: Long, opDate: Long,
-                                               origOpDate: Long) {
+    JvmStatic public fun updateProjection(ctx: Context, accountId: Long, opSum: Long, oldOpSum: Long, opDate: Long,
+                                          origOpDate: Long) {
         val args = ContentValues()
         processProjectionFurthestCase(ctx, accountId, opDate, args)
 
@@ -364,11 +363,11 @@ public object AccountTable {
         }
     }
 
-    platformStatic public fun getProjectionDate(): Long {
+    JvmStatic public fun getProjectionDate(): Long {
         return mProjectionDate
     }
 
-    platformStatic public fun updateCheckedOpSum(ctx: Context, sum: Long, accountId: Long, transAccountId: Long, b: Boolean) {
+    JvmStatic public fun updateCheckedOpSum(ctx: Context, sum: Long, accountId: Long, transAccountId: Long, b: Boolean) {
         val acc: Cursor = fetchAccount(ctx, accountId)
         if (acc.moveToFirst()) {
             val values = ContentValues()
@@ -396,14 +395,14 @@ public object AccountTable {
     //            updateCheckedOpSum(ctx, sum, accountId, transAccountId, b)
     //        }
 
-    platformStatic public fun updateCheckedOpSum(ctx: Context, op: Operation, b: Boolean) {
+    JvmStatic public fun updateCheckedOpSum(ctx: Context, op: Operation, b: Boolean) {
         val sum = op.mSum
         val accountId = op.mAccountId
         val transAccountId = op.mTransferAccountId
         updateCheckedOpSum(ctx, sum, accountId, transAccountId, b)
     }
 
-    platformStatic public fun getCheckedSum(ctx: Context, accountId: Long?): Long {
+    JvmStatic public fun getCheckedSum(ctx: Context, accountId: Long?): Long {
         val c = fetchAccount(ctx, accountId!!)
         var res: Long = 0
         if (c.moveToFirst()) {
@@ -414,7 +413,7 @@ public object AccountTable {
     }
 
 
-    // UPGRADE FUNCTIONS
+    // UPGRADEï¿½FUNCTIONS
     private fun rawSetCurrentSumAndDate(db: SQLiteDatabase, accountId: Long, values: ContentValues, start_sum: Long, projectionMode: Int, projectionDate: String) {
         var date: Long = 0
         var opSum: Long = 0
@@ -424,7 +423,7 @@ public object AccountTable {
                 if (accountId > 0) {
                     val allOps = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT, arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId)), null, null, OperationTable.OP_ORDERING, null)
                     if (null != allOps) {
-                        Log.d(TAG, "raw setCurrentSumAndDate allOps not null : " + allOps.getCount())
+                        Log.d(TAG, "raw setCurrentSumAndDate allOps not null : " + allOps.count)
                         if (allOps.moveToFirst()) {
                             Log.d(TAG, "raw setCurrentSumAndDate allOps moved to first")
                             date = allOps.getLong(allOps.getColumnIndex(OperationTable.KEY_OP_DATE))
@@ -441,7 +440,7 @@ public object AccountTable {
                 }
                 projDate.set(Calendar.DAY_OF_MONTH, Integer.parseInt(projectionDate))
                 projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
-                val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.getTimeInMillis())), null, null, OperationTable.OP_ORDERING)
+                val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.timeInMillis)), null, null, OperationTable.OP_ORDERING)
                 projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
                 // query
                 if (null != op) {
@@ -450,13 +449,13 @@ public object AccountTable {
                     }
                     op.close()
                 }
-                date = projDate.getTimeInMillis()
+                date = projDate.timeInMillis
             }
             2 -> {
                 val projDate = Tools.createClearedCalendar()
-                projDate.setTime(projectionDate.parseDate())
+                projDate.time = projectionDate.parseDate()
                 projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
-                val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.getTimeInMillis())), null, null, OperationTable.OP_ORDERING)
+                val op = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY, OperationTable.RESTRICT_TO_ACCOUNT + " and ops." + OperationTable.KEY_OP_DATE + " < ?", arrayOf(lang.Long.toString(accountId), lang.Long.toString(accountId), lang.Long.toString(projDate.timeInMillis)), null, null, OperationTable.OP_ORDERING)
                 projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
                 // query
                 if (null != op) {
@@ -465,7 +464,7 @@ public object AccountTable {
                     }
                     op.close()
                 }
-                date = projDate.getTimeInMillis()
+                date = projDate.timeInMillis
             }
             else -> {
             }
@@ -497,7 +496,7 @@ public object AccountTable {
         }
     }
 
-    platformStatic fun upgradeDefault(db: SQLiteDatabase) {
+    JvmStatic fun upgradeDefault(db: SQLiteDatabase) {
         val c = db.query(DATABASE_ACCOUNT_TABLE, arrayOf(KEY_ACCOUNT_ROWID), null, null, null, null, null)
         if (null != c) {
             if (c.moveToFirst()) {
@@ -509,7 +508,7 @@ public object AccountTable {
         }
     }
 
-    platformStatic fun upgradeFromV18(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV18(db: SQLiteDatabase) {
         db.execSQL(ADD_LAST_INSERT_DATE_COLUMN)
         val values = ContentValues()
         fun getAllPrefs(db: SQLiteDatabase): HashMap<String, String> {
@@ -532,11 +531,11 @@ public object AccountTable {
         db.update(DATABASE_ACCOUNT_TABLE, values, null, null)
     }
 
-    platformStatic fun upgradeFromV16(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV16(db: SQLiteDatabase) {
         db.execSQL(ADD_CHECKED_SUM_COLUNM)
     }
 
-    platformStatic fun upgradeFromV9(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV9(db: SQLiteDatabase) {
         db.execSQL(ADD_PROJECTION_MODE_COLUNM)
         db.execSQL(ADD_PROJECTION_MODE_DATE)
         val c = db.query(DATABASE_ACCOUNT_TABLE, arrayOf(), null, null, null, null, null)
@@ -550,7 +549,7 @@ public object AccountTable {
         }
     }
 
-    platformStatic fun upgradeFromV6(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV6(db: SQLiteDatabase) {
         db.execSQL("DROP TRIGGER on_delete_third_party")
         db.execSQL("DROP TRIGGER on_delete_mode")
         db.execSQL("DROP TRIGGER on_delete_tag")
@@ -584,11 +583,11 @@ public object AccountTable {
         }
     }
 
-    platformStatic fun upgradeFromV12(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV12(db: SQLiteDatabase) {
         db.execSQL(TRIGGER_ON_DELETE_ACCOUNT)
     }
 
-    platformStatic fun upgradeFromV4(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV4(db: SQLiteDatabase) {
         db.execSQL(ADD_CUR_DATE_COLUNM)
     }
 

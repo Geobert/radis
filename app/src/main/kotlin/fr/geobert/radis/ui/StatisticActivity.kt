@@ -25,8 +25,8 @@ class StatisticActivity : BaseActivity() {
     val chartCont: LinearLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.chart) as LinearLayout }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
-        val extras = getIntent().getExtras()
+        super.onCreate(savedInstanceState)
+        val extras = intent.extras
         val title = extras?.getString(ChartFactory.TITLE)
         // setContentView need different timing according to the need of title
         if (title != null) {
@@ -42,13 +42,13 @@ class StatisticActivity : BaseActivity() {
                 onBackPressed()
             }
         })
-        mToolbar.getMenu().clear()
+        mToolbar.menu.clear()
         setIcon(R.drawable.ok_48)
 
 
-        accountNameLbl.setText(extras.getString(ACCOUNT_NAME))
-        filterLbl.setText(extras.getString(FILTER))
-        timeScaleLbl.setText(extras.getString(TIME_SCALE))
+        accountNameLbl.text = extras.getString(ACCOUNT_NAME)
+        filterLbl.text = extras.getString(FILTER)
+        timeScaleLbl.text = extras.getString(TIME_SCALE)
 
         chartCont.addView(createCharteView(extras))
     }

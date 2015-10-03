@@ -28,6 +28,10 @@ import fr.geobert.radis.tools.Tools
 import java.util.*
 
 public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor {
+    override val isTransfertChecked: Boolean
+        get() = getOpFragment().isTransfertChecked()
+    override val srcAccountSpinnerIdx: Int
+        get() = getOpFragment().getSrcAccountIdx()
     private var mOriginalSchOp: ScheduledOperation? = null
     private var mOpIdSource: Long = 0
 
@@ -83,7 +87,7 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
                 onOkClicked()
                 return true
             }
-            else -> return super<CommonOpEditor>.onOptionsItemSelected(item)
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 
@@ -316,14 +320,6 @@ public class ScheduledOperationEditor : CommonOpEditor(), OpEditFragmentAccessor
     }
 
     override fun onLoaderReset(arg0: Loader<Cursor>) {
-    }
-
-    override fun isTransfertChecked(): Boolean {
-        return getOpFragment().isTransfertChecked()
-    }
-
-    override fun getSrcAccountSpinnerIdx(): Int {
-        return getOpFragment().getSrcAccountIdx()
     }
 
     companion object {

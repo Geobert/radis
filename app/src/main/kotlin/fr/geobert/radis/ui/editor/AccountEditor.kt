@@ -24,8 +24,8 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
 
     private val mViewPager by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.pager) as ViewPager }
 
-    private val mPagerAdapter = object : FragmentStatePagerAdapter(getSupportFragmentManager()) {
-        private val fragmentsList: Array<Fragment?> = arrayOfNulls(getCount())
+    private val mPagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+        private val fragmentsList: Array<Fragment?> = arrayOfNulls(count)
         override fun getItem(position: Int): Fragment? {
             val f = fragmentsList.get(position)
             return if (null == f) {
@@ -53,11 +53,11 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     fun isNewAccount() = NO_ACCOUNT == mRowId
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.multipane_editor)
         initToolbar(this)
 
-        val extra = getIntent().getExtras()
+        val extra = intent.extras
         mRowId = if (extra != null) {
             extra.getLong(PARAM_ACCOUNT_ID)
         } else {
@@ -70,28 +70,28 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
             setTitle(R.string.account_edit_title)
         }
 
-        mViewPager.setAdapter(mPagerAdapter)
+        mViewPager.adapter = mPagerAdapter
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
+        super.onRestoreInstanceState(savedInstanceState)
         mRowId = savedInstanceState.getLong("mRowId")
         //        getAccountFrag().onRestoreInstanceState(savedInstanceState) // not managed by Android
         //        getConfigFrag().onRestoreInstanceState(savedInstanceState)  // not managed by Android
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle?) {
-        super<BaseActivity>.onSaveInstanceState(outState, outPersistentState)
+        super.onSaveInstanceState(outState, outPersistentState)
         outState.putLong("mRowId", mRowId)
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.confirm -> {
                 onOkClicked()
                 return true
             }
-            else -> return super<BaseActivity>.onOptionsItemSelected(item)
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 

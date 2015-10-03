@@ -170,8 +170,8 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
                     if (currentDB.exists()) {
                         val srcFIS = FileInputStream(currentDB)
                         val dstFOS = FileOutputStream(backupDB)
-                        val src = srcFIS.getChannel()
-                        val dst = dstFOS.getChannel()
+                        val src = srcFIS.channel
+                        val dst = dstFOS.channel
                         dst.transferFrom(src, 0, src.size())
                         src.close()
                         dst.close()
@@ -200,8 +200,8 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
                     DbContentProvider.close()
                     val srcFIS = FileInputStream(backupDB)
                     val dstFOS = FileOutputStream(currentDB)
-                    val dst = dstFOS.getChannel()
-                    val src = srcFIS.getChannel()
+                    val dst = dstFOS.channel
+                    val src = srcFIS.channel
 
                     dst.transferFrom(src, 0, src.size())
                     src.close()

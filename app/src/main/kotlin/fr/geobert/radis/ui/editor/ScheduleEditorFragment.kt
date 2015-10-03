@@ -6,7 +6,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.CompoundButton
+import android.widget.DatePicker
+import android.widget.EditText
+import android.widget.Spinner
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
@@ -15,7 +21,7 @@ import fr.geobert.radis.ui.adapter.AccountAdapter
 import kotlin.properties.Delegates
 
 public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListener {
-    private val mActivity by lazy(LazyThreadSafetyMode.NONE) { getActivity() as ScheduledOperationEditor }
+    private val mActivity by lazy(LazyThreadSafetyMode.NONE) { activity as ScheduledOperationEditor }
     var mCurrentSchOp: ScheduledOperation? = null
     private var mEndDatePicker: DatePicker by Delegates.notNull()
     private var mAccountSpinner: Spinner by Delegates.notNull()
@@ -38,7 +44,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super<Fragment>.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
         initViewBehavior()
         // done by ScheduledOperationEditor
         //populateFields();
@@ -51,19 +57,19 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
         else mCurrentSchOp?.mPeriodicity.toString())
         populatePeriodicitySpinner()
         populateCustomPeriodicitySpinner()
-        populateAccountSpinner((getActivity() as CommonOpEditor).mAccountManager.mAccountAdapter)
+        populateAccountSpinner((activity as CommonOpEditor).mAccountManager.mAccountAdapter)
         if (op.getEndDate() > 0) {
-            mEndDateCheck.setChecked(true)
-            mEndDatePicker.setEnabled(true)
+            mEndDateCheck.isChecked = true
+            mEndDatePicker.isEnabled = true
             mEndDatePicker.updateDate(op.getEndYear(), op.getEndMonth() - 1, op.getEndDay())
         } else {
-            mEndDateCheck.setChecked(false)
-            mEndDatePicker.setEnabled(false)
+            mEndDateCheck.isChecked = false
+            mEndDatePicker.isEnabled = false
         }
     }
 
     override fun onResume() {
-        super<Fragment>.onResume()
+        super.onResume()
         mActivity.mAccountManager.fetchAllAccounts(false, {
             mActivity.onAllAccountsFetched()
             mActivity.getOpThenPopulate { op ->
@@ -74,23 +80,23 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     }
 
     private fun initViewBehavior() {
-        mCustomPeriodicityVal.setOnFocusChangeListener(object : View.OnFocusChangeListener {
+        mCustomPeriodicityVal.onFocusChangeListener = object : View.OnFocusChangeListener {
             override fun onFocusChange(v: View, hasFocus: Boolean) {
                 if (hasFocus) {
                     (v as EditText).selectAll()
                 }
             }
-        })
+        }
 
-        mEndDatePicker.setEnabled(false)
+        mEndDatePicker.isEnabled = false
 
         mEndDateCheck.setOnCheckedChangeListener(object : CompoundButton.OnCheckedChangeListener {
             override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-                mEndDatePicker.setEnabled(isChecked)
+                mEndDatePicker.isEnabled = isChecked
                 mEndDatePicker.clearFocus()
             }
         })
-        mEndDateCheck.setChecked(false)
+        mEndDateCheck.isChecked = false
 
 
     }
@@ -98,7 +104,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     private fun populateCustomPeriodicitySpinner() {
         val adapter = ArrayAdapter.createFromResource(mActivity, R.array.periodicity_custom_choices, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mCustomPeriodicityUnit.setAdapter(adapter)
+        mCustomPeriodicityUnit.adapter = adapter
 
         val schOp = mCurrentSchOp
         if (schOp != null) {
@@ -110,14 +116,14 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     }
 
     private fun setCustomPeriodicityVisibility(isVisible: Boolean) {
-        mCustomPeriodicityCont.setVisibility(if (isVisible)
+        mCustomPeriodicityCont.visibility = if (isVisible)
             View.VISIBLE
         else
-            View.GONE)
+            View.GONE
     }
 
     override fun onTransfertCheckedChanged(isChecked: Boolean) {
-        mAccountSpinner.setEnabled(!isChecked)
+        mAccountSpinner.isEnabled = !isChecked
         val acc0 = mAccountSpinner.getItemAtPosition(0) as Account
         if (isChecked) {
             acc0.name = getString(R.string.defined_by_transfert)
@@ -131,15 +137,15 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
         val adapter = ArrayAdapter.createFromResource(mActivity, R.array.periodicity_choices,
                 android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mPeriodicitySpinner.setAdapter(adapter)
-        mPeriodicitySpinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+        mPeriodicitySpinner.adapter = adapter
+        mPeriodicitySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
-                setCustomPeriodicityVisibility(pos == (parent.getAdapter().getCount() - 1))
+                setCustomPeriodicityVisibility(pos == (parent.adapter.count - 1))
             }
 
             override fun onNothingSelected(arg0: AdapterView<*>) {
             }
-        })
+        }
         val schOp = mCurrentSchOp
         if (schOp != null) {
             val unit = schOp.mPeriodicityUnit
@@ -152,15 +158,15 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     }
 
     private fun populateAccountSpinner(c: AccountAdapter?) {
-        if (c != null && c.getCount() > 0) {
+        if (c != null && c.count > 0) {
             val adapter = ArrayAdapter(mActivity, android.R.layout.simple_spinner_item, android.R.id.text1, c.toArrayList())
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            mAccountSpinner.setAdapter(adapter)
+            mAccountSpinner.adapter = adapter
 
             val schOp = mCurrentSchOp
             if (schOp != null && (schOp.mAccountId != 0L || mActivity.mCurAccountId != 0L)) {
                 var pos = 0
-                while (pos < adapter.getCount()) {
+                while (pos < adapter.count) {
                     val id = adapter.getItem(pos).id
                     if (id == schOp.mAccountId || id == mActivity.mCurAccountId) {
                         mAccountSpinner.setSelection(pos)
@@ -170,31 +176,31 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
                     }
                 }
             }
-            val isTransfert = mActivity.isTransfertChecked()
-            mAccountSpinner.setEnabled(!isTransfert)
+            val isTransfert = mActivity.isTransfertChecked
+            mAccountSpinner.isEnabled = !isTransfert
             if (isTransfert) {
-                mAccountSpinner.setSelection(mActivity.getSrcAccountSpinnerIdx())
+                mAccountSpinner.setSelection(mActivity.srcAccountSpinnerIdx)
             }
         }
     }
 
     fun fillOperationWithInputs(operation: Operation) {
         val op = operation as ScheduledOperation
-        if (!mActivity.isTransfertChecked()) {
+        if (!mActivity.isTransfertChecked) {
             //val c = mAccountSpinner.getSelectedItem() as Cursor
-            val o = mAccountSpinner.getSelectedItem()
+            val o = mAccountSpinner.selectedItem
             if (o != null) {
                 val c = o as Account
                 op.mAccountId = c.id
             }
         }
         Log.d("ScheduleEditorFragment", "selected accountId = ${op.mAccountId}")
-        val isCustom = mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner.getAdapter()?.getCount() ?: 0 - 1)
+        val isCustom = mPeriodicitySpinner.selectedItemPosition == (mPeriodicitySpinner.adapter?.count ?: 0 - 1)
         if (!isCustom) {
             op.mPeriodicity = 1
-            op.mPeriodicityUnit = mPeriodicitySpinner.getSelectedItemPosition()
+            op.mPeriodicityUnit = mPeriodicitySpinner.selectedItemPosition
         } else {
-            val periodicity = mCustomPeriodicityVal.getText().toString()
+            val periodicity = mCustomPeriodicityVal.text.toString()
             try {
                 op.mPeriodicity = Integer.parseInt(periodicity)
             } catch (e: NumberFormatException) {
@@ -213,14 +219,14 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
 
             }
 
-            op.mPeriodicityUnit = mCustomPeriodicityUnit.getSelectedItemPosition() + ScheduledOperation.CUSTOM_DAILY_PERIOD
+            op.mPeriodicityUnit = mCustomPeriodicityUnit.selectedItemPosition + ScheduledOperation.CUSTOM_DAILY_PERIOD
         }
-        if (mEndDatePicker.isEnabled()) {
+        if (mEndDatePicker.isEnabled) {
             val dp = mEndDatePicker
-            dp.clearChildFocus(mActivity.getCurrentFocus())
-            op.setEndDay(dp.getDayOfMonth())
-            op.setEndMonth(dp.getMonth() + 1)
-            op.setEndYear(dp.getYear())
+            dp.clearChildFocus(mActivity.currentFocus)
+            op.setEndDay(dp.dayOfMonth)
+            op.setEndMonth(dp.month + 1)
+            op.setEndYear(dp.year)
         } else {
             op.clearEndDate()
         }
@@ -229,9 +235,9 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     fun isFormValid(errMsg: StringBuilder): Boolean {
         val op = mCurrentSchOp
         var res = true
-        if (mPeriodicitySpinner.getSelectedItemPosition() == (mPeriodicitySpinner.getAdapter().getCount() - 1)) {
+        if (mPeriodicitySpinner.selectedItemPosition == (mPeriodicitySpinner.adapter.count - 1)) {
             try {
-                Integer.parseInt(mCustomPeriodicityVal.getText().toString())
+                Integer.parseInt(mCustomPeriodicityVal.text.toString())
             } catch (e: NumberFormatException) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n")
@@ -259,8 +265,8 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
                 res = false
             }
         }
-        if (!mActivity.isTransfertChecked()) {
-            val account = mAccountSpinner.getSelectedItem() as Account
+        if (!mActivity.isTransfertChecked) {
+            val account = mAccountSpinner.selectedItem as Account
             val accountId = account.id
             if (accountId == 0L) {
                 if (errMsg.length() > 0) {
@@ -274,7 +280,7 @@ public class ScheduleEditorFragment : Fragment(), OnTransfertCheckedChangeListen
     }
 
     override fun onPause() {
-        super<Fragment>.onPause()
+        super.onPause()
         fillOperationWithInputs(mActivity.mCurrentOp!!)
     }
 }

@@ -27,11 +27,11 @@ public class ProjectionDateController(private val mActivity: Activity) {
         val adapter = ArrayAdapter.createFromResource(mActivity, R.array.projection_modes, android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        mProjectionMode.setAdapter(adapter)
-        mProjectionMode.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+        mProjectionMode.adapter = adapter
+        mProjectionMode.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
             override fun onItemSelected(arg0: AdapterView<*>?, arg1: View?, pos: Int, id: Long) {
-                mProjectionDate.setVisibility(if (pos > 0) View.VISIBLE else View.GONE)
+                mProjectionDate.visibility = if (pos > 0) View.VISIBLE else View.GONE
                 if (pos != mCurPos) {
                     mProjectionDate.setText("")
                 }
@@ -40,7 +40,7 @@ public class ProjectionDateController(private val mActivity: Activity) {
 
             override fun onNothingSelected(arg0: AdapterView<*>?) {
             }
-        })
+        }
     }
 
     protected fun setHint(pos: Int) {
@@ -50,7 +50,7 @@ public class ProjectionDateController(private val mActivity: Activity) {
             1 -> hint = mActivity.getString(R.string.projection_day_of_month)
             2 -> hint = mActivity.getString(R.string.projection_full_date)
         }
-        mProjectionDate.setHint(hint)
+        mProjectionDate.hint = hint
     }
 
     public fun populateFields(account: Account) {
@@ -60,25 +60,25 @@ public class ProjectionDateController(private val mActivity: Activity) {
         setHint(mCurPos)
         mOrigProjMode = mCurPos
         mProjectionMode.setSelection(mCurPos)
-        mProjectionDate.setVisibility(if (mCurPos > 0) View.VISIBLE else View.GONE)
+        mProjectionDate.visibility = if (mCurPos > 0) View.VISIBLE else View.GONE
         mProjectionDate.setText(mOrigProjDate)
     }
 
     public fun getMode(): Int {
-        return mProjectionMode.getSelectedItemPosition()
+        return mProjectionMode.selectedItemPosition
     }
 
     public fun getDate(): String {
-        return mProjectionDate.getText().toString()
+        return mProjectionDate.text.toString()
     }
 
     public fun hasChanged(): Boolean {
-        return mOrigProjMode != mProjectionMode.getSelectedItemPosition() || (mOrigProjMode != 0 && mOrigProjDate != mProjectionDate.getText().toString())
+        return mOrigProjMode != mProjectionMode.selectedItemPosition || (mOrigProjMode != 0 && mOrigProjDate != mProjectionDate.text.toString())
     }
 
     public fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt("projectionMode", mProjectionMode.getSelectedItemPosition())
-        outState.putString("projectionDate", mProjectionDate.getText().toString())
+        outState.putInt("projectionMode", mProjectionMode.selectedItemPosition)
+        outState.putString("projectionDate", mProjectionDate.text.toString())
         outState.putInt("origProjMode", mOrigProjMode)
         outState.putString("origProjDate", mOrigProjDate)
         outState.putInt("pos", mCurPos)
@@ -94,7 +94,7 @@ public class ProjectionDateController(private val mActivity: Activity) {
         mAccountId = state.getLong("accountId")
         setHint(mCurPos)
         mProjectionMode.setSelection(mCurPos)
-        mProjectionDate.setVisibility(if (mCurPos > 0) View.VISIBLE else View.GONE)
+        mProjectionDate.visibility = if (mCurPos > 0) View.VISIBLE else View.GONE
         mProjectionDate.setText(mOrigProjDate)
     }
 

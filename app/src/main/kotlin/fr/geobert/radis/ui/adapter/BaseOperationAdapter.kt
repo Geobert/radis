@@ -48,13 +48,13 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
         get() {
             return _selectedPosition
         }
-    val resources = activity.getResources()
+    val resources = activity.resources
 
     override fun onCreateViewHolder(view: ViewGroup, viewType: Int): OpRowHolder<T> {
-        val l = LayoutInflater.from(view.getContext()).inflate(fr.geobert.radis.R.layout.operation_row, view, false)
+        val l = LayoutInflater.from(view.context).inflate(fr.geobert.radis.R.layout.operation_row, view, false)
         val h = OpRowHolder(l, this)
         // HACK to workaround a glitch at the end of animation
-        ExpandUpAnimation.mBg = h.separator.getBackground();
+        ExpandUpAnimation.mBg = h.separator.background;
         Tools.setViewBg(h.separator, null);
         Tools.setViewBg(h.separator, ExpandUpAnimation.mBg);
         // END HACK
@@ -66,7 +66,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
         val transfertId: Long = op.mTransferAccountId
         val sum: Long = if (transfertId > 0) {
-            viewHolder.transfertImg.setVisibility(View.VISIBLE)
+            viewHolder.transfertImg.visibility = View.VISIBLE
             val currentAccountId = activity.getCurrentAccountId()
             if (currentAccountId != 0L && currentAccountId == transfertId) {
                 -op.mSum
@@ -74,7 +74,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
                 op.mSum
             }
         } else {
-            viewHolder.transfertImg.setVisibility(View.GONE)
+            viewHolder.transfertImg.visibility = View.GONE
             op.mSum
         }
         if (sum >= 0.0) {
@@ -85,15 +85,15 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
             viewHolder.arrowImg.setImageResource(R.drawable.arrow_down16)
         }
 
-        viewHolder.opSum.setText((sum.toDouble() / 100.0).formatSum())
-        viewHolder.opDate.setText(op.getDateObj().formatShortDate())
+        viewHolder.opSum.text = (sum.toDouble() / 100.0).formatSum()
+        viewHolder.opDate.text = op.getDateObj().formatShortDate()
 
         // third party
-        viewHolder.opName.setText(if (activity.getCurrentAccountId() == transfertId) {
+        viewHolder.opName.text = if (activity.getCurrentAccountId() == transfertId) {
             op.mTransSrcAccName
         } else {
             op.mThirdParty
-        });
+        };
 
         //        viewHolder.checkedImg.setVisibility(if (op.mIsChecked) View.VISIBLE else View.GONE)
     }
@@ -104,7 +104,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     fun filterFrom(pos: Int, up: Boolean, f: (Operation) -> Boolean): List<Operation> {
         val cut = if (up) {
-            operations.reverse().drop(operations.count() - pos)
+            operations.reversed().drop(operations.count() - pos)
         } else {
             operations.drop(pos)
         }
@@ -151,8 +151,8 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
                         val l = operationsList.getListLayoutManager()
                         val firstIdx = l.findFirstVisibleItemPosition()
                         val lastIdx = l.findLastVisibleItemPosition()
-                        Log.d(TAG, "firstIdx:$firstIdx, lastIdx:$lastIdx, prev:$prevExpandedPos, count:${getItemCount()}")
-                        if (prevExpandedPos != -1 && prevExpandedPos < getItemCount () && (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx)) {
+                        Log.d(TAG, "firstIdx:$firstIdx, lastIdx:$lastIdx, prev:$prevExpandedPos, count:${itemCount}")
+                        if (prevExpandedPos != -1 && prevExpandedPos < itemCount && (prevExpandedPos < firstIdx || prevExpandedPos > lastIdx)) {
                             operationAt(prevExpandedPos).isSelected = false
                             prevExpandedPos = -1
                         }
@@ -216,7 +216,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
         //        Log.d(TAG, "animateSeparator: ${h.opDate.getText()}, expand:$expand")
         if (needSeparator) {
             h.separator.clearAnimation()
-            (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -37
+            (h.separator.layoutParams as LinearLayout.LayoutParams).bottomMargin = -37
             val anim = ExpandUpAnimation(h.separator, 300, expand)
             h.separator.startAnimation(anim)
         }
@@ -237,24 +237,24 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
         //        Log.d(TAG, "collapseSeparatorNoAnim: ${h.opDate.getText()}")
         if (needSeparator) {
             h.separator.clearAnimation()
-            (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -50
-            h.separator.setVisibility(View.GONE)
+            (h.separator.layoutParams as LinearLayout.LayoutParams).bottomMargin = -50
+            h.separator.visibility = View.GONE
         }
     }
 
     private fun collapseToolbarNoAnim(h: OpRowHolder<T>) {
         //        Log.d(TAG, "collapseToolbarNoAnim: ${h.opDate.getText()}")
         toolbarClearAnim(h)
-        (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = -84
-        h.actionsCont.setVisibility(View.GONE)
+        (h.actionsCont.layoutParams as LinearLayout.LayoutParams).bottomMargin = -84
+        h.actionsCont.visibility = View.GONE
     }
 
     private fun expandSeparatorNoAnim(h: OpRowHolder<T>) {
         //        Log.d(TAG, "expandSeparatorNoAnim: ${h.opDate.getText()}")
         if (needSeparator) {
             h.separator.clearAnimation()
-            (h.separator.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
-            h.separator.setVisibility(View.VISIBLE)
+            (h.separator.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
+            h.separator.visibility = View.VISIBLE
             ExpandUpAnimation.setChildrenVisibility(h.separator, View.VISIBLE)
             Tools.setViewBg(h.separator, ExpandUpAnimation.mBg)
         }
@@ -263,8 +263,8 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     private fun expandToolbarNoAnim(h: OpRowHolder<T>) {
         //        Log.d(TAG, "expandToolbarNoAnim: ${h.opDate.getText()}")
         toolbarClearAnim(h)
-        (h.actionsCont.getLayoutParams() as LinearLayout.LayoutParams).bottomMargin = 0
-        h.actionsCont.setVisibility(View.VISIBLE)
+        (h.actionsCont.layoutParams as LinearLayout.LayoutParams).bottomMargin = 0
+        h.actionsCont.visibility = View.VISIBLE
     }
 
     private fun findOpPosBy(predicate: (op: T) -> Boolean): Int {

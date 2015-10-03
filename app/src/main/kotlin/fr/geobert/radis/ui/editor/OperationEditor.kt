@@ -26,7 +26,7 @@ import kotlin.properties.Delegates
 
 public class OperationEditor : CommonOpEditor() {
     protected var mOriginalOp: Operation? = null
-    private val mEditFragment by lazy(LazyThreadSafetyMode.NONE) { getSupportFragmentManager().findFragmentById(R.id.main_edit_pane) as OperationEditFragment }
+    private val mEditFragment by lazy(LazyThreadSafetyMode.NONE) { supportFragmentManager.findFragmentById(R.id.main_edit_pane) as OperationEditFragment }
 
     override fun setView() {
         setContentView(R.layout.operation_edit)
@@ -94,7 +94,7 @@ public class OperationEditor : CommonOpEditor() {
                         setResAndExit()
                     } else {
                         if (op.mScheduledId > 0 && !op.equalsButDate(origOp)) {
-                            UpdateScheduledOp.newInstance(op, mPreviousSum, mRowId).show(getSupportFragmentManager(), "dialog")
+                            UpdateScheduledOp.newInstance(op, mPreviousSum, mRowId).show(supportFragmentManager, "dialog")
                         } else {
                             OperationTable.updateOp(this, mRowId, op, origOp)
                             setResAndExit()
@@ -110,7 +110,7 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.confirm -> {
                 onOkClicked()
                 return true
@@ -144,7 +144,7 @@ public class OperationEditor : CommonOpEditor() {
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        when (loader.getId()) {
+        when (loader.id) {
             GET_OP -> {
                 val op = if (data.moveToFirst()) {
                     mOriginalOp = Operation(data)
@@ -170,8 +170,8 @@ public class OperationEditor : CommonOpEditor() {
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             super.onCreateDialog(savedInstanceState)
-            val act = getActivity() as OperationEditor
-            val args = getArguments()
+            val act = activity as OperationEditor
+            val args = arguments
             val currentOp = args.getParcelable<Operation>("currentOp")
             val previousSum = args.getLong("previousSum")
             val rowId = args.getLong("rowId")
@@ -182,7 +182,7 @@ public class OperationEditor : CommonOpEditor() {
                     if (ScheduledOperationTable.updateScheduledOp(act, currentOp.mScheduledId, op, true)) {
                         AccountTable.updateProjection(act, act.mCurAccountId, op.mSum, previousSum, op.getDate(), -1L)
                     }
-                    ScheduledOperationTable.updateAllOccurences(getActivity(), op, previousSum, currentOp.mScheduledId)
+                    ScheduledOperationTable.updateAllOccurences(activity, op, previousSum, currentOp.mScheduledId)
                     act.setResAndExit()
                 }
             }).setNeutralButton(R.string.disconnect, object : DialogInterface.OnClickListener {
@@ -206,7 +206,7 @@ public class OperationEditor : CommonOpEditor() {
                 args.putLong("previousSum", previousSum)
                 args.putLong("rowId", rowId)
                 args.putParcelable("currentOp", currentOp)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }

@@ -46,7 +46,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
 
     // nothing to do, needed by Android
     override fun onResume() {
-        super<BaseActivity>.onResume()
+        super.onResume()
     }
 
     fun onAllAccountsFetched() {
@@ -54,7 +54,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     protected fun fetchOp(loaderId: Int) {
-        getSupportLoaderManager().initLoader(loaderId, Bundle(), this)
+        supportLoaderManager.initLoader(loaderId, Bundle(), this)
     }
 
     // default and common behaviors
@@ -63,8 +63,8 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
-        val extras = getIntent().getExtras()
+        super.onCreate(savedInstanceState)
+        val extras = intent.extras
         mCurAccountId = extras?.getLong(AccountEditor.PARAM_ACCOUNT_ID) ?: 0
         init(extras)
         setView()
@@ -76,7 +76,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onDestroy() {
-        super<BaseActivity>.onDestroy()
+        super.onDestroy()
         InfoManagerDialog.resetInfoManager()
     }
 

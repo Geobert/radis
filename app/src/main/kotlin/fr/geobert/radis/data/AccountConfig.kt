@@ -6,24 +6,24 @@ import android.os.Parcelable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.forEach
 import fr.geobert.radis.ui.ConfigFragment
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import kotlin.properties.get
+import kotlin.properties.set
 
 public class AccountConfig() : ImplParcelable {
     val NB_PREFS = 6 // number of couples of prefs
     override val parcels = hashMapOf<String, Any?>()
-    public var overrideInsertDate: Boolean by Delegates.mapVar(parcels)
-    public var overrideHideQuickAdd: Boolean by Delegates.mapVar(parcels)
-    public var overrideInvertQuickAddComp: Boolean by Delegates.mapVar(parcels)
-    public var overrideUseWeighedInfo: Boolean by Delegates.mapVar(parcels)
-    public var overrideNbMonthsAhead: Boolean by Delegates.mapVar(parcels)
-    public var overrideQuickAddAction: Boolean by Delegates.mapVar(parcels)
-    public var hideQuickAdd: Boolean by Delegates.mapVar(parcels)
-    public var invertQuickAddComp: Boolean by Delegates.mapVar(parcels)
-    public var useWeighedInfo: Boolean by Delegates.mapVar(parcels)
-    public var insertDate: Int by Delegates.mapVar(parcels)
-    public var nbMonthsAhead: Int by Delegates.mapVar(parcels)
-    public var quickAddAction: Int by Delegates.mapVar(parcels)
+    public var overrideInsertDate: Boolean by parcels
+    public var overrideHideQuickAdd: Boolean by parcels
+    public var overrideInvertQuickAddComp: Boolean by parcels
+    public var overrideUseWeighedInfo: Boolean by parcels
+    public var overrideNbMonthsAhead: Boolean by parcels
+    public var overrideQuickAddAction: Boolean by parcels
+    public var hideQuickAdd: Boolean by parcels
+    public var invertQuickAddComp: Boolean by parcels
+    public var useWeighedInfo: Boolean by parcels
+    public var insertDate: Int by parcels
+    public var nbMonthsAhead: Int by parcels
+    public var quickAddAction: Int by parcels
 
     init {
         overrideInsertDate = false
@@ -85,7 +85,7 @@ public class AccountConfig() : ImplParcelable {
     }
 
     companion object {
-        platformStatic public val CREATOR: Parcelable.Creator<AccountConfig> = object : Parcelable.Creator<AccountConfig> {
+        @JvmStatic public val CREATOR: Parcelable.Creator<AccountConfig> = object : Parcelable.Creator<AccountConfig> {
             override fun createFromParcel(p: Parcel): AccountConfig {
                 return AccountConfig(p)
             }

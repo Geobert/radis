@@ -34,7 +34,6 @@ import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OperationsAdapter
 import fr.geobert.radis.ui.editor.OperationEditor
 import hirondelle.date4j.DateTime
-import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
 public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>,
@@ -58,7 +57,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private var container: LinearLayout by Delegates.notNull()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
-        super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
+        super.onCreateView(inflater, container, savedInstanceState)
         this.container = inflater.inflate(R.layout.operation_list, container, false) as LinearLayout
         operation_list = this.container.findViewById(R.id.operation_list) as RecyclerView
         empty_textview = this.container.findViewById(R.id.empty_textview)
@@ -66,7 +65,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super<BaseFragment>.onActivityCreated(savedInstanceState)
+        super.onActivityCreated(savedInstanceState)
         setupIcon()
         setMenu(R.menu.operations_list_menu)
         initOperationList()
@@ -78,7 +77,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun setupIcon() = setIcon(R.drawable.radis_no_disc_48)
 
     override fun onResume() {
-        super<BaseFragment>.onResume()
+        super.onResume()
         Log.d(TAG, "onResume")
 
         initOperationList()
@@ -107,7 +106,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun onPause() {
-        super<BaseFragment>.onPause()
+        super.onPause()
         //        checkingDashboard?.onPause()
     }
 
@@ -138,23 +137,23 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super<BaseFragment>.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
         mQuickAddController?.onSaveInstanceState(outState)
         outState.putLong("mAccountId", mActivity.getCurrentAccountId())
     }
 
     override fun onDestroyView() {
-        super<BaseFragment>.onDestroyView()
+        super.onDestroyView()
         Log.d("OperationListFragment", "onDestroyView")
-        getLoaderManager().destroyLoader(GET_OPS)
+        loaderManager.destroyLoader(GET_OPS)
     }
 
     private fun initOperationList() {
-        Log.d(TAG, "initOperationList, mListLayout:$mListLayout, opListLayMan:${operation_list.getLayoutManager()}, oplist:${operation_list}")
+        Log.d(TAG, "initOperationList, mListLayout:$mListLayout, opListLayMan:${operation_list.layoutManager}, oplist:${operation_list}")
         //        if (mListLayout == null) {
         mListLayout = LinearLayoutManager(mActivity)
-        operation_list.setLayoutManager(mListLayout)
-        operation_list.setItemAnimator(DefaultItemAnimator())
+        operation_list.layoutManager = mListLayout
+        operation_list.itemAnimator = DefaultItemAnimator()
         operation_list.setHasFixedSize(true)
         mScrollLoader = OnOperationScrollLoader(this)
         operation_list.clearOnScrollListeners()
@@ -180,12 +179,12 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         getMoreOperations(initialStartDate())
     }
 
-    fun initialStartDate() = DateTime.today(TIME_ZONE).minusMonth(1).getStartOfMonth()
+    fun initialStartDate() = DateTime.today(TIME_ZONE).minusMonth(1).startOfMonth
 
     override fun onAccountChanged(itemId: Long): Boolean {
-        Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(getActivity())} / itemId : $itemId")
-        if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
-            getLoaderManager().destroyLoader(GET_OPS)
+        Log.d("OperationListFragment", "onAccountChanged old account id : ${mAccountManager.getCurrentAccountId(activity)} / itemId : $itemId")
+        if (mAccountManager.getCurrentAccountId(activity) != itemId) {
+            loaderManager.destroyLoader(GET_OPS)
             processAccountChanged(itemId)
         }
         return false
@@ -193,17 +192,17 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     fun setupEmptyViewVisibility(visible: Boolean) {
         if (visible) {
-            operation_list.setVisibility(View.GONE)
-            Log.d(TAG, "mEmptyView parent : ${empty_textview.getParent()}")
-            empty_textview.setVisibility(View.VISIBLE)
+            operation_list.visibility = View.GONE
+            Log.d(TAG, "mEmptyView parent : ${empty_textview.parent}")
+            empty_textview.visibility = View.VISIBLE
         } else {
-            operation_list.setVisibility(View.VISIBLE)
-            empty_textview.setVisibility(View.GONE)
+            operation_list.visibility = View.VISIBLE
+            empty_textview.visibility = View.GONE
         }
     }
 
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, cursor: Cursor) {
-        when (cursorLoader.getId()) {
+        when (cursorLoader.id) {
             GET_OPS -> {
                 var refresh = false
                 val adapter = mOpListAdapter
@@ -212,26 +211,26 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     val a = OperationsAdapter(mActivity, this, cursor)
                     mOpListAdapter = a
                     refresh = true
-                    operation_list.setAdapter(mOpListAdapter)
+                    operation_list.adapter = mOpListAdapter
                 } else {
                     adapter.increaseCache(cursor)
                     if (freshLoader) {
                         // TODO why this is needed?
-                        operation_list.setAdapter(adapter)
-                        operation_list.setLayoutManager(mListLayout)
+                        operation_list.adapter = adapter
+                        operation_list.layoutManager = mListLayout
                         adapter.notifyDataSetChanged()
                     }
                 }
                 freshLoader = false
-                val itemCount = mOpListAdapter?.getItemCount()
-                Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.getCount()}")
+                val itemCount = mOpListAdapter?.itemCount
+                Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.count}")
                 setupEmptyViewVisibility(itemCount == 0)
                 if (refresh || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
                 }
                 operation_list.post {
-                    val curChildCount = mListLayout?.getChildCount() ?: 0
+                    val curChildCount = mListLayout?.childCount ?: 0
                     val lastVisibleItemPos = mListLayout?.findLastCompletelyVisibleItemPosition()
                     Log.d(TAG, "onLoadFinished, old child count = $mOldChildCount, cur child count = $curChildCount, last visible = $lastVisibleItemPos")
                     if (itemCount == 0 || (mOldChildCount != curChildCount && curChildCount - 1 == lastVisibleItemPos)) {
@@ -269,20 +268,20 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val b = Bundle()
         b.putLong("earliestDate", earliestOpDate!!.getMilliseconds(TIME_ZONE))
         val a = mOpListAdapter
-        if (a != null && a.getItemCount() > 0) {
-            val o = a.operationAt(a.getItemCount() - 1)
+        if (a != null && a.itemCount > 0) {
+            val o = a.operationAt(a.itemCount - 1)
             b.putLong("latestDate", o.getDate())
         }
         if (mOperationsLoader == null) {
             freshLoader = true
-            getLoaderManager().initLoader<Cursor>(GET_OPS, b, this)
+            loaderManager.initLoader<Cursor>(GET_OPS, b, this)
         } else {
-            getLoaderManager().restartLoader<Cursor>(GET_OPS, b, this)
+            loaderManager.restartLoader<Cursor>(GET_OPS, b, this)
         }
     }
 
     override fun getMoreOperations(startDate: DateTime?) {
-        if (isAdded()) {
+        if (isAdded) {
             Log.d(TAG, "startDate : " + startDate?.formatDateLong())
             if (startDate != null) {
                 // date specified, use it
@@ -299,19 +298,19 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                             start.getMilliseconds(TIME_ZONE))
                 }
 
-                Log.d(TAG, "cursor count : ${c.getCount()} / mOpListAdapter?.getItemCount():${mOpListAdapter?.getItemCount()}")
+                Log.d(TAG, "cursor count : ${c.count} / mOpListAdapter?.getItemCount():${mOpListAdapter?.itemCount}")
                 if (c.moveToFirst()) {
                     val date = c.getLong(c.getColumnIndex(OperationTable.KEY_OP_DATE))
                     Log.d(TAG, "last chance date : " + Tools.getDateStr(date))
-                    val d = DateTime.forInstant(date, TIME_ZONE).getStartOfMonth()
+                    val d = DateTime.forInstant(date, TIME_ZONE).startOfMonth
                     Log.d(TAG, "last chance date verif : " + d.format("DD/MM/YYYY"))
                     //mScrollLoader.setStartDate(d)
                     earliestOpDate = d
                     getOperationsList()
                 } else if (start == null) {
-                    earliestOpDate = DateTime.today(TIME_ZONE).getStartOfMonth()
+                    earliestOpDate = DateTime.today(TIME_ZONE).startOfMonth
                     getOperationsList()
-                } else if (mOpListAdapter?.getItemCount() == 0) {
+                } else if (mOpListAdapter?.itemCount == 0) {
                     setupEmptyViewVisibility(true)
                 } else {
                     getOperationsList()
@@ -323,8 +322,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {
         Log.d("OperationListFragment", "onLoaderReset")
-        if (!mActivity.isFinishing()) {
-            when (cursorLoader.getId()) {
+        if (!mActivity.isFinishing) {
+            when (cursorLoader.id) {
                 GET_OPS -> {
                     Log.d("OperationListFragment", "onLoaderReset doing reset")
                     needRefreshSelection = true
@@ -349,20 +348,20 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         } else {
             val last = mLastSelectionPos
             val pos = a.addOp(op)
-            setupEmptyViewVisibility(a.getItemCount() == 0)
-            Log.d(TAG, "updateDisplay pos:$pos, last:$last, count:${a.getItemCount()}")
+            setupEmptyViewVisibility(a.itemCount == 0)
+            Log.d(TAG, "updateDisplay pos:$pos, last:$last, count:${a.itemCount}")
             //            mLastSelectionPos = -1
             mLastSelectionId = op.mRowId
             a.notifyItemChanged(last + if (pos <= last) 1 else 0)
             if (pos > 0) a.notifyItemChanged(pos - 1)
-            if (pos < a.getItemCount() - 1) a.notifyItemChanged(pos + 1)
+            if (pos < a.itemCount - 1) a.notifyItemChanged(pos + 1)
             refreshSelection()
             adjustScroll(pos)
         }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.create_operation -> {
                 OperationEditor.callMeForResult(mActivity, OperationEditor.NO_OPERATION,
                         mActivity.getCurrentAccountId())
@@ -385,10 +384,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         val l = mListLayout
         if (l != null) {
             fun getRowHeight(): Int {
-                return l.getChildAt(0)?.getHeight() ?: 35
+                return l.getChildAt(0)?.height ?: 35
             }
 
-            val half = (l.getChildCount() / 2) - 1
+            val half = (l.childCount / 2) - 1
             val offset = half * getRowHeight()
             Log.d("adjustScroll", "offset: $offset, pos: $position, first: ${l.findFirstCompletelyVisibleItemPosition()}, last: ${l.findLastCompletelyVisibleItemPosition()}")
             if (l.findFirstCompletelyVisibleItemPosition() >= position) {
@@ -409,7 +408,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 }
             } else if (l.findLastCompletelyVisibleItemPosition() <= position ) {
                 if (l.findLastCompletelyVisibleItemPosition() == position) {
-                    if (position + 1 > l.getChildCount()) {
+                    if (position + 1 > l.childCount) {
                         operation_list.post { l.scrollToPositionWithOffset(position, offset) }
                     } else {
                         mScrollLoader.onScrolled(operation_list, 0, 0);
@@ -423,7 +422,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     private fun selectOpAndAdjustOffset(position: Int) {
         val adapter = mOpListAdapter
-        if (adapter != null && adapter.getItemCount() > 0) {
+        if (adapter != null && adapter.itemCount > 0) {
             Log.d("selectOpAndAdjustOffset", "pos: $position, lastPos: $mLastSelectionPos")
             if (position != mLastSelectionPos) {
                 mLastSelectionPos = position
@@ -456,7 +455,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     private fun findOpPosition(id: Long): Int {
         val adapter = mOpListAdapter
         if (adapter != null) {
-            val count = adapter.getItemCount() - 1
+            val count = adapter.itemCount - 1
             for (i in 0..count) {
                 if (adapter.operationAt(i).mRowId == id) {
                     return i
@@ -477,7 +476,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 //                mAccountManager.setCurrentAccountSum()
                 adapter.selectedPosition = -1
                 adapter.delOp(opId)
-                setupEmptyViewVisibility(adapter.getItemCount() == 0)
+                setupEmptyViewVisibility(adapter.itemCount == 0)
                 operation_list.post { refreshSelection() }
             } else {
                 adapter.reset()
@@ -503,7 +502,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         mLastSelectionPos = -1
                         needRefreshSelection = true
                         mAccountManager.refreshCurrentAccount()
-                        setupEmptyViewVisibility(adap.getItemCount() == 0)
+                        setupEmptyViewVisibility(adap.itemCount == 0)
                     }
                     OperationEditor.OPERATION_EDITOR -> {
                         adap.updateOp(op)
@@ -521,9 +520,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun getRecyclerView(): RecyclerView = operation_list
 
     companion object {
-        platformStatic public fun restart(ctx: Context) {
+        JvmStatic public fun restart(ctx: Context) {
             DbContentProvider.reinit(ctx)
-            val intent = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName())
+            val intent = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             intent.addFlags(IntentCompat.FLAG_ACTIVITY_CLEAR_TASK)
             ctx.startActivity(intent)
@@ -536,11 +535,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             super.onCreate(savedInstanceState)
-            val args = getArguments()
+            val args = arguments
             this.accountId = args.getLong("accountId")
             this.operationId = args.getLong("opId")
-            return Tools.createDeleteConfirmationDialog(getActivity(), { d, i ->
-                if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+            return Tools.createDeleteConfirmationDialog(activity, { d, i ->
+                if (OperationTable.deleteOp(activity, operationId, accountId)) {
                     parentFrag.afterDelUpdateSelection(operationId)
                 }
             })
@@ -555,7 +554,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 val args = Bundle()
                 args.putLong("accountId", accountId)
                 args.putLong("opId", opId)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }
@@ -566,18 +565,18 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             super.onCreate(savedInstanceState)
-            val args = getArguments()
+            val args = arguments
             val accountId = args.getLong("accountId")
             val operationId = args.getLong("opId")
             val schId = args.getLong("schId")
             val date = args.getLong("date")
             val transfertId = args.getLong("transfertId")
             Log.d(TAG, "date of op to del : " + Tools.getDateStr(date))
-            val builder = AlertDialog.Builder(getActivity())
+            val builder = AlertDialog.Builder(activity)
             builder.setMessage(R.string.delete_recurring_op).setCancelable(true).
                     setPositiveButton(R.string.del_only_current, object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface, which: Int) {
-                            if (OperationTable.deleteOp(getActivity(), operationId, accountId)) {
+                            if (OperationTable.deleteOp(activity, operationId, accountId)) {
                                 parentFrag.afterDelUpdateSelection(operationId)
                             }
                         }
@@ -585,7 +584,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     setNeutralButton(R.string.del_all_following, object : DialogInterface.OnClickListener {
 
                         override fun onClick(dialog: DialogInterface, which: Int) {
-                            val nbDel = OperationTable.deleteAllFutureOccurrences(getActivity(), accountId, schId, date, transfertId)
+                            val nbDel = OperationTable.deleteAllFutureOccurrences(activity, accountId, schId, date, transfertId)
                             Log.d(TAG, "nbDel : " + nbDel)
                             if (nbDel > 0) {
                                 parentFrag.afterDelUpdateSelection(-1)
@@ -594,7 +593,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     }).
                     setNegativeButton(R.string.del_all_occurrences, object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface, id: Int) {
-                            if (OperationTable.deleteAllOccurrences(getActivity(), accountId, schId, transfertId) > 0) {
+                            if (OperationTable.deleteAllOccurrences(activity, accountId, schId, transfertId) > 0) {
                                 parentFrag.afterDelUpdateSelection(-1)
                             }
                         }
@@ -615,7 +614,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                 args.putLong("schId", schId)
                 args.putLong("date", date)
                 args.putLong("transfertId", transfertId)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }
@@ -625,40 +624,40 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         private var accountId: Long = 0
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val args = getArguments()
+            val args = arguments
             this.accountId = args.getLong("accountId")
             val accountName = args.getString("accountName")
-            return Tools.createDeleteConfirmationDialog(getActivity(),
-                    getActivity().getString(R.string.account_delete_confirmation).format(accountName),
+            return Tools.createDeleteConfirmationDialog(activity,
+                    activity.getString(R.string.account_delete_confirmation).format(accountName),
                     getString(R.string.delete_account_title).format(accountName),
                     { d, i ->
-                        if (AccountTable.deleteAccount(getActivity(), accountId)) {
-                            val act = getActivity() as MainActivity
+                        if (AccountTable.deleteAccount(activity, accountId)) {
+                            val act = activity as MainActivity
                             val accMan = act.mAccountManager
                             // attempt to fix Fatal Exception: java.lang.IllegalStateException
                             // couldn't move cursor to position 4
                             if (accountId == accMan.getCurrentAccountId(act)) {
-                                accMan.setCurrentAccountId(null, getActivity())
+                                accMan.setCurrentAccountId(null, activity)
                             }
                             if (accountId == accMan.getDefaultAccountId(act)) {
                                 accMan.mCurDefaultAccount = null
-                                accMan.setCurrentAccountId(null, getActivity())
+                                accMan.setCurrentAccountId(null, activity)
                                 DBPrefsManager.getInstance(act).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, null)
                             }
-                            MainActivity.refreshAccountList(getActivity())
+                            MainActivity.refreshAccountList(activity)
                         } else {
-                            (getActivity() as MainActivity).mAccountManager.setCurrentAccountId(null, getActivity())
+                            (activity as MainActivity).mAccountManager.setCurrentAccountId(null, activity)
                         }
                     })
         }
 
         companion object {
-            platformStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
+            JvmStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()
                 args.putLong("accountId", accountId)
                 args.putString("accountName", accountName)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }

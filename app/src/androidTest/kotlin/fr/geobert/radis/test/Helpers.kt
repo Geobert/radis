@@ -122,7 +122,7 @@ class Helpers {
         fun addOp(date: DateTime, third: String = "Toto", amount: String = "-1", tag: String = "", mode: String = "", desc: String = "") {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
-            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.getYear(), date.getMonth(), date.getDay()))
+            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.year, date.month, date.day))
             fillOpForm(third, amount, tag, mode, desc)
             clickOnActionItemConfirm()
         }
@@ -157,7 +157,7 @@ class Helpers {
         }
 
         fun setInsertDatePref(date: DateTime) {
-            setEdtPrefValue(R.string.prefs_insertion_date_label, Integer.toString(date.getDay()))
+            setEdtPrefValue(R.string.prefs_insertion_date_label, Integer.toString(date.day))
         }
 
         fun setUpSchOp() {
@@ -177,7 +177,7 @@ class Helpers {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            onView(withId(R.id.edit_op_date)).perform(setDate(date.getYear(), date.getMonth(), date.getDay()))
+            onView(withId(R.id.edit_op_date)).perform(setDate(date.year, date.month, date.day))
 
             fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
@@ -201,20 +201,20 @@ class Helpers {
             val today = DateTime.today(TIME_ZONE)
             val schOpDate = today.minusDays(14)
 
-            onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.getYear(), schOpDate.getMonth(), schOpDate.getDay()))
+            onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.year, schOpDate.month, schOpDate.day))
             fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             swipePagerLeft()
 
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())
-            val strs = getContext().getResources().getStringArray(R.array.periodicity_choices).get(0)
+            val strs = getContext().resources.getStringArray(R.array.periodicity_choices).get(0)
             onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
             clickOnActionItemConfirm()
 
             Espresso.pressBack() // back to operations list
             Helpers.pauseTest(2000)
-            val endOfMonth = today.getEndOfMonth()
+            val endOfMonth = today.endOfMonth
             val nbOp = endOfMonth.getWeekIndex(schOpDate)
 
             Log.d("RadisTest", "nb op inserted: $nbOp")
@@ -268,7 +268,7 @@ class Helpers {
         fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {
             onView(withId(spinnerId)).perform(scrollTo())
             onView(withId(spinnerId)).perform(click())
-            val strs = getContext().getResources().getStringArray(arrayResId).get(pos)
+            val strs = getContext().resources.getStringArray(arrayResId).get(pos)
             onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
         }
 
@@ -317,7 +317,7 @@ class Helpers {
 
                 override fun perform(p0: UiController?, p1: View?) {
                     val textView = p1 as TextView
-                    res = textView.getText()
+                    res = textView.text
                 }
 
             })

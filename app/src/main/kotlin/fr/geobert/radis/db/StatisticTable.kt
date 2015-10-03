@@ -7,7 +7,6 @@ import android.content.Context
 import android.net.Uri
 import android.support.v4.content.CursorLoader
 import fr.geobert.radis.tools.fillContentValuesWith
-import kotlin.platform.platformStatic
 
 public object StatisticTable {
     private val TAG = "StatisticTable"
@@ -36,16 +35,16 @@ public object StatisticTable {
     private val CREATE_TRIGGER_ON_STAT_DELETE = "CREATE TRIGGER IF NOT EXISTS on_account_deleted_for_stat AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
             "BEGIN DELETE FROM $STAT_TABLE WHERE $KEY_STAT_ACCOUNT = old._id ; END"
 
-    platformStatic fun onCreate(db: SQLiteDatabase) {
+    JvmStatic fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_TABLE)
         db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 
-    platformStatic fun upgradeFromV17(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV17(db: SQLiteDatabase) {
         onCreate(db)
     }
 
-    platformStatic fun upgradeFromV19(db: SQLiteDatabase) {
+    JvmStatic fun upgradeFromV19(db: SQLiteDatabase) {
         db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 
@@ -59,17 +58,17 @@ public object StatisticTable {
     }
 
     fun createStatistic(stat: Statistic, ctx: Context): Long {
-        val res = ctx.getContentResolver()?.insert(DbContentProvider.STATS_URI, fillContentValues(stat))
-        return res?.getLastPathSegment()?.toLong() as Long
+        val res = ctx.contentResolver?.insert(DbContentProvider.STATS_URI, fillContentValues(stat))
+        return res?.lastPathSegment?.toLong() as Long
     }
 
     fun updateStatistic(stat: Statistic, ctx: Context): Int {
-        return ctx.getContentResolver()?.update(Uri.parse("${DbContentProvider.STATS_URI}/${stat.id}"),
+        return ctx.contentResolver?.update(Uri.parse("${DbContentProvider.STATS_URI}/${stat.id}"),
                 fillContentValues(stat), null, null) as Int
     }
 
     fun deleteStatistic(statId: Long, ctx: Context): Boolean {
-        val nb = ctx.getContentResolver()?.delete(Uri.parse("${DbContentProvider.STATS_URI}/$statId"), null, null)
+        val nb = ctx.contentResolver?.delete(Uri.parse("${DbContentProvider.STATS_URI}/$statId"), null, null)
         return if (nb != null) nb > 0 else false
     }
 

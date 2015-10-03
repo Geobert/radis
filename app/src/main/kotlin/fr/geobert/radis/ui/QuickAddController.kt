@@ -24,7 +24,6 @@ import fr.geobert.radis.ui.adapter.InfoAdapter
 import hirondelle.date4j.DateTime
 import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
 import java.util.GregorianCalendar
-import kotlin.platform.platformStatic
 import kotlin.properties.Delegates
 
 public class QuickAddController(private val mActivity: MainActivity, container: View) {
@@ -44,7 +43,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         mQuickAddThirdParty = container.findViewById(R.id.quickadd_third_party) as MyAutoCompleteTextView
         mQuickAddAmount = container.findViewById(R.id.quickadd_amount) as EditText
         mQuickAddButton = container.findViewById(R.id.quickadd_validate) as ImageButton
-        mQuickAddThirdParty.setNextFocusDownId(R.id.quickadd_amount)
+        mQuickAddThirdParty.nextFocusDownId = R.id.quickadd_amount
         mCorrectCommaWatcher = CorrectCommaWatcher(getSumSeparator(), mQuickAddAmount).setAutoNegate(true)
 
         mQuickAddTextWatcher = QuickAddTextWatcher(mQuickAddThirdParty, mQuickAddAmount, mQuickAddButton)
@@ -52,10 +51,10 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         setQuickAddButEnabled(mQuickAddButton, false)
         mQuickAddButton.post(object : Runnable {
             private fun adjustImageButton(btn: ImageButton) {
-                val params = btn.getLayoutParams() as LinearLayout.LayoutParams
+                val params = btn.layoutParams as LinearLayout.LayoutParams
                 params.bottomMargin = 3
-                params.height = mQuickAddThirdParty.getMeasuredHeight()
-                btn.setLayoutParams(params)
+                params.height = mQuickAddThirdParty.measuredHeight
+                btn.layoutParams = params
             }
 
             override fun run() {
@@ -85,7 +84,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         mQuickAddAmount.setOnEditorActionListener(object : TextView.OnEditorActionListener {
             override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
                 try {
-                    if (mQuickAddButton.isEnabled()) {
+                    if (mQuickAddButton.isEnabled) {
                         if (invert) showDatePicker() else quickAddOp()
                     } else {
                         Tools.popError(mActivity, mActivity.getString(R.string.quickadd_fields_not_filled), null)
@@ -132,12 +131,12 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     private fun showDatePicker() {
         val today = DateTime.today(TIME_ZONE)
         val b = Bundle()
-        b.putInt(DatePickerDialogFragment.YEAR, today.getYear())
-        b.putInt(DatePickerDialogFragment.MONTH, today.getMonth() - 1)
-        b.putInt(DatePickerDialogFragment.DATE, today.getDay())
+        b.putInt(DatePickerDialogFragment.YEAR, today.year)
+        b.putInt(DatePickerDialogFragment.MONTH, today.month - 1)
+        b.putInt(DatePickerDialogFragment.DATE, today.day)
         b.putInt(DatePickerDialogFragment.TITLE, R.string.op_date)
         val dialog = DatePickerDialogFragment()
-        dialog.setArguments(b)
+        dialog.arguments = b
         dialog.setOnDateSetListener { datePicker, y, m, d ->
             val date = GregorianCalendar(y, m, d)
             try {
@@ -160,23 +159,23 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         //                alreadyFired++
         //            }
         //        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH))
-        dialog.show(mActivity.getSupportFragmentManager(), "quick_add_op_date")
+        dialog.show(mActivity.supportFragmentManager, "quick_add_op_date")
     }
 
-    throws(Exception::class)
+    Throws(Exception::class)
     private fun quickAddOp() {
         quickAddOp(null)
     }
 
-    throws(Exception::class)
+    Throws(Exception::class)
     private fun quickAddOp(date: GregorianCalendar?) {
         val op = Operation()
         if (date != null) {
             Tools.clearTimeOfCalendar(date)
-            op.setDate(date.getTimeInMillis())
+            op.setDate(date.timeInMillis)
         }
-        op.mThirdParty = mQuickAddThirdParty.getText().toString()
-        op.setSumStr(mQuickAddAmount.getText().toString())
+        op.mThirdParty = mQuickAddThirdParty.text.toString()
+        op.setSumStr(mQuickAddAmount.text.toString())
         Log.d("QuickAdd", "cur accountId = ${getCurAccountId()}")
         if (OperationTable.createOp(mActivity, op, getCurAccountId()) > -1) {
             val i = Intent()
@@ -187,7 +186,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         mQuickAddAmount.setText("")
         mQuickAddThirdParty.setText("")
         val mgr = mActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        mgr.hideSoftInputFromWindow(mQuickAddAmount.getWindowToken(), 0)
+        mgr.hideSoftInputFromWindow(mQuickAddAmount.windowToken, 0)
         mCorrectCommaWatcher.setAutoNegate(true)
         mQuickAddAmount.clearFocus()
         mQuickAddThirdParty.clearFocus()
@@ -196,7 +195,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     public fun clearFocus() {
         mQuickAddThirdParty.clearFocus()
         val imm = mActivity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(mQuickAddThirdParty.getWindowToken(), 0)
+        imm.hideSoftInputFromWindow(mQuickAddThirdParty.windowToken, 0)
     }
 
     //    public fun getFocus() {
@@ -213,8 +212,8 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     //    }
 
     public fun onSaveInstanceState(outState: Bundle) {
-        outState.putCharSequence("third_party", mQuickAddThirdParty.getText())
-        outState.putCharSequence("amount", mQuickAddAmount.getText())
+        outState.putCharSequence("third_party", mQuickAddThirdParty.text)
+        outState.putCharSequence("amount", mQuickAddAmount.text)
     }
 
     public fun onRestoreInstanceState(state: Bundle) {
@@ -223,7 +222,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     }
 
     public fun setVisibility(visibility: Int) {
-        mLayout.setVisibility(visibility)
+        mLayout.visibility = visibility
     }
 
     //    public fun isVisible(): Boolean {
@@ -231,8 +230,8 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     //    }
 
     companion object {
-        platformStatic public fun setQuickAddButEnabled(but: ImageButton, b: Boolean) {
-            but.setEnabled(b)
+        JvmStatic public fun setQuickAddButEnabled(but: ImageButton, b: Boolean) {
+            but.isEnabled = b
         }
     }
 }

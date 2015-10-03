@@ -65,7 +65,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     override protected fun onCreate(savedInstanceState: Bundle?): Unit {
-        super<BaseActivity>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.statistics_editor_fragment)
         setTitle(R.string.stat_editor_title)
         initToolbar(this)
@@ -73,9 +73,9 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     override fun onResume() {
-        super<BaseActivity>.onResume()
+        super.onResume()
         mAccountManager.fetchAllAccounts(false, { ->
-            mStatId = getIntent()?.getLongExtra(StatisticTable.KEY_STAT_ID, 0) as Long
+            mStatId = intent?.getLongExtra(StatisticTable.KEY_STAT_ID, 0) as Long
             if (mStatId == 0L) {
                 if (null == mStat) {
                     mStat = Statistic()
@@ -88,7 +88,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 initInfoSpinner()
                 initChartTypeButtons()
             } else {
-                getSupportLoaderManager()?.initLoader(GET_STAT, Bundle(), this)
+                supportLoaderManager?.initLoader(GET_STAT, Bundle(), this)
             }
         })
     }
@@ -96,8 +96,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable("mStat", mStat)
         outState.putParcelable("mOrigStat", mOrigStat)
-        outState.putCharSequence("xLast", mxLastEdt.getText())
-        outState.putCharSequence("name", mNameEdt.getText())
+        outState.putCharSequence("xLast", mxLastEdt.text)
+        outState.putCharSequence("name", mNameEdt.text)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -118,22 +118,22 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     private fun initChartTypeButtons() {
         when (mStat?.chartType) {
-            Statistic.CHART_PIE -> mPieBtn.setChecked(true)
-            Statistic.CHART_BAR -> mBarBtn.setChecked(true)
-            Statistic.CHART_LINE -> mLineBtn.setChecked(true)
+            Statistic.CHART_PIE -> mPieBtn.isChecked = true
+            Statistic.CHART_BAR -> mBarBtn.isChecked = true
+            Statistic.CHART_LINE -> mLineBtn.isChecked = true
         }
     }
 
     private fun refreshTimeScaleCont() {
         fun showAbsCont(show: Boolean) {
             if (show) {
-                mxLastCont.setVisibility(View.GONE)
-                mAbsDateCont.setVisibility(View.VISIBLE)
-                mStartDate.setText(mStat?.startDate?.formatDateLong())
-                mEndDate.setText(mStat?.endDate?.formatDateLong())
+                mxLastCont.visibility = View.GONE
+                mAbsDateCont.visibility = View.VISIBLE
+                mStartDate.text = mStat?.startDate?.formatDateLong()
+                mEndDate.text = mStat?.endDate?.formatDateLong()
             } else {
-                mxLastCont.setVisibility(View.VISIBLE)
-                mAbsDateCont.setVisibility(View.GONE)
+                mxLastCont.visibility = View.VISIBLE
+                mAbsDateCont.visibility = View.GONE
                 mxLastEdt.setText(mStat?.xLast.toString())
             }
         }
@@ -141,16 +141,16 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         when (mStat?.timeScaleType) {
             Statistic.PERIOD_DAYS -> {
                 showAbsCont(show = false)
-                mxLastSuffixLbl.setText(getString(R.string.last_male) + " " + getString(R.string.days).toLowerCase())
+                mxLastSuffixLbl.text = getString(R.string.last_male) + " " + getString(R.string.days).toLowerCase()
             }
 
             Statistic.PERIOD_MONTHES -> {
                 showAbsCont(show = false)
-                mxLastSuffixLbl.setText(getString(R.string.last_male) + " " + getString(R.string.monthes).toLowerCase())
+                mxLastSuffixLbl.text = getString(R.string.last_male) + " " + getString(R.string.monthes).toLowerCase()
             }
             Statistic.PERIOD_YEARS -> {
                 showAbsCont(show = false)
-                mxLastSuffixLbl.setText(getString(R.string.last_female) + " " + getString(R.string.years).toLowerCase())
+                mxLastSuffixLbl.text = getString(R.string.last_female) + " " + getString(R.string.years).toLowerCase()
             }
             Statistic.PERIOD_ABSOLUTE -> showAbsCont(show = true)
         }
@@ -161,8 +161,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 getString(R.string.absolute))
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mTimeScaleSpin.setAdapter(adapter)
-        mTimeScaleSpin.setOnItemSelectedListener(object : OnItemSelectedListener {
+        mTimeScaleSpin.adapter = adapter
+        mTimeScaleSpin.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
                 // nothing to do
             }
@@ -171,7 +171,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 mStat?.timeScaleType = p
                 refreshTimeScaleCont()
             }
-        })
+        }
 
         mStartDate.setOnClickListener { showDatePicker(mStartDate) }
 
@@ -180,14 +180,14 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     fun showDatePicker(button: Button): Unit {
         val date = GregorianCalendar()
-        date.setTime(button.getText().toString().parseDate())
+        date.time = button.text.toString().parseDate()
         val datePicker = DatePickerDialog(this, { v: DatePicker?, y: Int, m: Int, d: Int ->
             val dt = DateTime.forDateOnly(y, m + 1, d)
-            when (button.getId()) {
+            when (button.id) {
                 R.id.start_date_btn -> mStat?.startDate = dt
                 R.id.end_date_btn -> mStat?.endDate = dt
             }
-            button.setText(dt.formatDateLong())
+            button.text = dt.formatDateLong()
         }, date[Calendar.YEAR], date[Calendar.MONTH], date[Calendar.DAY_OF_MONTH])
         datePicker.setButton(DialogInterface.BUTTON_NEGATIVE, this.getString(android.R.string.cancel), null as Message?)
         datePicker.show()
@@ -198,8 +198,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 getString(R.string.no_filter))
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mFilterSpin.setAdapter(adapter)
-        mFilterSpin.setOnItemSelectedListener(object : OnItemSelectedListener {
+        mFilterSpin.adapter = adapter
+        mFilterSpin.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
                 // nothing to do
             }
@@ -208,7 +208,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 val stat = mStat
                 if (stat != null) stat.filterType = p
             }
-        })
+        }
     }
 
     private fun fillAccountSpinner(): Unit {
@@ -217,18 +217,18 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
         allAccCursor.forEach({ adapter.add(it) })
         mAccountSpinAdapter = adapter
-        mAccountSpin.setAdapter(adapter)
+        mAccountSpin.adapter = adapter
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mAccountSpin.setOnItemSelectedListener(object : OnItemSelectedListener {
+        mAccountSpin.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p2: Int, p3: Long) {
-                mStat?.accountId = (a?.getSelectedItem() as Account).id
-                mStat?.accountName = (v as TextView).getText().toString()
+                mStat?.accountId = (a?.selectedItem as Account).id
+                mStat?.accountName = (v as TextView).text.toString()
             }
 
             override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
                 // nothing
             }
-        })
+        }
     }
 
     private fun initAccountSpinner(): Unit {
@@ -243,12 +243,12 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             when (checked) {
                 true -> if (mStat?.chartType != chartType) {
                     mStat?.chartType = chartType
-                    mPieBtn.setChecked(false)
-                    mBarBtn.setChecked(false)
-                    mLineBtn.setChecked(false)
-                    view.setChecked(true)
+                    mPieBtn.isChecked = false
+                    mBarBtn.isChecked = false
+                    mLineBtn.isChecked = false
+                    view.isChecked = true
                 }
-                false -> if (mStat?.chartType == chartType) view.setChecked(true)
+                false -> if (mStat?.chartType == chartType) view.isChecked = true
             }
         }
 
@@ -272,20 +272,20 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        val inflater: MenuInflater = getMenuInflater()
+        val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.confirm_cancel_menu, menu)
         return true
     }
 
     private fun formErrorMessage(): String? {
         val builder = StringBuilder()
-        if (mNameEdt.getText().toString().trim().length() <= 0) {
+        if (mNameEdt.text.toString().trim().length() <= 0) {
             builder.append("- ").append(getString(R.string.empty_stat_name)).append('\n')
         }
         when (mStat?.timeScaleType) {
             Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS -> {
                 val valid = "([0-9]+)"
-                val x = mxLastEdt.getText().toString()
+                val x = mxLastEdt.text.toString()
                 if (!x.matches(valid.toRegex())) {
                     fun last(): String =
                             if (mStat?.timeScaleType == Statistic.PERIOD_YEARS)
@@ -294,7 +294,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                                 getString(R.string.last_male)
 
                     builder.append("- ").append(getString(R.string.xlast_invalid).format(last(),
-                            mTimeScaleSpin.getSelectedItem().toString().toLowerCase()))
+                            mTimeScaleSpin.selectedItem.toString().toLowerCase()))
                 }
             }
             Statistic.PERIOD_ABSOLUTE ->
@@ -310,10 +310,10 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         // filling missing info
         val stat = mStat
         if (stat != null) {
-            stat.name = mNameEdt.getText().toString().trim()
+            stat.name = mNameEdt.text.toString().trim()
             when (stat.timeScaleType) {
                 Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS ->
-                    stat.xLast = Integer.parseInt(mxLastEdt.getText().toString())
+                    stat.xLast = Integer.parseInt(mxLastEdt.text.toString())
             }
         }
     }
@@ -348,7 +348,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean =
-            when (item.getItemId()) {
+            when (item.itemId) {
                 R.id.confirm -> {
                     onConfirmPressed()
                     true

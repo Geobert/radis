@@ -25,7 +25,7 @@ public abstract class BaseActivity : ActionBarActivity() {
 
     protected fun hideProgress() {
         mProgressCount--
-        if (mProgress != null && mProgress!!.isShowing() && mProgressCount <= 0) {
+        if (mProgress != null && mProgress!!.isShowing && mProgressCount <= 0) {
             mProgressCount = 0
             mProgress!!.dismiss()
         }
@@ -49,7 +49,7 @@ public abstract class BaseActivity : ActionBarActivity() {
     }
 
     override fun setTitle(title: CharSequence?) {
-        mToolbar.setTitle(title)
+        mToolbar.title = title
     }
 
     override fun setTitle(titleId: Int) {

@@ -9,7 +9,7 @@ import fr.geobert.radis.tools.UpdateDisplayInterface
 import kotlin.properties.Delegates
 
 public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar.OnMenuItemClickListener {
-    protected val mActivity: MainActivity by lazy(LazyThreadSafetyMode.NONE) { getActivity() as MainActivity }
+    protected val mActivity: MainActivity by lazy(LazyThreadSafetyMode.NONE) { activity as MainActivity }
     protected val mAccountManager: AccountManager by lazy(LazyThreadSafetyMode.NONE) { mActivity.mAccountManager }
 
     open public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -18,7 +18,7 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
     open public fun onAccountChanged(itemId: Long): Boolean = false
 
     public fun getName(): String {
-        return this.javaClass.getName()
+        return this.javaClass.name
     }
 
     protected fun setIcon(id: Int) {
@@ -26,7 +26,7 @@ public abstract class BaseFragment : Fragment(), UpdateDisplayInterface, Toolbar
     }
 
     protected fun setMenu(id: Int) {
-        mActivity.mToolbar.getMenu().clear()
+        mActivity.mToolbar.menu.clear()
         mActivity.mToolbar.inflateMenu(id)
         mActivity.mToolbar.setOnMenuItemClickListener(this)
     }

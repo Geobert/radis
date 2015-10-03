@@ -15,10 +15,10 @@ public class ConfigEditor : BaseActivity(), EditorToolbarTrait {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.config_activity)
         initToolbar(this)
-        mToolbar.getMenu().clear()
+        mToolbar.menu.clear()
         setIcon(R.drawable.ok_48)
         setTitle(R.string.preferences)
     }

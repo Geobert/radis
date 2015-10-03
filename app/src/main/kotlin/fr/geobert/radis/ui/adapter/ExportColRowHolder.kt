@@ -13,13 +13,13 @@ public class ExportColRowHolder(val view: View, val adapter: ExportColsAdapter) 
     init {
         view.setOnClickListener(this)
         toExport.setOnCheckedChangeListener { b, checked ->
-            adapter.getItem(getAdapterPosition()).toExport = checked
+            adapter.getItem(adapterPosition).toExport = checked
         }
     }
 
     override fun onClick(p0: View) {
         val old = adapter.selectedPos
-        val position = getAdapterPosition()
+        val position = adapterPosition
         adapter.selectedPos = position
         adapter.notifyItemChanged(position)
         adapter.notifyItemChanged(old)

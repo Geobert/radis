@@ -9,14 +9,10 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
-import android.util.Log
 import fr.geobert.radis.R
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.PreferenceTable
-import fr.geobert.radis.ui.ConfigFragment
-import java.lang
-import java.util.HashMap
-import kotlin.platform.platformStatic
+import java.util.*
 import kotlin.properties.Delegates
 
 public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
@@ -30,7 +26,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     public fun fillCache(ctx: FragmentActivity, cbk: () -> Unit) {
         if (mCache == null) {
             mCbk = cbk
-            ctx.getSupportLoaderManager().initLoader<Cursor>(FILL_CACHE, Bundle(), this)
+            ctx.supportLoaderManager.initLoader<Cursor>(FILL_CACHE, Bundle(), this)
         } else {
             cbk()
         }
@@ -39,7 +35,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     // sync
     public fun fillCache(ctx: Context) {
         if (mCache == null) {
-            val data = ctx.getContentResolver().query(DbContentProvider.PREFS_URI, PreferenceTable.PREFS_COLS, null, null, null)
+            val data = ctx.contentResolver.query(DbContentProvider.PREFS_URI, PreferenceTable.PREFS_COLS, null, null, null)
             mCache = HashMap<String, String>()
             if (data != null) {
                 if (data.moveToFirst()) {
@@ -63,7 +59,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     public fun getBoolean(key: String): Boolean? {
         val v = mCache?.get(key)
         try {
-            val b = lang.Boolean.valueOf(v)
+            val b = v?.toBoolean()
             return b
         } catch (e: Exception) {
             return null
@@ -72,9 +68,8 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public fun getBoolean(key: String, defValue: Boolean): Boolean {
-        val v = mCache?.get(key)
         try {
-            return (if (v != null) lang.Boolean.valueOf(v) else null) ?: defValue
+            return (mCache?.get(key)?.toBoolean()) ?: defValue
         } catch (e: Exception) {
             return defValue
         }
@@ -108,8 +103,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         val v = mCache?.get(key)
         if (v != null) {
             try {
-                val b = lang.Long.valueOf(v)
-                return b
+                return v.toLong()
             } catch (e: Exception) {
                 return null
             }
@@ -119,9 +113,8 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     public fun getLong(key: String, defValue: Long): Long {
-        val v = mCache?.get(key)
         try {
-            return (if (v != null) lang.Long.valueOf(v) else null) ?: defValue
+            return (mCache?.get(key)?.toLong()) ?: defValue
         } catch (e: Exception) {
             return defValue
         }
@@ -130,7 +123,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
 
     public fun put(key: String, value: Any?) {
         if (!key.endsWith("_for_account") && !key.startsWith("override_")) {
-            val cr = mCurrentCtx!!.getContentResolver()
+            val cr = mCurrentCtx!!.contentResolver
             val values = ContentValues()
             values.put(PreferenceTable.KEY_PREFS_NAME, key)
             values.put(PreferenceTable.KEY_PREFS_VALUE, value.toString())
@@ -147,11 +140,11 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     private fun deletePref(key: String) {
-        mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, PreferenceTable.KEY_PREFS_NAME + "=?", arrayOf(key))
+        mCurrentCtx!!.contentResolver.delete(DbContentProvider.PREFS_URI, PreferenceTable.KEY_PREFS_NAME + "=?", arrayOf(key))
     }
 
     private fun deleteAllPrefs() {
-        val i = mCurrentCtx!!.getContentResolver().delete(DbContentProvider.PREFS_URI, null, null)
+        val i = mCurrentCtx!!.contentResolver.delete(DbContentProvider.PREFS_URI, null, null)
     }
 
     public fun resetAll() {
@@ -169,7 +162,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     override fun onLoadFinished(loader: Loader<Cursor>, data: Cursor) {
-        when (loader.getId()) {
+        when (loader.id) {
             FILL_CACHE -> {
                 mCache = HashMap<String, String>()
                 if (data.moveToFirst()) {
@@ -193,7 +186,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         public val SHARED_PREF_NAME: String = "radis_prefs"
         private var mInstance: DBPrefsManager? = null
 
-        platformStatic public fun getInstance(ctx: Context): DBPrefsManager {
+        @JvmStatic public fun getInstance(ctx: Context): DBPrefsManager {
             if (null == mInstance) {
                 mInstance = DBPrefsManager()
                 PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)

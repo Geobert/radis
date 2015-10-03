@@ -61,24 +61,24 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super<Fragment>.onActivityCreated(savedInstanceState)
-        mActivity = getActivity() as CommonOpEditor
-        edit_op_third_party.setNextFocusDownId(R.id.edit_op_sum)
-        edit_op_sum.setNextFocusDownId(R.id.edit_op_tag)
-        edit_op_tag.setNextFocusDownId(R.id.edit_op_mode)
-        edit_op_mode.setNextFocusDownId(R.id.edit_op_notes)
+        super.onActivityCreated(savedInstanceState)
+        mActivity = activity as CommonOpEditor
+        edit_op_third_party.nextFocusDownId = R.id.edit_op_sum
+        edit_op_sum.nextFocusDownId = R.id.edit_op_tag
+        edit_op_tag.nextFocusDownId = R.id.edit_op_mode
+        edit_op_mode.nextFocusDownId = R.id.edit_op_notes
 
         third_party_cont.post {
             fun adjustImageButton(btn: ImageButton) {
-                val params = btn.getLayoutParams() as LinearLayout.LayoutParams
+                val params = btn.layoutParams as LinearLayout.LayoutParams
                 params.bottomMargin = 3
-                params.height = third_party_cont.getMeasuredHeight()
-                btn.setLayoutParams(params)
+                params.height = third_party_cont.measuredHeight
+                btn.layoutParams = params
             }
 
-            val params = third_party_cont.getLayoutParams() as LinearLayout.LayoutParams
-            params.height = third_party_cont.getMeasuredHeight()
-            transfert_cont.setLayoutParams(params)
+            val params = third_party_cont.layoutParams as LinearLayout.LayoutParams
+            params.height = third_party_cont.measuredHeight
+            transfert_cont.layoutParams = params
             if (Build.VERSION.SDK_INT < 11) {
                 adjustImageButton(mActivity.findViewById(R.id.edit_op_third_parties_list) as ImageButton)
                 adjustImageButton(mActivity.findViewById(R.id.edit_op_tags_list) as ImageButton)
@@ -89,7 +89,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     override fun onResume() {
-        super<Fragment>.onResume()
+        super.onResume()
         mActivity.mAccountManager.fetchAllAccounts(false, {
             mActivity.onAllAccountsFetched()
             onAllAccountFetched()
@@ -101,7 +101,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
 
     fun onAllAccountFetched() {
         //        if (isResumed()) {
-        mSumTextWatcher.setAutoNegate(edit_op_sum.getText().toString().trim().length() == 0)
+        mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length() == 0)
         populateTransfertSpinner(mActivity.mAccountManager.mAccountAdapter)
         initViewAdapters()
         initListeners()
@@ -109,14 +109,14 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
             onTransfertCheckedChanged(arg1)
         }
 
-        configThirdPartyTransfertCont(is_transfert.isChecked())
+        configThirdPartyTransfertCont(is_transfert.isChecked)
         edit_op_third_party.clearFocus()
         edit_op_sum.clearFocus()
         edit_op_mode.clearFocus()
         edit_op_tag.clearFocus()
         edit_op_notes.clearFocus()
 
-        if (mActivity.getCurrentFocus() != null) {
+        if (mActivity.currentFocus != null) {
             Tools.hideKeyboard(mActivity)
         }
         //        }
@@ -127,8 +127,8 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         mActivity.findViewById(R.id.edit_op_third_parties_list).setOnClickListener {
             synchronized (this@OperationEditFragment) {
                 val d = InfoManagerDialog.createThirdPartiesListDialog(mActivity)
-                if (!d.isAdded()) {
-                    d.show(getFragmentManager(), "thirdPartiesDialog")
+                if (!d.isAdded) {
+                    d.show(fragmentManager, "thirdPartiesDialog")
                 }
             }
         }
@@ -137,8 +137,8 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         mActivity.findViewById(R.id.edit_op_tags_list).setOnClickListener {
             synchronized (this@OperationEditFragment) {
                 val d = InfoManagerDialog.createTagsListDialog(mActivity)
-                if (!d.isAdded()) {
-                    d.show(getFragmentManager(), "tagsDialog")
+                if (!d.isAdded) {
+                    d.show(fragmentManager, "tagsDialog")
                 }
             }
         }
@@ -147,8 +147,8 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         mActivity.findViewById(R.id.edit_op_modes_list).setOnClickListener {
             synchronized (this@OperationEditFragment) {
                 val d = InfoManagerDialog.createModesListDialog(mActivity)
-                if (!d.isAdded()) {
-                    d.show(getFragmentManager(), "modesDialog")
+                if (!d.isAdded) {
+                    d.show(fragmentManager, "modesDialog")
                 }
             }
         }
@@ -168,8 +168,8 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         val `in` = AnimationUtils.loadAnimation(mActivity, android.R.anim.fade_in)
         val out = AnimationUtils.makeOutAnimation(mActivity, true)
         mSumTextWatcher.setAllowNegativeSum(!isChecked)
-        edit_op_sign.setEnabled(!isChecked)
-        val sum = edit_op_sum.getText().toString().extractSumFromStr()
+        edit_op_sign.isEnabled = !isChecked
+        val sum = edit_op_sum.text.toString().extractSumFromStr()
         try {
             if (sum < 0) {
                 invertSign()
@@ -187,13 +187,13 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         if (isChecked == true) {
             transfert_cont.startAnimation(`in`)
             third_party_cont.startAnimation(out)
-            transfert_cont.setVisibility(View.VISIBLE)
-            third_party_cont.setVisibility(View.GONE)
+            transfert_cont.visibility = View.VISIBLE
+            third_party_cont.visibility = View.GONE
         } else {
             transfert_cont.startAnimation(out)
             third_party_cont.startAnimation(`in`)
-            transfert_cont.setVisibility(View.GONE)
-            third_party_cont.setVisibility(View.VISIBLE)
+            transfert_cont.visibility = View.GONE
+            third_party_cont.visibility = View.VISIBLE
         }
     }
 
@@ -205,11 +205,11 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     fun isTransfertChecked(): Boolean {
-        return is_transfert.isChecked()
+        return is_transfert.isChecked
     }
 
     fun getSrcAccountIdx(): Int {
-        return trans_src_account.getSelectedItemPosition()
+        return trans_src_account.selectedItemPosition
     }
 
     protected fun initViewAdapters() {
@@ -222,7 +222,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     protected fun populateTransfertSpinner(c: AccountAdapter?) {
-        if (c != null && c.getCount() > 0) {
+        if (c != null && c.count > 0) {
             val adapter = ArrayAdapter<Account>(mActivity, android.R.layout.simple_spinner_item)
             val adapter2 = ArrayAdapter<Account>(mActivity, android.R.layout.simple_spinner_item)
             adapter.add(Account(0, getString(R.string.no_transfert)))
@@ -234,12 +234,12 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
 
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            trans_src_account.setAdapter(adapter)
-            trans_dst_account.setAdapter(adapter2)
+            trans_src_account.adapter = adapter
+            trans_dst_account.adapter = adapter2
             val curOp = mActivity.mCurrentOp
             if (curOp != null) {
                 val isTransfert = curOp.mTransferAccountId > 0
-                is_transfert.setChecked(isTransfert)
+                is_transfert.isChecked = isTransfert
                 if (isTransfert) {
                     initAccountSpinner(trans_src_account, curOp.mAccountId)
                     initAccountSpinner(trans_dst_account, curOp.mTransferAccountId)
@@ -254,7 +254,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     private fun initAccountSpinner(spin: Spinner, accountId: Long) {
-        val adapter = spin.getAdapter() as ArrayAdapter<Account> //TODO how to remove this warning
+        val adapter = spin.adapter as ArrayAdapter<Account> //TODO how to remove this warning
         val pos = adapter.getPosition(Account(accountId, ""))
         if (pos > -1) {
             spin.setSelection(pos)
@@ -279,14 +279,14 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
                 edit_op_sum.setText(curOp.getSumStr())
             }
         }
-        is_checked.setChecked(op.mIsChecked)
-        populateTransfertSpinner((getActivity() as CommonOpEditor).mAccountManager.mAccountAdapter)
+        is_checked.isChecked = op.mIsChecked
+        populateTransfertSpinner((activity as CommonOpEditor).mAccountManager.mAccountAdapter)
     }
 
-    throws(ParseException::class)
+    Throws(ParseException::class)
     private fun invertSign() {
         mSumTextWatcher.setAutoNegate(false)
-        val sum: Double? = edit_op_sum.getText().toString().parseSum()
+        val sum: Double? = edit_op_sum.text.toString().parseSum()
         val s = if (sum != null) {
             -sum
         } else {
@@ -298,9 +298,9 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     fun isFormValid(errMsg: StringBuilder): Boolean {
         var res = true
         var str: String
-        if (is_transfert.isChecked()) {
-            val srcAccount = trans_src_account.getSelectedItem() as Account
-            val dstAccount = trans_dst_account.getSelectedItem() as Account
+        if (is_transfert.isChecked) {
+            val srcAccount = trans_src_account.selectedItem as Account
+            val dstAccount = trans_dst_account.selectedItem as Account
             if (srcAccount.id == 0L) {
                 errMsg.append(getString(R.string.err_transfert_no_src))
                 res = false
@@ -312,7 +312,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
                 res = false
             }
         } else {
-            str = edit_op_third_party.getText().toString().trim()
+            str = edit_op_third_party.text.toString().trim()
             if (str.length() == 0) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n")
@@ -321,7 +321,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
                 res = false
             }
         }
-        str = edit_op_sum.getText().toString().replace('+', ' ').trim()
+        str = edit_op_sum.text.toString().replace('+', ' ').trim()
         if (str.length() == 0) {
             if (errMsg.length() > 0) {
                 errMsg.append("\n")
@@ -345,19 +345,19 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     }
 
     fun fillOperationWithInputs(op: Operation) {
-        op.mMode = edit_op_mode.getText().toString().trim()
-        op.mTag = edit_op_tag.getText().toString().trim()
-        op.mNotes = edit_op_notes.getText().toString().trim()
-        mActivity.getCurrentFocus()?.clearFocus()
-        op.setSumStr(edit_op_sum.getText().toString())
-        op.setDay(edit_op_date.getDayOfMonth())
-        op.setMonth(edit_op_date.getMonth() + 1)
-        op.setYear(edit_op_date.getYear())
-        op.mIsChecked = is_checked.isChecked()
+        op.mMode = edit_op_mode.text.toString().trim()
+        op.mTag = edit_op_tag.text.toString().trim()
+        op.mNotes = edit_op_notes.text.toString().trim()
+        mActivity.currentFocus?.clearFocus()
+        op.setSumStr(edit_op_sum.text.toString())
+        op.setDay(edit_op_date.dayOfMonth)
+        op.setMonth(edit_op_date.month + 1)
+        op.setYear(edit_op_date.year)
+        op.mIsChecked = is_checked.isChecked
 
-        if (is_transfert.isChecked()) {
-            val srcAccount = trans_src_account.getSelectedItem() as Account
-            val dstAccount = trans_dst_account.getSelectedItem() as Account
+        if (is_transfert.isChecked) {
+            val srcAccount = trans_src_account.selectedItem as Account
+            val dstAccount = trans_dst_account.selectedItem as Account
             if (srcAccount.id > 0 && dstAccount.id > 0 && srcAccount.id != dstAccount.id) {
                 // a valid transfert has been setup
                 op.mTransferAccountId = dstAccount.id
@@ -367,17 +367,17 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
                 // invert sum because with sum > 0 (and I forced it), A->B means -sum in A and +sum in B
                 op.mSum = -op.mSum
             } else {
-                op.mThirdParty = edit_op_third_party.getText().toString().trim()
+                op.mThirdParty = edit_op_third_party.text.toString().trim()
             }
         } else {
             op.mTransferAccountId = 0
             op.mTransSrcAccName = ""
-            op.mThirdParty = edit_op_third_party.getText().toString().trim()
+            op.mThirdParty = edit_op_third_party.text.toString().trim()
         }
     }
 
     override fun onPause() {
-        super<Fragment>.onPause()
+        super.onPause()
         if (mActivity.mCurrentOp == null) {
             if (mActivity is OperationEditor) {
                 mActivity.mCurrentOp = Operation()
@@ -391,7 +391,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
 
     public fun setCheckedEditVisibility(visibility: Int) {
         //        mActivity.findViewById(R.id.checked_title).setVisibility(visibility);
-        is_checked.setVisibility(visibility)
+        is_checked.visibility = visibility
     }
 
     override fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {

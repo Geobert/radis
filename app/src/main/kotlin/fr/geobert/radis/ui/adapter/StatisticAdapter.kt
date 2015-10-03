@@ -17,7 +17,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
     var statistics = cursor.map<Statistic> { Statistic(it) }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, p1: Int): StatRowHolder {
-        val l = LayoutInflater.from(viewGroup.getContext()).inflate(fr.geobert.radis.R.layout.statistic_row,
+        val l = LayoutInflater.from(viewGroup.context).inflate(fr.geobert.radis.R.layout.statistic_row,
                 viewGroup, false)
         return StatRowHolder(l, ctx)
     }
@@ -25,13 +25,13 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
     override fun onBindViewHolder(holder: StatRowHolder, pos: Int) {
         val stat = statisticAt(pos)
 
-        holder.nameLbl.setText(stat.name)
-        holder.accountNameLbl.setText(stat.accountName)
+        holder.nameLbl.text = stat.name
+        holder.accountNameLbl.text = stat.accountName
         holder.trashBtn.setOnClickListener {
-            DeleteStatConfirmationDiag(stat.id).show(ctx.getActivity().getSupportFragmentManager(), "")
+            DeleteStatConfirmationDiag(stat.id).show(ctx.activity.supportFragmentManager, "")
         }
 
-        holder.editBtn.setOnClickListener { StatisticEditor.callMeForResult(ctx.getActivity(), stat.id) }
+        holder.editBtn.setOnClickListener { StatisticEditor.callMeForResult(ctx.activity, stat.id) }
 
         holder.chartType.setImageResource(when (stat.chartType) {
             Statistic.CHART_PIE -> R.drawable.stat_pie
@@ -42,7 +42,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
         holder.filterName.setText(stat.getFilterStr())
 
         val (start, end) = stat.createTimeRange()
-        holder.timeScale.setText("${start.formatDateLong()} ${ctx.getString(R.string.rarr)} ${end.formatDateLong()}")
+        holder.timeScale.text = "${start.formatDateLong()} ${ctx.getString(R.string.rarr)} ${end.formatDateLong()}"
         holder.stat = stat
     }
 

@@ -6,14 +6,11 @@ import android.os.Parcelable
 import fr.geobert.radis.R
 import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.minusMonth
 import fr.geobert.radis.tools.minusYear
 import hirondelle.date4j.DateTime
-import java.util.Calendar
-import java.util.Date
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import kotlin.properties.get
+import kotlin.properties.set
 
 public class Statistic() : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
@@ -34,7 +31,7 @@ public class Statistic() : ImplParcelable {
         val MODE = 2
         val NO_FILTER = 3
 
-        platformStatic public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
+        @JvmStatic public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
             override fun createFromParcel(p: Parcel): Statistic {
                 return Statistic(p)
             }
@@ -45,17 +42,17 @@ public class Statistic() : ImplParcelable {
         }
     }
 
-    var id: Long by Delegates.mapVar(parcels)
-    var name: String by Delegates.mapVar(parcels)
-    var accountId: Long by Delegates.mapVar(parcels)
-    var accountName: String by Delegates.mapVar(parcels)
-    var xLast: Int by Delegates.mapVar(parcels)
-    var endDate: DateTime by Delegates.mapVar(parcels)
-    var date: DateTime by Delegates.mapVar(parcels)
-    var startDate: DateTime by Delegates.mapVar(parcels)
-    var timeScaleType: Int by Delegates.mapVar(parcels)
-    var chartType: Int by Delegates.mapVar(parcels)
-    var filterType: Int by Delegates.mapVar(parcels)
+    var id: Long by parcels
+    var name: String by parcels
+    var accountId: Long by parcels
+    var accountName: String by parcels
+    var xLast: Int by parcels
+    var endDate: DateTime by parcels
+    var date: DateTime by parcels
+    var startDate: DateTime by parcels
+    var timeScaleType: Int by parcels
+    var chartType: Int by parcels
+    var filterType: Int by parcels
 
     init {
         id = 0L

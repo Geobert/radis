@@ -16,7 +16,6 @@ import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.ui.ConfigFragment
 import java.util.*
-import kotlin.platform.platformStatic
 
 public class RadisService : android.app.IntentService(RadisService.TAG) {
 
@@ -46,7 +45,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
             prefs.fillCache(this)
             processScheduledOps()
         } finally {
-            if (getLock(this).isHeld()) {
+            if (getLock(this).isHeld) {
                 android.util.Log.d(TAG, "release lock")
                 getLock(this).release()
             }
@@ -66,7 +65,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
 
     synchronized private fun processScheduledOps() {
         val schOpsCursor = ScheduledOperationTable.fetchAllScheduledOps(this)
-        if (schOpsCursor.isFirst()) {
+        if (schOpsCursor.isFirst) {
             val sumsPerAccount = LinkedHashMap<Long, Long>()
             val greatestDatePerAccount = LinkedHashMap<Long, Long>()
 
@@ -148,7 +147,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
             }
 
             DBPrefsManager.getInstance(this).put(ConfigFragment.KEY_LAST_INSERTION_DATE,
-                    Tools.createClearedCalendar().getTimeInMillis())
+                    Tools.createClearedCalendar().timeInMillis)
         }
         schOpsCursor.close()
     }
@@ -181,7 +180,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
             context.startService(android.content.Intent(context, RadisService::class.java))
         }
 
-        platformStatic public fun acquireStaticLock(context: android.content.Context) {
+        JvmStatic public fun acquireStaticLock(context: android.content.Context) {
             android.util.Log.d(TAG, "acquireStaticLock")
             getLock(context).acquire()
         }

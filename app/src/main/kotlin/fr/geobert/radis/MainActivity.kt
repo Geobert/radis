@@ -1,17 +1,12 @@
 package fr.geobert.radis
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.Message
-import android.support.v4.app.DialogFragment
 import android.support.v4.app.Fragment
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -23,27 +18,26 @@ import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.Spinner
 import com.crashlytics.android.Crashlytics
-import fr.geobert.radis.data.Account
-import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
-import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
-import fr.geobert.radis.tools.*
-import fr.geobert.radis.ui.*
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.PauseHandler
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.UpdateDisplayInterface
+import fr.geobert.radis.tools.initShortDate
+import fr.geobert.radis.ui.ConfigEditor
+import fr.geobert.radis.ui.ExporterActivity
+import fr.geobert.radis.ui.OperationListFragment
+import fr.geobert.radis.ui.ScheduledOpListFragment
+import fr.geobert.radis.ui.StatisticsListFragment
 import fr.geobert.radis.ui.drawer.NavDrawerItem
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter
 import fr.geobert.radis.ui.editor.AccountEditor
 import fr.geobert.radis.ui.editor.OperationEditor
 import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import io.fabric.sdk.android.Fabric
-import java.io.BufferedWriter
-import java.io.File
-import java.io.FileWriter
-import java.io.Writer
-import java.util.ArrayList
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import java.util.*
 
 public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private val mDrawerLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.drawer_layout) as DrawerLayout }
@@ -81,8 +75,8 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     protected fun findOrCreateFragment(c: Class<out BaseFragment>, fragmentId: Int): Fragment? {
         var fragment: Fragment?
-        val fragmentManager = getSupportFragmentManager()
-        fragment = fragmentManager.findFragmentByTag(c.getName())
+        val fragmentManager = supportFragmentManager
+        fragment = fragmentManager.findFragmentByTag(c.name)
         when (fragment) {
             null -> {
                 try {
@@ -97,7 +91,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
             else -> {
                 updateFragmentRefs(fragment, fragmentId)
                 mDrawerLayout.closeDrawer(mDrawerList)
-                fragmentManager.popBackStack(c.getName(), 0)
+                fragmentManager.popBackStack(c.name, 0)
                 return null
             }
         }
@@ -117,7 +111,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
         override fun processMessage(act: Activity, message: Message) {
             var fragment: Fragment? = null
-            val fragmentManager = activity.getSupportFragmentManager()
+            val fragmentManager = activity.supportFragmentManager
             when (message.what) {
                 OP_LIST -> fragment = findOrCreateFragment(OperationListFragment::class.java, message.what)
                 SCH_OP_LIST -> fragment = findOrCreateFragment(ScheduledOpListFragment::class.java, message.what)
@@ -177,7 +171,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         initShortDate(this)
 
         if (!BuildConfig.DEBUG)
@@ -186,7 +180,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         setContentView(R.layout.activity_main)
         Tools.checkDebugMode(this)
 
-        mToolbar.setTitle("")
+        mToolbar.title = ""
 
         registerReceiver(mOnRefreshReceiver, IntentFilter(Tools.INTENT_REFRESH_NEEDED))
         registerReceiver(mOnRefreshReceiver, IntentFilter(INTENT_UPDATE_ACC_LIST))
@@ -196,30 +190,30 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onPostCreate(savedInstanceState)
+        super.onPostCreate(savedInstanceState)
         mDrawerToggle.syncState()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
-        super<BaseActivity>.onConfigurationChanged(newConfig)
+        super.onConfigurationChanged(newConfig)
         mDrawerToggle.onConfigurationChanged(newConfig)
     }
 
     override fun onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() <= 1) {
+        if (supportFragmentManager.backStackEntryCount <= 1) {
             finish()
         } else {
             mActiveFragment = mPrevFragment
             mActiveFragmentId = mPrevFragmentId
             mDrawerList.setItemChecked(mActiveFragmentId, true)
-            super<BaseActivity>.onBackPressed()
+            super.onBackPressed()
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         // Pass the event to ActionBarDrawerToggle, if it returns
         // true, then it has handled the app icon touch event
-        return mDrawerToggle.onOptionsItemSelected(item) || super<BaseActivity>.onOptionsItemSelected(item)
+        return mDrawerToggle.onOptionsItemSelected(item) || super.onOptionsItemSelected(item)
     }
 
     private fun setUpDrawerToggle() {
@@ -243,12 +237,12 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun onPause() {
-        super<BaseActivity>.onPause()
+        super.onPause()
         handler.pause()
     }
 
     override fun onResume() {
-        super<BaseActivity>.onResume()
+        super.onResume()
         // nothing to do here, required by Android
     }
 
@@ -262,14 +256,14 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 Log.d(TAG, "all accounts fetched")
                 processAccountList(true)
                 mAccountSpinner.setSelection(mAccountManager.getCurrentAccountPosition(this))
-                super<BaseActivity>.onResumeFragments()
+                super.onResumeFragments()
             })
             handler.resume(this)
         })
     }
 
     override fun onDestroy() {
-        super<BaseActivity>.onDestroy()
+        super.onDestroy()
         unregisterReceiver(mOnRefreshReceiver)
     }
 
@@ -285,15 +279,15 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 processAccountList(requestCode == AccountEditor.ACCOUNT_CREATOR)
             })
         } else if (result == Activity.RESULT_CANCELED) {
-            if (mAccountManager.mAccountAdapter.getCount() == 0) {
+            if (mAccountManager.mAccountAdapter.count == 0) {
                 finish()
             }
         }
     }
 
     private fun processAccountList(create: Boolean) {
-        Log.d(TAG, "processAccountList: count:${mAccountManager.mAccountAdapter.getCount()}, create:$create")
-        if (mAccountManager.mAccountAdapter.getCount() == 0) {
+        Log.d(TAG, "processAccountList: count:${mAccountManager.mAccountAdapter.count}, create:$create")
+        if (mAccountManager.mAccountAdapter.count == 0) {
             // no account, open create account
             AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT, true)
         } else {
@@ -307,7 +301,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         Log.d(TAG, "onActivityResult : " + requestCode);
-        super<BaseActivity>.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             AccountEditor.ACCOUNT_EDITOR, AccountEditor.ACCOUNT_CREATOR -> onAccountEditFinished(requestCode, resultCode)
             ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE, ScheduledOperationEditor.ACTIVITY_SCH_OP_EDIT,
@@ -342,14 +336,14 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     private fun initAccountStuff() {
-        mAccountSpinner.setAdapter(mAccountManager.mAccountAdapter)
+        mAccountSpinner.adapter = mAccountManager.mAccountAdapter
         this.setActionBarListNavCbk(object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(p0: AdapterView<out Adapter>?) {
             }
 
             override fun onItemSelected(p0: AdapterView<out Adapter>?, p1: View?, p2: Int, itemId: Long) {
                 val frag = mActiveFragment
-                if (frag != null && frag.isAdded()) {
+                if (frag != null && frag.isAdded) {
                     frag.onAccountChanged(itemId)
                 }
             }
@@ -389,12 +383,12 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         navDrawerItems.add(NavDrawerItem(getString(R.string.recompute_account_sums), 0))
         navDrawerItems.add(NavDrawerItem(getString(R.string.export_csv), 0))
 
-        mDrawerList.setAdapter(NavDrawerListAdapter(getApplicationContext(), navDrawerItems))
-        mDrawerList.setOnItemClickListener(object : AdapterView.OnItemClickListener {
+        mDrawerList.adapter = NavDrawerListAdapter(applicationContext, navDrawerItems)
+        mDrawerList.onItemClickListener = object : AdapterView.OnItemClickListener {
             override fun onItemClick(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {
                 displayFragment(i, getCurrentAccountId())
             }
-        })
+        }
     }
 
     private fun installRadisTimer() {
@@ -408,25 +402,25 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super<BaseActivity>.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
         outState.putInt("activeFragId", mActiveFragmentId)
         outState.putInt("prevFragId", mPrevFragmentId)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
+        super.onRestoreInstanceState(savedInstanceState)
         mActiveFragmentId = savedInstanceState.getInt("activeFragId")
         mPrevFragmentId = savedInstanceState.getInt("prevFragId")
         DBPrefsManager.getInstance(this).fillCache(this, {
             initAccountStuff()
-            if (mAccountManager.mAccountAdapter.isEmpty()) {
+            if (mAccountManager.mAccountAdapter.isEmpty) {
                 updateDisplay(null)
             }
         })
     }
 
     public fun setActionBarListNavCbk(callback: AdapterView.OnItemSelectedListener?) {
-        mAccountSpinner.setOnItemSelectedListener(callback)
+        mAccountSpinner.onItemSelectedListener = callback
     }
 
     override fun updateDisplay(intent: Intent?) {
@@ -434,7 +428,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         mAccountManager.fetchAllAccounts(true, {
             processAccountList(true)
             val f = mActiveFragment
-            if (f != null && f.isAdded()) {
+            if (f != null && f.isAdded) {
                 f.updateDisplay(intent)
             }
         })
@@ -466,7 +460,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         public val RECOMPUTE_ACCOUNT: Int = 13
         public val EXPORT_CSV: Int = 14
 
-        platformStatic public fun refreshAccountList(ctx: Context) {
+        @JvmStatic public fun refreshAccountList(ctx: Context) {
             val intent = Intent(INTENT_UPDATE_ACC_LIST)
             ctx.sendBroadcast(intent)
         }

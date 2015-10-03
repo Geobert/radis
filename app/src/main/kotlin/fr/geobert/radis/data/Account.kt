@@ -5,24 +5,23 @@ import android.database.Cursor
 import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.db.AccountTable
-import java.util.Currency
-import java.util.Date
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import java.util.*
+import kotlin.properties.get
+import kotlin.properties.set
 
 public class Account(accountId: Long = 0, accountName: String = "") : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
-    public var id: Long by Delegates.mapVar(parcels)
-    public var name: String by Delegates.mapVar(parcels)
-    public var startSum: Long by Delegates.mapVar(parcels)
-    public var curSum: Long by Delegates.mapVar(parcels)
-    public var currency: String by Delegates.mapVar(parcels)
-    public var projMode: Int by Delegates.mapVar(parcels)
-    public var projDate: String by Delegates.mapVar(parcels) // TODO better type for this, it is use as MInt for day of month projection or as jj/mm/yyyy for absolute projection
-    public var opSum: Long by Delegates.mapVar(parcels)
-    public var checkedSum: Long by Delegates.mapVar(parcels)
-    public var description: String by Delegates.mapVar(parcels)
-    public var lastInsertDate: Long by Delegates.mapVar(parcels)
+    public var id: Long by parcels
+    public var name: String by parcels
+    public var startSum: Long by parcels
+    public var curSum: Long by parcels
+    public var currency: String by parcels
+    public var projMode: Int by parcels
+    public var projDate: String by parcels // TODO better type for this, it is use as MInt for day of month projection or as jj/mm/yyyy for absolute projection
+    public var opSum: Long by parcels
+    public var checkedSum: Long by parcels
+    public var description: String by parcels
+    public var lastInsertDate: Long by parcels
 
     init {
         id = accountId
@@ -75,15 +74,15 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
         }
 
         return try {
-            val c = Currency.getInstance(currency).getSymbol()
-            cleanupSymbols(c, arrayOf("£", "$"))
+            val c = Currency.getInstance(currency).symbol
+            cleanupSymbols(c, arrayOf("Â£", "$"))
         } catch (ex: IllegalArgumentException) {
-            Currency.getInstance(ctx.getResources().getConfiguration().locale).getSymbol()
+            Currency.getInstance(ctx.resources.configuration.locale).symbol
         }
     }
 
     companion object {
-        platformStatic public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
+        @JvmStatic public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
             override fun createFromParcel(p: Parcel): Account {
                 return Account(p)
             }

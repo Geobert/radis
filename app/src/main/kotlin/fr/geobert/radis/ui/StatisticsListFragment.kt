@@ -53,7 +53,7 @@ import java.util.Locale
 import kotlin.properties.Delegates
 
 class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
-    val ctx: FragmentActivity by lazy(LazyThreadSafetyMode.NONE) { getActivity() }
+    val ctx: FragmentActivity by lazy(LazyThreadSafetyMode.NONE) { activity }
     private val STAT_LOADER = 2000
     private var mContainer: View by Delegates.notNull()
     private var mList: RecyclerView by Delegates.notNull()
@@ -66,14 +66,14 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     override fun setupIcon() = setIcon(R.drawable.stat_48)
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
+        super.onCreateView(inflater, container, savedInstanceState)
 
         val v = inflater?.inflate(R.layout.statistics_list_fragment, container, false) as View
         mContainer = v
         mList = v.findViewById(R.id.operation_list) as RecyclerView
-        mList.setLayoutManager(android.support.v7.widget.LinearLayoutManager(getActivity()))
+        mList.layoutManager = android.support.v7.widget.LinearLayoutManager(activity)
         mList.setHasFixedSize(true)
-        mList.setItemAnimator(DefaultItemAnimator())
+        mList.itemAnimator = DefaultItemAnimator()
 
         setupIcon()
         setMenu(R.menu.operations_list_menu)
@@ -83,12 +83,12 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     }
 
     override fun onDestroyView() {
-        super<BaseFragment>.onDestroyView()
+        super.onDestroyView()
         mActivity.unregisterReceiver(mOnRefreshReceiver)
     }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean =
-            when (item?.getItemId()) {
+            when (item?.itemId) {
                 R.id.create_operation -> {
                     StatisticEditor.callMeForResult(ctx)
                     true
@@ -98,12 +98,12 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             }
 
     override fun onResume(): Unit {
-        super<BaseFragment>.onResume()
+        super.onResume()
         fetchStats()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
-        super<BaseFragment>.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             fetchStats()
         }
@@ -118,9 +118,9 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun fetchStats() {
         when (mLoader) {
             null ->
-                ctx.getSupportLoaderManager()?.initLoader(2000, Bundle(), this)
+                ctx.supportLoaderManager?.initLoader(2000, Bundle(), this)
             else ->
-                ctx.getSupportLoaderManager()?.restartLoader(2000, Bundle(), this)
+                ctx.supportLoaderManager?.restartLoader(2000, Bundle(), this)
         }
     }
 
@@ -140,23 +140,23 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     override fun onLoadFinished(loader: Loader<Cursor>?, cursor: Cursor): Unit {
         if (mAdapter == null) {
             mAdapter = StatisticAdapter(cursor, this)
-            mList.setAdapter(mAdapter)
+            mList.adapter = mAdapter
         } else {
             mAdapter?.swapCursor(cursor)
         }
-        if (mAdapter?.getItemCount() == 0) {
-            mList.setVisibility(View.GONE)
-            mEmptyView.setVisibility(View.VISIBLE)
+        if (mAdapter?.itemCount == 0) {
+            mList.visibility = View.GONE
+            mEmptyView.visibility = View.VISIBLE
         } else {
-            mList.setVisibility(View.VISIBLE)
-            mEmptyView.setVisibility(View.GONE)
+            mList.visibility = View.VISIBLE
+            mEmptyView.visibility = View.GONE
         }
     }
 
     // generate chart data
 
     private fun getColorsArray(id: Int): List<Int> =
-            ctx.getResources()?.getStringArray(id)?.map({ Color.parseColor(it) }) as List<Int>
+            ctx.resources?.getStringArray(id)?.map({ Color.parseColor(it) }) as List<Int>
 
     private val pos_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) { getColorsArray(R.array.positive_colors) }
     private val neg_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) { getColorsArray(R.array.negative_colors) }
@@ -186,14 +186,14 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                 else -> { // Statistic.NO_FILTER
                     o: Operation ->
                     val g = GregorianCalendar()
-                    g.setTimeInMillis(o.getDate())
+                    g.timeInMillis = o.getDate()
                     when (stat.timeScaleType) {
-                        Statistic.PERIOD_DAYS, Statistic.PERIOD_ABSOLUTE -> g.getTime().formatDate()
+                        Statistic.PERIOD_DAYS, Statistic.PERIOD_ABSOLUTE -> g.time.formatDate()
                         Statistic.PERIOD_MONTHES ->
                             if (Build.VERSION.SDK_INT >= 9) {
                                 g.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault()) ?: ""
                             } else {
-                                DateFormatSymbols().getShortMonths()?.get(g[Calendar.MONTH]) ?: ""
+                                DateFormatSymbols().shortMonths?.get(g[Calendar.MONTH]) ?: ""
                             }
                         Statistic.PERIOD_YEARS -> g[Calendar.YEAR].toString()
                         else -> {
@@ -242,8 +242,8 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         cursor.moveToFirst()
         val account = Account(cursor)
         val numFormat = NumberFormat.getCurrencyInstance()
-        numFormat.setCurrency(Currency.getInstance(account.currency))
-        numFormat.setMinimumFractionDigits(2)
+        numFormat.currency = Currency.getInstance(account.currency)
+        numFormat.minimumFractionDigits = 2
         return numFormat
     }
 
@@ -251,15 +251,15 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun createCategorySeries(stat: Statistic): Pair<CategorySeries, DefaultRenderer> {
         val data = CategorySeries("")
         val renderer = DefaultRenderer()
-        renderer.setStartAngle(180f)
-        renderer.setDisplayValues(true)
-        renderer.setLegendTextSize(16f)
-        renderer.setLabelsTextSize(16f)
-        renderer.setLabelsColor(Color.WHITE)
-        renderer.setShowLegend(true)
-        renderer.setInScroll(false)
-        renderer.setPanEnabled(true)
-        renderer.setZoomButtonsVisible(ZOOM_ENABLED)
+        renderer.startAngle = 180f
+        renderer.isDisplayValues = true
+        renderer.legendTextSize = 16f
+        renderer.labelsTextSize = 16f
+        renderer.labelsColor = Color.WHITE
+        renderer.isShowLegend = true
+        renderer.isInScroll = false
+        renderer.isPanEnabled = true
+        renderer.isZoomButtonsVisible = ZOOM_ENABLED
 
         // fill the data
         val (pos, neg) = sumPerFilter(stat)
@@ -267,15 +267,15 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             m.forEach {
                 data.add(it.key, Math.abs(it.value) / 100.0)
                 val r = SimpleSeriesRenderer()
-                r.setColor(colors[(data.getItemCount() - 1) % colors.size])
-                r.setChartValuesFormat(initNumFormat(stat))
+                r.color = colors[(data.itemCount - 1) % colors.size()]
+                r.chartValuesFormat = initNumFormat(stat)
                 renderer.addSeriesRenderer(r)
             }
         }
         construct(pos, pos_colors)
         construct(neg, neg_colors)
-        if (data.getItemCount() > 10) {
-            renderer.setShowLabels(false)
+        if (data.itemCount > 10) {
+            renderer.isShowLabels = false
         }
         return Pair(data, renderer)
     }
@@ -284,17 +284,17 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     private fun createLineXYDataSet(stat: Statistic): Pair<XYMultipleSeriesDataset, XYMultipleSeriesRenderer> {
         val data = XYMultipleSeriesDataset()
         val renderer = createXYMultipleSeriesRenderer(stat)
-        renderer.setInScroll(false)
-        renderer.setZoomButtonsVisible(ZOOM_ENABLED)
+        renderer.isInScroll = false
+        renderer.isZoomButtonsVisible = ZOOM_ENABLED
 
         fun createXYSeriesRenderer(colors: List<Int>): XYSeriesRenderer {
             val r = XYSeriesRenderer()
-            r.setColor(colors[(data.getSeriesCount() - 1) % colors.size])
-            r.setChartValuesFormat(initNumFormat(stat))
-            r.setDisplayChartValues(false) // otherwise, crash in achartengine
-            r.setPointStyle(PointStyle.CIRCLE)
-            r.setFillPoints(true)
-            r.setLineWidth(2f)
+            r.color = colors[(data.seriesCount - 1) % colors.size()]
+            r.chartValuesFormat = initNumFormat(stat)
+            r.isDisplayChartValues = false // otherwise, crash in achartengine
+            r.pointStyle = PointStyle.CIRCLE
+            r.isFillPoints = true
+            r.lineWidth = 2f
             return r
         }
 
@@ -305,7 +305,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                 fun construct(m: Map<String, List<Operation>>, colors: List<Int>) {
                     m.forEach {
                         val v = Math.abs(it.value.fold(0L) { i: Long, op: Operation -> i + op.mSum }) + 0.0
-                        renderer.setYAxisMax(Math.max(v + 1.0, renderer.getYAxisMax()))
+                        renderer.yAxisMax = Math.max(v + 1.0, renderer.yAxisMax)
                         renderer.addYTextLabel(v, v.formatSum())
                         s.add(it.value[0].getDateObj(), v)
                     }
@@ -321,7 +321,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                         val s = TimeSeries(it.key)
                         it.value.forEach {
                             val v = Math.abs(it.mSum / 100.0)
-                            renderer.setYAxisMax(Math.max(v + 1, renderer.getYAxisMax()))
+                            renderer.yAxisMax = Math.max(v + 1, renderer.yAxisMax)
                             renderer.addYTextLabel(v, it.getSumStr())
                             s.add(it.getDateObj(), v)
                         }
@@ -349,34 +349,34 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
     // for bar and lines chart
     private fun createXYMultipleSeriesRenderer(stat: Statistic): XYMultipleSeriesRenderer {
         val renderer = XYMultipleSeriesRenderer()
-        renderer.setBackgroundColor(ctx.getResources()?.getColor(android.R.color.transparent) ?: 0)
-        renderer.setApplyBackgroundColor(true)
-        renderer.setLabelsTextSize(18f)
-        renderer.setMarginsColor(ctx.getResources()?.getColor(android.R.color.transparent) ?: 0)
-        renderer.setYAxisMin(0.0)
-        renderer.setMargins(intArrayOf(0, 0, 0, 0)) // top, left, bottom, right
-        renderer.setInScroll(false)
+        renderer.backgroundColor = ctx.resources?.getColor(android.R.color.transparent) ?: 0
+        renderer.isApplyBackgroundColor = true
+        renderer.labelsTextSize = 18f
+        renderer.marginsColor = ctx.resources?.getColor(android.R.color.transparent) ?: 0
+        renderer.yAxisMin = 0.0
+        renderer.margins = intArrayOf(0, 0, 0, 0) // top, left, bottom, right
+        renderer.isInScroll = false
         renderer.setPanEnabled(true, false)
-        renderer.setZoomButtonsVisible(ZOOM_ENABLED)
+        renderer.isZoomButtonsVisible = ZOOM_ENABLED
 
         when (stat.chartType) {
             Statistic.CHART_BAR -> {
-                renderer.setShowLegend(false)
+                renderer.isShowLegend = false
                 renderer.setYLabelsAlign(Paint.Align.RIGHT)
-                renderer.setYTitle(ctx.getString(R.string.sum))
-                renderer.setXLabels(0)
-                renderer.setYLabels(0)
-                renderer.setXAxisMin(0.0)
-                renderer.setXAxisMax(0.0)
-                renderer.setBarWidth(70f)
-                renderer.setBarSpacing(0.5)
-                renderer.setXTitle(filterName(stat))
+                renderer.yTitle = ctx.getString(R.string.sum)
+                renderer.xLabels = 0
+                renderer.yLabels = 0
+                renderer.xAxisMin = 0.0
+                renderer.xAxisMax = 0.0
+                renderer.barWidth = 70f
+                renderer.barSpacing = 0.5
+                renderer.xTitle = filterName(stat)
             }
             Statistic.CHART_LINE -> {
-                renderer.setShowLegend(true)
-                renderer.setPointSize(5f)
+                renderer.isShowLegend = true
+                renderer.pointSize = 5f
                 renderer.setYLabelsAlign(Paint.Align.LEFT)
-                renderer.setZoomEnabled(false)
+                renderer.isZoomEnabled = false
             }
         }
         return renderer
@@ -404,11 +404,11 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             m.forEach {
                 val lbl = if (it.key.length() == 0) ctx.getString(R.string.no_lbl) else it.key
                 val v: Double = Math.abs(it.value / 100.0)
-                renderer.setYAxisMax(Math.max(v, renderer.getYAxisMax()))
+                renderer.yAxisMax = Math.max(v, renderer.yAxisMax)
 
                 val existingSeries: Double? = xLabels[lbl]
                 if (existingSeries == null) {
-                    val idx = data.getSeriesCount() * 0.5 + 0.5
+                    val idx = data.seriesCount * 0.5 + 0.5
                     renderer.addXTextLabel(idx, lbl)
                     xLabels.put(lbl, idx)
                     s2.add(idx, v)
@@ -418,18 +418,18 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
                 data.addSeries(s2)
 
                 val r = XYSeriesRenderer()
-                r.setColor(if (isPos) pos_colors[0] else neg_colors[0])
-                r.setChartValuesFormat(initNumFormat(stat))
-                r.setDisplayChartValues(true)
-                r.setChartValuesTextSize(16f)
+                r.color = if (isPos) pos_colors[0] else neg_colors[0]
+                r.chartValuesFormat = initNumFormat(stat)
+                r.isDisplayChartValues = true
+                r.chartValuesTextSize = 16f
                 renderer.addSeriesRenderer(r)
             }
 
-            renderer.setXAxisMax(renderer.getXAxisMax() + 1)
+            renderer.xAxisMax = renderer.xAxisMax + 1
         }
         construct(pos, isPos = true)
         construct(neg, isPos = false)
-        renderer.setRange(doubleArray(0.0, renderer.getXAxisMax(), 0.0, renderer.getYAxisMax() * 1.1))
+        renderer.setRange(doubleArrayOf(0.0, renderer.xAxisMax, 0.0, renderer.yAxisMax * 1.1))
         return Pair(data, renderer)
     }
 
