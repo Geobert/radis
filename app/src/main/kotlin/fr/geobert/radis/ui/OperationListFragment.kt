@@ -17,7 +17,6 @@ import android.support.v7.widget.DefaultItemAnimator
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -30,7 +29,12 @@ import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.TIME_ZONE
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.UpdateDisplayInterface
+import fr.geobert.radis.tools.formatDateLong
+import fr.geobert.radis.tools.minusMonth
 import fr.geobert.radis.ui.adapter.OperationsAdapter
 import fr.geobert.radis.ui.editor.OperationEditor
 import hirondelle.date4j.DateTime
@@ -520,7 +524,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun getRecyclerView(): RecyclerView = operation_list
 
     companion object {
-        JvmStatic public fun restart(ctx: Context) {
+        @JvmStatic public fun restart(ctx: Context) {
             DbContentProvider.reinit(ctx)
             val intent = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -652,7 +656,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
 
         companion object {
-            JvmStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
+            @JvmStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()
                 args.putLong("accountId", accountId)

@@ -423,6 +423,11 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         mAccountSpinner.onItemSelectedListener = callback
     }
 
+
+    public fun getCurrentAccountId(): Long {
+        return mAccountManager.getCurrentAccountId(this)
+    }
+
     override fun updateDisplay(intent: Intent?) {
         Log.d(TAG, "updateDisplay")
         mAccountManager.fetchAllAccounts(true, {
@@ -432,10 +437,6 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
                 f.updateDisplay(intent)
             }
         })
-    }
-
-    public fun getCurrentAccountId(): Long {
-        return mAccountManager.getCurrentAccountId(this)
     }
 
     private val TAG = "MainActivity"

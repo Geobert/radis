@@ -13,7 +13,6 @@ import java.util.*
 class DbContentProvider : ContentProvider() {
 
     override fun onCreate(): Boolean {
-        Log.d(TAG, "onCreate DbContentProvider in context : " + context.javaClass.toString())
         mDbHelper = DbHelper.getInstance(context)
         return false
     }

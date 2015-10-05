@@ -13,18 +13,27 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.*
+import android.widget.Adapter
+import android.widget.AdapterView
 import android.widget.AdapterView.OnItemSelectedListener
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.DatePicker
+import android.widget.EditText
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Statistic
 import fr.geobert.radis.db.StatisticTable
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.ToggleImageButton
+import fr.geobert.radis.tools.alert
+import fr.geobert.radis.tools.formatDateLong
+import fr.geobert.radis.tools.parseDate
 import hirondelle.date4j.DateTime
-import java.util.Calendar
-import java.util.Date
-import java.util.GregorianCalendar
+import java.util.*
 import kotlin.properties.Delegates
 
 public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorToolbarTrait {
@@ -252,23 +261,23 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             }
         }
 
-        mPieBtn.setOnCheckedChangeListener {
-            view: ToggleImageButton?, checked: Boolean ->
-            if (view != null)
-                onCheckedChanged(view, checked, Statistic.CHART_PIE)
-        }
+        mPieBtn.setOnCheckedChangeListener(object : ToggleImageButton.OnCheckedChangeListener {
+            override fun onCheckedChanged(buttonView: ToggleImageButton, isChecked: Boolean) {
+                onCheckedChanged(buttonView, isChecked, Statistic.CHART_PIE)
+            }
+        })
 
-        mBarBtn.setOnCheckedChangeListener {
-            view: ToggleImageButton?, checked: Boolean ->
-            if (view != null)
-                onCheckedChanged(view, checked, Statistic.CHART_BAR)
-        }
+        mBarBtn.setOnCheckedChangeListener(object : ToggleImageButton.OnCheckedChangeListener {
+            override fun onCheckedChanged(buttonView: ToggleImageButton, isChecked: Boolean) {
+                onCheckedChanged(buttonView, isChecked, Statistic.CHART_BAR)
+            }
+        })
 
-        mLineBtn.setOnCheckedChangeListener {
-            view: ToggleImageButton?, checked: Boolean ->
-            if (view != null)
-                onCheckedChanged(view, checked, Statistic.CHART_LINE)
-        }
+        mLineBtn.setOnCheckedChangeListener(object : ToggleImageButton.OnCheckedChangeListener {
+            override fun onCheckedChanged(buttonView: ToggleImageButton, isChecked: Boolean) {
+                onCheckedChanged(buttonView, isChecked, Statistic.CHART_LINE)
+            }
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

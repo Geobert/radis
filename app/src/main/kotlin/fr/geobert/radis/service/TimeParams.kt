@@ -12,7 +12,7 @@ import hirondelle.date4j.DateTime
 
 data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth: Long, val limitInsertionDate: Long) {
     companion object {
-        JvmStatic fun computeTimeParams(ctx: Context, account: Account, config: AccountConfig): TimeParams {
+        @JvmStatic fun computeTimeParams(ctx: Context, account: Account, config: AccountConfig): TimeParams {
             val today = DateTime.today(TIME_ZONE)
             val todayInMs = today.getMilliseconds(TIME_ZONE)
             val currentMonth = today.endOfMonth
@@ -40,7 +40,7 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
             val nbMonthAhead = if (config.overrideNbMonthsAhead) config.nbMonthsAhead else
                 prefs.getInt(ConfigFragment.KEY_NB_MONTH_AHEAD, ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
             val limitInsertDate = insertionDate.plusMonth(nbMonthAhead).endOfMonth
-            Log.d("ProcessSched", "limit date :�$limitInsertDate")
+            Log.d("ProcessSched", "limit date : $limitInsertDate")
             return TimeParams(todayInMs, insertionDate.getMilliseconds(TIME_ZONE),
                     currentMonth.getMilliseconds(TIME_ZONE), limitInsertDate.getMilliseconds(TIME_ZONE))
         }

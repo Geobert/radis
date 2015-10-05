@@ -57,7 +57,7 @@ class DayEditTextPreference : EditTextPreference {
         }
     }
 
-    override fun showDialog(state: Bundle) {
+    override fun showDialog(state: Bundle?) {
         super.showDialog(state)
 
         editText.removeTextChangedListener(m_watcher)
