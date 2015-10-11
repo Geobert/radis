@@ -142,6 +142,9 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
+        Log.d(TAG, "onSaveInstanceState lastSelPos=$mLastSelectionPos, lastSelId=$mLastSelectionId")
+        needRefreshSelection = true
+        mLastSelectionPos = -1
         mQuickAddController?.onSaveInstanceState(outState)
         outState.putLong("mAccountId", mActivity.getCurrentAccountId())
     }
@@ -208,14 +211,13 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, cursor: Cursor) {
         when (cursorLoader.id) {
             GET_OPS -> {
-                var refresh = false
                 val adapter = mOpListAdapter
                 Log.d("OperationListFragment", "onLoadFinished feshLoader:$freshLoader, adapter:$adapter, layout:$mListLayout")
-                if (adapter == null) {
+                val newAdapter = if (adapter == null) {
                     val a = OperationsAdapter(mActivity, this, cursor)
                     mOpListAdapter = a
-                    refresh = true
                     operation_list.adapter = mOpListAdapter
+                    true
                 } else {
                     adapter.increaseCache(cursor)
                     if (freshLoader) {
@@ -224,12 +226,13 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                         operation_list.layoutManager = mListLayout
                         adapter.notifyDataSetChanged()
                     }
+                    false
                 }
                 freshLoader = false
                 val itemCount = mOpListAdapter?.itemCount
                 Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.count}")
                 setupEmptyViewVisibility(itemCount == 0)
-                if (refresh || needRefreshSelection) {
+                if (newAdapter || needRefreshSelection) {
                     needRefreshSelection = false
                     refreshSelection()
                 }
@@ -440,6 +443,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     private fun refreshSelection() {
+        Log.d(TAG, ">>>>refreshSelection")
         val adapter = mOpListAdapter
         if (adapter != null) {
             Log.d(TAG, "refreshSelection, mLastSelectionId: $mLastSelectionId")
@@ -522,6 +526,11 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun getListLayoutManager(): LinearLayoutManager = mListLayout!!
 
     override fun getRecyclerView(): RecyclerView = operation_list
+
+    override fun selectionChanged(selPos: Int, selId: Long) {
+        mLastSelectionId = selId
+        mLastSelectionPos = selPos
+    }
 
     companion object {
         public fun restart(ctx: Context) {

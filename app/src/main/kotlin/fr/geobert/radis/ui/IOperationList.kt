@@ -14,4 +14,6 @@ public interface IOperationList {
     public fun getListLayoutManager(): LinearLayoutManager
 
     public fun getRecyclerView(): RecyclerView
+
+    public fun selectionChanged(selPos: Int, selId: Long)
 }

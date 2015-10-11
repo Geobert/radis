@@ -10,10 +10,14 @@ import android.widget.LinearLayout
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.ExpandAnimation
+import fr.geobert.radis.tools.ExpandUpAnimation
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.formatShortDate
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.map
 import fr.geobert.radis.ui.IOperationList
 import fr.geobert.radis.ui.OperationListFragment
-import java.util.LinkedList
 
 public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity, opList: IOperationList, cursor: Cursor) :
         RecyclerView.Adapter<OpRowHolder<T>>() {
@@ -43,6 +47,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
                 if (tmpOldPos != -1) {
                     notifyItemChanged(tmpOldPos)
                 }
+                operationsList.selectionChanged(value, operations[value].mRowId)
             }
         }
         get() {
@@ -161,15 +166,6 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
                     expandToolbarNoAnim(viewHolder)
                     expandSeparatorNoAnim(viewHolder)
                 }
-        //            CellState.STATE_MONTH_INFOS_CELL -> {
-        //                expandSeparatorNoAnim(viewHolder)
-        //                if (justClicked) {
-        //                    justClicked = false
-        //                    animateToolbar(viewHolder, true)
-        //                } else {
-        //                    expandToolbarNoAnim(viewHolder)
-        //                }
-        //            }
         }
         op.isSelected = true
     }
