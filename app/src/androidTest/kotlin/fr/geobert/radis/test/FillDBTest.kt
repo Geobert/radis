@@ -16,11 +16,10 @@ import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.minusMonth
 import hirondelle.date4j.DateTime
-import java.util.Calendar
+import java.util.*
 
 public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(MainActivity::class.java) {
 
-    Throws(Exception::class)
     override fun setUp() {
         super.setUp()
         val i = Intent()

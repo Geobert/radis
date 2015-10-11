@@ -19,11 +19,17 @@ import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.CorrectCommaWatcher
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.MyAutoCompleteTextView
+import fr.geobert.radis.tools.QuickAddTextWatcher
+import fr.geobert.radis.tools.TIME_ZONE
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.getSumSeparator
 import fr.geobert.radis.ui.adapter.InfoAdapter
 import hirondelle.date4j.DateTime
 import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
-import java.util.GregorianCalendar
+import java.util.*
 import kotlin.properties.Delegates
 
 public class QuickAddController(private val mActivity: MainActivity, container: View) {
@@ -145,29 +151,13 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
                 e.printStackTrace()
             }
         }
-
-        //        val dialog = DatePickerDialog(mActivity, object : DatePickerDialog.OnDateSetListener {
-        //            private var alreadyFired = 0
-        //
-        //            override fun onDateSet(datePicker: DatePicker, y: Int, m: Int, d: Int) {
-        //                Log.d("QuickAdd", "date set : " + y + "/" + m + "/" + d + " ///" + alreadyFired % 2)
-        //                // workaround known android bug
-        //                if (alreadyFired % 2 == 0) {
-        //
-        //
-        //                }
-        //                alreadyFired++
-        //            }
-        //        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH), today.get(Calendar.DAY_OF_MONTH))
         dialog.show(mActivity.supportFragmentManager, "quick_add_op_date")
     }
 
-    Throws(Exception::class)
     private fun quickAddOp() {
         quickAddOp(null)
     }
 
-    Throws(Exception::class)
     private fun quickAddOp(date: GregorianCalendar?) {
         val op = Operation()
         if (date != null) {
@@ -230,7 +220,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
     //    }
 
     companion object {
-        JvmStatic public fun setQuickAddButEnabled(but: ImageButton, b: Boolean) {
+        public fun setQuickAddButEnabled(but: ImageButton, b: Boolean) {
             but.isEnabled = b
         }
     }

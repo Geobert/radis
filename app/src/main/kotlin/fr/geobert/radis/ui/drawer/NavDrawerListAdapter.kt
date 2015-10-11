@@ -50,7 +50,7 @@ class NavDrawerListAdapter(private val context: Context, private val navDrawerIt
         val h: ViewHolder
         if (view == null) {
             val l = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-            view = l.inflate(R.layout.drawer_item, null)
+            view = l.inflate(R.layout.drawer_item, null, false)
             h = ViewHolder(view)
             view?.tag = h
         } else {

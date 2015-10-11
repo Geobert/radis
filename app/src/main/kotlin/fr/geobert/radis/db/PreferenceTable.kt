@@ -33,7 +33,7 @@ public object PreferenceTable {
     private val CREATE_TRIGGER_ACCOUNT_DELETED = "CREATE TRIGGER IF NOT EXISTS on_account_deleted AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
             "BEGIN DELETE FROM $DATABASE_PREFS_TABLE WHERE $KEY_PREFS_ACCOUNT = old._id ; END"
 
-    @JvmStatic fun onCreate(db: SQLiteDatabase) {
+    fun onCreate(db: SQLiteDatabase) {
         db.execSQL(DATABASE_PREFS_CREATE)
         db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)
     }
@@ -133,7 +133,7 @@ public object PreferenceTable {
 
     // UPGRADE
 
-    @JvmStatic fun upgradeFromV10(ctx: Context, db: SQLiteDatabase) {
+    fun upgradeFromV10(ctx: Context, db: SQLiteDatabase) {
         db.execSQL(DATABASE_PREFS_CREATE)
         // convert all preferences to DB
         val prefs = PrefsManager.getInstance(ctx)
@@ -148,7 +148,7 @@ public object PreferenceTable {
         }
     }
 
-    @JvmStatic fun upgradeFromV18(db: SQLiteDatabase) {
+    fun upgradeFromV18(db: SQLiteDatabase) {
         db.execSQL(ADD_ACCOUNT_COL)
         db.execSQL(ADD_IS_ACTIVE_COL)
         db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)

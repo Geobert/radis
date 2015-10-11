@@ -2,7 +2,6 @@ package fr.geobert.radis.ui.adapter
 
 import android.database.Cursor
 import android.support.v4.app.FragmentActivity
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -11,9 +10,7 @@ import fr.geobert.radis.data.Account
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.tools.map
-import java.util.Date
-import java.util.LinkedList
-import kotlin.properties.Delegates
+import java.util.*
 
 public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Iterable<Account> {
 
@@ -23,7 +20,7 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
 
     override fun getView(p0: Int, p1: View?, p2: ViewGroup): View? {
         val h: AccountRowHolder = if (p1 == null) {
-            val v = activity.layoutInflater.inflate(R.layout.account_row, null)
+            val v = activity.layoutInflater.inflate(R.layout.account_row, p2, false)
             val t = AccountRowHolder(v)
             v.tag = t
             t

@@ -4,10 +4,10 @@ import android.app.Activity
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.support.v4.widget.CursorAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CursorAdapter
 import android.widget.TextView
 import fr.geobert.radis.R
 import fr.geobert.radis.data.AccountConfig

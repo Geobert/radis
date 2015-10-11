@@ -12,7 +12,7 @@ import hirondelle.date4j.DateTime
 
 data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth: Long, val limitInsertionDate: Long) {
     companion object {
-        @JvmStatic fun computeTimeParams(ctx: Context, account: Account, config: AccountConfig): TimeParams {
+        fun computeTimeParams(ctx: Context, account: Account, config: AccountConfig): TimeParams {
             val today = DateTime.today(TIME_ZONE)
             val todayInMs = today.getMilliseconds(TIME_ZONE)
             val currentMonth = today.endOfMonth

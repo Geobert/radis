@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Message
 import android.support.v4.app.Fragment
+import android.support.v4.app.FragmentManager
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
@@ -19,6 +20,7 @@ import android.widget.ListView
 import android.widget.Spinner
 import com.crashlytics.android.Crashlytics
 import fr.geobert.radis.db.AccountTable
+import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
 import fr.geobert.radis.tools.DBPrefsManager
@@ -111,7 +113,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
         override fun processMessage(act: Activity, message: Message) {
             var fragment: Fragment? = null
-            val fragmentManager = activity.supportFragmentManager
+            val fragmentManager: FragmentManager = activity.supportFragmentManager
             when (message.what) {
                 OP_LIST -> fragment = findOrCreateFragment(OperationListFragment::class.java, message.what)
                 SCH_OP_LIST -> fragment = findOrCreateFragment(ScheduledOpListFragment::class.java, message.what)
@@ -170,6 +172,19 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         }
     }
 
+    private fun cleanDatabaseIfTestingMode() {
+        // if run by robotium, delete database, can't do it from robotium test, it leads to crash
+        // see http://stackoverflow.com/questions/12125656/robotium-testing-failed-because-of-deletedatabase
+        if (TEST_MODE) {
+            DBPrefsManager.getInstance(this).resetAll()
+            val client = contentResolver
+                    .acquireContentProviderClient("fr.geobert.radis.db")
+            val provider = client.localContentProvider as DbContentProvider
+            provider.deleteDatabase(this)
+            client.release()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initShortDate(this)
@@ -179,6 +194,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
         setContentView(R.layout.activity_main)
         Tools.checkDebugMode(this)
+        cleanDatabaseIfTestingMode()
 
         mToolbar.title = ""
 
@@ -442,6 +458,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private val TAG = "MainActivity"
 
     companion object {
+        var TEST_MODE: Boolean = false
         public val INTENT_UPDATE_OP_LIST: String = "fr.geobert.radis.UPDATE_OP_LIST"
         public val INTENT_UPDATE_ACC_LIST: String = "fr.geobert.radis.UPDATE_ACC_LIST"
 
@@ -461,7 +478,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         public val RECOMPUTE_ACCOUNT: Int = 13
         public val EXPORT_CSV: Int = 14
 
-        @JvmStatic public fun refreshAccountList(ctx: Context) {
+        public fun refreshAccountList(ctx: Context) {
             val intent = Intent(INTENT_UPDATE_ACC_LIST)
             ctx.sendBroadcast(intent)
         }

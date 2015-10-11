@@ -186,7 +186,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         public val SHARED_PREF_NAME: String = "radis_prefs"
         private var mInstance: DBPrefsManager? = null
 
-        @JvmStatic public fun getInstance(ctx: Context): DBPrefsManager {
+        public fun getInstance(ctx: Context): DBPrefsManager {
             if (null == mInstance) {
                 mInstance = DBPrefsManager()
                 PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)

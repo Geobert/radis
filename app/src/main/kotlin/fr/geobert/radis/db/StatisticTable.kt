@@ -35,16 +35,16 @@ public object StatisticTable {
     private val CREATE_TRIGGER_ON_STAT_DELETE = "CREATE TRIGGER IF NOT EXISTS on_account_deleted_for_stat AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
             "BEGIN DELETE FROM $STAT_TABLE WHERE $KEY_STAT_ACCOUNT = old._id ; END"
 
-    JvmStatic fun onCreate(db: SQLiteDatabase) {
+    fun onCreate(db: SQLiteDatabase) {
         db.execSQL(CREATE_TABLE)
         db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 
-    JvmStatic fun upgradeFromV17(db: SQLiteDatabase) {
+    fun upgradeFromV17(db: SQLiteDatabase) {
         onCreate(db)
     }
 
-    JvmStatic fun upgradeFromV19(db: SQLiteDatabase) {
+    fun upgradeFromV19(db: SQLiteDatabase) {
         db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 

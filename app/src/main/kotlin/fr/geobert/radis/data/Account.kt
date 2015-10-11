@@ -82,7 +82,7 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
     }
 
     companion object {
-        @JvmStatic public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
+        public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
             override fun createFromParcel(p: Parcel): Account {
                 return Account(p)
             }

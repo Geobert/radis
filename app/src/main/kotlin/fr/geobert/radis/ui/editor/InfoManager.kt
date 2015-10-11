@@ -80,7 +80,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
                 })
         builder.setTitle(title)
         val inflater = ctx.layoutInflater
-        val layout = inflater.inflate(R.layout.info_list, null)
+        val layout = inflater.inflate(R.layout.info_list, null, false)
         builder.setView(layout)
         mBuilder = builder
         ctx.supportLoaderManager.initLoader(GET_MATCHING_INFO_ID, mInfo,
@@ -232,7 +232,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
         if (mEditDialog == null && context != null) {
             val builder = AlertDialog.Builder(context)
             val inflater = context.layoutInflater
-            val layout = inflater.inflate(R.layout.info_edit, null)
+            val layout = inflater.inflate(R.layout.info_edit, null, false)
             builder.setPositiveButton(context.getString(R.string.ok),
                     object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface, id: Int) {

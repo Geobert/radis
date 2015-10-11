@@ -7,7 +7,7 @@ import android.os.PersistableBundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.ViewPager
-import android.support.v7.app.ActionBarActivity
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import fr.geobert.radis.BaseActivity
@@ -16,7 +16,6 @@ import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.ui.ConfigFragment
-import kotlin.properties.Delegates
 
 public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     public var mRowId: Long = 0
@@ -31,7 +30,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
             return if (null == f) {
                 fragmentsList.set(position, when (position) {
                     0 -> AccountEditFragment()
-                    else -> ConfigFragment() : Fragment
+                    else -> ConfigFragment()
                 })
                 fragmentsList.get(position)
             } else {
@@ -117,7 +116,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     }
 
     companion object {
-        public fun callMeForResult(context: ActionBarActivity, accountId: Long, firstAccount:Boolean = false) {
+        public fun callMeForResult(context: AppCompatActivity, accountId: Long, firstAccount:Boolean = false) {
             val intent = Intent(context, AccountEditor::class.java)
             intent.putExtra(PARAM_ACCOUNT_ID, accountId)
             context.startActivityForResult(intent, if (firstAccount) ACCOUNT_CREATOR else ACCOUNT_EDITOR)

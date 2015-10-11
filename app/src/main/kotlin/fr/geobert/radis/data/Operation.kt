@@ -67,7 +67,7 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
     }
 
     companion object {
-        @JvmStatic public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
+        public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
             override fun createFromParcel(p: Parcel): Operation {
                 return Operation(p)
             }

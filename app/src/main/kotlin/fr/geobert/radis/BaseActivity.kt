@@ -1,14 +1,13 @@
 package fr.geobert.radis
 
 import android.app.ProgressDialog
-import android.support.v7.app.ActionBarActivity
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
 import fr.geobert.radis.data.AccountManager
 import fr.geobert.radis.tools.DBPrefsManager
-import kotlin.properties.Delegates
 
-public abstract class BaseActivity : ActionBarActivity() {
+public abstract class BaseActivity : AppCompatActivity() {
     protected var mProgress: ProgressDialog? = null
     private var mProgressCount = 0
     public val mAccountManager: AccountManager by lazy(LazyThreadSafetyMode.NONE) { AccountManager(this) }

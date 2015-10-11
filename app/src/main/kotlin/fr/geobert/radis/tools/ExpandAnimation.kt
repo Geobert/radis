@@ -53,7 +53,7 @@ class ExpandAnimation
 
             override fun onAnimationEnd(animation: Animation) {
                 if (!mIsVisibleAfter) {
-                    mViewLayoutParams.bottomMargin = -mAnimatedView.getMeasuredHeight() // -55
+                    mViewLayoutParams.bottomMargin = -mAnimatedView.measuredHeight // -55
                     mAnimatedView.visibility = View.GONE
                 } else {
                     mViewLayoutParams.bottomMargin = 0

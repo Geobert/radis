@@ -3,12 +3,10 @@ package fr.geobert.radis.tools
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.ContentProviderClient
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Rect
@@ -33,9 +31,7 @@ import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.RadisService
 import fr.geobert.radis.ui.OperationListFragment
 import fr.geobert.radis.ui.adapter.InfoAdapter
-
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.util.*
 
 public object Tools {
     // Intents actions
@@ -92,7 +88,6 @@ public object Tools {
         Tools.popMessage(ctx, msg, R.string.error, ctx.getString(R.string.ok), onClick)
     }
 
-    SuppressWarnings("ConstantConditions")
     public fun setTextWithoutComplete(v: AutoCompleteTextView, text: String) {
         val adapter = v.adapter as InfoAdapter
         v.setAdapter(null)

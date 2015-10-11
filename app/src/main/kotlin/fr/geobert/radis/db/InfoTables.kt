@@ -81,7 +81,6 @@ public object InfoTables {
         db.execSQL(DATABASE_MODES_CREATE)
     }
 
-    @Throws(SQLException::class)
     private fun getInfoByKey(ctx: Context, key: String, table: Uri, col: String): Cursor? {
         val k = convertNonAscii(key).trim().toLowerCase()
         if (k.length() == 0) {
@@ -91,7 +90,6 @@ public object InfoTables {
                 mColNameNormName.get(col) + "= ?", arrayOf(k), null)
     }
 
-    @Throws(SQLException::class)
     private fun createKeyId(ctx: Context, key: String, table: Uri, col: String): Long {
         val k = convertNonAscii(key).trim().toLowerCase()
         val initialValues = ContentValues()

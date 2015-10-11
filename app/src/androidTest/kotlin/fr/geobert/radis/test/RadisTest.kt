@@ -2,19 +2,31 @@ package fr.geobert.radis.test
 
 import android.app.Activity
 import android.app.Instrumentation
-import android.content.Intent
 import android.database.Cursor
 import android.support.test.InstrumentationRegistry
 import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onData
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions
-import android.support.test.espresso.action.ViewActions.*
+import android.support.test.espresso.action.ViewActions.clearText
+import android.support.test.espresso.action.ViewActions.click
+import android.support.test.espresso.action.ViewActions.longClick
+import android.support.test.espresso.action.ViewActions.replaceText
+import android.support.test.espresso.action.ViewActions.scrollTo
+import android.support.test.espresso.action.ViewActions.swipeUp
+import android.support.test.espresso.action.ViewActions.typeText
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.contrib.PickerActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition
-import android.support.test.espresso.matcher.ViewMatchers.*
+import android.support.test.espresso.core.deps.guava.base.Throwables
+import android.support.test.espresso.core.deps.guava.collect.Sets
+import android.support.test.espresso.matcher.ViewMatchers.hasFocus
+import android.support.test.espresso.matcher.ViewMatchers.isChecked
+import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
+import android.support.test.espresso.matcher.ViewMatchers.isEnabled
+import android.support.test.espresso.matcher.ViewMatchers.withId
+import android.support.test.espresso.matcher.ViewMatchers.withText
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
@@ -25,22 +37,30 @@ import android.view.View
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
-import com.google.android.apps.common.testing.deps.guava.base.Throwables
-import com.google.android.apps.common.testing.deps.guava.collect.Sets
 import fr.geobert.espresso.DebugEspresso
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.TIME_ZONE
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.tools.formatDateLong
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.minusMonth
+import fr.geobert.radis.tools.plusMonth
 import fr.geobert.radis.ui.ConfigFragment
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.*
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.instanceOf
+import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.text.SimpleDateFormat
@@ -51,24 +71,27 @@ import java.util.concurrent.atomic.AtomicReference
 @RunWith(AndroidJUnit4::class)
 @LargeTest
 public class RadisTest {
+    init {
+        MainActivity.TEST_MODE = true
+    }
 
-    @Rule
-    private val activityRule = ActivityTestRule(MainActivity::class.java)
+    @get:org.junit.Rule
+    public val activityRule = ActivityTestRule(MainActivity::class.java)
 
     private fun getActivity() = activityRule.activity
 
-    @Before
-    fun setUp() {
+    private fun clearDB() {
         val appCtx = InstrumentationRegistry.getTargetContext().applicationContext
         DBPrefsManager.getInstance(appCtx).resetAll()
         val client = appCtx.contentResolver.acquireContentProviderClient("fr.geobert.radis.db")
         val provider = client.localContentProvider as DbContentProvider
         provider.deleteDatabase(appCtx)
         client.release()
+    }
 
-        val i = Intent()
-        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        activityRule.launchActivity(i)
+    @Before
+    fun setUp() {
+        //clearDB()
     }
 
     @After
@@ -76,7 +99,6 @@ public class RadisTest {
         closeAllActivities(InstrumentationRegistry.getInstrumentation())
     }
 
-    @Throws(Exception::class)
     public fun closeAllActivities(instrumentation: Instrumentation) {
         val NUMBER_OF_RETRIES = 100
         var i = 0
@@ -88,7 +110,6 @@ public class RadisTest {
         }
     }
 
-    @Throws(Exception::class)
     public fun <X> callOnMainSync(instrumentation: Instrumentation, callable: Callable<X>): X {
         val retAtomic = AtomicReference<X>()
         val exceptionAtomic = AtomicReference<Throwable>()
@@ -122,10 +143,9 @@ public class RadisTest {
         return activities
     }
 
-    @Throws(Exception::class)
     private fun closeActivity(instrumentation: Instrumentation): Boolean {
         val activityClosed = callOnMainSync(instrumentation, object : Callable<Boolean> {
-            @Throws(Exception::class)
+
             override public fun call(): Boolean {
                 val activities = getActivitiesInStages(Stage.RESUMED, Stage.STARTED, Stage.PAUSED, Stage.STOPPED, Stage.CREATED)
                 activities.removeAll(getActivitiesInStages(Stage.DESTROYED))
@@ -345,7 +365,7 @@ public class RadisTest {
 
         onView(allOf(iz(instanceOf(ListView::class.java)), isDisplayed()) as Matcher<View>).check(has(1, ListView::class.java))
 
-        onData(iz(instanceOf(Cursor::class.java))).inAdapterView(iz(instanceOf(ListView::class.java)) as Matcher<View>).atPosition(0).perform(click())
+        onData(iz(instanceOf(Cursor::class.java))).inAdapterView(iz<ListView>(instanceOf(ListView::class.java)) as Matcher<View>).atPosition(0).perform(click())
 
         Helpers.pauseTest(1000)
 

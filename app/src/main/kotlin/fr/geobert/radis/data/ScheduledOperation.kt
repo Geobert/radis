@@ -68,7 +68,7 @@ public class ScheduledOperation() : Operation() {
             return null
         }
 
-        @JvmStatic public val CREATOR: Parcelable.Creator<ScheduledOperation> = object : Parcelable.Creator<ScheduledOperation> {
+        public val CREATOR: Parcelable.Creator<ScheduledOperation> = object : Parcelable.Creator<ScheduledOperation> {
             override fun createFromParcel(`in`: Parcel): ScheduledOperation {
                 return ScheduledOperation(`in`)
             }
@@ -78,7 +78,7 @@ public class ScheduledOperation() : Operation() {
             }
         }
 
-        @JvmStatic public fun addPeriodicityToDate(op: ScheduledOperation) {
+        public fun addPeriodicityToDate(op: ScheduledOperation) {
             when (op.mPeriodicityUnit) {
                 ScheduledOperation.WEEKLY_PERIOD -> op.addDay(7)
                 ScheduledOperation.MONTHLY_PERIOD -> op.addMonth(1)

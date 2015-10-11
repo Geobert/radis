@@ -11,9 +11,9 @@ import fr.geobert.radis.tools.DBPrefsManager
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.channels.FileChannel
 
-public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpenHelper(mCtx, DbHelper.DATABASE_NAME, null, DbHelper.DATABASE_VERSION) {
+public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpenHelper(mCtx, DbHelper.DATABASE_NAME,
+        null, DbHelper.DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         AccountTable.onCreate(db)
@@ -138,16 +138,18 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
     }
 
     companion object {
-        public  val DATABASE_NAME: String = "radisDb"
+        public val DATABASE_NAME: String = "radisDb"
         protected val DATABASE_VERSION: Int = 20
 
         public var instance: DbHelper? = null
+        public fun getInstance(ctx: Context): DbHelper {
+            synchronized(this, {
+                if (instance == null) {
+                    instance = DbHelper(ctx)
+                }
+                return instance!!
+            })
 
-        synchronized public fun getInstance(ctx: Context): DbHelper {
-            if (instance == null) {
-                instance = DbHelper(ctx)
-            }
-            return instance!!
         }
 
         public fun trashDatabase(ctx: Context) {

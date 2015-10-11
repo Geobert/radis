@@ -524,7 +524,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     override fun getRecyclerView(): RecyclerView = operation_list
 
     companion object {
-        @JvmStatic public fun restart(ctx: Context) {
+        public fun restart(ctx: Context) {
             DbContentProvider.reinit(ctx)
             val intent = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -656,7 +656,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
 
         companion object {
-            @JvmStatic public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
+            public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()
                 args.putLong("accountId", accountId)

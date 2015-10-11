@@ -85,7 +85,7 @@ public class AccountConfig() : ImplParcelable {
     }
 
     companion object {
-        @JvmStatic public val CREATOR: Parcelable.Creator<AccountConfig> = object : Parcelable.Creator<AccountConfig> {
+        public val CREATOR: Parcelable.Creator<AccountConfig> = object : Parcelable.Creator<AccountConfig> {
             override fun createFromParcel(p: Parcel): AccountConfig {
                 return AccountConfig(p)
             }

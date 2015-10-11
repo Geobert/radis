@@ -17,11 +17,12 @@ class DbContentProvider : ContentProvider() {
         return false
     }
 
-    fun deleteDatabase(ctx: Context) {
+    fun deleteDatabase(ctx: Context): Boolean {
         Log.d(TAG, "deleteDatabase from ContentProvider")
         DbHelper.delete()
-        ctx.deleteDatabase(DbHelper.DATABASE_NAME)
+        val res = ctx.deleteDatabase(DbHelper.DATABASE_NAME)
         mDbHelper = DbHelper.getInstance(ctx)
+        return res
     }
 
     private fun switchToTable(uri: Uri): String {

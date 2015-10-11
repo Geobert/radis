@@ -9,14 +9,28 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.CompoundButton
+import android.widget.DatePicker
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.Spinner
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.CorrectCommaWatcher
+import fr.geobert.radis.tools.MyAutoCompleteTextView
+import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.configureForOpEditor
+import fr.geobert.radis.tools.extractSumFromStr
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.getSumSeparator
+import fr.geobert.radis.tools.parseSum
 import fr.geobert.radis.ui.adapter.AccountAdapter
 import fr.geobert.radis.ui.adapter.InfoAdapter
 import java.text.ParseException
@@ -57,6 +71,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         trans_src_account = l.findViewById(R.id.trans_src_account) as Spinner
         trans_dst_account = l.findViewById(R.id.trans_dst_account) as Spinner
         mSumTextWatcher = CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this)
+        edit_op_date.configureForOpEditor()
         return l
     }
 
@@ -283,7 +298,6 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         populateTransfertSpinner((activity as CommonOpEditor).mAccountManager.mAccountAdapter)
     }
 
-    Throws(ParseException::class)
     private fun invertSign() {
         mSumTextWatcher.setAutoNegate(false)
         val sum: Double? = edit_op_sum.text.toString().parseSum()

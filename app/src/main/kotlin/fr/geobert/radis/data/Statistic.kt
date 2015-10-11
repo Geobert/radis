@@ -31,7 +31,7 @@ public class Statistic() : ImplParcelable {
         val MODE = 2
         val NO_FILTER = 3
 
-        @JvmStatic public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
+        public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
             override fun createFromParcel(p: Parcel): Statistic {
                 return Statistic(p)
             }
