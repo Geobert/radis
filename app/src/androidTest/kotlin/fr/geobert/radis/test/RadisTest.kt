@@ -34,6 +34,7 @@ import android.support.test.runner.lifecycle.Stage
 import android.test.suitebuilder.annotation.LargeTest
 import android.util.Log
 import android.view.View
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
@@ -265,7 +266,8 @@ public class RadisTest {
 
         val today = Tools.createClearedCalendar()
         today.add(Calendar.MONTH, -2)
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
+        onView(withId(R.id.op_date_btn)).perform(click())
+        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(today.get(Calendar.YEAR),
                 today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
 
         Helpers.clickOnActionItemConfirm()
@@ -284,8 +286,10 @@ public class RadisTest {
 
         val today = Tools.createClearedCalendar()
         today.add(Calendar.MONTH, -2)
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.get(Calendar.YEAR),
+        onView(withId(R.id.op_date_btn)).perform(click())
+        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(today.get(Calendar.YEAR),
                 today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, "9,50")
         Helpers.scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
@@ -381,7 +385,8 @@ public class RadisTest {
 
     private fun addOpOnDate(t: DateTime, idx: Int) {
         onView(withId(R.id.create_operation)).perform(click())
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(t.year, t.month, t.day))
+        onView(withId(R.id.op_date_btn)).perform(click())
+        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(t.year, t.month, t.day))
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, "$OP_TP/$idx")
         Helpers.scrollThenTypeText(R.id.edit_op_sum, "1")
         Helpers.clickOnActionItemConfirm()
@@ -762,7 +767,8 @@ public class RadisTest {
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
 
         val today = DateTime.today(TIME_ZONE)
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(today.year,
+        onView(withId(R.id.op_date_btn)).perform(click())
+        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(today.year,
                 today.month, today.day))
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
@@ -813,7 +819,8 @@ public class RadisTest {
         val schOpDate = today.minusDays(28)
 
         Log.e(TAG, "date: ${schOpDate.formatDate()}")
-        onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(schOpDate.year,
+        onView(withId(R.id.op_date_btn)).perform(click())
+        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(schOpDate.year,
                 schOpDate.month, schOpDate.day))
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))

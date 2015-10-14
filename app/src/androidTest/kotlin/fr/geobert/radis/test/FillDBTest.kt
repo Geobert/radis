@@ -5,7 +5,6 @@ import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions.click
 import android.support.test.espresso.action.ViewActions.typeText
-import android.support.test.espresso.contrib.PickerActions.setDate
 import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.test.ActivityInstrumentationTestCase2
 import fr.geobert.radis.MainActivity
@@ -67,13 +66,13 @@ public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(MainAct
         var date = Tools.createClearedCalendar()
         date.set(Calendar.DAY_OF_MONTH, 29)
         date.add(Calendar.MONTH, -2)
-        onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
+        //onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
         Helpers.fillOpForm("Salaire", "+2000.00", "", "Virement", "")
         Helpers.clickOnActionItemConfirm()
 
         onView(withId(R.id.create_operation)).perform(click())
         date.set(Calendar.DAY_OF_MONTH, 5)
-        onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
+        //onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
         Helpers.fillOpForm("Internet", "35.00", "Maison", "Prelevement", "")
         Helpers.clickOnActionItemConfirm()
 

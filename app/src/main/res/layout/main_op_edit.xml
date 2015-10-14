@@ -13,15 +13,32 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-        <DatePicker
-                android:id="@+id/edit_op_date"
+        <!--<DatePicker-->
+        <!--android:id="@+id/edit_op_date"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:spinnersShown="true"-->
+        <!--android:calendarViewShown="true"-->
+        <!--android:paddingBottom="0dp"-->
+        <!--android:paddingTop="0dp"-->
+        <!--android:layout_marginTop="0dp"-->
+        <!--android:layout_marginBottom="0dp"/>-->
+        <TextView
+                android:text="Account"
+                android:textSize="20sp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:id="@+id/account_name"
                 android:layout_width="fill_parent"
+                android:layout_height="wrap_content"/>
+
+        <Button
+                android:id="@+id/op_date_btn"
+                android:text="lun. 04 Sept 2015"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:spinnersShown="true"
-                android:paddingBottom="0dp"
-                android:paddingTop="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"/>
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"/>
 
         <LinearLayout
                 style="@style/EditorHorizontalLinearLayout"

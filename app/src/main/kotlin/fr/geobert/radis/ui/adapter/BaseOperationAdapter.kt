@@ -47,7 +47,8 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
                 if (tmpOldPos != -1) {
                     notifyItemChanged(tmpOldPos)
                 }
-                operationsList.selectionChanged(value, operations[value].mRowId)
+                val id = if (value > -1) operations[value].mRowId else -1
+                operationsList.selectionChanged(value, id)
             }
         }
         get() {

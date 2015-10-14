@@ -122,7 +122,8 @@ class Helpers {
         fun addOp(date: DateTime, third: String = "Toto", amount: String = "-1", tag: String = "", mode: String = "", desc: String = "") {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
-            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.year, date.month, date.day))
+            onView(withId(R.id.op_date_btn)).perform(click())
+            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year, date.month, date.day))
             fillOpForm(third, amount, tag, mode, desc)
             clickOnActionItemConfirm()
         }
@@ -177,7 +178,8 @@ class Helpers {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            onView(withId(R.id.edit_op_date)).perform(setDate(date.year, date.month, date.day))
+            onView(withId(R.id.op_date_btn)).perform(click())
+            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year, date.month, date.day))
 
             fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
@@ -200,8 +202,8 @@ class Helpers {
             checkTitleBarDisplayed(R.string.sch_edition)
             val today = DateTime.today(TIME_ZONE)
             val schOpDate = today.minusDays(14)
-
-            onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.year, schOpDate.month, schOpDate.day))
+            onView(withId(R.id.op_date_btn)).perform(click())
+            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(schOpDate.year, schOpDate.month, schOpDate.day))
             fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             swipePagerLeft()

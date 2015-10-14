@@ -23,12 +23,10 @@ import fr.geobert.radis.tools.CorrectCommaWatcher
 import fr.geobert.radis.tools.DBPrefsManager
 import fr.geobert.radis.tools.MyAutoCompleteTextView
 import fr.geobert.radis.tools.QuickAddTextWatcher
-import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.getSumSeparator
+import fr.geobert.radis.tools.showDatePickerFragment
 import fr.geobert.radis.ui.adapter.InfoAdapter
-import hirondelle.date4j.DateTime
-import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -135,23 +133,14 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
 
 
     private fun showDatePicker() {
-        val today = DateTime.today(TIME_ZONE)
-        val b = Bundle()
-        b.putInt(DatePickerDialogFragment.YEAR, today.year)
-        b.putInt(DatePickerDialogFragment.MONTH, today.month - 1)
-        b.putInt(DatePickerDialogFragment.DATE, today.day)
-        b.putInt(DatePickerDialogFragment.TITLE, R.string.op_date)
-        val dialog = DatePickerDialogFragment()
-        dialog.arguments = b
-        dialog.setOnDateSetListener { datePicker, y, m, d ->
+        showDatePickerFragment(mActivity, { datePicker, y, m, d ->
             val date = GregorianCalendar(y, m, d)
             try {
                 quickAddOp(date)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }
-        dialog.show(mActivity.supportFragmentManager, "quick_add_op_date")
+        })
     }
 
     private fun quickAddOp() {

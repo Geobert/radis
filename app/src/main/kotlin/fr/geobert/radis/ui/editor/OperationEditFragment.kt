@@ -10,13 +10,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.CompoundButton
-import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.Spinner
+import android.widget.TextView
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
@@ -25,14 +26,16 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.tools.CorrectCommaWatcher
 import fr.geobert.radis.tools.MyAutoCompleteTextView
+import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.configureForOpEditor
 import fr.geobert.radis.tools.extractSumFromStr
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.tools.getSumSeparator
 import fr.geobert.radis.tools.parseSum
+import fr.geobert.radis.tools.showDatePickerFragment
 import fr.geobert.radis.ui.adapter.AccountAdapter
 import fr.geobert.radis.ui.adapter.InfoAdapter
+import hirondelle.date4j.DateTime
 import java.text.ParseException
 import kotlin.properties.Delegates
 
@@ -42,7 +45,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     private var edit_op_tag: MyAutoCompleteTextView by Delegates.notNull()
     private var edit_op_mode: MyAutoCompleteTextView by Delegates.notNull()
     private var edit_op_notes: EditText by Delegates.notNull()
-    private var edit_op_date: DatePicker by Delegates.notNull()
+    private var account_name: TextView by Delegates.notNull()
     private var third_party_cont: LinearLayout by Delegates.notNull()
     private var transfert_cont: LinearLayout by Delegates.notNull()
     private var is_transfert: CheckBox by Delegates.notNull()
@@ -50,10 +53,12 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     private var edit_op_sign: ImageButton by Delegates.notNull()
     private var trans_src_account: Spinner by Delegates.notNull()
     private var trans_dst_account: Spinner by Delegates.notNull()
+    private var op_date_btn: Button by Delegates.notNull()
     private var mSumTextWatcher: CorrectCommaWatcher by Delegates.notNull()
     private var mActivity: CommonOpEditor by Delegates.notNull()
     private var mWasInvertByTransfert: Boolean = false
     private var isOkClicked: Boolean = false
+    private var opDate: DateTime = DateTime.now(TIME_ZONE)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val l = inflater.inflate(R.layout.main_op_edit, container, false)
@@ -62,7 +67,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         edit_op_tag = l.findViewById(R.id.edit_op_tag) as MyAutoCompleteTextView
         edit_op_mode = l.findViewById(R.id.edit_op_mode) as MyAutoCompleteTextView
         edit_op_notes = l.findViewById(R.id.edit_op_notes) as EditText
-        edit_op_date = l.findViewById(R.id.edit_op_date) as DatePicker
+        account_name = l.findViewById(R.id.account_name) as TextView
         third_party_cont = l.findViewById(R.id.third_party_cont) as LinearLayout
         transfert_cont = l.findViewById(R.id.transfert_cont) as LinearLayout
         is_transfert = l.findViewById(R.id.is_transfert) as CheckBox
@@ -71,8 +76,18 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         trans_src_account = l.findViewById(R.id.trans_src_account) as Spinner
         trans_dst_account = l.findViewById(R.id.trans_dst_account) as Spinner
         mSumTextWatcher = CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this)
-        edit_op_date.configureForOpEditor()
+        op_date_btn = l.findViewById(R.id.op_date_btn) as Button
+        op_date_btn.setOnClickListener {
+            showDatePickerFragment(mActivity, { picker, y, m, d ->
+                opDate = DateTime.forDateOnly(y, m + 1, d)
+                updateDateBtn()
+            })
+        }
         return l
+    }
+
+    private fun updateDateBtn() {
+        op_date_btn.text = opDate.format("WWW. DD MMMM YYYY", mActivity.resources.configuration.locale)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -117,7 +132,9 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
     fun onAllAccountFetched() {
         //        if (isResumed()) {
         mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length() == 0)
-        populateTransfertSpinner(mActivity.mAccountManager.mAccountAdapter)
+        val adap = mActivity.mAccountManager.mAccountAdapter
+        populateTransfertSpinner(adap)
+        account_name.text = getString(R.string.current_account, adap.getAccountById(mActivity.mCurAccountId)?.name)
         initViewAdapters()
         initListeners()
         is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
@@ -280,7 +297,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         Tools.setTextWithoutComplete(edit_op_third_party, op.mThirdParty)
         Tools.setTextWithoutComplete(edit_op_mode, op.mMode)
         Tools.setTextWithoutComplete(edit_op_tag, op.mTag)
-        edit_op_date.updateDate(op.getYear(), op.getMonth() - 1, op.getDay())
+        updateDateBtn()
         mActivity.mPreviousSum = op.mSum
         edit_op_notes.setText(op.mNotes)
         Tools.setSumTextGravity(edit_op_sum)
@@ -364,9 +381,9 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         op.mNotes = edit_op_notes.text.toString().trim()
         mActivity.currentFocus?.clearFocus()
         op.setSumStr(edit_op_sum.text.toString())
-        op.setDay(edit_op_date.dayOfMonth)
-        op.setMonth(edit_op_date.month + 1)
-        op.setYear(edit_op_date.year)
+        op.setDay(opDate.day)
+        op.setMonth(opDate.month)
+        op.setYear(opDate.year)
         op.mIsChecked = is_checked.isChecked
 
         if (is_transfert.isChecked) {

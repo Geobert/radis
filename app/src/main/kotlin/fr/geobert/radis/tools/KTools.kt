@@ -5,10 +5,13 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.DialogInterface
 import android.database.Cursor
+import android.os.Bundle
 import android.os.Parcel
-import android.view.View
+import android.support.v7.app.AppCompatActivity
 import android.widget.DatePicker
+import fr.geobert.radis.R
 import hirondelle.date4j.DateTime
+import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
 import java.text.ParseException
 import java.util.*
 
@@ -143,16 +146,15 @@ public fun convertNonAscii(s: String): String {
     return sb.toString()
 }
 
-public fun DatePicker.configureForOpEditor() {
-    this.calendarView.showWeekNumber = false
-    this.calendarView.firstDayOfWeek = Calendar.MONDAY
-    val fields = this.javaClass.declaredFields
-    val toHide = arrayOf("mDayPicker", "mDaySpinner", "mYearPicker", "mYearSpinner")
-    for (f in fields) {
-        if (toHide.contains(f.name)) {
-            f.isAccessible = true;
-            val d = f.get(this) as View
-            d.visibility = View.GONE
-        }
-    }
+public fun showDatePickerFragment(ctx: AppCompatActivity, listener: (DatePicker?, Int, Int, Int) -> Unit) {
+    val today = DateTime.today(TIME_ZONE)
+    val b = Bundle()
+    b.putInt(DatePickerDialogFragment.YEAR, today.year)
+    b.putInt(DatePickerDialogFragment.MONTH, today.month - 1)
+    b.putInt(DatePickerDialogFragment.DATE, today.day)
+    b.putInt(DatePickerDialogFragment.TITLE, R.string.op_date)
+    val dialog = DatePickerDialogFragment()
+    dialog.arguments = b
+    dialog.setOnDateSetListener(listener)
+    dialog.show(ctx.supportFragmentManager, "quick_add_op_date")
 }

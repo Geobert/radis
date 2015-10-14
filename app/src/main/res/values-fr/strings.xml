@@ -279,4 +279,5 @@
     <string name="one_file_per_account">Faire un fichier par compte</string>
     <string name="export">Exporter</string>
     <string name="no_column_selected">Aucune colonne sélectionnée. Il faut au moins une colonne à exporter.</string>
+    <string name="current_account">Compte actuel : %s</string>
 </resources>

@@ -82,6 +82,11 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
         return count == 0
     }
 
+    fun getAccountById(id: Long): Account? {
+        accountsList.forEach { if (it.id == id) return it }
+        return null
+    }
+
     companion object {
         val TAG = "AccountAdapter"
     }
