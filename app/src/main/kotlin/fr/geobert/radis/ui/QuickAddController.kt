@@ -23,11 +23,12 @@ import fr.geobert.radis.tools.CorrectCommaWatcher
 import fr.geobert.radis.tools.DBPrefsManager
 import fr.geobert.radis.tools.MyAutoCompleteTextView
 import fr.geobert.radis.tools.QuickAddTextWatcher
+import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.getSumSeparator
 import fr.geobert.radis.tools.showDatePickerFragment
 import fr.geobert.radis.ui.adapter.InfoAdapter
-import java.util.*
+import hirondelle.date4j.DateTime
 import kotlin.properties.Delegates
 
 public class QuickAddController(private val mActivity: MainActivity, container: View) {
@@ -133,25 +134,23 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
 
 
     private fun showDatePicker() {
-        showDatePickerFragment(mActivity, { datePicker, y, m, d ->
-            val date = GregorianCalendar(y, m, d)
+        showDatePickerFragment(mActivity, { datePicker, date ->
             try {
                 quickAddOp(date)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        })
+        }, DateTime.now(TIME_ZONE))
     }
 
     private fun quickAddOp() {
         quickAddOp(null)
     }
 
-    private fun quickAddOp(date: GregorianCalendar?) {
+    private fun quickAddOp(date: DateTime?) {
         val op = Operation()
         if (date != null) {
-            Tools.clearTimeOfCalendar(date)
-            op.setDate(date.timeInMillis)
+            op.setDate(date.getMilliseconds(TIME_ZONE))
         }
         op.mThirdParty = mQuickAddThirdParty.text.toString()
         op.setSumStr(mQuickAddAmount.text.toString())

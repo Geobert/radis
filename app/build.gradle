@@ -1,6 +1,6 @@
 buildscript {
     ext.kotlin_version = '0.14.449'
-    ext.android_support = '23.0.1'
+    ext.android_support = '23.1.0'
     repositories {
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
@@ -9,7 +9,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:1.2.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 //        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-        classpath 'io.fabric.tools:gradle:1.15.2'
+        classpath 'io.fabric.tools:gradle:1.20.1'
     }
 }
 apply plugin: 'com.android.application'
@@ -17,11 +17,13 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 
 repositories {
+    def androidHome = System.getenv("ANDROID_HOME")
     jcenter()
     maven { url 'https://maven.fabric.io/public' }
     maven {
         url 'http://oss.sonatype.org/content/repositories/snapshots'
     }
+    maven { url "$androidHome/extras/android/m2repository/" }
 }
 
 android {
@@ -35,7 +37,7 @@ android {
         minSdkVersion 8
         targetSdkVersion 23
         versionCode 64
-        versionName "1.2.4b6" 
+        versionName "1.2.4b6"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -59,7 +61,7 @@ android {
 }
 
 configurations.all {
-    resolutionStrategy.force 'com.android.support:support-annotations:23.0.1'
+    resolutionStrategy.force 'com.android.support:support-annotations:23.1.0'
 }
 
 dependencies {

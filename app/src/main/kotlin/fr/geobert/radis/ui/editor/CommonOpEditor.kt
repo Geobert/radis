@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import fr.geobert.radis.BaseActivity
+import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import java.util.*
 import kotlin.properties.Delegates
@@ -18,21 +19,9 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     var mCurAccountId: Long by Delegates.notNull()
     var mCurrentInfoTable: Uri? = null
 
-    // abstract methods
-    protected abstract fun setView()
-
-    //    protected abstract fun populateFields()
+    protected abstract fun inflateFragment()
 
     protected abstract fun fetchOrCreateCurrentOp(cbk: (Operation) -> Unit)
-
-    //    open public fun onAllAccountsFetched() {
-    //        if (!mOnRestore) {
-    //            fetchOrCreateCurrentOp()
-    //        } else {
-    //            populateFields()
-    //            mOnRestore = false
-    //        }
-    //    }
 
     public fun getOpThenPopulate(cbk: (Operation) -> Unit) {
         val op = mCurrentOp
@@ -67,7 +56,8 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
         val extras = intent.extras
         mCurAccountId = extras?.getLong(AccountEditor.PARAM_ACCOUNT_ID) ?: 0
         init(extras)
-        setView()
+        setContentView(R.layout.operation_edit)
+        inflateFragment()
         initToolbar(this)
     }
 

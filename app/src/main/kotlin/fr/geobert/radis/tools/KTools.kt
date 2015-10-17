@@ -10,8 +10,8 @@ import android.os.Parcel
 import android.support.v7.app.AppCompatActivity
 import android.widget.DatePicker
 import fr.geobert.radis.R
+import fr.geobert.radis.ui.DatePickerDialogFragment
 import hirondelle.date4j.DateTime
-import net.davidcesarino.android.atlantis.ui.dialog.DatePickerDialogFragment
 import java.text.ParseException
 import java.util.*
 
@@ -146,12 +146,11 @@ public fun convertNonAscii(s: String): String {
     return sb.toString()
 }
 
-public fun showDatePickerFragment(ctx: AppCompatActivity, listener: (DatePicker?, Int, Int, Int) -> Unit) {
-    val today = DateTime.today(TIME_ZONE)
+public fun showDatePickerFragment(ctx: AppCompatActivity, listener: (DatePicker?, DateTime) -> Unit,
+                                  date: DateTime, minDate: DateTime? = null) {
     val b = Bundle()
-    b.putInt(DatePickerDialogFragment.YEAR, today.year)
-    b.putInt(DatePickerDialogFragment.MONTH, today.month - 1)
-    b.putInt(DatePickerDialogFragment.DATE, today.day)
+    b.putSerializable(DatePickerDialogFragment.DATE, date)
+    b.putSerializable(DatePickerDialogFragment.MIN_DATE, minDate)
     b.putInt(DatePickerDialogFragment.TITLE, R.string.op_date)
     val dialog = DatePickerDialogFragment()
     dialog.arguments = b

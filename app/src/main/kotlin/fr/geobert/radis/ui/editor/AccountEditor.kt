@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.view.PagerTabStrip
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -70,6 +71,8 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
         }
 
         mViewPager.adapter = mPagerAdapter
+        val header = findViewById(R.id.pager_header) as PagerTabStrip
+        header.setNonPrimaryAlpha(0.6f)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
@@ -116,7 +119,7 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     }
 
     companion object {
-        public fun callMeForResult(context: AppCompatActivity, accountId: Long, firstAccount:Boolean = false) {
+        public fun callMeForResult(context: AppCompatActivity, accountId: Long, firstAccount: Boolean = false) {
             val intent = Intent(context, AccountEditor::class.java)
             intent.putExtra(PARAM_ACCOUNT_ID, accountId)
             context.startActivityForResult(intent, if (firstAccount) ACCOUNT_CREATOR else ACCOUNT_EDITOR)

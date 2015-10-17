@@ -39,26 +39,26 @@ import hirondelle.date4j.DateTime
 import java.text.ParseException
 import kotlin.properties.Delegates
 
-public class OperationEditFragment() : Fragment(), TextWatcher {
-    private var edit_op_sum: EditText by Delegates.notNull()
-    private var edit_op_third_party: MyAutoCompleteTextView by Delegates.notNull()
-    private var edit_op_tag: MyAutoCompleteTextView by Delegates.notNull()
-    private var edit_op_mode: MyAutoCompleteTextView by Delegates.notNull()
-    private var edit_op_notes: EditText by Delegates.notNull()
-    private var account_name: TextView by Delegates.notNull()
-    private var third_party_cont: LinearLayout by Delegates.notNull()
-    private var transfert_cont: LinearLayout by Delegates.notNull()
-    private var is_transfert: CheckBox by Delegates.notNull()
-    private var is_checked: CheckBox by Delegates.notNull()
-    private var edit_op_sign: ImageButton by Delegates.notNull()
-    private var trans_src_account: Spinner by Delegates.notNull()
-    private var trans_dst_account: Spinner by Delegates.notNull()
-    private var op_date_btn: Button by Delegates.notNull()
-    private var mSumTextWatcher: CorrectCommaWatcher by Delegates.notNull()
+public open class OperationEditFragment() : Fragment(), TextWatcher {
+    protected var edit_op_sum: EditText by Delegates.notNull()
+    protected var edit_op_third_party: MyAutoCompleteTextView by Delegates.notNull()
+    protected var edit_op_tag: MyAutoCompleteTextView by Delegates.notNull()
+    protected var edit_op_mode: MyAutoCompleteTextView by Delegates.notNull()
+    protected var edit_op_notes: EditText by Delegates.notNull()
+    protected var account_name: TextView by Delegates.notNull()
+    protected var third_party_cont: LinearLayout by Delegates.notNull()
+    protected var transfert_cont: LinearLayout by Delegates.notNull()
+    protected var is_transfert: CheckBox by Delegates.notNull()
+    protected var is_checked: CheckBox by Delegates.notNull()
+    protected var edit_op_sign: ImageButton by Delegates.notNull()
+    protected var trans_src_account: Spinner by Delegates.notNull()
+    protected var trans_dst_account: Spinner by Delegates.notNull()
+    protected var op_date_btn: Button by Delegates.notNull()
+    protected var mSumTextWatcher: CorrectCommaWatcher by Delegates.notNull()
     private var mActivity: CommonOpEditor by Delegates.notNull()
-    private var mWasInvertByTransfert: Boolean = false
-    private var isOkClicked: Boolean = false
-    private var opDate: DateTime = DateTime.now(TIME_ZONE)
+    protected var mWasInvertByTransfert: Boolean = false
+    protected var isOkClicked: Boolean = false
+    protected var opDate: DateTime = DateTime.now(TIME_ZONE)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val l = inflater.inflate(R.layout.main_op_edit, container, false)
@@ -78,16 +78,20 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         mSumTextWatcher = CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this)
         op_date_btn = l.findViewById(R.id.op_date_btn) as Button
         op_date_btn.setOnClickListener {
-            showDatePickerFragment(mActivity, { picker, y, m, d ->
-                opDate = DateTime.forDateOnly(y, m + 1, d)
+            showDatePickerFragment(mActivity, { picker, date ->
+                opDate = date
                 updateDateBtn()
-            })
+            }, opDate)
         }
         return l
     }
 
+    protected fun updateDateBtn(b: Button, d: DateTime) {
+        b.text = d.format("WWW. DD MMMM YYYY", mActivity.resources.configuration.locale)
+    }
+
     private fun updateDateBtn() {
-        op_date_btn.text = opDate.format("WWW. DD MMMM YYYY", mActivity.resources.configuration.locale)
+        updateDateBtn(op_date_btn, opDate)
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -120,6 +124,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
 
     override fun onResume() {
         super.onResume()
+        edit_op_third_party.clearFocus()
         mActivity.mAccountManager.fetchAllAccounts(false, {
             mActivity.onAllAccountsFetched()
             onAllAccountFetched()
@@ -134,7 +139,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length() == 0)
         val adap = mActivity.mAccountManager.mAccountAdapter
         populateTransfertSpinner(adap)
-        account_name.text = getString(R.string.current_account, adap.getAccountById(mActivity.mCurAccountId)?.name)
+        account_name.text = adap.getAccountById(mActivity.mCurAccountId)?.name
         initViewAdapters()
         initListeners()
         is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
@@ -326,7 +331,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         edit_op_sum.setText(s?.formatSum())
     }
 
-    fun isFormValid(errMsg: StringBuilder): Boolean {
+    open fun isFormValid(errMsg: StringBuilder): Boolean {
         var res = true
         var str: String
         if (is_transfert.isChecked) {
@@ -375,7 +380,7 @@ public class OperationEditFragment() : Fragment(), TextWatcher {
         return res
     }
 
-    fun fillOperationWithInputs(op: Operation) {
+    open fun fillOperationWithInputs(op: Operation) {
         op.mMode = edit_op_mode.text.toString().trim()
         op.mTag = edit_op_tag.text.toString().trim()
         op.mNotes = edit_op_notes.text.toString().trim()

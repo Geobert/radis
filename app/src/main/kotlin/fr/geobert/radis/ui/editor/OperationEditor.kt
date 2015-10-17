@@ -22,21 +22,10 @@ import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.Tools
-import kotlin.properties.Delegates
 
 public class OperationEditor : CommonOpEditor() {
     protected var mOriginalOp: Operation? = null
-    private val mEditFragment by lazy(LazyThreadSafetyMode.NONE) { supportFragmentManager.findFragmentById(R.id.main_edit_pane) as OperationEditFragment }
-
-    override fun setView() {
-        setContentView(R.layout.operation_edit)
-    }
-
-    //     fun onAllAccountsFetched() {
-    //        mAccountManager.setCurrentAccountId(mCurAccountId, this) // trigger config fetch
-    //        //mEditFragment.onAllAccountFetched()
-    //        //super<CommonOpEditor>.onAllAccountsFetched()
-    //    }
+    private val mEditFragment by lazy { OperationEditFragment() }
 
     override fun fetchOrCreateCurrentOp(cbk: (Operation) -> Unit) {
         if (mRowId > 0) {
@@ -50,6 +39,10 @@ public class OperationEditor : CommonOpEditor() {
             mCurrentOp = op
             cbk(op)
         }
+    }
+
+    override fun inflateFragment() {
+        supportFragmentManager.beginTransaction().add(R.id.fragment_cont, mEditFragment).commit()
     }
 
     //    override fun populateFields() = mEditFragment.populateCommonFields(mCurrentOp as Operation)

@@ -120,7 +120,7 @@
     <string name="every">Every</string>
     <string name="every_fem">Every</string>
     <string name="no_end_date">Forever</string>
-    <string name="scheduling">Scheduling</string>
+    <string name="scheduling"> Scheduling </string>
     <string name="basics">Transaction</string>
     <string name="end_date">End date</string>
     <string name="scheduled_ops">Schedule</string>
@@ -278,5 +278,5 @@
     <string name="one_file_per_account">Makes one file per account</string>
     <string name="export">Export</string>
     <string name="no_column_selected">No selected column. At least one column has to be selected.</string>
-    <string name="current_account">Current account: %s</string>
+    <string name="current_account">Current account: </string>
 </resources>
