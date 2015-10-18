@@ -140,7 +140,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
             } catch (e: Exception) {
                 e.printStackTrace()
             }
-        }, DateTime.now(TIME_ZONE))
+        }, DateTime.today(TIME_ZONE))
     }
 
     private fun quickAddOp() {

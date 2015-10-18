@@ -16,7 +16,6 @@ import android.support.test.espresso.action.ViewActions.scrollTo
 import android.support.test.espresso.action.ViewActions.swipeUp
 import android.support.test.espresso.action.ViewActions.typeText
 import android.support.test.espresso.assertion.ViewAssertions.matches
-import android.support.test.espresso.contrib.PickerActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition
 import android.support.test.espresso.core.deps.guava.base.Throwables
@@ -34,7 +33,6 @@ import android.support.test.runner.lifecycle.Stage
 import android.test.suitebuilder.annotation.LargeTest
 import android.util.Log
 import android.view.View
-import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
@@ -45,7 +43,6 @@ import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.tools.DBPrefsManager
 import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.formatDateLong
 import fr.geobert.radis.tools.formatSum
@@ -264,12 +261,8 @@ public class RadisTest {
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
 
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.MONTH, -2)
-        onView(withId(R.id.op_date_btn)).perform(click())
-        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
-
+        val today = DateTime.today(TIME_ZONE).minusMonth(2)
+        Helpers.setDateOnPicker(R.id.op_date_btn, today)
         Helpers.clickOnActionItemConfirm()
         Helpers.clickOnDialogButton(R.string.cancel)
         Espresso.pressBack()
@@ -284,19 +277,15 @@ public class RadisTest {
         Helpers.setUpSchOp()
         onView(withId(R.id.create_operation)).perform(click())
 
-        val today = Tools.createClearedCalendar()
-        today.add(Calendar.MONTH, -2)
-        onView(withId(R.id.op_date_btn)).perform(click())
-        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(today.get(Calendar.YEAR),
-                today.get(Calendar.MONTH) + 1, today.get(Calendar.DAY_OF_MONTH)))
+        val today = DateTime.today(TIME_ZONE).minusMonth(2)
+
+        Helpers.setDateOnPicker(R.id.op_date_btn, today)
 
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, "9,50")
         Helpers.scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
         Helpers.scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
-
-        Helpers.swipePagerLeft()
 
         onView(withId(R.id.periodicity_choice)).perform(scrollTo())
         onView(withId(R.id.periodicity_choice)).perform(click())
@@ -385,8 +374,7 @@ public class RadisTest {
 
     private fun addOpOnDate(t: DateTime, idx: Int) {
         onView(withId(R.id.create_operation)).perform(click())
-        onView(withId(R.id.op_date_btn)).perform(click())
-        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(t.year, t.month, t.day))
+        Helpers.setDateOnPicker(R.id.op_date_btn, t)
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, "$OP_TP/$idx")
         Helpers.scrollThenTypeText(R.id.edit_op_sum, "1")
         Helpers.clickOnActionItemConfirm()
@@ -767,9 +755,7 @@ public class RadisTest {
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
 
         val today = DateTime.today(TIME_ZONE)
-        onView(withId(R.id.op_date_btn)).perform(click())
-        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(today.year,
-                today.month, today.day))
+        Helpers.setDateOnPicker(R.id.op_date_btn, today)
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
         Helpers.pauseTest(700)
@@ -819,9 +805,7 @@ public class RadisTest {
         val schOpDate = today.minusDays(28)
 
         Log.e(TAG, "date: ${schOpDate.formatDate()}")
-        onView(withId(R.id.op_date_btn)).perform(click())
-        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(schOpDate.year,
-                schOpDate.month, schOpDate.day))
+        Helpers.setDateOnPicker(R.id.op_date_btn, schOpDate)
 
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(isChecked()))
         Helpers.pauseTest(700)
@@ -831,8 +815,6 @@ public class RadisTest {
         Helpers.scrollThenTypeText(R.id.edit_op_tag, OP_TAG)
         Helpers.scrollThenTypeText(R.id.edit_op_mode, OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, OP_DESC)
-
-        Helpers.swipePagerLeft()
 
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 0)
         Helpers.clickOnActionItemConfirm()
@@ -987,14 +969,10 @@ public class RadisTest {
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, OP_AMOUNT)
 
-        Helpers.swipePagerLeft()
-
         Helpers.clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 3)
         onView(withId(R.id.custom_periodicity_value)).check(matches(isEnabled()))
         onView(withId(R.id.custom_periodicity_value)).perform(typeText(".2"))
 
-        Helpers.swipePagerRight()
-        Helpers.swipePagerLeft()
         Helpers.clickOnActionItemConfirm()
     }
 

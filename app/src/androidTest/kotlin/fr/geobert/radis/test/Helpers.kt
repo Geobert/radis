@@ -16,7 +16,6 @@ import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.contrib.DrawerActions.openDrawer
 import android.support.test.espresso.contrib.DrawerMatchers.isOpen
 import android.support.test.espresso.contrib.PickerActions
-import android.support.test.espresso.contrib.PickerActions.setDate
 import android.support.test.espresso.contrib.RecyclerViewActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.matcher.RootMatchers
@@ -24,9 +23,15 @@ import android.support.test.espresso.matcher.ViewMatchers.hasFocus
 import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
 import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.support.test.espresso.matcher.ViewMatchers.withText
+import android.support.v7.widget.AppCompatButton
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.DatePicker
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.tools.TIME_ZONE
@@ -34,7 +39,11 @@ import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.*
+import org.hamcrest.Matchers.allOf
+import org.hamcrest.Matchers.containsString
+import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.instanceOf
+import org.hamcrest.Matchers.not
 
 class Helpers {
 
@@ -122,8 +131,7 @@ class Helpers {
         fun addOp(date: DateTime, third: String = "Toto", amount: String = "-1", tag: String = "", mode: String = "", desc: String = "") {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
-            onView(withId(R.id.op_date_btn)).perform(click())
-            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year, date.month, date.day))
+            Helpers.setDateOnPicker(R.id.op_date_btn, date)
             fillOpForm(third, amount, tag, mode, desc)
             clickOnActionItemConfirm()
         }
@@ -178,12 +186,9 @@ class Helpers {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            onView(withId(R.id.op_date_btn)).perform(click())
-            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year, date.month, date.day))
+            Helpers.setDateOnPicker(R.id.op_date_btn, date)
 
             fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
-
-            swipePagerLeft()
 
             clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 1)
             clickOnActionItemConfirm()
@@ -202,11 +207,10 @@ class Helpers {
             checkTitleBarDisplayed(R.string.sch_edition)
             val today = DateTime.today(TIME_ZONE)
             val schOpDate = today.minusDays(14)
-            onView(withId(R.id.op_date_btn)).perform(click())
-            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(schOpDate.year, schOpDate.month, schOpDate.day))
-            fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
-            swipePagerLeft()
+            Helpers.setDateOnPicker(R.id.op_date_btn, schOpDate)
+
+            fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())
@@ -310,7 +314,7 @@ class Helpers {
 
             onView(allOf(withId(id), isDisplayed())).perform(object : ViewAction {
                 override fun getConstraints(): Matcher<View> {
-                    return allOf(isDisplayed(), iz(instanceOf(TextView::class.java))) as Matcher<View>
+                    return allOf(isDisplayed(), iz(instanceOf(TextView::class.java)))
                 }
 
                 override fun getDescription(): String {
@@ -325,6 +329,16 @@ class Helpers {
             })
 
             return res
+        }
+
+        fun setDateOnPicker(id: Int, date: DateTime) {
+            onView(withId(id)).perform(click())
+            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year,
+                    date.month, date.day))
+            onView(allOf(withId(android.R.id.button1), iz(instanceOf(AppCompatButton::class.java)))).perform(click());
+
+            //Helpers.clickOnDialogButton("OK")
+            pauseTest(300)
         }
     }
 }

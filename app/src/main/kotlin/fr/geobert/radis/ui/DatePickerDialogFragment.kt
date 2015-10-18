@@ -67,7 +67,7 @@ class DatePickerDialogFragment : DialogFragment() {
     @TargetApi(11)
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val b = arguments
-        val date = b.getSerializable(DATE) as DateTime? ?: DateTime.now(TIME_ZONE)
+        val date = b.getSerializable(DATE) as DateTime? ?: DateTime.today(TIME_ZONE)
         val minDate = b.getSerializable(MIN_DATE) as DateTime?
         val title = b.getInt(TITLE)
 

@@ -29,7 +29,7 @@ public class ScheduleEditorFragment : OperationEditFragment() {
     private var mCustomPeriodicityCont: View by Delegates.notNull()
     private var mEndDateCheck: CheckBox by Delegates.notNull()
     private var mEndDateButton: Button by Delegates.notNull()
-    private var mEndDate: DateTime = DateTime.now(TIME_ZONE)
+    private var mEndDate: DateTime = DateTime.today(TIME_ZONE)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val l = super.onCreateView(inflater, container, savedInstanceState)

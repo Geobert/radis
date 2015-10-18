@@ -46,53 +46,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="5dp"/>
 
-        <LinearLayout
-                style="@style/EditorHorizontalLinearLayout"
-                android:layout_marginTop="0dp">
-
-            <CheckBox
-                    android:id="@+id/is_transfert"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="3dp"
-                    android:layout_weight="1"
-                    android:text="@string/transfert"/>
-
-            <CheckBox
-                    android:id="@+id/is_checked"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="3dp"
-                    android:layout_weight="1"
-                    android:text="@string/checked"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-                android:id="@+id/transfert_cont"
-                android:layout_margin="0dp"
-                style="@style/EditorHorizontalLinearLayout">
-
-            <Spinner
-                    android:id="@+id/trans_src_account"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
-
-            <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="0dp"
-                    android:text="@string/rarr"
-                    android:textSize="20dp"/>
-
-            <Spinner
-                    android:id="@+id/trans_dst_account"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
-        </LinearLayout>
-
         <RelativeLayout
                 android:id="@+id/sched_op_section"
                 android:visibility="gone"
@@ -188,6 +141,53 @@
 
 
         </RelativeLayout>
+
+        <LinearLayout
+                style="@style/EditorHorizontalLinearLayout"
+                android:layout_marginTop="0dp">
+
+            <CheckBox
+                    android:id="@+id/is_transfert"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/transfert"/>
+
+            <CheckBox
+                    android:id="@+id/is_checked"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="3dp"
+                    android:layout_weight="1"
+                    android:text="@string/checked"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+                android:id="@+id/transfert_cont"
+                android:layout_margin="0dp"
+                style="@style/EditorHorizontalLinearLayout">
+
+            <Spinner
+                    android:id="@+id/trans_src_account"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="0dp"
+                    android:text="@string/rarr"
+                    android:textSize="20dp"/>
+
+            <Spinner
+                    android:id="@+id/trans_dst_account"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"/>
+        </LinearLayout>
 
         <LinearLayout
                 android:id="@+id/third_party_cont"

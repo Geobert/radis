@@ -58,7 +58,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
     private var mActivity: CommonOpEditor by Delegates.notNull()
     protected var mWasInvertByTransfert: Boolean = false
     protected var isOkClicked: Boolean = false
-    protected var opDate: DateTime = DateTime.now(TIME_ZONE)
+    protected var opDate: DateTime = DateTime.today(TIME_ZONE)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val l = inflater.inflate(R.layout.main_op_edit, container, false)
