@@ -302,6 +302,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         Tools.setTextWithoutComplete(edit_op_third_party, op.mThirdParty)
         Tools.setTextWithoutComplete(edit_op_mode, op.mMode)
         Tools.setTextWithoutComplete(edit_op_tag, op.mTag)
+        opDate = op.mDate
         updateDateBtn()
         mActivity.mPreviousSum = op.mSum
         edit_op_notes.setText(op.mNotes)

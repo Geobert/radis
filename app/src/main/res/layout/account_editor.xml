@@ -44,6 +44,7 @@
                 android:maxLength="3"
                 android:layout_weight="0"
                 android:layout_marginBottom="5dip"
+                android:visibility="gone"
                 android:hint="@string/custom_currency_hint"/>
 
         <TextView

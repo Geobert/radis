@@ -262,6 +262,7 @@ public class RadisTest {
         Helpers.checkTitleBarDisplayed(R.string.sch_edition)
 
         val today = DateTime.today(TIME_ZONE).minusMonth(2)
+        onView(withId(R.id.op_date_btn)).perform(scrollTo())
         Helpers.setDateOnPicker(R.id.op_date_btn, today)
         Helpers.clickOnActionItemConfirm()
         Helpers.clickOnDialogButton(R.string.cancel)
@@ -659,6 +660,7 @@ public class RadisTest {
 
         Helpers.pauseTest(700)
 
+        Espresso.closeSoftKeyboard()
         Helpers.clickOnSpinner(R.id.trans_src_account, ACCOUNT_NAME)
         Helpers.clickOnSpinner(R.id.trans_dst_account, ACCOUNT_NAME_2)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, OP_AMOUNT)
@@ -705,6 +707,7 @@ public class RadisTest {
         Helpers.clickOnRecyclerViewAtPos(0)
         onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.op_edition)
+        Espresso.closeSoftKeyboard()
         onView(withId(R.id.is_transfert)).perform(click()).check(matches(not(isChecked())))
         Helpers.pauseTest(700)
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
@@ -1128,6 +1131,7 @@ public class RadisTest {
 
         Helpers.goToCurAccountOptionPanel()
         onView(withId(android.R.id.list)).perform(swipeUp())
+        Helpers.pauseTest(500)
         onView(withText(R.string.override_quick_add_action)).perform(click())
         onView(withText(R.string.quick_add_long_press_action_title)).perform(click())
         Helpers.pauseTest(800)

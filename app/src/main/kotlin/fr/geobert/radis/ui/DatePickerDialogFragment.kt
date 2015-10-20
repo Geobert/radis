@@ -87,7 +87,8 @@ class DatePickerDialogFragment : DialogFragment() {
         // Of course, suggestions welcome.
 
         val picker = DatePickerDialog(activity, constructorListener, date.year, date.month - 1, date.day)
-
+        picker.datePicker.calendarViewShown = true
+        picker.datePicker.spinnersShown = false
         picker.setTitle(title)
         if (hasJellyBeanAndAbove()) {
             picker.setButton(DialogInterface.BUTTON_POSITIVE,

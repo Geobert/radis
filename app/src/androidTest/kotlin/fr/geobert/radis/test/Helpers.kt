@@ -23,7 +23,6 @@ import android.support.test.espresso.matcher.ViewMatchers.hasFocus
 import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
 import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.support.test.espresso.matcher.ViewMatchers.withText
-import android.support.v7.widget.AppCompatButton
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -267,20 +266,23 @@ class Helpers {
                 onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))
 
         fun scrollThenTypeText(edtId: Int, str: String) {
-
-            onView(withId(edtId)).perform(scrollTo()).perform(typeText(str))
+            onView(withId(edtId)).perform(scrollTo()).perform(replaceText("")).perform(typeText(str))
         }
 
         fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {
             onView(withId(spinnerId)).perform(scrollTo())
+            Helpers.pauseTest(500)
             onView(withId(spinnerId)).perform(click())
+            Helpers.pauseTest(500)
             val strs = getContext().resources.getStringArray(arrayResId).get(pos)
             onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
         }
 
         fun clickOnSpinner(spinnerId: Int, text: String) {
             onView(withId(spinnerId)).perform(scrollTo())
+            Helpers.pauseTest(500)
             onView(withId(spinnerId)).perform(click())
+            Helpers.pauseTest(500)
             onView(withText(equalTo(text))).perform(click())
         }
 
@@ -332,13 +334,16 @@ class Helpers {
         }
 
         fun setDateOnPicker(id: Int, date: DateTime) {
+            Log.d("Helpers", "setDateOnPicker ${date.format("dd/MM/yyyy")}")
             onView(withId(id)).perform(click())
+            //iz(instanceOf(DatePicker::class.java))
+            //withClassName(equalTo(DatePicker::class.java.name))
             onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year,
                     date.month, date.day))
-            onView(allOf(withId(android.R.id.button1), iz(instanceOf(AppCompatButton::class.java)))).perform(click());
+            //onView(allOf(withId(android.R.id.button1), iz(instanceOf(AppCompatButton::class.java)))).perform(click());
 
-            //Helpers.clickOnDialogButton("OK")
-            pauseTest(300)
+            Helpers.clickOnDialogButton(android.R.string.ok)
+            pauseTest(500)
         }
     }
 }

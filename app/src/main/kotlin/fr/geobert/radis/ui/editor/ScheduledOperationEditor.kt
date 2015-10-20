@@ -244,6 +244,7 @@ public class ScheduledOperationEditor : CommonOpEditor() {
                 mOriginalSchOp = ScheduledOperation(data)
                 mCurrentOp = ScheduledOperation(data)
                 val op = ScheduledOperation(data)
+                mCurrentSchOp = op
                 onOpFetchedCbks.forEach { it(op) }
             } else {
                 val cbks = LinkedList<(Operation) -> Unit>(onOpFetchedCbks)

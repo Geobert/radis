@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,12 +16,14 @@ import android.widget.Spinner
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.db.AccountTable
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.CorrectCommaWatcher
+import fr.geobert.radis.tools.ProjectionDateController
+import fr.geobert.radis.tools.extractSumFromStr
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.getSumSeparator
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Arrays
-import java.util.Currency
-import java.util.Locale
+import java.util.*
 import kotlin.properties.Delegates
 
 public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -79,7 +80,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         currency_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
             override fun onItemSelected(arg0: AdapterView<*>?, arg1: View?, pos: Int, id: Long) {
-                custom_currency.isEnabled = pos == getCustomCurrencyIdx(activity)
+                custom_currency.visibility = if (pos == getCustomCurrencyIdx(activity)) View.VISIBLE else View.GONE
             }
 
             override fun onNothingSelected(arg0: AdapterView<*>?) {

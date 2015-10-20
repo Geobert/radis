@@ -66,7 +66,7 @@ public class ScheduleEditorFragment : OperationEditFragment() {
         if (op.getEndDate() > 0) {
             mEndDateCheck.isChecked = true
             mEndDateButton.isEnabled = true
-            mEndDate = DateTime.forDateOnly(op.getEndYear(), op.getEndMonth(), op.getEndDay())
+            mEndDate = op.mEndDate
         } else {
             mEndDateCheck.isChecked = false
             mEndDateButton.isEnabled = false

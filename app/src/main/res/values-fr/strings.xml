@@ -36,7 +36,7 @@
     <string name="new_op">Nouvelle opération</string>
     <string name="tp_account_name">Compte %s</string>
     <string name="account_edit">Modifier le compte</string>
-    <string name="account_edit_title">Modifier</string>
+    <string name="account_edit_title">Modifier le compte</string>
     <string name="op_edition">Modifier l\'opération</string>
     <string name="future_sum_at">Projection au %1$s = %2$s</string>
     <string name="sum_at_selection">Solde à la selection</string>

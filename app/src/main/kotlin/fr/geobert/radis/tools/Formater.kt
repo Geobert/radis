@@ -5,9 +5,8 @@ import fr.geobert.radis.R
 import hirondelle.date4j.DateTime
 import java.text.DateFormat
 import java.text.DecimalFormat
-import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 import kotlin.properties.Delegates
 
 private val DATE_FORMAT: DateFormat by lazy(LazyThreadSafetyMode.NONE) { DateFormat.getDateInstance(DateFormat.SHORT) }
@@ -27,7 +26,7 @@ public fun String.parseSum(): Double = SUM_FORMAT.parse(this).toDouble()
 public fun Date.formatDate(): String = DATE_FORMAT.format(this)
 
 public fun DateTime.formatDate(): String = this.format("DD/MM")
-public fun DateTime.formatDateLong(): String = this.format("DD/MM/YY")
+public fun DateTime.formatDateLong(): String = this.format("DD/MM/YYYY")
 
 public fun Long.formatDate(): String = DATE_FORMAT.format(this)
 public fun String.parseDate(): Date = DATE_FORMAT.parse(this)
