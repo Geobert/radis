@@ -136,7 +136,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
 
     fun onAllAccountFetched() {
         //        if (isResumed()) {
-        mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length() == 0)
+        mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length == 0)
         val adap = mActivity.mAccountManager.mAccountAdapter
         populateTransfertSpinner(adap)
         account_name.text = adap.getAccountById(mActivity.mCurAccountId)?.name
@@ -350,7 +350,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
             }
         } else {
             str = edit_op_third_party.text.toString().trim()
-            if (str.length() == 0) {
+            if (str.length == 0) {
                 if (errMsg.length() > 0) {
                     errMsg.append("\n")
                 }
@@ -359,7 +359,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
             }
         }
         str = edit_op_sum.text.toString().replace('+', ' ').trim()
-        if (str.length() == 0) {
+        if (str.length == 0) {
             if (errMsg.length() > 0) {
                 errMsg.append("\n")
             }

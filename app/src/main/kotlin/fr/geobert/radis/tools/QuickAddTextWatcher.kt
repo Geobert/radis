@@ -14,7 +14,7 @@ class QuickAddTextWatcher(private val mThirdParty: AutoCompleteTextView,
         val amount = mAmount
         QuickAddController.setQuickAddButEnabled(
                 mQuickAdd,
-                ((mThirdParty.length() != 0) && (amount.length() != 0) && !(amount.length() == 1 && amount.text.charAt(0) == '-')))
+                ((mThirdParty.length() != 0) && (amount.length() != 0) && !(amount.length() == 1 && amount.text[0] == '-')))
     }
 
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int,

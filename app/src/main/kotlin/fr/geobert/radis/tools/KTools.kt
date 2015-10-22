@@ -133,12 +133,12 @@ private val UNICODE = "\u00C0\u00E0\u00C8\u00E8\u00CC\u00EC\u00D2\u00F2\u00D9\u0
 // remove accentued from a string and replace with ascii equivalent
 public fun convertNonAscii(s: String): String {
     val sb = StringBuilder()
-    val n = s.length()
+    val n = s.length
     for (i in 0..n - 1) {
-        val c = s.charAt(i)
+        val c = s[i]
         val pos = UNICODE.indexOf(c)
         if (pos > -1) {
-            sb.append(PLAIN_ASCII.charAt(pos))
+            sb.append(PLAIN_ASCII[pos])
         } else {
             sb.append(c)
         }

@@ -138,11 +138,11 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
                     }
                 } while (schOpsCursor.moveToNext())
 
-                sumsPerAccount.entrySet().forEach {
-                    updateAccountSum(it.getValue(), 0, it.getKey(), greatestDatePerAccount.get(it.getKey()) as Long)
+                sumsPerAccount.entries.forEach {
+                    updateAccountSum(it.value, 0, it.key, greatestDatePerAccount.get(it.key) as Long)
                 }
 
-                if (sumsPerAccount.entrySet().count() > 0) {
+                if (sumsPerAccount.entries.count() > 0) {
                     sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_NEEDED), null)
                 }
 

@@ -304,29 +304,33 @@ public object AccountTable {
 
             args.put(KEY_ACCOUNT_OP_SUM, accOpSum + (-oldOpSum + opSum))
 
-            var projDate: Long = 0
             val tmp = args.getAsLong(KEY_ACCOUNT_CUR_SUM_DATE)
-            if (tmp != null) {
-                projDate = tmp
-            }
-            if (projDate == 0L) {
-                projDate = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE))
-            }
+            val projDate = if (tmp != null && tmp != 0L) tmp else
+                accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM_DATE))
 
-            Log.d(TAG, "updateProjection projDate ${projDate.formatDate()}/opDate ${opDate.formatDate()}")
-
-            if (origOpDate == -2L) {
+            Log.d(TAG, "updateProjection projDate ${projDate.formatDate()}/opDate ${opDate.formatDate()}/origOpDate ${origOpDate} = ${origOpDate.formatDate()}/accOpSum ${accOpSum}")
+            val curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM))
+            val newSum: Long = if (origOpDate == -2L) {
                 // called from RadisService, oldSum = 0 and we always need to add opSum.
-                val curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM))
-                args.put(KEY_ACCOUNT_CUR_SUM, curSum + opSum)
+                curSum + opSum
             } else if (projDate == 0L || opDate == 0L || opDate <= projDate) {
-                val curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM))
-                args.put(KEY_ACCOUNT_CUR_SUM, curSum + (-oldOpSum + opSum))
-            } else if (opDate > projDate && (origOpDate == -1L || origOpDate <= projDate)) {
-                val curSum = accountCursor.getLong(accountCursor.getColumnIndex(KEY_ACCOUNT_CUR_SUM))
-                args.put(KEY_ACCOUNT_CUR_SUM, curSum - oldOpSum)
-            }
+                if (origOpDate > projDate) {
+                    // the oldOpSum was not in curSum because of projDate
+                    curSum + opSum
+                } else {
+                    curSum - oldOpSum + opSum
+                }
 
+            } else if (opDate > projDate) {
+                if ((origOpDate == -1L || origOpDate <= projDate)) {
+                    curSum - oldOpSum
+                } else {
+                    curSum
+                }
+            } else {
+                throw Exception("Should not happen")
+            }
+            args.put(KEY_ACCOUNT_CUR_SUM, newSum)
             if (updateAccount(ctx, accountId, args) > 0) {
                 if (mProjectionMode == PROJECTION_FURTHEST) {
                     mProjectionDate = opDate
@@ -338,18 +342,16 @@ public object AccountTable {
 
     private fun processProjectionFurthestCase(ctx: Context, accountId: Long, opDate: Long, args: ContentValues) {
         assert((mProjectionMode != -1))
-        Log.d(TAG, "updateProjection, mProjectionMode $mProjectionMode / opDate $opDate")
+        Log.d(TAG, "updateProjection, mProjectionMode $mProjectionMode / opDate ${opDate.formatDate()}")
         if (mProjectionMode == PROJECTION_FURTHEST && (opDate > mProjectionDate || opDate == 0L)) {
             if (opDate == 0L) {
                 val op = OperationTable.fetchLastOp(ctx, accountId)
-                if (null != op) {
-                    if (op.moveToFirst()) {
-                        Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 0 : " +
-                                "${op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE)).formatDate()}")
-                        args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE)))
-                    }
-                    op.close()
+                if (op.moveToFirst()) {
+                    Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 0 : " +
+                            "${op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE)).formatDate()}")
+                    args.put(KEY_ACCOUNT_CUR_SUM_DATE, op.getLong(op.getColumnIndex(OperationTable.KEY_OP_DATE)))
                 }
+                op.close()
             } else {
                 Log.d(TAG, "updateProjection, KEY_ACCOUNT_CUR_SUM_DATE 1 : ${opDate.formatDate()}")
                 args.put(KEY_ACCOUNT_CUR_SUM_DATE, opDate)

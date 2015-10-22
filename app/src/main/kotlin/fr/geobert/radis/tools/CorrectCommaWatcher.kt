@@ -26,8 +26,8 @@ public open class CorrectCommaWatcher : TextWatcher {
 
     protected fun correctComma(s: Editable) {
         var haveComma = false
-        for (i in 0..s.length() - 1) {
-            val c = s.charAt(i)
+        for (i in 0..s.length - 1) {
+            val c = s[i]
             if (c == mLocaleComma) {
                 if (haveComma) {
                     s.replace(i, i + 1, "")
@@ -46,8 +46,8 @@ public open class CorrectCommaWatcher : TextWatcher {
     }
 
     protected fun autoNegate(s: Editable) {
-        if (s.length() > 0) {
-            val c = s.charAt(0)
+        if (s.length > 0) {
+            val c = s[0]
             if (c == '+') {
                 mAutoNegate = false
             }

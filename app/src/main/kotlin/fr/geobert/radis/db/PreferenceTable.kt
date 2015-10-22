@@ -139,10 +139,10 @@ public object PreferenceTable {
         val prefs = PrefsManager.getInstance(ctx)
         val allPrefs = prefs.rawData
         if (null != allPrefs) {
-            for (elt in allPrefs.entrySet()) {
+            for (elt in allPrefs.entries) {
                 val values = ContentValues()
-                values.put(KEY_PREFS_VALUE, elt.getValue())
-                values.put(KEY_PREFS_NAME, elt.getKey())
+                values.put(KEY_PREFS_VALUE, elt.value)
+                values.put(KEY_PREFS_NAME, elt.key)
                 db.insert(DATABASE_PREFS_TABLE, null, values)
             }
         }

@@ -278,7 +278,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     public fun addOp(op: T): Int {
         var idx = findOpPosBy { o -> op.compareTo(o) > 0 }
-        if (idx >= operations.size()) {
+        if (idx >= operations.size) {
             operations.add(op)
         } else {
             operations.add(idx, op)
@@ -289,7 +289,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
 
     fun delOp(opId: Long) {
         var idx = findOpPosBy { o -> o.mRowId == opId }
-        operations.remove(idx)
+        operations.removeAt(idx)
         notifyItemRemoved(idx)
 
     }
@@ -297,9 +297,9 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     fun updateOp(op: T) {
         val idx = findOpPosBy { o -> o.mRowId == op.mRowId }
         var newIdx = findOpPosBy { o -> op.compareTo(o) > 0 }
-        operations.remove(idx)
+        operations.removeAt(idx)
         if (idx < newIdx) newIdx--
-        if (newIdx >= operations.size()) {
+        if (newIdx >= operations.size) {
             operations.add(op)
         } else {
             operations.add(newIdx, op)

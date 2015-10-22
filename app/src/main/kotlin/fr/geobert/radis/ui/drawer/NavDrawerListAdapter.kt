@@ -30,7 +30,7 @@ class NavDrawerListAdapter(private val context: Context, private val navDrawerIt
     }
 
     override fun getCount(): Int {
-        return navDrawerItems.size()
+        return navDrawerItems.size
     }
 
     override fun getItem(i: Int): Any {

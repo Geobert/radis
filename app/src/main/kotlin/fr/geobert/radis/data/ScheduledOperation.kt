@@ -8,8 +8,9 @@ import fr.geobert.radis.R
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.TIME_ZONE
 import hirondelle.date4j.DateTime
-import kotlin.properties.get
-import kotlin.properties.set
+import kotlin.properties.getValue
+import kotlin.properties.setValue
+
 
 public class ScheduledOperation() : Operation() {
     public var mPeriodicity: Int by parcels

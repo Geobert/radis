@@ -12,8 +12,8 @@ import fr.geobert.radis.tools.plusMonth
 import fr.geobert.radis.ui.adapter.CellState
 import hirondelle.date4j.DateTime
 import java.util.*
-import kotlin.properties.get
-import kotlin.properties.set
+import kotlin.properties.getValue
+import kotlin.properties.setValue
 
 public open class Operation() : ImplParcelable, Comparable<Operation> {
     override val parcels = hashMapOf<String, Any?>()

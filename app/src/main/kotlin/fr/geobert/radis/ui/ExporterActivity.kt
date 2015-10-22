@@ -123,8 +123,8 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 backupDir.mkdirs()
                 val path = processExportCSV(sd, backupDBDir)
                 if (path != null) {
-                    val p = if (path.length() > 0) path else backupDir.absolutePath
-                    ExportCSVSucceedDialog.newInstance(p, path.length() > 0).show(supportFragmentManager, "csv_export")
+                    val p = if (path.length > 0) path else backupDir.absolutePath
+                    ExportCSVSucceedDialog.newInstance(p, path.length > 0).show(supportFragmentManager, "csv_export")
                 }
             }
         } catch (e: Exception) {

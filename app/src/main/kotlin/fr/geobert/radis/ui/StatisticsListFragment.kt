@@ -210,7 +210,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         val result: MutableMap<String, Long> = hashMapOf()
         val miscKey = ctx.getString(R.string.misc_chart_cat)
         m.forEach {
-            Log.d("StatisticListFragment", "key: ${it.key} / value: ${it.value} / limit: $limit / total: $total / m.size: ${m.size()}")
+            Log.d("StatisticListFragment", "key: ${it.key} / value: ${it.value} / limit: $limit / total: $total / m.size: ${m.size}")
             if (Math.abs(it.value) < limit) {
                 val p = result[miscKey]
                 if (p != null) {
@@ -229,7 +229,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         // partition the list according to filterType
         fun sumMapOfList(m: Map<String, List<Operation>>) = m.mapValues { it.value.fold(0L) { s: Long, o: Operation -> s + o.mSum } }
 
-        fun sumMap(m: Map<String, Long>) = m.values().fold(0L) { s: Long, l: Long -> s + l }
+        fun sumMap(m: Map<String, Long>) = m.values.fold(0L) { s: Long, l: Long -> s + l }
         val (pos, neg) = partOps(stat)
         val sumP = sumMapOfList(pos)
         val sumN = sumMapOfList(neg)
@@ -267,7 +267,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
             m.forEach {
                 data.add(it.key, Math.abs(it.value) / 100.0)
                 val r = SimpleSeriesRenderer()
-                r.color = colors[(data.itemCount - 1) % colors.size()]
+                r.color = colors[(data.itemCount - 1) % colors.size]
                 r.chartValuesFormat = initNumFormat(stat)
                 renderer.addSeriesRenderer(r)
             }
@@ -289,7 +289,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
 
         fun createXYSeriesRenderer(colors: List<Int>): XYSeriesRenderer {
             val r = XYSeriesRenderer()
-            r.color = colors[(data.seriesCount - 1) % colors.size()]
+            r.color = colors[(data.seriesCount - 1) % colors.size]
             r.chartValuesFormat = initNumFormat(stat)
             r.isDisplayChartValues = false // otherwise, crash in achartengine
             r.pointStyle = PointStyle.CIRCLE
@@ -402,7 +402,7 @@ class StatisticsListFragment : BaseFragment(), LoaderCallbacks<Cursor> {
         fun construct(m: Map<String, Long>, isPos: Boolean) {
             val s2 = XYSeries("")
             m.forEach {
-                val lbl = if (it.key.length() == 0) ctx.getString(R.string.no_lbl) else it.key
+                val lbl = if (it.key.length == 0) ctx.getString(R.string.no_lbl) else it.key
                 val v: Double = Math.abs(it.value / 100.0)
                 renderer.yAxisMax = Math.max(v, renderer.yAxisMax)
 

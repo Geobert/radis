@@ -82,14 +82,14 @@ class DbContentProvider : ContentProvider() {
         }
 
         if (id != null) {
-            if (selection == null || selection.trim().length() == 0) {
+            if (selection == null || selection.trim().length == 0) {
                 rowsDeleted = db.delete(table, "_id=?", arrayOf(id))
             } else {
                 if (selectionArgs != null) {
-                    val args = ArrayList<String>(selectionArgs.size() + 1)
+                    val args = ArrayList<String>(selectionArgs.size + 1)
                     args.add(id)
                     Collections.addAll(args, *selectionArgs)
-                    selectionArgs = args.toArray<String>(arrayOfNulls<String>(args.size()))
+                    selectionArgs = args.toArray<String>(arrayOfNulls<String>(args.size))
                 } else {
                     selectionArgs = arrayOf(id)
                 }
@@ -151,14 +151,14 @@ class DbContentProvider : ContentProvider() {
         }
 
         if (id != null) {
-            if (selection == null || selection.trim().length() == 0) {
+            if (selection == null || selection.trim().length == 0) {
                 rowsUpdated = db.update(table, values, idKey + "=?", arrayOf(id))
             } else {
                 if (selectionArgs != null) {
-                    val args = ArrayList<String>(selectionArgs.size() + 1)
+                    val args = ArrayList<String>(selectionArgs.size + 1)
                     args.add(id)
                     Collections.addAll(args, *selectionArgs)
-                    selectionArgs = args.toArray<String>(arrayOfNulls<String>(args.size()))
+                    selectionArgs = args.toArray<String>(arrayOfNulls<String>(args.size))
                 } else {
                     selectionArgs = arrayOf(id)
                 }

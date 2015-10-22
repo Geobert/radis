@@ -26,9 +26,9 @@ public abstract class PauseHandler : Handler() {
     @Synchronized public fun resume(activity: Activity) {
         this.activity = activity
 
-        while (messageQueueBuffer.size() > 0) {
+        while (messageQueueBuffer.size > 0) {
             val msg = messageQueueBuffer.get(0)
-            messageQueueBuffer.remove(0)
+            messageQueueBuffer.removeAt(0)
             sendMessage(msg)
         }
     }

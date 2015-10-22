@@ -62,7 +62,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     }
 
     private fun notEmpty(s: String?): String? {
-        if (s != null && s.trim().length() == 0) {
+        if (s != null && s.trim().length == 0) {
             return null
         }
         return s
@@ -229,7 +229,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     fun fillConfig(): AccountConfig {
         mConfig.overrideInsertDate = getCheckBoxPrefValue(KEY_OVERRIDE_INSERT_DATE)
         val d = getEdtPrefValue(getKey(KEY_INSERTION_DATE))
-        mConfig.insertDate = if (d.trim().length() > 0) d.toInt() else DEFAULT_INSERTION_DATE.toInt()
+        mConfig.insertDate = if (d.trim().length > 0) d.toInt() else DEFAULT_INSERTION_DATE.toInt()
         mConfig.overrideHideQuickAdd = getCheckBoxPrefValue(KEY_OVERRIDE_HIDE_QUICK_ADD)
         mConfig.hideQuickAdd = getCheckBoxPrefValue(getKey(KEY_HIDE_OPS_QUICK_ADD))
         mConfig.overrideUseWeighedInfo = getCheckBoxPrefValue(KEY_OVERRIDE_USE_WEIGHTED_INFO)
@@ -238,7 +238,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         mConfig.invertQuickAddComp = getCheckBoxPrefValue(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD))
         mConfig.overrideNbMonthsAhead = getCheckBoxPrefValue(KEY_OVERRIDE_NB_MONTH_AHEAD)
         val m = getEdtPrefValue(getKey(KEY_NB_MONTH_AHEAD))
-        mConfig.nbMonthsAhead = if (m.trim().length() > 0) m.toInt() else DEFAULT_NB_MONTH_AHEAD
+        mConfig.nbMonthsAhead = if (m.trim().length > 0) m.toInt() else DEFAULT_NB_MONTH_AHEAD
         mConfig.overrideQuickAddAction = getCheckBoxPrefValue(KEY_OVERRIDE_QUICKADD_ACTION)
         mConfig.quickAddAction = getListPrefValue(getKey(KEY_QUICKADD_ACTION))
         return mConfig

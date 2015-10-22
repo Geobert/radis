@@ -44,7 +44,7 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
         }
 
         val item = columns.get(from)
-        columns.remove(from)
+        columns.removeAt(from)
         columns.add(newPos, item)
         notifyItemMoved(from, newPos)
         selectedPos += offset

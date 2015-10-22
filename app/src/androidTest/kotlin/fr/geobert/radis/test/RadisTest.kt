@@ -8,24 +8,14 @@ import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onData
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions
-import android.support.test.espresso.action.ViewActions.clearText
-import android.support.test.espresso.action.ViewActions.click
-import android.support.test.espresso.action.ViewActions.longClick
-import android.support.test.espresso.action.ViewActions.replaceText
-import android.support.test.espresso.action.ViewActions.scrollTo
-import android.support.test.espresso.action.ViewActions.swipeUp
-import android.support.test.espresso.action.ViewActions.typeText
+import android.support.test.espresso.action.ViewActions.*
 import android.support.test.espresso.assertion.ViewAssertions.matches
+import android.support.test.espresso.contrib.PickerActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.contrib.RecyclerViewActions.scrollToPosition
 import android.support.test.espresso.core.deps.guava.base.Throwables
 import android.support.test.espresso.core.deps.guava.collect.Sets
-import android.support.test.espresso.matcher.ViewMatchers.hasFocus
-import android.support.test.espresso.matcher.ViewMatchers.isChecked
-import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
-import android.support.test.espresso.matcher.ViewMatchers.isEnabled
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.matcher.ViewMatchers.withText
+import android.support.test.espresso.matcher.ViewMatchers.*
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.support.test.runner.lifecycle.ActivityLifecycleMonitorRegistry
@@ -33,6 +23,7 @@ import android.support.test.runner.lifecycle.Stage
 import android.test.suitebuilder.annotation.LargeTest
 import android.util.Log
 import android.view.View
+import android.widget.DatePicker
 import android.widget.EditText
 import android.widget.ListView
 import android.widget.TextView
@@ -52,11 +43,7 @@ import fr.geobert.radis.ui.ConfigFragment
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.instanceOf
-import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -147,7 +134,7 @@ public class RadisTest {
             override public fun call(): Boolean {
                 val activities = getActivitiesInStages(Stage.RESUMED, Stage.STARTED, Stage.PAUSED, Stage.STOPPED, Stage.CREATED)
                 activities.removeAll(getActivitiesInStages(Stage.DESTROYED))
-                if (activities.size() > 0) {
+                if (activities.size > 0) {
                     val activity = activities.iterator().next()
                     activity.finish()
                     return true
@@ -388,9 +375,37 @@ public class RadisTest {
         var date = cleanUpDay.minusMonth(2)
         for (i in 0..5) {
             addOpOnDate(date, i)
-            Helpers.pauseTest(500)
+            Helpers.pauseTest(100)
             date = date.plusMonth(1)
         }
+    }
+
+    fun modifyAccountToMode1(d: DateTime) {
+        Helpers.callAccountEdit()
+
+        Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 1)
+
+        onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
+
+        Helpers.scrollThenTypeText(R.id.projection_date_value, d.day.toString())
+        Helpers.clickOnActionItemConfirm()
+    }
+
+    @Test public fun testMoveOpMode1AfterToBefore() {
+        setUpProjTest1()
+        val today = DateTime.today(TIME_ZONE)
+        val cleanedUpDay = DateTime.forDateOnly(today.year, today.month, Math.min(today.day, 28))
+        modifyAccountToMode1(cleanedUpDay)
+
+        Helpers.checkAccountSumIs(996.50.formatSum())
+
+        Helpers.clickOnRecyclerViewAtPos(0)
+        onView(allOf(withId(R.id.edit_op), isDisplayed())).perform(click())
+        Helpers.checkTitleBarDisplayed(R.string.op_edition)
+        Helpers.setDateOnPicker(R.id.op_date_btn, today)
+        Helpers.clickOnActionItemConfirm()
+
+        Helpers.checkAccountSumIs(995.50.formatSum())
     }
 
     @Test public fun testProjectionFromOpList() {
@@ -399,10 +414,10 @@ public class RadisTest {
         // test mode 0 = furthest
         setUpProjTest1()
         val today = DateTime.today(TIME_ZONE)
-        val cleanUpDay = DateTime.forDateOnly(today.year, today.month, Math.min(today.day, 28))
-        val later3Month = cleanUpDay.plusMonth(3)
+        val cleanedUpDay = DateTime.forDateOnly(today.year, today.month, Math.min(today.day, 28))
+        val later3Month = cleanedUpDay.plusMonth(3)
         Helpers.pauseTest(1000)
-        onView(withId(R.id.account_sum)).check(matches(withText(containsString(994.50.formatSum()))))
+        Helpers.checkAccountSumIs(994.50.formatSum())
         onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(later3Month.formatDateLong()))))
 
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -410,16 +425,9 @@ public class RadisTest {
         Helpers.checkSelectedSumIs(994.50.formatSum())
 
         // test mode 1 = day of next month
-        Helpers.callAccountEdit()
+        modifyAccountToMode1(cleanedUpDay)
 
-        Helpers.clickOnSpinner(R.id.projection_date_spinner, R.array.projection_modes, 1)
-
-        onView(withId(R.id.projection_date_value)).check(matches(isEnabled()))
-
-        Helpers.scrollThenTypeText(R.id.projection_date_value, cleanUpDay.day.toString())
-        Helpers.clickOnActionItemConfirm()
-
-        val oneMonthLater = cleanUpDay.plusMonth(1)
+        val oneMonthLater = cleanedUpDay.plusMonth(1)
         Log.d(TAG, "1DATE : " + oneMonthLater)
 
         onView(withId(R.id.account_balance_at)).check(matches(withText(containsString(oneMonthLater.formatDateLong()))))
@@ -1174,9 +1182,7 @@ public class RadisTest {
         }
     }
 
-
-    // Espresso bug on DatePickerDialog prevent this to work
-    public fun testOpUpdateDisplay() {
+    @Test public fun testOpUpdateDisplay() {
         Helpers.addAccount()
         val today = DateTime.today(TIME_ZONE)
         fun add5ops(d: DateTime) {
@@ -1196,15 +1202,15 @@ public class RadisTest {
         onView(withId(R.id.quickadd_validate)).perform(longClick())
 
 
-        //val date = today.minusMonth(1).getEndOfMonth()
-        // -1 on year to work around Espresso bug
-        //onView(iz(instanceOf(javaClass<DatePicker>())) as Matcher<View>).perform(PickerActions.setDate(date.getYear() - 1, date.getMonth(), date.getDay()))
-        onView(withText(android.R.string.ok)).perform(click())
+        val date = today.minusMonth(1).endOfMonth
+        onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year, date.month, date.day))
+        Helpers.clickOnDialogButton(android.R.string.ok)
         Helpers.pauseTest(30000)
         val monthStr = today.minusMonth(1).format("MMMM", Locale.getDefault())
-        val m = monthStr.substring(0, 1).capitalize().concat(monthStr.substring(1))
+        val m = monthStr
         onView(allOf(withText(m), isDisplayed())).check(matches(isDisplayed()))
     }
+
 
     companion object {
         private val WAIT_DIALOG_TIME = 2000

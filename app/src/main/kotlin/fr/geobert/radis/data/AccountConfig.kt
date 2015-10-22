@@ -6,8 +6,9 @@ import android.os.Parcelable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.forEach
 import fr.geobert.radis.ui.ConfigFragment
-import kotlin.properties.get
-import kotlin.properties.set
+import kotlin.properties.getValue
+import kotlin.properties.setValue
+
 
 public class AccountConfig() : ImplParcelable {
     val NB_PREFS = 6 // number of couples of prefs

@@ -93,11 +93,11 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     fun isFormValid(errMsg: StringBuilder): Boolean {
         val name = edit_account_name.text.toString()
         var res = true
-        if (name.length() == 0) {
+        if (name.length == 0) {
             errMsg.append(R.string.empty_account_name)
             res = false
         }
-        if (edit_account_start_sum.text.length() == 0) {
+        if (edit_account_start_sum.text.length == 0) {
             edit_account_start_sum.setText("0")
         }
 
@@ -144,7 +144,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         edit_account_desc.setText(account.description)
         edit_account_start_sum.setText((account.startSum / 100.0).formatSum())
         var currencyStr = account.currency
-        if (currencyStr.length() == 0) {
+        if (currencyStr.length == 0) {
             currencyStr = Currency.getInstance(Locale.getDefault()).currencyCode
         }
         initCurrencySpinner(currencyStr)
@@ -155,7 +155,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         if (customCurrencyIdx == -1) {
             val res = ctx.resources
             val allCurrencies = res.getStringArray(R.array.all_currencies)
-            customCurrencyIdx = allCurrencies.size() - 1
+            customCurrencyIdx = allCurrencies.size - 1
         }
         return customCurrencyIdx
     }

@@ -83,7 +83,7 @@ public object InfoTables {
 
     private fun getInfoByKey(ctx: Context, key: String, table: Uri, col: String): Cursor? {
         val k = convertNonAscii(key).trim().toLowerCase()
-        if (k.length() == 0) {
+        if (k.length == 0) {
             return null
         }
         return ctx.contentResolver.query(table, arrayOf("_id", KEY_WEIGHT),
@@ -132,7 +132,7 @@ public object InfoTables {
         val args = ContentValues()
         if (value != null) {
             args.put(mInfoColMap.get(table.toString()), value)
-            args.put(mColNameNormName.get(mInfoColMap.get(table.toString())),
+            args.put(mColNameNormName.getRaw(mInfoColMap.get(table.toString())),
                     convertNonAscii(value).trim().toLowerCase())
         }
         if (weight != null) {
@@ -235,7 +235,7 @@ public object InfoTables {
         var id: Long = -1
         var weight: Long = -1
         if (inf == null || !inf.moveToFirst()) {
-            if (key.length() > 0) {
+            if (key.length > 0) {
                 id = createKeyId(ctx, key, keyTableName, keyTableCol)
                 justCreated = true
             }

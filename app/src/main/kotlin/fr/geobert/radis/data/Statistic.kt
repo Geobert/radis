@@ -9,8 +9,8 @@ import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.minusMonth
 import fr.geobert.radis.tools.minusYear
 import hirondelle.date4j.DateTime
-import kotlin.properties.get
-import kotlin.properties.set
+import kotlin.properties.getValue
+import kotlin.properties.setValue
 
 public class Statistic() : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
@@ -89,7 +89,7 @@ public class Statistic() : ImplParcelable {
         readFromParcel(p)
     }
 
-    fun getValue(value: String) =
+    fun getValue(value: String): Any =
             when (value) {
                 StatisticTable.KEY_STAT_NAME -> name
                 StatisticTable.KEY_STAT_ACCOUNT_NAME -> accountName
@@ -153,5 +153,9 @@ public class Statistic() : ImplParcelable {
                 Statistic.MODE -> R.string.mode
                 else -> R.string.no_filter
             }
+
+    override fun hashCode(): Int {
+        return parcels.hashCode()
+    }
 
 }

@@ -288,7 +288,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
     private fun formErrorMessage(): String? {
         val builder = StringBuilder()
-        if (mNameEdt.text.toString().trim().length() <= 0) {
+        if (mNameEdt.text.toString().trim().length <= 0) {
             builder.append("- ").append(getString(R.string.empty_stat_name)).append('\n')
         }
         when (mStat?.timeScaleType) {

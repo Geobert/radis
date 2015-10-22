@@ -6,8 +6,8 @@ import android.os.Parcel
 import android.os.Parcelable
 import fr.geobert.radis.db.AccountTable
 import java.util.*
-import kotlin.properties.get
-import kotlin.properties.set
+import kotlin.properties.getValue
+import kotlin.properties.setValue
 
 public class Account(accountId: Long = 0, accountName: String = "") : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
