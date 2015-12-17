@@ -25,6 +25,7 @@ import fr.geobert.radis.tools.MyAutoCompleteTextView
 import fr.geobert.radis.tools.QuickAddTextWatcher
 import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
+import fr.geobert.radis.tools.getGroupSeparator
 import fr.geobert.radis.tools.getSumSeparator
 import fr.geobert.radis.tools.showDatePickerFragment
 import fr.geobert.radis.ui.adapter.InfoAdapter
@@ -49,7 +50,7 @@ public class QuickAddController(private val mActivity: MainActivity, container: 
         mQuickAddAmount = container.findViewById(R.id.quickadd_amount) as EditText
         mQuickAddButton = container.findViewById(R.id.quickadd_validate) as ImageButton
         mQuickAddThirdParty.nextFocusDownId = R.id.quickadd_amount
-        mCorrectCommaWatcher = CorrectCommaWatcher(getSumSeparator(), mQuickAddAmount).setAutoNegate(true)
+        mCorrectCommaWatcher = CorrectCommaWatcher(getSumSeparator(), getGroupSeparator(), mQuickAddAmount).setAutoNegate(true)
 
         mQuickAddTextWatcher = QuickAddTextWatcher(mQuickAddThirdParty, mQuickAddAmount, mQuickAddButton)
 

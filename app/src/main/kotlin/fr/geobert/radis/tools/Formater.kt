@@ -21,6 +21,7 @@ val SUM_FORMAT: DecimalFormat by lazy {
 var SHORT_DATE_FORMAT: SimpleDateFormat by Delegates.notNull()
 
 public fun getSumSeparator(): Char = SUM_FORMAT.decimalFormatSymbols.decimalSeparator
+public fun getGroupSeparator(): Char = SUM_FORMAT.decimalFormatSymbols.groupingSeparator
 public fun Double.formatSum(): String = SUM_FORMAT.format(this)
 public fun String.parseSum(): Double = SUM_FORMAT.parse(this).toDouble()
 public fun Date.formatDate(): String = DATE_FORMAT.format(this)

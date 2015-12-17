@@ -8,18 +8,22 @@ import android.widget.EditText
 public open class CorrectCommaWatcher : TextWatcher {
     private val mListener: TextWatcher?
     private var mLocaleComma: Char = ' '
+    private var mLocaleGroupSep: Char = ' '
     private var mAutoNegate = false
     private var mEditText: EditText? = null
     private var mAllowNegativeSum = true
+    public var mEnable = true
 
-    public constructor(localeComma: Char, w: EditText) {
+    public constructor(localeComma: Char, localeGroupSep: Char, w: EditText) {
         mLocaleComma = localeComma
+        mLocaleGroupSep = localeGroupSep
         mEditText = w
         mListener = null
     }
 
-    public constructor(localeComma: Char, w: EditText, listener: TextWatcher) {
+    public constructor(localeComma: Char, localeGroupSep: Char, w: EditText, listener: TextWatcher) {
         mLocaleComma = localeComma
+        mLocaleGroupSep = localeGroupSep
         mEditText = w
         mListener = listener
     }
@@ -35,11 +39,13 @@ public open class CorrectCommaWatcher : TextWatcher {
                     haveComma = true
                 }
             } else if (c == '.' || c == ',') {
-                if (haveComma) {
-                    s.replace(i, i + 1, "")
-                } else {
-                    s.replace(i, i + 1, mLocaleComma.toString())
-                    haveComma = true
+                if (c != mLocaleGroupSep) {
+                    if (haveComma) {
+                        s.replace(i, i + 1, "")
+                    } else {
+                        s.replace(i, i + 1, mLocaleComma.toString())
+                        haveComma = true
+                    }
                 }
             }
         }
@@ -68,9 +74,11 @@ public open class CorrectCommaWatcher : TextWatcher {
     }
 
     override fun afterTextChanged(s: Editable) {
-        correctComma(s)
-        autoNegate(s)
-        mListener?.afterTextChanged(s)
+        if (mEnable) {
+            correctComma(s)
+            autoNegate(s)
+            mListener?.afterTextChanged(s)
+        }
     }
 
     override fun beforeTextChanged(s: CharSequence, start: Int, count: Int,

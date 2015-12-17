@@ -20,6 +20,7 @@ import fr.geobert.radis.tools.CorrectCommaWatcher
 import fr.geobert.radis.tools.ProjectionDateController
 import fr.geobert.radis.tools.extractSumFromStr
 import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.getGroupSeparator
 import fr.geobert.radis.tools.getSumSeparator
 import java.text.ParseException
 import java.text.SimpleDateFormat
@@ -58,7 +59,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             mAccount = Account()
         }
 
-        val w = CorrectCommaWatcher(getSumSeparator(), edit_account_start_sum)
+        val w = CorrectCommaWatcher(getSumSeparator(), getGroupSeparator(), edit_account_start_sum)
         w.setAutoNegate(false)
         edit_account_start_sum.addTextChangedListener(w)
         edit_account_start_sum.onFocusChangeListener = object : View.OnFocusChangeListener {

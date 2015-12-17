@@ -30,6 +30,7 @@ import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.extractSumFromStr
 import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.getGroupSeparator
 import fr.geobert.radis.tools.getSumSeparator
 import fr.geobert.radis.tools.parseSum
 import fr.geobert.radis.tools.showDatePickerFragment
@@ -75,7 +76,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         edit_op_sign = l.findViewById(R.id.edit_op_sign) as ImageButton
         trans_src_account = l.findViewById(R.id.trans_src_account) as Spinner
         trans_dst_account = l.findViewById(R.id.trans_dst_account) as Spinner
-        mSumTextWatcher = CorrectCommaWatcher(getSumSeparator(), edit_op_sum, this)
+        mSumTextWatcher = CorrectCommaWatcher(getSumSeparator(), getGroupSeparator(), edit_op_sum, this)
         op_date_btn = l.findViewById(R.id.op_date_btn) as Button
         op_date_btn.setOnClickListener {
             showDatePickerFragment(mActivity, { picker, date ->
@@ -308,6 +309,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         edit_op_notes.setText(op.mNotes)
         Tools.setSumTextGravity(edit_op_sum)
         mSumTextWatcher.setAutoNegate(false)
+        mSumTextWatcher.mEnable = false
         val curOp = mActivity.mCurrentOp
         if (curOp != null) {
             if (curOp.mSum == 0L) {
@@ -317,6 +319,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
                 edit_op_sum.setText(curOp.getSumStr())
             }
         }
+        mSumTextWatcher.mEnable = true
         is_checked.isChecked = op.mIsChecked
         populateTransfertSpinner((activity as CommonOpEditor).mAccountManager.mAccountAdapter)
     }
