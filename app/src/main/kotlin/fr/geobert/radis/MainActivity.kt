@@ -42,15 +42,15 @@ import io.fabric.sdk.android.Fabric
 import java.util.*
 
 public class MainActivity : BaseActivity(), UpdateDisplayInterface {
-    private val mDrawerLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.drawer_layout) as DrawerLayout }
-    private val mDrawerList by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.left_drawer) as ListView }
-    private val mOnRefreshReceiver by lazy(LazyThreadSafetyMode.NONE) { OnRefreshReceiver(this) }
-    private val handler: FragmentHandler by lazy(LazyThreadSafetyMode.NONE) { FragmentHandler(this) }
-    public val mAccountSpinner: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.account_spinner) as Spinner }
+    private val mDrawerLayout by lazy { findViewById(R.id.drawer_layout) as DrawerLayout }
+    private val mDrawerList by lazy { findViewById(R.id.left_drawer) as ListView }
+    private val mOnRefreshReceiver by lazy { OnRefreshReceiver(this) }
+    private val handler: FragmentHandler by lazy { FragmentHandler(this) }
+    public val mAccountSpinner: Spinner by lazy { findViewById(R.id.account_spinner) as Spinner }
 
     // ActionBarDrawerToggle ties together the the proper interactions
     // between the navigation drawer and the action bar app icon.
-    private val mDrawerToggle: ActionBarDrawerToggle by lazy(LazyThreadSafetyMode.NONE) {
+    private val mDrawerToggle: ActionBarDrawerToggle by lazy {
         object : ActionBarDrawerToggle(this, /* host Activity */
                 mDrawerLayout, /* DrawerLayout object */
                 mToolbar,

@@ -14,7 +14,7 @@ import java.util.*
 public object PreferenceTable {
 
     public fun deletePref(db: SQLiteDatabase, key: String) {
-        db.delete(DATABASE_PREFS_TABLE, KEY_PREFS_NAME + "='" + key + "'", null)
+        db.delete(DATABASE_PREFS_TABLE, "$KEY_PREFS_NAME='$key'", null)
     }
 
     public val DATABASE_PREFS_TABLE: String = "preferences"
@@ -24,11 +24,11 @@ public object PreferenceTable {
     public val KEY_PREFS_ACCOUNT: String = "account_id"
     public val KEY_PREFS_IS_ACTIVE: String = "active"
 
-    protected val DATABASE_PREFS_CREATE: String = "create table $DATABASE_PREFS_TABLE($KEY_PREFS_ROWID integer primary key autoincrement,$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null,$KEY_PREFS_ACCOUNT integer not null, $KEY_PREFS_IS_ACTIVE integer not null);"
+    private val DATABASE_PREFS_CREATE: String = "create table $DATABASE_PREFS_TABLE($KEY_PREFS_ROWID integer primary key autoincrement,$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null,$KEY_PREFS_ACCOUNT integer not null, $KEY_PREFS_IS_ACTIVE integer not null);"
     public val PREFS_COLS: Array<String> = arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE)
     public val ACCOUNT_CONFIG_COLS: Array<String> = arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE, KEY_PREFS_IS_ACTIVE)
-    protected val ADD_ACCOUNT_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
-    protected val ADD_IS_ACTIVE_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_IS_ACTIVE integer not null DEFAULT 1"
+    private val ADD_ACCOUNT_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
+    private val ADD_IS_ACTIVE_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_IS_ACTIVE integer not null DEFAULT 1"
 
     private val CREATE_TRIGGER_ACCOUNT_DELETED = "CREATE TRIGGER IF NOT EXISTS on_account_deleted AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
             "BEGIN DELETE FROM $DATABASE_PREFS_TABLE WHERE $KEY_PREFS_ACCOUNT = old._id ; END"
@@ -47,7 +47,7 @@ public object PreferenceTable {
             db.insert(DATABASE_PREFS_TABLE, null, values)
         } else {
             // update
-            db.update(DATABASE_PREFS_TABLE, values, KEY_PREFS_NAME + "='" + key + "'", null)
+            db.update(DATABASE_PREFS_TABLE, values, "$KEY_PREFS_NAME='$key'", null)
         }
     }
 

@@ -225,13 +225,15 @@
     <string name="navigation_drawer_close">Ferme le menu de navigation</string>
     <string name="statistics">Statistics</string>
     <string name="no_statistic"><![CDATA[No configured statistic. Please press the "plus" button to create one.]]></string>
+    <string name="no_statistic_data">No data with current statistic settings. Please edit your filters.</string>
     <string name="new_stat">Create a statistic</string>
     <string name="stat_name_hint">Chart\'s name</string>
     <string name="stat_editor_title">Chart\'s editor</string>
     <string name="no_filter">Time</string>
     <string name="account_for_stat">Account to see</string>
     <string name="filter_for_stat">Calculus filter</string>
-    <string name="period_for_stat">Time scale</string>
+    <string name="period_for_stat">Time period</string>
+    <string name="timescale_for_stat">Time scale</string>
     <string name="graph_type_for_stat">Graphic type</string>
     <string name="days">Days</string>
     <string name="monthes">Monthes</string>
@@ -279,4 +281,10 @@
     <string name="export">Export</string>
     <string name="no_column_selected">No selected column. At least one column has to be selected.</string>
     <string name="current_account">Current account: </string>
+    <string name="negative_values">Negative values</string>
+    <string name="positive_values">Positive values</string>
+    <string name="no_tag">No tag, %s</string>
+    <string name="no_mode">No mode, %s</string>
+    <string name="pos_values">positives</string>
+    <string name="neg_values">negatives</string>
 </resources>

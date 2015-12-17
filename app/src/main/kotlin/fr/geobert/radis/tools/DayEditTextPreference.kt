@@ -31,13 +31,13 @@ class DayEditTextPreference : EditTextPreference {
         }
     }
 
-    internal var m_watcher = EditTextWatcher()
+    private var m_watcher = EditTextWatcher()
 
     /**
      * Return true in order to enable positive button or false to disable it.
      */
     protected fun onCheckValue(value: String): Boolean {
-        var res = false
+        var res: Boolean
         try {
             val d = Integer.parseInt(value)
             res = d > 0 && d <= 31

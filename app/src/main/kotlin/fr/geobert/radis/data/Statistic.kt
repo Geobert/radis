@@ -50,6 +50,7 @@ public class Statistic() : ImplParcelable {
     var endDate: DateTime by parcels
     var date: DateTime by parcels
     var startDate: DateTime by parcels
+    var timePeriodType: Int by parcels
     var timeScaleType: Int by parcels
     var chartType: Int by parcels
     var filterType: Int by parcels
@@ -60,6 +61,7 @@ public class Statistic() : ImplParcelable {
         accountId = 0L
         accountName = ""
         xLast = 1
+        timePeriodType = Statistic.PERIOD_DAYS
         timeScaleType = Statistic.PERIOD_DAYS
         chartType = Statistic.CHART_PIE
         filterType = 0
@@ -76,7 +78,10 @@ public class Statistic() : ImplParcelable {
         accountId = cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_ACCOUNT))
         chartType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_TYPE))
         filterType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_FILTER))
-        timeScaleType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_PERIOD_TYPE))
+        timePeriodType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_PERIOD_TYPE))
+        timeScaleType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_TIMESCALE_TYPE))
+        if (timeScaleType < 0) // freshly added column
+            timeScaleType = if (timePeriodType == Statistic.PERIOD_ABSOLUTE) Statistic.PERIOD_DAYS else timePeriodType
         if (isPeriodAbsolute()) {
             startDate = DateTime.forInstant(cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_START_DATE)), TIME_ZONE)
             endDate = DateTime.forInstant(cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_END_DATE)), TIME_ZONE)
@@ -96,7 +101,8 @@ public class Statistic() : ImplParcelable {
                 StatisticTable.KEY_STAT_ACCOUNT -> accountId
                 StatisticTable.KEY_STAT_TYPE -> chartType
                 StatisticTable.KEY_STAT_FILTER -> filterType
-                StatisticTable.KEY_STAT_PERIOD_TYPE -> timeScaleType
+                StatisticTable.KEY_STAT_PERIOD_TYPE -> timePeriodType
+                StatisticTable.KEY_STAT_TIMESCALE_TYPE -> timeScaleType
                 StatisticTable.KEY_STAT_X_LAST -> xLast
                 StatisticTable.KEY_STAT_START_DATE -> startDate.getMilliseconds(TIME_ZONE)
                 StatisticTable.KEY_STAT_END_DATE -> endDate.getMilliseconds(TIME_ZONE)
@@ -106,13 +112,13 @@ public class Statistic() : ImplParcelable {
             }
 
 
-    fun isPeriodAbsolute() = timeScaleType == Statistic.PERIOD_ABSOLUTE
+    fun isPeriodAbsolute() = timePeriodType == Statistic.PERIOD_ABSOLUTE
 
     override fun equals(other: Any?): Boolean =
             if (other is Statistic) {
                 this.id == other.id && this.name == other.name && this.accountId == other.accountId &&
                         this.chartType == other.chartType && this.filterType == other.filterType &&
-                        this.timeScaleType == other.timeScaleType &&
+                        this.timePeriodType == other.timePeriodType && this.timeScaleType == other.timeScaleType &&
                         this.isPeriodAbsolute() == other.isPeriodAbsolute() &&
                         if (this.isPeriodAbsolute()) {
                             this.startDate == other.startDate && this.endDate == other.endDate
@@ -131,7 +137,7 @@ public class Statistic() : ImplParcelable {
     fun createTimeRange(): Pair<DateTime, DateTime> {
         fun createXLastRange(): Pair<DateTime, DateTime> {
             val today = DateTime.today(TIME_ZONE)
-            val startDate = when (this.timeScaleType) {
+            val startDate = when (this.timePeriodType) {
                 Statistic.PERIOD_DAYS -> today.minusDays(this.xLast)
                 Statistic.PERIOD_MONTHES -> today.minusMonth(this.xLast)
                 Statistic.PERIOD_YEARS -> today.minusYear(this.xLast)
@@ -140,7 +146,7 @@ public class Statistic() : ImplParcelable {
             return Pair(startDate, today)
         }
 
-        return when (this.timeScaleType) {
+        return when (this.timePeriodType) {
             Statistic.PERIOD_ABSOLUTE -> Pair(startDate, endDate)
             else -> createXLastRange()
         }

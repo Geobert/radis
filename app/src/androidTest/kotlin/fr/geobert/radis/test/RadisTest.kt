@@ -375,7 +375,7 @@ public class RadisTest {
         var date = cleanUpDay.minusMonth(2)
         for (i in 0..5) {
             addOpOnDate(date, i)
-            Helpers.pauseTest(100)
+            Helpers.pauseTest(300)
             date = date.plusMonth(1)
         }
     }

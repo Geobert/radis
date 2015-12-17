@@ -26,7 +26,7 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        Log.d("DbHelper", "onUpgrade " + oldVersion + " -> " + newVersion)
+        Log.d("DbHelper", "onUpgrade $oldVersion -> $newVersion")
         if (oldVersion <= 1) upgradeFromV1(db, oldVersion, newVersion)
         if (oldVersion <= 2) upgradeFromV2(db, oldVersion, newVersion)
         if (oldVersion <= 3) upgradeFromV3(db, oldVersion, newVersion)
@@ -46,11 +46,16 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
         if (oldVersion <= 17) upgradeFromV17(db)
         if (oldVersion <= 18) upgradeFromV18(db)
         if (oldVersion <= 19) upgradeFromV19(db)
+        if (oldVersion <= 20) upgradeFromV20(db)
         upgradeDefault(db)
     }
 
     private fun upgradeDefault(db: SQLiteDatabase) {
         AccountTable.upgradeDefault(db)
+    }
+
+    private fun upgradeFromV20(db: SQLiteDatabase) {
+        StatisticTable.upgradeFromV20(db)
     }
 
     private fun upgradeFromV19(db: SQLiteDatabase) {
@@ -139,7 +144,7 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
 
     companion object {
         public val DATABASE_NAME: String = "radisDb"
-        protected val DATABASE_VERSION: Int = 20
+        val DATABASE_VERSION: Int = 21
 
         public var instance: DbHelper? = null
         public fun getInstance(ctx: Context): DbHelper {

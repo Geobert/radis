@@ -76,7 +76,8 @@ public object Tools {
     //        }
     //    }
 
-    public fun popMessage(ctx: Activity, msg: String, titleStrId: Int, btnText: String, onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
+    public fun popMessage(ctx: Context, msg: String, titleStrId: Int, btnText: String,
+                          onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
         val alertDialog = AlertDialog.Builder(ctx).create()
         alertDialog.setTitle(titleStrId)
         alertDialog.setMessage(msg)
@@ -84,7 +85,7 @@ public object Tools {
         alertDialog.show()
     }
 
-    public fun popError(ctx: Activity, msg: String, onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
+    public fun popError(ctx: Context, msg: String, onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
         Tools.popMessage(ctx, msg, R.string.error, ctx.getString(R.string.ok), onClick)
     }
 

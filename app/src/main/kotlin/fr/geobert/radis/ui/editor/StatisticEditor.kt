@@ -40,7 +40,8 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     private val mNameEdt: EditText by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_name_edt) as EditText }
     private val mAccountSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_account_spinner) as Spinner }
     private val mFilterSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_filter_spinner) as Spinner }
-    private val mTimeScaleSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_period_spinner) as Spinner }
+    private val mTimePeriodSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_period_spinner) as Spinner }
+    private val mTimeScaleSpin: Spinner by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.stat_timescale_spinner) as Spinner }
     private val mxLastCont: LinearLayout by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.x_last_cont) as LinearLayout }
     private val mxLastEdt: EditText by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.x_last_edt) as EditText }
     private val mxLastSuffixLbl: TextView by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.x_last_suffix) as TextView }
@@ -90,9 +91,11 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                     mStat = Statistic()
                 }
                 fillInfoSpinner()
+                fillTimePeriodSpinner()
                 fillTimeScaleSpinner()
                 fillAccountSpinner()
                 initAccountSpinner()
+                initTimePeriodSpinner()
                 initTimeScaleSpinner()
                 initInfoSpinner()
                 initChartTypeButtons()
@@ -117,14 +120,45 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     private fun initInfoSpinner() {
-        mFilterSpin.setSelection(mStat?.filterType as Int)
+        mFilterSpin.setSelection(mStat?.filterType as Int, false)
+//        mFilterSpin.onItemSelectedListener = object : OnItemSelectedListener {
+//            override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
+//                // nothing to do
+//            }
+//
+//            override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p: Int, id: Long) {
+//                val stat = mStat
+//                if (stat != null) stat.filterType = p
+//            }
+//        }
+    }
+
+    private fun initTimePeriodSpinner() {
+        mTimePeriodSpin.onItemSelectedListener = object : OnItemSelectedListener {
+            override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
+                // nothing to do
+            }
+
+            override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p: Int, id: Long) {
+                refreshTimePeriodCont(p)
+            }
+        }
+        mTimePeriodSpin.setSelection(mStat?.timePeriodType as Int, false)
+        refreshTimePeriodCont(mStat?.timePeriodType as Int)
     }
 
     private fun initTimeScaleSpinner() {
-        mTimeScaleSpin.setSelection(mStat?.timeScaleType as Int)
-        refreshTimeScaleCont()
+        mTimeScaleSpin.setSelection(mStat?.timeScaleType as Int, false)
+//        mTimeScaleSpin.onItemSelectedListener = object : OnItemSelectedListener {
+//            override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
+//                // nothing to do
+//            }
+//
+//            override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p: Int, id: Long) {
+//                mStat?.timeScaleType = p
+//            }
+//        }
     }
-
     private fun initChartTypeButtons() {
         when (mStat?.chartType) {
             Statistic.CHART_PIE -> mPieBtn.isChecked = true
@@ -133,7 +167,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         }
     }
 
-    private fun refreshTimeScaleCont() {
+    private fun refreshTimePeriodCont(p: Int) {
         fun showAbsCont(show: Boolean) {
             if (show) {
                 mxLastCont.visibility = View.GONE
@@ -147,7 +181,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             }
         }
 
-        when (mStat?.timeScaleType) {
+        when (mStat?.timePeriodType) {
             Statistic.PERIOD_DAYS -> {
                 showAbsCont(show = false)
                 mxLastSuffixLbl.text = getString(R.string.last_male) + " " + getString(R.string.days).toLowerCase()
@@ -166,24 +200,21 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
     }
 
     private fun fillTimeScaleSpinner(): Unit {
+        val values = arrayOf(getString(R.string.days), getString(R.string.monthes), getString(R.string.years))
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        mTimeScaleSpin.adapter = adapter
+
+    }
+
+    private fun fillTimePeriodSpinner(): Unit {
         val values = arrayOf(getString(R.string.days), getString(R.string.monthes), getString(R.string.years),
                 getString(R.string.absolute))
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        mTimeScaleSpin.adapter = adapter
-        mTimeScaleSpin.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
-                // nothing to do
-            }
-
-            override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p: Int, id: Long) {
-                mStat?.timeScaleType = p
-                refreshTimeScaleCont()
-            }
-        }
+        mTimePeriodSpin.adapter = adapter
 
         mStartDate.setOnClickListener { showDatePicker(mStartDate) }
-
         mEndDate.setOnClickListener { showDatePicker(mEndDate) }
     }
 
@@ -208,16 +239,6 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, values)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mFilterSpin.adapter = adapter
-        mFilterSpin.onItemSelectedListener = object : OnItemSelectedListener {
-            override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
-                // nothing to do
-            }
-
-            override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p: Int, id: Long) {
-                val stat = mStat
-                if (stat != null) stat.filterType = p
-            }
-        }
     }
 
     private fun fillAccountSpinner(): Unit {
@@ -228,6 +249,13 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         mAccountSpinAdapter = adapter
         mAccountSpin.adapter = adapter
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+    }
+
+    private fun initAccountSpinner(): Unit {
+        val pos = mAccountSpinAdapter.getPosition(Account(mStat?.accountId as Long))
+        if (pos > -1) {
+            mAccountSpin.setSelection(pos)
+        }
         mAccountSpin.onItemSelectedListener = object : OnItemSelectedListener {
             override fun onItemSelected(a: AdapterView<out Adapter?>?, v: View?, p2: Int, p3: Long) {
                 mStat?.accountId = (a?.selectedItem as Account).id
@@ -237,13 +265,6 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
             override fun onNothingSelected(p0: AdapterView<out Adapter?>?) {
                 // nothing
             }
-        }
-    }
-
-    private fun initAccountSpinner(): Unit {
-        val pos = mAccountSpinAdapter.getPosition(Account(mStat?.accountId as Long))
-        if (pos > -1) {
-            mAccountSpin.setSelection(pos)
         }
     }
 
@@ -291,19 +312,19 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         if (mNameEdt.text.toString().trim().length <= 0) {
             builder.append("- ").append(getString(R.string.empty_stat_name)).append('\n')
         }
-        when (mStat?.timeScaleType) {
+        when (mStat?.timePeriodType) {
             Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS -> {
                 val valid = "([0-9]+)"
                 val x = mxLastEdt.text.toString()
                 if (!x.matches(valid.toRegex())) {
                     fun last(): String =
-                            if (mStat?.timeScaleType == Statistic.PERIOD_YEARS)
+                            if (mStat?.timePeriodType == Statistic.PERIOD_YEARS)
                                 getString(R.string.last_female)
                             else
                                 getString(R.string.last_male)
 
                     builder.append("- ").append(getString(R.string.xlast_invalid).format(last(),
-                            mTimeScaleSpin.selectedItem.toString().toLowerCase()))
+                            mTimePeriodSpin.selectedItem.toString().toLowerCase()))
                 }
             }
             Statistic.PERIOD_ABSOLUTE ->
@@ -312,7 +333,7 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
                 }
         }
 
-        return if (builder.length() > 0) builder.toString() else null
+        return if (builder.length > 0) builder.toString() else null
     }
 
     private fun fillStat() {
@@ -320,7 +341,10 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
         val stat = mStat
         if (stat != null) {
             stat.name = mNameEdt.text.toString().trim()
-            when (stat.timeScaleType) {
+            stat.timePeriodType = mTimePeriodSpin.selectedItemPosition
+            stat.timeScaleType = mTimeScaleSpin.selectedItemPosition
+            stat.filterType = mFilterSpin.selectedItemPosition
+            when (stat.timePeriodType) {
                 Statistic.PERIOD_DAYS, Statistic.PERIOD_MONTHES, Statistic.PERIOD_YEARS ->
                     stat.xLast = Integer.parseInt(mxLastEdt.text.toString())
             }
@@ -384,8 +408,10 @@ public class StatisticEditor : BaseActivity(), LoaderCallbacks<Cursor>, EditorTo
 
             fillAccountSpinner()
             fillInfoSpinner()
+            fillTimePeriodSpinner()
             fillTimeScaleSpinner()
             initAccountSpinner()
+            initTimePeriodSpinner()
             initTimeScaleSpinner()
             initInfoSpinner()
             initChartTypeButtons()

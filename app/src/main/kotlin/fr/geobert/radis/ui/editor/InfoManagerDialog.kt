@@ -126,7 +126,7 @@ public class InfoManagerDialog : DialogFragment() {
             return d
         }
 
-        protected fun createThirdPartiesDeleteDialog(ctx: Context): InfoManagerDialog {
+        fun createThirdPartiesDeleteDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.THIRD_PARTY_URI.toString() + "_del"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
@@ -138,7 +138,7 @@ public class InfoManagerDialog : DialogFragment() {
             return d
         }
 
-        protected fun createTagsDeleteDialog(ctx: Context): InfoManagerDialog {
+        fun createTagsDeleteDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.TAGS_URI.toString() + "_del"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
@@ -149,7 +149,7 @@ public class InfoManagerDialog : DialogFragment() {
             return d
         }
 
-        protected fun createModesDeleteDialog(ctx: Context): InfoManagerDialog {
+        fun createModesDeleteDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.MODES_URI.toString() + "_del"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
@@ -179,7 +179,7 @@ public class InfoManagerDialog : DialogFragment() {
             }
         }
 
-        protected fun createThirdPartiesEditDialog(ctx: Context): InfoManagerDialog {
+        fun createThirdPartiesEditDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.THIRD_PARTY_URI.toString() + "_edit"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
@@ -191,7 +191,7 @@ public class InfoManagerDialog : DialogFragment() {
             return d
         }
 
-        protected fun createTagsEditDialog(ctx: Context): InfoManagerDialog {
+        fun createTagsEditDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.TAGS_URI.toString() + "_edit"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
@@ -202,7 +202,7 @@ public class InfoManagerDialog : DialogFragment() {
             return d
         }
 
-        protected fun createModesEditDialog(ctx: Context): InfoManagerDialog {
+        fun createModesEditDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.MODES_URI.toString() + "_edit"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {

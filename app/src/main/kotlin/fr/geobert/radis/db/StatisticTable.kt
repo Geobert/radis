@@ -1,11 +1,11 @@
 package fr.geobert.radis.db
 
-import android.database.sqlite.SQLiteDatabase
-import fr.geobert.radis.data.Statistic
 import android.content.ContentValues
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.support.v4.content.CursorLoader
+import fr.geobert.radis.data.Statistic
 import fr.geobert.radis.tools.fillContentValuesWith
 
 public object StatisticTable {
@@ -16,21 +16,20 @@ public object StatisticTable {
     val KEY_STAT_ACCOUNT_NAME = "account_name"
     val KEY_STAT_FILTER = "filter"
     val KEY_STAT_PERIOD_TYPE = "period_type"
+    val KEY_STAT_TIMESCALE_TYPE = "timescale_type"
     val KEY_STAT_TYPE = "chart_type"
     val KEY_STAT_X_LAST = "x_last"
     val KEY_STAT_START_DATE = "start_date"
     val KEY_STAT_END_DATE = "end_date"
 
     val STAT_COLS = arrayOf(KEY_STAT_ID, KEY_STAT_NAME, KEY_STAT_ACCOUNT, KEY_STAT_FILTER, KEY_STAT_PERIOD_TYPE, KEY_STAT_TYPE,
-            KEY_STAT_X_LAST, KEY_STAT_START_DATE, KEY_STAT_END_DATE, KEY_STAT_ACCOUNT_NAME)
+            KEY_STAT_X_LAST, KEY_STAT_START_DATE, KEY_STAT_END_DATE, KEY_STAT_ACCOUNT_NAME, KEY_STAT_TIMESCALE_TYPE)
 
     public val STAT_TABLE: String = "statistics"
 
-    private val CREATE_TABLE = "create table $STAT_TABLE ($KEY_STAT_ID integer primary key autoincrement, " +
-            "$KEY_STAT_NAME  string not null, " +
-            "$KEY_STAT_ACCOUNT  integer not null, $KEY_STAT_FILTER  integer not null, $KEY_STAT_PERIOD_TYPE  integer not null, " +
-            "$KEY_STAT_TYPE  integer not null, $KEY_STAT_X_LAST  integer, $KEY_STAT_START_DATE  integer," +
-            "$KEY_STAT_END_DATE  integer, $KEY_STAT_ACCOUNT_NAME  string not null)"
+    private val CREATE_TABLE = "create table $STAT_TABLE ($KEY_STAT_ID integer primary key autoincrement, $KEY_STAT_NAME  string not null, $KEY_STAT_ACCOUNT  integer not null, $KEY_STAT_FILTER  integer not null, $KEY_STAT_PERIOD_TYPE  integer not null, $KEY_STAT_TYPE  integer not null, $KEY_STAT_X_LAST  integer, $KEY_STAT_START_DATE  integer,$KEY_STAT_END_DATE  integer, $KEY_STAT_ACCOUNT_NAME  string not null, $KEY_STAT_TIMESCALE_TYPE integer not null)"
+
+    private val ADD_TIMESCALE_COL = "ALTER TABLE $STAT_TABLE ADD COLUMN $KEY_STAT_TIMESCALE_TYPE integer not null DEFAULT -1"
 
     private val CREATE_TRIGGER_ON_STAT_DELETE = "CREATE TRIGGER IF NOT EXISTS on_account_deleted_for_stat AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
             "BEGIN DELETE FROM $STAT_TABLE WHERE $KEY_STAT_ACCOUNT = old._id ; END"
@@ -46,6 +45,10 @@ public object StatisticTable {
 
     fun upgradeFromV19(db: SQLiteDatabase) {
         db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
+    }
+
+    fun upgradeFromV20(db: SQLiteDatabase) {
+        db.execSQL(ADD_TIMESCALE_COL)
     }
 
     private fun fillContentValues(stat: Statistic): ContentValues {

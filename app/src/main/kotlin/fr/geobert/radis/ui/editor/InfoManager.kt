@@ -256,23 +256,20 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
     private fun saveText(ctx: Context) {
         val value = mEditorText?.text.toString().trim()
         val rowId = mInfo.getLong("rowId")
-        val ctx = mContext
-        if (ctx != null) {
-            if (rowId != 0L) {
-                // update
-                InfoTables.updateInfo(ctx, mInfo.getParcelable<Parcelable>("table") as Uri,
-                        rowId, value, null)
-            } else {
-                // create
-                val id = InfoTables.getKeyIdIfExistsOrCreate(ctx, value,
-                        mInfo.getParcelable<Parcelable>("table") as Uri)
-                if (id > 0) {
-                    // already existing value, update
-                    Tools.popError(ctx, ctx.getString(R.string.item_exists), null)
-                }
+        if (rowId != 0L) {
+            // update
+            InfoTables.updateInfo(ctx, mInfo.getParcelable<Parcelable>("table") as Uri,
+                    rowId, value, null)
+        } else {
+            // create
+            val id = InfoTables.getKeyIdIfExistsOrCreate(ctx, value,
+                    mInfo.getParcelable<Parcelable>("table") as Uri)
+            if (id > 0) {
+                // already existing value, update
+                Tools.popError(ctx, ctx.getString(R.string.item_exists), null)
             }
-            refresh()
         }
+        refresh()
     }
 
     private fun refresh() {

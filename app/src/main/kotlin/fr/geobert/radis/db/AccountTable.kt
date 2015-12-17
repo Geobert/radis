@@ -55,18 +55,18 @@ public object AccountTable {
             "$KEY_ACCOUNT_PROJECTION_DATE string, $KEY_ACCOUNT_CHECKED_OP_SUM integer not null, " +
             "$KEY_ACCOUNT_LAST_INSERTION_DATE integer not null);"
 
-    protected val ADD_CUR_DATE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CUR_SUM_DATE integer not null DEFAULT 0"
+    val ADD_CUR_DATE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CUR_SUM_DATE integer not null DEFAULT 0"
 
-    protected val ADD_PROJECTION_MODE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_MODE integer not null DEFAULT 0"
+    val ADD_PROJECTION_MODE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_MODE integer not null DEFAULT 0"
 
-    protected val ADD_PROJECTION_MODE_DATE: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_DATE string"
+    val ADD_PROJECTION_MODE_DATE: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_DATE string"
 
-    protected val ADD_CHECKED_SUM_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CHECKED_OP_SUM integer not null DEFAULT 0"
-    protected val ADD_LAST_INSERT_DATE_COLUMN: String =
+    val ADD_CHECKED_SUM_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CHECKED_OP_SUM integer not null DEFAULT 0"
+    val ADD_LAST_INSERT_DATE_COLUMN: String =
             "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_LAST_INSERTION_DATE integer not null DEFAULT 0"
 
 
-    protected val TRIGGER_ON_DELETE_ACCOUNT: String = "CREATE TRIGGER on_delete_account AFTER DELETE ON $DATABASE_ACCOUNT_TABLE BEGIN " +
+    val TRIGGER_ON_DELETE_ACCOUNT: String = "CREATE TRIGGER on_delete_account AFTER DELETE ON $DATABASE_ACCOUNT_TABLE BEGIN " +
             // if op is a transfert and was in deleted account, convert to an op in destination account
             "UPDATE ${OperationTable.DATABASE_OPERATIONS_TABLE} " +
             "SET ${OperationTable.KEY_OP_ACCOUNT_ID} = ${OperationTable.KEY_OP_TRANSFERT_ACC_ID}, " +
@@ -162,15 +162,13 @@ public object AccountTable {
             PROJECTION_FURTHEST -> {
                 if (account.id > 0) {
                     val allOps = OperationTable.fetchAllOps(ctx, account.id)
-                    if (null != allOps) {
-                        Log.d(TAG, "setCurrentSumAndDate allOps not null : ${allOps.count}")
-                        if (allOps.moveToFirst()) {
-                            date = allOps.getLong(allOps.getColumnIndex(OperationTable.KEY_OP_DATE))
-                            opSum = OperationTable.computeSumFromCursor(allOps, account.id)
-                            Log.d(TAG, "setCurrentSumAndDate allOps moved to first opSum = $opSum")
-                        }
-                        allOps.close()
+                    Log.d(TAG, "setCurrentSumAndDate allOps not null : ${allOps.count}")
+                    if (allOps.moveToFirst()) {
+                        date = allOps.getLong(allOps.getColumnIndex(OperationTable.KEY_OP_DATE))
+                        opSum = OperationTable.computeSumFromCursor(allOps, account.id)
+                        Log.d(TAG, "setCurrentSumAndDate allOps moved to first opSum = $opSum")
                     }
+                    allOps.close()
                 }
             }
             PROJECTION_DAY_OF_NEXT_MONTH -> {
@@ -182,12 +180,10 @@ public object AccountTable {
                 projDate.add(Calendar.DAY_OF_MONTH, 1) // for query
                 val op = OperationTable.fetchOpEarlierThan(ctx, projDate.timeInMillis, 0, account.id)
                 projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after query
-                if (null != op) {
-                    if (op.moveToFirst()) {
-                        opSum = OperationTable.computeSumFromCursor(op, account.id)
-                    }
-                    op.close()
+                if (op.moveToFirst()) {
+                    opSum = OperationTable.computeSumFromCursor(op, account.id)
                 }
+                op.close()
                 date = projDate.timeInMillis
             }
             PROJECTION_ABSOLUTE_DATE -> {
@@ -196,12 +192,10 @@ public object AccountTable {
                 projDate.add(Calendar.DAY_OF_MONTH, 1) // roll for query
                 val op = OperationTable.fetchOpEarlierThan(ctx, projDate.timeInMillis, 0, account.id)
                 projDate.add(Calendar.DAY_OF_MONTH, -1) // restore date after
-                if (null != op) {
-                    if (op.moveToFirst()) {
-                        opSum = OperationTable.computeSumFromCursor(op, account.id)
-                    }
-                    op.close()
+                if (op.moveToFirst()) {
+                    opSum = OperationTable.computeSumFromCursor(op, account.id)
                 }
+                op.close()
                 date = projDate.timeInMillis
             }
             else -> {
@@ -418,7 +412,7 @@ public object AccountTable {
             0 -> {
                 if (accountId > 0) {
                     val allOps = db.query(OperationTable.DATABASE_OP_TABLE_JOINTURE, OperationTable.OP_COLS_QUERY,
-                            OperationTable.RESTRICT_TO_ACCOUNT, arrayOf(accountId.toString()), accountId.toString(),
+                            OperationTable.RESTRICT_TO_ACCOUNT, arrayOf(accountId.toString(), accountId.toString()),
                             null, null, OperationTable.OP_ORDERING)
                     if (null != allOps) {
                         Log.d(TAG, "raw setCurrentSumAndDate allOps not null : " + allOps.count)

@@ -9,16 +9,16 @@ import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.properties.Delegates
 
-private val DATE_FORMAT: DateFormat by lazy(LazyThreadSafetyMode.NONE) { DateFormat.getDateInstance(DateFormat.SHORT) }
+val DATE_FORMAT: DateFormat by lazy { DateFormat.getDateInstance(DateFormat.SHORT) }
 
-private val SUM_FORMAT: DecimalFormat by lazy(LazyThreadSafetyMode.NONE) {
+val SUM_FORMAT: DecimalFormat by lazy {
     val d = DecimalFormat()
     d.maximumFractionDigits = 2
     d.minimumFractionDigits = 2
     d
 }
 
-private var SHORT_DATE_FORMAT: SimpleDateFormat by Delegates.notNull()
+var SHORT_DATE_FORMAT: SimpleDateFormat by Delegates.notNull()
 
 public fun getSumSeparator(): Char = SUM_FORMAT.decimalFormatSymbols.decimalSeparator
 public fun Double.formatSum(): String = SUM_FORMAT.format(this)

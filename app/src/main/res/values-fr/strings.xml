@@ -226,13 +226,15 @@
     <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
     <string name="statistics">Statistiques</string>
     <string name="no_statistic"><![CDATA[Aucune statistique configurée. Appuyez sur le bouton « plus » pour en créer.]]></string>
+    <string name="no_statistic_data">Pas de donnée à afficher avec les paramètres actuels de la statistique. Veuillez modifier vos filtres.</string>
     <string name="new_stat">Créer une statistique</string>
     <string name="stat_name_hint">Nom de la statistique</string>
     <string name="stat_editor_title">Édition de statistique</string>
     <string name="no_filter">Temps</string>
     <string name="account_for_stat">Compte à représenter</string>
     <string name="filter_for_stat">Filtre de calcul</string>
-    <string name="period_for_stat">Échelle du temps</string>
+    <string name="period_for_stat">Période de temps</string>
+    <string name="timescale_for_stat">Échelle de temps</string>
     <string name="graph_type_for_stat">Type de graphique</string>
     <string name="days">Jours</string>
     <string name="monthes">Mois</string>
@@ -280,4 +282,10 @@
     <string name="export">Exporter</string>
     <string name="no_column_selected">Aucune colonne sélectionnée. Il faut au moins une colonne à exporter.</string>
     <string name="current_account">Compte actuel : </string>
+    <string name="negative_values">Valeurs négatives</string>
+    <string name="positive_values">Valeurs positives</string>
+    <string name="no_tag">Aucune catégorie, %s</string>
+    <string name="no_mode">Aucun mode, %s</string>
+    <string name="pos_values">positives</string>
+    <string name="neg_values">négatives</string>
 </resources>

@@ -108,7 +108,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
             try {
                 Currency.getInstance(currency)
             } catch (e: IllegalArgumentException) {
-                if (errMsg.length() > 0)
+                if (errMsg.length > 0)
                     errMsg.append("\n")
                 errMsg.append(getString(R.string.bad_format_for_currency))
                 res = false
@@ -129,7 +129,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
                 mProjectionController.mProjectionDate.setText(format.format(d))
             } catch (e: ParseException) {
                 e.printStackTrace()
-                if (errMsg.length() > 0)
+                if (errMsg.length > 0)
                     errMsg.append("\n")
                 errMsg.append(getString(R.string.bad_format_for_date))
                 res = false

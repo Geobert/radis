@@ -106,7 +106,8 @@ public class ScheduleEditorFragment : OperationEditFragment() {
     }
 
     private fun populateCustomPeriodicitySpinner() {
-        val adapter = ArrayAdapter.createFromResource(mActivity, R.array.periodicity_custom_choices, android.R.layout.simple_spinner_item)
+        val adapter = ArrayAdapter.createFromResource(mActivity, R.array.periodicity_custom_choices,
+                android.R.layout.simple_spinner_item)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mCustomPeriodicityUnit.adapter = adapter
 
@@ -196,7 +197,7 @@ public class ScheduleEditorFragment : OperationEditFragment() {
             try {
                 Integer.parseInt(mCustomPeriodicityVal.text.toString())
             } catch (e: NumberFormatException) {
-                if (errMsg.length() > 0) {
+                if (errMsg.length > 0) {
                     errMsg.append("\n")
                 }
                 errMsg.append(getString(R.string.periodicity_must_be_num))
@@ -208,14 +209,14 @@ public class ScheduleEditorFragment : OperationEditFragment() {
             fillOperationWithInputs(op)
             val hasEnd = op.getEndDate() > 0
             if (hasEnd && (op.getDate() > op.getEndDate())) {
-                if (errMsg.length() > 0) {
+                if (errMsg.length > 0) {
                     errMsg.append("\n")
                 }
                 errMsg.append(getString(R.string.end_date_incorrect))
                 res = false
             }
             if ((op.mPeriodicityUnit >= ScheduledOperation.CUSTOM_DAILY_PERIOD) && op.mPeriodicity <= 0) {
-                if (errMsg.length() > 0) {
+                if (errMsg.length > 0) {
                     errMsg.append("\n")
                 }
                 errMsg.append(getString(R.string.periodicity_must_be_greater_0))

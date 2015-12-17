@@ -351,7 +351,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         } else {
             str = edit_op_third_party.text.toString().trim()
             if (str.length == 0) {
-                if (errMsg.length() > 0) {
+                if (errMsg.length > 0) {
                     errMsg.append("\n")
                 }
                 errMsg.append(getString(R.string.empty_third_party))
@@ -360,7 +360,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         }
         str = edit_op_sum.text.toString().replace('+', ' ').trim()
         if (str.length == 0) {
-            if (errMsg.length() > 0) {
+            if (errMsg.length > 0) {
                 errMsg.append("\n")
             }
             errMsg.append(getString(R.string.empty_amount))
@@ -369,7 +369,7 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
             try {
                 str.parseSum()
             } catch (e: ParseException) {
-                if (errMsg.length() > 0) {
+                if (errMsg.length > 0) {
                     errMsg.append("\n")
                 }
                 errMsg.append(getString(R.string.invalid_amount))

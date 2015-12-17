@@ -1,20 +1,19 @@
 package fr.geobert.radis.ui.adapter
 
-import android.support.v7.widget.RecyclerView
 import android.database.Cursor
-import fr.geobert.radis.tools.map
-import fr.geobert.radis.data.Statistic
-import android.view.ViewGroup
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
-import fr.geobert.radis.ui.DeleteStatConfirmationDiag
+import android.view.ViewGroup
 import fr.geobert.radis.R
-import fr.geobert.radis.ui.editor.StatisticEditor
-import fr.geobert.radis.ui.StatisticsListFragment
-import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.data.Statistic
 import fr.geobert.radis.tools.formatDateLong
+import fr.geobert.radis.tools.map
+import fr.geobert.radis.ui.DeleteStatConfirmationDiag
+import fr.geobert.radis.ui.StatisticsListFragment
+import fr.geobert.radis.ui.editor.StatisticEditor
 
 public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) : RecyclerView.Adapter<StatRowHolder>() {
-    var statistics = cursor.map<Statistic> { Statistic(it) }
+    var statistics = cursor.map { Statistic(it) }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, p1: Int): StatRowHolder {
         val l = LayoutInflater.from(viewGroup.context).inflate(fr.geobert.radis.R.layout.statistic_row,
@@ -51,7 +50,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
     override fun getItemCount(): Int = statistics.count()
 
     fun swapCursor(c: Cursor) {
-        statistics = c.map<Statistic> { Statistic(it) }
+        statistics = c.map { Statistic(it) }
         notifyDataSetChanged()
     }
 }

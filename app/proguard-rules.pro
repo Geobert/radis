@@ -18,8 +18,21 @@
 
 -dontwarn kotlin.**
 -dontwarn org.w3c.dom.events.*
+-dontwarn org.jetbrains.kotlin.di.InjectorForRuntimeDescriptorLoader
 
--keep class org.achartengine.** { *; }
+-keep class kotlin.** { *; }
+#-keep class kotlin.reflect.** { *; }
+#-keep class org.jetbrains.kotlin.** { *; }
+
+-keepclassmembers,allowoptimization enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+    **[] $VALUES;
+    public *;
+}
+
+-keepattributes InnerClasses
+-keep class com.github.mikephil.charting.** { *; }
 # -keep class *
 
 -keepattributes SourceFile,LineNumberTable

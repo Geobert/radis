@@ -2,7 +2,6 @@ package fr.geobert.radis.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
@@ -154,8 +153,8 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 }
                 sb
             })
-            if (stringbuilder.length() > 0) {
-                stringbuilder.replace(stringbuilder.length() - 1, stringbuilder.length(), "\n")
+            if (stringbuilder.length > 0) {
+                stringbuilder.replace(stringbuilder.length - 1, stringbuilder.length, "\n")
                 writer.write(stringbuilder.toString())
             } else {
                 Tools.popError(this, getString(R.string.no_column_selected), null)
@@ -201,8 +200,8 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 }
                 sb
             })
-            if (stringbuilder.length() > 0) {
-                stringbuilder.replace(stringbuilder.length() - 1, stringbuilder.length(), "\n")
+            if (stringbuilder.length > 0) {
+                stringbuilder.replace(stringbuilder.length - 1, stringbuilder.length, "\n")
             }
             w.write(stringbuilder.toString())
         }
