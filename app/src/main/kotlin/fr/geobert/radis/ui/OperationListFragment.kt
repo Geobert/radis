@@ -229,10 +229,10 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
                     false
                 }
                 freshLoader = false
-                val itemCount = mOpListAdapter?.itemCount
+                val itemCount = mOpListAdapter?.itemCount ?: 0
                 Log.d("OperationListFragment", "onLoadFinished item count : ${itemCount} / cursor.count:${cursor.count}")
                 setupEmptyViewVisibility(itemCount == 0)
-                if (newAdapter || needRefreshSelection) {
+                if (itemCount > 0 && (newAdapter || needRefreshSelection)) {
                     needRefreshSelection = false
                     refreshSelection()
                 }

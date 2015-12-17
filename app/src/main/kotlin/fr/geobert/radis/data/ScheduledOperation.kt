@@ -97,7 +97,10 @@ public class ScheduledOperation() : Operation() {
     }
 
     public fun setEndMonth(month: Int) {
-        mEndDate = DateTime.forDateOnly(mEndDate.year, month, mEndDate.day)
+        val d = if (month == 2 && mEndDate.day >= 29) {
+            Math.min(mEndDate.day, if (mEndDate.isLeapYear) 29 else 28)
+        } else mEndDate.day
+        mEndDate = DateTime.forDateOnly(mEndDate.year, month, d)
     }
 
     public fun getEndDay(): Int {
@@ -105,7 +108,10 @@ public class ScheduledOperation() : Operation() {
     }
 
     public fun setEndDay(day: Int) {
-        this.mEndDate = DateTime.forDateOnly(mEndDate.year, mEndDate.month, day)
+        val d = if (day >= 29 && mEndDate.month == 2) {
+            Math.min(day, if (mEndDate.isLeapYear) 29 else 28)
+        } else day
+        this.mEndDate = DateTime.forDateOnly(mEndDate.year, mEndDate.month, d)
     }
 
     public fun getEndYear(): Int {
@@ -113,7 +119,11 @@ public class ScheduledOperation() : Operation() {
     }
 
     public fun setEndYear(year: Int) {
-        this.mEndDate = DateTime.forDateOnly(year, mEndDate.month, mEndDate.day)
+        val t = DateTime.forDateOnly(year, 1, 1)
+        val d = if (mEndDate.day >= 29 && mEndDate.month == 2) {
+            Math.min(mEndDate.day, if (t.isLeapYear) 29 else 28)
+        } else mEndDate.day
+        this.mEndDate = DateTime.forDateOnly(year, mEndDate.month, d)
     }
 
     public fun getEndDate(): Long {

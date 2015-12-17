@@ -28,7 +28,11 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
             p1.tag as AccountRowHolder
         }
 
-        val account = accountsList.get(p0)
+        if (accountsList.isEmpty()) {
+            return null
+        }
+
+        val account = accountsList[p0]
         val currencySymbol = account.getCurrencySymbol(activity)
         h.accountName.text = account.name
         val stringBuilder = StringBuilder()

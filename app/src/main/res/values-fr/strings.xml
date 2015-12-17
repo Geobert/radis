@@ -139,8 +139,8 @@
         vous pouvez décorréler les occurrences existantes de cette échéance.
     </string>
     <string name="no">Non</string>
-    <string name="update">Mettre à jour</string>
-    <string name="disconnect">Décorréler</string>
+    <string name="update">Mettre à j.</string>
+    <string name="disconnect">Déco.</string>
     <string name="ask_update_scheduling">Cette opération proviens d\'une échéance.
         Voulez-vous mettre à jour cette échéance et toutes ses occurences ? Si
         non, cette opération sera décorrélée de l\'échéance.

@@ -210,7 +210,7 @@ public class RadisTest {
 
         Helpers.clickOnActionItemConfirm()
 
-        onView(allOf(withText(R.string.update), isDisplayed())).perform(click())
+        onView(withText(R.string.update)).perform(click())
         Helpers.checkAccountSumIs(993.0.formatSum())
     }
 
@@ -483,8 +483,6 @@ public class RadisTest {
         val tomorrow = DateTime.today(TIME_ZONE).plusDays(1)
         Helpers.scrollThenTypeText(R.id.projection_date_value, Integer.toString(tomorrow.day))
 
-        Helpers.pauseTest(10000)
-
         Helpers.clickOnActionItemConfirm()
 
         onView(withText(R.string.no_operation)).check(matches(isDisplayed()))
@@ -515,6 +513,8 @@ public class RadisTest {
         Helpers.clickOnRecyclerViewAtPos(0)
 
         Helpers.checkAccountSumIs(998.50.formatSum())
+
+        Helpers.pauseTest(1000)
         Helpers.checkSelectedSumIs(997.50.formatSum())
     }
 

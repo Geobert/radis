@@ -7,10 +7,7 @@ import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.UiController
 import android.support.test.espresso.ViewAction
 import android.support.test.espresso.action.ViewActions
-import android.support.test.espresso.action.ViewActions.click
-import android.support.test.espresso.action.ViewActions.replaceText
-import android.support.test.espresso.action.ViewActions.scrollTo
-import android.support.test.espresso.action.ViewActions.typeText
+import android.support.test.espresso.action.ViewActions.*
 import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.contrib.DrawerActions.openDrawer
@@ -19,10 +16,7 @@ import android.support.test.espresso.contrib.PickerActions
 import android.support.test.espresso.contrib.RecyclerViewActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.matcher.RootMatchers
-import android.support.test.espresso.matcher.ViewMatchers.hasFocus
-import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.matcher.ViewMatchers.withText
+import android.support.test.espresso.matcher.ViewMatchers.*
 import android.util.Log
 import android.view.View
 import android.widget.Button
@@ -38,11 +32,7 @@ import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.containsString
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.instanceOf
-import org.hamcrest.Matchers.not
+import org.hamcrest.Matchers.*
 
 class Helpers {
 
@@ -260,13 +250,16 @@ class Helpers {
 
         fun clickOnRecyclerViewAtPos(pos: Int) {
             onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+            Helpers.pauseTest(500)
         }
 
         fun checkAccountSumIs(text: String) =
                 onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))
 
         fun scrollThenTypeText(edtId: Int, str: String) {
-            onView(withId(edtId)).perform(scrollTo()).perform(replaceText("")).perform(typeText(str))
+            val v = onView(withId(edtId)).perform(scrollTo())
+            Helpers.pauseTest(500)
+            v.perform(replaceText("")).perform(typeText(str))
         }
 
         fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {

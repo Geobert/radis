@@ -1,6 +1,6 @@
 buildscript {
-    ext.kotlin_version = '1.0.0-beta-3594'
-    ext.android_support = '23.1.0'
+    ext.kotlin_version = '1.0.0-beta-3595'
+    ext.android_support = '23.1.1'
     repositories {
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
@@ -29,7 +29,7 @@ repositories {
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.1'
+    buildToolsVersion '23.0.2'
     lintOptions {
         disable 'MissingTranslation'
     }
@@ -62,7 +62,7 @@ android {
 }
 
 configurations.all {
-    resolutionStrategy.force 'com.android.support:support-annotations:23.1.0'
+    resolutionStrategy.force 'com.android.support:support-annotations:23.1.1'
 }
 
 dependencies {
