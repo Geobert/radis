@@ -308,7 +308,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         Log.d(TAG, "processAccountList: count:${mAccountManager.mAccountAdapter.count}, create:$create")
         if (mAccountManager.mAccountAdapter.count == 0) {
             // no account, try restore database
-            if (!DbHelper.restoreDatabase(this)) {
+            if (!TEST_MODE && !DbHelper.restoreDatabase(this)) {
                 // no account and no backup, open create account
                 AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT, true)
             } else {
