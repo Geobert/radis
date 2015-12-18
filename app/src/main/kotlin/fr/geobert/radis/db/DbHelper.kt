@@ -217,7 +217,6 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
                     dstFOS.close()
                     DbContentProvider.reinit(ctx)
                     DBPrefsManager.getInstance(ctx).put(RadisService.CONSOLIDATE_DB, true)
-                    //                PrefsManager.getInstance(ctx).commit();
                     return true
                 }
             } catch (e: Exception) {

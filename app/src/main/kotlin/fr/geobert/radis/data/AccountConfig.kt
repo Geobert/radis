@@ -11,7 +11,6 @@ import kotlin.properties.setValue
 
 
 public class AccountConfig() : ImplParcelable {
-    val NB_PREFS = 6 // number of couples of prefs
     override val parcels = hashMapOf<String, Any?>()
     public var overrideInsertDate: Boolean by parcels
     public var overrideHideQuickAdd: Boolean by parcels

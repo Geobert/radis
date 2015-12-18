@@ -25,8 +25,7 @@ public class RadisService : android.app.IntentService(RadisService.TAG) {
         val needConsolidate = prefs.getBoolean(CONSOLIDATE_DB, false)
         if (needConsolidate) {
             val cursor = AccountTable.fetchAllAccounts(this)
-            prefs.put(CONSOLIDATE_DB, false)
-            //            prefs.commit();
+            prefs.resetCache()
             if (cursor.moveToFirst()) {
                 do {
                     AccountTable.consolidateSums(this, cursor.getLong(0))

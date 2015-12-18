@@ -150,10 +150,15 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     public fun resetAll() {
         //clearAccountRelated()
         deleteAllPrefs()
-        mCache?.clear()
+        resetCache()
         val editor = PreferenceManager.getDefaultSharedPreferences (mCurrentCtx!!).edit() //mCurrentCtx!!.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE).edit()
         editor.clear()
         editor.commit()
+    }
+
+    public fun resetCache() {
+        mCache?.clear()
+        mCache = null
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor>? = when (id) {
