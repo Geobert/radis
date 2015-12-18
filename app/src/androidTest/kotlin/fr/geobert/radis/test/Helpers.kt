@@ -177,7 +177,7 @@ class Helpers {
 
             Helpers.setDateOnPicker(R.id.op_date_btn, date)
 
-            fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
+            fillOpForm(RadisTest.OP_TP, "9.50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 1)
             clickOnActionItemConfirm()
@@ -199,7 +199,7 @@ class Helpers {
 
             Helpers.setDateOnPicker(R.id.op_date_btn, schOpDate)
 
-            fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
+            fillOpForm(RadisTest.OP_TP, "1.00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())

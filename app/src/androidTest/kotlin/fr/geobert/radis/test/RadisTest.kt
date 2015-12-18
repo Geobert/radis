@@ -33,6 +33,7 @@ import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.tools.DBPrefsManager
+import fr.geobert.radis.tools.SUM_FORMAT
 import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.formatDateLong
@@ -98,14 +99,11 @@ public class RadisTest {
     public fun <X> callOnMainSync(instrumentation: Instrumentation, callable: Callable<X>): X {
         val retAtomic = AtomicReference<X>()
         val exceptionAtomic = AtomicReference<Throwable>()
-        instrumentation.runOnMainSync(object : Runnable {
-            override fun run() {
-                try {
-                    retAtomic.set(callable.call())
-                } catch (e: Throwable) {
-                    exceptionAtomic.set(e)
-                }
-
+        instrumentation.runOnMainSync({
+            try {
+                retAtomic.set(callable.call())
+            } catch (e: Throwable) {
+                exceptionAtomic.set(e)
             }
         })
         val exception = exceptionAtomic.get()
@@ -129,18 +127,15 @@ public class RadisTest {
     }
 
     private fun closeActivity(instrumentation: Instrumentation): Boolean {
-        val activityClosed = callOnMainSync(instrumentation, object : Callable<Boolean> {
-
-            override public fun call(): Boolean {
-                val activities = getActivitiesInStages(Stage.RESUMED, Stage.STARTED, Stage.PAUSED, Stage.STOPPED, Stage.CREATED)
-                activities.removeAll(getActivitiesInStages(Stage.DESTROYED))
-                if (activities.size > 0) {
-                    val activity = activities.iterator().next()
-                    activity.finish()
-                    return true
-                } else {
-                    return false
-                }
+        val activityClosed = callOnMainSync(instrumentation, Callable<kotlin.Boolean> {
+            val activities = getActivitiesInStages(Stage.RESUMED, Stage.STARTED, Stage.PAUSED, Stage.STOPPED, Stage.CREATED)
+            activities.removeAll(getActivitiesInStages(Stage.DESTROYED))
+            if (activities.size > 0) {
+                val activity = activities.iterator().next()
+                activity.finish()
+                true
+            } else {
+                false
             }
         })
         if (activityClosed) {
@@ -182,7 +177,7 @@ public class RadisTest {
         Helpers.checkTitleBarDisplayed(R.string.op_creation)
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
         Helpers.scrollThenTypeText(R.id.edit_op_sum, "+$OP_AMOUNT")
-        onView(withId(R.id.edit_op_sum)).check(matches(withText(equalTo("+10,50"))))
+        onView(withId(R.id.edit_op_sum)).check(matches(withText(equalTo("+${10.50.formatSum()}"))))
         Helpers.clickOnActionItemConfirm()
         Helpers.checkAccountSumIs(1011.0.formatSum())
         onView(withId(R.id.op_sum)).check(matches(withText(equalTo(10.50.formatSum()))))
@@ -206,7 +201,7 @@ public class RadisTest {
         Helpers.checkTitleBarDisplayed(R.string.op_edition)
 
         onView(withId(R.id.edit_op_sum)).perform(clearText())
-        onView(withId(R.id.edit_op_sum)).perform(typeText("-7,50"))
+        onView(withId(R.id.edit_op_sum)).perform(typeText("-7.50"))
 
         Helpers.clickOnActionItemConfirm()
 
@@ -270,7 +265,7 @@ public class RadisTest {
         Helpers.setDateOnPicker(R.id.op_date_btn, today)
 
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
-        Helpers.scrollThenTypeText(R.id.edit_op_sum, "9,50")
+        Helpers.scrollThenTypeText(R.id.edit_op_sum, "9.50")
         Helpers.scrollThenTypeText(R.id.edit_op_tag, RadisTest.OP_TAG)
         Helpers.scrollThenTypeText(R.id.edit_op_mode, RadisTest.OP_MODE)
         Helpers.scrollThenTypeText(R.id.edit_op_notes, RadisTest.OP_DESC)
@@ -1217,18 +1212,18 @@ public class RadisTest {
 
         var TAG = "RadisRobotium"
         val ACCOUNT_NAME = "Test"
-        val ACCOUNT_START_SUM = "+1000,50"
-        val ACCOUNT_START_SUM_FORMATED_IN_EDITOR = "1 000,50"
-        val ACCOUNT_START_SUM_FORMATED_ON_LIST = "1 000,50 €"
+        val ACCOUNT_START_SUM = "+1000.50"
+        val ACCOUNT_START_SUM_FORMATED_IN_EDITOR = "${1000.5.formatSum()}"
+        val ACCOUNT_START_SUM_FORMATED_ON_LIST = "${1000.5.formatSum()} ${SUM_FORMAT.decimalFormatSymbols.currencySymbol}"
         val ACCOUNT_DESC = "Test Description"
         val ACCOUNT_NAME_2 = "Test2"
-        val ACCOUNT_START_SUM_2 = "+2000,50"
-        val ACCOUNT_START_SUM_FORMATED_ON_LIST_2 = "2 000,50 €"
+        val ACCOUNT_START_SUM_2 = "+2000.50"
+        val ACCOUNT_START_SUM_FORMATED_ON_LIST_2 = "${2000.5.formatSum()} ${SUM_FORMAT.decimalFormatSymbols.currencySymbol}"
         val ACCOUNT_DESC_2 = "Test Description 2"
         val ACCOUNT_NAME_3 = "Test3"
         val OP_TP = "Operation 1"
         val OP_AMOUNT = "10.50"
-        val OP_AMOUNT_FORMATED = "-10,50"
+        val OP_AMOUNT_FORMATED = "${(-10.50).formatSum()}"
         val OP_TAG = "Tag 1"
         val OP_MODE = "Carte bleue"
         val OP_DESC = "Robotium Operation 1"
