@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Configuration
 import android.os.Bundle
+import android.os.Handler
 import android.os.Message
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
@@ -18,9 +19,11 @@ import android.widget.Adapter
 import android.widget.AdapterView
 import android.widget.ListView
 import android.widget.Spinner
+import android.widget.Toast
 import com.crashlytics.android.Crashlytics
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
+import fr.geobert.radis.db.DbHelper
 import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
 import fr.geobert.radis.tools.DBPrefsManager
@@ -304,8 +307,16 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private fun processAccountList(create: Boolean) {
         Log.d(TAG, "processAccountList: count:${mAccountManager.mAccountAdapter.count}, create:$create")
         if (mAccountManager.mAccountAdapter.count == 0) {
-            // no account, open create account
-            AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT, true)
+            // no account, try restore database
+            if (!DbHelper.restoreDatabase(this)) {
+                // no account and no backup, open create account
+                AccountEditor.callMeForResult(this, AccountEditor.NO_ACCOUNT, true)
+            } else {
+                val msg = StringBuilder()
+                msg.append(getString(R.string.backup_found)).append('\n').append(getString(R.string.restarting))
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                Handler().postDelayed({ Tools.restartApp(this) }, 500)
+            }
         } else {
             if (mActiveFragmentId == -1) {
                 displayFragment(OP_LIST, (-1).toLong())

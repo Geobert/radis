@@ -135,11 +135,9 @@ public object Tools {
                         R.string.backup_failed, { -> DbHelper.backupDatabase() })
                 MainActivity.RESTORE_ACCOUNT -> createRestoreOrBackupClickListener(R.string.restore_success,
                         R.string.restore_failed, { -> DbHelper.restoreDatabase(ctx) })
-                MainActivity.PROCESS_SCH -> object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface, which: Int) {
-                        RadisService.acquireStaticLock(ctx)
-                        ctx.startService(Intent(ctx, RadisService::class.java))
-                    }
+                MainActivity.PROCESS_SCH -> DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+                    RadisService.acquireStaticLock(ctx)
+                    ctx.startService(Intent(ctx, RadisService::class.java))
                 }
                 else -> {
                     null
@@ -208,17 +206,15 @@ public object Tools {
 
     private fun createRestoreOrBackupClickListener(successTextId: Int, failureTextId: Int,
                                                    action: () -> Boolean): DialogInterface.OnClickListener {
-        return object : DialogInterface.OnClickListener {
-            override fun onClick(dialog: DialogInterface, id: Int) {
-                val ctx = mActivity
-                if (action() && ctx != null) {
-                    val msg = StringBuilder()
-                    msg.append(ctx.getString(successTextId)).append('\n').append(ctx.getString(R.string.restarting))
-                    Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
-                    Handler().postDelayed({ Tools.restartApp(ctx) }, 2000)
-                } else {
-                    ErrorDialog.newInstance(failureTextId).show((ctx as BaseActivity).supportFragmentManager, "")
-                }
+        return DialogInterface.OnClickListener { dialog: DialogInterface, id: Int ->
+            val ctx = mActivity
+            if (action() && ctx != null) {
+                val msg = StringBuilder()
+                msg.append(ctx.getString(successTextId)).append('\n').append(ctx.getString(R.string.restarting))
+                Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
+                Handler().postDelayed({ Tools.restartApp(ctx) }, 2000)
+            } else {
+                ErrorDialog.newInstance(failureTextId).show((ctx as BaseActivity).supportFragmentManager, "")
             }
         }
     }

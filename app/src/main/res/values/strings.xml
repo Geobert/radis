@@ -287,4 +287,5 @@
     <string name="no_mode">No mode, %s</string>
     <string name="pos_values">positives</string>
     <string name="neg_values">negatives</string>
+    <string name="backup_found">A backup was found and restored.</string>
 </resources>
