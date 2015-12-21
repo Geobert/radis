@@ -2,7 +2,6 @@ package fr.geobert.radis.ui
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
@@ -46,7 +45,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
     private var isExporting = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.exporter_fragment)
         setTitle(R.string.export_csv)
         initToolbar(this)
@@ -56,11 +55,11 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
         moveBtnCont = findViewById(R.id.move_buttons_cont) as LinearLayout
         oneFilePerAccountChk = findViewById(R.id.one_file_per_account_chk) as CheckBox
 
-        val strings = getResources().getStringArray(R.array.csv_header_item)
+        val strings = resources.getStringArray(R.array.csv_header_item)
         adapter = ExportColsAdapter(this, strings.map { ExportCol(it) })
-        colsToExportList.setLayoutManager(LinearLayoutManager(this))
-        colsToExportList.setItemAnimator(DefaultItemAnimator())
-        colsToExportList.setAdapter(adapter)
+        colsToExportList.layoutManager = LinearLayoutManager(this)
+        colsToExportList.itemAnimator = DefaultItemAnimator()
+        colsToExportList.adapter = adapter
 
         moveUpBtn.setOnClickListener { moveItem(true) }
         moveDownBtn.setOnClickListener { moveItem(false) }
@@ -69,15 +68,15 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super<BaseActivity>.onSaveInstanceState(outState)
-        outState.putBoolean("oneFilePerAccount", oneFilePerAccountChk.isChecked())
+        super.onSaveInstanceState(outState)
+        outState.putBoolean("oneFilePerAccount", oneFilePerAccountChk.isChecked)
         outState.putParcelableArray("columns", adapter.toArray())
         outState.putInt("selected", adapter.selectedPos)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
-        oneFilePerAccountChk.setChecked(savedInstanceState.getBoolean("oneFilePerAccount"))
+        super.onRestoreInstanceState(savedInstanceState)
+        oneFilePerAccountChk.isChecked = savedInstanceState.getBoolean("oneFilePerAccount")
         adapter.fromArray(savedInstanceState.getParcelableArray("columns"))
         adapter.selectedPos = savedInstanceState.getInt("selected")
         if (adapter.selectedPos > -1) {
@@ -123,8 +122,8 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 backupDir.mkdirs()
                 val path = processExportCSV(sd, backupDBDir)
                 if (path != null) {
-                    val p = if (path.length() > 0) path else backupDir.getAbsolutePath()
-                    ExportCSVSucceedDialog.newInstance(p, path.length() > 0).show(getSupportFragmentManager(), "csv_export")
+                    val p = if (path.length > 0) path else backupDir.absolutePath
+                    ExportCSVSucceedDialog.newInstance(p, path.length > 0).show(supportFragmentManager, "csv_export")
                 }
             }
         } catch (e: Exception) {
@@ -146,7 +145,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
         val timeTag = filenameTimetag()
         val filename = "${timeTag}_radis.csv"
         val file = File(sd, "$backupDBDir$filename")
-        if (!oneFilePerAccountChk.isChecked()) {
+        if (!oneFilePerAccountChk.isChecked) {
             writer = BufferedWriter(FileWriter(file))
             val stringbuilder = adapter.fold(StringBuilder(), { sb, col ->
                 if (col.toExport) {
@@ -154,8 +153,8 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 }
                 sb
             })
-            if (stringbuilder.length() > 0) {
-                stringbuilder.replace(stringbuilder.length() - 1, stringbuilder.length(), "\n")
+            if (stringbuilder.length > 0) {
+                stringbuilder.replace(stringbuilder.length - 1, stringbuilder.length, "\n")
                 writer.write(stringbuilder.toString())
             } else {
                 Tools.popError(this, getString(R.string.no_column_selected), null)
@@ -168,7 +167,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
         writer?.close()
 
         return if (writer != null) {
-            file.getAbsolutePath()
+            file.absolutePath
         } else {
             ""
         }
@@ -183,7 +182,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
             BufferedWriter(FileWriter(File(sd, "$backupDBDir$filename")))
         }
 
-        val colsLabel = getResources().getStringArray(R.array.csv_header_item)
+        val colsLabel = resources.getStringArray(R.array.csv_header_item)
         operations.forEach {
             val stringbuilder = adapter.fold(StringBuilder(), { sb, col ->
                 if (col.toExport) {
@@ -201,8 +200,8 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 }
                 sb
             })
-            if (stringbuilder.length() > 0) {
-                stringbuilder.replace(stringbuilder.length() - 1, stringbuilder.length(), "\n")
+            if (stringbuilder.length > 0) {
+                stringbuilder.replace(stringbuilder.length - 1, stringbuilder.length, "\n")
             }
             w.write(stringbuilder.toString())
         }
@@ -214,13 +213,13 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
     public class ExportCSVSucceedDialog : DialogFragment() {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             super.onCreateDialog(savedInstanceState)
-            val builder = AlertDialog.Builder(getActivity())
-            val path = getArguments().getString("path")
-            val share = getArguments().getBoolean("share")
+            val builder = AlertDialog.Builder(activity)
+            val path = arguments.getString("path")
+            val share = arguments.getBoolean("share")
             val msg = getString(R.string.export_csv_success).format(path.substring(0, path.lastIndexOf(File.separator) + 1))
             builder.setTitle(R.string.export_csv).setMessage(msg).setCancelable(false).
                     setNegativeButton(R.string.ok, { d, i ->
-                        getActivity().finish()
+                        activity.finish()
                     })
             if (share) {
                 builder.setPositiveButton(R.string.open, { d, i ->
@@ -239,7 +238,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
                 val args = Bundle()
                 args.putString("path", path)
                 args.putBoolean("share", share)
-                f.setArguments(args)
+                f.arguments = args
                 return f
             }
         }
@@ -247,7 +246,7 @@ public class ExporterActivity : BaseActivity(), EditorToolbarTrait {
 
     companion object {
         public fun callMe(ctx: BaseActivity) {
-            val i = Intent(ctx, javaClass<ExporterActivity>())
+            val i = Intent(ctx, ExporterActivity::class.java)
             ctx.startActivityForResult(i, 90)
         }
     }

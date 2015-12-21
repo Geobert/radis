@@ -4,15 +4,15 @@ import android.app.Activity
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
-import android.support.v4.widget.CursorAdapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CursorAdapter
 import android.widget.TextView
 import fr.geobert.radis.R
 import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.db.InfoTables
-import fr.geobert.radis.tools.AsciiUtils
+import fr.geobert.radis.tools.convertNonAscii
 
 public class InfoAdapter(private val mCtx: Activity, private val tableUri: Uri,
                          private val colName: String, private val mIsQuickAdd: Boolean, val account: AccountConfig) :
@@ -25,7 +25,7 @@ public class InfoAdapter(private val mCtx: Activity, private val tableUri: Uri,
 
     override fun bindView(view: View, context: Context, cursor: Cursor) {
         val text = convertToString(cursor).toString()
-        (view as TextView).setText(text)
+        (view as TextView).text = text
     }
 
     override fun newView(context: Context, cursor: Cursor, parent: ViewGroup): View {
@@ -36,9 +36,9 @@ public class InfoAdapter(private val mCtx: Activity, private val tableUri: Uri,
     }
 
     override fun runQueryOnBackgroundThread(constraint: CharSequence?): Cursor {
-        mCurrentConstraint = if (constraint != null) AsciiUtils.convertNonAscii(constraint.toString()) else null
-        if (getFilterQueryProvider() != null) {
-            return getFilterQueryProvider().runQuery(constraint)
+        mCurrentConstraint = if (constraint != null) convertNonAscii(constraint.toString()) else null
+        if (filterQueryProvider != null) {
+            return filterQueryProvider.runQuery(constraint)
         }
         return InfoTables.fetchMatchingInfo(mCtx, tableUri, colName, mCurrentConstraint, mIsQuickAdd, account)
     }

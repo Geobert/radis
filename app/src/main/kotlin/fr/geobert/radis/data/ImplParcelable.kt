@@ -18,9 +18,9 @@ public interface ImplParcelable : Parcelable {
                 is String -> p.writeString(it.value as String)
                 is DateTime -> {
                     val d = it.value as DateTime
-                    p.writeInt(d.getYear())
-                    p.writeInt(d.getMonth())
-                    p.writeInt(d.getDay())
+                    p.writeInt(d.year)
+                    p.writeInt(d.month)
+                    p.writeInt(d.day)
                 }
                 else -> throw RuntimeException()
             }

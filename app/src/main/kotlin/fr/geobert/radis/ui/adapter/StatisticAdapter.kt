@@ -1,23 +1,22 @@
 package fr.geobert.radis.ui.adapter
 
-import android.support.v7.widget.RecyclerView
 import android.database.Cursor
-import fr.geobert.radis.tools.map
-import fr.geobert.radis.data.Statistic
-import android.view.ViewGroup
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
-import fr.geobert.radis.ui.DeleteStatConfirmationDiag
+import android.view.ViewGroup
 import fr.geobert.radis.R
-import fr.geobert.radis.ui.editor.StatisticEditor
-import fr.geobert.radis.ui.StatisticsListFragment
-import fr.geobert.radis.tools.formatDate
+import fr.geobert.radis.data.Statistic
 import fr.geobert.radis.tools.formatDateLong
+import fr.geobert.radis.tools.map
+import fr.geobert.radis.ui.DeleteStatConfirmationDiag
+import fr.geobert.radis.ui.StatisticsListFragment
+import fr.geobert.radis.ui.editor.StatisticEditor
 
 public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) : RecyclerView.Adapter<StatRowHolder>() {
-    var statistics = cursor.map<Statistic> { Statistic(it) }
+    var statistics = cursor.map { Statistic(it) }
 
     override fun onCreateViewHolder(viewGroup: ViewGroup, p1: Int): StatRowHolder {
-        val l = LayoutInflater.from(viewGroup.getContext()).inflate(fr.geobert.radis.R.layout.statistic_row,
+        val l = LayoutInflater.from(viewGroup.context).inflate(fr.geobert.radis.R.layout.statistic_row,
                 viewGroup, false)
         return StatRowHolder(l, ctx)
     }
@@ -25,13 +24,13 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
     override fun onBindViewHolder(holder: StatRowHolder, pos: Int) {
         val stat = statisticAt(pos)
 
-        holder.nameLbl.setText(stat.name)
-        holder.accountNameLbl.setText(stat.accountName)
+        holder.nameLbl.text = stat.name
+        holder.accountNameLbl.text = stat.accountName
         holder.trashBtn.setOnClickListener {
-            DeleteStatConfirmationDiag(stat.id).show(ctx.getActivity().getSupportFragmentManager(), "")
+            DeleteStatConfirmationDiag(stat.id).show(ctx.activity.supportFragmentManager, "")
         }
 
-        holder.editBtn.setOnClickListener { StatisticEditor.callMeForResult(ctx.getActivity(), stat.id) }
+        holder.editBtn.setOnClickListener { StatisticEditor.callMeForResult(ctx.activity, stat.id) }
 
         holder.chartType.setImageResource(when (stat.chartType) {
             Statistic.CHART_PIE -> R.drawable.stat_pie
@@ -42,7 +41,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
         holder.filterName.setText(stat.getFilterStr())
 
         val (start, end) = stat.createTimeRange()
-        holder.timeScale.setText("${start.formatDateLong()} ${ctx.getString(R.string.rarr)} ${end.formatDateLong()}")
+        holder.timeScale.text = "${start.formatDateLong()} ${ctx.getString(R.string.rarr)} ${end.formatDateLong()}"
         holder.stat = stat
     }
 
@@ -51,7 +50,7 @@ public class StatisticAdapter(cursor: Cursor, val ctx: StatisticsListFragment) :
     override fun getItemCount(): Int = statistics.count()
 
     fun swapCursor(c: Cursor) {
-        statistics = c.map<Statistic> { Statistic(it) }
+        statistics = c.map { Statistic(it) }
         notifyDataSetChanged()
     }
 }

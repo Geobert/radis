@@ -53,7 +53,7 @@
                 android:layout_alignTop="@id/filter_ico"
                 android:layout_alignBottom="@id/filter_ico"
                 android:layout_width="wrap_content"
-                android:text="toto"
+                android:text="Catégorie"
                 android:gravity="center_vertical"
                 android:textSize="12sp"
                 android:layout_toRightOf="@id/filter_ico"
@@ -66,7 +66,7 @@
                 android:layout_height="16dp"
                 android:layout_marginLeft="10dp"
                 android:layout_below="@+id/account_ico"
-                android:layout_marginTop="3dp"
+                android:layout_marginTop="5dp"
                 android:src="@drawable/clock_48"
                 />
 
@@ -82,7 +82,7 @@
                 android:textSize="12sp"
                 android:layout_marginLeft="6dp"/>
 
-        <LinearLayout
+        <RelativeLayout
                 android:id="@+id/chart"
                 android:gravity="center"
                 android:layout_below="@id/time_ico"

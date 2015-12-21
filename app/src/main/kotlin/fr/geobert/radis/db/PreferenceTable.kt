@@ -6,17 +6,15 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import android.support.v4.content.CursorLoader
-import android.util.Log
 import fr.geobert.radis.data.AccountConfig
 import fr.geobert.radis.tools.PrefsManager
 import fr.geobert.radis.ui.ConfigFragment
-import java.util.HashMap
-import kotlin.platform.platformStatic
+import java.util.*
 
 public object PreferenceTable {
 
     public fun deletePref(db: SQLiteDatabase, key: String) {
-        db.delete(DATABASE_PREFS_TABLE, KEY_PREFS_NAME + "='" + key + "'", null)
+        db.delete(DATABASE_PREFS_TABLE, "$KEY_PREFS_NAME='$key'", null)
     }
 
     public val DATABASE_PREFS_TABLE: String = "preferences"
@@ -26,18 +24,16 @@ public object PreferenceTable {
     public val KEY_PREFS_ACCOUNT: String = "account_id"
     public val KEY_PREFS_IS_ACTIVE: String = "active"
 
-    protected val DATABASE_PREFS_CREATE: String = "create table $DATABASE_PREFS_TABLE($KEY_PREFS_ROWID integer primary key autoincrement," +
-            "$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null," +
-            "$KEY_PREFS_ACCOUNT integer not null, $KEY_PREFS_IS_ACTIVE integer not null);"
+    private val DATABASE_PREFS_CREATE: String = "create table $DATABASE_PREFS_TABLE($KEY_PREFS_ROWID integer primary key autoincrement,$KEY_PREFS_NAME text not null, $KEY_PREFS_VALUE text not null,$KEY_PREFS_ACCOUNT integer not null, $KEY_PREFS_IS_ACTIVE integer not null);"
     public val PREFS_COLS: Array<String> = arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE)
     public val ACCOUNT_CONFIG_COLS: Array<String> = arrayOf(KEY_PREFS_NAME, KEY_PREFS_VALUE, KEY_PREFS_IS_ACTIVE)
-    protected val ADD_ACCOUNT_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
-    protected val ADD_IS_ACTIVE_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_IS_ACTIVE integer not null DEFAULT 1"
+    private val ADD_ACCOUNT_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_ACCOUNT integer not null DEFAULT 0"
+    private val ADD_IS_ACTIVE_COL: String = "ALTER TABLE $DATABASE_PREFS_TABLE ADD COLUMN $KEY_PREFS_IS_ACTIVE integer not null DEFAULT 1"
 
     private val CREATE_TRIGGER_ACCOUNT_DELETED = "CREATE TRIGGER IF NOT EXISTS on_account_deleted AFTER DELETE ON ${AccountTable.DATABASE_ACCOUNT_TABLE} " +
             "BEGIN DELETE FROM $DATABASE_PREFS_TABLE WHERE $KEY_PREFS_ACCOUNT = old._id ; END"
 
-    platformStatic fun onCreate(db: SQLiteDatabase) {
+    fun onCreate(db: SQLiteDatabase) {
         db.execSQL(DATABASE_PREFS_CREATE)
         db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)
     }
@@ -51,7 +47,7 @@ public object PreferenceTable {
             db.insert(DATABASE_PREFS_TABLE, null, values)
         } else {
             // update
-            db.update(DATABASE_PREFS_TABLE, values, KEY_PREFS_NAME + "='" + key + "'", null)
+            db.update(DATABASE_PREFS_TABLE, values, "$KEY_PREFS_NAME='$key'", null)
         }
     }
 
@@ -117,7 +113,7 @@ public object PreferenceTable {
         val values = createValuesOf(config)
         values.forEach {
             it.put(KEY_PREFS_ACCOUNT, accountId)
-            ctx.getContentResolver().insert(DbContentProvider.PREFS_URI, it)
+            ctx.contentResolver.insert(DbContentProvider.PREFS_URI, it)
         }
     }
 
@@ -126,33 +122,33 @@ public object PreferenceTable {
         values.forEach {
             val k = it.getAsString(KEY_PREFS_NAME)
             it.remove(KEY_PREFS_NAME)
-            val u = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.PREFS_URI}/$id"), it, "$KEY_PREFS_NAME=?", arrayOf(k))
+            val u = ctx.contentResolver.update(Uri.parse("${DbContentProvider.PREFS_URI}/$id"), it, "$KEY_PREFS_NAME=?", arrayOf(k))
         }
     }
 
     fun fetchPrefForAccount(ctx: Context, accountId: Long): Cursor {
-        return ctx.getContentResolver().query(Uri.parse("${DbContentProvider.PREFS_URI}/$accountId"), ACCOUNT_CONFIG_COLS, null, null, null)
+        return ctx.contentResolver.query(Uri.parse("${DbContentProvider.PREFS_URI}/$accountId"), ACCOUNT_CONFIG_COLS, null, null, null)
     }
 
 
     // UPGRADE
 
-    platformStatic fun upgradeFromV10(ctx: Context, db: SQLiteDatabase) {
+    fun upgradeFromV10(ctx: Context, db: SQLiteDatabase) {
         db.execSQL(DATABASE_PREFS_CREATE)
         // convert all preferences to DB
         val prefs = PrefsManager.getInstance(ctx)
-        val allPrefs = prefs.getRawData()
+        val allPrefs = prefs.rawData
         if (null != allPrefs) {
-            for (elt in allPrefs.entrySet()) {
+            for (elt in allPrefs.entries) {
                 val values = ContentValues()
-                values.put(KEY_PREFS_VALUE, elt.getValue())
-                values.put(KEY_PREFS_NAME, elt.getKey())
+                values.put(KEY_PREFS_VALUE, elt.value)
+                values.put(KEY_PREFS_NAME, elt.key)
                 db.insert(DATABASE_PREFS_TABLE, null, values)
             }
         }
     }
 
-    platformStatic fun upgradeFromV18(db: SQLiteDatabase) {
+    fun upgradeFromV18(db: SQLiteDatabase) {
         db.execSQL(ADD_ACCOUNT_COL)
         db.execSQL(ADD_IS_ACTIVE_COL)
         db.execSQL(CREATE_TRIGGER_ACCOUNT_DELETED)

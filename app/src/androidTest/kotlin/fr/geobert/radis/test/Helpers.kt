@@ -7,26 +7,24 @@ import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.UiController
 import android.support.test.espresso.ViewAction
 import android.support.test.espresso.action.ViewActions
-import android.support.test.espresso.action.ViewActions.click
-import android.support.test.espresso.action.ViewActions.replaceText
-import android.support.test.espresso.action.ViewActions.scrollTo
-import android.support.test.espresso.action.ViewActions.typeText
+import android.support.test.espresso.action.ViewActions.*
 import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
 import android.support.test.espresso.assertion.ViewAssertions.matches
 import android.support.test.espresso.contrib.DrawerActions.openDrawer
 import android.support.test.espresso.contrib.DrawerMatchers.isOpen
 import android.support.test.espresso.contrib.PickerActions
-import android.support.test.espresso.contrib.PickerActions.setDate
 import android.support.test.espresso.contrib.RecyclerViewActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.matcher.RootMatchers
-import android.support.test.espresso.matcher.ViewMatchers.hasFocus
-import android.support.test.espresso.matcher.ViewMatchers.isDisplayed
-import android.support.test.espresso.matcher.ViewMatchers.withId
-import android.support.test.espresso.matcher.ViewMatchers.withText
+import android.support.test.espresso.matcher.ViewMatchers.*
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.Button
+import android.widget.DatePicker
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.RelativeLayout
+import android.widget.TextView
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.tools.TIME_ZONE
@@ -102,7 +100,7 @@ class Helpers {
             clickOnActionItemConfirm()
 
             onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(2, javaClass<RelativeLayout>()))
+            onView(allOf(iz(instanceOf(ListView::class.java)), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(2, RelativeLayout::class.java))
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
@@ -115,14 +113,14 @@ class Helpers {
             clickOnActionItemConfirm()
 
             onView(allOf(withId(R.id.account_spinner), isDisplayed())).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<ListView>())), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(3, javaClass<RelativeLayout>()))
+            onView(allOf(iz(instanceOf(ListView::class.java)), isDisplayed()) as Matcher<View>).inRoot(RootMatchers.isPlatformPopup()).check(has(3, RelativeLayout::class.java))
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
         fun addOp(date: DateTime, third: String = "Toto", amount: String = "-1", tag: String = "", mode: String = "", desc: String = "") {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.op_creation)
-            onView(withId(R.id.edit_op_date)).perform(PickerActions.setDate(date.getYear(), date.getMonth(), date.getDay()))
+            Helpers.setDateOnPicker(R.id.op_date_btn, date)
             fillOpForm(third, amount, tag, mode, desc)
             clickOnActionItemConfirm()
         }
@@ -150,14 +148,14 @@ class Helpers {
 
         fun setEdtPrefValue(key: Int, value: String) {
             onView(withText(key)).perform(click())
-            onView(allOf(iz(instanceOf(javaClass<EditText>())), hasFocus()) as Matcher<View>).perform(replaceText(value))
+            onView(allOf(iz(instanceOf(EditText::class.java)), hasFocus()) as Matcher<View>).perform(replaceText(value))
             Espresso.closeSoftKeyboard()
             pauseTest(2000) // needed to workaround espresso 2.0 bug
             clickOnDialogButton(R.string.ok)
         }
 
         fun setInsertDatePref(date: DateTime) {
-            setEdtPrefValue(R.string.prefs_insertion_date_label, Integer.toString(date.getDay()))
+            setEdtPrefValue(R.string.prefs_insertion_date_label, Integer.toString(date.day))
         }
 
         fun setUpSchOp() {
@@ -177,11 +175,9 @@ class Helpers {
             onView(withId(R.id.create_operation)).perform(click())
             checkTitleBarDisplayed(R.string.sch_edition)
 
-            onView(withId(R.id.edit_op_date)).perform(setDate(date.getYear(), date.getMonth(), date.getDay()))
+            Helpers.setDateOnPicker(R.id.op_date_btn, date)
 
-            fillOpForm(RadisTest.OP_TP, "9,50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
-
-            swipePagerLeft()
+            fillOpForm(RadisTest.OP_TP, "9.50", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             clickOnSpinner(R.id.periodicity_choice, R.array.periodicity_choices, 1)
             clickOnActionItemConfirm()
@@ -201,20 +197,19 @@ class Helpers {
             val today = DateTime.today(TIME_ZONE)
             val schOpDate = today.minusDays(14)
 
-            onView(withId(R.id.edit_op_date)).perform(setDate(schOpDate.getYear(), schOpDate.getMonth(), schOpDate.getDay()))
-            fillOpForm(RadisTest.OP_TP, "1,00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
+            Helpers.setDateOnPicker(R.id.op_date_btn, schOpDate)
 
-            swipePagerLeft()
+            fillOpForm(RadisTest.OP_TP, "1.00", RadisTest.OP_TAG, RadisTest.OP_MODE, RadisTest.OP_DESC)
 
             onView(withId(R.id.periodicity_choice)).perform(scrollTo())
             onView(withId(R.id.periodicity_choice)).perform(click())
-            val strs = getContext().getResources().getStringArray(R.array.periodicity_choices).get(0)
-            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+            val strs = getContext().resources.getStringArray(R.array.periodicity_choices).get(0)
+            onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
             clickOnActionItemConfirm()
 
             Espresso.pressBack() // back to operations list
             Helpers.pauseTest(2000)
-            val endOfMonth = today.getEndOfMonth()
+            val endOfMonth = today.endOfMonth
             val nbOp = endOfMonth.getWeekIndex(schOpDate)
 
             Log.d("RadisTest", "nb op inserted: $nbOp")
@@ -243,10 +238,10 @@ class Helpers {
         fun actionOnOpListAtPosition(pos: Int, viewAction: ViewAction) =
                 actionOnItemAtPosition<OpRowHolder<Operation>>(pos, viewAction)
 
-        fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(textId),
+        fun clickOnDialogButton(textId: Int) = onView(allOf(iz(instanceOf(Button::class.java)), withText(textId),
                 isDisplayed()) as Matcher<View>).perform(click())
 
-        fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(javaClass<Button>())), withText(text),
+        fun clickOnDialogButton(text: String) = onView(allOf(iz(instanceOf(Button::class.java)), withText(text),
                 isDisplayed()) as Matcher<View>).perform(click())
 
         fun scrollRecyclerViewToPos(pos: Int) {
@@ -255,26 +250,32 @@ class Helpers {
 
         fun clickOnRecyclerViewAtPos(pos: Int) {
             onView(withId(R.id.operation_list)).perform(Helpers.actionOnOpListAtPosition(pos, click()))
+            Helpers.pauseTest(500)
         }
 
         fun checkAccountSumIs(text: String) =
                 onView(withId(R.id.account_sum)).check(matches(withText(containsString(text))))
 
         fun scrollThenTypeText(edtId: Int, str: String) {
-
-            onView(withId(edtId)).perform(scrollTo()).perform(typeText(str))
+            val v = onView(withId(edtId)).perform(scrollTo())
+            Helpers.pauseTest(500)
+            v.perform(replaceText("")).perform(typeText(str))
         }
 
         fun clickOnSpinner(spinnerId: Int, arrayResId: Int, pos: Int) {
             onView(withId(spinnerId)).perform(scrollTo())
+            Helpers.pauseTest(500)
             onView(withId(spinnerId)).perform(click())
-            val strs = getContext().getResources().getStringArray(arrayResId).get(pos)
-            onData(allOf(iz(instanceOf(javaClass<String>())), iz(equalTo(strs)))).perform(click())
+            Helpers.pauseTest(500)
+            val strs = getContext().resources.getStringArray(arrayResId).get(pos)
+            onData(allOf(iz(instanceOf(String::class.java)), iz(equalTo(strs)))).perform(click())
         }
 
         fun clickOnSpinner(spinnerId: Int, text: String) {
             onView(withId(spinnerId)).perform(scrollTo())
+            Helpers.pauseTest(500)
             onView(withId(spinnerId)).perform(click())
+            Helpers.pauseTest(500)
             onView(withText(equalTo(text))).perform(click())
         }
 
@@ -308,7 +309,7 @@ class Helpers {
 
             onView(allOf(withId(id), isDisplayed())).perform(object : ViewAction {
                 override fun getConstraints(): Matcher<View> {
-                    return allOf(isDisplayed(), iz(instanceOf(javaClass<TextView>()))) as Matcher<View>
+                    return allOf(isDisplayed(), iz(instanceOf(TextView::class.java)))
                 }
 
                 override fun getDescription(): String {
@@ -317,12 +318,25 @@ class Helpers {
 
                 override fun perform(p0: UiController?, p1: View?) {
                     val textView = p1 as TextView
-                    res = textView.getText()
+                    res = textView.text
                 }
 
             })
 
             return res
+        }
+
+        fun setDateOnPicker(id: Int, date: DateTime) {
+            Log.d("Helpers", "setDateOnPicker ${date.format("dd/MM/yyyy")}")
+            onView(withId(id)).perform(click())
+            //iz(instanceOf(DatePicker::class.java))
+            //withClassName(equalTo(DatePicker::class.java.name))
+            onView(iz(instanceOf(DatePicker::class.java))).perform(PickerActions.setDate(date.year,
+                    date.month, date.day))
+            //onView(allOf(withId(android.R.id.button1), iz(instanceOf(AppCompatButton::class.java)))).perform(click());
+
+            Helpers.clickOnDialogButton(android.R.string.ok)
+            pauseTest(500)
         }
     }
 }

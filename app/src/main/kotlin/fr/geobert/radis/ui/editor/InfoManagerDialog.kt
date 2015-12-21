@@ -3,7 +3,6 @@ package fr.geobert.radis.ui.editor
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
@@ -11,14 +10,14 @@ import fr.geobert.radis.R
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
 import fr.geobert.radis.tools.Tools
-
-import java.util.HashMap
+import java.util.*
 
 public class InfoManagerDialog : DialogFragment() {
     private var mInfoManager: InfoManager? = null
     private var mMode = -1
 
-    private fun createInfoManagerIfNeeded(table: Uri, colName: String, title: String, editId: Int, deleteId: Int): InfoManager {
+    private fun createInfoManagerIfNeeded(table: Uri, colName: String, title: String, editId: Int, deleteId: Int):
+            InfoManager {
         var i: InfoManager? = mInfoManagersMap.get(table.toString())
         if (null == i) {
             i = InfoManager(this, title, table, colName, editId, deleteId)
@@ -28,7 +27,7 @@ public class InfoManagerDialog : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val args = getArguments()
+        val args = arguments
         val table = args.getParcelable<Uri>("table")
         val colName = args.getString("colName")
         val title = args.getString("title")
@@ -42,7 +41,7 @@ public class InfoManagerDialog : DialogFragment() {
             THIRD_PARTIES_DIALOG_ID, TAGS_DIALOG_ID, MODES_DIALOG_ID -> return infoManager.getListDialog()
             EDIT_MODE_DIALOG_ID, EDIT_TAG_DIALOG_ID, EDIT_THIRD_PARTY_DIALOG_ID -> return infoManager.getEditDialog()
             DELETE_MODE_DIALOG_ID, DELETE_TAG_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID ->
-                return Tools.createDeleteConfirmationDialog(getActivity(), { d, i ->
+                return Tools.createDeleteConfirmationDialog(activity, { d, i ->
                     createInfoManagerIfNeeded(table, colName, title, editId, deleteId).deleteInfo()
                 })
             else -> // should not happen
@@ -52,7 +51,7 @@ public class InfoManagerDialog : DialogFragment() {
 
     override fun onResume() {
         super.onResume()
-        val d = getDialog()
+        val d = dialog
         when (mMode) {
             THIRD_PARTIES_DIALOG_ID, TAGS_DIALOG_ID, MODES_DIALOG_ID -> mInfoManager!!.onPrepareDialog(d as AlertDialog)
             EDIT_MODE_DIALOG_ID, EDIT_TAG_DIALOG_ID, EDIT_THIRD_PARTY_DIALOG_ID -> mInfoManager!!.initEditDialog(d)
@@ -79,7 +78,8 @@ public class InfoManagerDialog : DialogFragment() {
             mInfoManagersMap.clear()
         }
 
-        private fun newInstance(table: Uri, colName: String, title: String, editId: Int, deleteId: Int, mode: Int): InfoManagerDialog {
+        private fun newInstance(table: Uri, colName: String, title: String, editId: Int, deleteId: Int, mode: Int):
+                InfoManagerDialog {
             val frag = InfoManagerDialog()
             val args = Bundle()
             args.putParcelable("table", table)
@@ -88,7 +88,7 @@ public class InfoManagerDialog : DialogFragment() {
             args.putInt("editId", editId)
             args.putInt("deleteId", deleteId)
             args.putInt("mode", mode)
-            frag.setArguments(args)
+            frag.arguments = args
             return frag
         }
 
@@ -96,7 +96,9 @@ public class InfoManagerDialog : DialogFragment() {
             val k = DbContentProvider.THIRD_PARTY_URI.toString() + "_list"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME, ctx.getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID, THIRD_PARTIES_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME,
+                        ctx.getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID,
+                        THIRD_PARTIES_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
@@ -106,7 +108,8 @@ public class InfoManagerDialog : DialogFragment() {
             val k = DbContentProvider.TAGS_URI.toString() + "_list"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.TAGS_URI, InfoTables.KEY_TAG_NAME, ctx.getString(R.string.tags), EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID, TAGS_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.TAGS_URI, InfoTables.KEY_TAG_NAME,
+                        ctx.getString(R.string.tags), EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID, TAGS_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
@@ -116,37 +119,43 @@ public class InfoManagerDialog : DialogFragment() {
             val k = DbContentProvider.MODES_URI.toString() + "_list"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, ctx.getString(R.string.modes), EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID, MODES_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME,
+                        ctx.getString(R.string.modes), EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID, MODES_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
         }
 
-        protected fun createThirdPartiesDeleteDialog(ctx: Context): InfoManagerDialog {
+        fun createThirdPartiesDeleteDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.THIRD_PARTY_URI.toString() + "_del"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME, ctx.getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME,
+                        ctx.getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID,
+                        DELETE_THIRD_PARTY_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
         }
 
-        protected fun createTagsDeleteDialog(ctx: Context): InfoManagerDialog {
+        fun createTagsDeleteDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.TAGS_URI.toString() + "_del"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.TAGS_URI, InfoTables.KEY_TAG_NAME, ctx.getString(R.string.tags), EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.TAGS_URI, InfoTables.KEY_TAG_NAME,
+                        ctx.getString(R.string.tags), EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
         }
 
-        protected fun createModesDeleteDialog(ctx: Context): InfoManagerDialog {
+        fun createModesDeleteDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.MODES_URI.toString() + "_del"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, ctx.getString(R.string.modes), EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME,
+                        ctx.getString(R.string.modes), EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID,
+                        DELETE_MODE_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
@@ -170,31 +179,35 @@ public class InfoManagerDialog : DialogFragment() {
             }
         }
 
-        protected fun createThirdPartiesEditDialog(ctx: Context): InfoManagerDialog {
+        fun createThirdPartiesEditDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.THIRD_PARTY_URI.toString() + "_edit"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME, ctx.getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID, EDIT_THIRD_PARTY_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.THIRD_PARTY_URI, InfoTables.KEY_THIRD_PARTY_NAME,
+                        ctx.getString(R.string.third_parties), EDIT_THIRD_PARTY_DIALOG_ID, DELETE_THIRD_PARTY_DIALOG_ID,
+                        EDIT_THIRD_PARTY_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
         }
 
-        protected fun createTagsEditDialog(ctx: Context): InfoManagerDialog {
+        fun createTagsEditDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.TAGS_URI.toString() + "_edit"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.TAGS_URI, InfoTables.KEY_TAG_NAME, ctx.getString(R.string.tags), EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID, EDIT_TAG_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.TAGS_URI, InfoTables.KEY_TAG_NAME,
+                        ctx.getString(R.string.tags), EDIT_TAG_DIALOG_ID, DELETE_TAG_DIALOG_ID, EDIT_TAG_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d
         }
 
-        protected fun createModesEditDialog(ctx: Context): InfoManagerDialog {
+        fun createModesEditDialog(ctx: Context): InfoManagerDialog {
             val k = DbContentProvider.MODES_URI.toString() + "_edit"
             var d: InfoManagerDialog? = mInfoManagerDialogMap.get(k)
             if (d == null) {
-                d = InfoManagerDialog.newInstance(DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME, ctx.getString(R.string.modes), EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID, EDIT_MODE_DIALOG_ID)
+                d = InfoManagerDialog.newInstance(DbContentProvider.MODES_URI, InfoTables.KEY_MODE_NAME,
+                        ctx.getString(R.string.modes), EDIT_MODE_DIALOG_ID, DELETE_MODE_DIALOG_ID, EDIT_MODE_DIALOG_ID)
                 mInfoManagerDialogMap.put(k, d)
             }
             return d

@@ -9,22 +9,21 @@ import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.plusMonth
 import fr.geobert.radis.ui.ConfigFragment
 import hirondelle.date4j.DateTime
-import kotlin.platform.platformStatic
 
 data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth: Long, val limitInsertionDate: Long) {
     companion object {
-        platformStatic fun computeTimeParams(ctx: Context, account: Account, config: AccountConfig): TimeParams {
+        fun computeTimeParams(ctx: Context, account: Account, config: AccountConfig): TimeParams {
             val today = DateTime.today(TIME_ZONE)
             val todayInMs = today.getMilliseconds(TIME_ZONE)
-            val currentMonth = today.getEndOfMonth()
-            val maxDayOfCurMonth = currentMonth.getDay()
+            val currentMonth = today.endOfMonth
+            val maxDayOfCurMonth = currentMonth.day
             val prefs = DBPrefsManager.getInstance(ctx)
 
             // manage February if insertionDayOfMonth is 29, 30 or 31
             val cfgInsertDay = if (config.overrideInsertDate) config.insertDate else
                 prefs.getInt(ConfigFragment.KEY_INSERTION_DATE, ConfigFragment.DEFAULT_INSERTION_DATE.toInt())
             val insertionDayOfMonth = if (cfgInsertDay > maxDayOfCurMonth) maxDayOfCurMonth else cfgInsertDay
-            var insertionDate = DateTime.forDateOnly(today.getYear(), today.getMonth(), insertionDayOfMonth)
+            var insertionDate = DateTime.forDateOnly(today.year, today.month, insertionDayOfMonth)
 
             //            if (todayInMs > insertionDate.getMilliseconds(TIME_ZONE)) {
             //                // what is that for?
@@ -40,8 +39,8 @@ data class TimeParams(val today: Long, val insertionDate: Long, val currentMonth
 
             val nbMonthAhead = if (config.overrideNbMonthsAhead) config.nbMonthsAhead else
                 prefs.getInt(ConfigFragment.KEY_NB_MONTH_AHEAD, ConfigFragment.DEFAULT_NB_MONTH_AHEAD)
-            val limitInsertDate = insertionDate.plusMonth(nbMonthAhead).getEndOfMonth()
-            Log.d("ProcessSched", "limit date : $limitInsertDate")
+            val limitInsertDate = insertionDate.plusMonth(nbMonthAhead).endOfMonth
+            Log.d("ProcessSched", "limit date : $limitInsertDate")
             return TimeParams(todayInMs, insertionDate.getMilliseconds(TIME_ZONE),
                     currentMonth.getMilliseconds(TIME_ZONE), limitInsertDate.getMilliseconds(TIME_ZONE))
         }

@@ -13,16 +13,134 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-        <DatePicker
-                android:id="@+id/edit_op_date"
-                android:layout_width="fill_parent"
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <TextView
+                    android:text="@string/current_account"
+                    android:textSize="18sp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp"
+
+                    android:id="@+id/account_name_lbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+            <TextView
+                    android:text="Test"
+                    android:textSize="18sp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="5dp"
+                    android:id="@+id/account_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+
+        <Button
+                android:id="@+id/op_date_btn"
+                android:text="lun. 04 Sept 2015"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:calendarViewShown="false"
-                android:datePickerMode="spinner"
-                android:paddingBottom="0dp"
-                android:paddingTop="0dp"
-                android:layout_marginTop="0dp"
-                android:layout_marginBottom="0dp"/>
+                android:layout_marginBottom="5dp"/>
+
+        <RelativeLayout
+                android:id="@+id/sched_op_section"
+                android:visibility="gone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+            <LinearLayout
+                    android:id="@+id/sched_op_section_"
+                    android:orientation="vertical"
+                    android:background="@drawable/border"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:padding="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+                <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/periodicity"/>
+
+                    <Spinner
+                            android:id="@+id/periodicity_choice"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <LinearLayout
+                        android:id="@+id/custom_periodicity"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginLeft="5dp"
+                        android:gravity="center_vertical"
+                        android:visibility="gone">
+
+                    <TextView
+                            android:id="@+id/custom_periodicity_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/every"/>
+
+                    <EditText
+                            android:id="@+id/custom_periodicity_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:minEms="2"/>
+
+                    <Spinner
+                            android:id="@+id/custom_periodicity_choice"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"/>
+                </LinearLayout>
+
+                <CheckBox
+                        android:id="@+id/end_date_check"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/end_date"/>
+
+                <Button
+                        android:id="@+id/sch_op_date_btn"
+                        android:text="lun. 04 Sept 2015"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginBottom="5dp"/>
+            </LinearLayout>
+
+            <TextView
+                    android:id="@+id/sched_op_section_lbl"
+                    android:text="@string/scheduling"
+                    android:textSize="16sp"
+                    android:background="@color/normal_bg"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginLeft="20dp"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+
+
+        </RelativeLayout>
 
         <LinearLayout
                 style="@style/EditorHorizontalLinearLayout"

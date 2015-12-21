@@ -11,7 +11,7 @@ public class OnAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         synchronized (startServiceLock) {
             RadisService.acquireStaticLock(context)
-            context.startService(Intent(context, javaClass<RadisService>()))
+            context.startService(Intent(context, RadisService::class.java))
         }
     }
 

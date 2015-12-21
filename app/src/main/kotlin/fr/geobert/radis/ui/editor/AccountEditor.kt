@@ -6,8 +6,9 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentStatePagerAdapter
+import android.support.v4.view.PagerTabStrip
 import android.support.v4.view.ViewPager
-import android.support.v7.app.ActionBarActivity
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import fr.geobert.radis.BaseActivity
@@ -16,22 +17,21 @@ import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.ui.ConfigFragment
-import kotlin.properties.Delegates
 
 public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     public var mRowId: Long = 0
         private set
 
-    private val mViewPager by Delegates.lazy { findViewById(R.id.pager) as ViewPager }
+    private val mViewPager by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.pager) as ViewPager }
 
-    private val mPagerAdapter = object : FragmentStatePagerAdapter(getSupportFragmentManager()) {
-        private val fragmentsList: Array<Fragment?> = arrayOfNulls(getCount())
+    private val mPagerAdapter = object : FragmentStatePagerAdapter(supportFragmentManager) {
+        private val fragmentsList: Array<Fragment?> = arrayOfNulls(count)
         override fun getItem(position: Int): Fragment? {
             val f = fragmentsList.get(position)
             return if (null == f) {
                 fragmentsList.set(position, when (position) {
                     0 -> AccountEditFragment()
-                    else -> ConfigFragment() : Fragment
+                    else -> ConfigFragment()
                 })
                 fragmentsList.get(position)
             } else {
@@ -53,11 +53,11 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     fun isNewAccount() = NO_ACCOUNT == mRowId
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         setContentView(R.layout.multipane_editor)
         initToolbar(this)
 
-        val extra = getIntent().getExtras()
+        val extra = intent.extras
         mRowId = if (extra != null) {
             extra.getLong(PARAM_ACCOUNT_ID)
         } else {
@@ -70,28 +70,30 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
             setTitle(R.string.account_edit_title)
         }
 
-        mViewPager.setAdapter(mPagerAdapter)
+        mViewPager.adapter = mPagerAdapter
+        val header = findViewById(R.id.pager_header) as PagerTabStrip
+        header.setNonPrimaryAlpha(0.6f)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super<BaseActivity>.onRestoreInstanceState(savedInstanceState)
+        super.onRestoreInstanceState(savedInstanceState)
         mRowId = savedInstanceState.getLong("mRowId")
         //        getAccountFrag().onRestoreInstanceState(savedInstanceState) // not managed by Android
         //        getConfigFrag().onRestoreInstanceState(savedInstanceState)  // not managed by Android
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle?) {
-        super<BaseActivity>.onSaveInstanceState(outState, outPersistentState)
+        super.onSaveInstanceState(outState, outPersistentState)
         outState.putLong("mRowId", mRowId)
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.confirm -> {
                 onOkClicked()
                 return true
             }
-            else -> return super<BaseActivity>.onOptionsItemSelected(item)
+            else -> return super.onOptionsItemSelected(item)
         }
     }
 
@@ -117,8 +119,8 @@ public class AccountEditor : BaseActivity(), EditorToolbarTrait {
     }
 
     companion object {
-        public fun callMeForResult(context: ActionBarActivity, accountId: Long, firstAccount:Boolean = false) {
-            val intent = Intent(context, javaClass<AccountEditor>())
+        public fun callMeForResult(context: AppCompatActivity, accountId: Long, firstAccount: Boolean = false) {
+            val intent = Intent(context, AccountEditor::class.java)
             intent.putExtra(PARAM_ACCOUNT_ID, accountId)
             context.startActivityForResult(intent, if (firstAccount) ACCOUNT_CREATOR else ACCOUNT_EDITOR)
         }

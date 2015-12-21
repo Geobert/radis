@@ -1,18 +1,17 @@
 package fr.geobert.radis
 
 import android.app.ProgressDialog
-import android.support.v7.app.ActionBarActivity
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
 import android.view.View
 import fr.geobert.radis.data.AccountManager
 import fr.geobert.radis.tools.DBPrefsManager
-import kotlin.properties.Delegates
 
-public abstract class BaseActivity : ActionBarActivity() {
+public abstract class BaseActivity : AppCompatActivity() {
     protected var mProgress: ProgressDialog? = null
     private var mProgressCount = 0
-    public val mAccountManager: AccountManager by Delegates.lazy { AccountManager(this) }
-    public val mToolbar: Toolbar by Delegates.lazy { findViewById(R.id.my_toolbar) as Toolbar }
+    public val mAccountManager: AccountManager by lazy(LazyThreadSafetyMode.NONE) { AccountManager(this) }
+    public val mToolbar: Toolbar by lazy(LazyThreadSafetyMode.NONE) { findViewById(R.id.my_toolbar) as Toolbar }
 
     protected fun showProgress() {
         mProgressCount++
@@ -25,7 +24,7 @@ public abstract class BaseActivity : ActionBarActivity() {
 
     protected fun hideProgress() {
         mProgressCount--
-        if (mProgress != null && mProgress!!.isShowing() && mProgressCount <= 0) {
+        if (mProgress != null && mProgress!!.isShowing && mProgressCount <= 0) {
             mProgressCount = 0
             mProgress!!.dismiss()
         }
@@ -49,7 +48,7 @@ public abstract class BaseActivity : ActionBarActivity() {
     }
 
     override fun setTitle(title: CharSequence?) {
-        mToolbar.setTitle(title)
+        mToolbar.title = title
     }
 
     override fun setTitle(titleId: Int) {

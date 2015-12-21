@@ -3,12 +3,10 @@ package fr.geobert.radis.tools
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.ContentProviderClient
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Rect
@@ -33,9 +31,7 @@ import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.RadisService
 import fr.geobert.radis.ui.OperationListFragment
 import fr.geobert.radis.ui.adapter.InfoAdapter
-
-import java.util.Calendar
-import java.util.GregorianCalendar
+import java.util.*
 
 public object Tools {
     // Intents actions
@@ -52,7 +48,7 @@ public object Tools {
     public fun checkDebugMode(ctx: Activity) {
         // See if we're a debug or a release build
         try {
-            val packageInfo = ctx.getPackageManager().getPackageInfo(ctx.getPackageName(), PackageManager.GET_CONFIGURATIONS)
+            val packageInfo = ctx.packageManager.getPackageInfo(ctx.packageName, PackageManager.GET_CONFIGURATIONS)
             val flags = packageInfo.applicationInfo.flags
             DEBUG_MODE = (flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         } catch (e1: NameNotFoundException) {
@@ -64,7 +60,7 @@ public object Tools {
 
     public fun setViewBg(v: View, drawable: Drawable?) {
         if (Build.VERSION.SDK_INT >= 16) {
-            v.setBackground(drawable)
+            v.background = drawable
         } else {
             //noinspection deprecation
             v.setBackgroundDrawable(drawable)
@@ -80,7 +76,8 @@ public object Tools {
     //        }
     //    }
 
-    public fun popMessage(ctx: Activity, msg: String, titleStrId: Int, btnText: String, onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
+    public fun popMessage(ctx: Context, msg: String, titleStrId: Int, btnText: String,
+                          onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
         val alertDialog = AlertDialog.Builder(ctx).create()
         alertDialog.setTitle(titleStrId)
         alertDialog.setMessage(msg)
@@ -88,13 +85,12 @@ public object Tools {
         alertDialog.show()
     }
 
-    public fun popError(ctx: Activity, msg: String, onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
+    public fun popError(ctx: Context, msg: String, onClick: ((d: DialogInterface, i: Int) -> Unit)?) {
         Tools.popMessage(ctx, msg, R.string.error, ctx.getString(R.string.ok), onClick)
     }
 
-    SuppressWarnings("ConstantConditions")
     public fun setTextWithoutComplete(v: AutoCompleteTextView, text: String) {
-        val adapter = v.getAdapter() as InfoAdapter
+        val adapter = v.adapter as InfoAdapter
         v.setAdapter(null)
         v.setText(text)
         v.setAdapter(adapter)
@@ -117,7 +113,7 @@ public object Tools {
 
     public fun onDefaultOptionItemSelected(ctx: MainActivity, item: MenuItem): Boolean {
         mActivity = ctx
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.debug -> {
                 Tools.showDebugDialog(ctx)
                 return true
@@ -131,25 +127,23 @@ public object Tools {
         private var mId: Int = 0
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val args = getArguments()
+            val args = arguments
             this.mId = args.getInt("id")
-            val ctx = getActivity()
+            val ctx = activity
             val listener: DialogInterface.OnClickListener? = when (mId) {
                 MainActivity.SAVE_ACCOUNT -> createRestoreOrBackupClickListener(R.string.backup_success,
                         R.string.backup_failed, { -> DbHelper.backupDatabase() })
                 MainActivity.RESTORE_ACCOUNT -> createRestoreOrBackupClickListener(R.string.restore_success,
                         R.string.restore_failed, { -> DbHelper.restoreDatabase(ctx) })
-                MainActivity.PROCESS_SCH -> object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface, which: Int) {
-                        RadisService.acquireStaticLock(ctx)
-                        ctx.startService(Intent(ctx, javaClass<RadisService>()))
-                    }
+                MainActivity.PROCESS_SCH -> DialogInterface.OnClickListener { dialog: DialogInterface, which: Int ->
+                    RadisService.acquireStaticLock(ctx)
+                    ctx.startService(Intent(ctx, RadisService::class.java))
                 }
                 else -> {
                     null
                 }
             }
-            return Tools.getAdvancedDialog(getActivity(), mId, listener!!)
+            return Tools.getAdvancedDialog(activity, mId, listener!!)
         }
 
         companion object {
@@ -158,7 +152,7 @@ public object Tools {
                 val frag = AdvancedDialog()
                 val args = Bundle()
                 args.putInt("id", id)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }
@@ -183,9 +177,9 @@ public object Tools {
         private var mId: Int = 0
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val args = getArguments()
+            val args = arguments
             this.mId = args.getInt("id")
-            return Tools.createFailAndRestartDialog(getActivity(), mId)
+            return Tools.createFailAndRestartDialog(activity, mId)
         }
 
         companion object {
@@ -194,7 +188,7 @@ public object Tools {
                 val frag = ErrorDialog()
                 val args = Bundle()
                 args.putInt("id", id)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }
@@ -212,17 +206,15 @@ public object Tools {
 
     private fun createRestoreOrBackupClickListener(successTextId: Int, failureTextId: Int,
                                                    action: () -> Boolean): DialogInterface.OnClickListener {
-        return object : DialogInterface.OnClickListener {
-            override fun onClick(dialog: DialogInterface, id: Int) {
-                val ctx = mActivity
-                if (action() && ctx != null) {
-                    val msg = StringBuilder()
-                    msg.append(ctx.getString(successTextId)).append('\n').append(ctx.getString(R.string.restarting))
-                    Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
-                    Handler().postDelayed({ Tools.restartApp(ctx) }, 2000)
-                } else {
-                    ErrorDialog.newInstance(failureTextId).show((ctx as BaseActivity).getSupportFragmentManager(), "")
-                }
+        return DialogInterface.OnClickListener { dialog: DialogInterface, id: Int ->
+            val ctx = mActivity
+            if (action() && ctx != null) {
+                val msg = StringBuilder()
+                msg.append(ctx.getString(successTextId)).append('\n').append(ctx.getString(R.string.restarting))
+                Toast.makeText(ctx, msg, Toast.LENGTH_LONG).show()
+                Handler().postDelayed({ Tools.restartApp(ctx) }, 2000)
+            } else {
+                ErrorDialog.newInstance(failureTextId).show((ctx as BaseActivity).supportFragmentManager, "")
             }
         }
     }
@@ -248,13 +240,13 @@ public object Tools {
     }
 
     public fun showDebugDialog(activity: Context) {
-        DebugDialog.newInstance().show((activity as BaseActivity).getSupportFragmentManager(), "debug")
+        DebugDialog.newInstance().show((activity as BaseActivity).supportFragmentManager, "debug")
     }
 
     public class DebugDialog : DialogFragment() {
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val context = getActivity()
+            val context = activity
             val items = arrayOf<CharSequence>("Trash DB", "Restart", "Install RadisService", "Trash Prefs")
             val builder = AlertDialog.Builder(context)
             builder.setNegativeButton("Cancel", object : DialogInterface.OnClickListener {
@@ -266,15 +258,15 @@ public object Tools {
                 override fun onClick(dialog: DialogInterface, item: Int) {
                     when (item) {
                         0 -> {
-                            val client = context.getContentResolver().acquireContentProviderClient("fr.geobert.radis.db")
-                            val provider = client.getLocalContentProvider() as DbContentProvider
+                            val client = context.contentResolver.acquireContentProviderClient("fr.geobert.radis.db")
+                            val provider = client.localContentProvider as DbContentProvider
                             provider.deleteDatabase(context)
                             client.release()
                             Tools.restartApp(context)
                         }
                         1 -> Tools.restartApp(context)
                         2 -> {
-                            val i = Intent(context, javaClass<InstallRadisServiceReceiver>())
+                            val i = Intent(context, InstallRadisServiceReceiver::class.java)
                             i.setAction(Tools.INTENT_RADIS_STARTED)
                             context.sendBroadcast(i)
                         }
@@ -302,7 +294,7 @@ public object Tools {
         } else {
             gravity = Gravity.CENTER_VERTICAL or Gravity.LEFT
         }
-        sumText.setGravity(gravity)
+        sumText.gravity = gravity
     }
 
     public fun getDateStr(date: Long): String {
@@ -310,21 +302,21 @@ public object Tools {
     }
 
     public fun getDateStr(cal: Calendar): String {
-        return getDateStr(cal.getTimeInMillis())
+        return getDateStr(cal.timeInMillis)
     }
 
     public fun createTooltip(stringId: Int): View.OnLongClickListener {
         return object : View.OnLongClickListener {
             override fun onLongClick(v: View): Boolean {
-                val ctx = v.getContext()
+                val ctx = v.context
                 val t = Toast.makeText(ctx, ctx.getString(stringId), Toast.LENGTH_SHORT)
                 val screenPos = IntArray(2)
                 val displayFrame = Rect()
-                val screenWidth = ctx.getResources().getDisplayMetrics().widthPixels
+                val screenWidth = ctx.resources.displayMetrics.widthPixels
                 v.getWindowVisibleDisplayFrame(displayFrame)
                 v.getLocationInWindow(screenPos)
                 t.setGravity(Gravity.RIGHT or Gravity.TOP, screenWidth - screenPos[0],
-                        screenPos[1] - v.getHeight() - v.getHeight() / 2)
+                        screenPos[1] - v.height - v.height / 2)
                 t.show()
                 return true
             }
@@ -333,14 +325,14 @@ public object Tools {
 
     public fun hideKeyboard(ctx: Activity) {
         val inputManager = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputManager.hideSoftInputFromWindow(ctx.getCurrentFocus()!!.getWindowToken(),
+        inputManager.hideSoftInputFromWindow(ctx.currentFocus!!.windowToken,
                 InputMethodManager.HIDE_NOT_ALWAYS)
     }
 
 
     public fun showKeyboard(ctx: Activity) {
         val inputManager = ctx.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputManager.showSoftInput(ctx.getCurrentFocus(), InputMethodManager.SHOW_IMPLICIT)
+        inputManager.showSoftInput(ctx.currentFocus, InputMethodManager.SHOW_IMPLICIT)
     }
 }
 

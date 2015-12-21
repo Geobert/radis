@@ -49,6 +49,7 @@
 
         <activity
                 android:name=".ui.editor.ScheduledOperationEditor"
+                android:windowSoftInputMode="stateAlwaysHidden"
                 android:label="@string/sch_edition"
                 android:launchMode="singleTop">
         </activity>

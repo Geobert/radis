@@ -16,9 +16,9 @@ import android.support.test.espresso.matcher.ViewMatchers
 import android.support.test.espresso.matcher.ViewMatchers.*
 
 // sugar wrapper for the backquote
-fun iz<T>(matcher: Matcher<T>): Matcher<T> = `is`(matcher)
+fun <T> iz(matcher: Matcher<T>): Matcher<T> = `is`(matcher)
 
-fun iz<T>(value: T): Matcher<T> = iz(equalTo(value))
+fun <T> iz(value: T): Matcher<T> = iz(equalTo(value))
 
 // Custom espresso matchers
 // kotlin translation of https://gist.github.com/cpeppas/b5ffe6bd29b67d96416a
@@ -28,9 +28,9 @@ fun withResourceName(resourceName: String) = withResourceName(iz(resourceName))
 fun withResourceName(resourceNameMatcher: Matcher<String>): Matcher<View> {
     return object : TypeSafeMatcher<View>() {
         override fun matchesSafely(view: View): Boolean {
-            val id = view.getId()
-            return id != View.NO_ID && id != 0 && view.getResources() != null &&
-                    resourceNameMatcher.matches(view.getResources().getResourceName(id))
+            val id = view.id
+            return id != View.NO_ID && id != 0 && view.resources != null &&
+                    resourceNameMatcher.matches(view.resources.getResourceName(id))
         }
 
         override fun describeTo(desc: Description) {
@@ -51,8 +51,8 @@ fun withAdaptedData(dataMatcher: Matcher<Any>): Matcher<View> {
             if (view !is AdapterView<*>) {
                 return false
             }
-            val adapter = view.getAdapter()
-            for (i in 0..adapter.getCount()) {
+            val adapter = view.adapter
+            for (i in 0..adapter.count) {
                 if (dataMatcher.matches(adapter.getItem(i))) {
                     return true
                 }
@@ -72,7 +72,7 @@ fun withNavDrawerItem(itemTitleMatcher: Matcher<String>): Matcher<Any> {
 
         override fun matchesSafely(item: Any): Boolean {
             if (item !is NavDrawerItem) return false
-            if (itemTitleMatcher.matches(item.getTitle())) {
+            if (itemTitleMatcher.matches(item.title)) {
                 return true
             }
             return false

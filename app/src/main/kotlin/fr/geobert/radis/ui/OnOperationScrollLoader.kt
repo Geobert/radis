@@ -12,15 +12,15 @@ public class OnOperationScrollLoader(val operationListActivity: IOperationList) 
     private val linearLayoutManager: LinearLayoutManager = operationListActivity.getListLayoutManager()
 
     override fun onScrollStateChanged(recyclerView: RecyclerView?, i: Int) {
-        super<RecyclerView.OnScrollListener>.onScrollStateChanged(recyclerView, i)
+        super.onScrollStateChanged(recyclerView, i)
         // nothing to do
     }
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-        super<RecyclerView.OnScrollListener>.onScrolled(recyclerView, dx, dy)
+        super.onScrolled(recyclerView, dx, dy)
 
         val lastVisible = linearLayoutManager.findLastVisibleItemPosition()
-        val totalCount = linearLayoutManager.getItemCount()
+        val totalCount = linearLayoutManager.itemCount
 
         Log.d("OnOperationScrollLoader", "lastVisible: $lastVisible/ totalCount: $totalCount/ lastTotal: $lastTotalCount")
         //        Log.d("OnOperationScrollLoader", "startOpDate " + startOpDate)

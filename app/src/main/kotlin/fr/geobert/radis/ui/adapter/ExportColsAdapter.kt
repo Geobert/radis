@@ -24,8 +24,8 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
     override fun onBindViewHolder(holder: ExportColRowHolder, position: Int) {
         val item = columns.get(position)
 
-        holder.label.setText(item.label)
-        holder.toExport.setChecked(item.toExport)
+        holder.label.text = item.label
+        holder.toExport.isChecked = item.toExport
 
         holder.view.setBackgroundResource(if (position == selectedPos) R.drawable.line_selected_gradient
         else R.color.normal_bg)
@@ -39,12 +39,12 @@ public class ExportColsAdapter(val ctx: FragmentActivity, cols: List<ExportCol>)
     public fun moveItem(offset: Int) {
         val from = selectedPos
         val newPos = from + offset
-        if (from == -1 || offset == 0 || newPos < 0 || newPos >= getItemCount()) {
+        if (from == -1 || offset == 0 || newPos < 0 || newPos >= itemCount) {
             return
         }
 
         val item = columns.get(from)
-        columns.remove(from)
+        columns.removeAt(from)
         columns.add(newPos, item)
         notifyItemMoved(from, newPos)
         selectedPos += offset

@@ -16,22 +16,22 @@ public fun DeleteStatConfirmationDiag(statId: Long): DeleteStatConfirmationDiag 
     val args = Bundle()
     args.putLong("statId", statId)
     frag.statId = statId
-    frag.setArguments(args)
+    frag.arguments = args
     return frag
 }
 
 
 class DeleteStatConfirmationDiag : DialogFragment() {
-    val ctx: Context by Delegates.lazy { getActivity() }
+    val ctx: Context by lazy(LazyThreadSafetyMode.NONE) { activity }
     var statId: Long = 0L
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         super.onCreate(savedInstanceState)
-        val args: Bundle = getArguments()
+        val args: Bundle = arguments
         statId = args.getLong("statId")
-        return Tools.createDeleteConfirmationDialog(getActivity(), { d: DialogInterface, i: Int ->
+        return Tools.createDeleteConfirmationDialog(activity, { d: DialogInterface, i: Int ->
             if (StatisticTable.deleteStatistic(statId, ctx)) {
-                getActivity().sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_STAT), null)
+                activity.sendOrderedBroadcast(Intent(Tools.INTENT_REFRESH_STAT), null)
             }
         })
     }

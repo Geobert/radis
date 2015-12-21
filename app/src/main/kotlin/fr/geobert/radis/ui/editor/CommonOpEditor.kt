@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import fr.geobert.radis.BaseActivity
+import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
 import java.util.*
 import kotlin.properties.Delegates
@@ -18,21 +19,9 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     var mCurAccountId: Long by Delegates.notNull()
     var mCurrentInfoTable: Uri? = null
 
-    // abstract methods
-    protected abstract fun setView()
-
-    //    protected abstract fun populateFields()
+    protected abstract fun inflateFragment()
 
     protected abstract fun fetchOrCreateCurrentOp(cbk: (Operation) -> Unit)
-
-    //    open public fun onAllAccountsFetched() {
-    //        if (!mOnRestore) {
-    //            fetchOrCreateCurrentOp()
-    //        } else {
-    //            populateFields()
-    //            mOnRestore = false
-    //        }
-    //    }
 
     public fun getOpThenPopulate(cbk: (Operation) -> Unit) {
         val op = mCurrentOp
@@ -46,7 +35,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
 
     // nothing to do, needed by Android
     override fun onResume() {
-        super<BaseActivity>.onResume()
+        super.onResume()
     }
 
     fun onAllAccountsFetched() {
@@ -54,7 +43,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     protected fun fetchOp(loaderId: Int) {
-        getSupportLoaderManager().initLoader(loaderId, Bundle(), this)
+        supportLoaderManager.initLoader(loaderId, Bundle(), this)
     }
 
     // default and common behaviors
@@ -63,11 +52,12 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<BaseActivity>.onCreate(savedInstanceState)
-        val extras = getIntent().getExtras()
+        super.onCreate(savedInstanceState)
+        val extras = intent.extras
         mCurAccountId = extras?.getLong(AccountEditor.PARAM_ACCOUNT_ID) ?: 0
         init(extras)
-        setView()
+        setContentView(R.layout.operation_edit)
+        inflateFragment()
         initToolbar(this)
     }
 
@@ -76,7 +66,7 @@ public abstract class CommonOpEditor : BaseActivity(), LoaderCallbacks<Cursor>, 
     }
 
     override fun onDestroy() {
-        super<BaseActivity>.onDestroy()
+        super.onDestroy()
         InfoManagerDialog.resetInfoManager()
     }
 

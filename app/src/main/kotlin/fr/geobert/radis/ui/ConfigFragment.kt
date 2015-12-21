@@ -24,31 +24,31 @@ import kotlin.properties.Delegates
 
 public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPreferenceChangeListener, LoaderManager.LoaderCallbacks<Cursor> {
     // only in global prefs, it is lazy so no crash in AccountEditor
-    private val mAccountsChoice by Delegates.lazy { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
+    private val mAccountsChoice by lazy(LazyThreadSafetyMode.NONE) { findPreference(KEY_DEFAULT_ACCOUNT) as ListPreference }
 
     //TODO lazy access to prefs in AccountEditor mode
-    private val mOverInsertDate by Delegates.lazy { findPreference(KEY_OVERRIDE_INSERT_DATE) as CheckBoxPreference }
+    private val mOverInsertDate by lazy(LazyThreadSafetyMode.NONE) { findPreference(KEY_OVERRIDE_INSERT_DATE) as CheckBoxPreference }
 
-    private val isAccountEditor by Delegates.lazy { getActivity() is AccountEditor }
+    private val isAccountEditor by lazy(LazyThreadSafetyMode.NONE) { activity is AccountEditor }
     private var mOnRestore: Boolean = false
 
     var mConfig: AccountConfig by Delegates.notNull()
         private set
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super<PreferenceFragment>.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
         addPreferencesFromResource(if (isAccountEditor) R.xml.account_prefs else R.xml.preferences)
         if (!isAccountEditor) // do not call account spinner init, it does not exist
             initAccountChoices()
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super<PreferenceFragment>.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
         if (isAccountEditor) {
             // change only in account editor, because de listView is not match_parent
-            getListView().setBackgroundColor(getResources().getColor(R.color.normal_bg))
+            listView.setBackgroundColor(resources.getColor(R.color.normal_bg))
 
-            val act = getActivity() as AccountEditor
+            val act = activity as AccountEditor
             if (act.isNewAccount()) {
                 mConfig = AccountConfig()
             }
@@ -58,24 +58,24 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     }
 
     private fun getPrefs(): DBPrefsManager {
-        return DBPrefsManager.getInstance(getActivity())
+        return DBPrefsManager.getInstance(activity)
     }
 
     private fun notEmpty(s: String?): String? {
-        if (s != null && s.trim().length() == 0) {
+        if (s != null && s.trim().length == 0) {
             return null
         }
         return s
     }
 
     private fun initAccountChoices() {
-        val accounts = getActivity().getContentResolver().query(DbContentProvider.ACCOUNT_URI,
+        val accounts = activity.contentResolver.query(DbContentProvider.ACCOUNT_URI,
                 AccountTable.ACCOUNT_ID_AND_NAME_COLS, null, null, null)
         if (accounts.moveToFirst()) {
-            val entries = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)) }.copyToArray()
-            val values = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)) }.copyToArray()
-            mAccountsChoice.setEntries(entries)
-            mAccountsChoice.setEntryValues(values)
+            val entries = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_NAME)) }.toTypedArray()
+            val values = accounts.map { it.getString(it.getColumnIndex(AccountTable.KEY_ACCOUNT_ROWID)) }.toTypedArray()
+            mAccountsChoice.entries = entries
+            mAccountsChoice.entryValues = values
         }
         accounts.close()
     }
@@ -93,13 +93,13 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
             }
             getKey(KEY_QUICKADD_ACTION) -> {
                 val valueIdx = if (account != null) account.quickAddAction else getPrefs().getInt(key, DEFAULT_QUICKADD_LONG_PRESS_ACTION)
-                val value = getActivity().getResources().getStringArray(R.array.quickadd_actions)[valueIdx]
+                val value = activity.resources.getStringArray(R.array.quickadd_actions)[valueIdx]
                 getString(R.string.quick_add_long_press_action_text).format(value)
             }
             KEY_DEFAULT_ACCOUNT -> {
                 // !isAccountEditor only
                 val l = findPreference(key) as ListPreference
-                val s = l.getEntry()
+                val s = l.entry
                 if (null != s) {
                     val value = s.toString()
                     getString(R.string.default_account_desc, value)
@@ -111,9 +111,9 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         }
 
         if (summary != null) {
-            val ps = getPreferenceScreen()
+            val ps = preferenceScreen
             if (ps != null) {
-                ps.findPreference(key)?.setSummary(summary)
+                ps.findPreference(key)?.summary = summary
             }
         }
 
@@ -122,21 +122,21 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     fun getKey(k: String) = if (isAccountEditor) "${k}_for_account" else k
 
     override fun onResume() {
-        super<PreferenceFragment>.onResume()
+        super.onResume()
 
-        val act = getActivity()
+        val act = activity
         PreferenceManager.getDefaultSharedPreferences(act).registerOnSharedPreferenceChangeListener(this)
 
         if (!isAccountEditor) {
             var value: String? = getPrefs().getString(KEY_INSERTION_DATE, DEFAULT_INSERTION_DATE)
             val ep = findPreference(KEY_INSERTION_DATE) as EditTextPreference
-            ep.getEditText().setText(value)
+            ep.editText.setText(value)
 
             value = getPrefs().getString(KEY_DEFAULT_ACCOUNT)
             if (value != null) {
-                for (s in mAccountsChoice.getEntryValues()) {
+                for (s in mAccountsChoice.entryValues) {
                     if (value == s) {
-                        mAccountsChoice.setValue(s.toString())
+                        mAccountsChoice.value = s.toString()
                     }
                 }
             }
@@ -146,7 +146,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
             updateLabel(KEY_QUICKADD_ACTION)
         } else if (act is AccountEditor) {
             if (!mOnRestore && !act.isNewAccount()) {
-                act.getSupportLoaderManager().initLoader<Cursor>(AccountEditor.GET_ACCOUNT_CONFIG, Bundle(), this)
+                act.supportLoaderManager.initLoader<Cursor>(AccountEditor.GET_ACCOUNT_CONFIG, Bundle(), this)
             } else {
                 mOnRestore = false
             }
@@ -160,7 +160,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super<PreferenceFragment>.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
         if (isAccountEditor)
             outState.putParcelable("mConfig", mConfig)
         mOnRestore = true
@@ -174,20 +174,20 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
 
     private fun setCheckBoxPrefState(key: String, value: Boolean) {
         val checkbox = findPreference(key) as CheckBoxPreference
-        checkbox.setChecked(value)
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putBoolean(key, value)
+        checkbox.isChecked = value
+        PreferenceManager.getDefaultSharedPreferences(activity).edit().putBoolean(key, value)
     }
 
     private fun setEditTextPrefValue(key: String, value: String) {
         val edt = findPreference(key) as EditTextPreference
-        edt.getEditText().setText(value)
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putString(key, value)
+        edt.editText.setText(value)
+        PreferenceManager.getDefaultSharedPreferences(activity).edit().putString(key, value)
     }
 
     private fun setListPrefValue(key: String, value: Int) {
         val l = findPreference(key) as ListPreference
         l.setValueIndex(value)
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().putInt(key, value)
+        PreferenceManager.getDefaultSharedPreferences(activity).edit().putInt(key, value)
     }
 
     public fun populateFields(account: AccountConfig) {
@@ -205,31 +205,31 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         setCheckBoxPrefState(getKey(KEY_HIDE_OPS_QUICK_ADD), account.hideQuickAdd)
         setCheckBoxPrefState(getKey(KEY_USE_WEIGHTED_INFOS), account.useWeighedInfo)
         setCheckBoxPrefState(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD), account.invertQuickAddComp)
-        PreferenceManager.getDefaultSharedPreferences(getActivity()).edit().commit()
+        PreferenceManager.getDefaultSharedPreferences(activity).edit().commit()
     }
 
     private fun getCheckBoxPrefValue(key: String): Boolean {
         val chk = findPreference(key) as CheckBoxPreference
-        val r = chk.isChecked()
+        val r = chk.isChecked
         return r
     }
 
     private fun getEdtPrefValue(key: String): String {
         val edt = findPreference(key) as EditTextPreference
-        val r = edt.getEditText().getText().toString()
+        val r = edt.editText.text.toString()
         return r
     }
 
     private fun getListPrefValue(key: String): Int {
         val l = findPreference(key) as ListPreference
-        return l.getValue().toInt()
+        return l.value.toInt()
     }
 
     // called by AccountEditFragment.saveState
     fun fillConfig(): AccountConfig {
         mConfig.overrideInsertDate = getCheckBoxPrefValue(KEY_OVERRIDE_INSERT_DATE)
         val d = getEdtPrefValue(getKey(KEY_INSERTION_DATE))
-        mConfig.insertDate = if (d.trim().length() > 0) d.toInt() else DEFAULT_INSERTION_DATE.toInt()
+        mConfig.insertDate = if (d.trim().length > 0) d.toInt() else DEFAULT_INSERTION_DATE.toInt()
         mConfig.overrideHideQuickAdd = getCheckBoxPrefValue(KEY_OVERRIDE_HIDE_QUICK_ADD)
         mConfig.hideQuickAdd = getCheckBoxPrefValue(getKey(KEY_HIDE_OPS_QUICK_ADD))
         mConfig.overrideUseWeighedInfo = getCheckBoxPrefValue(KEY_OVERRIDE_USE_WEIGHTED_INFO)
@@ -238,15 +238,15 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         mConfig.invertQuickAddComp = getCheckBoxPrefValue(getKey(KEY_INVERT_COMPLETION_IN_QUICK_ADD))
         mConfig.overrideNbMonthsAhead = getCheckBoxPrefValue(KEY_OVERRIDE_NB_MONTH_AHEAD)
         val m = getEdtPrefValue(getKey(KEY_NB_MONTH_AHEAD))
-        mConfig.nbMonthsAhead = if (m.trim().length() > 0) m.toInt() else DEFAULT_NB_MONTH_AHEAD
+        mConfig.nbMonthsAhead = if (m.trim().length > 0) m.toInt() else DEFAULT_NB_MONTH_AHEAD
         mConfig.overrideQuickAddAction = getCheckBoxPrefValue(KEY_OVERRIDE_QUICKADD_ACTION)
         mConfig.quickAddAction = getListPrefValue(getKey(KEY_QUICKADD_ACTION))
         return mConfig
     }
 
     override fun onPause() {
-        super<PreferenceFragment>.onPause()
-        val act = getActivity()
+        super.onPause()
+        val act = activity
         PreferenceManager.getDefaultSharedPreferences(act).unregisterOnSharedPreferenceChangeListener(this)
     }
 
@@ -255,9 +255,9 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
         val value = if (p is EditTextPreference) {
             notEmpty(sharedPreferences.getString(key, null))
         } else if (p is ListPreference) {
-            p.getValue()
+            p.value
         } else if (p is CheckBoxPreference) {
-            java.lang.Boolean.toString(p.isChecked())
+            java.lang.Boolean.toString(p.isChecked)
         } else {
             ""
         }
@@ -266,7 +266,7 @@ public class ConfigFragment : PreferenceFragment(), SharedPreferences.OnSharedPr
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor> {
-        val act = getActivity() as AccountEditor
+        val act = activity as AccountEditor
         return PreferenceTable.getAccountConfigLoader(act, act.mRowId)
     }
 

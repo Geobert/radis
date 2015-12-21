@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,12 +16,15 @@ import android.widget.Spinner
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.db.AccountTable
-import fr.geobert.radis.tools.*
+import fr.geobert.radis.tools.CorrectCommaWatcher
+import fr.geobert.radis.tools.ProjectionDateController
+import fr.geobert.radis.tools.extractSumFromStr
+import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.getGroupSeparator
+import fr.geobert.radis.tools.getSumSeparator
 import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Arrays
-import java.util.Currency
-import java.util.Locale
+import java.util.*
 import kotlin.properties.Delegates
 
 public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cursor> {
@@ -31,7 +33,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     private var edit_account_desc: EditText by Delegates.notNull()
     private var currency_spinner: Spinner by Delegates.notNull()
     private var custom_currency: EditText by Delegates.notNull()
-    private val mProjectionController by Delegates.lazy { ProjectionDateController(getActivity()) }
+    private val mProjectionController by lazy(LazyThreadSafetyMode.NONE) { ProjectionDateController(activity) }
 
     private var customCurrencyIdx = -1
     private var mOnRestore: Boolean = false
@@ -50,64 +52,64 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super<Fragment>.onViewCreated(view, savedInstanceState)
+        super.onViewCreated(view, savedInstanceState)
         mProjectionController // trigger lazy access
-        val act = getActivity() as AccountEditor
+        val act = activity as AccountEditor
         if (act.isNewAccount()) {
             mAccount = Account()
         }
 
-        val w = CorrectCommaWatcher(getSumSeparator(), edit_account_start_sum)
+        val w = CorrectCommaWatcher(getSumSeparator(), getGroupSeparator(), edit_account_start_sum)
         w.setAutoNegate(false)
         edit_account_start_sum.addTextChangedListener(w)
-        edit_account_start_sum.setOnFocusChangeListener(object : View.OnFocusChangeListener {
+        edit_account_start_sum.onFocusChangeListener = object : View.OnFocusChangeListener {
             override fun onFocusChange(v: View, hasFocus: Boolean) {
                 if (hasFocus) {
                     (v as EditText).selectAll()
                 }
             }
-        })
+        }
         fillCurrencySpinner()
         if (savedInstanceState != null)
             onRestoreInstanceState(savedInstanceState)
     }
 
     private fun fillCurrencySpinner() {
-        val mCurrAdapter = ArrayAdapter.createFromResource(getActivity(), R.array.all_currencies, android.R.layout.simple_spinner_item)
+        val mCurrAdapter = ArrayAdapter.createFromResource(activity, R.array.all_currencies, android.R.layout.simple_spinner_item)
         mCurrAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        currency_spinner.setAdapter(mCurrAdapter)
-        currency_spinner.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+        currency_spinner.adapter = mCurrAdapter
+        currency_spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
 
             override fun onItemSelected(arg0: AdapterView<*>?, arg1: View?, pos: Int, id: Long) {
-                custom_currency.setEnabled(pos == getCustomCurrencyIdx(getActivity()))
+                custom_currency.visibility = if (pos == getCustomCurrencyIdx(activity)) View.VISIBLE else View.GONE
             }
 
             override fun onNothingSelected(arg0: AdapterView<*>?) {
             }
 
-        })
+        }
     }
 
     // check the form and fill mAccount
     fun isFormValid(errMsg: StringBuilder): Boolean {
-        val name = edit_account_name.getText().toString()
+        val name = edit_account_name.text.toString()
         var res = true
-        if (name.length() == 0) {
+        if (name.length == 0) {
             errMsg.append(R.string.empty_account_name)
             res = false
         }
-        if (edit_account_start_sum.getText().length() == 0) {
+        if (edit_account_start_sum.text.length == 0) {
             edit_account_start_sum.setText("0")
         }
 
 
         // check if currency is correct
-        if (currency_spinner.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
-            val currency = custom_currency.getText().toString().trim().toUpperCase()
+        if (currency_spinner.selectedItemPosition == getCustomCurrencyIdx(activity)) {
+            val currency = custom_currency.text.toString().trim().toUpperCase()
             try {
                 Currency.getInstance(currency)
             } catch (e: IllegalArgumentException) {
-                if (errMsg.length() > 0)
+                if (errMsg.length > 0)
                     errMsg.append("\n")
                 errMsg.append(getString(R.string.bad_format_for_currency))
                 res = false
@@ -115,7 +117,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
 
         }
         // check projection date format
-        if (mProjectionController.mProjectionDate.getVisibility() == View.VISIBLE) {
+        if (mProjectionController.mProjectionDate.visibility == View.VISIBLE) {
             //                && mProjectionController.getDate().trim().length() == 0) {
             try {
                 val format: SimpleDateFormat =
@@ -128,7 +130,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
                 mProjectionController.mProjectionDate.setText(format.format(d))
             } catch (e: ParseException) {
                 e.printStackTrace()
-                if (errMsg.length() > 0)
+                if (errMsg.length > 0)
                     errMsg.append("\n")
                 errMsg.append(getString(R.string.bad_format_for_date))
                 res = false
@@ -143,8 +145,8 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         edit_account_desc.setText(account.description)
         edit_account_start_sum.setText((account.startSum / 100.0).formatSum())
         var currencyStr = account.currency
-        if (currencyStr.length() == 0) {
-            currencyStr = Currency.getInstance(Locale.getDefault()).getCurrencyCode()
+        if (currencyStr.length == 0) {
+            currencyStr = Currency.getInstance(Locale.getDefault()).currencyCode
         }
         initCurrencySpinner(currencyStr)
         mProjectionController.populateFields(account)
@@ -152,24 +154,24 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
 
     private fun getCustomCurrencyIdx(ctx: Context): Int {
         if (customCurrencyIdx == -1) {
-            val res = ctx.getResources()
+            val res = ctx.resources
             val allCurrencies = res.getStringArray(R.array.all_currencies)
-            customCurrencyIdx = allCurrencies.size() - 1
+            customCurrencyIdx = allCurrencies.size - 1
         }
         return customCurrencyIdx
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super<Fragment>.onSaveInstanceState(outState)
-        outState.putString("name", edit_account_name.getText().toString())
-        outState.putString("startSum", edit_account_start_sum.getText().toString())
-        outState.putInt("currency", currency_spinner.getSelectedItemPosition())
-        val customCurIdx = getCustomCurrencyIdx(getActivity())
+        super.onSaveInstanceState(outState)
+        outState.putString("name", edit_account_name.text.toString())
+        outState.putString("startSum", edit_account_start_sum.text.toString())
+        outState.putInt("currency", currency_spinner.selectedItemPosition)
+        val customCurIdx = getCustomCurrencyIdx(activity)
         outState.putInt("customCurrencyIdx", customCurIdx)
-        if (currency_spinner.getSelectedItemPosition() == customCurIdx) {
-            outState.putString("customCurrency", custom_currency.getText().toString())
+        if (currency_spinner.selectedItemPosition == customCurIdx) {
+            outState.putString("customCurrency", custom_currency.text.toString())
         }
-        outState.putString("desc", edit_account_desc.getText().toString())
+        outState.putString("desc", edit_account_desc.text.toString())
         mProjectionController.onSaveInstanceState(outState)
         outState.putParcelable("mAccount", mAccount)
         mOnRestore = true
@@ -180,11 +182,11 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
         edit_account_start_sum.setText(state.getString("startSum"))
         currency_spinner.setSelection(state.getInt("currency"))
         customCurrencyIdx = state.getInt("customCurrencyIdx")
-        if (currency_spinner.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
+        if (currency_spinner.selectedItemPosition == getCustomCurrencyIdx(activity)) {
             custom_currency.setText(state.getString("customCurrency"))
-            custom_currency.setEnabled(true)
+            custom_currency.isEnabled = true
         } else {
-            custom_currency.setEnabled(false)
+            custom_currency.isEnabled = false
         }
         edit_account_desc.setText(state.getString("desc"))
         mProjectionController.onRestoreInstanceState(state)
@@ -193,47 +195,47 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     }
 
     override fun onResume() {
-        super<Fragment>.onResume()
-        val act = getActivity() as AccountEditor
+        super.onResume()
+        val act = activity as AccountEditor
         if (!mOnRestore && !act.isNewAccount()) {
-            act.getSupportLoaderManager().initLoader<Cursor>(AccountEditor.GET_ACCOUNT, Bundle(), this)
+            act.supportLoaderManager.initLoader<Cursor>(AccountEditor.GET_ACCOUNT, Bundle(), this)
         } else {
             mOnRestore = false
         }
-        if ((getActivity() as AccountEditor).isNewAccount()) {
+        if ((activity as AccountEditor).isNewAccount()) {
             initCurrencySpinner()
         }
     }
 
     fun initCurrencySpinner() {
         try {
-            initCurrencySpinner(Currency.getInstance(Locale.getDefault()).getCurrencyCode())
+            initCurrencySpinner(Currency.getInstance(Locale.getDefault()).currencyCode)
         } catch (ex: IllegalArgumentException) {
-            initCurrencySpinner(Currency.getInstance(Locale("fr", "FR")).getCurrencyCode())
+            initCurrencySpinner(Currency.getInstance(Locale("fr", "FR")).currencyCode)
         }
     }
 
     protected fun initCurrencySpinner(currencyStr: String) {
-        val allCurrencies = getResources().getStringArray(R.array.all_currencies)
+        val allCurrencies = resources.getStringArray(R.array.all_currencies)
         val pos = Arrays.binarySearch(allCurrencies, currencyStr)
         if (pos >= 0) {
             currency_spinner.setSelection(pos)
-            custom_currency.setEnabled(false)
+            custom_currency.isEnabled = false
         } else {
-            currency_spinner.setSelection(getCustomCurrencyIdx(getActivity()))
-            custom_currency.setEnabled(true)
+            currency_spinner.setSelection(getCustomCurrencyIdx(activity))
+            custom_currency.isEnabled = true
         }
     }
 
     fun fillAccount(): Account {
-        mAccount.name = edit_account_name.getText().toString().trim()
-        mAccount.description = edit_account_desc.getText().toString().trim()
+        mAccount.name = edit_account_name.text.toString().trim()
+        mAccount.description = edit_account_desc.text.toString().trim()
         try {
-            mAccount.startSum = edit_account_start_sum.getText().toString().extractSumFromStr()
-            mAccount.currency = if (currency_spinner.getSelectedItemPosition() == getCustomCurrencyIdx(getActivity())) {
-                custom_currency.getText().toString().trim().toUpperCase()
+            mAccount.startSum = edit_account_start_sum.text.toString().extractSumFromStr()
+            mAccount.currency = if (currency_spinner.selectedItemPosition == getCustomCurrencyIdx(activity)) {
+                custom_currency.text.toString().trim().toUpperCase()
             } else {
-                currency_spinner.getSelectedItem().toString()
+                currency_spinner.selectedItem.toString()
             }
             mAccount.projMode = mProjectionController.getMode()
             mAccount.projDate = mProjectionController.getDate()
@@ -244,7 +246,7 @@ public class AccountEditFragment : Fragment(), LoaderManager.LoaderCallbacks<Cur
     }
 
     override fun onCreateLoader(id: Int, args: Bundle): Loader<Cursor> {
-        val act = getActivity() as AccountEditor
+        val act = activity as AccountEditor
         return AccountTable.getAccountLoader(act, act.mRowId)
     }
 

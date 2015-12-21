@@ -7,17 +7,15 @@ import android.os.Parcelable
 import fr.geobert.radis.R
 import fr.geobert.radis.db.ScheduledOperationTable
 import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
 import hirondelle.date4j.DateTime
-import java.util.Calendar
-import java.util.GregorianCalendar
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import kotlin.properties.getValue
+import kotlin.properties.setValue
+
 
 public class ScheduledOperation() : Operation() {
-    public var mPeriodicity: Int by Delegates.mapVar(parcels)
-    public var mPeriodicityUnit: Int by Delegates.mapVar(parcels)
-    public var mEndDate: DateTime by Delegates.mapVar(parcels)
+    public var mPeriodicity: Int by parcels
+    public var mPeriodicityUnit: Int by parcels
+    public var mEndDate: DateTime by parcels
 
     init {
         mPeriodicity = 0
@@ -62,7 +60,7 @@ public class ScheduledOperation() : Operation() {
         public val CUSTOM_YEARLY_PERIOD: Int = 6
 
         public fun getUnitStr(context: Activity, unit: Int, periodicity: Int): String? {
-            val s = context.getResources().getStringArray(R.array.periodicity_labels)[unit]
+            val s = context.resources.getStringArray(R.array.periodicity_labels)[unit]
             if (unit < CUSTOM_DAILY_PERIOD) {
                 return s
             } else if (unit <= CUSTOM_YEARLY_PERIOD) {
@@ -71,7 +69,7 @@ public class ScheduledOperation() : Operation() {
             return null
         }
 
-        platformStatic public val CREATOR: Parcelable.Creator<ScheduledOperation> = object : Parcelable.Creator<ScheduledOperation> {
+        public val CREATOR: Parcelable.Creator<ScheduledOperation> = object : Parcelable.Creator<ScheduledOperation> {
             override fun createFromParcel(`in`: Parcel): ScheduledOperation {
                 return ScheduledOperation(`in`)
             }
@@ -81,7 +79,7 @@ public class ScheduledOperation() : Operation() {
             }
         }
 
-        public platformStatic fun addPeriodicityToDate(op: ScheduledOperation) {
+        public fun addPeriodicityToDate(op: ScheduledOperation) {
             when (op.mPeriodicityUnit) {
                 ScheduledOperation.WEEKLY_PERIOD -> op.addDay(7)
                 ScheduledOperation.MONTHLY_PERIOD -> op.addMonth(1)
@@ -95,27 +93,37 @@ public class ScheduledOperation() : Operation() {
     }
 
     public fun getEndMonth(): Int {
-        return mEndDate.getMonth()
+        return mEndDate.month
     }
 
     public fun setEndMonth(month: Int) {
-        mEndDate = DateTime.forDateOnly(mEndDate.getYear(), month, mEndDate.getDay())
+        val d = if (month == 2 && mEndDate.day >= 29) {
+            Math.min(mEndDate.day, if (mEndDate.isLeapYear) 29 else 28)
+        } else mEndDate.day
+        mEndDate = DateTime.forDateOnly(mEndDate.year, month, d)
     }
 
     public fun getEndDay(): Int {
-        return mEndDate.getDay()
+        return mEndDate.day
     }
 
     public fun setEndDay(day: Int) {
-        this.mEndDate = DateTime.forDateOnly(mEndDate.getYear(), mEndDate.getMonth(), day)
+        val d = if (day >= 29 && mEndDate.month == 2) {
+            Math.min(day, if (mEndDate.isLeapYear) 29 else 28)
+        } else day
+        this.mEndDate = DateTime.forDateOnly(mEndDate.year, mEndDate.month, d)
     }
 
     public fun getEndYear(): Int {
-        return mEndDate.getYear()
+        return mEndDate.year
     }
 
     public fun setEndYear(year: Int) {
-        this.mEndDate = DateTime.forDateOnly(year, mEndDate.getMonth(), mEndDate.getDay())
+        val t = DateTime.forDateOnly(year, 1, 1)
+        val d = if (mEndDate.day >= 29 && mEndDate.month == 2) {
+            Math.min(mEndDate.day, if (t.isLeapYear) 29 else 28)
+        } else mEndDate.day
+        this.mEndDate = DateTime.forDateOnly(year, mEndDate.month, d)
     }
 
     public fun getEndDate(): Long {
@@ -131,7 +139,8 @@ public class ScheduledOperation() : Operation() {
             return false
         }
         val schOp = op as ScheduledOperation
-        return super.equals(op) && mAccountId == schOp.mAccountId && mEndDate == schOp.mEndDate && mPeriodicity == schOp.mPeriodicity && mPeriodicityUnit == schOp.mPeriodicityUnit
+        return super.equals(op) && mAccountId == schOp.mAccountId && mEndDate == schOp.mEndDate &&
+                mPeriodicity == schOp.mPeriodicity && mPeriodicityUnit == schOp.mPeriodicityUnit
     }
 
     public fun periodicityEquals(schOp: ScheduledOperation): Boolean {

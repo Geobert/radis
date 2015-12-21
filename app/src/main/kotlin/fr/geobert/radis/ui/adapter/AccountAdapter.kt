@@ -2,7 +2,6 @@ package fr.geobert.radis.ui.adapter
 
 import android.database.Cursor
 import android.support.v4.app.FragmentActivity
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
@@ -11,29 +10,31 @@ import fr.geobert.radis.data.Account
 import fr.geobert.radis.tools.formatDate
 import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.tools.map
-import java.util.Date
-import java.util.LinkedList
-import kotlin.properties.Delegates
+import java.util.*
 
 public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Iterable<Account> {
 
     private var accountsList: MutableList<Account> = LinkedList()
-    private val redColor: Int by Delegates.lazy { activity.getResources().getColor(R.color.op_alert) }
-    private val greenColor: Int by Delegates.lazy { activity.getResources().getColor(R.color.positiveSum) }
+    private val redColor: Int by lazy(LazyThreadSafetyMode.NONE) { activity.resources.getColor(R.color.op_alert) }
+    private val greenColor: Int by lazy(LazyThreadSafetyMode.NONE) { activity.resources.getColor(R.color.positiveSum) }
 
     override fun getView(p0: Int, p1: View?, p2: ViewGroup): View? {
         val h: AccountRowHolder = if (p1 == null) {
-            val v = activity.getLayoutInflater().inflate(R.layout.account_row, null)
+            val v = activity.layoutInflater.inflate(R.layout.account_row, p2, false)
             val t = AccountRowHolder(v)
-            v.setTag(t)
+            v.tag = t
             t
         } else {
-            p1.getTag() as AccountRowHolder
+            p1.tag as AccountRowHolder
         }
 
-        val account = accountsList.get(p0)
+        if (accountsList.isEmpty()) {
+            return null
+        }
+
+        val account = accountsList[p0]
         val currencySymbol = account.getCurrencySymbol(activity)
-        h.accountName.setText(account.name)
+        h.accountName.text = account.name
         val stringBuilder = StringBuilder()
         val sum = account.curSum
         if (sum < 0) {
@@ -43,16 +44,16 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
         }
         stringBuilder.append((sum.toDouble() / 100.0).formatSum())
         stringBuilder.append(' ').append(currencySymbol)
-        h.accountSum.setText(stringBuilder)
+        h.accountSum.text = stringBuilder
 
-        val dateLong = account.curSumDate?.getTime() ?: 0
+        val dateLong = account.curSumDate?.time ?: 0
         stringBuilder.setLength(0)
         if (dateLong > 0) {
             stringBuilder.append(activity.getString(R.string.balance_at).format(Date(dateLong).formatDate()))
         } else {
             stringBuilder.append(activity.getString(R.string.current_sum))
         }
-        h.balanceDate.setText(stringBuilder)
+        h.balanceDate.text = stringBuilder
         return h.view
     }
 
@@ -65,7 +66,7 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
     }
 
     override fun getItemId(p0: Int): Long {
-        return if (p0 < getCount()) accountsList.get(p0).id else 0
+        return if (p0 < count) accountsList.get(p0).id else 0
     }
 
     override fun getCount(): Int {
@@ -82,7 +83,12 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
     }
 
     override fun isEmpty(): Boolean {
-        return getCount() == 0
+        return count == 0
+    }
+
+    fun getAccountById(id: Long): Account? {
+        accountsList.forEach { if (it.id == id) return it }
+        return null
     }
 
     companion object {

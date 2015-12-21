@@ -5,7 +5,6 @@ import android.support.test.espresso.Espresso
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions.click
 import android.support.test.espresso.action.ViewActions.typeText
-import android.support.test.espresso.contrib.PickerActions.setDate
 import android.support.test.espresso.matcher.ViewMatchers.withId
 import android.test.ActivityInstrumentationTestCase2
 import fr.geobert.radis.MainActivity
@@ -16,21 +15,20 @@ import fr.geobert.radis.tools.TIME_ZONE
 import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.minusMonth
 import hirondelle.date4j.DateTime
-import java.util.Calendar
+import java.util.*
 
-public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaClass<MainActivity>()) {
+public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(MainActivity::class.java) {
 
-    throws(Exception::class)
     override fun setUp() {
         super.setUp()
         val i = Intent()
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
         setActivityIntent(i)
 
-        val appCtx = getInstrumentation().getTargetContext().getApplicationContext()
+        val appCtx = instrumentation.targetContext.applicationContext
         DBPrefsManager.getInstance(appCtx).resetAll()
-        val client = appCtx.getContentResolver().acquireContentProviderClient("fr.geobert.radis.db")
-        val provider = client.getLocalContentProvider() as DbContentProvider
+        val client = appCtx.contentResolver.acquireContentProviderClient("fr.geobert.radis.db")
+        val provider = client.localContentProvider as DbContentProvider
         provider.deleteDatabase(appCtx)
         client.release()
 
@@ -68,13 +66,13 @@ public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaCla
         var date = Tools.createClearedCalendar()
         date.set(Calendar.DAY_OF_MONTH, 29)
         date.add(Calendar.MONTH, -2)
-        onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
+        //onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
         Helpers.fillOpForm("Salaire", "+2000.00", "", "Virement", "")
         Helpers.clickOnActionItemConfirm()
 
         onView(withId(R.id.create_operation)).perform(click())
         date.set(Calendar.DAY_OF_MONTH, 5)
-        onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
+        //onView(withId(R.id.edit_op_date)).perform(setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH) + 1, date.get(Calendar.DAY_OF_MONTH)))
         Helpers.fillOpForm("Internet", "35.00", "Maison", "Prelevement", "")
         Helpers.clickOnActionItemConfirm()
 
@@ -84,19 +82,19 @@ public class FillDBTest : ActivityInstrumentationTestCase2<MainActivity>(javaCla
         //        date.set(Calendar.DAY_OF_MONTH, 22)
 
         val t = DateTime.today(TIME_ZONE)
-        var d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 22)
+        var d = DateTime.forDateOnly(t.year, t.month, 22)
         Helpers.addOp(d, "Boucherie", "45.00", "Alimentaire", "CB", "")
-        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 26).minusMonth(1)
+        d = DateTime.forDateOnly(t.year, t.month, 26).minusMonth(1)
         //        date.set(Calendar.DAY_OF_MONTH, 26)
         //        date.add(Calendar.MONTH, -1)
         Helpers.addOp(d, "Mutuelle", "+35.00", "Sante", "Virement", "")
-        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 22)
+        d = DateTime.forDateOnly(t.year, t.month, 22)
         //date.set(Calendar.DAY_OF_MONTH, 22)
         Helpers.addOp(d, "Boulangerie", "8.00", "Alimentaire", "Espece", "")
-        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 19)
+        d = DateTime.forDateOnly(t.year, t.month, 19)
         //        date.set(Calendar.DAY_OF_MONTH, 19)
         Helpers.addOp(d, "Disquaire", "17.00", "Loisir", "CB", "")
-        d = DateTime.forDateOnly(t.getYear(), t.getMonth(), 28)
+        d = DateTime.forDateOnly(t.year, t.month, 28)
         //date.set(Calendar.DAY_OF_MONTH, 28)
         Helpers.addOp(d, "Restaurant", "43.32", "Sortie", "CB", "")
     }

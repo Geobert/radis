@@ -11,9 +11,9 @@ import fr.geobert.radis.tools.DBPrefsManager
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.nio.channels.FileChannel
 
-public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpenHelper(mCtx, DbHelper.DATABASE_NAME, null, DbHelper.DATABASE_VERSION) {
+public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpenHelper(mCtx, DbHelper.DATABASE_NAME,
+        null, DbHelper.DATABASE_VERSION) {
 
     override fun onCreate(db: SQLiteDatabase) {
         AccountTable.onCreate(db)
@@ -26,7 +26,7 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        Log.d("DbHelper", "onUpgrade " + oldVersion + " -> " + newVersion)
+        Log.d("DbHelper", "onUpgrade $oldVersion -> $newVersion")
         if (oldVersion <= 1) upgradeFromV1(db, oldVersion, newVersion)
         if (oldVersion <= 2) upgradeFromV2(db, oldVersion, newVersion)
         if (oldVersion <= 3) upgradeFromV3(db, oldVersion, newVersion)
@@ -46,11 +46,16 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
         if (oldVersion <= 17) upgradeFromV17(db)
         if (oldVersion <= 18) upgradeFromV18(db)
         if (oldVersion <= 19) upgradeFromV19(db)
+        if (oldVersion <= 20) upgradeFromV20(db)
         upgradeDefault(db)
     }
 
     private fun upgradeDefault(db: SQLiteDatabase) {
         AccountTable.upgradeDefault(db)
+    }
+
+    private fun upgradeFromV20(db: SQLiteDatabase) {
+        StatisticTable.upgradeFromV20(db)
     }
 
     private fun upgradeFromV19(db: SQLiteDatabase) {
@@ -138,16 +143,18 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
     }
 
     companion object {
-        public  val DATABASE_NAME: String = "radisDb"
-        protected val DATABASE_VERSION: Int = 20
+        public val DATABASE_NAME: String = "radisDb"
+        val DATABASE_VERSION: Int = 21
 
         public var instance: DbHelper? = null
+        public fun getInstance(ctx: Context): DbHelper {
+            synchronized(this, {
+                if (instance == null) {
+                    instance = DbHelper(ctx)
+                }
+                return instance!!
+            })
 
-        synchronized public fun getInstance(ctx: Context): DbHelper {
-            if (instance == null) {
-                instance = DbHelper(ctx)
-            }
-            return instance!!
         }
 
         public fun trashDatabase(ctx: Context) {
@@ -170,8 +177,8 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
                     if (currentDB.exists()) {
                         val srcFIS = FileInputStream(currentDB)
                         val dstFOS = FileOutputStream(backupDB)
-                        val src = srcFIS.getChannel()
-                        val dst = dstFOS.getChannel()
+                        val src = srcFIS.channel
+                        val dst = dstFOS.channel
                         dst.transferFrom(src, 0, src.size())
                         src.close()
                         dst.close()
@@ -200,8 +207,8 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
                     DbContentProvider.close()
                     val srcFIS = FileInputStream(backupDB)
                     val dstFOS = FileOutputStream(currentDB)
-                    val dst = dstFOS.getChannel()
-                    val src = srcFIS.getChannel()
+                    val dst = dstFOS.channel
+                    val src = srcFIS.channel
 
                     dst.transferFrom(src, 0, src.size())
                     src.close()
@@ -210,7 +217,6 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
                     dstFOS.close()
                     DbContentProvider.reinit(ctx)
                     DBPrefsManager.getInstance(ctx).put(RadisService.CONSOLIDATE_DB, true)
-                    //                PrefsManager.getInstance(ctx).commit();
                     return true
                 }
             } catch (e: Exception) {

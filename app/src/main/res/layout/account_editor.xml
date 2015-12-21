@@ -16,15 +16,18 @@
         <EditText
                 android:id="@+id/edit_account_name"
                 style="@style/EditorEditText"
+                android:layout_weight="0"
                 android:hint="@string/name"/>
 
         <EditText
                 android:id="@+id/edit_account_start_sum"
                 style="@style/EditorEditText.Sum"
+                android:layout_weight="0"
                 android:hint="@string/start_sum"/>
 
         <TextView
                 style="@style/EditorTextView"
+                android:layout_weight="0"
                 android:text="@string/currency"/>
 
         <Spinner
@@ -39,11 +42,14 @@
                 android:id="@+id/custom_currency"
                 style="@style/EditorEditText"
                 android:maxLength="3"
+                android:layout_weight="0"
                 android:layout_marginBottom="5dip"
+                android:visibility="gone"
                 android:hint="@string/custom_currency_hint"/>
 
         <TextView
                 style="@style/EditorTextView"
+                android:layout_weight="0"
                 android:text="@string/projection_date"/>
 
         <Spinner
@@ -57,6 +63,7 @@
                 android:id="@+id/projection_date_value"
                 style="@style/EditorEditText.Date"
                 android:inputType="number"
+                android:layout_weight="0"
                 android:layout_marginBottom="5dip"/>
 
         <EditText

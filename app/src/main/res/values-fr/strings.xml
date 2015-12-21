@@ -36,7 +36,7 @@
     <string name="new_op">Nouvelle opération</string>
     <string name="tp_account_name">Compte %s</string>
     <string name="account_edit">Modifier le compte</string>
-    <string name="account_edit_title">Modifier</string>
+    <string name="account_edit_title">Modifier le compte</string>
     <string name="op_edition">Modifier l\'opération</string>
     <string name="future_sum_at">Projection au %1$s = %2$s</string>
     <string name="sum_at_selection">Solde à la selection</string>
@@ -115,7 +115,7 @@
     <string name="every">Tous les</string>
     <string name="every_fem">Toutes les</string>
     <string name="no_end_date">Pas de fin</string>
-    <string name="scheduling">Planification</string>
+    <string name="scheduling"> Planification </string>
     <string name="basics">Opération</string>
     <string name="end_date">Date de fin</string>
     <string name="scheduled_ops">Échéancier</string>
@@ -139,8 +139,8 @@
         vous pouvez décorréler les occurrences existantes de cette échéance.
     </string>
     <string name="no">Non</string>
-    <string name="update">Mettre à jour</string>
-    <string name="disconnect">Décorréler</string>
+    <string name="update">Mettre à j.</string>
+    <string name="disconnect">Déco.</string>
     <string name="ask_update_scheduling">Cette opération proviens d\'une échéance.
         Voulez-vous mettre à jour cette échéance et toutes ses occurences ? Si
         non, cette opération sera décorrélée de l\'échéance.
@@ -226,13 +226,15 @@
     <string name="navigation_drawer_open">Ouvre le menu de navigation</string>
     <string name="statistics">Statistiques</string>
     <string name="no_statistic"><![CDATA[Aucune statistique configurée. Appuyez sur le bouton « plus » pour en créer.]]></string>
+    <string name="no_statistic_data">Pas de donnée à afficher avec les paramètres actuels de la statistique. Veuillez modifier vos filtres.</string>
     <string name="new_stat">Créer une statistique</string>
     <string name="stat_name_hint">Nom de la statistique</string>
     <string name="stat_editor_title">Édition de statistique</string>
     <string name="no_filter">Temps</string>
     <string name="account_for_stat">Compte à représenter</string>
     <string name="filter_for_stat">Filtre de calcul</string>
-    <string name="period_for_stat">Échelle du temps</string>
+    <string name="period_for_stat">Période de temps</string>
+    <string name="timescale_for_stat">Échelle de temps</string>
     <string name="graph_type_for_stat">Type de graphique</string>
     <string name="days">Jours</string>
     <string name="monthes">Mois</string>
@@ -279,4 +281,12 @@
     <string name="one_file_per_account">Faire un fichier par compte</string>
     <string name="export">Exporter</string>
     <string name="no_column_selected">Aucune colonne sélectionnée. Il faut au moins une colonne à exporter.</string>
+    <string name="current_account">Compte actuel : </string>
+    <string name="negative_values">Valeurs négatives</string>
+    <string name="positive_values">Valeurs positives</string>
+    <string name="no_tag">Aucune catégorie, %s</string>
+    <string name="no_mode">Aucun mode, %s</string>
+    <string name="pos_values">positives</string>
+    <string name="neg_values">négatives</string>
+    <string name="backup_found">Une sauvegarde a été trouvée et restorée.</string>
 </resources>

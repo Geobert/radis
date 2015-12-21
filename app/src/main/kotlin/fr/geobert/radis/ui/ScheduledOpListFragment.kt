@@ -49,7 +49,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     override fun setupIcon() = setIcon(R.drawable.sched_48)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle?): View {
-        super<BaseFragment>.onCreateView(inflater, container, savedInstanceState)
+        super.onCreateView(inflater, container, savedInstanceState)
 
         val ll = inflater.inflate(R.layout.scheduled_list, container, false) as LinearLayout
         mContainer = ll
@@ -60,41 +60,41 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         mListView = ll.findViewById(R.id.operation_list) as RecyclerView
         mTotalLbl = ll.findViewById(R.id.sch_op_sum_total) as TextView
         mListView.setHasFixedSize(true)
-        mListLayout = LinearLayoutManager(getActivity())
+        mListLayout = LinearLayoutManager(activity)
         //        if (mListView.getLayoutManager() == null) {
-        mListView.setLayoutManager(mListLayout)
+        mListView.layoutManager = mListLayout
         //        }
-        mListView.setItemAnimator(DefaultItemAnimator())
+        mListView.itemAnimator = DefaultItemAnimator()
         return ll
     }
 
     private fun fetchSchOpsOfAccount() {
         Log.d("ScheduledOpListFragment", "fetchSchOpsOfAccount mLoader:$mLoader")
         if (mLoader == null) {
-            getLoaderManager().initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
+            loaderManager.initLoader<Cursor>(GET_SCH_OPS_OF_ACCOUNT, Bundle(), this)
         }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        super<BaseFragment>.onSaveInstanceState(outState)
+        super.onSaveInstanceState(outState)
         outState.putLong("mCurrentAccount", mActivity.getCurrentAccountId())
     }
 
     override fun onResume() {
-        super<BaseFragment>.onResume()
+        super.onResume()
         Log.d("ScheduledOpListFragment", "onResume")
         mAccountManager.fetchAllAccounts(false, { fetchSchOpsOfAccount() })
     }
 
     override fun onAccountChanged(itemId: Long): Boolean {
-        if (mAccountManager.getCurrentAccountId(getActivity()) != itemId) {
-            mAccountManager.setCurrentAccountId(itemId, getActivity())
+        if (mAccountManager.getCurrentAccountId(activity) != itemId) {
+            mAccountManager.setCurrentAccountId(itemId, activity)
             val req = if (mActivity.getCurrentAccountId() == 0L) {
                 GET_ALL_SCH_OPS
             } else {
                 GET_SCH_OPS_OF_ACCOUNT
             }
-            getLoaderManager().destroyLoader(req)
+            loaderManager.destroyLoader(req)
             fetchSchOpsOfAccount()
         }
         return true
@@ -102,7 +102,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     private fun deleteSchOp(delAllOccurrences: Boolean, opId: Long) {
         val cursorOp = ScheduledOperationTable.fetchOneScheduledOp(mActivity, opId)
-        val transId = cursorOp.getLong(cursorOp.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID))
+        val transId = cursorOp?.getLong(cursorOp.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID))
         var needRefresh = false
         if (delAllOccurrences) {
             ScheduledOperationTable.deleteAllOccurences(mActivity, opId)
@@ -115,14 +115,14 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
             setupListVisibility()
         }
         if (needRefresh) {
-            if (transId > 0) {
+            if (transId != null && transId > 0) {
                 AccountTable.consolidateSums(mActivity, transId)
             }
         }
     }
 
     override fun onMenuItemClick(item: MenuItem): Boolean {
-        when (item.getItemId()) {
+        when (item.itemId) {
             R.id.create_operation -> {
                 ScheduledOperationEditor.callMeForResult(mActivity, 0,
                         mActivity.getCurrentAccountId(), ScheduledOperationEditor.ACTIVITY_SCH_OP_CREATE)
@@ -154,7 +154,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
         val adapter = mAdapter
         if (adapter == null) {
             mAdapter = SchedOpAdapter(mActivity, this, data)
-            mListView.setAdapter(mAdapter)
+            mListView.adapter = mAdapter
         } else {
             adapter.increaseCache(data)
         }
@@ -163,19 +163,19 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
     }
 
     private fun setupListVisibility() {
-        if (mAdapter?.getItemCount() == 0) {
-            mListView.setVisibility(View.GONE)
-            mEmptyView.setVisibility(View.VISIBLE)
+        if (mAdapter?.itemCount == 0) {
+            mListView.visibility = View.GONE
+            mEmptyView.visibility = View.VISIBLE
         } else {
-            mListView.setVisibility(View.VISIBLE)
-            mEmptyView.setVisibility(View.GONE)
+            mListView.visibility = View.VISIBLE
+            mEmptyView.visibility = View.GONE
         }
     }
 
     private fun computeTotal(data: Cursor?) {
         var credit: Long = 0
         var debit: Long = 0
-        if (data != null && data.getCount() > 0 && data.moveToFirst()) {
+        if (data != null && data.count > 0 && data.moveToFirst()) {
             do {
                 var s = data.getLong(data.getColumnIndex(OperationTable.KEY_OP_SUM))
                 val transId = data.getLong(data.getColumnIndex(OperationTable.KEY_OP_TRANSFERT_ACC_ID))
@@ -189,10 +189,10 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
                 }
             } while (data.moveToNext())
         }
-        mTotalLbl.setText(getString(R.string.sched_op_total_sum).format(
+        mTotalLbl.text = getString(R.string.sched_op_total_sum).format(
                 (credit.toDouble() / 100.0).formatSum(),
                 (debit.toDouble() / 100.0).formatSum(),
-                ((credit + debit).toDouble() / 100.0).formatSum()))
+                ((credit + debit).toDouble() / 100.0).formatSum())
     }
 
     override fun onLoaderReset(cursorLoader: Loader<Cursor>) {
@@ -236,14 +236,18 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
 
     override fun getRecyclerView(): RecyclerView = mListView
 
+    override fun selectionChanged(selPos: Int, selId: Long) {
+        // TODO
+    }
+
     public class DeleteOpConfirmationDialog : DialogFragment() {
         private var operationId: Long = 0
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             super.onCreate(savedInstanceState)
-            val args = getArguments()
+            val args = arguments
             this.operationId = args.getLong("opId")
-            val builder = AlertDialog.Builder(getActivity())
+            val builder = AlertDialog.Builder(activity)
             builder.setMessage(R.string.ask_delete_occurrences).setCancelable(false).
                     setPositiveButton(R.string.del_all_occurrences, object : DialogInterface.OnClickListener {
                         override fun onClick(dialog: DialogInterface, id: Int) {
@@ -269,7 +273,7 @@ public class ScheduledOpListFragment : BaseFragment(), LoaderCallbacks<Cursor>, 
                 val frag = DeleteOpConfirmationDialog()
                 val args = Bundle()
                 args.putLong("opId", opId)
-                frag.setArguments(args)
+                frag.arguments = args
                 return frag
             }
         }

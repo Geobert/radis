@@ -6,14 +6,11 @@ import android.os.Parcelable
 import fr.geobert.radis.R
 import fr.geobert.radis.db.StatisticTable
 import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
 import fr.geobert.radis.tools.minusMonth
 import fr.geobert.radis.tools.minusYear
 import hirondelle.date4j.DateTime
-import java.util.Calendar
-import java.util.Date
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import kotlin.properties.getValue
+import kotlin.properties.setValue
 
 public class Statistic() : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
@@ -34,7 +31,7 @@ public class Statistic() : ImplParcelable {
         val MODE = 2
         val NO_FILTER = 3
 
-        platformStatic public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
+        public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
             override fun createFromParcel(p: Parcel): Statistic {
                 return Statistic(p)
             }
@@ -45,17 +42,18 @@ public class Statistic() : ImplParcelable {
         }
     }
 
-    var id: Long by Delegates.mapVar(parcels)
-    var name: String by Delegates.mapVar(parcels)
-    var accountId: Long by Delegates.mapVar(parcels)
-    var accountName: String by Delegates.mapVar(parcels)
-    var xLast: Int by Delegates.mapVar(parcels)
-    var endDate: DateTime by Delegates.mapVar(parcels)
-    var date: DateTime by Delegates.mapVar(parcels)
-    var startDate: DateTime by Delegates.mapVar(parcels)
-    var timeScaleType: Int by Delegates.mapVar(parcels)
-    var chartType: Int by Delegates.mapVar(parcels)
-    var filterType: Int by Delegates.mapVar(parcels)
+    var id: Long by parcels
+    var name: String by parcels
+    var accountId: Long by parcels
+    var accountName: String by parcels
+    var xLast: Int by parcels
+    var endDate: DateTime by parcels
+    var date: DateTime by parcels
+    var startDate: DateTime by parcels
+    var timePeriodType: Int by parcels
+    var timeScaleType: Int by parcels
+    var chartType: Int by parcels
+    var filterType: Int by parcels
 
     init {
         id = 0L
@@ -63,6 +61,7 @@ public class Statistic() : ImplParcelable {
         accountId = 0L
         accountName = ""
         xLast = 1
+        timePeriodType = Statistic.PERIOD_DAYS
         timeScaleType = Statistic.PERIOD_DAYS
         chartType = Statistic.CHART_PIE
         filterType = 0
@@ -79,7 +78,10 @@ public class Statistic() : ImplParcelable {
         accountId = cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_ACCOUNT))
         chartType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_TYPE))
         filterType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_FILTER))
-        timeScaleType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_PERIOD_TYPE))
+        timePeriodType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_PERIOD_TYPE))
+        timeScaleType = cursor.getInt(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_TIMESCALE_TYPE))
+        if (timeScaleType < 0) // freshly added column
+            timeScaleType = if (timePeriodType == Statistic.PERIOD_ABSOLUTE) Statistic.PERIOD_DAYS else timePeriodType
         if (isPeriodAbsolute()) {
             startDate = DateTime.forInstant(cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_START_DATE)), TIME_ZONE)
             endDate = DateTime.forInstant(cursor.getLong(StatisticTable.STAT_COLS.indexOf(StatisticTable.KEY_STAT_END_DATE)), TIME_ZONE)
@@ -92,14 +94,15 @@ public class Statistic() : ImplParcelable {
         readFromParcel(p)
     }
 
-    fun getValue(value: String) =
+    fun getValue(value: String): Any =
             when (value) {
                 StatisticTable.KEY_STAT_NAME -> name
                 StatisticTable.KEY_STAT_ACCOUNT_NAME -> accountName
                 StatisticTable.KEY_STAT_ACCOUNT -> accountId
                 StatisticTable.KEY_STAT_TYPE -> chartType
                 StatisticTable.KEY_STAT_FILTER -> filterType
-                StatisticTable.KEY_STAT_PERIOD_TYPE -> timeScaleType
+                StatisticTable.KEY_STAT_PERIOD_TYPE -> timePeriodType
+                StatisticTable.KEY_STAT_TIMESCALE_TYPE -> timeScaleType
                 StatisticTable.KEY_STAT_X_LAST -> xLast
                 StatisticTable.KEY_STAT_START_DATE -> startDate.getMilliseconds(TIME_ZONE)
                 StatisticTable.KEY_STAT_END_DATE -> endDate.getMilliseconds(TIME_ZONE)
@@ -109,13 +112,13 @@ public class Statistic() : ImplParcelable {
             }
 
 
-    fun isPeriodAbsolute() = timeScaleType == Statistic.PERIOD_ABSOLUTE
+    fun isPeriodAbsolute() = timePeriodType == Statistic.PERIOD_ABSOLUTE
 
     override fun equals(other: Any?): Boolean =
             if (other is Statistic) {
                 this.id == other.id && this.name == other.name && this.accountId == other.accountId &&
                         this.chartType == other.chartType && this.filterType == other.filterType &&
-                        this.timeScaleType == other.timeScaleType &&
+                        this.timePeriodType == other.timePeriodType && this.timeScaleType == other.timeScaleType &&
                         this.isPeriodAbsolute() == other.isPeriodAbsolute() &&
                         if (this.isPeriodAbsolute()) {
                             this.startDate == other.startDate && this.endDate == other.endDate
@@ -134,7 +137,7 @@ public class Statistic() : ImplParcelable {
     fun createTimeRange(): Pair<DateTime, DateTime> {
         fun createXLastRange(): Pair<DateTime, DateTime> {
             val today = DateTime.today(TIME_ZONE)
-            val startDate = when (this.timeScaleType) {
+            val startDate = when (this.timePeriodType) {
                 Statistic.PERIOD_DAYS -> today.minusDays(this.xLast)
                 Statistic.PERIOD_MONTHES -> today.minusMonth(this.xLast)
                 Statistic.PERIOD_YEARS -> today.minusYear(this.xLast)
@@ -143,7 +146,7 @@ public class Statistic() : ImplParcelable {
             return Pair(startDate, today)
         }
 
-        return when (this.timeScaleType) {
+        return when (this.timePeriodType) {
             Statistic.PERIOD_ABSOLUTE -> Pair(startDate, endDate)
             else -> createXLastRange()
         }
@@ -156,5 +159,9 @@ public class Statistic() : ImplParcelable {
                 Statistic.MODE -> R.string.mode
                 else -> R.string.no_filter
             }
+
+    override fun hashCode(): Int {
+        return parcels.hashCode()
+    }
 
 }

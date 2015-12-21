@@ -46,7 +46,7 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
             if (mCurDefaultAccount == null) {
                 //                Log.d(TAG, "getDefaultAccountId, no pref for def account")
                 // no pref set, take the first account, set it as default
-                if (mAccountAdapter.getCount() > 0) {
+                if (mAccountAdapter.count > 0) {
                     this.mCurDefaultAccount = mAccountAdapter.getAccount(0).id
                     DBPrefsManager.getInstance(context).put(ConfigFragment.KEY_DEFAULT_ACCOUNT, mCurDefaultAccount)
                 } else {
@@ -68,7 +68,7 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
             return mCurAccountId!!
         } else if (getDefaultAccountId(context) != null) {
             setCurrentAccountId(getDefaultAccountId(context), context)
-        } else if (mAccountAdapter.getCount() > 0) {
+        } else if (mAccountAdapter.count > 0) {
             setCurrentAccountId(mAccountAdapter.getAccount(0).id, context)
         } else {
             throw RuntimeException("No current account!")
@@ -147,15 +147,15 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
     }
 
     public fun fetchAllAccounts(force: Boolean, cbk: () -> Any?) {
-        Log.d(TAG, ">>>fetchAllAccounts:$force, fetching:$isFetching, empty:${mAccountAdapter.isEmpty()} ")
+        Log.d(TAG, ">>>fetchAllAccounts:$force, fetching:$isFetching, empty:${mAccountAdapter.isEmpty} ")
         this.mCallbacks.add(cbk)
         if (!isFetching) {
             isFetching = true
-            if (force || mAccountAdapter.isEmpty()) {
+            if (force || mAccountAdapter.isEmpty) {
                 if (mAccountLoader == null) {
-                    ctx.getSupportLoaderManager().initLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
+                    ctx.supportLoaderManager.initLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
                 } else {
-                    ctx.getSupportLoaderManager().restartLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
+                    ctx.supportLoaderManager.restartLoader<Cursor>(GET_ACCOUNTS, Bundle(), this)
                 }
             } else {
                 Log.d(TAG, "<<<fetchAllAccounts:$force")
@@ -184,13 +184,13 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
     }
 
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, cursor: Cursor) {
-        when (cursorLoader.getId()) {
+        when (cursorLoader.id) {
             GET_ACCOUNTS -> {
                 mAccountAdapter.swapCursor(cursor)
                 if (mCurAccountId != null) {
                     setCurrentAccountSum()
                 }
-                Log.d(TAG, "onLoadFinished: cursor:${cursor.getCount()}, count:${mAccountAdapter.getCount()}")
+                Log.d(TAG, "onLoadFinished: cursor:${cursor.count}, count:${mAccountAdapter.count}")
                 execCbks()
                 isFetching = false
             }

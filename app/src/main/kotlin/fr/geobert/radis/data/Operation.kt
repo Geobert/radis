@@ -11,27 +11,27 @@ import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.tools.plusMonth
 import fr.geobert.radis.ui.adapter.CellState
 import hirondelle.date4j.DateTime
-import java.util.Date
-import kotlin.platform.platformStatic
-import kotlin.properties.Delegates
+import java.util.*
+import kotlin.properties.getValue
+import kotlin.properties.setValue
 
 public open class Operation() : ImplParcelable, Comparable<Operation> {
     override val parcels = hashMapOf<String, Any?>()
-    public var mDate: DateTime by Delegates.mapVar(parcels)
-    public var mThirdParty: String by Delegates.mapVar(parcels)
-    public var mTag: String by Delegates.mapVar(parcels)
-    public var mMode: String by Delegates.mapVar(parcels)
-    public var mNotes: String by Delegates.mapVar(parcels)
-    public var mSum: Long by Delegates.mapVar(parcels)
-    public var mScheduledId: Long by Delegates.mapVar(parcels)
-    public var mRowId: Long by Delegates.mapVar(parcels)
-    public var mTransSrcAccName: String by Delegates.mapVar(parcels)
-    public var mIsChecked: Boolean by Delegates.mapVar(parcels)
+    public var mDate: DateTime by parcels
+    public var mThirdParty: String by parcels
+    public var mTag: String by parcels
+    public var mMode: String by parcels
+    public var mNotes: String by parcels
+    public var mSum: Long by parcels
+    public var mScheduledId: Long by parcels
+    public var mRowId: Long by parcels
+    public var mTransSrcAccName: String by parcels
+    public var mIsChecked: Boolean by parcels
 
     // if these value are != 0, it is a transfert operation between 2 accounts
     // mTransferAccountId is the other account
-    public var mTransferAccountId: Long by Delegates.mapVar(parcels)
-    public var mAccountId: Long by Delegates.mapVar(parcels)
+    public var mTransferAccountId: Long by parcels
+    public var mAccountId: Long by parcels
 
     // properties used only for ui
     public var isSelected: Boolean = false
@@ -67,7 +67,7 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
     }
 
     companion object {
-        platformStatic public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
+        public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
             override fun createFromParcel(p: Parcel): Operation {
                 return Operation(p)
             }
@@ -123,34 +123,34 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
     }
 
     public fun getMonth(): Int {
-        return mDate.getMonth()
+        return mDate.month
     }
 
     public fun setMonth(month: Int) {
-        val d = Math.min(mDate.getDay(), DateTime.forDateOnly(mDate.getYear(), month, 1).getEndOfMonth().getDay())
-        mDate = DateTime.forDateOnly(mDate.getYear(), month, d)
+        val d = Math.min(mDate.day, DateTime.forDateOnly(mDate.year, month, 1).endOfMonth.day)
+        mDate = DateTime.forDateOnly(mDate.year, month, d)
     }
 
     public fun getDay(): Int {
-        return mDate.getDay()
+        return mDate.day
     }
 
     public fun setDay(day: Int) {
-        val d = Math.min(day, mDate.getEndOfMonth().getDay())
-        mDate = DateTime.forDateOnly(mDate.getYear(), mDate.getMonth(), d)
+        val d = Math.min(day, mDate.endOfMonth.day)
+        mDate = DateTime.forDateOnly(mDate.year, mDate.month, d)
     }
 
     public fun getYear(): Int {
-        return mDate.getYear()
+        return mDate.year
     }
 
     public fun setYear(year: Int) {
         // will throw exception if month = feb and day = 29 and year is not leap, adjust the day
-        val d = if (mDate.getMonth() == 2 && mDate.isLeapYear() && !DateTime.forDateOnly(year, 1, 1).isLeapYear())
-            Math.min(mDate.getDay(), 28)
+        val d = if (mDate.month == 2 && mDate.isLeapYear && !DateTime.forDateOnly(year, 1, 1).isLeapYear)
+            Math.min(mDate.day, 28)
         else
-            mDate.getDay()
-        mDate = DateTime.forDateOnly(year, mDate.getMonth(), d)
+            mDate.day
+        mDate = DateTime.forDateOnly(year, mDate.month, d)
     }
 
     public fun getDate(): Long {
@@ -159,7 +159,7 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
 
     public fun setDate(date: Long) {
         val d = DateTime.forInstant(date, TIME_ZONE)
-        mDate = DateTime.forDateOnly(d.getYear(), d.getMonth(), d.getDay())
+        mDate = DateTime.forDateOnly(d.year, d.month, d.day)
     }
 
     public fun getDateObj(): Date {

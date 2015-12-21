@@ -10,9 +10,7 @@ import android.util.Log
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.tools.Tools
 import hirondelle.date4j.DateTime
-
-import java.util.GregorianCalendar
-import java.util.TimeZone
+import java.util.*
 
 public object OperationTable {
     public val DATABASE_OPERATIONS_TABLE: String = "operations"
@@ -29,22 +27,22 @@ public object OperationTable {
     public val KEY_OP_TRANSFERT_ACC_NAME: String = "transfert_acc_src_name"
     public val KEY_OP_CHECKED: String = "checked"
 
-    public val OP_ORDERING: String = "ops." + KEY_OP_DATE + " desc, ops." + KEY_OP_ROWID + " desc"
-    public val DATABASE_OP_TABLE_JOINTURE: String = DATABASE_OPERATIONS_TABLE + " ops LEFT OUTER JOIN " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + " tp ON ops." + KEY_OP_THIRD_PARTY + " = tp." + InfoTables.KEY_THIRD_PARTY_ROWID + " LEFT OUTER JOIN " + InfoTables.DATABASE_MODES_TABLE + " mode ON ops." + KEY_OP_MODE + " = mode." + InfoTables.KEY_MODE_ROWID + " LEFT OUTER JOIN " + InfoTables.DATABASE_TAGS_TABLE + " tag ON ops." + KEY_OP_TAG + " = tag." + InfoTables.KEY_TAG_ROWID
-    public val OP_COLS_QUERY: Array<String> = arrayOf("ops." + KEY_OP_ROWID, // 0
-            "tp." + InfoTables.KEY_THIRD_PARTY_NAME, "tag." + InfoTables.KEY_TAG_NAME, "mode." + InfoTables.KEY_MODE_NAME, "ops." + KEY_OP_SUM, // 4
-            "ops." + KEY_OP_DATE, "ops." + KEY_OP_ACCOUNT_ID, "ops." + KEY_OP_NOTES, "ops." + KEY_OP_SCHEDULED_ID, // 8
-            "ops." + KEY_OP_TRANSFERT_ACC_ID, "ops." + KEY_OP_TRANSFERT_ACC_NAME, "ops." + KEY_OP_CHECKED) // 11
-    public val RESTRICT_TO_ACCOUNT: String = "(ops." + KEY_OP_ACCOUNT_ID + " = ? OR ops." + KEY_OP_TRANSFERT_ACC_ID + " = ?)"
-    protected val DATABASE_OP_CREATE: String = "create table " + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID + " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY + " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM + " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, " + KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, " + KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID + " integer, " + KEY_OP_TRANSFERT_ACC_NAME + " text, " + KEY_OP_TRANSFERT_ACC_ID + " integer not null, " + KEY_OP_CHECKED + " integer not null, " + " FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + "(" + InfoTables.KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES " + InfoTables.DATABASE_TAGS_TABLE + "(" + InfoTables.KEY_TAG_ROWID + "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES " + InfoTables.DATABASE_MODES_TABLE + "(" + InfoTables.KEY_MODE_ROWID + "), FOREIGN KEY (" + KEY_OP_SCHEDULED_ID + ") REFERENCES " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + "(" + ScheduledOperationTable.KEY_SCHEDULED_ROWID + "));"
-    protected val INDEX_ON_ACCOUNT_ID_CREATE: String = "CREATE INDEX IF NOT EXISTS account_id_idx ON " + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ACCOUNT_ID + ")"
-    protected val TRIGGER_ON_DELETE_THIRD_PARTY_CREATE: String = "CREATE TRIGGER on_delete_third_party AFTER DELETE ON " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; END"
-    protected val TRIGGER_ON_DELETE_MODE_CREATE: String = "CREATE TRIGGER on_delete_mode AFTER DELETE ON " + InfoTables.DATABASE_MODES_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_MODE + " = null WHERE " + KEY_OP_MODE + " = old." + InfoTables.KEY_MODE_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_MODE + " = null WHERE " + KEY_OP_MODE + " = old." + InfoTables.KEY_MODE_ROWID + "; END"
-    protected val TRIGGER_ON_DELETE_TAG_CREATE: String = "CREATE TRIGGER on_delete_tag AFTER DELETE ON " + InfoTables.DATABASE_TAGS_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_TAG + " = null WHERE " + KEY_OP_TAG + " = old." + InfoTables.KEY_TAG_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_TAG + " = null WHERE " + KEY_OP_TAG + " = old." + InfoTables.KEY_TAG_ROWID + "; END"
-    protected val ADD_NOTES_COLUNM: String = "ALTER TABLE " + DATABASE_OPERATIONS_TABLE + " ADD COLUMN op_notes text"
-    protected val ADD_TRANSFERT_ID_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_TRANSFERT_ACC_ID + " integer not null DEFAULT 0"
-    protected val ADD_TRANSFERT_NAME_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_TRANSFERT_ACC_NAME + " text"
-    protected val ADD_CHECKED_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_CHECKED + " integer not null DEFAULT 0"
+    public val OP_ORDERING: String = "ops.$KEY_OP_DATE desc, ops.$KEY_OP_ROWID desc"
+    public val DATABASE_OP_TABLE_JOINTURE: String = "$DATABASE_OPERATIONS_TABLE ops LEFT OUTER JOIN ${InfoTables.DATABASE_THIRD_PARTIES_TABLE} tp ON ops.$KEY_OP_THIRD_PARTY = tp.${InfoTables.KEY_THIRD_PARTY_ROWID} LEFT OUTER JOIN ${InfoTables.DATABASE_MODES_TABLE} mode ON ops.$KEY_OP_MODE = mode.${InfoTables.KEY_MODE_ROWID} LEFT OUTER JOIN ${InfoTables.DATABASE_TAGS_TABLE} tag ON ops.$KEY_OP_TAG = tag.${InfoTables.KEY_TAG_ROWID}"
+    public val OP_COLS_QUERY: Array<String> = arrayOf("ops.$KEY_OP_ROWID", // 0
+            "tp.${InfoTables.KEY_THIRD_PARTY_NAME}", "tag.${InfoTables.KEY_TAG_NAME}", "mode.${InfoTables.KEY_MODE_NAME}", "ops.$KEY_OP_SUM", // 4
+            "ops.$KEY_OP_DATE", "ops.$KEY_OP_ACCOUNT_ID", "ops.$KEY_OP_NOTES", "ops.$KEY_OP_SCHEDULED_ID", // 8
+            "ops.$KEY_OP_TRANSFERT_ACC_ID", "ops.$KEY_OP_TRANSFERT_ACC_NAME", "ops.$KEY_OP_CHECKED") // 11
+    public val RESTRICT_TO_ACCOUNT: String = "(ops.$KEY_OP_ACCOUNT_ID = ? OR ops.$KEY_OP_TRANSFERT_ACC_ID = ?)"
+    val DATABASE_OP_CREATE = "create table " + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID + " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY + " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM + " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, " + KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, " + KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID + " integer, " + KEY_OP_TRANSFERT_ACC_NAME + " text, " + KEY_OP_TRANSFERT_ACC_ID + " integer not null, " + KEY_OP_CHECKED + " integer not null, " + " FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + "(" + InfoTables.KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES " + InfoTables.DATABASE_TAGS_TABLE + "(" + InfoTables.KEY_TAG_ROWID + "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES " + InfoTables.DATABASE_MODES_TABLE + "(" + InfoTables.KEY_MODE_ROWID + "), FOREIGN KEY (" + KEY_OP_SCHEDULED_ID + ") REFERENCES " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + "(" + ScheduledOperationTable.KEY_SCHEDULED_ROWID + "));"
+    val INDEX_ON_ACCOUNT_ID_CREATE: String = "CREATE INDEX IF NOT EXISTS account_id_idx ON " + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ACCOUNT_ID + ")"
+    public val TRIGGER_ON_DELETE_THIRD_PARTY_CREATE: String = "CREATE TRIGGER on_delete_third_party AFTER DELETE ON " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; END"
+    public val TRIGGER_ON_DELETE_MODE_CREATE: String = "CREATE TRIGGER on_delete_mode AFTER DELETE ON " + InfoTables.DATABASE_MODES_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_MODE + " = null WHERE " + KEY_OP_MODE + " = old." + InfoTables.KEY_MODE_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_MODE + " = null WHERE " + KEY_OP_MODE + " = old." + InfoTables.KEY_MODE_ROWID + "; END"
+    public val TRIGGER_ON_DELETE_TAG_CREATE: String = "CREATE TRIGGER on_delete_tag AFTER DELETE ON " + InfoTables.DATABASE_TAGS_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_TAG + " = null WHERE " + KEY_OP_TAG + " = old." + InfoTables.KEY_TAG_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_TAG + " = null WHERE " + KEY_OP_TAG + " = old." + InfoTables.KEY_TAG_ROWID + "; END"
+    val ADD_NOTES_COLUNM: String = "ALTER TABLE " + DATABASE_OPERATIONS_TABLE + " ADD COLUMN op_notes text"
+    public val ADD_TRANSFERT_ID_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_TRANSFERT_ACC_ID + " integer not null DEFAULT 0"
+    public val ADD_TRANSFERT_NAME_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_TRANSFERT_ACC_NAME + " text"
+    val ADD_CHECKED_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_CHECKED + " integer not null DEFAULT 0"
 
     private val TAG = "OperationTable"
 
@@ -60,19 +58,19 @@ public object OperationTable {
     }
 
     public fun fetchAllOps(ctx: Context, accountId: Long): Cursor {
-        val c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT, arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId)), OP_ORDERING)
+        val c = ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT, arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId)), OP_ORDERING)
         c?.moveToFirst()
         return c
     }
 
     public fun fetchAllCheckedOps(ctx: Context, accountId: Long): Cursor {
-        val c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), Integer.toString(1)), OP_ORDERING)
+        val c = ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), Integer.toString(1)), OP_ORDERING)
         c?.moveToFirst()
         return c
     }
 
     public fun fetchAllUncheckedOps(ctx: Context, accountId: Long, maxDate: Long): Cursor {
-        val c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ? AND ops." + KEY_OP_DATE + " <= ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), Integer.toString(0), java.lang.Long.toString(maxDate)), OP_ORDERING)
+        val c = ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + OperationTable.KEY_OP_CHECKED + " = ? AND ops." + KEY_OP_DATE + " <= ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), Integer.toString(0), java.lang.Long.toString(maxDate)), OP_ORDERING)
         c?.moveToFirst()
         return c
     }
@@ -81,7 +79,7 @@ public object OperationTable {
         var sum = 0L
         val sumIdx = c.getColumnIndex(KEY_OP_SUM)
         val transIdx = c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID)
-        if (!c.isBeforeFirst() && !c.isAfterLast()) {
+        if (!c.isBeforeFirst && !c.isAfterLast) {
             do {
                 var s = c.getLong(sumIdx)
                 if (c.getLong(transIdx) == curAccount) {
@@ -97,7 +95,7 @@ public object OperationTable {
         Log.d(TAG, "fetchOpEarlierThan date : " + Tools.getDateStr(date) + " with limit : " + nbOps)
         val c: Cursor?
         val limit = if (nbOps == 0) null else Integer.toString(nbOps)
-        c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " and ops." + KEY_OP_DATE + " < ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(date)), OP_ORDERING + (if (limit == null) "" else " ops._id asc LIMIT " + limit))
+        c = ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " and ops." + KEY_OP_DATE + " < ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(date)), OP_ORDERING + (if (limit == null) "" else " ops._id asc LIMIT " + limit))
         c?.moveToFirst()
         return c
     }
@@ -125,8 +123,8 @@ public object OperationTable {
         initialValues.put(KEY_OP_TRANSFERT_ACC_ID, op.mTransferAccountId)
         initialValues.put(KEY_OP_TRANSFERT_ACC_NAME, op.mTransSrcAccName)
         initialValues.put(KEY_OP_CHECKED, if (op.mIsChecked) 1 else 0)
-        val res = ctx.getContentResolver().insert(DbContentProvider.OPERATION_URI, initialValues)
-        op.mRowId = java.lang.Long.parseLong(res.getLastPathSegment())
+        val res = ctx.contentResolver.insert(DbContentProvider.OPERATION_URI, initialValues)
+        op.mRowId = java.lang.Long.parseLong(res.lastPathSegment)
         if (op.mRowId > -1) {
             if (withUpdate) {
                 AccountTable.updateProjection(ctx, accountId, op.mSum, 0, op.getDate(), -1)
@@ -151,7 +149,7 @@ public object OperationTable {
             val checked = c.getInt(c.getColumnIndex(KEY_OP_CHECKED)) == 1
             val transfertId = c.getLong(c.getColumnIndex(KEY_OP_TRANSFERT_ACC_ID))
             c.close()
-            if (ctx.getContentResolver().delete(Uri.parse("${DbContentProvider.OPERATION_URI}/$rowId"), null, null) > 0) {
+            if (ctx.contentResolver.delete(Uri.parse("${DbContentProvider.OPERATION_URI}/$rowId"), null, null) > 0) {
                 AccountTable.updateProjection(ctx, accountId, -opSum, 0, opDate, -1)
                 if (transfertId > 0) {
                     AccountTable.updateProjection(ctx, transfertId, opSum, 0, opDate, -1)
@@ -166,15 +164,15 @@ public object OperationTable {
     }
 
     public fun fetchLastOp(ctx: Context, accountId: Long): Cursor {
-        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM " + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." + KEY_OP_TRANSFERT_ACC_ID + " = ?)) ", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId)), OP_ORDERING)
+        return ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM " + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." + KEY_OP_TRANSFERT_ACC_ID + " = ?)) ", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId)), OP_ORDERING)
     }
 
     public fun fetchLastOpSince(ctx: Context, accountId: Long, time: Long): Cursor {
-        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM " + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." + KEY_OP_TRANSFERT_ACC_ID + " = ?) AND ops2." + KEY_OP_DATE + " < ?) ", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(time)), OP_ORDERING)
+        return ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " = (SELECT max(ops2." + KEY_OP_DATE + ") FROM " + DATABASE_OPERATIONS_TABLE + " ops2 WHERE (ops2." + KEY_OP_ACCOUNT_ID + " = ? OR ops2." + KEY_OP_TRANSFERT_ACC_ID + " = ?) AND ops2." + KEY_OP_DATE + " < ?) ", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(time)), OP_ORDERING)
     }
 
     public fun fetchOneOp(ctx: Context, rowId: Long, accountId: Long): Cursor {
-        val c = ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_ROWID + " = ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(rowId)), null)
+        val c = ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_ROWID + " = ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(rowId)), null)
         c?.moveToFirst()
         return c
     }
@@ -189,7 +187,7 @@ public object OperationTable {
 
     public fun getOpsBetweenDate(ctx: Context, earliestOpDate: DateTime, latestOpDate: DateTime, accountId: Long): Cursor {
         val tz = TimeZone.getDefault()
-        return ctx.getContentResolver().query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(earliestOpDate.getMilliseconds(tz)), // TODO once converted to Kotlin, use TIME_ZONE
+        return ctx.contentResolver.query(DbContentProvider.OPERATION_JOINED_URI, OP_COLS_QUERY, RESTRICT_TO_ACCOUNT + " AND ops." + KEY_OP_DATE + " >= ? AND ops." + KEY_OP_DATE + " <= ?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(accountId), java.lang.Long.toString(earliestOpDate.getMilliseconds(tz)), // TODO once converted to Kotlin, use TIME_ZONE
                 java.lang.Long.toString(latestOpDate.getMilliseconds(tz))), OP_ORDERING)
     }
 
@@ -221,8 +219,10 @@ public object OperationTable {
     // return if need to update OP_SUM
     public fun updateOp(ctx: Context, rowId: Long, op: Operation, originalOp: Operation): Boolean {
         val args = createContentValuesFromOp(ctx, op, false)
-        if (ctx.getContentResolver().update(Uri.parse("${DbContentProvider.OPERATION_URI}/$rowId"), args, null, null) > 0) {
+        if (ctx.contentResolver.update(Uri.parse("${DbContentProvider.OPERATION_URI}/$rowId"), args, null, null) > 0) {
             AccountTable.updateProjection(ctx, op.mAccountId, op.mSum, originalOp.mSum, op.getDate(), originalOp.getDate())
+
+            // tranfert op management
             if (op.mTransferAccountId > 0) {
                 if (originalOp.mTransferAccountId <= 0) {
                     // op was not a transfert, it is like adding an op in transfertAccountId
@@ -245,6 +245,7 @@ public object OperationTable {
                 AccountTable.updateProjection(ctx, originalOp.mTransferAccountId, originalOp.mSum, 0, op.getDate(), -1)
             }
 
+            // checked status management
             if (originalOp.mIsChecked != op.mIsChecked) {
                 AccountTable.updateCheckedOpSum(ctx, op.mSum, op.mAccountId, op.mTransferAccountId, op.mIsChecked)
             }
@@ -255,7 +256,7 @@ public object OperationTable {
     }
 
     public fun deleteAllOccurrences(ctx: Context, accountId: Long, schOpId: Long, transfertId: Long): Int {
-        val nb = ctx.getContentResolver().delete(DbContentProvider.OPERATION_URI, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId)))
+        val nb = ctx.contentResolver.delete(DbContentProvider.OPERATION_URI, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId)))
         if (nb > 0) {
             AccountTable.consolidateSums(ctx, accountId)
             if (transfertId > 0) {
@@ -266,7 +267,7 @@ public object OperationTable {
     }
 
     public fun deleteAllFutureOccurrences(ctx: Context, accountId: Long, schOpId: Long, date: Long, transfertId: Long): Int {
-        val nbDel = ctx.getContentResolver().delete(DbContentProvider.OPERATION_URI, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND " + KEY_OP_DATE + ">=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId), java.lang.Long.toString(date)))
+        val nbDel = ctx.contentResolver.delete(DbContentProvider.OPERATION_URI, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=? AND " + KEY_OP_DATE + ">=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId), java.lang.Long.toString(date)))
         if (nbDel > 0) {
             AccountTable.consolidateSums(ctx, accountId)
             if (transfertId > 0) {
@@ -278,19 +279,19 @@ public object OperationTable {
 
     public fun updateAllOccurrences(ctx: Context, accountId: Long, schOpId: Long, op: Operation): Int {
         val args = createContentValuesFromOp(ctx, op, true)
-        return ctx.getContentResolver().update(DbContentProvider.OPERATION_URI, args, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId)))
+        return ctx.contentResolver.update(DbContentProvider.OPERATION_URI, args, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId)))
     }
 
     public fun disconnectAllOccurrences(ctx: Context, accountId: Long, schOpId: Long): Int {
         val args = ContentValues()
         args.put(KEY_OP_SCHEDULED_ID, 0)
-        return ctx.getContentResolver().update(DbContentProvider.OPERATION_URI, args, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId)))
+        return ctx.contentResolver.update(DbContentProvider.OPERATION_URI, args, KEY_OP_ACCOUNT_ID + "=? AND " + KEY_OP_SCHEDULED_ID + "=?", arrayOf(java.lang.Long.toString(accountId), java.lang.Long.toString(schOpId)))
     }
 
     public fun updateOpCheckedStatus(ctx: Context, opId: Long, sum: Long, accountId: Long, transAccountId: Long, b: Boolean) {
         val values = ContentValues()
         values.put(KEY_OP_CHECKED, b)
-        val res = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.OPERATION_URI}/$opId"), values, null, null)
+        val res = ctx.contentResolver.update(Uri.parse("${DbContentProvider.OPERATION_URI}/$opId"), values, null, null)
         if (res == 1) {
             AccountTable.updateCheckedOpSum(ctx, sum, accountId, transAccountId, b)
         } else {
@@ -301,7 +302,7 @@ public object OperationTable {
     public fun updateOpCheckedStatus(ctx: Context, op: Operation, b: Boolean) {
         val values = ContentValues()
         values.put(KEY_OP_CHECKED, b)
-        val res = ctx.getContentResolver().update(Uri.parse("${DbContentProvider.OPERATION_URI}/${op.mRowId}"), values, null, null)
+        val res = ctx.contentResolver.update(Uri.parse("${DbContentProvider.OPERATION_URI}/${op.mRowId}"), values, null, null)
         if (res == 1) {
             AccountTable.updateCheckedOpSum(ctx, op, b)
         } else {
@@ -324,13 +325,12 @@ public object OperationTable {
         val c = db.query(DATABASE_OPERATIONS_TABLE, arrayOf(KEY_OP_ROWID, KEY_OP_DATE), null, null, null, null, null)
         if (null != c) {
             if (c.moveToFirst()) {
-                val values: ContentValues
                 do {
-                    values = ContentValues()
+                    val values = ContentValues()
                     val d = GregorianCalendar()
-                    d.setTimeInMillis(c.getLong(c.getColumnIndex(KEY_OP_DATE)))
+                    d.timeInMillis = c.getLong(c.getColumnIndex(KEY_OP_DATE))
                     Tools.clearTimeOfCalendar(d)
-                    values.put(KEY_OP_DATE, d.getTimeInMillis())
+                    values.put(KEY_OP_DATE, d.timeInMillis)
                     db.update(DATABASE_OPERATIONS_TABLE, values, KEY_OP_ROWID + "=" + c.getLong(c.getColumnIndex(KEY_OP_ROWID)), null)
                 } while (c.moveToNext())
             }

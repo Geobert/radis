@@ -18,7 +18,7 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
     override fun operationFactory(c: Cursor): ScheduledOperation = ScheduledOperation(c)
 
     override fun onBindViewHolder(viewHolder: OpRowHolder<ScheduledOperation>, pos: Int) {
-        super<BaseOperationAdapter>.onBindViewHolder(viewHolder, pos)
+        super.onBindViewHolder(viewHolder, pos)
         val op = operationAt(pos) as ScheduledOperation
 
         val b = StringBuilder()
@@ -32,12 +32,12 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
         } else {
             b.append(activity.getString(R.string.no_end_date));
         }
-        viewHolder.tag.setText(b.toString());
+        viewHolder.tag.text = b.toString();
 
         // date
-        viewHolder.opDate.setText(op.getDateObj().formatDate());
+        viewHolder.opDate.text = op.getDateObj().formatDate();
 
-        viewHolder.isCheckedBox.setVisibility(View.GONE)
+        viewHolder.isCheckedBox.visibility = View.GONE
 
         configureCell(op, viewHolder, pos)
         doAnimations(viewHolder, pos)
@@ -45,14 +45,14 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
 
     private fun configureCell(op: ScheduledOperation, h: OpRowHolder<ScheduledOperation>, position: Int) {
         val needInfos = position == selectedPosition
-        h.scheduledImg.setVisibility(View.GONE)
+        h.scheduledImg.visibility = View.GONE
         op.state = if (needInfos) {
             CellState.STATE_INFOS_CELL
         } else {
             CellState.STATE_REGULAR_CELL
         }
-        h.sumAtSelection.setText("")
-        h.month.setText("")
+        h.sumAtSelection.text = ""
+        h.month.text = ""
         if (needInfos) {
             h.editBtn.setOnClickListener(object : View.OnClickListener {
 
@@ -65,12 +65,12 @@ public class SchedOpAdapter(act: MainActivity, opList: IOperationList, c: Cursor
             h.deleteBtn.setOnClickListener(object : View.OnClickListener {
 
                 override fun onClick(view: View) {
-                    operationsList.getDeleteConfirmationDialog(op).show(activity.getSupportFragmentManager(),
+                    operationsList.getDeleteConfirmationDialog(op).show(activity.supportFragmentManager,
                             "deleteOpConfirm");
                 }
             });
             h.deleteBtn.setOnLongClickListener(Tools.createTooltip(R.string.delete));
-            h.varBtn.setVisibility(View.GONE);
+            h.varBtn.visibility = View.GONE;
         } else {
             clearListeners(h);
         }

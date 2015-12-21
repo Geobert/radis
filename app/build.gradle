@@ -1,15 +1,15 @@
 buildscript {
-    ext.kotlin_version = '0.12.613'
-    ext.android_support = '22.2.0'
+    ext.kotlin_version = '1.0.0-beta-3595'
+    ext.android_support = '23.1.1'
     repositories {
         jcenter()
         maven { url 'https://maven.fabric.io/public' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.1'
+        classpath 'com.android.tools.build:gradle:1.2.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
 //        classpath "org.jetbrains.kotlin:kotlin-android-extensions:$kotlin_version"
-        classpath 'io.fabric.tools:gradle:1.15.2'
+        classpath 'io.fabric.tools:gradle:1.20.1'
     }
 }
 apply plugin: 'com.android.application'
@@ -17,25 +17,28 @@ apply plugin: 'io.fabric'
 apply plugin: 'kotlin-android'
 
 repositories {
+    def androidHome = System.getenv("ANDROID_HOME")
     jcenter()
     maven { url 'https://maven.fabric.io/public' }
     maven {
         url 'http://oss.sonatype.org/content/repositories/snapshots'
     }
+    maven { url "https://jitpack.io" }
+    maven { url "$androidHome/extras/android/m2repository/" }
 }
 
 android {
-    compileSdkVersion 22
-    buildToolsVersion '22.0.1'
+    compileSdkVersion 23
+    buildToolsVersion '23.0.2'
     lintOptions {
         disable 'MissingTranslation'
     }
     defaultConfig {
         applicationId "fr.geobert.radis"
         minSdkVersion 8
-        targetSdkVersion 22
-        versionCode 64
-        versionName "1.2.3"
+        targetSdkVersion 23
+        versionCode 65
+        versionName "1.2.4"
         testApplicationId "fr.geobert.radis.test"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
@@ -59,7 +62,7 @@ android {
 }
 
 configurations.all {
-    resolutionStrategy.force 'com.android.support:support-annotations:22.2.0'
+    resolutionStrategy.force 'com.android.support:support-annotations:23.1.1'
 }
 
 dependencies {
@@ -69,20 +72,21 @@ dependencies {
     compile "com.android.support:recyclerview-v7:$android_support"
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     compile "com.darwinsys:hirondelle-date4j:1.5.1"
+    compile 'com.github.PhilJay:MPAndroidChart:v2.1.6'
 
-    androidTestCompile 'com.android.support.test:runner:0.2'
-    androidTestCompile('com.android.support.test:rules:0.2') {
+    androidTestCompile 'com.android.support.test:runner:0.4.1'
+    androidTestCompile('com.android.support.test:rules:0.4.1') {
         exclude group: 'com.android.support', module: 'support-v4'
     }
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.1') {
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.1') {
         exclude group: 'com.android.support', module: 'support-v4'
     }
-    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.1') {
+    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.1') {
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'recyclerview-v7'
     }
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.4.0@aar') {
+    compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') {
         transitive = true;
     }
 }
