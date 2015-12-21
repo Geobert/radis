@@ -1,3 +1,8 @@
+Version 1.2.4 - 21/12/2015
+- changement de moteur de graphique pour MPAndroidChart
+- simplification de l'éditeur d'échéances
+- bug fix
+
 Version 1.2.3 - 09/08/2015
 - le quick add perdait parfois la complétion
 - stabilisation
