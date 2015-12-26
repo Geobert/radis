@@ -28,21 +28,26 @@ public object OperationTable {
     public val KEY_OP_CHECKED: String = "checked"
 
     public val OP_ORDERING: String = "ops.$KEY_OP_DATE desc, ops.$KEY_OP_ROWID desc"
-    public val DATABASE_OP_TABLE_JOINTURE: String = "$DATABASE_OPERATIONS_TABLE ops LEFT OUTER JOIN ${InfoTables.DATABASE_THIRD_PARTIES_TABLE} tp ON ops.$KEY_OP_THIRD_PARTY = tp.${InfoTables.KEY_THIRD_PARTY_ROWID} LEFT OUTER JOIN ${InfoTables.DATABASE_MODES_TABLE} mode ON ops.$KEY_OP_MODE = mode.${InfoTables.KEY_MODE_ROWID} LEFT OUTER JOIN ${InfoTables.DATABASE_TAGS_TABLE} tag ON ops.$KEY_OP_TAG = tag.${InfoTables.KEY_TAG_ROWID}"
+    public val DATABASE_OP_TABLE_JOINTURE: String = "$DATABASE_OPERATIONS_TABLE ops" +
+            " LEFT OUTER JOIN ${InfoTables.DATABASE_THIRD_PARTIES_TABLE} tp ON ops.$KEY_OP_THIRD_PARTY = tp.${InfoTables.KEY_THIRD_PARTY_ROWID}" +
+            " LEFT OUTER JOIN ${InfoTables.DATABASE_MODES_TABLE} mode ON ops.$KEY_OP_MODE = mode.${InfoTables.KEY_MODE_ROWID}" +
+            " LEFT OUTER JOIN ${InfoTables.DATABASE_TAGS_TABLE} tag ON ops.$KEY_OP_TAG = tag.${InfoTables.KEY_TAG_ROWID}"
     public val OP_COLS_QUERY: Array<String> = arrayOf("ops.$KEY_OP_ROWID", // 0
             "tp.${InfoTables.KEY_THIRD_PARTY_NAME}", "tag.${InfoTables.KEY_TAG_NAME}", "mode.${InfoTables.KEY_MODE_NAME}", "ops.$KEY_OP_SUM", // 4
             "ops.$KEY_OP_DATE", "ops.$KEY_OP_ACCOUNT_ID", "ops.$KEY_OP_NOTES", "ops.$KEY_OP_SCHEDULED_ID", // 8
             "ops.$KEY_OP_TRANSFERT_ACC_ID", "ops.$KEY_OP_TRANSFERT_ACC_NAME", "ops.$KEY_OP_CHECKED") // 11
     public val RESTRICT_TO_ACCOUNT: String = "(ops.$KEY_OP_ACCOUNT_ID = ? OR ops.$KEY_OP_TRANSFERT_ACC_ID = ?)"
     val DATABASE_OP_CREATE = "create table " + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ROWID + " integer primary key autoincrement, " + KEY_OP_THIRD_PARTY + " integer, " + KEY_OP_TAG + " integer, " + KEY_OP_SUM + " integer not null, " + KEY_OP_ACCOUNT_ID + " integer not null, " + KEY_OP_MODE + " integer, " + KEY_OP_DATE + " integer not null, " + KEY_OP_NOTES + " text, " + KEY_OP_SCHEDULED_ID + " integer, " + KEY_OP_TRANSFERT_ACC_NAME + " text, " + KEY_OP_TRANSFERT_ACC_ID + " integer not null, " + KEY_OP_CHECKED + " integer not null, " + " FOREIGN KEY (" + KEY_OP_THIRD_PARTY + ") REFERENCES " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + "(" + InfoTables.KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + KEY_OP_TAG + ") REFERENCES " + InfoTables.DATABASE_TAGS_TABLE + "(" + InfoTables.KEY_TAG_ROWID + "), FOREIGN KEY (" + KEY_OP_MODE + ") REFERENCES " + InfoTables.DATABASE_MODES_TABLE + "(" + InfoTables.KEY_MODE_ROWID + "), FOREIGN KEY (" + KEY_OP_SCHEDULED_ID + ") REFERENCES " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + "(" + ScheduledOperationTable.KEY_SCHEDULED_ROWID + "));"
-    val INDEX_ON_ACCOUNT_ID_CREATE: String = "CREATE INDEX IF NOT EXISTS account_id_idx ON " + DATABASE_OPERATIONS_TABLE + "(" + KEY_OP_ACCOUNT_ID + ")"
-    public val TRIGGER_ON_DELETE_THIRD_PARTY_CREATE: String = "CREATE TRIGGER on_delete_third_party AFTER DELETE ON " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; END"
+    val INDEX_ON_ACCOUNT_ID_CREATE: String = "CREATE INDEX IF NOT EXISTS account_id_idx ON $DATABASE_OPERATIONS_TABLE($KEY_OP_ACCOUNT_ID)"
+    public val TRIGGER_ON_DELETE_THIRD_PARTY_CREATE: String = "CREATE TRIGGER on_delete_third_party AFTER DELETE ON " + InfoTables.DATABASE_THIRD_PARTIES_TABLE +
+            " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; " +
+            "UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_THIRD_PARTY + " = null WHERE " + KEY_OP_THIRD_PARTY + " = old." + InfoTables.KEY_THIRD_PARTY_ROWID + "; END"
     public val TRIGGER_ON_DELETE_MODE_CREATE: String = "CREATE TRIGGER on_delete_mode AFTER DELETE ON " + InfoTables.DATABASE_MODES_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_MODE + " = null WHERE " + KEY_OP_MODE + " = old." + InfoTables.KEY_MODE_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_MODE + " = null WHERE " + KEY_OP_MODE + " = old." + InfoTables.KEY_MODE_ROWID + "; END"
     public val TRIGGER_ON_DELETE_TAG_CREATE: String = "CREATE TRIGGER on_delete_tag AFTER DELETE ON " + InfoTables.DATABASE_TAGS_TABLE + " BEGIN UPDATE " + DATABASE_OPERATIONS_TABLE + " SET " + KEY_OP_TAG + " = null WHERE " + KEY_OP_TAG + " = old." + InfoTables.KEY_TAG_ROWID + "; UPDATE " + ScheduledOperationTable.DATABASE_SCHEDULED_TABLE + " SET " + KEY_OP_TAG + " = null WHERE " + KEY_OP_TAG + " = old." + InfoTables.KEY_TAG_ROWID + "; END"
-    val ADD_NOTES_COLUNM: String = "ALTER TABLE " + DATABASE_OPERATIONS_TABLE + " ADD COLUMN op_notes text"
-    public val ADD_TRANSFERT_ID_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_TRANSFERT_ACC_ID + " integer not null DEFAULT 0"
-    public val ADD_TRANSFERT_NAME_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_TRANSFERT_ACC_NAME + " text"
-    val ADD_CHECKED_COLUNM: String = "ALTER TABLE %s ADD COLUMN " + KEY_OP_CHECKED + " integer not null DEFAULT 0"
+    val ADD_NOTES_COLUNM: String = "ALTER TABLE $DATABASE_OPERATIONS_TABLE ADD COLUMN op_notes text"
+    public val ADD_TRANSFERT_ID_COLUNM: String = "ALTER TABLE %s ADD COLUMN $KEY_OP_TRANSFERT_ACC_ID integer not null DEFAULT 0"
+    public val ADD_TRANSFERT_NAME_COLUNM: String = "ALTER TABLE %s ADD COLUMN $KEY_OP_TRANSFERT_ACC_NAME text"
+    val ADD_CHECKED_COLUNM: String = "ALTER TABLE %s ADD COLUMN $KEY_OP_CHECKED integer not null DEFAULT 0"
 
     private val TAG = "OperationTable"
 

@@ -16,7 +16,7 @@ import fr.geobert.radis.ui.ConfigFragment
 import java.text.ParseException
 import java.util.*
 
-public object AccountTable {
+object AccountTable {
     private val TAG = "AccountTable"
     val DATABASE_ACCOUNT_TABLE = "accounts"
     public val PROJECTION_FURTHEST: Int = 0
@@ -43,25 +43,39 @@ public object AccountTable {
             KEY_ACCOUNT_DESC, KEY_ACCOUNT_START_SUM, KEY_ACCOUNT_OP_SUM, KEY_ACCOUNT_CHECKED_OP_SUM,
             KEY_ACCOUNT_LAST_INSERTION_DATE)
 
-    private val DATABASE_ACCOUNT_CREATE_v7 = "create table $DATABASE_ACCOUNT_TABLE($KEY_ACCOUNT_ROWID integer primary key autoincrement, " +
-            "$KEY_ACCOUNT_NAME text not null, $KEY_ACCOUNT_DESC text not null, $KEY_ACCOUNT_START_SUM integer not null, " +
-            "$KEY_ACCOUNT_OP_SUM integer not null, $KEY_ACCOUNT_CUR_SUM integer not null, " +
-            "$KEY_ACCOUNT_CUR_SUM_DATE integer not null, $KEY_ACCOUNT_CURRENCY text not null);"
+    private val DATABASE_ACCOUNT_CREATE_v7 = "CREATE TABLE ${AccountTable.DATABASE_ACCOUNT_TABLE}(" +
+            "$KEY_ACCOUNT_ROWID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+            "$KEY_ACCOUNT_NAME TEXT NOT NULL, " +
+            "$KEY_ACCOUNT_DESC TEXT NOT NULL, " +
+            "$KEY_ACCOUNT_START_SUM INTEGER NOT NULL, " +
+            "$KEY_ACCOUNT_OP_SUM INTEGER NOT NULL, " +
+            "$KEY_ACCOUNT_CUR_SUM INTEGER NOT NULL, " +
+            "$KEY_ACCOUNT_CUR_SUM_DATE INTEGER NOT NULL, " +
+            "$KEY_ACCOUNT_CURRENCY TEXT NOT NULL" +
+            ");"
 
-    private val DATABASE_ACCOUNT_CREATE = "create table $DATABASE_ACCOUNT_TABLE($KEY_ACCOUNT_ROWID integer primary key autoincrement, " +
-            "$KEY_ACCOUNT_NAME text not null, $KEY_ACCOUNT_DESC text not null, $KEY_ACCOUNT_START_SUM integer not null, " +
-            "$KEY_ACCOUNT_OP_SUM integer not null, $KEY_ACCOUNT_CUR_SUM integer not null, $KEY_ACCOUNT_CUR_SUM_DATE integer not null, " +
-            "$KEY_ACCOUNT_CURRENCY text not null, $KEY_ACCOUNT_PROJECTION_MODE integer not null, " +
-            "$KEY_ACCOUNT_PROJECTION_DATE string, $KEY_ACCOUNT_CHECKED_OP_SUM integer not null, " +
-            "$KEY_ACCOUNT_LAST_INSERTION_DATE integer not null);"
+    private val DATABASE_ACCOUNT_CREATE = "CREATE TABLE ${AccountTable.DATABASE_ACCOUNT_TABLE}(" +
+            "$KEY_ACCOUNT_ROWID INTEGER PRIMARY KEY AUTOINCREMENT," +
+            "$KEY_ACCOUNT_NAME TEXT NOT NULL," +
+            "$KEY_ACCOUNT_DESC TEXT NOT NULL," +
+            "$KEY_ACCOUNT_START_SUM INTEGER NOT NULL," +
+            "$KEY_ACCOUNT_OP_SUM INTEGER NOT NULL," +
+            "$KEY_ACCOUNT_CUR_SUM INTEGER NOT NULL," +
+            "$KEY_ACCOUNT_CUR_SUM_DATE INTEGER NOT NULL," +
+            "$KEY_ACCOUNT_CURRENCY TEXT NOT NULL," +
+            "$KEY_ACCOUNT_PROJECTION_MODE INTEGER NOT NULL," +
+            "$KEY_ACCOUNT_PROJECTION_DATE STRING," +
+            "$KEY_ACCOUNT_CHECKED_OP_SUM INTEGER NOT NULL," +
+            "$KEY_ACCOUNT_LAST_INSERTION_DATE INTEGER NOT NULL" +
+            ");"
 
-    val ADD_CUR_DATE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CUR_SUM_DATE integer not null DEFAULT 0"
+    val ADD_CUR_DATE_COLUMN: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CUR_SUM_DATE integer not null DEFAULT 0"
 
-    val ADD_PROJECTION_MODE_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_MODE integer not null DEFAULT 0"
+    val ADD_PROJECTION_MODE_COLUMN: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_MODE integer not null DEFAULT 0"
 
     val ADD_PROJECTION_MODE_DATE: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_PROJECTION_DATE string"
 
-    val ADD_CHECKED_SUM_COLUNM: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CHECKED_OP_SUM integer not null DEFAULT 0"
+    val ADD_CHECKED_SUM_COLUMN: String = "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_CHECKED_OP_SUM integer not null DEFAULT 0"
     val ADD_LAST_INSERT_DATE_COLUMN: String =
             "ALTER TABLE $DATABASE_ACCOUNT_TABLE ADD COLUMN $KEY_ACCOUNT_LAST_INSERTION_DATE integer not null DEFAULT 0"
 
@@ -530,11 +544,11 @@ public object AccountTable {
     }
 
     fun upgradeFromV16(db: SQLiteDatabase) {
-        db.execSQL(ADD_CHECKED_SUM_COLUNM)
+        db.execSQL(ADD_CHECKED_SUM_COLUMN)
     }
 
     fun upgradeFromV9(db: SQLiteDatabase) {
-        db.execSQL(ADD_PROJECTION_MODE_COLUNM)
+        db.execSQL(ADD_PROJECTION_MODE_COLUMN)
         db.execSQL(ADD_PROJECTION_MODE_DATE)
         val c = db.query(DATABASE_ACCOUNT_TABLE, arrayOf(), null, null, null, null, null)
         if (null != c) {
@@ -586,7 +600,7 @@ public object AccountTable {
     }
 
     fun upgradeFromV4(db: SQLiteDatabase) {
-        db.execSQL(ADD_CUR_DATE_COLUNM)
+        db.execSQL(ADD_CUR_DATE_COLUMN)
     }
 
 

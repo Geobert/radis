@@ -10,12 +10,7 @@ import android.widget.LinearLayout
 import fr.geobert.radis.MainActivity
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
-import fr.geobert.radis.tools.ExpandAnimation
-import fr.geobert.radis.tools.ExpandUpAnimation
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.formatShortDate
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.map
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.IOperationList
 import fr.geobert.radis.ui.OperationListFragment
 
@@ -57,7 +52,7 @@ public abstract class BaseOperationAdapter<T : Operation>(activity: MainActivity
     val resources = activity.resources
 
     override fun onCreateViewHolder(view: ViewGroup, viewType: Int): OpRowHolder<T> {
-        val l = LayoutInflater.from(view.context).inflate(fr.geobert.radis.R.layout.operation_row, view, false)
+        val l = LayoutInflater.from(view.context).inflate(R.layout.operation_row, view, false)
         val h = OpRowHolder(l, this)
         // HACK to workaround a glitch at the end of animation
         ExpandUpAnimation.mBg = h.separator.background;

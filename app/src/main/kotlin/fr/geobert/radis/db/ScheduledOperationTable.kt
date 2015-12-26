@@ -28,7 +28,22 @@ public class ScheduledOperationTable {
         public val KEY_SCHEDULED_ROWID: String = "_id"
         public val KEY_SCHEDULED_PERIODICITY_UNIT: String = "periodicity_units"
 
-        protected val DATABASE_SCHEDULED_CREATE: String = "create table " + DATABASE_SCHEDULED_TABLE + "(" + KEY_SCHEDULED_ROWID + " integer primary key autoincrement, " + OperationTable.KEY_OP_THIRD_PARTY + " integer, " + OperationTable.KEY_OP_TAG + " integer, " + OperationTable.KEY_OP_SUM + " integer not null, " + KEY_SCHEDULED_ACCOUNT_ID + " integer not null, " + OperationTable.KEY_OP_MODE + " integer, " + OperationTable.KEY_OP_DATE + " integer not null, " + KEY_SCHEDULED_END_DATE + " integer, " + KEY_SCHEDULED_PERIODICITY + " integer, " + KEY_SCHEDULED_PERIODICITY_UNIT + " integer not null, " + OperationTable.KEY_OP_NOTES + " text, " + OperationTable.KEY_OP_TRANSFERT_ACC_NAME + " text, " + OperationTable.KEY_OP_TRANSFERT_ACC_ID + " integer not null, FOREIGN KEY (" + OperationTable.KEY_OP_THIRD_PARTY + ") REFERENCES " + InfoTables.DATABASE_THIRD_PARTIES_TABLE + "(" + InfoTables.KEY_THIRD_PARTY_ROWID + "), FOREIGN KEY (" + OperationTable.KEY_OP_TAG + ") REFERENCES " + InfoTables.DATABASE_TAGS_TABLE + "(" + InfoTables.KEY_TAG_ROWID + "), FOREIGN KEY (" + OperationTable.KEY_OP_MODE + ") REFERENCES " + InfoTables.DATABASE_MODES_TABLE + "(" + InfoTables.KEY_MODE_ROWID + "));"
+        protected val DATABASE_SCHEDULED_CREATE: String = "create table $DATABASE_SCHEDULED_TABLE(" +
+                "$KEY_SCHEDULED_ROWID integer primary key autoincrement, " +
+                "${OperationTable.KEY_OP_THIRD_PARTY} integer, " +
+                "${OperationTable.KEY_OP_TAG} integer, " +
+                "${OperationTable.KEY_OP_SUM} integer not null, " +
+                "$KEY_SCHEDULED_ACCOUNT_ID integer not null, " +
+                "${OperationTable.KEY_OP_MODE} integer, " +
+                "${OperationTable.KEY_OP_DATE} integer not null, " +
+                "$KEY_SCHEDULED_END_DATE integer, " +
+                "$KEY_SCHEDULED_PERIODICITY integer, " +
+                "$KEY_SCHEDULED_PERIODICITY_UNIT integer not null, " +
+                "${OperationTable.KEY_OP_NOTES} text, " +
+                "${OperationTable.KEY_OP_TRANSFERT_ACC_NAME} text, " +
+                "${OperationTable.KEY_OP_TRANSFERT_ACC_ID} integer not null, " +
+                "FOREIGN KEY (${OperationTable.KEY_OP_THIRD_PARTY}) REFERENCES ${InfoTables.DATABASE_THIRD_PARTIES_TABLE}(${InfoTables.KEY_THIRD_PARTY_ROWID}), " +
+                "FOREIGN KEY (" + OperationTable.KEY_OP_TAG + ") REFERENCES " + InfoTables.DATABASE_TAGS_TABLE + "(" + InfoTables.KEY_TAG_ROWID + "), FOREIGN KEY (" + OperationTable.KEY_OP_MODE + ") REFERENCES " + InfoTables.DATABASE_MODES_TABLE + "(" + InfoTables.KEY_MODE_ROWID + "));"
 
         public val SCHEDULED_OP_ORDERING: String = "sch." + OperationTable.KEY_OP_DATE + " desc, sch." + KEY_SCHEDULED_ROWID + " desc"
 
