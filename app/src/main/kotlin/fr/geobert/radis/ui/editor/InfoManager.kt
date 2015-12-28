@@ -150,7 +150,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
     public fun deleteInfo() {
         val c = mCursor
         val ctx = mContext
-        if (c != null && ctx != null) {
+        if (c != null && c.count > 0 && ctx != null) {
             c.moveToPosition(mSelectedInfo)
             InfoTables.deleteInfo(ctx, mInfo.getParcelable<Parcelable>("table") as Uri,
                     c.getLong(c.getColumnIndex("_id")))
