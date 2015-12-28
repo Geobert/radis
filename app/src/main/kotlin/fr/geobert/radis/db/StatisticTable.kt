@@ -47,8 +47,10 @@ public object StatisticTable {
         db.execSQL(CREATE_TRIGGER_ON_STAT_DELETE)
     }
 
-    fun upgradeFromV20(db: SQLiteDatabase) {
-        db.execSQL(ADD_TIMESCALE_COL)
+    fun upgradeFromV20(db: SQLiteDatabase, oldVersion: Int) {
+        if (oldVersion > 17) {
+            db.execSQL(ADD_TIMESCALE_COL)
+        }
     }
 
     private fun fillContentValues(stat: Statistic): ContentValues {
