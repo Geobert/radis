@@ -126,9 +126,9 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
     private fun onAllAccountFetched() {
         //        if (isResumed()) {
         mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length == 0)
-        val adap = mActivity.mAccountManager.mAccountAdapter
-        populateTransfertSpinner(adap)
-        account_name.text = adap.getAccountById(mActivity.mCurAccountId)?.name
+        val adapter = mActivity.mAccountManager.mAccountAdapter
+        populateTransfertSpinner(adapter)
+        account_name.text = adapter.getAccountById(mActivity.mCurAccountId)?.name
         initViewAdapters()
         initListeners()
         is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->

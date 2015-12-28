@@ -5,6 +5,7 @@ import android.text.TextWatcher
 import android.view.Gravity
 import android.widget.EditText
 import com.crashlytics.android.Crashlytics
+import fr.geobert.radis.BuildConfig
 
 public open class CorrectCommaWatcher : TextWatcher {
     private val mListener: TextWatcher?
@@ -51,10 +52,13 @@ public open class CorrectCommaWatcher : TextWatcher {
                     }
                 }
             }
-            Crashlytics.log("haveComma : $haveComma")
+            if (!BuildConfig.DEBUG)
+                Crashlytics.log("haveComma : $haveComma")
         } catch(e: IndexOutOfBoundsException) {
-            Crashlytics.setString("mLocaleComma", mLocaleComma.toString())
-            Crashlytics.setString("mLocaleGroupSep", mLocaleGroupSep.toString())
+            if (!BuildConfig.DEBUG) {
+                Crashlytics.setString("mLocaleComma", mLocaleComma.toString())
+                Crashlytics.setString("mLocaleGroupSep", mLocaleGroupSep.toString())
+            }
             throw e
         }
     }
