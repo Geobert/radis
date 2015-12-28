@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.LoaderManager.LoaderCallbacks
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.Loader
 import android.support.v4.widget.CursorAdapter
 import android.support.v4.widget.SimpleCursorAdapter
@@ -59,7 +60,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
                 val textView = super.getView(position,
                         convertView, parent) as TextView
                 if (Build.VERSION.SDK_INT < 11) {
-                    textView.setTextColor(mContext.resources.getColor(
+                    textView.setTextColor(ContextCompat.getColor(mContext,
                             android.R.color.black))
                 }
                 return textView
