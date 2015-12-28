@@ -4,6 +4,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.Gravity
 import android.widget.EditText
+import com.crashlytics.android.Crashlytics
+import fr.geobert.radis.BuildConfig
 
 public open class CorrectCommaWatcher : TextWatcher {
     private val mListener: TextWatcher?
@@ -29,25 +31,35 @@ public open class CorrectCommaWatcher : TextWatcher {
     }
 
     protected fun correctComma(s: Editable) {
-        var haveComma = false
-        for (i in 0..s.length - 1) {
-            val c = s[i]
-            if (c == mLocaleComma) {
-                if (haveComma) {
-                    s.replace(i, i + 1, "")
-                } else {
-                    haveComma = true
-                }
-            } else if (c == '.' || c == ',') {
-                if (c != mLocaleGroupSep) {
+        try {
+            var haveComma = false
+            for (i in 0..s.length - 1) {
+                val c = s[i]
+                if (c == mLocaleComma) {
                     if (haveComma) {
                         s.replace(i, i + 1, "")
                     } else {
-                        s.replace(i, i + 1, mLocaleComma.toString())
                         haveComma = true
+                    }
+                } else if (c == '.' || c == ',') {
+                    if (c != mLocaleGroupSep) {
+                        if (haveComma) {
+                            s.replace(i, i + 1, "")
+                        } else {
+                            s.replace(i, i + 1, mLocaleComma.toString())
+                            haveComma = true
+                        }
                     }
                 }
             }
+            if (!BuildConfig.DEBUG)
+                Crashlytics.log("haveComma : $haveComma")
+        } catch(e: IndexOutOfBoundsException) {
+            if (!BuildConfig.DEBUG) {
+                Crashlytics.setString("mLocaleComma", mLocaleComma.toString())
+                Crashlytics.setString("mLocaleGroupSep", mLocaleGroupSep.toString())
+            }
+            throw e
         }
     }
 

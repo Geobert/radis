@@ -1,3 +1,6 @@
+Version 1.2.5 - 28/12/2015
+- bug fix
+
 Version 1.2.4 - 21/12/2015
 - changement de moteur de graphique pour MPAndroidChart
 - simplification de l'éditeur d'échéances

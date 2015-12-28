@@ -46,7 +46,7 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
         if (oldVersion <= 17) upgradeFromV17(db)
         if (oldVersion <= 18) upgradeFromV18(db)
         if (oldVersion <= 19) upgradeFromV19(db)
-        if (oldVersion <= 20) upgradeFromV20(db)
+        if (oldVersion <= 20) upgradeFromV20(db, oldVersion)
         upgradeDefault(db)
     }
 
@@ -54,8 +54,8 @@ public class DbHelper private constructor(private val mCtx: Context) : SQLiteOpe
         AccountTable.upgradeDefault(db)
     }
 
-    private fun upgradeFromV20(db: SQLiteDatabase) {
-        StatisticTable.upgradeFromV20(db)
+    private fun upgradeFromV20(db: SQLiteDatabase, oldVersion: Int) {
+        StatisticTable.upgradeFromV20(db, oldVersion)
     }
 
     private fun upgradeFromV19(db: SQLiteDatabase) {

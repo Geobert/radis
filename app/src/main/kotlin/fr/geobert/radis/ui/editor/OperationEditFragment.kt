@@ -9,31 +9,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.CompoundButton
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.Spinner
-import android.widget.TextView
+import android.widget.*
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.data.ScheduledOperation
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.InfoTables
-import fr.geobert.radis.tools.CorrectCommaWatcher
-import fr.geobert.radis.tools.MyAutoCompleteTextView
-import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.extractSumFromStr
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.getGroupSeparator
-import fr.geobert.radis.tools.getSumSeparator
-import fr.geobert.radis.tools.parseSum
-import fr.geobert.radis.tools.showDatePickerFragment
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.AccountAdapter
 import fr.geobert.radis.ui.adapter.InfoAdapter
 import hirondelle.date4j.DateTime
@@ -135,12 +118,17 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         })
     }
 
-    fun onAllAccountFetched() {
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        mActivity.mAccountManager.cancelAllRequests()
+    }
+
+    private fun onAllAccountFetched() {
         //        if (isResumed()) {
         mSumTextWatcher.setAutoNegate(edit_op_sum.text.toString().trim().length == 0)
-        val adap = mActivity.mAccountManager.mAccountAdapter
-        populateTransfertSpinner(adap)
-        account_name.text = adap.getAccountById(mActivity.mCurAccountId)?.name
+        val adapter = mActivity.mAccountManager.mAccountAdapter
+        populateTransfertSpinner(adapter)
+        account_name.text = adapter.getAccountById(mActivity.mCurAccountId)?.name
         initViewAdapters()
         initListeners()
         is_transfert.setOnCheckedChangeListener { arg0: CompoundButton, arg1: Boolean ->
@@ -242,13 +230,13 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         }
     }
 
-    fun isTransfertChecked(): Boolean {
-        return is_transfert.isChecked
-    }
-
-    fun getSrcAccountIdx(): Int {
-        return trans_src_account.selectedItemPosition
-    }
+    //    fun isTransfertChecked(): Boolean {
+    //        return is_transfert.isChecked
+    //    }
+    //
+    //    fun getSrcAccountIdx(): Int {
+    //        return trans_src_account.selectedItemPosition
+    //    }
 
     protected fun initViewAdapters() {
         val account = mActivity.mAccountManager.mCurAccountConfig
@@ -395,7 +383,8 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
         op.setYear(opDate.year)
         op.mIsChecked = is_checked.isChecked
 
-        if (is_transfert.isChecked) {
+        if (is_transfert.isChecked && trans_src_account.selectedItem != null &&
+                trans_dst_account.selectedItem != null) {
             val srcAccount = trans_src_account.selectedItem as Account
             val dstAccount = trans_dst_account.selectedItem as Account
             if (srcAccount.id > 0 && dstAccount.id > 0 && srcAccount.id != dstAccount.id) {
@@ -429,10 +418,10 @@ public open class OperationEditFragment() : Fragment(), TextWatcher {
             fillOperationWithInputs(mActivity.mCurrentOp as Operation)
     }
 
-    public fun setCheckedEditVisibility(visibility: Int) {
-        //        mActivity.findViewById(R.id.checked_title).setVisibility(visibility);
-        is_checked.visibility = visibility
-    }
+    //    public fun setCheckedEditVisibility(visibility: Int) {
+    //        //        mActivity.findViewById(R.id.checked_title).setVisibility(visibility);
+    //        is_checked.visibility = visibility
+    //    }
 
     override fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
         // nothing

@@ -18,7 +18,7 @@ public class InfoManagerDialog : DialogFragment() {
 
     private fun createInfoManagerIfNeeded(table: Uri, colName: String, title: String, editId: Int, deleteId: Int):
             InfoManager {
-        var i: InfoManager? = mInfoManagersMap.get(table.toString())
+        var i: InfoManager? = mInfoManagersMap[table.toString()]
         if (null == i) {
             i = InfoManager(this, title, table, colName, editId, deleteId)
             mInfoManagersMap.put(table.toString(), i)

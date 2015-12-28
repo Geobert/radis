@@ -11,6 +11,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.support.v4.app.DialogFragment
 import android.support.v4.app.LoaderManager.LoaderCallbacks
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.Loader
 import android.support.v4.widget.CursorAdapter
 import android.support.v4.widget.SimpleCursorAdapter
@@ -50,7 +51,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
     init {
         val ctx = mDiagFragment.activity as BaseActivity
         mContext = ctx
-        GET_MATCHING_INFO_ID = EDITTEXT_OF_INFO.get(table.toString()) as Int
+        GET_MATCHING_INFO_ID = EDITTEXT_OF_INFO[table.toString()] as Int
         mAdapter = object : SimpleCursorAdapter(ctx,
                 android.R.layout.simple_list_item_single_choice, null,
                 arrayOf(colName), intArrayOf(android.R.id.text1),
@@ -59,7 +60,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
                 val textView = super.getView(position,
                         convertView, parent) as TextView
                 if (Build.VERSION.SDK_INT < 11) {
-                    textView.setTextColor(mContext.resources.getColor(
+                    textView.setTextColor(ContextCompat.getColor(mContext,
                             android.R.color.black))
                 }
                 return textView
@@ -71,13 +72,10 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
         mInfo.putParcelable("table", table)
         mInfo.putString("colName", colName)
         val builder = AlertDialog.Builder(ctx)
-        builder.setSingleChoiceItems(mAdapter, -1,
-                object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface, item: Int) {
-                        mSelectedInfo = item
-                        refreshToolbarStatus()
-                    }
-                })
+        builder.setSingleChoiceItems(mAdapter, -1, { dialog, item ->
+            mSelectedInfo = item
+            refreshToolbarStatus()
+        })
         builder.setTitle(title)
         val inflater = ctx.layoutInflater
         val layout = inflater.inflate(R.layout.info_list, null, false)
@@ -86,47 +84,29 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
         ctx.supportLoaderManager.initLoader(GET_MATCHING_INFO_ID, mInfo,
                 this)
 
-        builder.setPositiveButton(ctx.getString(R.string.ok),
-                object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface, id: Int) {
-                        infoSelected()
-                        ctx.supportLoaderManager.destroyLoader(GET_MATCHING_INFO_ID)
-                        dialog.cancel()
-                        mDiagFragment.dismiss()
-                        mSelectedInfo = -1
-                    }
-                }).setNegativeButton(ctx.getString(R.string.cancel),
-                object : DialogInterface.OnClickListener {
-                    override fun onClick(dialog: DialogInterface, id: Int) {
-                        ctx.supportLoaderManager.destroyLoader(GET_MATCHING_INFO_ID)
-                        dialog.cancel()
-                        mDiagFragment.dismiss()
-                        mSelectedInfo = -1
-                    }
-                })
+        builder.setPositiveButton(ctx.getString(R.string.ok), { dialog, id ->
+            infoSelected()
+            ctx.supportLoaderManager.destroyLoader(GET_MATCHING_INFO_ID)
+            dialog.cancel()
+            mDiagFragment.dismiss()
+            mSelectedInfo = -1
+        }).setNegativeButton(ctx.getString(R.string.cancel), { dialog, id ->
+            ctx.supportLoaderManager.destroyLoader(GET_MATCHING_INFO_ID)
+            dialog.cancel()
+            mDiagFragment.dismiss()
+            mSelectedInfo = -1
+        })
 
         mAddBut = layout.findViewById(R.id.create_info) as Button
         mDelBut = layout.findViewById(R.id.del_info) as Button
         mEditBut = layout.findViewById(R.id.edit_info) as Button
-        mInfoText = ctx.findViewById(EDITTEXT_OF_INFO.get(table.toString()) as Int) as AutoCompleteTextView
+        mInfoText = ctx.findViewById(EDITTEXT_OF_INFO[table.toString()] as Int) as AutoCompleteTextView
 
-        mDelBut.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                onDeleteClicked()
-            }
-        })
+        mDelBut.setOnClickListener({ onDeleteClicked() })
 
-        mAddBut.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                onAddClicked()
-            }
-        })
+        mAddBut.setOnClickListener({ onAddClicked() })
 
-        mEditBut.setOnClickListener(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                onEditClicked()
-            }
-        })
+        mEditBut.setOnClickListener({ onEditClicked() })
     }
 
     protected fun infoSelected() {
@@ -170,7 +150,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
     public fun deleteInfo() {
         val c = mCursor
         val ctx = mContext
-        if (c != null && ctx != null) {
+        if (c != null && c.count > 0 && ctx != null) {
             c.moveToPosition(mSelectedInfo)
             InfoTables.deleteInfo(ctx, mInfo.getParcelable<Parcelable>("table") as Uri,
                     c.getLong(c.getColumnIndex("_id")))
@@ -195,7 +175,7 @@ public class InfoManager(private val mDiagFragment: DialogFragment, title: Strin
         val lv = mListDialog!!.listView
         val c = mCursor
         val ctx = mContext
-        if (c != null && ctx != null) {
+        if (c != null && c.count > 0 && ctx != null) {
             c.moveToPosition(lv.checkedItemPosition)
             val info = mInfo
 

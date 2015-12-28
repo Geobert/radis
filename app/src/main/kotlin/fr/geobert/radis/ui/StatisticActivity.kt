@@ -3,46 +3,26 @@ package fr.geobert.radis.ui
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.content.ContextCompat
 import android.support.v4.util.SimpleArrayMap
 import android.util.Log
 import android.view.View
 import android.widget.RelativeLayout
 import android.widget.TextView
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.BarLineChartBase
-import com.github.mikephil.charting.charts.Chart
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.charts.PieChart
+import com.github.mikephil.charting.charts.*
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.BarLineScatterCandleBubbleData
-import com.github.mikephil.charting.data.BarLineScatterCandleBubbleDataSet
-import com.github.mikephil.charting.data.ChartData
-import com.github.mikephil.charting.data.DataSet
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.DefaultValueFormatter
 import com.github.mikephil.charting.utils.ColorTemplate
 import fr.geobert.radis.BaseActivity
 import fr.geobert.radis.R
-import fr.geobert.radis.data.Account
 import fr.geobert.radis.data.Operation
 import fr.geobert.radis.data.Statistic
-import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.formatDate
-import fr.geobert.radis.tools.formatDateLong
-import fr.geobert.radis.tools.map
-import fr.geobert.radis.tools.plusMonth
-import fr.geobert.radis.tools.plusYear
+import fr.geobert.radis.tools.*
 import hirondelle.date4j.DateTime
+import kotlinx.android.synthetic.main.statistic_activity.*
 import java.text.DateFormatSymbols
-import java.text.NumberFormat
 import java.util.*
 
 class StatisticActivity : BaseActivity() {
@@ -53,14 +33,14 @@ class StatisticActivity : BaseActivity() {
     val accountNameLbl: TextView by lazy { findViewById(R.id.chart_account_name) as TextView }
     val filterLbl: TextView by lazy { findViewById(R.id.filter_lbl) as TextView }
     val timeScaleLbl: TextView by lazy { findViewById(R.id.time_scale_lbl) as TextView }
-    val chartCont: RelativeLayout by lazy { findViewById(R.id.chart) as RelativeLayout }
+    //val chart_cont: RelativeLayout by lazy { findViewById(R.id.chart_cont) as RelativeLayout }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val extras = intent.extras
         val stat = extras.getParcelable<Statistic>(STAT)
         setContentView(R.layout.statistic_activity)
-        setTitle(stat.name)
+        title = stat.name
 
         setIconOnClick(View.OnClickListener { onBackPressed() })
         mToolbar.menu.clear()
@@ -75,12 +55,12 @@ class StatisticActivity : BaseActivity() {
         try {
             val chart = createChartView(stat)
 
-            chartCont.addView(chart, p)
+            chart_cont.addView(chart, p)
             chart.invalidate()
         } catch(e: InputMismatchException) {
             val lbl = TextView(this)
             lbl.text = getString(R.string.no_statistic_data)
-            chartCont.addView(lbl, p)
+            chart_cont.addView(lbl, p)
         }
     }
 
@@ -89,8 +69,12 @@ class StatisticActivity : BaseActivity() {
     private fun getColorsArray(id: Int): List<Int> =
             resources.getStringArray(id)?.map({ Color.parseColor(it) }) as List<Int>
 
-    private val pos_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) { getColorsArray(R.array.positive_colors) }
-    private val neg_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) { getColorsArray(R.array.negative_colors) }
+    private val pos_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) {
+        getColorsArray(R.array.positive_colors)
+    }
+    private val neg_colors: List<Int> by lazy(LazyThreadSafetyMode.NONE) {
+        getColorsArray(R.array.negative_colors)
+    }
 
     /**
      * get the ops list according to the time range, split by sum sign and group each by partFunc
@@ -168,15 +152,15 @@ class StatisticActivity : BaseActivity() {
         return Pair(cleanMap(sumP, total), cleanMap(sumN, total))
     }
 
-    private fun initNumFormat(stat: Statistic): NumberFormat {
-        val cursor = AccountTable.fetchAccount(this, stat.accountId)
-        cursor.moveToFirst()
-        val account = Account(cursor)
-        val numFormat = NumberFormat.getCurrencyInstance()
-        numFormat.currency = Currency.getInstance(account.currency)
-        numFormat.minimumFractionDigits = 2
-        return numFormat
-    }
+    //    private fun initNumFormat(stat: Statistic): NumberFormat {
+    //        val cursor = AccountTable.fetchAccount(this, stat.accountId)
+    //        cursor.moveToFirst()
+    //        val account = Account(cursor)
+    //        val numFormat = NumberFormat.getCurrencyInstance()
+    //        numFormat.currency = Currency.getInstance(account.currency)
+    //        numFormat.minimumFractionDigits = 2
+    //        return numFormat
+    //    }
 
     // for pie chart
     private fun createPieData(stat: Statistic): PieData {
@@ -311,52 +295,15 @@ class StatisticActivity : BaseActivity() {
         }
     }
 
-    private fun filterName(stat: Statistic): String {
-        val stId = when (stat.filterType) {
-            Statistic.THIRD_PARTY -> R.string.third_parties
-            Statistic.TAGS -> R.string.tags
-            Statistic.MODE -> R.string.modes
-            else -> R.string.time
-        }
-        return getString(stId)
-    }
-
-    // for bar and lines chart
-    private fun createXYMultipleSeriesRenderer(stat: Statistic): BarData? {
-        //        val renderer = XYMultipleSeriesRenderer()
-        //        renderer.backgroundColor = ctx.resources?.getColor(android.R.color.transparent) ?: 0
-        //        renderer.isApplyBackgroundColor = true
-        //        renderer.labelsTextSize = 18f
-        //        renderer.marginsColor = ctx.resources?.getColor(android.R.color.transparent) ?: 0
-        //        renderer.yAxisMin = 0.0
-        //        renderer.margins = intArrayOf(0, 0, 0, 0) // top, left, bottom, right
-        //        renderer.isInScroll = false
-        //        renderer.setPanEnabled(true, false)
-        //        renderer.isZoomButtonsVisible = ZOOM_ENABLED
-        //
-        //        when (stat.chartType) {
-        //            Statistic.CHART_BAR -> {
-        //                renderer.isShowLegend = false
-        //                renderer.setYLabelsAlign(Paint.Align.RIGHT)
-        //                renderer.yTitle = ctx.getString(R.string.sum)
-        //                renderer.xLabels = 0
-        //                renderer.yLabels = 0
-        //                renderer.xAxisMin = 0.0
-        //                renderer.xAxisMax = 0.0
-        //                renderer.barWidth = 70f
-        //                renderer.barSpacing = 0.5
-        //                renderer.xTitle = filterName(stat)
-        //            }
-        //            Statistic.CHART_LINE -> {
-        //                renderer.isShowLegend = true
-        //                renderer.pointSize = 5f
-        //                renderer.setYLabelsAlign(Paint.Align.LEFT)
-        //                renderer.isZoomEnabled = false
-        //            }
-        //        }
-        //        return renderer
-        return null
-    }
+    //    private fun filterName(stat: Statistic): String {
+    //        val stId = when (stat.filterType) {
+    //            Statistic.THIRD_PARTY -> R.string.third_parties
+    //            Statistic.TAGS -> R.string.tags
+    //            Statistic.MODE -> R.string.modes
+    //            else -> R.string.time
+    //        }
+    //        return getString(stId)
+    //    }
 
     // for bar chart
     private fun createBarData(stat: Statistic): BarData {
@@ -422,7 +369,7 @@ class StatisticActivity : BaseActivity() {
             Statistic.CHART_PIE -> {
                 val c = PieChart(this)
                 c.data = createPieData(stat)
-                c.setHoleColor(resources.getColor(R.color.normal_bg))
+                c.setHoleColor(ContextCompat.getColor(this, R.color.normal_bg))
                 c.legend.textColor = Color.WHITE
                 c
             }
