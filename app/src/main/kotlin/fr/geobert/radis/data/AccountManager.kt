@@ -7,16 +7,13 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
-import android.support.v4.widget.SimpleCursorAdapter
 import android.util.Log
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.map
 import fr.geobert.radis.ui.ConfigFragment
 import fr.geobert.radis.ui.adapter.AccountAdapter
-import java.util.ArrayList
-import java.util.Currency
+import java.util.*
 
 public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCallbacks<Cursor> {
     private var mCurAccountId: Long? = null
@@ -183,6 +180,11 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
         mCallbacks.clear()
     }
 
+    fun cancelAllRequests() {
+        mAccountLoader?.cancelLoad()
+        mCallbacks.clear()
+    }
+
     override fun onLoadFinished(cursorLoader: Loader<Cursor>, cursor: Cursor) {
         when (cursorLoader.id) {
             GET_ACCOUNTS -> {
@@ -226,7 +228,6 @@ public class AccountManager(val ctx: FragmentActivity) : LoaderManager.LoaderCal
 
     companion object {
         private val GET_ACCOUNTS = 200
-        private val GET_ONE_ACCOUNT = 210
         private val TAG = "AccountManager"
     }
 
