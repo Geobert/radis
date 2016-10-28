@@ -1,34 +1,22 @@
 package fr.geobert.radis.test
 
 import android.support.test.InstrumentationRegistry
-import android.support.test.espresso.Espresso
-import android.support.test.espresso.Espresso.onData
-import android.support.test.espresso.Espresso.onView
-import android.support.test.espresso.UiController
-import android.support.test.espresso.ViewAction
+import android.support.test.espresso.*
+import android.support.test.espresso.Espresso.*
 import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.action.ViewActions.*
-import android.support.test.espresso.assertion.ViewAssertions.doesNotExist
-import android.support.test.espresso.assertion.ViewAssertions.matches
-import android.support.test.espresso.contrib.DrawerActions.openDrawer
+import android.support.test.espresso.assertion.ViewAssertions.*
+import android.support.test.espresso.contrib.*
 import android.support.test.espresso.contrib.DrawerMatchers.isOpen
-import android.support.test.espresso.contrib.PickerActions
-import android.support.test.espresso.contrib.RecyclerViewActions
 import android.support.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import android.support.test.espresso.matcher.RootMatchers
 import android.support.test.espresso.matcher.ViewMatchers.*
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.DatePicker
-import android.widget.EditText
-import android.widget.ListView
-import android.widget.RelativeLayout
-import android.widget.TextView
+import android.widget.*
 import fr.geobert.radis.R
 import fr.geobert.radis.data.Operation
-import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.formatSum
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OpRowHolder
 import hirondelle.date4j.DateTime
 import org.hamcrest.Matcher
@@ -61,7 +49,7 @@ class Helpers {
         fun clickInDrawer(text: Int) {
             val str = getContext().getString(text)
             Log.d("clickInDrawer", "wanted text : " + str)
-            openDrawer(R.id.drawer_layout)
+            onView(withId(R.id.drawer_layout)).perform(DrawerActions.open())
             pauseTest(100)
             onView(withId(R.id.drawer_layout)).check(matches(isOpen()))
             onData(withNavDrawerItem(str)).inAdapterView(withId(R.id.left_drawer)).perform(click())
@@ -91,7 +79,7 @@ class Helpers {
             // TODO test if only one entry once converted the actionbar to Toolbar
         }
 
-        public fun addAccount2() {
+        fun addAccount2() {
             callAccountCreation()
             checkTitleBarDisplayed(R.string.account_creation)
             onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME_2))
@@ -104,7 +92,7 @@ class Helpers {
             onView(withText(RadisTest.ACCOUNT_NAME)).inRoot(RootMatchers.isPlatformPopup()).perform(click())
         }
 
-        public fun addAccount3() {
+        fun addAccount3() {
             callAccountCreation()
             checkTitleBarDisplayed(R.string.account_creation)
             onView(withId(R.id.edit_account_name)).perform(typeText(RadisTest.ACCOUNT_NAME_3))
@@ -218,12 +206,12 @@ class Helpers {
             return nbOp
         }
 
-        public fun swipePagerLeft() {
+        fun swipePagerLeft() {
             onView(withId(R.id.pager)).perform(ViewActions.swipeLeft())
             Espresso.closeSoftKeyboard()
         }
 
-        public fun swipePagerRight() {
+        fun swipePagerRight() {
             onView(withId(R.id.pager)).perform(ViewActions.swipeRight())
             Espresso.closeSoftKeyboard()
         }

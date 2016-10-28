@@ -8,11 +8,7 @@ import fr.geobert.radis.R
 public interface EditorToolbarTrait : Toolbar.OnMenuItemClickListener {
     fun initToolbar(activity: BaseActivity) {
         activity.setIcon(R.drawable.cancel_48)
-        activity.setIconOnClick(object : View.OnClickListener {
-            override fun onClick(view: View) {
-                activity.onBackPressed()
-            }
-        })
+        activity.setIconOnClick(View.OnClickListener { activity.onBackPressed() })
         activity.setMenu(R.menu.confirm_cancel_menu)
         activity.mToolbar.setOnMenuItemClickListener(this)
     }

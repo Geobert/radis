@@ -15,7 +15,7 @@ import fr.geobert.radis.db.PreferenceTable
 import java.util.*
 import kotlin.properties.Delegates
 
-public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
+class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     private var mCurrentCtx: Context? = null
     private var mCache: HashMap<String, String>? = null
     private val FILL_CACHE = 100
@@ -23,7 +23,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     private var mCbk: () -> Unit by Delegates.notNull()
 
     // async
-    public fun fillCache(ctx: FragmentActivity, cbk: () -> Unit) {
+    fun fillCache(ctx: FragmentActivity, cbk: () -> Unit) {
         if (mCache == null) {
             mCbk = cbk
             ctx.supportLoaderManager.initLoader<Cursor>(FILL_CACHE, Bundle(), this)
@@ -33,7 +33,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     // sync
-    public fun fillCache(ctx: Context) {
+    fun fillCache(ctx: Context) {
         if (mCache == null) {
             val data = ctx.contentResolver.query(DbContentProvider.PREFS_URI, PreferenceTable.PREFS_COLS, null, null, null)
             mCache = HashMap<String, String>()
@@ -48,15 +48,15 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         }
     }
 
-    public fun getString(key: String): String? {
+    fun getString(key: String): String? {
         return mCache?.get(key)
     }
 
-    public fun getString(key: String, defValue: String): String {
+    fun getString(key: String, defValue: String): String {
         return mCache?.get(key) ?: defValue
     }
 
-    public fun getBoolean(key: String): Boolean? {
+    fun getBoolean(key: String): Boolean? {
         val v = mCache?.get(key)
         try {
             val b = v?.toBoolean()
@@ -67,7 +67,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
 
     }
 
-    public fun getBoolean(key: String, defValue: Boolean): Boolean {
+    fun getBoolean(key: String, defValue: Boolean): Boolean {
         try {
             return (mCache?.get(key)?.toBoolean()) ?: defValue
         } catch (e: Exception) {
@@ -76,7 +76,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
 
     }
 
-    public fun getInt(key: String): Int? {
+    fun getInt(key: String): Int? {
         val v = mCache?.get(key)
         if (v != null) {
             try {
@@ -90,7 +90,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         }
     }
 
-    public fun getInt(key: String, defValue: Int): Int {
+    fun getInt(key: String, defValue: Int): Int {
         val v = mCache?.get(key)
         try {
             return (if (v != null) Integer.valueOf(v) else null) ?: defValue
@@ -99,7 +99,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         }
     }
 
-    public fun getLong(key: String): Long? {
+    fun getLong(key: String): Long? {
         val v = mCache?.get(key)
         if (v != null) {
             try {
@@ -112,7 +112,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         }
     }
 
-    public fun getLong(key: String, defValue: Long): Long {
+    fun getLong(key: String, defValue: Long): Long {
         try {
             return (mCache?.get(key)?.toLong()) ?: defValue
         } catch (e: Exception) {
@@ -121,7 +121,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
 
     }
 
-    public fun put(key: String, value: Any?) {
+    fun put(key: String, value: Any?) {
         if (!key.endsWith("_for_account") && !key.startsWith("override_")) {
             val cr = mCurrentCtx!!.contentResolver
             val values = ContentValues()
@@ -147,7 +147,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         val i = mCurrentCtx!!.contentResolver.delete(DbContentProvider.PREFS_URI, null, null)
     }
 
-    public fun resetAll() {
+    fun resetAll() {
         //clearAccountRelated()
         deleteAllPrefs()
         resetCache()
@@ -156,7 +156,7 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
         editor.commit()
     }
 
-    public fun resetCache() {
+    fun resetCache() {
         mCache?.clear()
         mCache = null
     }
@@ -188,10 +188,10 @@ public class DBPrefsManager : LoaderManager.LoaderCallbacks<Cursor> {
     }
 
     companion object {
-        public val SHARED_PREF_NAME: String = "radis_prefs"
+        val SHARED_PREF_NAME: String = "radis_prefs"
         private var mInstance: DBPrefsManager? = null
 
-        public fun getInstance(ctx: Context): DBPrefsManager {
+        fun getInstance(ctx: Context): DBPrefsManager {
             if (null == mInstance) {
                 mInstance = DBPrefsManager()
                 PreferenceManager.setDefaultValues(ctx, R.xml.preferences, false)

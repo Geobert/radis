@@ -12,7 +12,7 @@ import fr.geobert.radis.tools.formatSum
 import fr.geobert.radis.tools.map
 import java.util.*
 
-public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Iterable<Account> {
+class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Iterable<Account> {
 
     private var accountsList: MutableList<Account> = LinkedList()
     private val redColor: Int by lazy(LazyThreadSafetyMode.NONE) { activity.resources.getColor(R.color.op_alert) }
@@ -73,7 +73,7 @@ public class AccountAdapter(val activity: FragmentActivity) : BaseAdapter(), Ite
         return accountsList.count()
     }
 
-    public fun swapCursor(c: Cursor) {
+    fun swapCursor(c: Cursor) {
         accountsList = c.map { Account(c) }
         notifyDataSetChanged()
     }

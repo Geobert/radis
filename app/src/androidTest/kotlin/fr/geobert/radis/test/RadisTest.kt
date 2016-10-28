@@ -55,14 +55,12 @@ import java.util.concurrent.Callable
 import java.util.concurrent.atomic.AtomicReference
 
 @RunWith(AndroidJUnit4::class)
-@LargeTest
-public class RadisTest {
+@LargeTest class RadisTest {
     init {
         MainActivity.TEST_MODE = true
     }
 
-    @get:org.junit.Rule
-    public val activityRule = ActivityTestRule(MainActivity::class.java)
+    @get:org.junit.Rule val activityRule = ActivityTestRule(MainActivity::class.java)
 
     private fun getActivity() = activityRule.activity
 
@@ -85,7 +83,7 @@ public class RadisTest {
         closeAllActivities(InstrumentationRegistry.getInstrumentation())
     }
 
-    public fun closeAllActivities(instrumentation: Instrumentation) {
+    fun closeAllActivities(instrumentation: Instrumentation) {
         val NUMBER_OF_RETRIES = 100
         var i = 0
         while (closeActivity(instrumentation)) {
@@ -96,7 +94,7 @@ public class RadisTest {
         }
     }
 
-    public fun <X> callOnMainSync(instrumentation: Instrumentation, callable: Callable<X>): X {
+    fun <X> callOnMainSync(instrumentation: Instrumentation, callable: Callable<X>): X {
         val retAtomic = AtomicReference<X>()
         val exceptionAtomic = AtomicReference<Throwable>()
         instrumentation.runOnMainSync({
@@ -114,7 +112,7 @@ public class RadisTest {
         return retAtomic.get()
     }
 
-    public fun getActivitiesInStages(vararg stages: Stage): HashSet<Activity> {
+    fun getActivitiesInStages(vararg stages: Stage): HashSet<Activity> {
         val activities = Sets.newHashSet<Activity>()
         val instance = ActivityLifecycleMonitorRegistry.getInstance()
         for (stage in stages) {
@@ -145,7 +143,7 @@ public class RadisTest {
     }
 
 
-    @Test public fun testEditOp() {
+    @Test fun testEditOp() {
         TAG = "testEditOp"
         Helpers.addManyOps()
         Helpers.clickOnRecyclerViewAtPos(5)
@@ -159,7 +157,7 @@ public class RadisTest {
         Helpers.checkAccountSumIs((-2.5).formatSum())
     }
 
-    @Test public fun testQuickAddFromOpList() {
+    @Test fun testQuickAddFromOpList() {
         TAG = "testQuickAddFromOpList"
         Helpers.addAccount()
         onView(withId(R.id.account_sum)).check(matches(withText(containsString(1000.50.formatSum()))))
@@ -170,7 +168,7 @@ public class RadisTest {
         onView(withText(R.string.no_operation)).check(matches(not(isDisplayed())))
     }
 
-    @Test public fun testDisableAutoNegate() {
+    @Test fun testDisableAutoNegate() {
         TAG = "testDisableAutoNegate"
         Helpers.addAccount()
         onView(withId(R.id.create_operation)).perform(click())
@@ -188,7 +186,7 @@ public class RadisTest {
      */
 
 
-    @Test public fun testEditScheduledOp() {
+    @Test fun testEditScheduledOp() {
         TAG = "testEditScheduledOp"
         Helpers.setUpSchOp()
         Helpers.addScheduleOp(DateTime.today(TIME_ZONE))
@@ -210,7 +208,7 @@ public class RadisTest {
     }
 
 
-    @Test public fun testDelFutureOccurences() {
+    @Test fun testDelFutureOccurences() {
         TAG = "testDelFutureOccurences"
         val nbOps = Helpers.setupDelOccFromOps()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -220,7 +218,7 @@ public class RadisTest {
     }
 
 
-    @Test public fun testDelAllOccurencesFromOps() {
+    @Test fun testDelAllOccurencesFromOps() {
         TAG = "testDelAllOccurencesFromOps"
         Helpers.setupDelOccFromOps()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -232,7 +230,7 @@ public class RadisTest {
 
     // issue 112 : it was about when clicking on + or - of date chooser then cancel that does not work
     // since android 3, the date picker has no buttons anymore, removed Picker usage
-    @Test public fun testCancelSchEdition() {
+    @Test fun testCancelSchEdition() {
         TAG = "testCancelSchEdition"
         Helpers.setupDelOccFromOps()
         Helpers.clickInDrawer(R.string.scheduled_ops)
@@ -255,7 +253,7 @@ public class RadisTest {
     }
 
     // issue 59 test
-    @Test public fun testDeleteAllOccurences() {
+    @Test fun testDeleteAllOccurences() {
         TAG = "testDeleteAllOccurences"
         Helpers.setUpSchOp()
         onView(withId(R.id.create_operation)).perform(click())
@@ -298,7 +296,7 @@ public class RadisTest {
      */
 
     // test adding info with different casing
-    @Test public fun testAddExistingInfo() {
+    @Test fun testAddExistingInfo() {
         TAG = "testAddExistingInfo"
         Helpers.addAccount()
         onView(withId(R.id.create_operation)).perform(click())
@@ -326,7 +324,7 @@ public class RadisTest {
     }
 
     // issue 50 test // TODO : debug
-    public fun _estAddInfoAndCreateOp() {
+    fun _estAddInfoAndCreateOp() {
         TAG = "testAddInfoAndCreateOp"
         Helpers.addAccount()
         onView(withId(R.id.create_operation)).perform(click())
@@ -386,7 +384,7 @@ public class RadisTest {
         Helpers.clickOnActionItemConfirm()
     }
 
-    @Test public fun testMoveOpMode1AfterToBefore() {
+    @Test fun testMoveOpMode1AfterToBefore() {
         setUpProjTest1()
         val today = DateTime.today(TIME_ZONE)
         val cleanedUpDay = DateTime.forDateOnly(today.year, today.month, Math.min(today.day, 28))
@@ -403,7 +401,7 @@ public class RadisTest {
         Helpers.checkAccountSumIs(995.50.formatSum())
     }
 
-    @Test public fun testProjectionFromOpList() {
+    @Test fun testProjectionFromOpList() {
         TAG = "testProjectionFromOpList"
 
         // test mode 0 = furthest
@@ -465,7 +463,7 @@ public class RadisTest {
         Helpers.checkSelectedSumIs(999.50.formatSum())
     }
 
-    public fun addOpMode1() {
+    fun addOpMode1() {
         // add account
         Helpers.checkTitleBarDisplayed(R.string.account_creation)
         Helpers.scrollThenTypeText(R.id.edit_account_name, ACCOUNT_NAME)
@@ -513,7 +511,7 @@ public class RadisTest {
         Helpers.checkSelectedSumIs(997.50.formatSum())
     }
 
-    public fun editOpMode1() {
+    fun editOpMode1() {
         addOpMode1()
 
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -564,13 +562,13 @@ public class RadisTest {
         Helpers.checkSelectedSumIs(sum2)
     }
 
-    @Test public fun testDelOpMode1() {
+    @Test fun testDelOpMode1() {
         TAG = "testDelOpMode1"
         editOpMode1()
         delOps()
     }
 
-    public fun addOpMode2() {
+    fun addOpMode2() {
         // add account
         Helpers.checkTitleBarDisplayed(R.string.account_creation)
 
@@ -617,7 +615,7 @@ public class RadisTest {
         Helpers.checkSelectedSumIs(997.50.formatSum())
     }
 
-    public fun editOpMode2() {
+    fun editOpMode2() {
         addOpMode2()
 
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -647,7 +645,7 @@ public class RadisTest {
         // Log.d(TAG, "editOpMode2 after two edit " + solo.getCurrentListViews().get(0).getCount());
     }
 
-    @Test public fun testDelOpMode2() {
+    @Test fun testDelOpMode2() {
         TAG = "testDelOpMode2"
         editOpMode2()
         delOps()
@@ -682,7 +680,7 @@ public class RadisTest {
         onView(allOf(withId(R.id.op_sum), isDisplayed())).check(matches(withText(containsString((-10.50).formatSum()))))
     }
 
-    public fun simpleTransfert() {
+    fun simpleTransfert() {
         Helpers.addAccount()
         Helpers.addAccount2()
         addTransfertOp()
@@ -692,7 +690,7 @@ public class RadisTest {
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
     }
 
-    @Test public fun testDelSimpleTransfert() {
+    @Test fun testDelSimpleTransfert() {
         TAG = "testDelSimpleTransfert"
         simpleTransfert()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -704,7 +702,7 @@ public class RadisTest {
         Helpers.checkAccountSumIs(2000.50.formatSum())
     }
 
-    @Test public fun testEditTransfertToNoTransfertAnymore() {
+    @Test fun testEditTransfertToNoTransfertAnymore() {
         TAG = "testEditTransfertToNoTransfertAnymore"
         simpleTransfert()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -722,7 +720,7 @@ public class RadisTest {
     }
 
 
-    @Test public fun testEditSimpleTrans3accounts() {
+    @Test fun testEditSimpleTrans3accounts() {
         TAG = "testEditSimpleTrans3accounts"
         simpleTransfert()
         Helpers.addAccount3()
@@ -774,7 +772,7 @@ public class RadisTest {
         Helpers.clickOnActionItemConfirm()
     }
 
-    public fun makeSchTransfertFromAccList() {
+    fun makeSchTransfertFromAccList() {
         setUpSchTransOp() // setup insert date to yesterday
         Helpers.clickInDrawer(R.string.scheduled_ops)
         addSchTransfert() // add sch op today
@@ -790,7 +788,7 @@ public class RadisTest {
         Helpers.clickOnAccountSpinner(ACCOUNT_NAME)
     }
 
-    @Test public fun testDelSchTransfert() {
+    @Test fun testDelSchTransfert() {
         TAG = "testDelSchTransfert"
         makeSchTransfertFromAccList()
         Helpers.clickInDrawer(R.string.scheduled_ops)
@@ -845,14 +843,14 @@ public class RadisTest {
         return nb
     }
 
-    public fun makeSchTransfertHebdoFromAccList(): Int {
+    fun makeSchTransfertHebdoFromAccList(): Int {
         val yesterday = setUpSchTransOp()
         Helpers.clickInDrawer(R.string.scheduled_ops)
         val nb = addSchTransfertHebdo(yesterday)
         return nb
     }
 
-    @Test public fun testDelSchTransfFromOpsList() {
+    @Test fun testDelSchTransfFromOpsList() {
         TAG = "testDelSchTransfFromOpsList"
         val nb = makeSchTransfertHebdoFromAccList()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -865,7 +863,7 @@ public class RadisTest {
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
     }
 
-    @Test public fun testDelAllOccSchTransfFromOpsList() {
+    @Test fun testDelAllOccSchTransfFromOpsList() {
         TAG = "testDelAllOccSchTransfFromOpsList"
         makeSchTransfertHebdoFromAccList()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -879,7 +877,7 @@ public class RadisTest {
     }
 
 
-    @Test public fun testDelFutureSchTransfFromOpsList() {
+    @Test fun testDelFutureSchTransfFromOpsList() {
         TAG = "testDelFutureSchTransfFromOpsList"
         val nb = makeSchTransfertHebdoFromAccList()
         Helpers.clickOnRecyclerViewAtPos(2)
@@ -892,7 +890,7 @@ public class RadisTest {
         Helpers.checkAccountSumIs((2000.50 + sum).formatSum())
     }
 
-    @Test public fun testDelAllOccSchTransfFromSchList() {
+    @Test fun testDelAllOccSchTransfFromSchList() {
         TAG = "testDelAllOccSchTransfFromSchList"
         makeSchTransfertHebdoFromAccList()
         Helpers.clickInDrawer(R.string.scheduled_ops)
@@ -909,7 +907,7 @@ public class RadisTest {
     }
 
     // issue #30 on github
-    @Test public fun testSumAtSelectionOnOthersAccount() {
+    @Test fun testSumAtSelectionOnOthersAccount() {
         Helpers.addAccount()
         val today = DateTime.today(TIME_ZONE)
         var date = today.endOfMonth.minusMonth(1)
@@ -946,7 +944,7 @@ public class RadisTest {
         Helpers.checkSelectedSumIs((1000.50 - 2.00).formatSum())
     }
 
-    public fun addOpNoTagsNorMode() {
+    fun addOpNoTagsNorMode() {
         onView(withId(R.id.create_operation)).perform(click())
         Helpers.checkTitleBarDisplayed(R.string.op_creation)
         Helpers.scrollThenTypeText(R.id.edit_op_third_party, OP_TP)
@@ -955,7 +953,7 @@ public class RadisTest {
     }
 
     // issue #31
-    @Test public fun testEmptyInfoCreation() {
+    @Test fun testEmptyInfoCreation() {
         Helpers.addAccount()
         addOpNoTagsNorMode()
         Helpers.clickOnRecyclerViewAtPos(0)
@@ -966,7 +964,7 @@ public class RadisTest {
     }
 
     // issue #32
-    @Test public fun testCorruptedCustomPeriodicity() {
+    @Test fun testCorruptedCustomPeriodicity() {
         Helpers.addAccount()
         Helpers.clickInDrawer(R.string.scheduled_ops)
         onView(withId(R.id.create_operation)).perform(click())
@@ -983,7 +981,7 @@ public class RadisTest {
     }
 
     // will not work if launched last day of month
-    @Test public fun testOverrideInsertDate() {
+    @Test fun testOverrideInsertDate() {
         Helpers.addAccount()
 
         Helpers.clickInDrawer(R.string.preferences)
@@ -1022,7 +1020,7 @@ public class RadisTest {
     }
 
 
-    @Test public fun testNbMonthAheadAndOverride() {
+    @Test fun testNbMonthAheadAndOverride() {
         Helpers.addAccount()
         Helpers.clickInDrawer(R.string.preferences)
         Helpers.setInsertDatePref(DateTime.today(TIME_ZONE))
@@ -1060,7 +1058,7 @@ public class RadisTest {
         Helpers.checkAccountSumIs(991.00.formatSum())
     }
 
-    @Test public fun testOverrideHideQuickAdd() {
+    @Test fun testOverrideHideQuickAdd() {
         Helpers.addAccount()
 
         fun checkQuickAddVisibilityAs(visible: Boolean) {
@@ -1108,7 +1106,7 @@ public class RadisTest {
         checkQuickAddVisibilityAs(false)
     }
 
-    @Test public fun testQuickAddActionOption() {
+    @Test fun testQuickAddActionOption() {
         Helpers.addAccount()
 
         // set long press to add today = simple click set to ask date
@@ -1150,14 +1148,14 @@ public class RadisTest {
     }
 
     // test bug where only transaction older than 3 months exist in the account
-    @Test public fun testOnlyOldOps() {
+    @Test fun testOnlyOldOps() {
         Helpers.addAccount()
         val oldDate = DateTime.today(TIME_ZONE).minusMonth(3)
         Helpers.addOp(oldDate, "Toto", "-1", "", "", "")
         Helpers.checkSelectedSumIs(999.50.formatSum())
     }
 
-    @Test public fun testOldOps() {
+    @Test fun testOldOps() {
         Helpers.addAccount()
         val today = DateTime.today(TIME_ZONE)
         Helpers.addOp(today, "Toto", "-1", "", "", "")
@@ -1177,7 +1175,7 @@ public class RadisTest {
         }
     }
 
-    @Test public fun testOpUpdateDisplay() {
+    @Test fun testOpUpdateDisplay() {
         Helpers.addAccount()
         val today = DateTime.today(TIME_ZONE)
         fun add5ops(d: DateTime) {

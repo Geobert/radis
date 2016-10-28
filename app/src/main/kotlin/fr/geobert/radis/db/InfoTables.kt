@@ -1,17 +1,13 @@
 package fr.geobert.radis.db
 
-import android.content.ContentValues
-import android.content.Context
-import android.database.Cursor
-import android.database.SQLException
-import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteException
+import android.content.*
+import android.database.*
+import android.database.sqlite.*
 import android.net.Uri
 import android.support.v4.content.CursorLoader
 import android.util.Log
 import fr.geobert.radis.data.AccountConfig
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.convertNonAscii
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.ConfigFragment
 import java.util.*
 
@@ -132,7 +128,7 @@ public object InfoTables {
         val args = ContentValues()
         if (value != null) {
             args.put(mInfoColMap.get(table.toString()), value)
-            args.put(mColNameNormName.getRaw(mInfoColMap.get(table.toString())),
+            args.put(mColNameNormName[mInfoColMap[table.toString()]],
                     convertNonAscii(value).trim().toLowerCase())
         }
         if (weight != null) {

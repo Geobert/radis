@@ -29,18 +29,13 @@ import fr.geobert.radis.data.Operation
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.UpdateDisplayInterface
-import fr.geobert.radis.tools.formatDateLong
-import fr.geobert.radis.tools.minusMonth
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.OperationsAdapter
 import fr.geobert.radis.ui.editor.OperationEditor
 import hirondelle.date4j.DateTime
 import kotlin.properties.Delegates
 
-public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>,
+class OperationListFragment : BaseFragment(), UpdateDisplayInterface, LoaderManager.LoaderCallbacks<Cursor>,
         IOperationList {
     private var mOldChildCount: Int = -1
     private var freshLoader: Boolean = false
@@ -494,7 +489,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         mActivity.updateAccountList()
     }
 
-    override public fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onOperationEditorResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (resultCode == Activity.RESULT_OK && data != null) {
             val op: Operation = data.getParcelableExtra("operation")
             mLastSelectionId = op.mRowId
@@ -533,7 +528,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
     }
 
     companion object {
-        public fun restart(ctx: Context) {
+        fun restart(ctx: Context) {
             DbContentProvider.reinit(ctx)
             val intent = ctx.packageManager.getLaunchIntentForPackage(ctx.packageName)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -542,7 +537,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    public class DeleteOpConfirmationDialog : DialogFragment() {
+    class DeleteOpConfirmationDialog : DialogFragment() {
         private var accountId: Long = 0
         private var operationId: Long = 0
 
@@ -561,7 +556,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         companion object {
             var parentFrag: OperationListFragment by Delegates.notNull()
 
-            public fun newInstance(accountId: Long, opId: Long, parentFrag: OperationListFragment): DeleteOpConfirmationDialog {
+            fun newInstance(accountId: Long, opId: Long, parentFrag: OperationListFragment): DeleteOpConfirmationDialog {
                 val frag = DeleteOpConfirmationDialog()
                 DeleteOpConfirmationDialog.parentFrag = parentFrag
                 val args = Bundle()
@@ -573,7 +568,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    public class DeleteOccurrenceConfirmationDialog : DialogFragment() {
+    class DeleteOccurrenceConfirmationDialog : DialogFragment() {
         val TAG = "DeleteOccurrenceConfirmationDialog"
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -617,8 +612,8 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         companion object {
             var parentFrag: OperationListFragment by Delegates.notNull()
 
-            public fun newInstance(accountId: Long, opId: Long, schId: Long, date: Long, transfertId: Long,
-                                   parentFrag: OperationListFragment): DeleteOccurrenceConfirmationDialog {
+            fun newInstance(accountId: Long, opId: Long, schId: Long, date: Long, transfertId: Long,
+                            parentFrag: OperationListFragment): DeleteOccurrenceConfirmationDialog {
                 DeleteOccurrenceConfirmationDialog.parentFrag = parentFrag
                 val frag = DeleteOccurrenceConfirmationDialog()
                 val args = Bundle()
@@ -633,7 +628,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
     }
 
-    public class DeleteAccountConfirmationDialog : DialogFragment() {
+    class DeleteAccountConfirmationDialog : DialogFragment() {
         private var accountId: Long = 0
 
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -665,7 +660,7 @@ public class OperationListFragment : BaseFragment(), UpdateDisplayInterface, Loa
         }
 
         companion object {
-            public fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
+            fun newInstance(accountId: Long, accountName: String): DeleteAccountConfirmationDialog {
                 val frag = DeleteAccountConfirmationDialog()
                 val args = Bundle()
                 args.putLong("accountId", accountId)

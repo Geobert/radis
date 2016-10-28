@@ -15,27 +15,15 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
-import android.widget.Adapter
-import android.widget.AdapterView
-import android.widget.ListView
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import com.crashlytics.android.Crashlytics
 import fr.geobert.radis.db.AccountTable
 import fr.geobert.radis.db.DbContentProvider
 import fr.geobert.radis.db.DbHelper
 import fr.geobert.radis.service.InstallRadisServiceReceiver
 import fr.geobert.radis.service.OnRefreshReceiver
-import fr.geobert.radis.tools.DBPrefsManager
-import fr.geobert.radis.tools.PauseHandler
-import fr.geobert.radis.tools.Tools
-import fr.geobert.radis.tools.UpdateDisplayInterface
-import fr.geobert.radis.tools.initShortDate
-import fr.geobert.radis.ui.ConfigEditor
-import fr.geobert.radis.ui.ExporterActivity
-import fr.geobert.radis.ui.OperationListFragment
-import fr.geobert.radis.ui.ScheduledOpListFragment
-import fr.geobert.radis.ui.StatisticsListFragment
+import fr.geobert.radis.tools.*
+import fr.geobert.radis.ui.*
 import fr.geobert.radis.ui.drawer.NavDrawerItem
 import fr.geobert.radis.ui.drawer.NavDrawerListAdapter
 import fr.geobert.radis.ui.editor.AccountEditor
@@ -44,12 +32,12 @@ import fr.geobert.radis.ui.editor.ScheduledOperationEditor
 import io.fabric.sdk.android.Fabric
 import java.util.*
 
-public class MainActivity : BaseActivity(), UpdateDisplayInterface {
+class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private val mDrawerLayout by lazy { findViewById(R.id.drawer_layout) as DrawerLayout }
     private val mDrawerList by lazy { findViewById(R.id.left_drawer) as ListView }
     private val mOnRefreshReceiver by lazy { OnRefreshReceiver(this) }
     private val handler: FragmentHandler by lazy { FragmentHandler(this) }
-    public val mAccountSpinner: Spinner by lazy { findViewById(R.id.account_spinner) as Spinner }
+    val mAccountSpinner: Spinner by lazy { findViewById(R.id.account_spinner) as Spinner }
 
     // ActionBarDrawerToggle ties together the the proper interactions
     // between the navigation drawer and the action bar app icon.
@@ -239,14 +227,10 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         // Defer code dependent on restoration of previous instance state.
         // NB: required for the drawer indicator to show up!
         mDrawerLayout.setDrawerListener(mDrawerToggle)
-        mDrawerLayout.post(object : Runnable {
-            override fun run() {
-                mDrawerToggle.syncState()
-            }
-        })
+        mDrawerLayout.post({ mDrawerToggle.syncState() })
     }
 
-    public fun displayFragment(fragmentId: Int, id: Long) {
+    fun displayFragment(fragmentId: Int, id: Long) {
         if (fragmentId != mActiveFragmentId || mActiveFragment == null) {
             val msg = Message()
             msg.what = fragmentId
@@ -286,7 +270,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         unregisterReceiver(mOnRefreshReceiver)
     }
 
-    public fun onAccountEditFinished(requestCode: Int, result: Int) {
+    fun onAccountEditFinished(requestCode: Int, result: Int) {
         Log.d(TAG, "onAccountEditFinished: $result")
         if (result == Activity.RESULT_OK) {
             mAccountManager.fetchAllAccounts(true, {
@@ -381,7 +365,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         })
     }
 
-    public fun updateAccountList() {
+    fun updateAccountList() {
         mAccountManager.fetchAllAccounts(true, {
             onFetchAllAccountCbk()
         })
@@ -425,7 +409,7 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
     private fun installRadisTimer() {
         if (mFirstStart) {
             val i = Intent(this, InstallRadisServiceReceiver::class.java)
-            i.setAction(Tools.INTENT_RADIS_STARTED)
+            i.action = Tools.INTENT_RADIS_STARTED
             sendBroadcast(i) // install radis timer
             fr.geobert.radis.service.RadisService.callMe(this) // call service once
             mFirstStart = false
@@ -450,12 +434,12 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
         })
     }
 
-    public fun setActionBarListNavCbk(callback: AdapterView.OnItemSelectedListener?) {
+    fun setActionBarListNavCbk(callback: AdapterView.OnItemSelectedListener?) {
         mAccountSpinner.onItemSelectedListener = callback
     }
 
 
-    public fun getCurrentAccountId(): Long {
+    fun getCurrentAccountId(): Long {
         return mAccountManager.getCurrentAccountId(this)
     }
 
@@ -474,26 +458,26 @@ public class MainActivity : BaseActivity(), UpdateDisplayInterface {
 
     companion object {
         var TEST_MODE: Boolean = false
-        public val INTENT_UPDATE_OP_LIST: String = "fr.geobert.radis.UPDATE_OP_LIST"
-        public val INTENT_UPDATE_ACC_LIST: String = "fr.geobert.radis.UPDATE_ACC_LIST"
+        val INTENT_UPDATE_OP_LIST: String = "fr.geobert.radis.UPDATE_OP_LIST"
+        val INTENT_UPDATE_ACC_LIST: String = "fr.geobert.radis.UPDATE_ACC_LIST"
 
         // used for FragmentHandler
-        public val OP_LIST: Int = 1
-        public val SCH_OP_LIST: Int = 2
-        public val STATISTICS: Int = 3
+        val OP_LIST: Int = 1
+        val SCH_OP_LIST: Int = 2
+        val STATISTICS: Int = 3
 
-        public val CREATE_ACCOUNT: Int = 5
-        public val EDIT_ACCOUNT: Int = 6
-        public val DELETE_ACCOUNT: Int = 7
+        val CREATE_ACCOUNT: Int = 5
+        val EDIT_ACCOUNT: Int = 6
+        val DELETE_ACCOUNT: Int = 7
 
-        public val PREFERENCES: Int = 9
-        public val SAVE_ACCOUNT: Int = 10
-        public val RESTORE_ACCOUNT: Int = 11
-        public val PROCESS_SCH: Int = 12
-        public val RECOMPUTE_ACCOUNT: Int = 13
-        public val EXPORT_CSV: Int = 14
+        val PREFERENCES: Int = 9
+        val SAVE_ACCOUNT: Int = 10
+        val RESTORE_ACCOUNT: Int = 11
+        val PROCESS_SCH: Int = 12
+        val RECOMPUTE_ACCOUNT: Int = 13
+        val EXPORT_CSV: Int = 14
 
-        public fun refreshAccountList(ctx: Context) {
+        fun refreshAccountList(ctx: Context) {
             val intent = Intent(INTENT_UPDATE_ACC_LIST)
             ctx.sendBroadcast(intent)
         }

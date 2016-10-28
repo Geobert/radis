@@ -1,18 +1,13 @@
 package fr.geobert.radis.data
 
 import android.database.Cursor
-import android.os.Parcel
-import android.os.Parcelable
+import android.os.*
 import fr.geobert.radis.R
 import fr.geobert.radis.db.StatisticTable
-import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.minusMonth
-import fr.geobert.radis.tools.minusYear
+import fr.geobert.radis.tools.*
 import hirondelle.date4j.DateTime
-import kotlin.properties.getValue
-import kotlin.properties.setValue
 
-public class Statistic() : ImplParcelable {
+class Statistic() : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
 
     companion object {
@@ -31,7 +26,7 @@ public class Statistic() : ImplParcelable {
         val MODE = 2
         val NO_FILTER = 3
 
-        public val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
+        val CREATOR: Parcelable.Creator<Statistic> = object : Parcelable.Creator<Statistic> {
             override fun createFromParcel(p: Parcel): Statistic {
                 return Statistic(p)
             }

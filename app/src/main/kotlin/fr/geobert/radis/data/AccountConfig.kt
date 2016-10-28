@@ -1,13 +1,10 @@
 package fr.geobert.radis.data
 
 import android.database.Cursor
-import android.os.Parcel
-import android.os.Parcelable
+import android.os.*
 import fr.geobert.radis.db.PreferenceTable
 import fr.geobert.radis.tools.forEach
 import fr.geobert.radis.ui.ConfigFragment
-import kotlin.properties.getValue
-import kotlin.properties.setValue
 
 
 public class AccountConfig() : ImplParcelable {

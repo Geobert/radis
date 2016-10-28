@@ -2,26 +2,23 @@ package fr.geobert.radis.data
 
 import android.content.Context
 import android.database.Cursor
-import android.os.Parcel
-import android.os.Parcelable
+import android.os.*
 import fr.geobert.radis.db.AccountTable
 import java.util.*
-import kotlin.properties.getValue
-import kotlin.properties.setValue
 
-public class Account(accountId: Long = 0, accountName: String = "") : ImplParcelable {
+class Account(accountId: Long = 0, accountName: String = "") : ImplParcelable {
     override val parcels = hashMapOf<String, Any?>()
-    public var id: Long by parcels
-    public var name: String by parcels
-    public var startSum: Long by parcels
-    public var curSum: Long by parcels
-    public var currency: String by parcels
-    public var projMode: Int by parcels
-    public var projDate: String by parcels // TODO better type for this, it is use as MInt for day of month projection or as jj/mm/yyyy for absolute projection
-    public var opSum: Long by parcels
-    public var checkedSum: Long by parcels
-    public var description: String by parcels
-    public var lastInsertDate: Long by parcels
+    var id: Long by parcels
+    var name: String by parcels
+    var startSum: Long by parcels
+    var curSum: Long by parcels
+    var currency: String by parcels
+    var projMode: Int by parcels
+    var projDate: String by parcels // TODO better type for this, it is use as MInt for day of month projection or as jj/mm/yyyy for absolute projection
+    var opSum: Long by parcels
+    var checkedSum: Long by parcels
+    var description: String by parcels
+    var lastInsertDate: Long by parcels
 
     init {
         id = accountId
@@ -37,7 +34,7 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
         lastInsertDate = 0
     }
 
-    public var curSumDate: Date? = null
+    var curSumDate: Date? = null
 
     constructor(cursor: Cursor) : this() {
         fun getIdx(s: String): Int = cursor.getColumnIndex(s)
@@ -82,7 +79,7 @@ public class Account(accountId: Long = 0, accountName: String = "") : ImplParcel
     }
 
     companion object {
-        public val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
+        val CREATOR: Parcelable.Creator<Account> = object : Parcelable.Creator<Account> {
             override fun createFromParcel(p: Parcel): Account {
                 return Account(p)
             }

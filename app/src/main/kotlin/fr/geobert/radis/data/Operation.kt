@@ -1,41 +1,34 @@
 package fr.geobert.radis.data
 
 import android.database.Cursor
-import android.os.Parcel
-import android.os.Parcelable
-import fr.geobert.radis.db.InfoTables
-import fr.geobert.radis.db.OperationTable
-import fr.geobert.radis.tools.TIME_ZONE
-import fr.geobert.radis.tools.extractSumFromStr
-import fr.geobert.radis.tools.formatSum
-import fr.geobert.radis.tools.plusMonth
+import android.os.*
+import fr.geobert.radis.db.*
+import fr.geobert.radis.tools.*
 import fr.geobert.radis.ui.adapter.CellState
 import hirondelle.date4j.DateTime
 import java.util.*
-import kotlin.properties.getValue
-import kotlin.properties.setValue
 
-public open class Operation() : ImplParcelable, Comparable<Operation> {
+open class Operation() : ImplParcelable, Comparable<Operation> {
     override val parcels = hashMapOf<String, Any?>()
-    public var mDate: DateTime by parcels
-    public var mThirdParty: String by parcels
-    public var mTag: String by parcels
-    public var mMode: String by parcels
-    public var mNotes: String by parcels
-    public var mSum: Long by parcels
-    public var mScheduledId: Long by parcels
-    public var mRowId: Long by parcels
-    public var mTransSrcAccName: String by parcels
-    public var mIsChecked: Boolean by parcels
+    var mDate: DateTime by parcels
+    var mThirdParty: String by parcels
+    var mTag: String by parcels
+    var mMode: String by parcels
+    var mNotes: String by parcels
+    var mSum: Long by parcels
+    var mScheduledId: Long by parcels
+    var mRowId: Long by parcels
+    var mTransSrcAccName: String by parcels
+    var mIsChecked: Boolean by parcels
 
     // if these value are != 0, it is a transfert operation between 2 accounts
     // mTransferAccountId is the other account
-    public var mTransferAccountId: Long by parcels
-    public var mAccountId: Long by parcels
+    var mTransferAccountId: Long by parcels
+    var mAccountId: Long by parcels
 
     // properties used only for ui
-    public var isSelected: Boolean = false
-    public var state: CellState = CellState.STATE_REGULAR_CELL
+    var isSelected: Boolean = false
+    var state: CellState = CellState.STATE_REGULAR_CELL
 
 
     init {
@@ -67,7 +60,7 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
     }
 
     companion object {
-        public val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
+        val CREATOR: Parcelable.Creator<Operation> = object : Parcelable.Creator<Operation> {
             override fun createFromParcel(p: Parcel): Operation {
                 return Operation(p)
             }
@@ -122,29 +115,29 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
         mIsChecked = op.mIsChecked
     }
 
-    public fun getMonth(): Int {
+    fun getMonth(): Int {
         return mDate.month
     }
 
-    public fun setMonth(month: Int) {
+    fun setMonth(month: Int) {
         val d = Math.min(mDate.day, DateTime.forDateOnly(mDate.year, month, 1).endOfMonth.day)
         mDate = DateTime.forDateOnly(mDate.year, month, d)
     }
 
-    public fun getDay(): Int {
+    fun getDay(): Int {
         return mDate.day
     }
 
-    public fun setDay(day: Int) {
+    fun setDay(day: Int) {
         val d = Math.min(day, mDate.endOfMonth.day)
         mDate = DateTime.forDateOnly(mDate.year, mDate.month, d)
     }
 
-    public fun getYear(): Int {
+    fun getYear(): Int {
         return mDate.year
     }
 
-    public fun setYear(year: Int) {
+    fun setYear(year: Int) {
         // will throw exception if month = feb and day = 29 and year is not leap, adjust the day
         val d = if (mDate.month == 2 && mDate.isLeapYear && !DateTime.forDateOnly(year, 1, 1).isLeapYear)
             Math.min(mDate.day, 28)
@@ -153,36 +146,36 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
         mDate = DateTime.forDateOnly(year, mDate.month, d)
     }
 
-    public fun getDate(): Long {
+    fun getDate(): Long {
         return mDate.getMilliseconds(TIME_ZONE)
     }
 
-    public fun setDate(date: Long) {
+    fun setDate(date: Long) {
         val d = DateTime.forInstant(date, TIME_ZONE)
         mDate = DateTime.forDateOnly(d.year, d.month, d.day)
     }
 
-    public fun getDateObj(): Date {
+    fun getDateObj(): Date {
         return Date(mDate.getMilliseconds(TIME_ZONE))
     }
 
-    public fun addDay(nbDays: Int) {
+    fun addDay(nbDays: Int) {
         mDate = mDate.plusDays(nbDays)
     }
 
-    public fun addMonth(nbMonths: Int) {
+    fun addMonth(nbMonths: Int) {
         mDate = mDate.plusMonth(nbMonths)
     }
 
-    public fun addYear(nbYears: Int) {
+    fun addYear(nbYears: Int) {
         mDate.plus(nbYears, 0, 0, 0, 0, 0, 0, DateTime.DayOverflow.LastDay)
     }
 
-    public fun getSumStr(): String {
+    fun getSumStr(): String {
         return (mSum.toDouble() / 100.0).formatSum()
     }
 
-    public fun setSumStr(sumStr: String) {
+    fun setSumStr(sumStr: String) {
         mSum = sumStr.extractSumFromStr()
     }
 
@@ -194,14 +187,14 @@ public open class Operation() : ImplParcelable, Comparable<Operation> {
         return 0
     }
 
-    public open fun equals(op: Operation?): Boolean {
+    open fun equals(op: Operation?): Boolean {
         if (null == op) {
             return false
         }
         return mDate == op.mDate && equalsButDate(op)
     }
 
-    public fun equalsButDate(op: Operation?): Boolean {
+    fun equalsButDate(op: Operation?): Boolean {
         if (null == op) {
             return false
         }
