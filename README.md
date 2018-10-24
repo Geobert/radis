@@ -1,3 +1,10 @@
+# Non supported
+This project is no longer under active development.
+
+# Non supporté
+Ce projet n'est plus en développement.
+
+
 Keep track of your daily expenses!
 ==================================
 Radis (french slang for money) is an ad-free application, under GPL license to track all your banking transactions so you always know how much money you have.
